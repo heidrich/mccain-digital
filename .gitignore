@@ -1,0 +1,14 @@
+# dependencies / AI tooling
+.mind/
+.recall/
+.mcp.json
+*.mp4
+
+# OS
+.DS_Store
+
+# internal — kept on disk for development, never part of the public site
+labs/
+assets-src/
+docs/
+CHANGELOG.md

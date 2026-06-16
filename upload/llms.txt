@@ -1,0 +1,46 @@
+# McCain Digital
+
+> Digital product studio in Bavaria, Germany. We build AI tools, web apps, mobile apps,
+> websites and custom software for companies, individuals and startups — from idea to launch.
+
+Contact: info@mccain-digital.com · https://mccain-digital.com
+Location: Holderweg 1, 86869 Oberostendorf, Bavaria, Germany
+
+## Services
+
+- **AI Tools**: AI agents and automation wired into real workflows — not chat toys.
+  Proven in production with our own product, whatever-recall.
+- **Web Apps**: Fast, scalable applications built on React, Next.js and TypeScript.
+  Core Web Vitals in the green from day one; MVP to scale without a rewrite.
+- **Mobile Apps**: iOS and Android from one clean codebase. Native feel (gestures,
+  offline, push), store-ready — review, release and updates handled.
+- **Websites**: Marketing sites with top-tier SEO. This very site scores
+  4× 100 on Google PageSpeed (Performance, Accessibility, Best Practices, SEO).
+- **Software for Companies**: Dashboards, internal tools and integrations
+  (ERP, CRM, APIs — including legacy). Tailor-made, documented, yours to keep.
+- **Built for Everyone**: Startups (MVP in weeks), companies (processes digitised
+  end to end), individuals (your idea, built honestly).
+
+## Product: whatever-recall
+
+AI-native project memory for software teams: https://whatever-recall.com
+
+- Knowledge is stamped onto the git commit at write-time — while the AI still knows why.
+- Reading it back takes microseconds and zero tokens; no second source of truth to drift.
+- Self-hosted: runs entirely on your machine, no sync, no telemetry, no upload.
+- Every note is pinned to a commit; when code moves on, recall raises a freshness flag.
+- Setup in about 2 minutes: pip install whatever-recall, recall init — no cloud account.
+- 14-day free trial, no credit card.
+
+## Facts about this website
+
+- Hand-written vanilla HTML/CSS/JS, no framework, no build step.
+- Google PageSpeed: 100/100/100/100 (mobile and desktop), Total Blocking Time 0 ms,
+  Cumulative Layout Shift 0 — while running a custom canvas pixel-physics engine.
+- Every word is real DOM text (the pixel effects are canvas overlays), structured
+  data via JSON-LD (ProfessionalService, WebSite, SoftwareApplication).
+
+## How to reach us
+
+Email info@mccain-digital.com with a short description of your project.
+We usually reply within 24 hours with an honest assessment.

@@ -1,0 +1,11 @@
+# McCain Digital — Apache config (classic webspace)
+ErrorDocument 404 /404.html
+
+# sensible caching for the static assets
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/png "access plus 30 days"
+  ExpiresByType image/jpeg "access plus 30 days"
+  ExpiresByType image/svg+xml "access plus 30 days"
+  ExpiresByType application/javascript "access plus 7 days"
+</IfModule>

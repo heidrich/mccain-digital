@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="McCain Digital">
+  <rect width="64" height="64" rx="15" fill="#0f0e0c"/>
+  <text x="33" y="43" text-anchor="middle" dominant-baseline="alphabetic"
+        font-family="'Segoe UI', Helvetica, Arial, sans-serif"
+        font-size="34" letter-spacing="-1.5">
+    <tspan fill="#ece7dd" font-weight="800">m</tspan><tspan fill="#f5c518" font-weight="600">d</tspan>
+  </text>
+</svg>
