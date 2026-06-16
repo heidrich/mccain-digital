@@ -2,7 +2,7 @@
 
 > We build digital products.
 
-The marketing site for **McCain Digital**, a digital product studio in Bavaria, Germany (AI tools, web apps, mobile apps, websites and custom software).
+The marketing site for our new small company **McCain Digital**, a digital product studio in Bavaria, Germany (AI tools, web apps, mobile apps, websites and custom software).
 
 It is hand-written **vanilla HTML / CSS / JS** — no framework, no build step, no dependencies — and scores **100 / 100 / 100 / 100** on Google PageSpeed (Performance, Accessibility, Best Practices, SEO), with Total Blocking Time 0 ms and Cumulative Layout Shift 0 — *while* running a custom canvas **pixel-physics engine** over every headline, button and tile.
 
