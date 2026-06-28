@@ -30,7 +30,7 @@
   <meta name="twitter:description" content="AI tools, web apps, mobile apps, websites and software. Built in Bavaria.">
   <meta name="twitter:image" content="https://mccain-digital.com/og-image.png">
   <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"ProfessionalService","name":"McCain Digital","url":"https://mccain-digital.com","email":"info@mccain-digital.com","logo":"https://mccain-digital.com/logo-mark-200.png","image":"https://mccain-digital.com/og-image.png","description":"Digital product studio in Bavaria, Germany. Builds AI tools, web apps, mobile apps, websites and custom software for companies, individuals and startups.","address":{"@type":"PostalAddress","streetAddress":"Holderweg 1","postalCode":"86869","addressLocality":"Oberostendorf","addressRegion":"Bavaria","addressCountry":"DE"},"areaServed":"Worldwide","sameAs":["https://whatever-recall.com"],"hasOfferCatalog":{"@type":"OfferCatalog","name":"Services","itemListElement":[{"@type":"Offer","itemOffered":{"@type":"Service","name":"AI Tools","description":"AI agents and automation wired into real workflows."}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Web Apps","description":"Fast, scalable applications on React, Next.js and TypeScript."}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Mobile Apps","description":"iOS and Android apps from one clean codebase, store-ready."}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Websites","description":"Marketing sites with top-tier SEO and Lighthouse scores in the green."}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Software for Companies","description":"Dashboards, internal tools and integrations, tailor-made."}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Consulting for Everyone","description":"Pragmatic advice and honest estimates for startups, companies and individuals."}}]}}
+{"@context":"https://schema.org","@type":"ProfessionalService","name":"McCain Digital","url":"https://mccain-digital.com","email":"info@mccain-digital.com","logo":"https://mccain-digital.com/logo-mark-200.png","image":"https://mccain-digital.com/og-image.png","description":"Digital product studio in Bavaria, Germany. Builds AI tools, web apps, mobile apps, websites and custom software for companies, individuals and startups.","address":{"@type":"PostalAddress","streetAddress":"Holderweg 1","postalCode":"86869","addressLocality":"Oberostendorf","addressRegion":"Bavaria","addressCountry":"DE"},"areaServed":"Worldwide","sameAs":["https://whatever-recall.com"],"hasOfferCatalog":{"@type":"OfferCatalog","name":"Services","itemListElement":[{"@type":"Offer","itemOffered":{"@type":"Service","name":"AI Tools","description":"AI agents and automation wired into real workflows."}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Web Apps","description":"Fast, scalable applications on React, Next.js and TypeScript."}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Mobile Apps","description":"iOS and Android apps from one clean codebase, store-ready."}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Websites","description":"Marketing sites with top-tier SEO and Lighthouse scores in the green."}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Software for Companies","description":"Dashboards, internal tools and integrations, tailor-made."}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Design & Brand","description":"Identity, UI and motion designed in-house — a design system that scales with the product."}}]}}
 </script>
   <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebSite","name":"McCain Digital","url":"https://mccain-digital.com/"}
@@ -1133,11 +1133,27 @@
     }
 
     /* ---------- services ---------- */
+    /* a single "why us" lede between the section title and the grid — the only
+       place the two-decade track record reads as an ARGUMENT (senior hands),
+       not just the ticker caption. Honest founder voice, no invented metrics. */
+    .svc-lede {
+      margin-top: 1.6rem;
+      max-width: 60ch;
+      font-size: clamp(1rem, 1.4vw, 1.16rem);
+      line-height: 1.6;
+      color: var(--paper-2)
+    }
+
+    .svc-lede b {
+      color: var(--paper);
+      font-weight: 600
+    }
+
     /* fixed 3×2 grid for the six service tiles — deterministic at any width.
        (auto-fit broke once the section capped at --maxw: it fit 5 across and
        left one orphan tile with a huge empty gap.) Collapses 3→2→1. */
     .services-grid {
-      margin-top: 4rem;
+      margin-top: 2.6rem;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 1px;
@@ -2800,16 +2816,19 @@
     <div class="hero-inner">
       <div class="hero-left">
         <div class="hero-tag"><span class="rule"></span><span><b>Digital Product Studio</b> · from Bavaria, Germany</span></div>
-        <h1>
-          <span class="line l1"><span class="ph" data-pixel>We build</span></span>
-          <span class="line l2"><span class="ph" data-pixel>digital</span></span>
-          <span class="line l3"><span class="ph" data-pixel><span class="accent">products.</span></span></span>
+        <!-- aria-label keeps a single stable accessible name while the third
+             line's accent word cycles visually (products. → AI tools. → …);
+             so SR/title/OG stay coherent and the cycling is purely visual. -->
+        <h1 aria-label="We build digital products.">
+          <span class="line l1"><span class="ph" data-pixel aria-hidden="true">We build</span></span>
+          <span class="line l2"><span class="ph" data-pixel aria-hidden="true">digital</span></span>
+          <span class="line l3"><span class="ph" data-pixel aria-hidden="true" id="heroPx"><span class="accent">products.</span></span></span>
         </h1>
         <div class="hero-bottom">
-          <p class="hero-sub" id="heroSub">AI tools, web apps, mobile apps, websites and custom software — for
-            companies, individuals and startups. From idea to launch.</p>
+          <p class="hero-sub" id="heroSub">A Bavarian studio that designs, builds and ships digital products —
+            for companies, individuals and startups. From idea to launch.</p>
           <div class="hero-ctas" id="heroCtas">
-            <a href="#product" class="btn btn-primary">Our latest product <span class="arr">→</span></a>
+            <a href="#product" class="btn btn-primary">Meet whatever-recall <span class="arr">→</span></a>
             <a href="#contact" class="btn btn-ghost">Let's talk</a>
           </div>
         </div>
@@ -2876,9 +2895,9 @@
         <span class="ph" data-pixel>We know AI.</span>
       </h2>
       <p class="ai-lede reveal">
-        Not a buzzword bolted on after launch. We design with models in the loop —
-        and we wire them into <em>your</em> systems: your data, your tools, your workflow.
-        The proof is below: <b>whatever-recall</b> is our own AI-native product, in production.
+        We don't just talk about AI — we ship it. <b>whatever-recall</b> is our own
+        AI-native product, live in production. We design with models in the loop and
+        wire them into <em>your</em> systems: your data, your tools, your workflow.
       </p>
 
       <!-- the actual stack we work in, day to day — framed as our TOOLS, not a
@@ -2932,7 +2951,7 @@
         <span class="ai-rot-words">
           <span class="arw is-on">integrate AI into your stack.</span>
           <span class="arw">ship agents that do real work.</span>
-          <span class="arw">automate the busywork away.</span>
+          <span class="arw">automate the repetitive tasks away.</span>
           <span class="arw">turn your docs into answers.</span>
         </span>
       </p>
@@ -2982,8 +3001,8 @@
       </div>
 
       <div class="ai-ctas reveal">
-        <a href="#services" class="btn btn-primary">See what we build <span class="arr">→</span></a>
-        <a href="#contact" class="btn btn-ghost">Talk AI with us</a>
+        <a href="#product" class="btn btn-primary">See it in production <span class="arr">→</span></a>
+        <a href="#contact" class="btn btn-ghost">Let's talk AI</a>
       </div>
     </div>
   </section>
@@ -2992,6 +3011,10 @@
   <section id="services" aria-labelledby="svcTitle">
     <p class="kicker reveal">01 — What we do</p>
     <h2 class="sec-title" id="svcTitle"><span class="ph" data-pixel>From the first pixel</span> <em>to the final deploy.</em></h2>
+    <p class="svc-lede reveal">Two decades of building software — across products people use every day — distilled
+      into a small studio that now ships its own. You get <b>senior hands on the work</b>, not a handoff to juniors,
+      and a team that builds with AI because we build AI. For startups, companies and individuals alike — same craft,
+      scoped to your stage.</p>
     <div class="services-grid">
       <article class="svc reveal" data-morph>
         <span class="gnum" aria-hidden="true">01</span>
@@ -3021,9 +3044,8 @@
                 <rect x="2" y="4" width="20" height="14" rx="2" />
                 <path d="M2 9h20M6 13h6" />
               </svg></span>Web Apps</h3>
-          <p>Fast, scalable applications built on a modern stack — React, Next.js & friends. Performance is a feature,
-            not
-            an afterthought.</p>
+          <p>Fast, scalable apps on a modern stack — React, Next.js & TypeScript. Core Web Vitals in the green from
+            day one, and an architecture that grows from MVP to scale without a rewrite.</p>
           <span class="flip-hint" aria-hidden="true"><i></i>what you get</span>
         </div>
         <div class="svc-face svc-back">
@@ -3104,20 +3126,21 @@
         <span class="gnum" aria-hidden="true">06</span>
         <div class="svc-face svc-front">
           <h3><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z" />
-              </svg></span>Built for Everyone</h3>
-          <p>Companies, individuals, startups — we speak all three languages. Pragmatic advice, honest estimates, clean
-            delivery.</p>
+                <path d="M3 21l4-1L19.5 7.5a2.1 2.1 0 0 0-3-3L4 17l-1 4z" />
+                <path d="M14.5 6.5l3 3" />
+              </svg></span>Design &amp; Brand</h3>
+          <p>Interfaces people remember and trust in the first second — identity, UI and motion, designed in-house,
+            not bought off a template.</p>
           <span class="flip-hint" aria-hidden="true"><i></i>what you get</span>
         </div>
         <div class="svc-face svc-back">
           <span class="bk-kicker">/06 — what you get</span>
           <ul class="svc-list">
-            <li><b>Startups:</b> an MVP that ships in weeks</li>
-            <li><b>Companies:</b> processes digitised end to end</li>
-            <li><b>Individuals:</b> your idea, built honestly</li>
+            <li><b>Identity &amp; UI</b> from one hand — consistent everywhere</li>
+            <li><b>Motion that earns attention,</b> not noise</li>
+            <li><b>A design system</b> that scales with the product</li>
           </ul>
-          <div class="bk-tags"><span>Startups</span><span>Companies</span><span>Individuals</span></div>
+          <div class="bk-tags"><span>Identity</span><span>UI/UX</span><span>Motion</span></div>
         </div>
       </article>
     </div>
@@ -3186,7 +3209,7 @@
               <div>&nbsp;</div>
               <div><span class="dim">$</span> <span class="cmd">recall</span> <span class="typed" id="typedQuery"></span></div>
               <div id="recallAnswer" style="opacity:0;transition:opacity .8s">
-                <div class="ok">✓ 1 hit · 0.41 ms · 0 tokens</div>
+                <div class="ok">✓ 1 hit · this lookup: 0.41 ms · 0 tokens</div>
                 <div><span class="dim">→ lesson:</span> RLS cut-over: writers must set</div>
                 <div><span class="dim">&nbsp;&nbsp;</span>the new scope column.</div>
                 <div><span class="dim">→ pinned to</span> a1f9c20 <span class="dim">· 🟢 fresh</span></div>
@@ -3339,7 +3362,8 @@
         </div>
         <div class="pstep reveal">
           <h3>$ mccain ship</h3>
-          <p>Launch — Lighthouse in the green, handover documented, 30 days of support included.</p>
+          <p>Launch — Lighthouse in the green, code and docs handed over (yours to keep, no lock-in), plus 30 days of
+            support. Need more after that? Agreed up front, never billed by surprise.</p>
         </div>
       </div>
     </div>
@@ -3351,8 +3375,8 @@
       <div class="contact-info">
         <p class="kicker reveal">04 — Contact</p>
         <h2 class="sec-title" id="contactTitle"><span class="ph" data-pixel>Let's build your</span> <span class="ph" data-pixel><span class="accent">project.</span></span></h2>
-        <p class="reveal">Tell us briefly what you have in mind — we usually get back to you within 24 hours with an
-          honest assessment.</p>
+        <p class="reveal">Tell us briefly what you have in mind. Within 24 hours you'll hear back from the people who'd
+          actually build it — with an honest take on whether we're the right fit, no sales call required.</p>
         <a class="contact-mail reveal" href="mailto:info@mccain-digital.com">info@mccain-digital.com</a>
         <div class="contact-meta reveal">
           <span>McCain Digital · Bavaria, Germany</span>
@@ -3752,6 +3776,48 @@
         clearTimeout(pxRT);
         pxRT = setTimeout(function () { pxInsts.forEach(function (i) { i.redraw(); }); }, 160);
       });
+
+      /* ============================================================
+         HERO ACCENT CYCLING — the third headline line PERFORMS the
+         offer instead of naming it: products. → AI tools. → web apps.
+         → mobile apps. → software. (loop). Each step rewrites only the
+         accent word and replays its pixel assembly (the engine re-reads
+         the live DOM in play(), so the mustard .accent colour is kept).
+         Visual only: the <h1> carries a stable aria-label, so SR/title
+         stay "We build digital products." Reduced-motion / no-JS keep
+         the static first word.
+         ============================================================ */
+      (function () {
+        if (reduced) return;
+        var host = d.getElementById("heroPx");
+        if (!host) return;
+        var inst = pxInsts.find(function (i) { return i.host === host; });
+        if (!inst) return;
+        // drawn from the real offer wording (hero-sub + meta) — nothing new claimed
+        var WORDS = ["products.", "AI tools.", "web apps.", "mobile apps.", "software."];
+        var wi = 0, timer = null, onScreen = false, firstAssembled = false;
+
+        function accentEl() { return host.querySelector(".accent"); }
+
+        function step() {
+          var acc = accentEl();
+          if (!acc) return;
+          wi = (wi + 1) % WORDS.length;
+          acc.textContent = WORDS[wi];
+          inst.play();   // re-rasterise + re-assemble just this line
+        }
+
+        // only cycle while the hero is on screen; park otherwise (no idle timers)
+        new IntersectionObserver(function (es) {
+          onScreen = es[0].isIntersecting;
+          if (onScreen && !timer) {
+            // let the initial assembly land before the first swap
+            timer = setInterval(step, 2800);
+          } else if (!onScreen && timer) {
+            clearInterval(timer); timer = null;
+          }
+        }, { threshold: .3 }).observe(host);
+      })();
 
       d.querySelectorAll(".btn, .nav-cta").forEach(function (b) {
         if (b.closest(".product")) return;   // owner call: product CTAs stay native

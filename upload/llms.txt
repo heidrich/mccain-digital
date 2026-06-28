@@ -20,7 +20,7 @@ Contact: info@mccain-digital.com · Holderweg 1, 86869 Oberostendorf, Bavaria, G
 - [Mobile Apps](https://mccain-digital.com/#services): iOS and Android from one clean codebase. Native feel (gestures, offline, push), store-ready — review, release and updates handled.
 - [Websites](https://mccain-digital.com/#services): marketing sites with top-tier SEO. This very site scores 4× 100 on Google PageSpeed (Performance, Accessibility, Best Practices, SEO).
 - [Software for Companies](https://mccain-digital.com/#services): dashboards, internal tools and integrations (ERP, CRM, APIs — including legacy). Tailor-made, documented, yours to keep.
-- [Built for Everyone](https://mccain-digital.com/#services): startups (MVP in weeks), companies (processes digitised end to end), individuals (your idea, built honestly).
+- [Design & Brand](https://mccain-digital.com/#services): interfaces people remember and trust in the first second — identity, UI and motion designed in-house. A design system that scales with the product. For startups, companies and individuals alike — same craft, scoped to your stage.
 
 ## Product: whatever-recall
 
