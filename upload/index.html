@@ -2062,8 +2062,9 @@
       grid-template-areas: "head stage" "head nav";
       align-items: start;
       column-gap: clamp(1.5rem, 3vw, 3rem);
-      row-gap: clamp(1rem, 2.4vh, 1.6rem);
-      padding-right: 0
+      row-gap: clamp(1rem, 2.4vh, 1.6rem)
+      /* keep the section's symmetric L/R padding (was padding-right:0, which
+         glued the stage card to the right viewport edge on wide screens) */
     }
 
     /* left column — heading on the dark bg, light text, like other sections.
