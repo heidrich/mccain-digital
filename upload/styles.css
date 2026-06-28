@@ -1122,6 +1122,28 @@
       overflow: hidden
     }
 
+    /* whole-tile deep-link to the service page — sits above the morph faces so
+       a click anywhere navigates, while hover still flips the card. A small
+       corner arrow appears on hover as the affordance. */
+    .svc-deeplink {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      display: block;
+      font-size: 0
+    }
+    .svc-deeplink::after {
+      content: "→";
+      position: absolute;
+      top: 1.4rem; right: 1.5rem;
+      font-size: 1.1rem;
+      color: var(--acc);
+      opacity: 0;
+      transform: translate(-4px, 4px);
+      transition: opacity .3s var(--ease), transform .3s var(--ease)
+    }
+    .svc:hover .svc-deeplink::after { opacity: 1; transform: none }
+
     @media (max-width: 1080px) {
       .services-grid { grid-template-columns: repeat(2, 1fr) }
     }

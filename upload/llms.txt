@@ -8,6 +8,7 @@ Contact: info@mccain-digital.com · Holderweg 1, 86869 Oberostendorf, Bavaria, G
 ## Pages
 
 - [Home](https://mccain-digital.com/): studio overview, services, our product whatever-recall, and the contact path.
+- [Contact / Start a project](https://mccain-digital.com/contact.html): tell us what you have in mind — a real reply within 24 hours, a fixed quote within 48 hours, no sales call. Form with project type, budget and timeframe.
 - [Imprint](https://mccain-digital.com/legal/imprint.html): company details, address and legal owner (§5 DDG).
 - [Privacy](https://mccain-digital.com/legal/privacy.html): how data is handled — no tracking beyond what's disclosed.
 - [Terms](https://mccain-digital.com/legal/terms.html): the terms of service for engagements.
@@ -15,12 +16,12 @@ Contact: info@mccain-digital.com · Holderweg 1, 86869 Oberostendorf, Bavaria, G
 
 ## Services
 
-- [AI Tools](https://mccain-digital.com/#services): AI agents and automation wired into real workflows — not chat toys. Proven in production with our own product, whatever-recall.
-- [Web Apps](https://mccain-digital.com/#services): fast, scalable applications on React, Next.js and TypeScript. Core Web Vitals green from day one; MVP to scale without a rewrite.
-- [Mobile Apps](https://mccain-digital.com/#services): iOS and Android from one clean codebase. Native feel (gestures, offline, push), store-ready — review, release and updates handled.
-- [Websites](https://mccain-digital.com/#services): marketing sites with top-tier SEO. This very site scores 4× 100 on Google PageSpeed (Performance, Accessibility, Best Practices, SEO).
-- [Software for Companies](https://mccain-digital.com/#services): dashboards, internal tools and integrations (ERP, CRM, APIs — including legacy). Tailor-made, documented, yours to keep.
-- [Design & Brand](https://mccain-digital.com/#services): interfaces people remember and trust in the first second — identity, UI and motion designed in-house. A design system that scales with the product. For startups, companies and individuals alike — same craft, scoped to your stage.
+- [AI Tools](https://mccain-digital.com/services/ai-tools.html): production AI — RAG over your own data (pgvector/Qdrant, citations, abstain path), autonomous & multi-step agents with guardrails, MCP tool-servers into your CRM/ERP, and automation pipelines. Model-agnostic (Claude, GPT, Llama, Mistral, Qwen). Proven in production with our own product, whatever-recall.
+- [Web Apps](https://mccain-digital.com/services/web-apps.html): fast, scalable applications on React, Next.js and TypeScript. Core Web Vitals green from day one; MVP to scale without a rewrite; real-time, auth and integrations (websockets, Stripe, OAuth/SSO).
+- [Mobile Apps](https://mccain-digital.com/services/apps.html): iOS and Android from one clean React Native/Expo codebase. Native feel (gestures, offline, push), store-ready — review, release and OTA updates handled.
+- [Websites](https://mccain-digital.com/services/websites.html): marketing sites with top-tier SEO and a perfect Lighthouse 100. This very site scores 4× 100 on Google PageSpeed plus Agentic Browsing 3/3 — real crawlable DOM text, JSON-LD, llms.txt. CMS or pure static.
+- [Software for Companies](https://mccain-digital.com/services/software.html): dashboards, internal tools and integrations (ERP, CRM, REST/SOAP APIs — including legacy). Tailor-made, documented, tested, yours to keep — no lock-in.
+- [Design & Brand](https://mccain-digital.com/services/design-brand.html): interfaces people remember and trust in the first second — identity, UI and motion designed in-house. A design system that scales with the product; designed with the build in mind. For startups, companies and individuals alike.
 
 ## Product: whatever-recall
 
