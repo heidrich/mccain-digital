@@ -3143,3 +3143,231 @@
       .mega, .mega-link, .mega-card, .mega-contact { transition: opacity .2s linear !important; transform: none !important }
       .mega.open .mega-link, .mega.open .mega-card, .mega.open .mega-contact { transform: none !important; transition-delay: 0s !important }
     }
+
+    /* ============================================================
+       SERVICE PAGES — shared layout for /services/*.html.
+       Reuses tokens, kicker, sec-title, pixel headlines, buttons.
+       ============================================================ */
+    .svc-page main { display: block }
+
+    /* hero */
+    .svc-hero {
+      max-width: var(--maxw);
+      margin-inline: auto;
+      padding: clamp(7rem, 13vw, 11rem) clamp(1.2rem, 4vw, 3.5rem) clamp(3rem, 6vw, 5rem);
+      position: relative
+    }
+
+    .svc-hero .breadcrumb {
+      display: flex;
+      gap: .5rem;
+      align-items: center;
+      font-size: .8rem;
+      color: var(--mute2);
+      margin-bottom: 1.6rem
+    }
+    .svc-hero .breadcrumb a { color: var(--mute2); transition: color .3s }
+    .svc-hero .breadcrumb a:hover { color: var(--acc) }
+    .svc-hero .breadcrumb .sep { opacity: .5 }
+
+    .svc-hero h1 {
+      font-size: clamp(2.6rem, 8vw, 6.5rem);
+      line-height: .98;
+      letter-spacing: -.04em;
+      margin-bottom: 1.6rem
+    }
+    .svc-hero h1 .accent { color: var(--acc); font-style: normal; white-space: nowrap }
+
+    .svc-hero .svc-hero-lede {
+      font-size: clamp(1.1rem, 1.8vw, 1.45rem);
+      line-height: 1.5;
+      color: var(--paper-2);
+      max-width: 60ch;
+      margin-bottom: 2.4rem
+    }
+    .svc-hero .svc-hero-lede b { color: var(--paper); font-weight: 600 }
+
+    .svc-hero-cta { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center }
+    .svc-hero-note { font-size: .85rem; color: var(--mute2) }
+
+    /* generic section wrapper for service pages */
+    .svc-sec {
+      max-width: var(--maxw);
+      margin-inline: auto;
+      padding: clamp(3.5rem, 7vw, 6rem) clamp(1.2rem, 4vw, 3.5rem);
+      position: relative
+    }
+    .svc-sec.alt { background: var(--ink2) }
+    .svc-sec.alt-full {
+      max-width: none;
+      margin-inline: 0;
+      background: var(--ink2)
+    }
+    .svc-sec.alt-full > .svc-sec-inner {
+      max-width: var(--maxw);
+      margin-inline: auto
+    }
+
+    .svc-sec-head { margin-bottom: clamp(2rem, 4vw, 3.2rem); max-width: 60ch }
+    .svc-sec-head h2 { font-size: clamp(1.8rem, 4vw, 3rem); letter-spacing: -.03em; margin-bottom: 1rem }
+    .svc-sec-head p { color: var(--paper-dim); font-size: 1.02rem; line-height: 1.6 }
+
+    /* specs / "what you get" feature grid */
+    .svc-features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden
+    }
+    .svc-feature {
+      background: var(--ink);
+      padding: clamp(1.6rem, 2.5vw, 2.2rem)
+    }
+    .svc-sec.alt .svc-feature { background: var(--ink2) }
+    .svc-feature .sf-ico {
+      width: 38px; height: 38px;
+      display: grid; place-items: center;
+      border-radius: 10px;
+      background: var(--acc-dim);
+      color: var(--acc);
+      margin-bottom: 1.1rem
+    }
+    .svc-feature .sf-ico svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8 }
+    .svc-feature h3 { font-size: 1.12rem; margin-bottom: .5rem; letter-spacing: -.01em }
+    .svc-feature p { font-size: .9rem; line-height: 1.55; color: var(--mute2) }
+
+    /* tech-stack strip */
+    .svc-stack { display: flex; flex-wrap: wrap; gap: .7rem }
+    .svc-chip {
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--paper-dim);
+      background: var(--ink3);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: .5rem 1rem;
+      transition: border-color .3s var(--ease), color .3s var(--ease)
+    }
+    .svc-chip:hover { border-color: var(--acc); color: var(--paper) }
+
+    /* process timeline (numbered steps) */
+    .svc-steps { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 18px; overflow: hidden }
+    .svc-step {
+      background: var(--ink);
+      padding: clamp(1.6rem, 2.5vw, 2.2rem);
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 1.4rem;
+      align-items: start
+    }
+    .svc-sec.alt .svc-step { background: var(--ink2) }
+    .svc-step .ss-num {
+      font-size: 1.4rem; font-weight: 800;
+      color: var(--acc);
+      font-variant-numeric: tabular-nums;
+      line-height: 1
+    }
+    .svc-step h3 { font-size: 1.1rem; margin-bottom: .4rem }
+    .svc-step p { font-size: .92rem; line-height: 1.55; color: var(--mute2) }
+
+    /* metric/proof row */
+    .svc-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: clamp(1rem, 2.5vw, 2.2rem) }
+    .svc-metric .sm-v { font-size: clamp(2.2rem, 5vw, 3.4rem); font-weight: 800; letter-spacing: -.03em; color: var(--acc); line-height: 1 }
+    .svc-metric .sm-v small { font-size: .45em; font-weight: 700 }
+    .svc-metric .sm-l { font-size: .9rem; color: var(--paper-dim); margin-top: .5rem; line-height: 1.4 }
+
+    /* FAQ accordion */
+    .svc-faq { display: grid; gap: .8rem; max-width: 64rem }
+    .faq-item {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--ink2)
+    }
+    .svc-sec.alt .faq-item { background: var(--ink) }
+    .faq-q {
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: 0;
+      cursor: pointer;
+      color: var(--paper);
+      font-family: inherit;
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: -.01em;
+      padding: 1.2rem 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem
+    }
+    .faq-q .faq-ico {
+      flex: 0 0 auto;
+      width: 22px; height: 22px;
+      position: relative;
+      transition: transform .35s var(--ease)
+    }
+    .faq-q .faq-ico::before, .faq-q .faq-ico::after {
+      content: ""; position: absolute; background: var(--acc);
+      left: 50%; top: 50%; transform: translate(-50%, -50%)
+    }
+    .faq-q .faq-ico::before { width: 14px; height: 2px }
+    .faq-q .faq-ico::after { width: 2px; height: 14px; transition: transform .35s var(--ease) }
+    .faq-item.open .faq-q .faq-ico::after { transform: translate(-50%, -50%) scaleY(0) }
+    .faq-a {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .4s var(--ease)
+    }
+    .faq-a-inner { padding: 0 1.4rem 1.3rem; color: var(--mute2); font-size: .95rem; line-height: 1.6 }
+    .faq-a-inner b { color: var(--paper-dim) }
+
+    /* related services row */
+    .svc-related { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem }
+    .svc-rel-card {
+      display: block;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 1.4rem 1.5rem;
+      transition: border-color .3s var(--ease), transform .3s var(--ease), background .3s var(--ease)
+    }
+    .svc-rel-card:hover { border-color: var(--acc); transform: translateY(-3px); background: var(--ink2) }
+    .svc-rel-card .rc-name { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: .5rem; margin-bottom: .35rem }
+    .svc-rel-card .rc-name .rc-arr { color: var(--acc); transition: transform .3s var(--ease) }
+    .svc-rel-card:hover .rc-name .rc-arr { transform: translateX(4px) }
+    .svc-rel-card .rc-desc { font-size: .86rem; color: var(--mute2); line-height: 1.5 }
+
+    /* big CTA band */
+    .svc-cta-band {
+      max-width: none;
+      margin-inline: 0;
+      background: var(--acc);
+      color: var(--acc-ink);
+      text-align: center;
+      padding: clamp(4rem, 8vw, 7rem) clamp(1.2rem, 4vw, 3.5rem)
+    }
+    .svc-cta-band h2 {
+      font-size: clamp(2rem, 5vw, 3.6rem);
+      letter-spacing: -.03em;
+      color: var(--acc-ink);
+      margin-bottom: 1rem;
+      max-width: 18ch;
+      margin-inline: auto
+    }
+    .svc-cta-band p { color: var(--acc-ink); opacity: .8; font-size: 1.05rem; margin-bottom: 2rem; max-width: 50ch; margin-inline: auto }
+    .svc-cta-band .btn-dark {
+      display: inline-flex; align-items: center; gap: .6rem;
+      background: var(--ink); color: var(--paper);
+      padding: .9rem 1.8rem; border-radius: 999px;
+      font-weight: 700; font-size: 1rem;
+      transition: transform .3s var(--ease), box-shadow .3s var(--ease)
+    }
+    .svc-cta-band .btn-dark:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,.25) }
+
+    @media (max-width: 640px) {
+      .svc-step { grid-template-columns: 1fr; gap: .5rem }
+    }
