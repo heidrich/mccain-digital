@@ -2816,13 +2816,12 @@
     <div class="hero-inner">
       <div class="hero-left">
         <div class="hero-tag"><span class="rule"></span><span><b>Digital Product Studio</b> · from Bavaria, Germany</span></div>
-        <!-- aria-label keeps a single stable accessible name while the third
-             line's accent word cycles visually (products. → AI tools. → …);
+        <!-- aria-label keeps a single stable accessible name while line 2
+             cycles visually (digital products. → AI products. → web apps. → …);
              so SR/title/OG stay coherent and the cycling is purely visual. -->
         <h1 aria-label="We build digital products.">
           <span class="line l1"><span class="ph" data-pixel aria-hidden="true">We build</span></span>
-          <span class="line l2"><span class="ph" data-pixel aria-hidden="true">digital</span></span>
-          <span class="line l3"><span class="ph" data-pixel aria-hidden="true" id="heroPx"><span class="accent">products.</span></span></span>
+          <span class="line l2"><span class="ph" data-pixel aria-hidden="true" id="heroPx"><span class="accent">digital products.</span></span></span>
         </h1>
         <div class="hero-bottom">
           <p class="hero-sub" id="heroSub">A Bavarian studio that designs, builds and ships digital products —
@@ -3793,8 +3792,10 @@
         if (!host) return;
         var inst = pxInsts.find(function (i) { return i.host === host; });
         if (!inst) return;
-        // drawn from the real offer wording (hero-sub + meta) — nothing new claimed
-        var WORDS = ["products.", "AI tools.", "web apps.", "mobile apps.", "software."];
+        // line 2 cycles the TYPE while "products." anchors the loop. A mix of
+        // type+products and standalone deliverables, all from the real offer
+        // wording (hero-sub + meta) — nothing new claimed.
+        var WORDS = ["digital products.", "AI products.", "web apps.", "mobile apps.", "software."];
         var wi = 0, timer = null, onScreen = false, firstAssembled = false;
 
         function accentEl() { return host.querySelector(".accent"); }
