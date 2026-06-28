@@ -12,8 +12,8 @@
   <link rel="preload" href="pixel-engine.js?v=h6" as="script">
   <!-- shared stylesheet, loaded non-render-blocking (preload→stylesheet swap);
        a tiny critical shell is inlined below so first paint never waits on it -->
-  <link rel="preload" href="styles.css?v=s7" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="styles.css?v=s7"></noscript>
+  <link rel="preload" href="styles.css?v=s8" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="styles.css?v=s8"></noscript>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="canonical" href="https://mccain-digital.com/">
@@ -390,38 +390,17 @@
       transform: translateY(-7px) rotate(-45deg)
     }
 
+    /* mobile nav: the menu is now the shared mega-menu overlay, so .nav-links
+       stays inline in the bar (Menu trigger + Product + CTA). On the narrowest
+       screens drop the inline "Product" link to keep the bar from crowding. */
     @media(max-width:860px) {
-      .nav-links {
-        position: fixed;
-        inset: 0;
-        background: var(--ink);
-        flex-direction: column;
-        justify-content: center;
-        gap: 2rem;
-        transform: translateY(-100%);
-        transition: transform .6s var(--ease);
-        z-index: 1001
-      }
+      .nav-links { gap: 1.2rem }
+    }
 
-      .nav-links.open {
-        transform: translateY(0)
-      }
-
-      .nav-links a {
-        font-size: 1.7rem;
-        font-weight: 700;
-        color: var(--paper)
-      }
-
-      .nav-links .nav-cta {
-        font-size: 1.02rem;
-        padding: .8rem 1.6rem;
-        margin-top: .6rem
-      }
-
-      .burger {
-        display: flex
-      }
+    @media(max-width:560px) {
+      .nav-links { gap: 1rem }
+      .nav-links > a:not(.nav-cta) { display: none }
+      .nav-cta { padding: .55rem 1.05rem }
     }
 
     /* ---------- hero ---------- */
