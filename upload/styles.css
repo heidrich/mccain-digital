@@ -2748,3 +2748,199 @@
         scroll-behavior: auto !important
       }
     }
+
+    /* ---------- cookie consent banner (vanilla, GDPR/TDDDG) ----------
+       bottom-anchored card, on-brand dark + mustard. Reject/Accept are the
+       SAME class (equal prominence, legal). Built by consent.js. */
+    .consent {
+      position: fixed;
+      left: 50%;
+      bottom: clamp(.8rem, 2vw, 1.6rem);
+      transform: translateX(-50%);
+      width: min(calc(100% - 2rem), 640px);
+      z-index: 9000;
+      background: var(--ink2);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: clamp(1.3rem, 2.5vw, 1.8rem);
+      box-shadow: 0 20px 60px -20px rgba(0, 0, 0, .7), 0 0 0 1px rgba(0, 0, 0, .4);
+      animation: consentIn .5s var(--ease) both
+    }
+
+    .consent--settings { width: min(calc(100% - 2rem), 560px) }
+
+    @keyframes consentIn {
+      from { opacity: 0; transform: translate(-50%, 20px) }
+      to { opacity: 1; transform: translate(-50%, 0) }
+    }
+
+    .consent__title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      margin-bottom: .55rem
+    }
+
+    .consent__text {
+      font-size: .86rem;
+      line-height: 1.55;
+      color: var(--paper-dim);
+      margin-bottom: .9rem
+    }
+
+    .consent__text strong, .consent__text b { color: var(--paper); font-weight: 600 }
+
+    .consent__links {
+      display: flex;
+      gap: 1.2rem;
+      margin-bottom: 1.1rem
+    }
+
+    .consent__links a {
+      font-size: .8rem;
+      color: var(--acc);
+      text-decoration: underline;
+      text-underline-offset: 2px
+    }
+
+    .consent__links a:hover { color: var(--acc-soft) }
+
+    .consent__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .6rem
+    }
+
+    .consent__actions--settings { margin-top: 1.2rem }
+
+    /* Reject all + Accept all + Save = identical (equal prominence, legal) */
+    .consent__btn {
+      flex: 1 1 auto;
+      min-width: 8rem;
+      padding: .7rem 1.1rem;
+      border: 1px solid var(--acc);
+      border-radius: 999px;
+      background: var(--acc);
+      color: var(--acc-ink);
+      font-family: inherit;
+      font-size: .85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s var(--ease), transform .2s var(--ease)
+    }
+
+    .consent__btn:hover { background: var(--acc-soft); transform: translateY(-1px) }
+
+    /* Settings is the only de-emphasised control (it's not a consent choice) */
+    .consent__settings-btn {
+      flex: 0 0 auto;
+      padding: .7rem 1.1rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--paper);
+      font-family: inherit;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color .2s var(--ease), color .2s var(--ease)
+    }
+
+    .consent__settings-btn:hover { border-color: var(--paper-dim) }
+
+    /* per-category rows (settings view) */
+    .consent__row {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-top: 1px solid var(--line)
+    }
+
+    .consent__cat { flex: 1 1 auto }
+
+    .consent__cat-head {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      margin-bottom: .3rem
+    }
+
+    .consent__cat-name { font-weight: 700; font-size: .92rem }
+
+    .consent__cat-state {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--acc);
+      background: var(--acc-dim);
+      padding: .12rem .5rem;
+      border-radius: 999px
+    }
+
+    .consent__cat-desc { font-size: .8rem; line-height: 1.5; color: var(--mute2) }
+
+    /* toggle switch */
+    .consent__toggle {
+      flex: 0 0 auto;
+      width: 44px;
+      height: 26px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--ink3);
+      position: relative;
+      cursor: pointer;
+      padding: 0;
+      transition: background .25s var(--ease), border-color .25s var(--ease)
+    }
+
+    .consent__toggle-knob {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--paper-dim);
+      transition: transform .25s var(--ease), background .25s var(--ease)
+    }
+
+    .consent__toggle--on { background: var(--acc); border-color: var(--acc) }
+    .consent__toggle--on .consent__toggle-knob { transform: translateX(18px); background: var(--acc-ink) }
+
+    .consent__toggle--locked {
+      background: var(--ink3);
+      opacity: .6;
+      cursor: not-allowed
+    }
+
+    .consent__toggle--locked::after {
+      content: "";
+      position: absolute;
+      top: 2px; right: 2px;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--acc-deep)
+    }
+
+    /* footer reopen link */
+    .consent__reopen {
+      background: none;
+      border: none;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: none
+    }
+
+    .consent__reopen:hover { color: var(--acc) }
+
+    @media (max-width: 520px) {
+      .consent__btn, .consent__settings-btn { flex: 1 1 100%; min-width: 0 }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .consent { animation: none }
+    }
