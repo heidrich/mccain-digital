@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Start a project — McCain Digital</title>
+  <meta name="description"
+    content="Tell us what you have in mind. Within 24 hours you'll hear back from the people who'd actually build it — with an honest take on whether we're the right fit. No sales call required.">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#0f0e0c">
+  <link rel="preload" href="pixel-engine.js?v=h6" as="script">
+  <link rel="preload" href="styles.css?v=s6" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="styles.css?v=s6"></noscript>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="canonical" href="https://mccain-digital.com/contact.html">
+  <link rel="sitemap" type="application/xml" href="sitemap.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mccain-digital.com/contact.html">
+  <meta property="og:site_name" content="McCain Digital">
+  <meta property="og:title" content="Start a project — McCain Digital">
+  <meta property="og:description"
+    content="Tell us what you have in mind — within 24 hours you'll hear back from the people who'd actually build it, with an honest take on fit.">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:image" content="https://mccain-digital.com/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="McCain Digital — start a project">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Start a project — McCain Digital">
+  <meta name="twitter:description" content="Tell us what you have in mind — honest reply within 24 hours, no sales call.">
+  <meta name="twitter:image" content="https://mccain-digital.com/og-image.png">
+  <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"ContactPage","name":"Contact McCain Digital","url":"https://mccain-digital.com/contact.html","mainEntity":{"@type":"ProfessionalService","name":"McCain Digital","email":"info@mccain-digital.com","url":"https://mccain-digital.com","address":{"@type":"PostalAddress","addressRegion":"Bavaria","addressCountry":"DE"},"areaServed":"Worldwide"}}
+</script>
+  <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://mccain-digital.com/"},{"@type":"ListItem","position":2,"name":"Contact","item":"https://mccain-digital.com/contact.html"}]}
+</script>
+  <style>
+    :root {
+      --ink: #0f0e0c;
+      --ink2: #171511;
+      --ink3: #201d18;
+      --paper: #ece7dd;
+      --paper-2: #cbc6bb;
+      /* deliberate brighter lede tier (11.3:1) — persuasion copy sits between
+         --paper headings and --paper-dim captions */
+      --paper-dim: #a8a294;
+      --mute: #6e6a5f;
+      /* --mute is decorative-only (3.57:1, fails AA as text). For real TEXT on
+         dark use --mute2 (5.31:1 AA). The site sells "Accessibility 100". */
+      --mute2: #8b8678;
+      --acc: #f5c518;
+      --acc-soft: #ffd23a;
+      --acc-deep: #d9a800;
+      --acc-ink: #4a3800;
+      --acc-dim: rgba(245, 197, 24, .12);
+      --line: rgba(236, 231, 221, .1);
+      /* light product section (on --paper) */
+      --p-kicker: #9A7400;
+      /* --p-kicker (3.50:1) + --p-em (2.45:1) FAIL AA as text — keep them only
+         for large display / decorative bits; use the -text variants below for
+         real small text on paper (both AA-verified on --paper) */
+      --p-kicker-text: #7d5e00;
+      --p-em: #9B9484;
+      --p-em-text: #6b665b;
+      --p-text: #54504A;
+      --p-dim: #5E5A53;
+      --t-ok: #9FD98A;
+      --t-bar: #3C3830;
+      --err: #C4554D;
+      --ff-d: "Sora-x", "Segoe UI", system-ui, sans-serif;
+      --ease: cubic-bezier(.16, 1, .3, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 90px
+    }
+
+    .sec-title,
+    h1,
+    h2 {
+      text-wrap: balance
+    }
+
+    p {
+      text-wrap: pretty
+    }
+
+    html,
+    body {
+      background: var(--ink);
+      color: var(--paper);
+      font-family: var(--ff-d);
+      /* clip instead of hidden: hidden turns the body into a scroll container and
+         breaks position:sticky (scrub chapters); clip only clips */
+      overflow-x: hidden;
+      overflow-x: clip
+    }
+
+    body {
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased
+    }
+
+    ::selection {
+      background: var(--acc);
+      color: var(--acc-ink)
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-weight: 700;
+      letter-spacing: -.03em;
+      line-height: 1.04
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--acc);
+      outline-offset: 3px
+    }
+
+    img {
+      max-width: 100%
+    }
+
+    button {
+      font-family: inherit
+    }
+
+    /* ---------- scroll progress: collects pixels while you scroll ----------
+       a thin row of pixel blocks revealed via clip-path (no scaleX — that
+       would stretch the blocks instead of adding new ones). Pure CSS
+       scroll-driven animation; browsers without support never show it. */
+    .scroll-progress {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: repeating-linear-gradient(90deg,
+          var(--acc) 0 4px, transparent 4px 7px,
+          var(--acc-soft) 7px 11px, transparent 11px 14px);
+      clip-path: inset(0 100% 0 0);
+      z-index: 1200;
+      pointer-events: none
+    }
+
+    @supports (animation-timeline: scroll(root)) {
+      .scroll-progress {
+        display: block;
+        animation: sp-grow auto linear both;
+        animation-timeline: scroll(root);
+        animation-timing-function: steps(64)
+      }
+
+      @keyframes sp-grow {
+        from {
+          clip-path: inset(0 100% 0 0)
+        }
+
+        to {
+          clip-path: inset(0 -1% 0 0)
+        }
+      }
+    }
+
+    /* ---------- noise overlay ---------- */
+    .noise {
+      position: fixed;
+      inset: -50%;
+      width: 200%;
+      height: 200%;
+      pointer-events: none;
+      z-index: 9000;
+      opacity: .045;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      animation: grain 7s steps(8) infinite
+    }
+
+    @keyframes grain {
+
+      0%,
+      100% {
+        transform: translate(0, 0)
+      }
+
+      20% {
+        transform: translate(-3%, 2%)
+      }
+
+      40% {
+        transform: translate(2%, -3%)
+      }
+
+      60% {
+        transform: translate(-2%, -2%)
+      }
+
+      80% {
+        transform: translate(3%, 3%)
+      }
+    }
+
+    /* ---------- pac-bar: Pac-Man vs. the progress line ----------
+       replaces the CSS bar when JS runs (the CSS bar stays as the
+       no-JS / reduced-motion fallback). Canvas is taller than the
+       line so the "!?" gag has air above Pac-Man. */
+    #pacbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      /* tall canvas: the line lives in the top ~26px, the puked pixels
+         trickle down through the rest until they dissolve */
+      height: 150px;
+      z-index: 1201;
+      pointer-events: none;
+      display: none;
+      /* eases in 2s after load (JS flips it), then it's always there */
+      opacity: 0;
+      transition: opacity .9s var(--ease)
+    }
+    /* ---------- nav ---------- */
+    #nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      /* extra top room: Pac-Man owns the first ~26px of the viewport */
+      padding: calc(1.4rem + 12px) clamp(1.2rem, 4vw, 3.5rem) 1.4rem;
+      transition: padding .4s;
+    }
+
+    /* scrolled state: plain solid page-ink behind the nav — glass looked
+       off against this site's hard-edged language (owner call). The bg
+       lives on a pseudo-element so it can fade independently. No border,
+       no hairline, no shadow. */
+    #nav::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: var(--ink);
+      opacity: 0;
+      transition: opacity .4s;
+      pointer-events: none
+    }
+
+    #nav.scrolled::before {
+      opacity: 1
+    }
+
+    #nav.scrolled {
+      padding: calc(.9rem + 12px) clamp(1.2rem, 4vw, 3.5rem) .9rem
+    }
+
+    /* clean typographic wordmark — no icon */
+    .logo {
+      font-size: 1.16rem;
+      letter-spacing: -.03em;
+      display: inline-flex;
+      align-items: baseline;
+      gap: .3em;
+      z-index: 1002;
+      line-height: 1
+    }
+
+    .logo b {
+      font-weight: 800;
+      color: var(--paper)
+    }
+
+    .logo span {
+      font-weight: 600;
+      color: var(--acc);
+      transition: color .3s var(--ease)
+    }
+
+    .logo:hover span {
+      color: var(--acc-soft)
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.2rem;
+      align-items: center
+    }
+
+    .nav-links a {
+      font-size: .86rem;
+      font-weight: 500;
+      color: var(--paper-dim);
+      position: relative;
+      transition: color .3s
+    }
+
+    .nav-links a:hover {
+      color: var(--paper)
+    }
+
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -5px;
+      height: 1.5px;
+      width: 0;
+      background: var(--acc);
+      transition: width .35s var(--ease)
+    }
+
+    .nav-links a:hover::after {
+      width: 100%
+    }
+
+    .nav-cta {
+      background: var(--acc);
+      color: var(--acc-ink) !important;
+      padding: .62rem 1.25rem;
+      border-radius: 99px;
+      font-weight: 700 !important;
+      transition: transform .3s var(--ease), box-shadow .3s, background .3s !important
+    }
+
+    .nav-cta::after {
+      display: none
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(245, 197, 24, .35);
+      background: var(--acc-soft)
+    }
+
+    .burger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: 0;
+      cursor: pointer;
+      z-index: 1002;
+      padding: 6px
+    }
+
+    .burger span {
+      width: 26px;
+      height: 2px;
+      background: var(--paper);
+      transition: .35s var(--ease)
+    }
+
+    .burger.open span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg)
+    }
+
+    .burger.open span:nth-child(2) {
+      opacity: 0
+    }
+
+    .burger.open span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg)
+    }
+
+    @media(max-width:860px) {
+      .nav-links {
+        position: fixed;
+        inset: 0;
+        background: var(--ink);
+        flex-direction: column;
+        justify-content: center;
+        gap: 2rem;
+        transform: translateY(-100%);
+        transition: transform .6s var(--ease);
+        z-index: 1001
+      }
+
+      .nav-links.open {
+        transform: translateY(0)
+      }
+
+      .nav-links a {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: var(--paper)
+      }
+
+      .nav-links .nav-cta {
+        font-size: 1.02rem;
+        padding: .8rem 1.6rem;
+        margin-top: .6rem
+      }
+
+      .burger {
+        display: flex
+      }
+    }
+  </style>
+</head>
+
+<body class="contact-page">
+
+  <div class="noise" aria-hidden="true"></div>
+
+  <!-- NAV -->
+  <nav id="nav" aria-label="Main navigation">
+    <a class="logo" href="index.html#top" aria-label="McCain Digital — home">
+      <b>mccain</b><span>digital</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <button class="menu-trigger" type="button" data-mega-open aria-label="Open menu">
+        <span class="mt-bars" aria-hidden="true"><i></i><i></i></span>Menu
+      </button>
+      <a href="index.html#product">Product</a>
+      <a href="contact.html" class="nav-cta" aria-current="page">Start a project</a>
+    </div>
+  </nav>
+
+  <!-- MEGA-MENU OVERLAY (shared on every page) -->
+  <div class="mega" id="mega" role="dialog" aria-modal="true" aria-label="Main menu" aria-hidden="true">
+    <div class="mega-top">
+      <a class="logo" href="#top" aria-label="McCain Digital — home"><b>mccain</b><span>digital</span></a>
+      <button class="mega-close" id="megaClose" type="button" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+
+    <div class="mega-body">
+      <nav class="mega-services" aria-label="Services">
+        <p class="mega-eyebrow">What we do</p>
+        <a class="mega-link" href="services/ai-tools.html">
+          <span class="ml-title">AI Tools <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">AI agents, RAG and automation wired into your real workflows — not chat toys.</span>
+        </a>
+        <a class="mega-link" href="services/web-apps.html">
+          <span class="ml-title">Web Apps <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">Fast, scalable apps on React, Next.js &amp; TypeScript — MVP to scale, no rewrite.</span>
+        </a>
+        <a class="mega-link" href="services/apps.html">
+          <span class="ml-title">Mobile Apps <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">iOS &amp; Android from one clean codebase. Native feel, store-ready.</span>
+        </a>
+        <a class="mega-link" href="services/websites.html">
+          <span class="ml-title">Websites <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">Sites people remember — perfect Lighthouse 100, SEO from day one.</span>
+        </a>
+        <a class="mega-link" href="services/software.html">
+          <span class="ml-title">Software for Companies <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">Dashboards, internal tools and integrations — tailor-made, yours to keep.</span>
+        </a>
+        <a class="mega-link" href="services/design-brand.html">
+          <span class="ml-title">Design &amp; Brand <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">Identity, UI and motion designed in-house — a system that scales.</span>
+        </a>
+      </nav>
+
+      <aside class="mega-rail">
+        <p class="mega-eyebrow">Our product</p>
+        <a class="mega-card" href="#product">
+          <span class="mc-tag">Live · in production</span>
+          <span class="mc-title"><b>whatever-</b><span class="hl">recall</span></span>
+          <span class="mc-desc">Our own AI-native project memory — the proof that we ship what we sell.</span>
+        </a>
+        <div class="mega-contact">
+          <p class="mc-h">Start a project</p>
+          <a class="mc-mail" href="contact.html">Get in touch →</a>
+          <div class="mega-social">
+            <a href="mailto:info@mccain-digital.com">info@mccain-digital.com</a>
+            <a href="https://github.com/heidrich" target="_blank" rel="noopener">GitHub</a>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="mega-bottom">
+      <span>© <span class="mega-year">2026</span> McCain Digital · Bavaria, Germany</span>
+      <span class="mb-links">
+        <a href="legal/imprint.html">Imprint</a>
+        <a href="legal/privacy.html">Privacy</a>
+        <a href="legal/terms.html">Terms</a>
+      </span>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- HERO -->
+    <header class="cp-hero" id="top">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="index.html#top">Home</a><span class="sep">/</span>
+        <span>Contact</span>
+      </nav>
+      <h1><span class="ph" data-pixel>Let's build your</span> <span class="ph" data-pixel><span class="accent">next thing.</span></span></h1>
+      <p class="cp-lede">Tell us what you have in mind. Within 24 hours you'll hear back from the people who'd
+        actually build it — with an honest take on whether we're the right fit. No sales call, no funnel.</p>
+    </header>
+
+    <!-- GRID: details + form -->
+    <section class="cp-grid" aria-label="Contact form">
+      <div class="cp-info">
+        <div class="cp-info-block">
+          <p class="ci-h">Email us directly</p>
+          <a class="ci-mail" href="mailto:info@mccain-digital.com">info@mccain-digital.com</a>
+        </div>
+        <div class="cp-info-block">
+          <p class="ci-h">Studio</p>
+          <p>McCain Digital<br>Bavaria, Germany<br>Mon–Fri · 9:00–18:00 CET</p>
+        </div>
+        <div class="cp-info-block">
+          <p class="ci-h">What happens next</p>
+          <ul class="cp-info-promises">
+            <li>A real reply within 24 hours — from a builder, not a bot</li>
+            <li>An honest take on fit, and a fixed quote within 48 hours</li>
+            <li>No obligation, no lock-in — the code is always yours to keep</li>
+          </ul>
+        </div>
+      </div>
+
+      <form id="cpForm" class="cp-form" novalidate>
+        <!-- honeypot (Web3Forms) — off-screen, must stay empty -->
+        <input type="checkbox" name="botcheck" id="cpBot" tabindex="-1" autocomplete="off"
+          aria-hidden="true" style="position:absolute;left:-9999px;width:0;height:0;opacity:0">
+
+        <div class="cp-field-group">
+          <span class="cfg-label">What do you need? <span class="opt">— pick what fits</span></span>
+          <div class="cp-pills" data-pillgroup="projectType" role="group" aria-label="Project type">
+            <label class="cp-pill"><input type="checkbox" name="type" value="AI Tools">AI Tools</label>
+            <label class="cp-pill"><input type="checkbox" name="type" value="Web App">Web App</label>
+            <label class="cp-pill"><input type="checkbox" name="type" value="Mobile App">Mobile App</label>
+            <label class="cp-pill"><input type="checkbox" name="type" value="Website">Website</label>
+            <label class="cp-pill"><input type="checkbox" name="type" value="Software">Software</label>
+            <label class="cp-pill"><input type="checkbox" name="type" value="Design & Brand">Design &amp; Brand</label>
+            <label class="cp-pill"><input type="checkbox" name="type" value="Not sure yet">Not sure yet</label>
+          </div>
+        </div>
+
+        <div class="cp-field-group">
+          <span class="cfg-label">Rough budget <span class="opt">— helps us scope honestly (optional)</span></span>
+          <div class="cp-pills" data-pillgroup="budget" role="radiogroup" aria-label="Budget range">
+            <label class="cp-pill"><input type="radio" name="budget" value="< €5k">&lt; €5k</label>
+            <label class="cp-pill"><input type="radio" name="budget" value="€5k–15k">€5k–15k</label>
+            <label class="cp-pill"><input type="radio" name="budget" value="€15k–50k">€15k–50k</label>
+            <label class="cp-pill"><input type="radio" name="budget" value="€50k+">€50k+</label>
+            <label class="cp-pill"><input type="radio" name="budget" value="Not sure">Not sure</label>
+          </div>
+        </div>
+
+        <div class="cp-field-group">
+          <span class="cfg-label">Timeframe <span class="opt">— when would you start? (optional)</span></span>
+          <div class="cp-pills" data-pillgroup="timeframe" role="radiogroup" aria-label="Timeframe">
+            <label class="cp-pill"><input type="radio" name="timeframe" value="ASAP">ASAP</label>
+            <label class="cp-pill"><input type="radio" name="timeframe" value="1–3 months">1–3 months</label>
+            <label class="cp-pill"><input type="radio" name="timeframe" value="Just exploring">Just exploring</label>
+          </div>
+        </div>
+
+        <div class="cp-field">
+          <input type="text" id="cpName" name="name" placeholder=" " required autocomplete="name">
+          <label for="cpName">Your name</label>
+        </div>
+        <div class="cp-field">
+          <input type="email" id="cpEmail" name="email" placeholder=" " required autocomplete="email">
+          <label for="cpEmail">Your email</label>
+        </div>
+        <div class="cp-field">
+          <textarea id="cpMsg" name="message" placeholder=" " required></textarea>
+          <label for="cpMsg">Tell us about the project</label>
+        </div>
+
+        <div class="cp-ok" id="cpOk" role="status">Thanks — your message is on its way. We'll get back to you within 24 hours.</div>
+
+        <div class="cp-submit-row">
+          <button type="submit" class="btn btn-primary">Send message <span class="arr">→</span></button>
+          <p class="cp-consent">We'll only use your details to reply to this enquiry — see our <a href="legal/privacy.html">privacy policy</a>.</p>
+        </div>
+      </form>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>© <span id="year">2026</span> McCain Digital · Bavaria, Germany</span>
+    <div class="f-links">
+      <a class="f-recall" href="https://whatever-recall.com" target="_blank" rel="noopener"><img
+          src="recall-logo-128.png" width="18" height="18" alt="" loading="lazy" decoding="async"><span
+          class="recall-wordmark">whatever-<span class="hl">recall</span></span></a>
+      <a class="f-git" href="https://github.com/heidrich" target="_blank" rel="noopener" aria-label="McCain Digital on GitHub"><svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg></a>
+      <a href="legal/imprint.html">Imprint</a>
+      <a href="legal/privacy.html">Privacy</a>
+      <a href="legal/terms.html">Terms</a>
+      <a href="legal/withdrawal.html">Withdrawal</a>
+      <button type="button" class="consent__reopen" onclick="window.MCD_openConsent&&window.MCD_openConsent()">Cookie settings</button>
+    </div>
+  </footer>
+
+  <script src="pixel-engine.js?v=h6" defer></script>
+  <script src="mega.js" defer></script>
+  <script src="consent.js" defer></script>
+  <script src="svc-page.js" defer></script>
+  <script src="contact.js" defer></script>
+</body>
+
+</html>

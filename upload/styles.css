@@ -3371,3 +3371,116 @@
     @media (max-width: 640px) {
       .svc-step { grid-template-columns: 1fr; gap: .5rem }
     }
+
+    /* ============================================================
+       CONTACT PAGE — its own page (contact.html). Big pixel hero +
+       a richer "start a project" form (budget / type / timeframe
+       pill-groups + message). Reuses the dark/mustard identity.
+       ============================================================ */
+    .contact-page main { display: block }
+
+    .cp-hero {
+      max-width: var(--maxw);
+      margin-inline: auto;
+      padding: clamp(7rem, 13vw, 10rem) clamp(1.2rem, 4vw, 3.5rem) clamp(1rem, 2vw, 2rem)
+    }
+    .cp-hero .breadcrumb {
+      display: flex; gap: .5rem; align-items: center;
+      font-size: .8rem; color: var(--mute2); margin-bottom: 1.4rem
+    }
+    .cp-hero .breadcrumb a { color: var(--mute2); transition: color .3s }
+    .cp-hero .breadcrumb a:hover { color: var(--acc) }
+    .cp-hero .breadcrumb .sep { opacity: .5 }
+    .cp-hero h1 { font-size: clamp(2.6rem, 8vw, 6rem); line-height: .98; letter-spacing: -.04em; margin-bottom: 1.4rem }
+    .cp-hero h1 .accent { color: var(--acc); font-style: normal; white-space: nowrap }
+    .cp-hero .cp-lede { font-size: clamp(1.05rem, 1.7vw, 1.35rem); line-height: 1.5; color: var(--paper-2); max-width: 56ch }
+
+    .cp-grid {
+      max-width: var(--maxw);
+      margin-inline: auto;
+      padding: clamp(2rem, 4vw, 3.5rem) clamp(1.2rem, 4vw, 3.5rem) clamp(4rem, 8vw, 6rem);
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: clamp(2rem, 5vw, 5rem);
+      align-items: start
+    }
+
+    /* left rail — details */
+    .cp-info { display: flex; flex-direction: column; gap: 2rem }
+    .cp-info-block .ci-h { font-size: .72rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--mute2); margin-bottom: .7rem }
+    .cp-info-block a.ci-mail { font-size: 1.2rem; font-weight: 700; color: var(--paper); transition: color .3s }
+    .cp-info-block a.ci-mail:hover { color: var(--acc) }
+    .cp-info-block p { color: var(--paper-dim); font-size: .95rem; line-height: 1.6 }
+    .cp-info-promises { display: grid; gap: .9rem }
+    .cp-info-promises li { list-style: none; display: flex; gap: .7rem; align-items: flex-start; font-size: .92rem; color: var(--paper-dim) }
+    .cp-info-promises li::before { content: "→"; color: var(--acc); flex: 0 0 auto }
+
+    /* the form */
+    .cp-form { display: flex; flex-direction: column; gap: 1.6rem }
+    .cp-field-group .cfg-label {
+      display: block; font-size: .8rem; font-weight: 700; letter-spacing: .04em;
+      color: var(--paper); margin-bottom: .8rem
+    }
+    .cp-field-group .cfg-label .opt { color: var(--mute2); font-weight: 500; letter-spacing: 0 }
+
+    /* pill chooser (budget / type / timeframe) */
+    .cp-pills { display: flex; flex-wrap: wrap; gap: .6rem }
+    .cp-pill {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--ink2);
+      color: var(--paper-dim);
+      font-family: inherit; font-size: .86rem; font-weight: 600;
+      padding: .6rem 1.1rem;
+      cursor: pointer;
+      transition: border-color .25s var(--ease), color .25s var(--ease), background .25s var(--ease)
+    }
+    .cp-pill:hover { border-color: var(--paper-dim); color: var(--paper) }
+    .cp-pill input { position: absolute; opacity: 0; width: 0; height: 0 }
+    .cp-pill.is-on { background: var(--acc); border-color: var(--acc); color: var(--acc-ink) }
+
+    /* text fields (float-label, matching the homepage form) */
+    .cp-field { position: relative }
+    .cp-field input, .cp-field textarea {
+      width: 100%;
+      background: var(--ink2);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1.15rem 1.1rem .55rem;
+      color: var(--paper);
+      font-family: inherit;
+      font-size: 1rem;
+      transition: border-color .25s var(--ease)
+    }
+    .cp-field textarea { min-height: 9rem; resize: vertical; padding-top: 1.4rem }
+    .cp-field label {
+      position: absolute; left: 1.1rem; top: 1rem;
+      color: var(--mute2); font-size: 1rem;
+      pointer-events: none;
+      transition: transform .2s var(--ease), font-size .2s var(--ease), color .2s var(--ease);
+      transform-origin: left top
+    }
+    .cp-field input:focus, .cp-field textarea:focus { outline: none; border-color: var(--acc) }
+    .cp-field input:focus + label, .cp-field input:not(:placeholder-shown) + label,
+    .cp-field textarea:focus + label, .cp-field textarea:not(:placeholder-shown) + label {
+      transform: translateY(-.65rem) scale(.78); color: var(--acc)
+    }
+    .cp-field input[aria-invalid="true"], .cp-field textarea[aria-invalid="true"] { border-color: var(--err) }
+
+    .cp-submit-row { display: flex; flex-wrap: wrap; align-items: center; gap: 1.2rem; margin-top: .4rem }
+    .cp-consent { font-size: .82rem; color: var(--mute2); max-width: 42ch }
+    .cp-consent a { color: var(--acc); text-decoration: underline; text-underline-offset: 2px }
+    .cp-ok {
+      display: none;
+      background: var(--acc-dim);
+      border: 1px solid var(--acc);
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      color: var(--acc-soft);
+      font-size: .95rem
+    }
+
+    @media (max-width: 880px) {
+      .cp-grid { grid-template-columns: 1fr; gap: 2.6rem }
+    }
