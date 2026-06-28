@@ -9,7 +9,7 @@
     content="McCain Digital builds AI tools, web apps, mobile apps, websites and custom software for companies, individuals and startups — in Bavaria, Germany.">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#0f0e0c">
-  <link rel="preload" href="pixel-engine.js?v=h1" as="script">
+  <link rel="preload" href="pixel-engine.js?v=h5" as="script">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="canonical" href="https://mccain-digital.com/">
@@ -1449,6 +1449,536 @@
       }
     }
 
+    /* ============================================================
+       PROJECTS SLIDER (section 02)
+       Base = honest no-JS / reduced-motion fallback: every .pslide is a
+       normal stacked block, fully readable, zero CLS. The controller adds
+       .is-slider on the section to switch into the scroll-pinned 100vh
+       carousel. All transitions are opacity/transform only (compositor-
+       friendly) + the canvas pixel-bridge drawn by PixelFX.slides.
+       ============================================================ */
+    .product.slider {
+      /* the light paper card keeps its rounded shell; pinning needs the
+         section to NOT clip its sticky child, so overflow stays visible */
+      overflow: visible;
+      padding-top: clamp(2.6rem, 5vh, 4rem);
+      padding-bottom: clamp(2.6rem, 5vh, 4rem)
+    }
+
+    .slider-head { margin-bottom: 2rem }
+
+    .slider-head .kicker { color: var(--p-kicker) }
+    .slider-head .kicker::before { background: var(--p-kicker) }
+    .slider-head .sec-title em { color: var(--p-em) }
+
+    /* ---- base (no-JS): slides simply stack ---- */
+    .slider-track {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(3rem, 7vw, 6rem)
+    }
+
+    .pslide-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem
+    }
+
+    .pslide-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: .6em;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--p-kicker)
+    }
+
+    .pslide-eyebrow::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      background: var(--acc-deep)
+    }
+
+    .pslide-head { margin-bottom: .4rem }
+
+    .pslide-title {
+      font-size: clamp(1.7rem, 3.6vw, 2.8rem);
+      letter-spacing: -.03em;
+      line-height: 1.05;
+      margin-top: .7rem
+    }
+
+    .pslide-title em { font-style: normal; color: var(--p-em) }
+
+    .pslide h4 {
+      font-size: 1.04rem;
+      margin-bottom: .45rem;
+      display: flex;
+      gap: .55em;
+      align-items: baseline
+    }
+
+    .pslide h4::before { content: "→"; color: var(--p-kicker); font-weight: 400 }
+
+    .cta-note { font-size: .82rem; color: var(--mute) }
+
+    /* ---- proof card (slide 2 — the four 100s) ---- */
+    .proof-card {
+      background: var(--ink);
+      color: var(--paper);
+      border-radius: 18px;
+      padding: 1.8rem 1.6rem 1.4rem;
+      box-shadow: 0 32px 80px -28px rgba(15, 14, 12, .5);
+      transform: rotate(-.5deg)
+    }
+
+    .proof-scores {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden
+    }
+
+    /* proof tiles — pixel-morph flip (engine: PixelFX.morph) like the 01
+       service tiles. Two faces stacked in one grid cell; the engine
+       dissolves front into pixels and reassembles the back. */
+    .proof-score {
+      background: var(--ink);
+      padding: 1.3rem 1.2rem;
+      position: relative;
+      display: grid;
+      cursor: help;
+      overflow: hidden;
+      transition: background .4s var(--ease)
+    }
+    .proof-score:hover { background: var(--ink2) }
+
+    .proof-score .svc-face { grid-area: 1 / 1 }
+    .proof-score .svc-back { visibility: hidden; display: flex; align-items: center }
+    /* reduced-motion fallback path used by morph(): toggles .flipped */
+    .proof-score.flipped .svc-front { visibility: hidden }
+    .proof-score.flipped .svc-back { visibility: visible }
+
+    .proof-score .v {
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -.04em;
+      line-height: 1;
+      color: var(--acc)
+    }
+
+    .proof-score .l { margin-top: .4rem; font-size: .8rem; color: var(--paper-dim) }
+
+    .proof-score .svc-back p {
+      margin: 0;
+      font-size: .76rem;
+      line-height: 1.45;
+      color: var(--paper-dim)
+    }
+    .proof-score .svc-back p b { color: var(--paper); font-weight: 700 }
+    .proof-score .svc-back p i { font-style: italic; color: var(--acc-soft) }
+
+    /* the morph canvas overlay the engine appends */
+    .proof-score .pxm { position: absolute; inset: 0; display: none; pointer-events: none; z-index: 2 }
+
+    .proof-foot {
+      margin-top: 1.1rem;
+      font-size: .76rem;
+      color: var(--mute);
+      font-family: ui-monospace, "Cascadia Code", Consolas, monospace
+    }
+
+    /* ============================================================
+       AUTO-SLIDER MODE — applied by the controller (.is-slider) when there
+       is >1 slide, JS is on and motion is allowed. NO scroll hijack, NO
+       pinning: the section is a normal block ≤70vh tall. Slides auto-advance
+       on a timer (pixel bridge between them) while on screen; hover / focus /
+       swipe / dots drive it manually. The page scrolls past it normally.
+       ============================================================ */
+    /* ASYMMETRIC 2-COLUMN LAYOUT: the section bg goes dark (transparent over
+       the hero), the HEADING sits LEFT on the dark — animated like every
+       other section — and the light slider stage sits RIGHT at ~70vw. The
+       nav lives UNDER the stage on the dark page bg. Deliberate asymmetry. */
+    .product.slider.is-slider {
+      background: transparent;
+      border-radius: 0;
+      overflow: visible;
+      display: grid;
+      /* left column wide enough that the full-size heading word "production."
+         never clips; right column is the ~62vw slider stage */
+      grid-template-columns: minmax(0, 1fr) minmax(0, 62vw);
+      grid-template-areas: "head stage" "head nav";
+      align-items: start;
+      column-gap: clamp(1.5rem, 3vw, 3rem);
+      row-gap: clamp(1rem, 2.4vh, 1.6rem);
+      padding-right: 0
+    }
+
+    /* left column — heading on the dark bg, light text, like other sections.
+       Sits at the TOP and scrolls with the section (no sticky/centering). */
+    .is-slider .slider-head {
+      grid-area: head;
+      align-self: start;
+      margin: 0;
+      min-width: 0
+    }
+    .is-slider .slider-head .kicker { color: var(--acc) }
+    .is-slider .slider-head .kicker::before { background: var(--acc) }
+    /* match the OTHER sections' heading size exactly (the old .product
+       @921px rule shrank it to 3rem — restore the full sec-title scale) */
+    .is-slider .slider-head .sec-title {
+      color: var(--paper);
+      font-size: clamp(2rem, 5.4vw, 4.2rem)
+    }
+    .is-slider .slider-head .sec-title em { color: var(--mute) }
+    .slider-lede {
+      margin-top: 1.6rem;
+      color: var(--paper-dim);
+      font-size: clamp(.95rem, 1.2vw, 1.06rem);
+      max-width: 38ch
+    }
+
+    /* right column — the light stage, a fixed-height window (≤70vh) holding
+       all slides stacked; only the active one is visible */
+    .is-slider .slider-track {
+      grid-area: stage;
+      position: relative;
+      height: 70vh;
+      max-height: 42rem;
+      min-height: 22rem;
+      display: block;
+      gap: 0;
+      background: var(--paper);
+      border-radius: 28px;
+      overflow: hidden
+    }
+
+    /* stack to ONE column on smaller desktops — heading above, full-width
+       stage below (still auto-playing) */
+    @media (max-width: 1080px) {
+      .product.slider.is-slider {
+        grid-template-columns: 1fr;
+        grid-template-areas: "head" "stage" "nav";
+        align-items: stretch
+      }
+      .is-slider .slider-head { align-self: start; max-width: none; margin-bottom: clamp(1.2rem, 2.6vh, 1.8rem) }
+    }
+
+    .is-slider .pslide {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      /* center when the slide fits, pin to top if taller (never clip head) */
+      place-items: safe center;
+      align-content: safe center;
+      padding: clamp(2rem, 4vh, 3.4rem) clamp(1.2rem, 3vw, 2.6rem) clamp(3.6rem, 7vh, 5rem);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(24px) scale(.99);
+      transition: opacity .5s var(--ease), transform .6s var(--ease);
+      pointer-events: none;
+      will-change: opacity, transform
+    }
+
+    .is-slider .pslide-inner {
+      width: 100%;
+      max-width: 1180px;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(.7rem, 2vh, 1.4rem);
+      max-height: 100%;
+      overflow: auto;
+      /* hide the scrollbar visually — it's a safety net, not chrome */
+      scrollbar-width: none
+    }
+
+    .is-slider .pslide-inner::-webkit-scrollbar { display: none }
+
+    /* compact the dense slides so lede+points+terminal+cta fit the stage
+       without clipping. Tighter rhythm inside the slider only — the stacked
+       fallback keeps the roomy spacing. */
+    .is-slider .pslide .product-hero { gap: clamp(1.2rem, 2.6vw, 2.6rem); margin-top: 0 }
+    .is-slider .pslide .product-lede { margin-top: 0; font-size: clamp(.9rem, 1.15vw, 1.02rem); line-height: 1.5 }
+    .is-slider .pslide .product-points { margin-top: clamp(.8rem, 1.8vh, 1.4rem); gap: clamp(.7rem, 1.6vh, 1.2rem) 1.8rem }
+    .is-slider .pslide .ppoint h4 { margin-bottom: .25rem }
+    .is-slider .pslide .ppoint p { font-size: .86rem; line-height: 1.45 }
+    .is-slider .pslide .stats { margin-top: clamp(.8rem, 1.8vh, 1.4rem) }
+    .is-slider .pslide .stat { padding: clamp(.85rem, 1.8vh, 1.4rem) 1.3rem }
+    .is-slider .pslide .product-cta { margin-top: clamp(.9rem, 2vh, 1.5rem) }
+    .is-slider .pslide .pslide-title { font-size: clamp(1.5rem, 3vw, 2.4rem) }
+    .is-slider .pslide .terminal { font-size: clamp(.74rem, 1vw, .84rem); padding: 1.3rem 1.3rem }
+
+    /* ---- flip-stats: hover/focus reveals what the number means & why it
+       matters (like the service tiles in 01, but a clean crossfade-slide
+       instead of a 3D flip — hard-edged + score-safe). ---- */
+    .stats-flip .stat {
+      position: relative;
+      cursor: help;
+      overflow: hidden;
+      transition: background .35s var(--ease)
+    }
+    .stats-flip .stat::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--acc-deep);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .4s var(--ease)
+    }
+    .stats-flip .stat:hover,
+    .stats-flip .stat:focus-visible { background: #fff; outline: none }
+    .stats-flip .stat:hover::after,
+    .stats-flip .stat:focus-visible::after { transform: scaleX(1) }
+
+    .stat-face {
+      transition: opacity .4s var(--ease), transform .45s var(--ease)
+    }
+    /* front = the number; back = the explanation, stacked on top */
+    .stat-back {
+      position: absolute;
+      inset: 0;
+      padding: inherit;
+      display: flex;
+      align-items: center;
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none
+    }
+    .stat-back p {
+      margin: 0;
+      font-size: .82rem;
+      line-height: 1.5;
+      color: var(--p-text)
+    }
+    .stat-back p b { color: var(--ink); font-weight: 700 }
+    .stat-back p i { font-style: italic; color: var(--p-em) }
+
+    .stats-flip .stat:hover .stat-front,
+    .stats-flip .stat:focus-visible .stat-front { opacity: 0; transform: translateY(-8px) }
+    .stats-flip .stat:hover .stat-back,
+    .stats-flip .stat:focus-visible .stat-back { opacity: 1; transform: none }
+
+    /* hint that they're interactive: a tiny corner mark */
+    .stats-flip .stat .stat-front::after {
+      content: "?";
+      position: absolute;
+      top: .7rem; right: .9rem;
+      width: 1.1rem; height: 1.1rem;
+      display: grid; place-items: center;
+      font-size: .66rem; font-weight: 700;
+      color: var(--p-kicker);
+      border: 1px solid rgba(154, 116, 0, .35);
+      border-radius: 50%;
+      opacity: .6;
+      transition: opacity .3s var(--ease)
+    }
+    .stats-flip .stat:hover .stat-front::after { opacity: 0 }
+
+    /* when the viewport is genuinely short, drop the stats row to a single
+       line and let the inner scroll — never clip the CTA */
+    @media (max-height: 760px) {
+      .is-slider .pslide .stats { grid-template-columns: repeat(4, 1fr) }
+      .is-slider .pslide .stat .v { font-size: clamp(1.6rem, 3vw, 2.2rem) }
+    }
+
+    /* active slide */
+    .is-slider .pslide.is-active {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      pointer-events: auto
+    }
+
+    /* a slide that has been scrolled past leaves upward (the one entering
+       comes from below) — set by the controller via .leaving-up */
+    .is-slider .pslide.leaving-up {
+      transform: translateY(-24px) scale(.99)
+    }
+
+    /* during the pixel bridge the DOM slide is hidden; the canvas carries
+       the morph. controller toggles .bridging on the TRACK (#sliderTrack),
+       so these selectors target the track — NOT the section. */
+    .slider-track.bridging .pslide.is-active { opacity: 0; transition: opacity .12s linear }
+
+    /* the pixel-bridge canvas overlay */
+    .slider-bridge {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+      display: none
+    }
+
+    .slider-track.bridging .slider-bridge { display: block }
+
+    /* ---- slider chrome — PROMINENT & PLAYFUL. Lives UNDER the stage on the
+       dark page bg: chunky prev/next arrows, an oversized counter, square
+       index ticks and a mustard position rail. Built to feel like a toy. ---- */
+    .slider-ui { display: none }
+
+    .is-slider .slider-ui {
+      grid-area: nav;
+      display: flex;
+      align-items: center;
+      gap: clamp(1rem, 2.5vw, 1.8rem);
+      padding-top: clamp(1.2rem, 2.2vh, 1.6rem)
+    }
+
+    /* ---- prev / next arrows ---- */
+    .slider-arrows { display: flex; gap: .6rem; flex: 0 0 auto }
+
+    .slider-arrow {
+      width: 3rem;
+      height: 3rem;
+      display: grid;
+      place-items: center;
+      border-radius: 99px;
+      border: 1.5px solid var(--line);
+      background: transparent;
+      color: var(--paper);
+      cursor: pointer;
+      transition: transform .35s var(--spring, var(--ease)), background .3s var(--ease), border-color .3s var(--ease), color .3s var(--ease)
+    }
+
+    .slider-arrow svg {
+      width: 20px; height: 20px;
+      fill: none; stroke: currentColor; stroke-width: 2.2;
+      stroke-linecap: round; stroke-linejoin: round;
+      transition: transform .35s var(--ease)
+    }
+
+    .slider-arrow:hover {
+      background: var(--acc);
+      border-color: var(--acc);
+      color: var(--acc-ink);
+      transform: translateY(-2px) scale(1.06)
+    }
+    .slider-arrow:active { transform: translateY(0) scale(.96) }
+    #sliderPrev:hover svg { transform: translateX(-3px) }
+    #sliderNext:hover svg { transform: translateX(3px) }
+    .slider-arrow:disabled { opacity: .3; cursor: default; transform: none }
+
+    /* ---- oversized counter "01 / 03" ---- */
+    .slider-counter {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: baseline;
+      gap: .35rem;
+      font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+      letter-spacing: -.02em;
+      color: var(--mute);
+      line-height: 1
+    }
+    .slider-counter b {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      color: var(--acc);
+      font-variant-numeric: tabular-nums;
+      transition: transform .3s var(--ease)
+    }
+    .slider-counter .sc-sep { font-size: 1.3rem; color: var(--mute); opacity: .5 }
+    .slider-counter .sc-total { font-size: 1.3rem; color: var(--paper-dim) }
+
+    /* ---- index ticks — square, light up on the active project ---- */
+    .slider-dots { display: flex; gap: .5rem; align-items: center; flex: 0 0 auto }
+
+    .slider-dots button {
+      width: 10px;
+      height: 10px;
+      padding: 0;
+      border: 0;
+      border-radius: 2px;
+      background: rgba(236, 231, 221, .25);
+      cursor: pointer;
+      position: relative;
+      transition: background .3s var(--ease), transform .35s var(--spring, var(--ease)), width .35s var(--ease)
+    }
+
+    /* slides of the SAME project share a short connector */
+    .slider-dots button.same-project::before {
+      content: "";
+      position: absolute;
+      right: 100%;
+      top: 50%;
+      width: .5rem;
+      height: 2px;
+      margin-top: -1px;
+      background: rgba(236, 231, 221, .25)
+    }
+
+    .slider-dot-sep { width: .45rem }
+
+    .slider-dots button:hover { background: rgba(236, 231, 221, .6); transform: scale(1.2) }
+
+    /* the active tick stretches into a mustard pill — playful + clear */
+    .slider-dots button[aria-selected="true"] {
+      background: var(--acc);
+      width: 26px
+    }
+
+    /* ---- position rail (fills toward the last slide) ---- */
+    .slider-rail {
+      flex: 1 1 auto;
+      height: 3px;
+      background: rgba(236, 231, 221, .12);
+      border-radius: 3px;
+      overflow: hidden
+    }
+
+    .slider-fill {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--acc-deep), var(--acc));
+      border-radius: 3px;
+      transition: width .5s var(--ease)
+    }
+
+    @media (max-width: 560px) {
+      .slider-arrow { width: 2.6rem; height: 2.6rem }
+      .slider-counter b { font-size: 2rem }
+    }
+
+    /* the stage clips (overflow:hidden) so the big soft button drop-shadow
+       gets sheared into an ugly rectangle. Inside the slider, drop the blur
+       shadow and just lift the button — cleaner and on-brand anyway. */
+    .is-slider .btn-ink:hover {
+      box-shadow: none;
+      transform: translateY(-2px)
+    }
+    .is-slider .btn-outline-ink:hover { transform: translateY(-2px) }
+
+    /* slide-2 hero columns mirror the product-hero grid */
+    .pslide .product-hero { width: 100% }
+
+    @media (max-width: 920px) {
+      .proof-card { transform: none }
+    }
+
+    /* on narrow viewports the controller does NOT run (handled in JS); this
+       guarantees the stacked fallback also looks intentional if a desktop
+       window is dragged narrow mid-session */
+    @media (max-width: 700px) {
+      .is-slider .slider-track { position: static; height: auto; border-radius: 28px }
+      .is-slider .pslide {
+        position: static;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        pointer-events: auto;
+        min-height: auto
+      }
+      .is-slider .slider-ui { display: none }
+    }
+
     /* ---------- big type divider ---------- */
     .bigline {
       padding: clamp(4rem, 8vw, 7rem) clamp(1.2rem, 4vw, 3.5rem);
@@ -2036,85 +2566,172 @@
     <h2 id="bigline1">Idea → Design → Code → <b>Launch.</b> Idea → Design → Code → <b>Launch.</b></h2>
   </div>
 
-  <!-- PRODUCT: whatever-recall -->
-  <section class="product" id="product" aria-labelledby="prodTitle">
-    <p class="kicker reveal">02 — Our latest product</p>
-    <h2 class="sec-title reveal" id="prodTitle"><span class="recall-wordmark">whatever-<span
-          class="hl">recall</span></span><br><em>The code is its own memory.</em></h2>
-
-    <div class="product-hero">
-      <div>
-        <p class="product-lede reveal"><b>Stop paying your AI to re-read the same files.</b> recall is an AI-native
-          project memory: knowledge is stamped onto the commit at write-time — while the AI still knows <i>why</i>.
-          Reading it back takes microseconds and zero tokens. No second source of truth to drift out of date.</p>
-        <div class="product-points">
-          <div class="ppoint reveal">
-            <h3>Self-hosted</h3>
-            <p>Runs entirely on your machine. No sync, no telemetry — your code never leaves your computer.</p>
-          </div>
-          <div class="ppoint reveal">
-            <h3>Can't go stale</h3>
-            <p>Every note is pinned to a commit. The moment the code moves on, recall raises a flag.</p>
-          </div>
-          <div class="ppoint reveal">
-            <h3>Rules that stick</h3>
-            <p>Standing instructions your AI checks before every edit — they can't be skipped or forgotten.</p>
-          </div>
-          <div class="ppoint reveal">
-            <h3>Ready in 2 minutes</h3>
-            <p>One pip install, one recall init — done. No config, no cloud account, no upload.</p>
-          </div>
-        </div>
-      </div>
-      <div class="terminal reveal" aria-hidden="true">
-        <div class="t-bar"><i></i><i></i><i></i></div>
-        <div><span class="dim">$</span> <span class="cmd">pip install</span> whatever-recall</div>
-        <div><span class="dim">$</span> <span class="cmd">recall init</span> .</div>
-        <div class="ok"># indexed — your repo is its own memory now</div>
-        <div>&nbsp;</div>
-        <div><span class="dim">$</span> <span class="cmd">recall</span> <span class="typed" id="typedQuery"></span>
-        </div>
-        <div id="recallAnswer" style="opacity:0;transition:opacity .8s">
-          <div class="ok">✓ 1 hit · 0.41 ms · 0 tokens</div>
-          <div><span class="dim">→ lesson:</span> RLS cut-over: writers must set</div>
-          <div><span class="dim">&nbsp;&nbsp;</span>the new scope column.</div>
-          <div><span class="dim">→ pinned to</span> a1f9c20 <span class="dim">· 🟢 fresh</span></div>
-        </div>
-      </div>
+  <!-- ============================================================
+       PROJECTS SLIDER — section 02. Scroll-pinned, one 100vh slide per
+       project, pixel disintegrate→assemble between slides (PixelFX.slides).
+       Data-driven: each .pslide is real, crawlable DOM (SEO/a11y/no-JS) —
+       the controller only adds pinning + transitions on top. Add a project
+       = add a <article class="pslide"> here (the slider auto-counts them);
+       reduced-motion / single-slide falls back to plain stacked sections.
+       ============================================================ -->
+  <section class="product slider" id="product" aria-labelledby="prodTitle"
+           aria-roledescription="carousel" aria-label="Selected projects we build and ship">
+    <div class="slider-head">
+      <p class="kicker reveal">02 — Things we've shipped</p>
+      <h2 class="sec-title" id="prodTitle"><span class="ph" data-pixel>Built by us.</span> <em>In production.</em></h2>
+      <p class="slider-lede reveal">Real projects, shipped and running — our own product, this very page, and the work behind them. Step through with the arrows or dots.</p>
     </div>
 
-    <div class="stats">
-      <div class="stat reveal">
-        <div class="v"><span data-count="1400">1,400</span><small>×</small></div>
-        <div class="l">fewer tokens than grep-and-read</div>
-      </div>
-      <div class="stat reveal">
-        <div class="v"><span data-count="67">67</span><small>×</small></div>
-        <div class="l">faster to the answer — including the why</div>
-      </div>
-      <div class="stat reveal">
-        <div class="v">0<small>.25&nbsp;ms</small></div>
-        <div class="l">recall at 108,000+ anchors — scales flat</div>
-      </div>
-      <div class="stat reveal">
-        <div class="v">0</div>
-        <div class="l">tokens to recall a fact</div>
-      </div>
+    <div class="slider-track" id="sliderTrack">
+
+      <!-- ===== SLIDE 1 — whatever-recall · intro (anim: pixel) ===== -->
+      <article class="pslide" id="slide-recall" data-project="recall" data-anim="pixel"
+               aria-roledescription="slide" aria-label="whatever-recall — what it is">
+        <div class="pslide-inner">
+          <div class="pslide-head">
+            <span class="pslide-eyebrow">Our product · live</span>
+            <h3 class="pslide-title"><span class="recall-wordmark">whatever-<span class="hl">recall</span></span> — <em>the code is its own memory.</em></h3>
+          </div>
+          <div class="product-hero">
+            <div>
+              <p class="product-lede"><b>Stop paying your AI to re-read the same files.</b> recall is an AI-native
+                project memory: knowledge is stamped onto the commit at write-time — while the AI still knows <i>why</i>.
+                Reading it back takes microseconds and zero tokens.</p>
+              <div class="product-points">
+                <div class="ppoint"><h4>Self-hosted</h4><p>Runs entirely on your machine. No sync, no telemetry — your code never leaves your computer.</p></div>
+                <div class="ppoint"><h4>Can't go stale</h4><p>Every note is pinned to a commit. The moment the code moves on, recall raises a flag.</p></div>
+                <div class="ppoint"><h4>Rules that stick</h4><p>Standing instructions your AI checks before every edit — they can't be skipped or forgotten.</p></div>
+              </div>
+            </div>
+            <div class="terminal" aria-hidden="true">
+              <div class="t-bar"><i></i><i></i><i></i></div>
+              <div><span class="dim">$</span> <span class="cmd">pip install</span> whatever-recall</div>
+              <div><span class="dim">$</span> <span class="cmd">recall init</span> .</div>
+              <div class="ok"># indexed — your repo is its own memory now</div>
+              <div>&nbsp;</div>
+              <div><span class="dim">$</span> <span class="cmd">recall</span> <span class="typed" id="typedQuery"></span></div>
+              <div id="recallAnswer" style="opacity:0;transition:opacity .8s">
+                <div class="ok">✓ 1 hit · 0.41 ms · 0 tokens</div>
+                <div><span class="dim">→ lesson:</span> RLS cut-over: writers must set</div>
+                <div><span class="dim">&nbsp;&nbsp;</span>the new scope column.</div>
+                <div><span class="dim">→ pinned to</span> a1f9c20 <span class="dim">· 🟢 fresh</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="product-cta">
+            <a class="btn btn-ink" href="https://whatever-recall.com" target="_blank" rel="noopener">whatever-recall.com <span class="arr">→</span></a>
+            <span class="cta-note">14-day free trial · no credit card · keep scrolling for the numbers ↓</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- ===== SLIDE 2 — whatever-recall · the numbers (same project, anim: shatter) ===== -->
+      <article class="pslide" id="slide-recall-stats" data-project="recall" data-anim="shatter"
+               aria-roledescription="slide" aria-label="whatever-recall — the numbers">
+        <div class="pslide-inner">
+          <div class="pslide-head">
+            <span class="pslide-eyebrow">whatever-recall · measured</span>
+            <h3 class="pslide-title">The same answer — <em>67× faster, at zero tokens.</em></h3>
+          </div>
+          <p class="product-lede">Numbers from a real repo at 108,000+ anchors. recall stays flat where grep-and-read
+            blows up your context window — because it never re-reads the files, it recalls the fact and the <i>why</i>.</p>
+          <div class="stats stats-flip">
+            <div class="stat" tabindex="0">
+              <div class="stat-face stat-front"><div class="v"><span data-count="1400">1,400</span><small>×</small></div><div class="l">fewer tokens than grep-and-read</div></div>
+              <div class="stat-face stat-back"><p><b>Why it matters:</b> the context window stops filling with the same files — the AI stays sharp and cheap.</p></div>
+            </div>
+            <div class="stat" tabindex="0">
+              <div class="stat-face stat-front"><div class="v"><span data-count="67">67</span><small>×</small></div><div class="l">faster to the answer — including the why</div></div>
+              <div class="stat-face stat-back"><p><b>Why it matters:</b> the AI gets the decision <i>and</i> the reason instantly — no re-deriving what was known.</p></div>
+            </div>
+            <div class="stat" tabindex="0">
+              <div class="stat-face stat-front"><div class="v">0<small>.25&nbsp;ms</small></div><div class="l">recall at 108,000+ anchors — scales flat</div></div>
+              <div class="stat-face stat-back"><p><b>Why it matters:</b> still instant on a real, years-old codebase — not just a toy repo.</p></div>
+            </div>
+            <div class="stat" tabindex="0">
+              <div class="stat-face stat-front"><div class="v">0</div><div class="l">tokens to recall a fact</div></div>
+              <div class="stat-face stat-back"><p><b>Why it matters:</b> no model call to read a stored fact — usable on every edit, free.</p></div>
+            </div>
+          </div>
+          <div class="product-cta">
+            <a class="btn btn-ink" href="https://whatever-recall.com/how-it-works" target="_blank" rel="noopener">How it works <span class="arr">→</span></a>
+            <a class="btn btn-outline-ink" href="https://whatever-recall.com" target="_blank" rel="noopener">whatever-recall.com</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- ===== SLIDE 3 — this site (meta case, honest & verifiable; anim: swipe) ===== -->
+      <article class="pslide" id="slide-thissite" data-project="thissite" data-anim="swipe"
+               aria-roledescription="slide" aria-label="mccain-digital.com">
+        <div class="pslide-inner">
+          <div class="pslide-head">
+            <span class="pslide-eyebrow">Website · live</span>
+            <h3 class="pslide-title">This very page — <em>the proof is the page.</em></h3>
+          </div>
+          <div class="product-hero">
+            <div>
+              <p class="product-lede"><b>The site you're reading is the portfolio piece.</b> Hand-written vanilla HTML,
+                no framework, no build step, no web fonts — running a custom canvas pixel-engine over every headline,
+                button and tile, and still scoring four perfect 100s. Most marketing sites pick looks <i>or</i> speed.
+                This one refuses to choose.</p>
+              <div class="product-points">
+                <div class="ppoint"><h4>Zero dependencies</h4><p>One HTML file, one JS engine. Drop it on any static host and it runs — nothing to compile.</p></div>
+                <div class="ppoint"><h4>Real DOM, always</h4><p>Every word is selectable, crawlable text. The pixel effects are aria-hidden canvas on top.</p></div>
+                <div class="ppoint"><h4>Frame-frugal</h4><p>Every animation parks itself when nothing moves — an idle page burns zero frames.</p></div>
+              </div>
+            </div>
+            <div class="proof-card">
+              <div class="proof-scores">
+                <div class="proof-score" data-morph tabindex="0">
+                  <div class="svc-face svc-front"><div class="v">100</div><div class="l">Performance</div></div>
+                  <div class="svc-face svc-back"><p>Loads fast on mobile <i>and</i> desktop — most sites sit at 50–70. <b>Yours won't make visitors wait.</b></p></div>
+                </div>
+                <div class="proof-score" data-morph tabindex="0">
+                  <div class="svc-face svc-front"><div class="v">100</div><div class="l">Accessibility</div></div>
+                  <div class="svc-face svc-back"><p>Keyboard, screen-reader and contrast all pass. <b>Usable by everyone — and a legal must.</b></p></div>
+                </div>
+                <div class="proof-score" data-morph tabindex="0">
+                  <div class="svc-face svc-front"><div class="v">100</div><div class="l">Best Practices</div></div>
+                  <div class="svc-face svc-back"><p>HTTPS, no console errors, no deprecated APIs. <b>Modern, secure engineering — full marks.</b></p></div>
+                </div>
+                <div class="proof-score" data-morph tabindex="0">
+                  <div class="svc-face svc-front"><div class="v">100</div><div class="l">SEO</div></div>
+                  <div class="svc-face svc-back"><p>Clean structure, metadata, crawl path. <b>Found by Google — and by AI agents.</b></p></div>
+                </div>
+              </div>
+              <div class="proof-foot" aria-hidden="true">Google PageSpeed · mobile &amp; desktop · TBT 0 ms · CLS 0 · agentic browsing 3/3</div>
+            </div>
+          </div>
+          <div class="product-cta">
+            <a class="btn btn-ink" href="https://pagespeed.web.dev/analysis?url=https%3A%2F%2Fmccain-digital.com%2F" target="_blank" rel="noopener">Verify the score yourself <span class="arr">→</span></a>
+            <span class="cta-note">don't take our word for it — run Google's own test</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- ===== ADD MORE PROJECTS HERE =====
+           Copy a <article class="pslide" data-project="…"> block. The slider
+           auto-counts slides and builds its dots/progress. Keep it real:
+           only ship projects we actually built (UWG) — the brand ticker in
+           the hero stays a career reference, never a case here. -->
+
     </div>
 
-    <div class="product-cta reveal">
-      <a class="btn btn-ink" href="https://whatever-recall.com" target="_blank" rel="noopener">whatever-recall.com <span
-          class="arr">→</span></a>
-      <a class="btn btn-outline-ink" href="https://whatever-recall.com/how-it-works" target="_blank" rel="noopener">How
-        it works</a>
-      <span style="font-size:.82rem;color:var(--mute)">14-day free trial · no credit card</span>
+    <!-- slider chrome: prev/next arrows + counter + dots + rail. Manual nav
+         (no auto-advance) — built to feel like an experience. -->
+    <div class="slider-ui" id="sliderUi" aria-hidden="true">
+      <div class="slider-arrows">
+        <button type="button" class="slider-arrow" id="sliderPrev" aria-label="Previous project">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+        </button>
+        <button type="button" class="slider-arrow" id="sliderNext" aria-label="Next project">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+      <div class="slider-counter" id="sliderHint"><b>01</b><span class="sc-sep">/</span><span class="sc-total">03</span></div>
+      <div class="slider-dots" id="sliderDots" role="tablist" aria-label="Project slides"></div>
+      <div class="slider-rail"><span class="slider-fill" id="sliderFill"></span></div>
     </div>
-
-    <blockquote class="quote reveal">
-      <p>"We document constantly, then change the plan and never touch the doc again. The memory rots. So we moved the
-        truth into the <span class="hl">code itself</span> — the one thing that can't lie."</p>
-      <cite>— Christian, founder · McCain Digital · Bavaria</cite>
-    </blockquote>
   </section>
 
   <!-- BIG LINE 2 -->
@@ -2205,7 +2822,7 @@
     </div>
   </footer>
 
-  <script src="pixel-engine.js?v=h1" defer></script>
+  <script src="pixel-engine.js?v=h5" defer></script>
   <script>
     (function () {
       "use strict";
@@ -2500,6 +3117,223 @@
         PixelFX.button(b);
       });
       d.querySelectorAll(".svc[data-morph]").forEach(function (s) { PixelFX.morph(s); });
+      // proof tiles in the slider get the same pixel-morph flip
+      d.querySelectorAll(".proof-score[data-morph]").forEach(function (s) { PixelFX.morph(s); });
+
+      /* ============================================================
+         PROJECTS SLIDER (section 02) — scroll-pinned 100vh carousel.
+         Data-driven: counts whatever .pslide elements exist. Pins the
+         section for (N-1) viewport-heights; each scroll-step crosses to
+         the next slide through a PixelFX.slides() pixel bridge. Keyboard
+         (↑↓ / ←→ / Home / End), dots, touch-swipe and wheel all drive the
+         same step(). Falls back to plain stacked sections when JS-off,
+         reduced-motion, only one slide, or the viewport is small.
+         ============================================================ */
+      (function () {
+        var section = d.getElementById("product");
+        if (!section) return;
+        var track = d.getElementById("sliderTrack");
+        var ui = d.getElementById("sliderUi");
+        var fill = d.getElementById("sliderFill");
+        var dotsWrap = d.getElementById("sliderDots");
+        var hint = d.getElementById("sliderHint");
+        var prevBtn = d.getElementById("sliderPrev");
+        var nextBtn = d.getElementById("sliderNext");
+        var slides = [].slice.call(track.querySelectorAll(".pslide"));
+        var N = slides.length;
+        var pad2 = function (n) { return (n < 10 ? "0" : "") + n; };
+
+        // engine refuses to pin under these conditions -> honest stacked fallback
+        // run the auto-slider only with >1 slide, JS + engine present, motion
+        // allowed and a roomy-enough viewport; otherwise keep the readable
+        // stacked DOM (no auto, no bridge) — phones/reduced-motion get that.
+        function canRun() {
+          return !reduced && N > 1 && w.innerWidth > 700
+            && !!(w.PixelFX && PixelFX.slides);
+        }
+        if (!canRun()) { return; }
+
+        var slider_arm = function () {};   // set later to arm the auto-timer
+        section.classList.add("is-slider");
+        section.setAttribute("tabindex", "-1");
+
+        // build dots — slides sharing a data-project get a connecting bar so
+        // multi-slide projects read as one group (●●● | ○ next project)
+        var dots = [];
+        slides.forEach(function (s, i) {
+          var prj = s.getAttribute("data-project") || ("p" + i);
+          var prevPrj = i > 0 ? (slides[i - 1].getAttribute("data-project") || ("p" + (i - 1))) : null;
+          if (i > 0 && prj !== prevPrj) {
+            var sep = d.createElement("span");
+            sep.className = "slider-dot-sep";
+            sep.setAttribute("aria-hidden", "true");
+            dotsWrap.appendChild(sep);
+          }
+          var b = d.createElement("button");
+          b.type = "button";
+          b.setAttribute("role", "tab");
+          b.className = "slider-dot";
+          if (i > 0 && prj === prevPrj) b.classList.add("same-project");
+          b.setAttribute("aria-label", "Slide " + (i + 1) + (s.getAttribute("aria-label") ? " — " + s.getAttribute("aria-label") : ""));
+          b.addEventListener("click", function () { jumpTo(i); });
+          dotsWrap.appendChild(b);
+          dots.push(b);
+        });
+
+        var bridge = PixelFX.slides(track);
+        var cur = 0, animating = false;
+
+        function setActive(i, leavingUp) {
+          slides.forEach(function (s, k) {
+            s.classList.toggle("is-active", k === i);
+            s.classList.toggle("leaving-up", false);
+            // the bridge sets inline visibility:visible on the incoming slide;
+            // clear it on every NON-active slide so only the active one shows
+            // (a leftover visible+opacity:0 slide bleeds through at the edges)
+            if (k !== i) s.style.visibility = "";
+          });
+          if (typeof leavingUp === "number" && slides[leavingUp]) {
+            slides[leavingUp].classList.add("leaving-up");
+          }
+          dots.forEach(function (b, k) { b.setAttribute("aria-selected", k === i ? "true" : "false"); });
+          // counter: bump the current number with a tiny pop
+          if (hint) {
+            var cb = hint.querySelector("b"), tot = hint.querySelector(".sc-total");
+            if (cb) { cb.textContent = pad2(i + 1); cb.style.transform = "translateY(-3px)"; requestAnimationFrame(function () { requestAnimationFrame(function () { cb.style.transform = "none"; }); }); }
+            if (tot) tot.textContent = pad2(N);
+          }
+          // re-fire the load-reveal animations on the freshly shown slide
+          revealSlide(slides[i]);
+          // update the position rail
+          slider_arm();
+        }
+
+        /* the trendy "content loads in" reveal: pixel headline replays +
+           cards stagger up. Reuses the existing .reveal pattern locally. */
+        function revealSlide(slide) {
+          // pixel headline inside the slide (if any) replays its assembly
+          var ph = slide.querySelector("[data-pixel]");
+          if (ph && ph.__pxInst) { ph.__pxInst.play(); }
+          // stagger the points/stat/cta blocks (compositor-only transform)
+          var rows = slide.querySelectorAll(".product-lede, .ppoint, .stat, .proof-score, .product-cta, .terminal, .proof-card");
+          rows.forEach(function (el, k) {
+            el.style.transition = "none";
+            el.style.opacity = "0";
+            el.style.transform = "translateY(16px)";
+            // next frame: ease in with a small per-row delay
+            requestAnimationFrame(function () {
+              requestAnimationFrame(function () {
+                el.style.transition = "opacity .55s var(--ease) " + (k * 0.045) + "s, transform .55s var(--ease) " + (k * 0.045) + "s";
+                el.style.opacity = "1";
+                el.style.transform = "none";
+              });
+            });
+          });
+        }
+
+        function crossTo(i, dir) {
+          if (i < 0 || i >= N || i === cur || animating) return;
+          animating = true;
+          var from = slides[cur], to = slides[i];
+          // per-slide animation variant: the INCOMING slide picks the style
+          var anim = to.getAttribute("data-anim") || "pixel";
+          // make BOTH visible-ish so the bridge can sample the incoming face
+          to.style.visibility = "visible";
+          track.classList.add("bridging");
+          bridge.go(from, to, dir, anim, function () {
+            track.classList.remove("bridging");
+            setActive(i, dir > 0 ? cur : undefined);
+            cur = i;
+            animating = false;
+          });
+        }
+
+        function jumpTo(i) {
+          if (i === cur || animating) return;
+          crossTo(i, i > cur ? 1 : -1);
+        }
+        function nextSlide() { jumpTo((cur + 1) % N); }
+        function prevSlide() { jumpTo((cur - 1 + N) % N); }
+
+        /* ============================================================
+           MANUAL slider (no auto-advance). The rail is a position indicator
+           (how far through the set you are), driven by setActive via the
+           exposed slider_arm hook. Drive it with the arrows nav, dots,
+           keyboard or swipe. The page scrolls past the section normally.
+           ============================================================ */
+        slider_arm = function () {
+          // rail shows position: slide (i+1) of N
+          fill.style.width = (N > 1 ? ((cur) / (N - 1)) * 100 : 100) + "%";
+        };
+
+        // keyboard: arrows move slides ONLY when the slider has focus (so it
+        // never fights the page's normal arrow-key scrolling)
+        section.addEventListener("keydown", function (e) {
+          var handled = true;
+          if (e.key === "ArrowRight" || e.key === "ArrowDown") { nextSlide(); }
+          else if (e.key === "ArrowLeft" || e.key === "ArrowUp") { prevSlide(); }
+          else if (e.key === "Home") { jumpTo(0); }
+          else if (e.key === "End") { jumpTo(N - 1); }
+          else handled = false;
+          if (handled) e.preventDefault();
+        });
+
+        // touch swipe (horizontal) to change slides — vertical swipes scroll
+        // the page normally (we never preventDefault on the page scroll)
+        var tx0 = null, ty0 = null;
+        track.addEventListener("touchstart", function (e) { tx0 = e.touches[0].clientX; ty0 = e.touches[0].clientY; }, { passive: true });
+        track.addEventListener("touchend", function (e) {
+          if (tx0 === null) return;
+          var dx = e.changedTouches[0].clientX - tx0, dy = e.changedTouches[0].clientY - ty0;
+          if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) { jumpTo(dx < 0 ? (cur + 1) % N : (cur - 1 + N) % N); }
+          tx0 = ty0 = null;
+        }, { passive: true });
+
+        // expose prev/next for the new arrow buttons (built below)
+        section.__sliderNext = nextSlide;
+        section.__sliderPrev = prevSlide;
+
+        /* size the stage to the TALLEST slide (so nothing — esp. the CTA —
+           ever gets clipped) but never taller than ~78vh. Measures each
+           slide's natural content height with the slides momentarily laid
+           out, then locks the stage height. */
+        function fitStage() {
+          var pad = 0;
+          // read vertical padding of a slide once
+          var probe = slides[0];
+          var cs = w.getComputedStyle(probe);
+          pad = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+          var tallest = 0;
+          slides.forEach(function (s) {
+            var inner = s.querySelector(".pslide-inner");
+            // temporarily un-cap to read true content height
+            var prevMax = inner.style.maxHeight; inner.style.maxHeight = "none";
+            tallest = Math.max(tallest, inner.scrollHeight);
+            inner.style.maxHeight = prevMax;
+          });
+          var need = Math.ceil(tallest + pad);
+          var cap = Math.round(w.innerHeight * 0.88);
+          var floor = 22 * 16;
+          var h = Math.max(floor, Math.min(need, cap));
+          track.style.height = h + "px";
+          track.style.minHeight = "0";
+          track.style.maxHeight = "none";
+          bridge.resize();
+        }
+
+        // wire the prev/next arrows (loop around the set)
+        if (prevBtn) prevBtn.addEventListener("click", function () { prevSlide(); });
+        if (nextBtn) nextBtn.addEventListener("click", function () { nextSlide(); });
+
+        var rt = null;
+        w.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(function () { fitStage(); }, 160); });
+
+        // init: stash the pixel-headline instance on its host so we can replay it
+        pxInsts.forEach(function (inst) { if (inst && inst.host) inst.host.__pxInst = inst; });
+        fitStage();
+        bridge.resize();
+        setActive(0);
+      })();
 
       /* ---- chip tooltips: every info pill explains itself on hover,
              focus or tap — one fixed card, never clipped by the tiles ---- */

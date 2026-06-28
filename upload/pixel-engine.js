@@ -95,6 +95,9 @@
   function headline(host) {
     var GAP = parseFloat(host.dataset.gap) || 2.4;
     var SIZE = parseFloat(host.dataset.size) || 1.7;
+    // data-ink="#0f0e0c" forces EVERY pixel to one colour — used on the light
+    // paper sections where the sampled (dark-on-light) field reads too faint
+    var INK = host.dataset.ink || null;
 
     var txt = document.createElement("span");
     txt.className = "ph-txt";
@@ -135,7 +138,7 @@
         if (img) {
           var sampled = sampleField(img, imgW, W, H, GAP, 120);
           if (sampled.length) {
-            parts = sampled.map(function (s) { return initPart(s.hx, s.hy, rgbStr(s.color)); });
+            parts = sampled.map(function (s) { return initPart(s.hx, s.hy, INK || rgbStr(s.color)); });
             done(true);
             return;
           }
@@ -1075,11 +1078,145 @@
     return { el: container, trigger: trigger };
   }
 
+  /* ============================================================
+     6) SLIDE BRIDGE — the cinematic project-slider transition.
+        Rasterizes the OUTGOING slide into particles that scatter
+        + fade, while the INCOMING slide assembles from scattered
+        particles to home — same physics language as the headlines.
+        Pure overlay on a single canvas sized to the stage; the real
+        slide DOM is swapped underneath at the crossover. Parks at 0
+        idle frames; reduced-motion never calls this (controller does
+        an instant swap instead).
+
+        PixelFX.slides(stage) -> { go(fromEl, toEl, dir, done) }
+          stage : the positioned container that holds the slides
+          fromEl/toEl : the slide elements (their .pslide-inner is sampled)
+          dir   : +1 (next, incoming rises) or -1 (prev, incoming sinks)
+          done  : called once the bridge has handed off to the DOM slide
+     ============================================================ */
+  function slides(stage) {
+    if (!stage) return null;
+    var cv = document.createElement("canvas");
+    cv.className = "slider-bridge";
+    cv.setAttribute("aria-hidden", "true");
+    var ctx = cv.getContext("2d");
+    stage.appendChild(cv);
+
+    var raf = null, W = 0, H = 0;
+    var GAP = 6, DUR = 1000, PX = 4;   // coarser + slower + bigger pixels = a transition you can't miss
+
+    function size() {
+      var r = stage.getBoundingClientRect();
+      W = Math.max(1, Math.round(r.width));
+      H = Math.max(1, Math.round(r.height));
+      cv.style.width = W + "px"; cv.style.height = H + "px";
+      cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
+
+    /* rasterize a slide's inner content into a coarse particle field,
+       positioned within the stage box (so out + in line up visually) */
+    function fieldOf(slideEl, cb) {
+      var inner = slideEl.querySelector(".pslide-inner") || slideEl;
+      var sr = stage.getBoundingClientRect(), ir = inner.getBoundingClientRect();
+      var ox = ir.left - sr.left, oy = ir.top - sr.top;
+      var iw = Math.max(1, Math.round(ir.width)), ih = Math.max(1, Math.round(ir.height));
+      rasterizeNode(inner, iw, ih, function (img, imgW) {
+        if (!img) { cb([]); return; }
+        var s = sampleField(img, imgW, iw, ih, GAP, 60), out = [];
+        for (var i = 0; i < s.length; i++) {
+          out.push({ hx: s[i].hx + ox, hy: s[i].hy + oy, col: rgbStr(s[i].color) });
+        }
+        cb(out);
+      });
+    }
+
+    /* ---- transition variants ----
+       Each variant decides the SCATTER ORIGIN of every particle: where an
+       outgoing pixel flies TO, and where an incoming pixel comes FROM. The
+       physics (ease, fade, flash) is shared so they all feel like one
+       studio. Pick per slide via data-anim; default 'pixel'. */
+    var ANIMS = {
+      // signature: vertical drift in scroll direction + horizontal jitter
+      pixel: {
+        dur: 1000, flash: 0.16,
+        out: function (p, i) { p.sx = p.hx + (Math.random() - .5) * W * 0.55; p.sy = p.hy + (-i) * (H * 0.6 + Math.random() * H * 0.7); },
+        inn: function (q, i) { q.sx = q.hx + (Math.random() - .5) * W * 0.55; q.sy = q.hy + i * (H * 0.6 + Math.random() * H * 0.7); q.d = Math.random() * 0.4; }
+      },
+      // falling sand: everything drops down, the new slide rises from below
+      shatter: {
+        dur: 1150, flash: 0.12,
+        out: function (p) { p.sx = p.hx + (Math.random() - .5) * 50; p.sy = p.hy + H * (0.7 + Math.random() * 0.9); },
+        inn: function (q) { q.sx = q.hx + (Math.random() - .5) * 50; q.sy = q.hy - H * (0.5 + Math.random() * 0.6); q.d = (q.hy / H) * 0.35 + Math.random() * 0.2; }
+      },
+      // horizontal push with a pixel smear, follows scroll direction
+      swipe: {
+        dur: 950, flash: 0.14,
+        out: function (p, i) { p.sx = p.hx + (-i) * (W * 0.9 + Math.random() * W * 0.5); p.sy = p.hy + (Math.random() - .5) * 40; },
+        inn: function (q, i) { q.sx = q.hx + i * (W * 0.9 + Math.random() * W * 0.5); q.sy = q.hy + (Math.random() - .5) * 40; q.d = Math.random() * 0.28; }
+      },
+      // zoom-through: out explodes outward from centre, in implodes from edges
+      zoom: {
+        dur: 1050, flash: 0.18,
+        out: function (p) { var cx = W / 2, cy = H / 2, k = 1.9 + Math.random() * 1.0; p.sx = cx + (p.hx - cx) * k; p.sy = cy + (p.hy - cy) * k; },
+        inn: function (q) { var cx = W / 2, cy = H / 2, k = 0.15 + Math.random() * 0.25; q.sx = cx + (q.hx - cx) * k; q.sy = cy + (q.hy - cy) * k; q.d = Math.random() * 0.35; }
+      }
+    };
+
+    function go(fromEl, toEl, dir, anim, done) {
+      if (raf) { cancelAnimationFrame(raf); raf = null; }
+      size();
+      var cfg = ANIMS[anim] || ANIMS.pixel;
+      var ready = 0, fOut = [], fIn = [];
+      function start() {
+        for (var i = 0; i < fOut.length; i++) cfg.out(fOut[i], dir);
+        for (var j = 0; j < fIn.length; j++) { cfg.inn(fIn[j], dir); if (typeof fIn[j].d !== "number") fIn[j].d = Math.random() * 0.3; }
+        var t0 = null;
+        function frame(t) {
+          if (!t0) t0 = t;
+          var g = Math.min(1, (t - t0) / cfg.dur);
+          ctx.clearRect(0, 0, W, H);
+          // outgoing fades out over the first ~65%
+          var oa = Math.max(0, 1 - g / 0.65);
+          if (oa > 0) {
+            var eo = g * g;                 // ease-in: accelerates away
+            ctx.globalAlpha = oa;
+            for (var i = 0; i < fOut.length; i++) {
+              var p = fOut[i];
+              ctx.fillStyle = p.col;
+              ctx.fillRect(p.hx + (p.sx - p.hx) * eo, p.hy + (p.sy - p.hy) * eo, PX, PX);
+            }
+          }
+          // incoming assembles, each particle eased from its delay
+          for (var j = 0; j < fIn.length; j++) {
+            var q = fIn[j];
+            var local = Math.max(0, Math.min(1, (g - q.d) / (1 - q.d)));
+            var ei = 1 - Math.pow(1 - local, 3);   // ease-out cubic (matches headlines)
+            ctx.globalAlpha = local * local;
+            ctx.fillStyle = (local < .8 && q.flash) ? ACC : q.col;
+            ctx.fillRect(q.sx + (q.hx - q.sx) * ei, q.sy + (q.hy - q.sy) * ei, PX, PX);
+          }
+          ctx.globalAlpha = 1;
+          if (g < 1) { raf = requestAnimationFrame(frame); }
+          else { ctx.clearRect(0, 0, W, H); raf = null; if (done) done(); }
+        }
+        raf = requestAnimationFrame(frame);
+      }
+      fieldOf(fromEl, function (a) { fOut = a; for (var i = 0; i < a.length; i++) a[i].flash = false; if (++ready === 2) start(); });
+      fieldOf(toEl, function (b) { fIn = b; for (var i = 0; i < b.length; i++) b[i].flash = Math.random() < cfg.flash; if (++ready === 2) start(); });
+    }
+
+    function cancel() { if (raf) { cancelAnimationFrame(raf); raf = null; } ctx.clearRect(0, 0, W, H); }
+
+    return { el: cv, go: go, cancel: cancel, resize: size, anims: ANIMS };
+  }
+
   window.PixelFX = {
     headline: headline,
     button: button,
     morph: morph,
     sand: sand,
+    slides: slides,
     onVelocity: function (fn) { velSubs.push(fn); },
     velocity: function () { return vel; },
     reduced: reduced,
