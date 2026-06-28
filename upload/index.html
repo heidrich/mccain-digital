@@ -431,6 +431,8 @@
       overflow: hidden
     }
 
+    /* the hero stays full-screen / full-width (owner) — it's the stage; only
+       the downstream content sections cap to --maxw */
     .hero-inner {
       width: 100%;
       display: grid;
@@ -1061,9 +1063,27 @@
     }
 
     /* ---------- sections base ---------- */
+    /* global editorial width cap — on big monitors the content sits centered
+       in a calm ~1560px column instead of stretching edge-to-edge. Sections
+       with a full-bleed background (.ai-band, the light #product) keep their
+       band full-width and cap their INNER content instead (see below). */
+    :root {
+      --maxw: 1560px
+    }
+
     section {
+      max-width: var(--maxw);
+      margin-inline: auto;
       padding: clamp(5rem, 10vw, 9rem) clamp(1.2rem, 4vw, 3.5rem);
       position: relative
+    }
+
+    /* the AI band is a true full-bleed colour band — it spans the whole
+       viewport and caps its INNER content (.ai-inner) instead. The #product
+       paper card is an inset rounded card, so it respects --maxw like the rest. */
+    #ai.ai-band {
+      max-width: none;
+      margin-inline: 0
     }
 
     .kicker {
@@ -1509,7 +1529,11 @@
       background: var(--paper);
       color: var(--ink);
       border-radius: 36px;
-      margin: 0 clamp(.6rem, 1.5vw, 1.4rem)
+      /* centered within the global --maxw cap (section rule sets max-width);
+         auto side-margins keep it centered, the clamp gives breathing room
+         on narrower screens where it reaches the cap */
+      margin: 0 auto;
+      width: calc(100% - clamp(1.2rem, 3vw, 2.8rem))
     }
 
     .product .kicker {
