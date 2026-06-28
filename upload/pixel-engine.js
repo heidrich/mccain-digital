@@ -1079,7 +1079,145 @@
   }
 
   /* ============================================================
-     6) SLIDE BRIDGE — the cinematic project-slider transition.
+     6) VOID REVEAL — the AI-section signature. A dark "black hole"
+        disc sweeps across the host; the host's real text is sampled
+        into a coloured pixel field that stays HIDDEN ahead of the
+        void and MATERIALISES in its wake (scatter -> home, with a
+        mustard leading-edge flash, same physics as the headlines).
+        Behind the text the disc itself is drawn as a glowing senf
+        ring with a black core, so it reads as something punching
+        through from the dark page. Real DOM text always stays in the
+        document (the canvas is aria-hidden presentation only) — it's
+        just transparent until revealed, so SEO/a11y are intact.
+
+        PixelFX.voidReveal(host) -> { play(), redraw(), host }
+          host : the element whose textContent is sampled. Tunables:
+            data-gap  pixel pitch (default 3)
+            data-size pixel draw size (default 2)
+            data-dir  sweep direction: "lr" (default) | "rl"
+        Plays once per IntersectionObserver hit; re-arms on redraw.
+     ============================================================ */
+  function voidReveal(host) {
+    var GAP = parseFloat(host.dataset.gap) || 3;
+    var SIZE = parseFloat(host.dataset.size) || 2;
+    var DIR = host.dataset.dir === "rl" ? -1 : 1;
+    var DUR = 1500;
+
+    // keep the real text in the flow for SEO/a11y but invisible — the
+    // canvas paints the pixel version on top, aligned to the same box
+    var txt = document.createElement("span");
+    txt.className = "vr-txt";
+    while (host.firstChild) txt.appendChild(host.firstChild);
+    host.appendChild(txt);
+    var cv = document.createElement("canvas"), ctx = cv.getContext("2d");
+    cv.className = "vr-canvas";
+    cv.setAttribute("aria-hidden", "true");
+    host.appendChild(cv);
+
+    var parts = [], raf = null, W = 0, H = 0, built = false, playing = false;
+
+    function build(done) {
+      var r = txt.getBoundingClientRect();
+      W = Math.ceil(r.width); H = Math.ceil(r.height);
+      if (W < 2 || H < 2) { if (done) done(false); return; }
+      cv.style.width = W + "px"; cv.style.height = H + "px";
+      cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      rasterizeNode(txt, W, H, function (img, imgW) {
+        if (!img) { if (done) done(false); return; }
+        var s = sampleField(img, imgW, W, H, GAP, 110);
+        parts = s.map(function (p) {
+          return {
+            hx: p.hx, hy: p.hy,
+            // scatter origin: pulled toward the incoming void edge
+            sx: p.hx - DIR * (40 + Math.random() * 90),
+            sy: p.hy + (Math.random() - .5) * H * 0.9,
+            col: rgbStr(p.color),
+            flash: Math.random() < 0.18
+          };
+        });
+        built = true;
+        if (done) done(parts.length > 0);
+      });
+    }
+
+    function play() {
+      if (playing || reduced) { host.classList.add("vr-done"); return; }
+      function run() {
+        if (!parts.length) { host.classList.add("vr-done"); return; }
+        playing = true;
+        host.classList.add("vr-playing");
+        var t0 = null;
+        // the void travels a bit past both edges so every pixel gets swept
+        var span = W + H * 1.4;
+        function frame(t) {
+          if (!t0) t0 = t;
+          var g = Math.min(1, (t - t0) / DUR);
+          var ease = 1 - Math.pow(1 - g, 2);            // ease-out: decelerates
+          // void centre x position (in host space), travelling DIR
+          var voidX = DIR > 0 ? (-H * 0.7 + ease * span) : (W + H * 0.7 - ease * span);
+          ctx.clearRect(0, 0, W, H);
+
+          // 1) the glowing void disc — black core, senf ring, drawn behind
+          var vr = H * 0.62;
+          var grad = ctx.createRadialGradient(voidX, H / 2, vr * 0.2, voidX, H / 2, vr * 1.25);
+          grad.addColorStop(0, "rgba(8,7,6,0.95)");
+          grad.addColorStop(0.62, "rgba(8,7,6,0.55)");
+          grad.addColorStop(0.82, "rgba(245,197,24,0.55)");
+          grad.addColorStop(1, "rgba(245,197,24,0)");
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(voidX, H / 2, vr * 1.25, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 2) pixels: revealed once the void's leading edge has passed them.
+          //    each pixel eases from its scatter origin to home over a short
+          //    local window after the void front crosses its x.
+          var reveal = 70;                                // px of travel from scatter->home
+          for (var i = 0; i < parts.length; i++) {
+            var p = parts[i];
+            // signed distance from the void front to this pixel (negative = already passed)
+            var rel = DIR > 0 ? (voidX - p.hx) : (p.hx - voidX);
+            if (rel < 0) continue;                        // void hasn't reached it yet
+            var local = Math.min(1, rel / reveal);
+            var ei = 1 - Math.pow(1 - local, 3);          // ease-out cubic
+            ctx.globalAlpha = local;
+            // leading edge glows senf, settles to its real colour
+            ctx.fillStyle = (local < 0.75 && p.flash) ? ACC : p.col;
+            ctx.fillRect(p.sx + (p.hx - p.sx) * ei, p.sy + (p.hy - p.sy) * ei, SIZE, SIZE);
+          }
+          ctx.globalAlpha = 1;
+
+          if (g < 1) { raf = requestAnimationFrame(frame); }
+          else {
+            // settle: hand off to the real text (CSS reveals .vr-txt), wipe canvas
+            raf = null; playing = false;
+            host.classList.remove("vr-playing");
+            host.classList.add("vr-done");
+            ctx.clearRect(0, 0, W, H);
+          }
+        }
+        raf = requestAnimationFrame(frame);
+      }
+      if (built && parts.length) run(); else build(function (ok) { if (ok) run(); else host.classList.add("vr-done"); });
+    }
+
+    function redraw() {
+      if (raf) { cancelAnimationFrame(raf); raf = null; }
+      playing = false; built = false; parts = [];
+      host.classList.remove("vr-playing", "vr-done");
+      build(function () {});
+    }
+
+    // pre-sample while idle so the first play is instant
+    var vIdle = window.requestIdleCallback || function (fn) { setTimeout(fn, 400); };
+    vIdle(function () { if (!built) build(function () {}); });
+
+    return { host: host, play: play, redraw: redraw };
+  }
+
+  /* ============================================================
+     7) SLIDE BRIDGE — the cinematic project-slider transition.
         Rasterizes the OUTGOING slide into particles that scatter
         + fade, while the INCOMING slide assembles from scattered
         particles to home — same physics language as the headlines.
@@ -1216,6 +1354,7 @@
     button: button,
     morph: morph,
     sand: sand,
+    voidReveal: voidReveal,
     slides: slides,
     onVelocity: function (fn) { velSubs.push(fn); },
     velocity: function () { return vel; },

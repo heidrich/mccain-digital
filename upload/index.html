@@ -9,7 +9,7 @@
     content="McCain Digital builds AI tools, web apps, mobile apps, websites and custom software for companies, individuals and startups — in Bavaria, Germany.">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#0f0e0c">
-  <link rel="preload" href="pixel-engine.js?v=h5" as="script">
+  <link rel="preload" href="pixel-engine.js?v=h6" as="script">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="canonical" href="https://mccain-digital.com/">
@@ -620,6 +620,333 @@
       .hero-bottom {
         margin-left: 0;
         gap: 1.8rem
+      }
+    }
+
+    /* ============================================================
+       AI BAND — the flex section. Dark page bg, a void-reveal
+       headline, faint rotating glyphs behind, integrate-copy,
+       rotating one-liner, three pixel-morph capability tiles.
+       ============================================================ */
+    .ai-band {
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(120% 80% at 50% -10%, rgba(245, 197, 24, .07), transparent 60%),
+        var(--ink);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line)
+    }
+
+    /* faint starfield — a few static senf specks via repeating gradient,
+       costs nothing and sells the "void" depth */
+    .ai-stars {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: .5;
+      background-image:
+        radial-gradient(1px 1px at 18% 28%, rgba(245, 197, 24, .5), transparent),
+        radial-gradient(1px 1px at 72% 18%, rgba(236, 231, 221, .35), transparent),
+        radial-gradient(1px 1px at 41% 72%, rgba(245, 197, 24, .35), transparent),
+        radial-gradient(1px 1px at 88% 62%, rgba(236, 231, 221, .3), transparent),
+        radial-gradient(1px 1px at 60% 88%, rgba(245, 197, 24, .3), transparent),
+        radial-gradient(1px 1px at 30% 52%, rgba(236, 231, 221, .25), transparent)
+    }
+
+    .ai-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 980px;
+      margin: 0 auto;
+      text-align: center
+    }
+
+    /* the section is centered, but the global .kicker is a left-aligned flex
+       row with a leading hairline — center it as a unit, and mirror the
+       hairline on the right so it reads balanced over the headline instead
+       of hanging lost on the left */
+    .ai-inner .kicker {
+      justify-content: center;
+      margin-bottom: 1.5rem
+    }
+
+    .ai-inner .kicker::after {
+      content: "";
+      width: 34px;
+      height: 1px;
+      background: var(--acc)
+    }
+
+    /* headline matches the other sections (.sec-title), but centered here */
+    .ai-title.sec-title {
+      max-width: none;
+      margin: .2rem auto 1.5rem;
+      color: var(--paper)
+    }
+
+    .ai-lede {
+      max-width: 54ch;
+      margin: 0 auto 2.2rem;
+      font-size: clamp(1.05rem, 1.7vw, 1.32rem);
+      line-height: 1.55;
+      color: var(--paper-dim)
+    }
+
+    .ai-lede b {
+      color: var(--paper);
+      font-weight: 700
+    }
+
+    .ai-lede em {
+      font-style: normal;
+      color: var(--acc)
+    }
+
+    /* ----- the real stack we build with (tools, not a partnership badge) ----- */
+    .ai-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.1rem;
+      margin: 0 auto 2.6rem
+    }
+
+    .ai-stack-label {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--mute)
+    }
+
+    .ai-logos {
+      list-style: none;
+      display: flex;
+      align-items: flex-start;
+      gap: clamp(2rem, 5vw, 4rem);
+      flex-wrap: wrap;
+      justify-content: center
+    }
+
+    .ai-logo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .7rem;
+      color: var(--paper-dim);
+      opacity: .7;
+      cursor: help;
+      transition: color .4s var(--ease), opacity .4s var(--ease), transform .4s var(--ease)
+    }
+
+    .ai-logo:hover,
+    .ai-logo:focus-visible {
+      color: var(--acc);
+      opacity: 1;
+      transform: translateY(-2px);
+      outline: none
+    }
+
+    .ai-logo svg {
+      display: block;
+      height: clamp(28px, 3.6vw, 38px);
+      width: auto
+    }
+
+    .ai-logo-name {
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: -.01em;
+      color: inherit;
+      transition: color .4s var(--ease)
+    }
+
+    /* a tiny "?" affordance so people know the name carries an explanation,
+       mirroring the chip tooltips elsewhere on the page */
+    .ai-logo-name::after {
+      content: "?";
+      display: inline-grid;
+      place-items: center;
+      width: 14px;
+      height: 14px;
+      margin-left: .4em;
+      vertical-align: -2px;
+      font-size: .62rem;
+      font-weight: 700;
+      line-height: 1;
+      border-radius: 50%;
+      border: 1px solid currentColor;
+      opacity: .5
+    }
+
+    .ai-logo:hover .ai-logo-name::after,
+    .ai-logo:focus-visible .ai-logo-name::after {
+      opacity: 1
+    }
+
+    /* ----- rotating one-liner ----- */
+    .ai-rotator {
+      font-size: clamp(1.15rem, 2.1vw, 1.6rem);
+      font-weight: 700;
+      letter-spacing: -.01em;
+      color: var(--paper);
+      margin-bottom: 3.4rem;
+      display: inline-flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: .4em
+    }
+
+    .ai-rot-words {
+      position: relative;
+      display: inline-grid
+    }
+
+    .ai-rot-words .arw {
+      grid-area: 1 / 1;
+      color: var(--acc);
+      opacity: 0;
+      transform: translateY(.45em);
+      transition: opacity .5s var(--ease), transform .5s var(--ease)
+    }
+
+    .ai-rot-words .arw.is-on {
+      opacity: 1;
+      transform: none
+    }
+
+    .ai-rot-words .arw.is-out {
+      opacity: 0;
+      transform: translateY(-.45em);
+      transition: opacity .4s var(--ease), transform .4s var(--ease)
+    }
+
+    /* ----- capability tiles (reuse .svc morph engine) — big & loud ----- */
+    /* the tiles break out wider than the 980px text column — the headline,
+       lede and rotator stay at a comfortable reading width, but the cards
+       get room to breathe and read better. Centred breakout via vw. */
+    .ai-tiles {
+      width: min(1280px, 92vw);
+      margin-left: 50%;
+      transform: translateX(-50%);
+      margin-bottom: 3rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      overflow: hidden;
+      text-align: left
+    }
+
+    .ai-tile.svc {
+      padding: clamp(2.6rem, 3.2vw, 3.6rem) clamp(2.4rem, 3vw, 3.4rem)
+    }
+
+    /* push the icon to the top and let the heading + copy settle toward the
+       bottom, so the tile breathes instead of stacking everything up top
+       (that top-loaded look read as "gedrungen / klobig") */
+    .ai-tile .svc-front {
+      justify-content: space-between;
+      gap: clamp(2.2rem, 4vw, 3.4rem)
+    }
+
+    .ai-tile .svc-front .ai-copy {
+      display: block
+    }
+
+    /* oversized ghost number anchoring each tile */
+    .ai-tile .ai-num {
+      position: absolute;
+      top: clamp(1.4rem, 2vw, 2rem);
+      right: clamp(1.4rem, 2vw, 2.2rem);
+      font-size: clamp(3rem, 5vw, 4.6rem);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -.04em;
+      color: var(--paper);
+      opacity: .06;
+      transition: opacity .45s var(--ease), color .45s var(--ease);
+      pointer-events: none
+    }
+
+    .ai-tile:hover .ai-num {
+      opacity: .12;
+      color: var(--acc)
+    }
+
+    .ai-tile .ai-ico {
+      width: clamp(46px, 5vw, 56px);
+      height: clamp(46px, 5vw, 56px);
+      border-radius: 14px;
+      padding: clamp(11px, 1.3vw, 14px);
+      background: var(--acc-dim);
+      border: 1px solid rgba(245, 197, 24, .25);
+      stroke: var(--acc);
+      fill: none;
+      stroke-width: 1.7;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex: 0 0 auto;
+      transition: transform .5s var(--ease), background .45s var(--ease), border-color .45s var(--ease)
+    }
+
+    .ai-tile:hover .ai-ico {
+      transform: translateY(-3px) scale(1.04);
+      background: var(--acc);
+      border-color: var(--acc);
+      stroke: var(--acc-ink)
+    }
+
+    .ai-tile h3 {
+      font-size: clamp(1.5rem, 2.1vw, 1.95rem);
+      letter-spacing: -.02em;
+      margin-bottom: .9rem
+    }
+
+    .ai-tile .svc-front p {
+      font-size: clamp(1.02rem, 1.25vw, 1.14rem);
+      line-height: 1.6;
+      color: var(--paper-dim);
+      max-width: 36ch
+    }
+
+    .ai-tile .svc-back {
+      justify-content: center
+    }
+
+    .ai-tile .svc-back p {
+      color: var(--paper);
+      font-size: clamp(1rem, 1.25vw, 1.12rem);
+      line-height: 1.6
+    }
+
+    .ai-tile .svc-back b {
+      display: block;
+      color: var(--acc-soft);
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin-bottom: .6rem
+    }
+
+    .ai-ctas {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap
+    }
+
+    @media(max-width:920px) {
+      .ai-tiles {
+        grid-template-columns: 1fr
+      }
+
+      .ai-tile.svc {
+        min-height: 0
       }
     }
 
@@ -2413,6 +2740,129 @@
     </div>
   </header>
 
+  <!-- AI — the flex band: a dark void sweeps across and reveals our AI stance.
+       Stylised own glyphs (no third-party logos / no external requests), real
+       text stays in the DOM for SEO/a11y; the canvas is presentation only. -->
+  <section id="ai" class="ai-band" aria-labelledby="aiTitle">
+    <div class="ai-stars" aria-hidden="true"></div>
+
+    <div class="ai-inner">
+      <p class="kicker reveal">00.5 — AI, built in</p>
+      <h2 class="ai-title sec-title" id="aiTitle">
+        <span class="ph" data-pixel>We know AI.</span>
+      </h2>
+      <p class="ai-lede reveal">
+        Not a buzzword bolted on after launch. We design with models in the loop —
+        and we wire them into <em>your</em> systems: your data, your tools, your workflow.
+      </p>
+
+      <!-- the actual stack we work in, day to day — framed as our TOOLS, not a
+           partnership/trust badge (UWG). Real logos, inline SVG (no requests). -->
+      <div class="ai-stack reveal" aria-label="The stack we build with">
+        <span class="ai-stack-label">The stack we build with</span>
+        <ul class="ai-logos">
+          <li class="ai-logo" data-tip="claude">
+            <!-- Anthropic / Claude — the radial sunburst mark, tapered blades
+                 from a centre point (12 spokes). Clean at small sizes.
+                 Decorative: the visible name below labels it. -->
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+              <g fill="currentColor">
+                <path d="M50 4 53.4 38 46.6 38Z"/>
+                <path d="M50 96 46.6 62 53.4 62Z"/>
+                <path d="M4 50 38 46.6 38 53.4Z"/>
+                <path d="M96 50 62 53.4 62 46.6Z"/>
+                <path d="M17.5 17.5 43.6 39.4 39.4 43.6Z"/>
+                <path d="M82.5 82.5 56.4 60.6 60.6 56.4Z"/>
+                <path d="M82.5 17.5 60.6 43.6 56.4 39.4Z"/>
+                <path d="M17.5 82.5 39.4 56.4 43.6 60.6Z"/>
+                <path d="M31 7.4 47.1 37.4 41.1 39.6Z"/>
+                <path d="M69 92.6 52.9 62.6 58.9 60.4Z"/>
+                <path d="M7.4 69 37.4 52.9 39.6 58.9Z"/>
+                <path d="M92.6 31 62.6 47.1 60.4 41.1Z"/>
+                <circle cx="50" cy="50" r="9"/>
+              </g>
+            </svg>
+            <span class="ai-logo-name">Claude</span>
+          </li>
+          <li class="ai-logo" data-tip="cursor">
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+              <path fill="currentColor" d="M50 6.7 7.5 31.2v49L50 104.7l42.5-24.5v-49L50 6.7Zm0 5.8 35 20.2-35 20.2-35-20.2 35-20.2Zm-37.5 25 35 20.2v39.6l-35-20.2V37.5Zm75 0v39.4l-35 20.2V57.7l35-20.2Z" opacity=".55"/>
+              <path fill="currentColor" d="M50 12.5 85 32.7 50 52.9 15 32.7 50 12.5Z"/>
+              <path fill="currentColor" d="M85 32.7v39.4L50 92.3V52.9l35-20.2Z" opacity=".8"/>
+            </svg>
+            <span class="ai-logo-name">Cursor</span>
+          </li>
+          <li class="ai-logo" data-tip="chatgpt">
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+              <path fill="currentColor" d="M91.6 41a24.8 24.8 0 0 0-2.1-20.4A25.1 25.1 0 0 0 62.5 8.5a24.8 24.8 0 0 0-18.7-8.4 25.1 25.1 0 0 0-24 17.4 24.8 24.8 0 0 0-16.6 12A25.1 25.1 0 0 0 6.3 59a24.8 24.8 0 0 0 2.1 20.4 25.1 25.1 0 0 0 27 12.1 24.8 24.8 0 0 0 18.7 8.4 25.1 25.1 0 0 0 24-17.4 24.8 24.8 0 0 0 16.6-12A25.1 25.1 0 0 0 91.6 41ZM54.1 93.5a18.6 18.6 0 0 1-12-4.3l.6-.3 19.9-11.5a3.2 3.2 0 0 0 1.6-2.8V46.3l8.4 4.9v23.2a18.7 18.7 0 0 1-18.5 19.1ZM14 76.5a18.6 18.6 0 0 1-2.2-12.5l.6.4L32.3 76a3.2 3.2 0 0 0 3.3 0L60 61.9v9.7a.3.3 0 0 1-.1.3L39.6 83.6A18.7 18.7 0 0 1 14 76.5ZM8.8 33.5a18.6 18.6 0 0 1 9.7-8.2v23.6a3.2 3.2 0 0 0 1.6 2.8L44 64v-9.7a.3.3 0 0 1-.1-.3L23.5 42.3A18.7 18.7 0 0 1 8.8 33.5ZM76.4 49.3 52 35.2l8.4-4.8a.3.3 0 0 1 .3 0l20.2 11.6a18.6 18.6 0 0 1-2.8 33.6V52a3.2 3.2 0 0 0-1.7-2.7ZM84.8 36.6l-.6-.4L64.3 24.6a3.2 3.2 0 0 0-3.3 0L36.6 38.7V29a.3.3 0 0 1 .1-.3L57 17.1a18.6 18.6 0 0 1 27.7 19.3ZM32 53.8l-8.4-4.9V25.7a18.6 18.6 0 0 1 30.5-14.3l-.6.3L33.6 23.2a3.2 3.2 0 0 0-1.6 2.8ZM36.6 44 47.5 37.6 58.4 44v12.8L47.5 63 36.6 56.8Z"/>
+            </svg>
+            <span class="ai-logo-name">ChatGPT</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- rotating one-liner that flexes the offer -->
+      <p class="ai-rotator reveal" aria-live="polite">
+        <span class="ai-rot-fixed">We help you</span>
+        <span class="ai-rot-words">
+          <span class="arw is-on">integrate AI into your stack.</span>
+          <span class="arw">ship agents that do real work.</span>
+          <span class="arw">automate the busywork away.</span>
+          <span class="arw">turn your docs into answers.</span>
+        </span>
+      </p>
+
+      <!-- capability tiles reuse the proven pixel-morph flip (front = claim,
+           back = what we actually do). Same engine as section 01. -->
+      <div class="ai-tiles">
+        <article class="ai-tile svc reveal" data-morph tabindex="0" aria-label="AI integration">
+          <div class="svc-face svc-front">
+            <span class="ai-num" aria-hidden="true">01</span>
+            <svg class="ai-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/><circle cx="12" cy="12" r="3"/></svg>
+            <div class="ai-copy">
+              <h3>AI integration</h3>
+              <p>Models wired straight into your product — chat, semantic search, copilots that know your domain.</p>
+            </div>
+          </div>
+          <div class="svc-face svc-back">
+            <p><b>What we actually do:</b> RAG over your own data, function-calling into your real APIs, and a UI your team actually uses. Self-hosted or cloud — your call.</p>
+          </div>
+        </article>
+        <article class="ai-tile svc reveal" data-morph tabindex="0" aria-label="Agents and automation">
+          <div class="svc-face svc-front">
+            <span class="ai-num" aria-hidden="true">02</span>
+            <svg class="ai-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h7M4 12h10M4 17h6"/><path d="M16 5l4 4-4 4"/><circle cx="19" cy="18" r="2"/></svg>
+            <div class="ai-copy">
+              <h3>Agents &amp; automation</h3>
+              <p>Multi-step workflows that run themselves — and check their own work before they hand it back.</p>
+            </div>
+          </div>
+          <div class="svc-face svc-back">
+            <p><b>What we actually do:</b> n8n pipelines, custom agent loops, scheduled jobs. We build the guardrails so automation is reliable, not a liability.</p>
+          </div>
+        </article>
+        <article class="ai-tile svc reveal" data-morph tabindex="0" aria-label="AI-native software">
+          <div class="svc-face svc-front">
+            <span class="ai-num" aria-hidden="true">03</span>
+            <svg class="ai-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3M8 9l-2 2 2 2M16 9l2 2-2 2M13 8l-2 6"/></svg>
+            <div class="ai-copy">
+              <h3>AI-native software</h3>
+              <p>Whole products designed from the first sketch around what today's models make possible.</p>
+            </div>
+          </div>
+          <div class="svc-face svc-back">
+            <p><b>What we actually do:</b> we start by asking "what can the model do here?" — so the AI isn't a bolted-on feature, it's the architecture of the product.</p>
+          </div>
+        </article>
+      </div>
+
+      <div class="ai-ctas reveal">
+        <a href="#services" class="btn btn-primary">See what we build <span class="arr">→</span></a>
+        <a href="#contact" class="btn btn-ghost">Talk AI with us</a>
+      </div>
+    </div>
+  </section>
+
   <!-- SERVICES -->
   <section id="services" aria-labelledby="svcTitle">
     <p class="kicker reveal">01 — What we do</p>
@@ -2822,7 +3272,7 @@
     </div>
   </footer>
 
-  <script src="pixel-engine.js?v=h5" defer></script>
+  <script src="pixel-engine.js?v=h6" defer></script>
   <script>
     (function () {
       "use strict";
@@ -3121,6 +3571,40 @@
       d.querySelectorAll(".proof-score[data-morph]").forEach(function (s) { PixelFX.morph(s); });
 
       /* ============================================================
+         AI BAND (section 00.5) — the rotating one-liner. The headline
+         is a standard pixel-assembly headline (handled by the global
+         pxInsts pass above); the rotator cycles its phrases only while
+         the section is on screen (parks otherwise).
+         ============================================================ */
+      (function () {
+        var band = d.getElementById("ai");
+        if (!band) return;
+
+        // rotating one-liner — advance only while the band is visible, so an
+        // off-screen page burns no timers (and reduced-motion shows just one)
+        var words = [].slice.call(band.querySelectorAll(".ai-rot-words .arw"));
+        if (words.length > 1 && !reduced) {
+          var ri = 0, rTimer = null, onScreen = false;
+          function tick() {
+            var prev = words[ri];
+            ri = (ri + 1) % words.length;
+            var next = words[ri];
+            prev.classList.remove("is-on");
+            prev.classList.add("is-out");
+            next.classList.remove("is-out");
+            next.classList.add("is-on");
+            setTimeout(function () { prev.classList.remove("is-out"); }, 450);
+          }
+          var rotIO = new IntersectionObserver(function (es) {
+            onScreen = es[0].isIntersecting;
+            if (onScreen && !rTimer) { rTimer = setInterval(tick, 2600); }
+            else if (!onScreen && rTimer) { clearInterval(rTimer); rTimer = null; }
+          }, { threshold: .25 });
+          rotIO.observe(band.querySelector(".ai-rotator") || band);
+        }
+      })();
+
+      /* ============================================================
          PROJECTS SLIDER (section 02) — scroll-pinned 100vh carousel.
          Data-driven: counts whatever .pslide elements exist. Pins the
          section for (N-1) viewport-heights; each scroll-step crosses to
@@ -3362,7 +3846,10 @@
           "best practices 100": ["Best Practices 100", "Modern, secure engineering: HTTPS everywhere, no console errors, no deprecated APIs. Full marks."],
           "seo 100": ["SEO 100", "Everything search engines need — structure, metadata, crawlability. Very few pages ever hit all four 100s."],
           "agentic browsing 3/3": ["Agentic Browsing 3/3", "Lighthouse's newest audit: is this site ready for AI agents? All three checks pass — a valid llms.txt, machine-readable structure and a clean crawl path. Full marks."],
-          "llms.txt": ["llms.txt", "A plain-text summary of this site, written for AI crawlers and assistants (llmstxt.org standard). Click to read the raw file — opens in a new tab."]
+          "llms.txt": ["llms.txt", "A plain-text summary of this site, written for AI crawlers and assistants (llmstxt.org standard). Click to read the raw file — opens in a new tab."],
+          "claude": ["Claude — Anthropic", "The frontier model we reason and build with day to day. We design products with Claude in the loop, not bolted on afterwards."],
+          "cursor": ["Cursor", "The AI-native editor we ship in. It's why we move fast without cutting corners — the model writes alongside us, we stay in control."],
+          "chatgpt": ["ChatGPT — OpenAI", "The GPT stack, used where it fits. We're model-agnostic: we pick whatever gives your product the best answer, not whatever's trendy."]
         };
         /* tiny stroke icons, keyed like the dictionary */
         var ICO = {
@@ -3401,7 +3888,10 @@
         d.body.appendChild(tip);
         var cur = null;
         function show(el) {
-          var t = TIPS[el.textContent.trim().toLowerCase()];
+          // explicit data-tip wins (logos carry a visible name caption that
+          // would otherwise double up in textContent); chips key off their text
+          var key = el.getAttribute("data-tip") || el.textContent.trim().toLowerCase();
+          var t = TIPS[key];
           if (!t) return;
           cur = el;
           tip.innerHTML = "";
@@ -3426,12 +3916,15 @@
           tip.classList.remove("show");
           tip.setAttribute("aria-hidden", "true");
         }
-        d.querySelectorAll(".bk-tags span, .ps-scores span, .ps-llms").forEach(function (chip) {
+        d.querySelectorAll(".bk-tags span, .ps-scores span, .ps-llms, .ai-logo").forEach(function (chip) {
           var isLink = chip.tagName === "A";
           if (!isLink) chip.setAttribute("tabindex", "0");
-          var ic = ICO[chip.textContent.trim().toLowerCase()];
-          if (ic) chip.insertAdjacentHTML("afterbegin",
-            '<svg viewBox="0 0 24 24" aria-hidden="true">' + ic + "</svg>");
+          // logos already carry their mark — only the text chips get an auto icon
+          if (!chip.classList.contains("ai-logo")) {
+            var ic = ICO[chip.textContent.trim().toLowerCase()];
+            if (ic) chip.insertAdjacentHTML("afterbegin",
+              '<svg viewBox="0 0 24 24" aria-hidden="true">' + ic + "</svg>");
+          }
           chip.addEventListener("pointerenter", function (e) { if (e.pointerType === "mouse") show(chip); });
           chip.addEventListener("pointerleave", function () { if (cur === chip) hide(); });
           chip.addEventListener("focus", function () { show(chip); });
@@ -3444,7 +3937,7 @@
         });
         w.addEventListener("scroll", function () { if (cur) hide(); }, { passive: true });
         d.addEventListener("click", function (e) {
-          if (cur && !e.target.closest(".bk-tags span, .ps-scores span, .ps-llms")) hide();
+          if (cur && !e.target.closest(".bk-tags span, .ps-scores span, .ps-llms, .ai-logo")) hide();
         });
         d.addEventListener("keydown", function (e) { if (e.key === "Escape") hide(); });
       })();
