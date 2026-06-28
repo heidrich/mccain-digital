@@ -200,7 +200,7 @@
     }
 
     /* ---------- nav ---------- */
-    nav {
+    #nav {
       position: fixed;
       top: 0;
       left: 0;
@@ -218,7 +218,7 @@
        off against this site's hard-edged language (owner call). The bg
        lives on a pseudo-element so it can fade independently. No border,
        no hairline, no shadow. */
-    nav::before {
+    #nav::before {
       content: "";
       position: absolute;
       inset: 0;
@@ -229,11 +229,11 @@
       pointer-events: none
     }
 
-    nav.scrolled::before {
+    #nav.scrolled::before {
       opacity: 1
     }
 
-    nav.scrolled {
+    #nav.scrolled {
       padding: calc(.9rem + 12px) clamp(1.2rem, 4vw, 3.5rem) .9rem
     }
 
@@ -2943,4 +2943,203 @@
 
     @media (prefers-reduced-motion: reduce) {
       .consent { animation: none }
+    }
+
+    /* ============================================================
+       MEGA-MENU — a single full-screen overlay behind a "Menu"
+       trigger (owner: madebyshape-style). Holds Services (6, each
+       with a one-line desc), Product, Contact + Social. Pixel/senf
+       identity, backdrop blur, focus-trapped, Esc-closable.
+       ============================================================ */
+    .menu-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      background: none;
+      border: 0;
+      cursor: pointer;
+      color: var(--paper);
+      font-family: inherit;
+      font-size: .86rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+      padding: .4rem 0;
+      z-index: 1002
+    }
+
+    .menu-trigger .mt-bars {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 4px;
+      width: 22px
+    }
+
+    .menu-trigger .mt-bars i {
+      height: 2px;
+      width: 22px;
+      background: var(--paper);
+      transition: transform .4s var(--ease), opacity .3s, width .4s var(--ease)
+    }
+
+    .menu-trigger .mt-bars i:nth-child(2) { width: 15px; margin-left: auto }
+    .menu-trigger:hover .mt-bars i:nth-child(2) { width: 22px }
+
+    .mega {
+      position: fixed;
+      inset: 0;
+      z-index: 1500;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      background: rgba(15, 14, 12, .86);
+      -webkit-backdrop-filter: blur(18px) saturate(120%);
+      backdrop-filter: blur(18px) saturate(120%);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity .45s var(--ease), visibility .45s;
+      overflow-y: auto
+    }
+
+    .mega.open { opacity: 1; visibility: visible }
+
+    .mega-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: calc(1.4rem + 12px) clamp(1.2rem, 4vw, 3.5rem) 1.4rem
+    }
+
+    .mega-close {
+      background: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      width: 44px; height: 44px;
+      display: grid; place-items: center;
+      cursor: pointer;
+      color: var(--paper);
+      transition: border-color .3s var(--ease), transform .3s var(--ease)
+    }
+    .mega-close:hover { border-color: var(--acc); transform: rotate(90deg) }
+    .mega-close svg { width: 18px; height: 18px }
+
+    .mega-body {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: clamp(2rem, 5vw, 5rem);
+      align-content: start;
+      max-width: var(--maxw);
+      width: 100%;
+      margin-inline: auto;
+      padding: clamp(1rem, 3vh, 2.4rem) clamp(1.2rem, 4vw, 3.5rem) clamp(2rem, 5vh, 4rem)
+    }
+
+    .mega-eyebrow {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--acc);
+      margin-bottom: 1.4rem;
+      display: flex; align-items: center; gap: .7em
+    }
+    .mega-eyebrow::before { content: ""; width: 30px; height: 1px; background: var(--acc) }
+
+    .mega-services { display: grid; gap: .2rem }
+
+    .mega-link {
+      display: block;
+      padding: 1rem 0;
+      border-top: 1px solid var(--line);
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity .5s var(--ease), transform .5s var(--ease), padding-left .3s var(--ease)
+    }
+    .mega.open .mega-link { opacity: 1; transform: none }
+    .mega-link:hover { padding-left: .8rem }
+
+    .mega-link .ml-title {
+      font-size: clamp(1.5rem, 3.2vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -.03em;
+      color: var(--paper);
+      transition: color .3s var(--ease);
+      display: flex; align-items: center; gap: .6rem
+    }
+    .mega-link:hover .ml-title { color: var(--acc) }
+    .mega-link .ml-title .ml-arr {
+      opacity: 0; transform: translateX(-8px);
+      transition: opacity .3s var(--ease), transform .3s var(--ease);
+      color: var(--acc)
+    }
+    .mega-link:hover .ml-title .ml-arr { opacity: 1; transform: none }
+
+    .mega-link .ml-desc {
+      font-size: .92rem;
+      color: var(--mute2);
+      margin-top: .25rem;
+      max-width: 46ch
+    }
+
+    .mega.open .mega-link:nth-child(1) { transition-delay: .08s }
+    .mega.open .mega-link:nth-child(2) { transition-delay: .13s }
+    .mega.open .mega-link:nth-child(3) { transition-delay: .18s }
+    .mega.open .mega-link:nth-child(4) { transition-delay: .23s }
+    .mega.open .mega-link:nth-child(5) { transition-delay: .28s }
+    .mega.open .mega-link:nth-child(6) { transition-delay: .33s }
+    .mega.open .mega-link:nth-child(7) { transition-delay: .38s }
+
+    .mega-rail { display: flex; flex-direction: column; gap: 2rem }
+
+    .mega-card {
+      display: block;
+      background: var(--ink2);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 1.6rem;
+      transition: border-color .3s var(--ease), transform .3s var(--ease);
+      opacity: 0;
+      transform: translateY(14px)
+    }
+    .mega.open .mega-card { opacity: 1; transform: none; transition: opacity .5s var(--ease) .42s, transform .5s var(--ease) .42s, border-color .3s var(--ease) }
+    .mega-card:hover { border-color: var(--acc); transform: translateY(-3px) }
+
+    .mega-card .mc-tag {
+      font-size: .68rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--acc); display: flex; align-items: center; gap: .5em; margin-bottom: .7rem
+    }
+    .mega-card .mc-tag::before { content: ""; width: 7px; height: 7px; background: var(--acc); display: inline-block }
+    .mega-card .mc-title { font-size: 1.3rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: .4rem }
+    .mega-card .mc-title b { color: var(--paper) }
+    .mega-card .mc-title .hl { background: var(--acc); color: var(--acc-ink); padding: 0 .18em; border-radius: 3px }
+    .mega-card .mc-desc { font-size: .88rem; color: var(--paper-dim); line-height: 1.5 }
+
+    .mega-contact { opacity: 0; transform: translateY(14px) }
+    .mega.open .mega-contact { opacity: 1; transform: none; transition: opacity .5s var(--ease) .5s, transform .5s var(--ease) .5s }
+    .mega-contact .mc-h { font-size: .72rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--mute2); margin-bottom: .7rem }
+    .mega-contact a.mc-mail { font-size: 1.15rem; font-weight: 700; color: var(--paper); transition: color .3s }
+    .mega-contact a.mc-mail:hover { color: var(--acc) }
+    .mega-social { display: flex; gap: 1.4rem; margin-top: 1.2rem }
+    .mega-social a { font-size: .85rem; color: var(--paper-dim); transition: color .3s }
+    .mega-social a:hover { color: var(--acc) }
+
+    .mega-bottom {
+      display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: center;
+      max-width: var(--maxw); width: 100%; margin-inline: auto;
+      padding: 1.4rem clamp(1.2rem, 4vw, 3.5rem);
+      border-top: 1px solid var(--line);
+      font-size: .8rem; color: var(--mute2)
+    }
+    .mega-bottom a { color: var(--mute2); transition: color .3s }
+    .mega-bottom a:hover { color: var(--paper) }
+    .mega-bottom .mb-links { display: flex; gap: 1.2rem; flex-wrap: wrap }
+
+    body.mega-open { overflow: hidden }
+
+    @media (max-width: 820px) {
+      .mega-body { grid-template-columns: 1fr; gap: 2.4rem }
+      .mega-link .ml-title { font-size: 1.6rem }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .mega, .mega-link, .mega-card, .mega-contact { transition: opacity .2s linear !important; transform: none !important }
+      .mega.open .mega-link, .mega.open .mega-card, .mega.open .mega-contact { transform: none !important; transition-delay: 0s !important }
     }

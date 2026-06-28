@@ -12,8 +12,8 @@
   <link rel="preload" href="pixel-engine.js?v=h6" as="script">
   <!-- shared stylesheet, loaded non-render-blocking (preload→stylesheet swap);
        a tiny critical shell is inlined below so first paint never waits on it -->
-  <link rel="preload" href="styles.css?v=s3" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="styles.css?v=s3"></noscript>
+  <link rel="preload" href="styles.css?v=s5" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="styles.css?v=s5"></noscript>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="canonical" href="https://mccain-digital.com/">
@@ -245,7 +245,7 @@
     }
 
     /* ---------- nav ---------- */
-    nav {
+    #nav {
       position: fixed;
       top: 0;
       left: 0;
@@ -263,7 +263,7 @@
        off against this site's hard-edged language (owner call). The bg
        lives on a pseudo-element so it can fade independently. No border,
        no hairline, no shadow. */
-    nav::before {
+    #nav::before {
       content: "";
       position: absolute;
       inset: 0;
@@ -274,11 +274,11 @@
       pointer-events: none
     }
 
-    nav.scrolled::before {
+    #nav.scrolled::before {
       opacity: 1
     }
 
-    nav.scrolled {
+    #nav.scrolled {
       padding: calc(.9rem + 12px) clamp(1.2rem, 4vw, 3.5rem) .9rem
     }
 
@@ -654,16 +654,80 @@
     <a class="logo" href="#top" aria-label="McCain Digital — home">
       <b>mccain</b><span>digital</span>
     </a>
-    <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
     <div class="nav-links" id="navLinks">
-      <a href="#services">Services</a>
+      <button class="menu-trigger" type="button" data-mega-open aria-label="Open menu">
+        <span class="mt-bars" aria-hidden="true"><i></i><i></i></span>Menu
+      </button>
       <a href="#product">Product</a>
-      <a href="#contact">Contact</a>
-      <a href="#contact" class="nav-cta">Start a project</a>
+      <a href="contact.html" class="nav-cta">Start a project</a>
     </div>
   </nav>
+
+  <!-- MEGA-MENU OVERLAY (shared on every page) -->
+  <div class="mega" id="mega" role="dialog" aria-modal="true" aria-label="Main menu" aria-hidden="true">
+    <div class="mega-top">
+      <a class="logo" href="#top" aria-label="McCain Digital — home"><b>mccain</b><span>digital</span></a>
+      <button class="mega-close" id="megaClose" type="button" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+
+    <div class="mega-body">
+      <nav class="mega-services" aria-label="Services">
+        <p class="mega-eyebrow">What we do</p>
+        <a class="mega-link" href="services/ai-tools.html">
+          <span class="ml-title">AI Tools <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">AI agents, RAG and automation wired into your real workflows — not chat toys.</span>
+        </a>
+        <a class="mega-link" href="services/web-apps.html">
+          <span class="ml-title">Web Apps <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">Fast, scalable apps on React, Next.js &amp; TypeScript — MVP to scale, no rewrite.</span>
+        </a>
+        <a class="mega-link" href="services/apps.html">
+          <span class="ml-title">Mobile Apps <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">iOS &amp; Android from one clean codebase. Native feel, store-ready.</span>
+        </a>
+        <a class="mega-link" href="services/websites.html">
+          <span class="ml-title">Websites <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">Sites people remember — perfect Lighthouse 100, SEO from day one.</span>
+        </a>
+        <a class="mega-link" href="services/software.html">
+          <span class="ml-title">Software for Companies <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">Dashboards, internal tools and integrations — tailor-made, yours to keep.</span>
+        </a>
+        <a class="mega-link" href="services/design-brand.html">
+          <span class="ml-title">Design &amp; Brand <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">Identity, UI and motion designed in-house — a system that scales.</span>
+        </a>
+      </nav>
+
+      <aside class="mega-rail">
+        <p class="mega-eyebrow">Our product</p>
+        <a class="mega-card" href="#product">
+          <span class="mc-tag">Live · in production</span>
+          <span class="mc-title"><b>whatever-</b><span class="hl">recall</span></span>
+          <span class="mc-desc">Our own AI-native project memory — the proof that we ship what we sell.</span>
+        </a>
+        <div class="mega-contact">
+          <p class="mc-h">Start a project</p>
+          <a class="mc-mail" href="contact.html">Get in touch →</a>
+          <div class="mega-social">
+            <a href="mailto:info@mccain-digital.com">info@mccain-digital.com</a>
+            <a href="https://github.com/heidrich" target="_blank" rel="noopener">GitHub</a>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="mega-bottom">
+      <span>© <span class="mega-year">2026</span> McCain Digital · Bavaria, Germany</span>
+      <span class="mb-links">
+        <a href="legal/imprint.html">Imprint</a>
+        <a href="legal/privacy.html">Privacy</a>
+        <a href="legal/terms.html">Terms</a>
+      </span>
+    </div>
+  </div>
 
   <!-- HERO -->
   <main>
@@ -1281,6 +1345,7 @@
   </footer>
 
   <script src="pixel-engine.js?v=h6" defer></script>
+  <script src="mega.js" defer></script>
   <script src="consent.js" defer></script>
   <script>
     (function () {
@@ -1305,18 +1370,8 @@
       /* ---- nav ---- */
       var nav = d.getElementById("nav");
       w.addEventListener("scroll", function () { nav.classList.toggle("scrolled", w.scrollY > 40); }, { passive: true });
-      var burger = d.getElementById("burger"), links = d.getElementById("navLinks");
-      burger.addEventListener("click", function () {
-        var open = links.classList.toggle("open");
-        burger.classList.toggle("open", open);
-        burger.setAttribute("aria-expanded", open);
-        d.body.style.overflow = open ? "hidden" : "";
-      });
-      links.querySelectorAll("a").forEach(function (a) {
-        a.addEventListener("click", function () {
-          links.classList.remove("open"); burger.classList.remove("open"); d.body.style.overflow = "";
-        });
-      });
+      /* nav menu is now the shared mega-menu overlay (mega.js) — the old
+         burger/nav-links toggle was removed with the inline links */
 
       /* ---- reveal on scroll ---- */
       var io = new IntersectionObserver(function (es) {
