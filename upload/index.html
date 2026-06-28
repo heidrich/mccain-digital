@@ -3795,7 +3795,7 @@
         // line 2 cycles the TYPE while "products." anchors the loop. A mix of
         // type+products and standalone deliverables, all from the real offer
         // wording (hero-sub + meta) — nothing new claimed.
-        var WORDS = ["digital products.", "AI products.", "web apps.", "mobile apps.", "software."];
+        var WORDS = ["digital products.", "AI tools.", "web apps.", "mobile apps.", "software."];
         var wi = 0, timer = null, onScreen = false, firstAssembled = false;
 
         function accentEl() { return host.querySelector(".accent"); }
@@ -3812,8 +3812,8 @@
         new IntersectionObserver(function (es) {
           onScreen = es[0].isIntersecting;
           if (onScreen && !timer) {
-            // let the initial assembly land before the first swap
-            timer = setInterval(step, 2800);
+            // ~1s assembly + ~3.4s rest so each word is calmly readable
+            timer = setInterval(step, 4400);
           } else if (!onScreen && timer) {
             clearInterval(timer); timer = null;
           }
