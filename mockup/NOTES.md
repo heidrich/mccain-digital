@@ -73,9 +73,9 @@ Reviews(006) → Contact(007) → Footer.
 ## Bilder (`img/`, 10 Unsplash-Downloads, Attribution im Git-Log dieser Welle)
 
 - Platziert: studio-wide + portrait-tall (Studio-Mosaik), process-notes /
-  hands-keyboard / team-collab (Process-Steps).
-- Reserve: abstract-detail, green-accent (acid auf schwarz, sehr markentreu),
-  screen-work, code-screen, circuit-macro.
+  hands-keyboard / team-collab (Process-Steps), green-accent (AI-Panel, acid
+  auf schwarz — sehr markentreu).
+- Reserve: abstract-detail, screen-work, code-screen, circuit-macro.
 - ALLE = PLACEHOLDER für echte Studio-Fotografie (Shape-Trust-Pattern braucht
   echte Menschen; Awwwards-Elite nutzt gar keine Stock-Fotos).
 - Einheitliche Behandlung: `filter: saturate(.94) contrast(1.04)`.
@@ -87,7 +87,8 @@ Reviews(006) → Contact(007) → Footer.
 - Webfont im SVG-Rasterizer: `window.PixelFXFontCSS` — http via fetch→FileReader,
   file:// lädt `fonts/schibsted-inline.js` als Fallback-Script.
 - voidReveal: Text via `visibility` verstecken (nie `color:transparent`), `play()` per IO.
-- voidReveal-Canvas ist breiter als der Text (Sweep-Raum) → `#product { overflow-x: clip }`
+- voidReveal-Canvas ist breiter als der Text (Sweep-Raum) → wird von
+  `.panel { overflow: clip }` + `body { overflow-x: clip }` eingefangen,
   sonst 50px+ H-Overflow auf Mobile.
 
 ## Verifiziert (Browser, 2026-07-02 Welle 3)
