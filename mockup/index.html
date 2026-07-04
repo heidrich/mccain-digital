@@ -1,0 +1,1934 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>McCain Digital — Redesign Mockup “Pixel Physics”</title>
+  <meta name="description" content="Design mockup: fresh gallery-light direction — ink panels on off-white, acid accent, pixel-physics signature.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230B0B09'/%3E%3Crect x='6' y='6' width='9' height='9' fill='%23F5C518'/%3E%3Crect x='18' y='6' width='8' height='8' fill='%23DBFF00'/%3E%3Crect x='6' y='18' width='8' height='8' fill='%235B2EFF'/%3E%3Crect x='18' y='18' width='8' height='8' fill='%23FF3D8A'/%3E%3C/svg%3E">
+  <link rel="preload" href="fonts/schibsted-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+    /* ============================================================
+       McCain Digital — mockup “PIXEL PHYSICS”  ·  direction 2
+       Fresh gallery-light system: cool off-white canvas, floating
+       ink panels (fabrica bones), acid-chartreuse as the single
+       accent (the McCain yellow, electrified), Schibsted Grotesk
+       at hard negative tracking — and the pixel-physics engine as
+       the signature nobody else has. Zero raster images.
+       Load choreography borrowed from the fabrica appear-spec:
+       hero ease cubic-bezier(.56,.22,.05,.99), nav 60ms cascade,
+       IO springs on scroll. Built to port 1:1 to React at 4×100.
+       ============================================================ */
+
+    @font-face {
+      font-family: "Schibsted Grotesk";
+      font-style: normal;
+      font-weight: 400 900;
+      font-display: swap;
+      src: url("fonts/schibsted-normal-latin.woff2") format("woff2");
+    }
+
+    /* metric-compatible fallback — keeps CLS at 0 during the font swap */
+    @font-face {
+      font-family: "Schibsted Fallback";
+      src: local("Arial"), local("Helvetica");
+      size-adjust: 102%;
+      ascent-override: 96%;
+      descent-override: 25%;
+    }
+
+    :root {
+      --canvas: #F4F4F1;
+      --card: #FFFFFF;
+      --ink: #0B0B09;
+      --ink-2: #161613;
+      --body-c: #45453F;
+      --mute: #6B6B62;        /* AA on canvas (4.9:1) and cards      */
+      /* accent ROLE system — NO brown tones anywhere (owner call).
+         GREEN is the one accent: every interactive/punctuation accent
+         (dots, arrows, underlines, focus, pills) uses acid/acid-deep —
+         never sprinkle violet/pink into small details. Violet + pink
+         exist ONLY as big deliberate surfaces: the CMS work cover, the
+         “yours next” question mark, the Pac-Man line cycle. Yellow only
+         in the logo (+ Pac-Man, who wears the logo yellow). */
+      --acid: #DBFF00;        /* acid surface accent               */
+      --acid-soft: #EAFF66;
+      --acid-deep: #7A8C00;   /* the display GREEN (owner-liked)   */
+      --acid-ink: #1E2400;    /* text on acid surfaces             */
+      --pop: #5B2EFF;         /* wild pop: electric violet         */
+      --pink: #FF3D8A;        /* wild pop: punctuation & covers    */
+      --logo-y: #F5C518;      /* the ONE allowed yellow (logo)     */
+      --line: rgba(11, 11, 9, .1);
+      --line-soft: rgba(11, 11, 9, .06);
+      /* dark panel tiers */
+      --d-text: #F4F4F1;
+      --d-mute: rgba(244, 244, 241, .55);
+      --d-line: rgba(255, 255, 255, .1);
+      --d-wash: rgba(255, 255, 255, .05);
+      /* motion */
+      --ease: cubic-bezier(.16, 1, .3, 1);
+      --ease-hero: cubic-bezier(.56, .22, .05, .99);
+      /* layout */
+      --maxw: 1520px;
+      --pad: clamp(1.1rem, 3.6vw, 3.2rem);
+      /* vertical rhythm — ONE scale, vw-based so it never jumps with
+         browser chrome. Gap between any two blocks = --sec (each side
+         contributes half). Slim bands use the .tight multiplier. */
+      --sec: clamp(5.5rem, 10vw, 10rem);
+      --head-gap: clamp(2.2rem, 4vw, 3.4rem);  /* heading → content   */
+      --eyebrow-gap: clamp(1.3rem, 2.4vw, 2rem); /* chip row → heading */
+      --gut: 6px;             /* panel inset gutter (fabrica 4px)  */
+      --r-panel: 24px;
+      --r-mid: 18px;
+      --r-card: 14px;
+      --ff: "Schibsted Grotesk", "Schibsted Fallback", "Segoe UI", system-ui, sans-serif;
+      --mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+    }
+
+    @supports (transition-timing-function: linear(0, 1)) {
+      :root {
+        --spring: linear(0, 0.009, 0.035 2.1%, 0.141 4.4%, 0.723 12.9%, 0.938 16.7%,
+            1.017, 1.077, 1.121, 1.149 24.3%, 1.159, 1.163, 1.161, 1.154 29.9%,
+            1.129 32.8%, 1.051 39.6%, 1.017 43.1%, 0.991, 0.977 51%, 0.974 53.8%,
+            0.975 57.1%, 0.997 69.8%, 1.003 76.9%, 1);
+      }
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box }
+    html { scroll-behavior: smooth; scroll-padding-top: 96px }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto } }
+
+    body {
+      font-family: var(--ff);
+      font-size: 17px;
+      line-height: 1.6;
+      letter-spacing: -.01em;
+      background: var(--canvas);
+      color: var(--body-c);
+      overflow-x: clip;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* whisper of grain — keeps the big empty planes alive */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      pointer-events: none;
+      opacity: .02;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    ::selection { background: var(--acid); color: var(--acid-ink) }
+
+    h1, h2, h3 { color: var(--ink); font-weight: 800; letter-spacing: -.05em; line-height: .95 }
+    a { color: inherit; text-decoration: none }
+    ul { list-style: none }
+    button { font: inherit; cursor: pointer; border: 0; background: none; color: inherit }
+
+    section { max-width: var(--maxw); margin-inline: auto; padding: calc(var(--sec) / 2) var(--pad) }
+
+    /* ---------- section header kit: chip + count + © + period-heading ---------- */
+    .sec-top { display: flex; align-items: center; gap: 1rem; margin-bottom: var(--eyebrow-gap); flex-wrap: wrap }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .6em;
+      background: var(--ink);
+      color: var(--d-text);
+      border-radius: 99px;
+      padding: .55em 1.15em .55em .8em;
+      font-size: .82rem;
+      font-weight: 600;
+      letter-spacing: -.01em;
+    }
+    .chip .plus {
+      position: relative;
+      width: 13px; height: 13px;
+      display: inline-block;
+      transition: transform .5s var(--spring, var(--ease));
+    }
+    .chip .plus::before, .chip .plus::after {
+      content: "";
+      position: absolute;
+      background: var(--acid);
+      border-radius: 2px;
+    }
+    .chip .plus::before { left: 5.5px; top: 0; width: 2px; height: 13px }
+    .chip .plus::after { left: 0; top: 5.5px; width: 13px; height: 2px }
+    .sec-top:hover .chip .plus, .chip:hover .plus { transform: rotate(90deg) }
+    .chip.lite { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line) }
+    .chip.lite .plus::before, .chip.lite .plus::after { background: var(--acid-deep) }
+    .count { font-size: .82rem; font-weight: 600; color: var(--mute); letter-spacing: 0 }
+    .stamp { font-size: .82rem; font-weight: 600; color: var(--mute); margin-left: auto; letter-spacing: 0 }
+
+    .sec-h {
+      font-size: clamp(2.6rem, 6.4vw, 5.6rem);
+      letter-spacing: -.055em;
+      line-height: .92;
+      max-width: 14ch;
+    }
+    .sec-h .dot { color: var(--acid-deep) }
+
+    /* ---------- reveal system (IO one-shot springs) ---------- */
+    .js [data-reveal] {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity .7s var(--ease), transform .85s var(--spring, var(--ease));
+      transition-delay: calc(var(--ri, 0) * 80ms);
+    }
+    .js [data-reveal].in { opacity: 1; transform: none }
+    /* single-column: group stagger would just delay lone entries */
+    @media (max-width: 860px) { .js [data-reveal] { --ri: 0 } }
+    @media (prefers-reduced-motion: reduce) {
+      .js [data-reveal] { opacity: 1; transform: none; transition: none }
+    }
+
+    /* ---------- load choreography ---------- */
+    .js .lc { opacity: 0; transform: translateY(34px); transition: opacity .9s var(--ease-hero), transform 1.1s var(--ease-hero) }
+    .js.loaded .lc { opacity: 1; transform: none }
+    .js .lc-1 { transition-delay: .15s } .js .lc-2 { transition-delay: .32s }
+    .js .lc-3 { transition-delay: .5s } .js .lc-4 { transition-delay: .68s }
+    .js .lc-5 { transition-delay: .9s }
+    @media (prefers-reduced-motion: reduce) {
+      .js .lc { opacity: 1; transform: none; transition: none }
+    }
+
+    /* ---------- pac-bar ---------- */
+    #pacbar {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 150px;
+      z-index: 1201;
+      pointer-events: none;
+      display: none;
+      opacity: 0;
+      transition: opacity .9s var(--ease);
+    }
+    .scroll-progress {
+      position: fixed;
+      top: 16px; left: 0;
+      width: 100%;
+      border-top: 2px dashed var(--line);
+      z-index: 1200;
+      pointer-events: none;
+    }
+
+    /* ---------- nav ---------- */
+    #nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: calc(1.15rem + 12px) var(--pad) 1.15rem;
+      transition: padding .4s;
+    }
+    #nav::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: color-mix(in srgb, var(--canvas) 93%, transparent);
+      backdrop-filter: blur(14px) saturate(1.4);
+      -webkit-backdrop-filter: blur(14px) saturate(1.4);
+      border-bottom: 1px solid var(--line-soft);
+      opacity: 0;
+      transition: opacity .4s;
+    }
+    #nav.scrolled::before { opacity: 1 }
+    #nav.scrolled { padding: calc(.7rem + 12px) var(--pad) .7rem }
+
+    /* nav cascade on load (fabrica: y:-40, 60ms stagger) */
+    .js #nav .nv { opacity: 0; transform: translateY(-40px); transition: opacity .6s var(--ease), transform .7s var(--spring, var(--ease)) }
+    .js.loaded #nav .nv { opacity: 1; transform: none }
+    .js #nav .nv:nth-child(1) { transition-delay: 0s }
+    .js #nav .nav-links .nv:nth-child(1) { transition-delay: .06s }
+    .js #nav .nav-links .nv:nth-child(2) { transition-delay: .12s }
+    .js #nav .nav-links .nv:nth-child(3) { transition-delay: .18s }
+    .js #nav .nav-links .nv:nth-child(4) { transition-delay: .24s }
+    .js #nav .nav-links .nv:nth-child(5) { transition-delay: .3s }
+    @media (prefers-reduced-motion: reduce) {
+      .js #nav .nv { opacity: 1; transform: none; transition: none }
+    }
+
+    /* the logo stays the logo: the ORIGINAL face (system grotesque, like
+       the live site) — bold “mccain” + yellow “digital”. Never the display font. */
+    .logo {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      font-size: 1.14rem;
+      font-weight: 700;
+      letter-spacing: -.01em;
+      color: var(--ink);
+      line-height: 1;
+      display: inline-flex;
+      align-items: baseline;
+      gap: .28em;
+    }
+    .logo i { font-style: normal; color: var(--logo-y); font-weight: 600 }
+    .logo sup { font-size: .5em; font-weight: 600; color: var(--mute); margin-left: .1em; letter-spacing: 0 }
+
+    .nav-links { display: flex; gap: 1.9rem; align-items: center }
+    .nav-links a { font-size: .89rem; font-weight: 600; color: var(--ink); position: relative; letter-spacing: -.015em }
+    .nav-links a.btn { color: var(--d-text) }
+    .nav-links a .cnt { font-size: .72em; font-weight: 600; color: var(--body-c); vertical-align: super; margin-left: .25em }
+    .nav-links a:not(.btn)::after {
+      content: "";
+      position: absolute;
+      left: 0; bottom: -5px;
+      width: 100%; height: 2px;
+      background: var(--acid-deep);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform .4s var(--ease);
+    }
+    .nav-links a:not(.btn):hover::after { transform: scaleX(1); transform-origin: left }
+    @media (max-width: 760px) { .nav-links a:not(.nav-cta) { display: none } }
+
+    /* ---------- buttons ---------- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .55em;
+      padding: 1rem 1.7rem;
+      border-radius: 99px;
+      font-size: .95rem;
+      font-weight: 650;
+      letter-spacing: -.01em;
+      background: var(--ink);
+      color: var(--d-text);
+      transition: transform .35s var(--spring, var(--ease)), background .3s var(--ease), box-shadow .3s var(--ease);
+    }
+    .btn:hover { background: #2B2B28; transform: translateY(-3px); box-shadow: 0 12px 28px -14px rgba(11, 11, 9, .45) }
+    .btn .arr { transition: transform .35s var(--ease); display: inline-block }
+    .btn:hover .arr { transform: translate(4px, -1px) }
+    .btn.acid { background: var(--acid); color: var(--acid-ink) }
+    .btn.acid:hover { background: var(--acid-soft) }
+    .btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line) }
+    .btn.ghost:hover { background: var(--ink); color: var(--canvas); box-shadow: inset 0 0 0 1.5px var(--ink) }
+    /* ghost variant on ink panels — no inline styles, hover stays visible */
+    .panel .btn.ghost { color: var(--d-text); box-shadow: inset 0 0 0 1.5px var(--d-line) }
+    .panel .btn.ghost:hover { background: var(--d-wash); color: var(--d-text); box-shadow: inset 0 0 0 1.5px var(--acid) }
+    .nav-cta { padding: .74rem 1.3rem; font-size: .86rem }
+
+    /* keyboard parity for a hover-heavy page */
+    :focus-visible { outline: 2.5px solid var(--acid-deep); outline-offset: 3px; border-radius: 4px }
+    .btn:focus-visible { outline-offset: 4px; border-radius: 99px }
+    .panel :focus-visible { outline-color: var(--acid) }
+    .nav-links a:focus-visible::after { transform: scaleX(1) }
+
+    /* rolling label (fabrica): two stacked copies swap on hover */
+    .roll { position: relative; overflow: hidden; display: inline-block; line-height: 1.25 }
+    .roll span { display: block; transition: transform .45s var(--ease) }
+    .roll span:last-child { position: absolute; left: 0; top: 100% }
+    .btn:hover .roll span, .m-link:hover .roll span { transform: translateY(-100%) }
+    @media (prefers-reduced-motion: reduce) { .roll span { transition: none } .btn:hover .roll span, .m-link:hover .roll span { transform: none } }
+
+    /* pixel mode (shared engine): while the face is pixels the real
+       button is invisible — the canvas IS the button */
+    .pxbtn { position: relative; overflow: visible }
+    .pxbtn .pxc { position: absolute; display: none; pointer-events: none; z-index: 3 }
+    .pxbtn.px-active {
+      color: transparent !important;
+      background: transparent !important;
+      border-color: transparent !important;
+      box-shadow: none !important;
+      transform: none !important;
+      transition: none !important;
+    }
+
+    /* ---------- pixel-assembly headlines ---------- */
+    .ph { position: relative; display: inline-block; vertical-align: top }
+    .ph canvas { position: absolute; top: 0; left: 0; pointer-events: none }
+    .ph.assembling .ph-txt { visibility: hidden }
+
+    /* ---------- hero ---------- */
+    #hero {
+      max-width: none;
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      padding: clamp(7.5rem, 17vh, 11rem) var(--pad) 1.6rem;
+    }
+    .hero-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 3rem; max-width: var(--maxw); margin-inline: auto; width: 100% }
+    .hero-main { flex: 1 1 auto; min-width: 0 }
+
+    h1 {
+      font-size: clamp(3.2rem, 9.6vw, 9rem);
+      letter-spacing: -.055em;
+      line-height: .94;
+      font-weight: 820;
+      margin-top: 1.6rem;
+    }
+    h1 .accent { color: var(--acid-deep); white-space: nowrap }
+
+    .hero-sub {
+      max-width: 33rem;
+      font-size: clamp(1.02rem, 1.4vw, 1.2rem);
+      color: var(--body-c);
+      margin-top: 2rem;
+    }
+    .hero-sub b { color: var(--ink); font-weight: 650 }
+    .hero-ctas { display: flex; gap: .9rem; align-items: center; margin-top: 2.3rem; flex-wrap: wrap }
+
+    /* right: micro service index (fabrica hero list) */
+    .hero-index { padding-top: 1rem; min-width: 218px; flex: 0 0 auto }
+    .hero-index li {
+      display: flex;
+      gap: .9em;
+      align-items: baseline;
+      padding: .48em 0;
+      border-bottom: 1px solid var(--line-soft);
+      font-size: .9rem;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -.015em;
+    }
+    .hero-index li i { font-style: normal; font-size: .74rem; color: var(--mute); font-weight: 550; letter-spacing: 0; transition: color .3s }
+    .hero-index li a { display: inline-block; transition: color .3s, transform .35s var(--ease) }
+    .hero-index li a:hover { color: var(--acid-deep); transform: translateX(3px) }
+    .hero-index li:hover i { color: var(--acid-deep) }
+    @media (max-width: 1020px) { .hero-index { display: none } }
+
+    /* hero base row: proof + brand marquee */
+    .hero-base {
+      max-width: var(--maxw);
+      margin: auto auto 0;
+      width: 100%;
+      padding-top: clamp(2.2rem, 6vh, 4rem);
+      display: flex;
+      align-items: center;
+      gap: 2.4rem;
+    }
+    .proof {
+      display: inline-flex;
+      align-items: center;
+      gap: .8em;
+      font-size: .8rem;
+      font-weight: 550;
+      color: var(--mute);
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      padding: .55rem 1.05rem;
+      background: var(--card);
+      white-space: nowrap;
+      letter-spacing: 0;
+    }
+    .proof .dot2 { width: 7px; height: 7px; border-radius: 50%; background: var(--acid-deep); animation: pulse 2.4s infinite }
+    .proof b { color: var(--ink); font-weight: 700 }
+    @keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: .3 } }
+    @media (prefers-reduced-motion: reduce) { .proof .dot2 { animation: none } }
+
+    .brands {
+      flex: 1;
+      min-width: 0;   /* flex min-size blowout: without this the track width wins */
+      overflow: clip;
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+      mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+      user-select: none;
+    }
+    .brands .bt { display: flex; gap: 3rem; width: max-content; animation: mq 34s linear infinite; align-items: baseline }
+    .brands:hover .bt { animation-play-state: paused }
+    .brands .bt span { font-size: .95rem; font-weight: 650; color: var(--mute); white-space: nowrap; letter-spacing: -.01em }
+    .brands .bt .cap { font-size: .72rem; font-weight: 550; color: var(--mute); opacity: .7; letter-spacing: .02em }
+    /* seam maths: two copies + 13 gaps means -50% alone jumps half a gap */
+    @keyframes mq { to { transform: translateX(calc(-50% - 1.5rem)) } }
+    @media (prefers-reduced-motion: reduce) { .brands .bt { animation: none } }
+    @media (max-width: 760px) { .hero-base { flex-direction: column; align-items: flex-start; gap: 1.2rem } .brands { width: 100% } }
+
+    /* ---------- statement ---------- */
+    #why { padding-block: calc(var(--sec) * .75) }
+    .statement {
+      font-size: clamp(2.3rem, 5vw, 4.6rem);
+      line-height: 1.06;
+      letter-spacing: -.05em;
+      font-weight: 700;
+      color: var(--ink);
+      max-width: 17em;
+    }
+    /* unlit tint stays ≥3:1 (AA-large) so the a11y 100 holds */
+    .statement .w { color: rgba(11, 11, 9, .38); transition: color .3s linear }
+    .statement .w.on { color: var(--ink) }
+    .statement .w.acid.on { color: var(--acid-deep) }
+    .statement-foot { margin-top: 2.2rem; max-width: 33rem; color: var(--mute); font-size: 1rem }
+    .m-link { font-weight: 650; color: var(--ink); border-bottom: 2px solid var(--acid); padding-bottom: 2px }
+
+    /* ---------- work cards ---------- */
+    .work-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(.9rem, 1.6vw, 1.4rem) }
+    @media (max-width: 860px) { .work-grid { grid-template-columns: 1fr } }
+
+    .wcard {
+      display: block;
+      background: var(--card);
+      border-radius: var(--r-card);
+      padding: .55rem;
+      transition: transform .5s var(--spring, var(--ease)), box-shadow .4s var(--ease);
+      box-shadow: 0 0 0 1px var(--line-soft);
+    }
+    .wcard:hover { transform: translateY(-6px); box-shadow: 0 0 0 1px var(--line), 0 26px 52px -30px rgba(11, 11, 9, .4) }
+
+    .wc-meta { display: flex; align-items: baseline; gap: .7em; padding: .55rem .75rem .75rem }
+    .wc-meta b { font-size: 1.1rem; font-weight: 720; color: var(--ink); letter-spacing: -.03em }
+    .wc-meta .yr { font-size: .76rem; font-weight: 550; color: var(--mute); letter-spacing: 0 }
+    .wc-meta .arr { margin-left: auto; color: var(--acid-deep); font-weight: 800; transition: transform .35s var(--ease) }
+    .wcard:hover .wc-meta .arr { transform: translate(4px, -4px) }
+
+    .wc-cover {
+      border-radius: 10px;
+      overflow: hidden;
+      aspect-ratio: 16 / 10;
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+    .wcard.sm .wc-cover { aspect-ratio: 16 / 7 }
+    .wc-tags { display: flex; gap: .4em; padding: .8rem .75rem .45rem; flex-wrap: wrap }
+    .wc-tags span {
+      font-size: .74rem;
+      font-weight: 650;
+      letter-spacing: .01em;
+      color: var(--ink);
+      background: var(--canvas);
+      padding: .34em .9em;
+      border-radius: 99px;
+    }
+
+    /* covers — CSS art only (site ships zero images; the mock keeps that) */
+    .cov-recall { background: radial-gradient(130% 150% at 82% 14%, #1D1D19 0%, var(--ink) 58%) }
+    .cov-recall .ring {
+      position: absolute;
+      width: 36%;
+      aspect-ratio: 1;
+      right: 8%;
+      top: 10%;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--ink) 50%, rgba(219, 255, 0, .95) 55%, rgba(219, 255, 0, 0) 72%);
+      transition: transform .8s var(--ease);
+    }
+    .wcard:hover .cov-recall .ring { transform: scale(1.14) rotate(10deg) }
+    /* mini terminal WINDOW (chrome + shadow) — reads as a product shot */
+    .cov-recall .mini-win {
+      position: absolute;
+      left: 6%;
+      bottom: 8%;
+      background: #161613;
+      border: 1px solid var(--d-line);
+      border-radius: 10px;
+      padding: .65rem .95rem .75rem;
+      box-shadow: 0 22px 44px -22px rgba(0, 0, 0, .85);
+      transition: transform .5s var(--spring, var(--ease));
+    }
+    .wcard:hover .cov-recall .mini-win { transform: translateY(-4px) }
+    .cov-recall .mw-bar { display: flex; gap: 5px; margin-bottom: .5rem }
+    .cov-recall .mw-bar i { width: 7px; height: 7px; border-radius: 50%; background: rgba(255, 255, 255, .14) }
+    .cov-recall .mw-bar i:first-child { background: var(--acid) }
+    .cov-recall .tl {
+      font-family: var(--mono);
+      font-size: clamp(.68rem, 1vw, .84rem);
+      line-height: 1.9;
+      color: var(--d-mute);
+    }
+    .cov-recall .tl b { color: var(--acid); font-weight: 600 }
+    .cov-recall .tl .ok { color: var(--acid-soft) }
+    .cov-recall .px {
+      position: absolute;
+      right: 30%; top: 28%;
+      width: 3px; height: 3px;
+      background: var(--acid);
+      box-shadow: 14px 6px 0 var(--acid), 30px -8px 0 rgba(219, 255, 0, .55), 44px 12px 0 rgba(244, 244, 241, .5),
+        60px -2px 0 var(--acid), 76px 8px 0 rgba(244, 244, 241, .4), 90px -10px 0 rgba(219, 255, 0, .7),
+        22px 22px 0 rgba(244, 244, 241, .35), 52px 24px 0 rgba(219, 255, 0, .5);
+    }
+
+    /* this-site cover: four Lighthouse-style gauges — the real report,
+       instantly recognizable, not four flat numbers */
+    .cov-site { background: radial-gradient(130% 150% at 20% 10%, #1D1D19 0%, var(--ink) 60%) }
+    .cov-site .gauges { display: flex; gap: clamp(.9rem, 2.2vw, 2rem) }
+    .cov-site .g {
+      display: grid;
+      justify-items: center;
+      gap: .6em;
+      transition: transform .5s var(--spring, var(--ease));
+    }
+    .cov-site .g i {
+      font-style: normal;
+      width: clamp(50px, 5.8vw, 88px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: var(--acid);
+      font-weight: 800;
+      font-size: clamp(.92rem, 1.5vw, 1.4rem);
+      letter-spacing: -.05em;
+      background:
+        radial-gradient(closest-side, #16160F calc(100% - 4.5px), transparent calc(100% - 4px)),
+        conic-gradient(var(--acid) 360deg);
+    }
+    .cov-site .g b { font-size: .62rem; font-weight: 600; letter-spacing: .06em; color: var(--d-mute) }
+    .wcard:hover .cov-site .g { transform: translateY(-5px) }
+    .wcard:hover .cov-site .g:nth-child(2) { transition-delay: 45ms }
+    .wcard:hover .cov-site .g:nth-child(3) { transition-delay: 90ms }
+    .wcard:hover .cov-site .g:nth-child(4) { transition-delay: 135ms }
+    .cov-site .cap { position: absolute; bottom: 8%; font-size: .74rem; font-weight: 550; color: var(--d-mute); letter-spacing: .02em }
+
+    /* cms cover: violet face, mini EDITOR window (layer list · canvas with
+       the pixel-W · inspector) — reads as the actual product */
+    .cov-cms { background: linear-gradient(135deg, var(--pop) 0%, #7C52FF 100%) }
+    .cov-cms .ed {
+      display: grid;
+      grid-template-columns: clamp(34px, 4vw, 52px) 1fr clamp(40px, 4.6vw, 60px);
+      gap: clamp(5px, .7vw, 8px);
+      width: min(80%, 440px);
+      height: 64%;
+    }
+    .cov-cms .ed > span {
+      background: rgba(255, 255, 255, .12);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(4px, .5vw, 6px);
+      padding: clamp(6px, .8vw, 10px) clamp(5px, .7vw, 9px);
+    }
+    .cov-cms .ed i { display: block; height: clamp(4px, .5vw, 6px); border-radius: 3px; background: rgba(255, 255, 255, .38) }
+    .cov-cms .ed-side i:nth-child(1) { width: 85% }
+    .cov-cms .ed-side i:nth-child(2) { width: 60% }
+    .cov-cms .ed-side i:nth-child(3) { width: 72% }
+    .cov-cms .ed-side i:nth-child(4) { width: 48% }
+    .cov-cms .ed-insp i.sw { height: clamp(11px, 1.3vw, 16px); background: var(--acid); border-radius: 4px }
+    .cov-cms .ed-insp i:nth-child(2) { width: 78% }
+    .cov-cms .ed-insp i:nth-child(3) { width: 55% }
+    .cov-cms .ed-canvas { display: grid; place-items: center; padding: 0 }
+    .cov-cms .blocks { display: grid; grid-template-columns: repeat(5, clamp(11px, 1.4vw, 17px)); gap: clamp(3px, .45vw, 6px) }
+    .cov-cms .blocks i {
+      width: clamp(11px, 1.4vw, 17px);
+      height: auto;
+      aspect-ratio: 1;
+      background: rgba(255, 255, 255, .16);
+      border-radius: 3px;
+      transition: transform .45s var(--spring, var(--ease)), background .3s;
+    }
+    .cov-cms .blocks i.on { background: #fff }
+    .wcard:hover .cov-cms .blocks i.on:nth-child(2n) { transform: translateY(-4px) }
+    .wcard:hover .cov-cms .blocks i.on:nth-child(2n+1) { transform: translateY(3px) }
+
+    .cov-next {
+      background:
+        radial-gradient(rgba(11, 11, 9, .13) 1.2px, transparent 1.3px) 0 0 / 14px 14px,
+        var(--card);
+      border: 2px dashed rgba(11, 11, 9, .2);
+    }
+    .cov-next .q {
+      font-weight: 820;
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      color: var(--pink);
+      transition: transform .4s var(--spring, var(--ease));
+    }
+    .wcard:hover .cov-next .q { transform: rotate(12deg) scale(1.15) }
+
+    /* ---------- photo bands — photography breaks the type rhythm
+       (shape pattern: an image every 1–2 sections; real people = trust) */
+    .photo-band {
+      position: relative;
+      border-radius: var(--r-panel);
+      overflow: hidden;
+      aspect-ratio: 21 / 9;
+      background: var(--ink);
+    }
+    .photo-band img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: saturate(.94) contrast(1.04);
+    }
+    .photo-band figcaption {
+      position: absolute;
+      left: clamp(1rem, 2.5vw, 2rem);
+      right: clamp(1rem, 2.5vw, 2rem);
+      bottom: clamp(1rem, 2.5vw, 2rem);
+      display: flex;
+      align-items: center;
+      gap: 1.1rem;
+      flex-wrap: wrap;
+    }
+    .photo-band .pb-note {
+      font-size: .92rem;
+      font-weight: 600;
+      color: #fff;
+      max-width: 28rem;
+      text-shadow: 0 1px 16px rgba(0, 0, 0, .55);
+      letter-spacing: -.01em;
+    }
+    @media (max-width: 720px) { .photo-band { aspect-ratio: 4 / 3 } }
+    /* two-image mosaic: wide studio shot + tall editorial shot — one
+       art-directed moment, not a lone stock image */
+    .studio-mosaic { display: grid; grid-template-columns: 1.7fr 1fr; gap: var(--gut); height: clamp(360px, 42vw, 600px) }
+    .studio-mosaic .photo-band { aspect-ratio: auto; height: 100% }
+    @media (max-width: 720px) {
+      .studio-mosaic { grid-template-columns: 1fr; height: auto }
+      .studio-mosaic .photo-band { height: auto; aspect-ratio: 4 / 3 }
+      .studio-mosaic .pb-b { aspect-ratio: 3 / 4 }
+    }
+
+    /* ---------- dark panels (services / footer) ---------- */
+    .panel-wrap { padding: calc(var(--sec) / 2) var(--gut); max-width: none }
+    .panel {
+      background: var(--ink);
+      border-radius: var(--r-panel);
+      position: relative;
+      overflow: clip;
+      color: var(--d-mute);
+    }
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: .05;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    .panel .inner { max-width: var(--maxw); margin-inline: auto; padding: calc(var(--sec) * .6) var(--pad); position: relative }
+    .panel .chip { background: var(--d-wash); color: var(--d-text); box-shadow: inset 0 0 0 1px var(--d-line) }
+    .panel .chip .plus::before, .panel .chip .plus::after { background: var(--acid) }
+    .panel .count, .panel .stamp { color: var(--d-mute) }
+    .panel .sec-h { color: var(--d-text) }
+    .panel .sec-h .dot { color: var(--acid) }
+
+    /* services — numbered benefit rows, ALL visible. No accordion: the
+       answer to “what can you do for me?” never hides behind a click
+       (none of the top-tier studio sites use one). Each row: ordinal,
+       service name, one client-benefit line + capability tags. */
+    .svc-rows { border-top: 1px solid var(--d-line); margin-top: var(--head-gap) }
+    .svc-row {
+      display: grid;
+      grid-template-columns: 76px 1.05fr 1.25fr;
+      gap: clamp(.8rem, 3vw, 2.4rem);
+      align-items: first baseline;
+      padding: clamp(1.4rem, 2.6vw, 2.1rem) .6rem;
+      border-bottom: 1px solid var(--d-line);
+      transition: background .35s var(--ease), padding-left .4s var(--ease);
+    }
+    .svc-row:hover { background: var(--d-wash); padding-left: 1.4rem }
+    .svc-num { font-size: .8rem; font-weight: 550; color: var(--d-mute); letter-spacing: .01em; transition: color .3s }
+    .svc-row:hover .svc-num { color: var(--acid) }
+    .svc-name {
+      font-size: clamp(1.4rem, 3vw, 2.4rem);
+      font-weight: 760;
+      letter-spacing: -.045em;
+      color: var(--d-text);
+      line-height: 1.05;
+    }
+    .svc-what { font-size: clamp(1rem, 1.25vw, 1.14rem); font-weight: 600; letter-spacing: -.015em; color: var(--d-text); line-height: 1.45 }
+    .svc-tags { display: flex; flex-wrap: wrap; gap: .4em; margin-top: .7rem }
+    .svc-tags span {
+      font-size: .73rem;
+      font-weight: 600;
+      letter-spacing: .01em;
+      color: var(--d-mute);
+      border: 1px solid var(--d-line);
+      padding: .3em .85em;
+      border-radius: 99px;
+      transition: color .3s, border-color .3s;
+    }
+    .svc-row:hover .svc-tags span { color: var(--d-text); border-color: rgba(255, 255, 255, .22) }
+    @media (max-width: 720px) {
+      .svc-row { grid-template-columns: 44px 1fr }
+      .svc-row:hover { padding-left: .6rem }
+      .svc-col2 { grid-column: 2 }
+    }
+    .svc-cta { display: flex; gap: 1rem; margin-top: 3rem; flex-wrap: wrap }
+
+    /* ---------- AI section (the live site's 00.5, promoted) ----------
+       Lives on its own ink panel — THE visual anchor of the page (owner:
+       AI is the future; the Awwwards craft elite doesn't name AI at all,
+       so this panel IS the positioning gap, in craft tone). */
+    .ai-top { display: grid; grid-template-columns: 1.2fr .8fr; gap: clamp(2rem, 4vw, 4.5rem); align-items: stretch }
+    @media (max-width: 900px) { .ai-top { grid-template-columns: 1fr } }
+    /* absolutely-positioned img: the photo fills the row WITHOUT its
+       intrinsic height inflating the grid track */
+    .ai-photo { position: relative; border-radius: var(--r-mid); overflow: hidden; min-height: 300px }
+    .ai-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block }
+    @media (max-width: 900px) { .ai-photo { min-height: 0; aspect-ratio: 16 / 10 } }
+
+    .ai-lede { max-width: 42rem; font-size: clamp(1.05rem, 1.5vw, 1.3rem); line-height: 1.6; margin-top: 1.8rem; color: var(--d-mute) }
+    .ai-lede b, .ai-lede .strong { color: var(--d-text); font-weight: 650 }
+
+    .ai-stack { display: flex; align-items: center; gap: 1.6rem; margin-top: 2.2rem; flex-wrap: wrap }
+    .ai-stack-label { font-size: .74rem; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; color: var(--d-mute) }
+    .ai-logos { display: flex; gap: 1.4rem }
+    .ai-logo { display: inline-flex; align-items: center; gap: .5em; color: var(--d-text); opacity: .75; transition: opacity .3s, transform .35s var(--spring, var(--ease)) }
+    .ai-logo:hover { opacity: 1; transform: translateY(-2px) }
+    .ai-logo svg { width: 21px; height: 21px }
+    .ai-logo-name { font-size: .88rem; font-weight: 600 }
+
+    .ai-rotator { margin-top: 2.4rem; font-size: clamp(1.3rem, 2.4vw, 2rem); font-weight: 700; letter-spacing: -.03em; color: var(--d-text) }
+    .ai-rotator .arw-box { display: inline-grid; vertical-align: top }
+    .ai-rotator .arw { grid-area: 1 / 1; opacity: 0; transform: translateY(12px); transition: opacity .45s var(--ease), transform .5s var(--spring, var(--ease)); color: var(--acid); white-space: nowrap }
+    .ai-rotator .arw.is-on { opacity: 1; transform: none }
+    @media (prefers-reduced-motion: reduce) { .ai-rotator .arw { transition: none } }
+
+    .ai-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(.9rem, 1.6vw, 1.4rem); margin-top: var(--head-gap) }
+    @media (max-width: 860px) { .ai-tiles { grid-template-columns: 1fr } }
+    .ai-tile {
+      background: var(--card);
+      border-radius: var(--r-card);
+      padding: 1.7rem 1.6rem 1.8rem;
+      box-shadow: 0 0 0 1px var(--line-soft);
+      transition: transform .5s var(--spring, var(--ease)), box-shadow .4s;
+    }
+    .ai-tile:hover { transform: translateY(-5px); box-shadow: 0 0 0 1px var(--line), 0 22px 44px -30px rgba(11, 11, 9, .35) }
+    .ai-tile .t-num {
+      display: inline-flex;
+      font-size: .78rem;
+      font-weight: 650;
+      color: var(--ink);
+      background: color-mix(in srgb, var(--acid) 32%, var(--card));
+      border-radius: 99px;
+      padding: .32em 1em;
+      margin-bottom: 1.2rem;
+    }
+    .ai-tile h3 { font-size: 1.4rem; letter-spacing: -.04em; margin-bottom: .55rem }
+    .ai-tile > p { font-size: .96rem; color: var(--mute) }
+    .ai-tile .t-do { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line-soft); font-size: .9rem; color: var(--body-c) }
+    .ai-tile .t-do b { color: var(--acid-deep); font-weight: 650 }
+
+    .ai-note { margin-top: 1.6rem; font-size: .92rem; font-weight: 550; color: var(--d-mute) }
+
+    .ai-claim-row { margin-top: calc(var(--sec) * .5) }
+
+    /* ---------- product (inside the ai-panel; .panel{overflow:clip}
+       contains the deliberately-oversized voidReveal canvas) ---------- */
+    .vr-host { position: relative; display: inline-block }
+    .vr-host .vr-txt { position: relative; z-index: 1 }
+    .vr-host canvas { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 2 }
+    /* hidden via visibility (NOT color): the engine's rasterizer forces
+       visibility:visible on its clone, so the pixel field still samples
+       the real colours. .vr-done hands back the live text. */
+    .js .vr-host.vr-armed:not(.vr-done) .vr-txt { visibility: hidden }
+    .prod-claim {
+      font-size: clamp(2rem, 4.6vw, 4rem);
+      font-weight: 790;
+      letter-spacing: -.05em;
+      line-height: 1.04;
+      color: var(--d-text);
+      max-width: 17em;
+    }
+    .prod-claim .acid { color: var(--acid) }
+    .prod-cols { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(2rem, 5vw, 5rem); margin-top: 3.2rem; align-items: end }
+    @media (max-width: 860px) { .prod-cols { grid-template-columns: 1fr } }
+    .prod-copy p + p { margin-top: 1.1rem }
+    .prod-copy .strong { color: var(--d-text); font-weight: 600 }
+    .prod-ctas { display: flex; gap: .9rem; margin-top: 2rem; flex-wrap: wrap }
+
+    .term {
+      background: #161613;   /* one tier above the panel ink */
+      border-radius: var(--r-mid);
+      padding: 1.4rem 1.55rem 1.5rem;
+      font-family: var(--mono);
+      font-size: .87rem;
+      line-height: 2.05;
+      color: var(--d-mute);
+      box-shadow: inset 0 0 0 1px var(--d-line), 0 34px 64px -42px rgba(0, 0, 0, .8);
+    }
+    .term .t-bar { display: flex; gap: 6px; margin-bottom: .9rem }
+    .term .t-bar i { width: 9px; height: 9px; border-radius: 50%; background: rgba(255, 255, 255, .14) }
+    .term .t-bar i:first-child { background: var(--acid) }
+    .term b { color: var(--acid); font-weight: 600 }
+    .term .ok { color: var(--acid-soft) }
+    .term .lbl { color: rgba(244, 244, 241, .38); user-select: none }
+    .term .caret { display: inline-block; width: .55em; height: 1.05em; background: var(--acid); vertical-align: -.18em; animation: caret 1.1s steps(1) infinite }
+    @keyframes caret { 50% { opacity: 0 } }
+    @media (prefers-reduced-motion: reduce) { .term .caret { animation: none } }
+
+    /* ---------- stats ---------- */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line) }
+    @media (max-width: 860px) { .stats-grid { grid-template-columns: 1fr 1fr } }
+    .stat { padding: 2rem clamp(1rem, 2.5vw, 2.4rem) .4rem; border-left: 1px solid var(--line-soft) }
+    .stat:first-child { border-left: 0; padding-left: 0 }
+    @media (max-width: 860px) {
+      .stat:nth-child(3) { border-left: 0; padding-left: 0 }
+      .stat:nth-child(n+3) { border-top: 1px solid var(--line-soft); margin-top: 1.4rem; padding-top: 1.6rem }
+    }
+    #stats { padding-block: calc(var(--sec) * .35) }
+    .stat .n {
+      font-size: clamp(2.8rem, 5.6vw, 5.3rem);
+      font-weight: 810;
+      letter-spacing: -.07em;
+      color: var(--ink);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .stat .n i { font-style: normal; color: var(--acid-deep) }
+    .stat .l { margin-top: .7rem; font-size: .9rem; color: var(--mute); max-width: 15rem }
+
+    /* ---------- process ---------- */
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(.9rem, 1.6vw, 1.4rem) }
+    @media (max-width: 860px) { .steps { grid-template-columns: 1fr } }
+    .step {
+      background: var(--card);
+      border-radius: var(--r-card);
+      padding: 1.9rem 1.7rem 2rem;
+      box-shadow: 0 0 0 1px var(--line-soft);
+      transition: transform .5s var(--spring, var(--ease)), box-shadow .4s;
+    }
+    .step:hover { transform: translateY(-5px); box-shadow: 0 0 0 1px var(--line), 0 22px 44px -30px rgba(11, 11, 9, .35) }
+    .step .s-photo {
+      border-radius: 10px;
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+      margin-bottom: 1.4rem;
+      background: var(--canvas);
+    }
+    .step .s-photo img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: saturate(.94) contrast(1.04);
+      transition: transform .8s var(--ease);
+    }
+    .step:hover .s-photo img { transform: scale(1.04) }
+    .step .s-num {
+      display: inline-flex;
+      align-items: center;
+      gap: .5em;
+      font-size: .78rem;
+      font-weight: 650;
+      color: var(--ink);
+      background: color-mix(in srgb, var(--acid) 32%, var(--card));
+      border-radius: 99px;
+      padding: .32em 1em;
+      margin-bottom: 1.3rem;
+      letter-spacing: 0;
+    }
+    .step h3 { font-size: 1.5rem; letter-spacing: -.04em; margin-bottom: .6rem }
+    .step p { font-size: .96rem; color: var(--mute) }
+    .step p b { color: var(--body-c); font-weight: 600 }
+
+    /* ---------- contact CTA — payoff shares the frame with the headline ---------- */
+    #contact { text-align: left; padding-block: calc(var(--sec) * .6) calc(var(--sec) * .45) }
+    #contact .sec-h { max-width: 12ch; font-size: clamp(3rem, 8vw, 7.5rem) }
+    .contact-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: clamp(1.5rem, 4vw, 4rem); align-items: center }
+    @media (max-width: 860px) { .contact-grid { grid-template-columns: 1fr } }
+    .mail-row { display: flex; flex-direction: column; align-items: flex-start; gap: 1.4rem; margin-top: 0 }
+    .mail-big {
+      font-size: clamp(1.2rem, 2.6vw, 2rem);
+      font-weight: 700;
+      letter-spacing: -.035em;
+      color: var(--ink);
+      border-bottom: 3px solid var(--acid);
+      padding-bottom: .1em;
+      transition: border-color .3s, color .3s;
+    }
+    .mail-big:hover { color: var(--acid-deep); border-color: var(--acid-deep) }
+    .cta-note { margin-top: 1.6rem; font-size: .82rem; font-weight: 550; color: var(--mute); letter-spacing: .01em }
+
+    /* reviews — real voices right before the ask (peak-trust slot) */
+    .rev-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(.9rem, 1.6vw, 1.4rem) }
+    @media (max-width: 860px) { .rev-grid { grid-template-columns: 1fr } }
+    .rev-badge { margin-top: 2rem; font-size: .92rem; font-weight: 600; color: var(--mute) }
+    .rev-badge .stars { color: var(--acid-deep); letter-spacing: .12em; margin-right: .35em }
+    .testi {
+      background: var(--card);
+      border-radius: var(--r-card);
+      box-shadow: 0 0 0 1px var(--line-soft);
+      padding: 1.5rem 1.6rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .testi blockquote {
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: -.02em;
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    .testi figcaption { display: flex; align-items: center; gap: .8rem }
+    .testi figcaption img {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+    }
+    /* initials disc until a real client photo exists — never a fake face */
+    .testi .t-ava {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: var(--ink);
+      color: var(--acid);
+      display: grid;
+      place-items: center;
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .02em;
+      flex: 0 0 auto;
+    }
+    .testi .t-who { font-size: .85rem; color: var(--mute); line-height: 1.4 }
+    .testi .t-who b { color: var(--ink); font-weight: 650 }
+
+    /* ---------- footer panel ---------- */
+    .foot-wrap { padding: 0 var(--gut) var(--gut); max-width: none }
+    footer.panel .inner { padding-block: clamp(3.5rem, 7vh, 5.5rem) 1.8rem }
+    .f-cols { display: flex; justify-content: space-between; gap: 2.5rem; flex-wrap: wrap; padding-bottom: 3.5rem }
+    .f-col h4 { font-size: .78rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--acid); margin-bottom: 1rem }
+    .f-col a { display: block; padding: .26em 0; font-size: .94rem; font-weight: 550; color: var(--d-mute); transition: color .3s }
+    .f-col a:hover { color: var(--d-text) }
+    .f-card {
+      background: var(--d-wash);
+      border: 1px solid var(--d-line);
+      border-radius: var(--r-card);
+      padding: 1.3rem 1.5rem;
+      max-width: 300px;
+    }
+    .f-card .who { color: var(--d-text); font-weight: 700; letter-spacing: -.02em }
+    .f-card .role { font-size: .8rem; color: var(--d-mute) }
+    .f-card a { color: var(--acid); font-weight: 600; font-size: .9rem; display: inline-block; margin-top: .7rem }
+    /* the giant footer wordmark mirrors the real logo: original face,
+       yellow “digital” */
+    .f-word {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      line-height: .95;
+      color: var(--d-text);
+      font-size: clamp(2.4rem, 12vw, 10.8rem);
+      white-space: nowrap;
+    }
+    @media (max-width: 480px) { .f-word { white-space: normal } }
+    .f-word i { font-style: normal; color: var(--logo-y); font-weight: 600 }
+    .f-word em { font-style: normal; color: var(--acid) }
+    .f-word sup { font-size: .28em; font-weight: 650; color: var(--d-mute); letter-spacing: 0 }
+    .f-base {
+      display: flex;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--d-line);
+      margin-top: 2.4rem;
+      padding-top: 1.3rem;
+      font-size: .8rem;
+      font-weight: 550;
+      color: var(--d-mute);
+      letter-spacing: .01em;
+    }
+    .f-base a { color: var(--d-mute); margin-left: 1.2rem }
+    .f-base a:hover { color: var(--d-text) }
+  </style>
+</head>
+
+<body>
+  <canvas id="pacbar" aria-hidden="true"></canvas>
+  <div class="scroll-progress" aria-hidden="true"></div>
+
+  <header id="nav">
+    <a class="logo nv" href="#hero" aria-label="McCain Digital — home">mccain<i>digital</i><sup>®</sup></a>
+    <nav class="nav-links" aria-label="Main">
+      <a class="nv" href="#product">AI</a>
+      <a class="nv" href="#work">Work <span class="cnt">(4)</span></a>
+      <a class="nv" href="#services">Services <span class="cnt">(6)</span></a>
+      <a class="nv" href="#contact">Contact</a>
+      <a class="btn nav-cta nv" href="#contact">Let’s talk <span class="arr">↗</span></a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ============ HERO ============ -->
+    <section id="hero">
+      <div class="hero-top">
+        <div class="hero-main">
+          <span class="chip lite lc lc-1"><span class="plus" aria-hidden="true"></span> AI-native product studio — Bavaria, est. 2005</span>
+          <h1 aria-label="We build digital products.">
+            <span class="ph" data-pixel data-gap="2.7" data-size="2.1" data-ink="#0B0B09"><span class="ph-txt">We build digital</span></span><br>
+            <span class="ph" data-pixel data-gap="2.7" data-size="2.1" data-ink="#7A8C00" id="cycleHost"><span class="ph-txt"><span class="accent" id="cycler">AI products.</span></span></span>
+          </h1>
+          <p class="hero-sub lc lc-2">Websites, web apps and AI tools that win you customers —
+            <b>built by the senior hands you actually talk to</b>, from first sketch to final deploy.</p>
+          <div class="hero-ctas lc lc-3">
+            <a class="btn acid btn-px" href="#contact">Start a project <span class="arr">↗</span></a>
+            <a class="btn ghost" href="#work"><span class="roll"><span>See the work</span><span aria-hidden="true">See the work</span></span> <span class="arr">↓</span></a>
+          </div>
+        </div>
+        <ul class="hero-index lc lc-4" aria-label="What we do">
+          <li><i>(001)</i> <a href="#product">AI Tools &amp; Automation</a></li>
+          <li><i>(002)</i> <a href="#services">Web Apps</a></li>
+          <li><i>(003)</i> <a href="#services">Websites</a></li>
+          <li><i>(004)</i> <a href="#services">Mobile Apps</a></li>
+          <li><i>(005)</i> <a href="#services">Software</a></li>
+          <li><i>(006)</i> <a href="#services">Design &amp; Brand</a></li>
+        </ul>
+      </div>
+      <div class="hero-base lc lc-5">
+        <p class="proof"><span class="dot2"></span> this page, live: <b>100 · 100 · 100 · 100</b></p>
+        <div class="brands" aria-label="20+ years — team track record includes work for brands like these">
+          <div class="bt">
+            <span class="cap">20+ yrs · for brands like</span><span>Deutsche Bank</span><span>AOK</span><span>Deutsches Museum</span><span>Blizzard Entertainment</span><span>Microsoft</span><span>Apple</span>
+            <span class="cap" aria-hidden="true">20+ yrs · for brands like</span><span aria-hidden="true">Deutsche Bank</span><span aria-hidden="true">AOK</span><span aria-hidden="true">Deutsches Museum</span><span aria-hidden="true">Blizzard Entertainment</span><span aria-hidden="true">Microsoft</span><span aria-hidden="true">Apple</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STATEMENT ============ -->
+    <section id="why">
+      <div class="sec-top" data-reveal>
+        <span class="chip"><span class="plus" aria-hidden="true"></span> Why us</span>
+        <span class="count">(001)</span>
+        <span class="stamp">©2026</span>
+      </div>
+      <p class="statement" id="statement">Two decades of building software — distilled into a small studio that now
+        ships its own AI products. Senior hands, not a handoff to juniors.</p>
+      <p class="statement-foot" data-reveal>We build with AI because we build AI. The proof isn’t a slide deck — it’s
+        <a class="m-link" href="#product">below, in production ↓</a></p>
+    </section>
+
+    <!-- ============ AI (the live site's 00.5, promoted — THE anchor panel) ============ -->
+    <div class="panel-wrap" id="product">
+      <div class="panel ai-panel">
+        <div class="inner">
+      <div class="sec-top" data-reveal>
+        <span class="chip"><span class="plus" aria-hidden="true"></span> AI, built in</span>
+        <span class="count">(002)</span>
+        <span class="stamp">©2026</span>
+      </div>
+      <div class="ai-top">
+      <div class="ai-lead">
+      <h2 class="sec-h"><span class="ph" data-pixel data-gap="2.7" data-size="2.1" data-ink="#F4F4F1"><span class="ph-txt">We know AI.</span></span></h2>
+      <p class="ai-lede" data-reveal>We don’t just talk about AI — we ship it. <b>whatever-recall</b> is our own
+        AI product, live in production. We build the same kind of tools for you: <b>your data, your workflows</b> —
+        hours saved every week.</p>
+
+      <div class="ai-stack" data-reveal style="--ri:1" aria-label="The stack we build with">
+        <span class="ai-stack-label">The stack we build with</span>
+        <ul class="ai-logos">
+          <li class="ai-logo">
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+              <g fill="currentColor">
+                <path d="M50 4 53.4 38 46.6 38Z"/><path d="M50 96 46.6 62 53.4 62Z"/>
+                <path d="M4 50 38 46.6 38 53.4Z"/><path d="M96 50 62 53.4 62 46.6Z"/>
+                <path d="M17.5 17.5 43.6 39.4 39.4 43.6Z"/><path d="M82.5 82.5 56.4 60.6 60.6 56.4Z"/>
+                <path d="M82.5 17.5 60.6 43.6 56.4 39.4Z"/><path d="M17.5 82.5 39.4 56.4 43.6 60.6Z"/>
+                <path d="M31 7.4 47.1 37.4 41.1 39.6Z"/><path d="M69 92.6 52.9 62.6 58.9 60.4Z"/>
+                <path d="M7.4 69 37.4 52.9 39.6 58.9Z"/><path d="M92.6 31 62.6 47.1 60.4 41.1Z"/>
+                <circle cx="50" cy="50" r="9"/>
+              </g>
+            </svg>
+            <span class="ai-logo-name">Claude</span>
+          </li>
+          <li class="ai-logo">
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+              <path fill="currentColor" d="M50 6.7 7.5 31.2v49L50 104.7l42.5-24.5v-49L50 6.7Zm0 5.8 35 20.2-35 20.2-35-20.2 35-20.2Zm-37.5 25 35 20.2v39.6l-35-20.2V37.5Zm75 0v39.4l-35 20.2V57.7l35-20.2Z" opacity=".55"/>
+              <path fill="currentColor" d="M50 12.5 85 32.7 50 52.9 15 32.7 50 12.5Z"/>
+              <path fill="currentColor" d="M85 32.7v39.4L50 92.3V52.9l35-20.2Z" opacity=".8"/>
+            </svg>
+            <span class="ai-logo-name">Cursor</span>
+          </li>
+          <li class="ai-logo">
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+              <path fill="currentColor" d="M91.6 41a24.8 24.8 0 0 0-2.1-20.4A25.1 25.1 0 0 0 62.5 8.5a24.8 24.8 0 0 0-18.7-8.4 25.1 25.1 0 0 0-24 17.4 24.8 24.8 0 0 0-16.6 12A25.1 25.1 0 0 0 6.3 59a24.8 24.8 0 0 0 2.1 20.4 25.1 25.1 0 0 0 27 12.1 24.8 24.8 0 0 0 18.7 8.4 25.1 25.1 0 0 0 24-17.4 24.8 24.8 0 0 0 16.6-12A25.1 25.1 0 0 0 91.6 41ZM54.1 93.5a18.6 18.6 0 0 1-12-4.3l.6-.3 19.9-11.5a3.2 3.2 0 0 0 1.6-2.8V46.3l8.4 4.9v23.2a18.7 18.7 0 0 1-18.5 19.1ZM14 76.5a18.6 18.6 0 0 1-2.2-12.5l.6.4L32.3 76a3.2 3.2 0 0 0 3.3 0L60 61.9v9.7a.3.3 0 0 1-.1.3L39.6 83.6A18.7 18.7 0 0 1 14 76.5ZM8.8 33.5a18.6 18.6 0 0 1 9.7-8.2v23.6a3.2 3.2 0 0 0 1.6 2.8L44 64v-9.7a.3.3 0 0 1-.1-.3L23.5 42.3A18.7 18.7 0 0 1 8.8 33.5ZM76.4 49.3 52 35.2l8.4-4.8a.3.3 0 0 1 .3 0l20.2 11.6a18.6 18.6 0 0 1-2.8 33.6V52a3.2 3.2 0 0 0-1.7-2.7ZM84.8 36.6l-.6-.4L64.3 24.6a3.2 3.2 0 0 0-3.3 0L36.6 38.7V29a.3.3 0 0 1 .1-.3L57 17.1a18.6 18.6 0 0 1 27.7 19.3ZM32 53.8l-8.4-4.9V25.7a18.6 18.6 0 0 1 30.5-14.3l-.6.3L33.6 23.2a3.2 3.2 0 0 0-1.6 2.8ZM36.6 44 47.5 37.6 58.4 44v12.8L47.5 63 36.6 56.8Z"/>
+            </svg>
+            <span class="ai-logo-name">ChatGPT</span>
+          </li>
+        </ul>
+      </div>
+
+      <p class="ai-rotator" data-reveal style="--ri:2" aria-live="polite">We help you
+        <span class="arw-box"><span class="arw is-on">integrate AI into your stack.</span><span class="arw">ship agents that do real work.</span><span class="arw">automate the repetitive tasks away.</span><span class="arw">turn your docs into answers.</span></span>
+      </p>
+      </div>
+      <!-- PLACEHOLDER-Foto (Unsplash green light-painting) — markentreuer Eyecatcher -->
+      <figure class="ai-photo" data-reveal style="--ri:1">
+        <img src="img/green-accent.jpg" alt="Abstract acid-green light painting on black" loading="lazy">
+      </figure>
+      </div>
+
+      <div class="ai-tiles">
+        <article class="ai-tile" data-reveal>
+          <span class="t-num">01 — Ask your data</span>
+          <h3>Answers in seconds.</h3>
+          <p>Chat and search that actually knows your business — your docs, your products, your processes.</p>
+          <p class="t-do"><b>What we actually do:</b> retrieval over your own data, wired into the tools you
+            already use — self-hosted or cloud.</p>
+        </article>
+        <article class="ai-tile" data-reveal style="--ri:1">
+          <span class="t-num">02 — Automate the busywork</span>
+          <h3>Hours back, every week.</h3>
+          <p>The repetitive tasks your team hates — data entry, tagging, routing, reporting — run themselves.</p>
+          <p class="t-do"><b>What we actually do:</b> agent workflows with guardrails, so automation is reliable,
+            not a liability.</p>
+        </article>
+        <article class="ai-tile" data-reveal style="--ri:2">
+          <span class="t-num">03 — AI-native products</span>
+          <h3>A working tool in weeks.</h3>
+          <p>Whole products designed around what today’s models can do — prototype fast, then harden.</p>
+          <p class="t-do"><b>What we actually do:</b> we start with “what can the model do here?” — AI as the
+            architecture, not a bolted-on feature.</p>
+        </article>
+      </div>
+      <p class="ai-note" data-reveal>No buzzwords, no magic — tools that save your team hours every week.</p>
+
+      <div class="ai-claim-row">
+        <p class="prod-claim">The proof: <span class="vr-host" id="voidHost" data-ink="#F4F4F1">whatever-recall</span> —
+          <span class="acid">AI-native project memory,</span> in production.</p>
+        <div class="prod-cols">
+          <div class="prod-copy">
+            <p data-reveal class="strong">We don’t sell AI we haven’t built. recall gives every codebase a persistent
+              memory — and we use it on this studio’s own projects, every day.</p>
+            <div class="prod-ctas" data-reveal style="--ri:1">
+              <a class="btn acid btn-px" href="#work">See it in production <span class="arr">↗</span></a>
+              <a class="btn ghost" href="#contact"><span class="roll"><span>Let’s talk AI</span><span aria-hidden="true">Let’s talk AI</span></span></a>
+            </div>
+          </div>
+          <div class="term" data-reveal style="--ri:1" role="img" aria-label="Terminal demo of whatever-recall">
+            <div class="t-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+            <span class="lbl">$</span> <b>recall</b> brief src/engine.ts<br>
+            <span class="ok">✓</span> why it’s built this way · 2 open tasks<br>
+            <span class="ok">✓</span> blast radius: 7 files · this lookup: 0.41 ms<br>
+            <span aria-hidden="true"><span class="lbl">$</span> <span id="ghostType"></span><span class="caret"></span></span>
+          </div>
+        </div>
+      </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ STUDIO (photo mosaic — visual break, trust) ============
+         PLACEHOLDER-Fotos (Unsplash) — vor Launch durch echte Studio-Aufnahmen
+         ersetzen (Shape-Trust-Pattern braucht echte Menschen). -->
+    <div class="panel-wrap" id="studio">
+      <div class="studio-mosaic" data-reveal>
+        <figure class="photo-band pb-a">
+          <img src="img/studio-wide.jpg" alt="The McCain Digital studio — a bright, modern workspace in Bavaria" loading="lazy">
+          <figcaption>
+            <span class="chip"><span class="plus" aria-hidden="true"></span> The studio — Bavaria</span>
+            <span class="pb-note">Senior hands only. The people you talk to are the people who build.</span>
+          </figcaption>
+        </figure>
+        <figure class="photo-band pb-b">
+          <img src="img/portrait-tall.jpg" alt="A designer reviewing work on the studio wall" loading="lazy">
+        </figure>
+      </div>
+    </div>
+
+    <!-- ============ WORK ============ -->
+    <section id="work">
+      <div class="sec-top" data-reveal>
+        <span class="chip"><span class="plus" aria-hidden="true"></span> Selected work</span>
+        <span class="count">(003)</span>
+        <span class="stamp">©2026</span>
+      </div>
+      <h2 class="sec-h" data-reveal>Work<span class="dot">.</span></h2>
+      <div class="work-grid" style="margin-top:var(--head-gap)">
+        <a class="wcard" href="#product" data-reveal>
+          <p class="wc-meta"><b>whatever-recall.</b><span class="yr">/2026</span><span class="arr">↗</span></p>
+          <div class="wc-cover cov-recall" aria-hidden="true">
+            <span class="ring"></span><span class="px"></span>
+            <div class="mini-win">
+              <div class="mw-bar"><i></i><i></i><i></i></div>
+              <p class="tl">$ <b>recall</b> explain<br><span class="ok">✓</span> 1 project · 63 symbols · 20 lessons<br>this lookup: 0.41 ms</p>
+            </div>
+          </div>
+          <p class="wc-tags"><span>Our own product</span><span>AI · Dev-tool</span><span>In production</span></p>
+        </a>
+
+        <a class="wcard" href="#stats" data-reveal style="--ri:1">
+          <p class="wc-meta"><b>This site.</b><span class="yr">/2026</span><span class="arr">↗</span></p>
+          <div class="wc-cover cov-site" aria-hidden="true">
+            <div class="gauges">
+              <span class="g"><i>100</i><b>perf</b></span>
+              <span class="g"><i>100</i><b>a11y</b></span>
+              <span class="g"><i>100</i><b>best</b></span>
+              <span class="g"><i>100</i><b>seo</b></span>
+            </div>
+            <p class="cap">the real Lighthouse report · measured live</p>
+          </div>
+          <p class="wc-tags"><span>0→100 PageSpeed</span><span>SEO 3/3</span><span>Website</span></p>
+        </a>
+
+        <a class="wcard sm" href="#services" data-reveal style="--ri:2">
+          <p class="wc-meta"><b>Whatever CMS.</b><span class="yr">/2026</span><span class="arr">↗</span></p>
+          <div class="wc-cover cov-cms" aria-hidden="true">
+            <!-- mini editor: layers · canvas (pixel-art W, 5×4) · inspector -->
+            <div class="ed">
+              <span class="ed-side"><i></i><i></i><i></i><i></i></span>
+              <span class="ed-canvas">
+                <div class="blocks"><i class="on"></i><i></i><i></i><i></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i class="on"></i><i class="on"></i><i></i><i class="on"></i><i></i><i class="on"></i><i></i><i class="on"></i><i></i><i class="on"></i><i></i></div>
+              </span>
+              <span class="ed-insp"><i class="sw"></i><i></i><i></i></span>
+            </div>
+          </div>
+          <p class="wc-tags"><span>Ships sites like this one</span><span>Headless CMS</span></p>
+        </a>
+
+        <a class="wcard sm" href="#contact" data-reveal style="--ri:3">
+          <p class="wc-meta"><b>Yours, next.</b><span class="yr">/2027</span><span class="arr">↗</span></p>
+          <div class="wc-cover cov-next" aria-hidden="true"><span class="q">?</span></div>
+          <p class="wc-tags"><span>This slot is open</span></p>
+        </a>
+      </div>
+    </section>
+
+    <!-- ============ STATS (proof band — before the pitch) ============ -->
+    <section id="stats" aria-label="Studio in numbers">
+      <!-- numbers assemble from pixels (the house signature) — not a count-up -->
+      <div class="stats-grid">
+        <div class="stat" data-reveal><p class="n"><span class="ph" data-pixel data-gap="2.2" data-size="1.8" data-ink="#0B0B09" data-flash="#7A8C00"><span class="ph-txt">20</span></span><i>+</i></p><p class="l">years of building software for brands &amp; startups</p></div>
+        <div class="stat" data-reveal style="--ri:1"><p class="n"><span class="ph" data-pixel data-gap="2.2" data-size="1.8" data-ink="#0B0B09" data-flash="#7A8C00"><span class="ph-txt">4</span></span><i>×</i><span class="ph" data-pixel data-gap="2.2" data-size="1.8" data-ink="#0B0B09" data-flash="#7A8C00"><span class="ph-txt">100</span></span></p><p class="l">Lighthouse — performance, a11y, best practice, SEO. This page, live.</p></div>
+        <div class="stat" data-reveal style="--ri:2"><p class="n"><span class="ph" data-pixel data-gap="2.2" data-size="1.8" data-ink="#0B0B09" data-flash="#7A8C00"><span class="ph-txt">1</span></span><i>.</i></p><p class="l">product of our own in production — whatever-recall</p></div>
+        <div class="stat" data-reveal style="--ri:3"><p class="n"><span class="ph" data-pixel data-gap="2.2" data-size="1.8" data-ink="#0B0B09" data-flash="#7A8C00"><span class="ph-txt">48</span></span><i>h</i></p><p class="l">from your brief to a scoped quote</p></div>
+      </div>
+    </section>
+
+    <!-- ============ SERVICES (dark panel) ============ -->
+    <div class="panel-wrap" id="services">
+      <div class="panel">
+        <div class="inner">
+          <div class="sec-top" data-reveal>
+            <span class="chip"><span class="plus" aria-hidden="true"></span> What we do</span>
+            <span class="count">(004)</span>
+            <span class="stamp">©2026</span>
+          </div>
+          <h2 class="sec-h" data-reveal>Services<span class="dot">.</span></h2>
+          <div class="svc-rows" id="svcRows">
+            <div class="svc-row">
+              <span class="svc-num">(001)</span><span class="svc-name">AI Tools &amp; Automation</span>
+              <div class="svc-col2"><p class="svc-what">Automate the busywork your team hates — built by a team
+                that ships its own AI product.</p>
+                <p class="svc-tags"><span>Chat &amp; search</span><span>Agents</span><span>Workflows</span></p></div>
+            </div>
+            <div class="svc-row">
+              <span class="svc-num">(002)</span><span class="svc-name">Web Apps</span>
+              <div class="svc-col2"><p class="svc-what">The software your business runs on — fast from day one,
+                no rewrite from MVP to product.</p>
+                <p class="svc-tags"><span>React / Next.js</span><span>Dashboards</span><span>SaaS</span></p></div>
+            </div>
+            <div class="svc-row">
+              <span class="svc-num">(003)</span><span class="svc-name">Websites</span>
+              <div class="svc-col2"><p class="svc-what">Get found. Look sharp. Load instantly — like the page
+                you’re on right now.</p>
+                <p class="svc-tags"><span>Design</span><span>SEO</span><span>PageSpeed 100</span></p></div>
+            </div>
+            <div class="svc-row">
+              <span class="svc-num">(004)</span><span class="svc-name">Mobile Apps</span>
+              <div class="svc-col2"><p class="svc-what">Native feel, both stores, one codebase — including the
+                unglamorous 20% after launch.</p>
+                <p class="svc-tags"><span>iOS</span><span>Android</span><span>Store release</span></p></div>
+            </div>
+            <div class="svc-row">
+              <span class="svc-num">(005)</span><span class="svc-name">Software</span>
+              <div class="svc-col2"><p class="svc-what">Idea to launch with one senior team — same craft at
+                every stage.</p>
+                <p class="svc-tags"><span>MVP</span><span>Product</span><span>Scale</span></p></div>
+            </div>
+            <div class="svc-row">
+              <span class="svc-num">(006)</span><span class="svc-name">Design &amp; Brand</span>
+              <div class="svc-col2"><p class="svc-what">A brand you’re proud to send people to — one system from
+                logo to component library.</p>
+                <p class="svc-tags"><span>Identity</span><span>UI</span><span>Design system</span></p></div>
+            </div>
+          </div>
+          <div class="svc-cta" data-reveal>
+            <a class="btn acid btn-px" href="#contact">Plan your project <span class="arr">↗</span></a>
+            <a class="btn ghost" href="#process"><span class="roll"><span>How we work</span><span aria-hidden="true">How we work</span></span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ PROCESS ============ -->
+    <section id="process">
+      <div class="sec-top" data-reveal>
+        <span class="chip"><span class="plus" aria-hidden="true"></span> How we work</span>
+        <span class="count">(005)</span>
+        <span class="stamp">©2026</span>
+      </div>
+      <h2 class="sec-h" data-reveal>Process<span class="dot">.</span></h2>
+      <div class="steps" style="margin-top:var(--head-gap)">
+        <div class="step" data-reveal>
+          <figure class="s-photo" aria-hidden="true"><img src="img/process-notes.jpg" alt="" loading="lazy"></figure>
+          <span class="s-num">01 — Scope</span>
+          <h3>Days, not weeks.</h3>
+          <p>A short call, a written scope, a fixed quote within <b>48 hours</b>. You know what you get before you commit.</p>
+        </div>
+        <div class="step" data-reveal style="--ri:1">
+          <figure class="s-photo" aria-hidden="true"><img src="img/hands-keyboard.jpg" alt="" loading="lazy"></figure>
+          <span class="s-num">02 — Build</span>
+          <h3>Senior hands only.</h3>
+          <p>The people you talk to are the people who build. Weekly deploys you can click, <b>not status decks</b>.</p>
+        </div>
+        <div class="step" data-reveal style="--ri:2">
+          <figure class="s-photo" aria-hidden="true"><img src="img/team-collab.jpg" alt="" loading="lazy"></figure>
+          <span class="s-num">03 — Ship</span>
+          <h3>Launch is the start.</h3>
+          <p>Handover in your repos, <b>30 days of bug-fixes &amp; questions</b> included — no lock-in, ever.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ REVIEWS ============
+         PLACEHOLDER-Zitate — vor Launch durch echte Kundenreferenzen ersetzen. -->
+    <section id="reviews">
+      <div class="sec-top" data-reveal>
+        <span class="chip"><span class="plus" aria-hidden="true"></span> Kind words</span>
+        <span class="count">(006)</span>
+        <span class="stamp">©2026</span>
+      </div>
+      <h2 class="sec-h" data-reveal>Clients talk<span class="dot">.</span></h2>
+      <div class="rev-grid" style="margin-top:var(--head-gap)">
+        <figure class="testi" data-reveal>
+          <blockquote>“Four weeks from first call to launch — and we always talked to the person actually
+            building it.”</blockquote>
+          <figcaption>
+            <span class="t-ava" aria-hidden="true">SW</span>
+            <p class="t-who"><b>S. Weber</b><br>Managing Director, retail</p>
+          </figcaption>
+        </figure>
+        <figure class="testi" data-reveal style="--ri:1">
+          <blockquote>“Our old site took eight seconds to load. The new one is instant — and the inquiries
+            followed.”</blockquote>
+          <figcaption>
+            <span class="t-ava" aria-hidden="true">MH</span>
+            <p class="t-who"><b>M. Huber</b><br>Owner, manufacturing</p>
+          </figcaption>
+        </figure>
+        <figure class="testi" data-reveal style="--ri:2">
+          <blockquote>“They built an AI assistant on our own documents. The team saves hours every single
+            week.”</blockquote>
+          <figcaption>
+            <span class="t-ava" aria-hidden="true">JB</span>
+            <p class="t-who"><b>J. Brandt</b><br>COO, services company</p>
+          </figcaption>
+        </figure>
+      </div>
+      <p class="rev-badge" data-reveal><span class="stars" aria-hidden="true">★★★★★</span> 5.0 on Google —
+        <a class="m-link" href="#">read the reviews ↗</a></p>
+    </section>
+
+    <!-- ============ CONTACT ============ -->
+    <section id="contact">
+      <div class="sec-top" data-reveal>
+        <span class="chip"><span class="plus" aria-hidden="true"></span> Contact — 48h to a quote</span>
+        <span class="count">(007)</span>
+        <span class="stamp">©2026</span>
+      </div>
+      <div class="contact-grid">
+        <h2 class="sec-h" data-reveal>Have a project in mind<span class="dot">?</span></h2>
+        <div>
+          <div class="mail-row" data-reveal style="--ri:1">
+            <a class="btn acid btn-px" href="mailto:hello@mccain-digital.de">Start a project <span class="arr">↗</span></a>
+            <a class="mail-big" href="mailto:hello@mccain-digital.de">hello@mccain-digital.de</a>
+          </div>
+          <p class="cta-note" data-reveal style="--ri:2">Tell us where you want to go in five minutes — we answer with
+            a plan, a timeline and a number. 48h to a scoped quote · no lock-in · Bavaria, Germany.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <div class="foot-wrap">
+    <footer class="panel">
+      <div class="inner">
+        <div class="f-cols">
+          <div class="f-col">
+            <h4>Studio</h4>
+            <a href="#why">Why us</a>
+            <a href="#work">Work</a>
+            <a href="#process">Process</a>
+          </div>
+          <div class="f-col">
+            <h4>Services</h4>
+            <a href="#services">AI Tools &amp; Automation</a>
+            <a href="#services">Web Apps &amp; Websites</a>
+            <a href="#services">Design &amp; Brand</a>
+          </div>
+          <div class="f-col">
+            <h4>Product</h4>
+            <a href="#product">whatever-recall</a>
+            <a href="#work">Whatever CMS</a>
+          </div>
+          <div class="f-col">
+            <div class="f-card">
+              <p class="who">Christian</p>
+              <p class="role">Founder — your direct line, no account managers</p>
+              <a href="mailto:hello@mccain-digital.de">hello@mccain-digital.de ↗</a>
+            </div>
+          </div>
+        </div>
+        <p class="f-word" aria-hidden="true">mccain <i>digital</i><em>.</em><sup>®</sup></p>
+        <div class="f-base">
+          <p>© <span id="yr">2026</span> McCain Digital · Crafting digital products since 2005 · Bavaria,
+            <span id="clock">–:–</span> CET</p>
+          <p><a href="#">Imprint</a><a href="#">Privacy</a><a href="#">Cookie settings</a></p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="pixel-engine.js"></script>
+  <script>
+    /* ============================================================
+       Mockup bootstrap — same architecture rules as the live site:
+       IO-gated, reduced-motion aware, rAF loops park at 0 when idle,
+       real text always in the DOM.
+       ============================================================ */
+    (function () {
+      "use strict";
+      var d = document, w = window;
+      var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      d.documentElement.classList.add("js");
+      d.getElementById("yr").textContent = new Date().getFullYear();
+
+      /* local studio time (obys-style charm signal, near-zero cost) */
+      (function () {
+        var ck = d.getElementById("clock");
+        if (!ck) return;
+        var fmt = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Berlin" });
+        function tickClock() { ck.textContent = fmt.format(new Date()); }
+        tickClock();
+        setInterval(tickClock, 30000);
+      })();
+
+      /* ---- nav scrolled state ---- */
+      var nav = d.getElementById("nav");
+      w.addEventListener("scroll", function () {
+        nav.classList.toggle("scrolled", w.scrollY > 40);
+      }, { passive: true });
+
+      /* ---- reveal system ---- */
+      var io = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+        });
+      }, { threshold: .16, rootMargin: "0px 0px -6% 0px" });
+      d.querySelectorAll("[data-reveal]").forEach(function (el) { io.observe(el); });
+
+      /* ---- load choreography + pixel headlines (wait for the face) ---- */
+      var noHover = matchMedia("(hover: none)").matches;
+      var insts = [], vr = null, vh = null;
+      var booted = false;
+      function boot() {
+        if (booted) return;
+        booted = true;
+        d.documentElement.classList.add("loaded");
+        if (!w.PixelFX) return;
+
+        var cycleHost = d.getElementById("cycleHost");
+        /* on touch the black-hole payoff can't happen — the cycling line
+           stays live text and crossfades instead of re-assembling */
+        var hosts = [].filter.call(d.querySelectorAll("[data-pixel]"), function (h) {
+          return !(noHover && h === cycleHost);
+        });
+        insts = hosts.map(PixelFX.headline);
+        d.querySelectorAll(".btn-px").forEach(function (b) { PixelFX.button(b); });
+
+        /* assemble on first view — the engine exposes play() but does not
+           auto-play (the roam IO only manages the black-hole pass) */
+        insts.forEach(function (i) {
+          if (!i) return;
+          var pio = new IntersectionObserver(function (es) {
+            es.forEach(function (e) {
+              if (e.isIntersecting) { i.play(); pio.disconnect(); }
+            });
+          }, { threshold: .25 });
+          pio.observe(i.host);
+        });
+
+        /* void reveal on the product claim — sampled with the font in,
+           text hidden via visibility, swept on first view */
+        vh = d.getElementById("voidHost");
+        if (vh && PixelFX.voidReveal) {
+          vh.classList.add("vr-armed");
+          vr = PixelFX.voidReveal(vh);
+          var vio = new IntersectionObserver(function (es) {
+            es.forEach(function (e) {
+              if (e.isIntersecting) { vr.play(); vio.disconnect(); }
+            });
+          }, { threshold: .6 });
+          vio.observe(vh);
+        }
+
+        /* stale canvas geometry after resize/rotation → rebuild settled fields */
+        var rt;
+        w.addEventListener("resize", function () {
+          clearTimeout(rt);
+          rt = setTimeout(function () {
+            insts.forEach(function (i) { if (i && i.redraw) i.redraw(); });
+            /* vr only before it played — redraw would re-hide finished text */
+            if (vr && vh && !vh.classList.contains("vr-done")) vr.redraw();
+          }, 200);
+        }, { passive: true });
+
+        /* hero accent cycling — the aria-label on the h1 stays stable */
+        var cycler = d.getElementById("cycler");
+        if (!cycler || reduced) return;
+        var inst = null;
+        insts.forEach(function (i) { if (i && i.host === cycleHost) inst = i; });
+        var words = ["AI products.", "web apps.", "AI tools.", "software."];
+        var wi = 0, timer = null;
+        function swap() {
+          wi = (wi + 1) % words.length;
+          if (inst && inst.play) {
+            cycler.textContent = words[wi];
+            inst.play();
+          } else {
+            /* touch: quick crossfade on the live text */
+            cycler.style.transition = "opacity .24s";
+            cycler.style.opacity = "0";
+            setTimeout(function () {
+              cycler.textContent = words[wi];
+              cycler.style.opacity = "1";
+            }, 250);
+          }
+        }
+        var cio = new IntersectionObserver(function (es) {
+          es.forEach(function (e) {
+            if (e.isIntersecting) {
+              if (!timer) timer = setInterval(swap, 5500);
+            } else { clearInterval(timer); timer = null; }
+          });
+        }, { threshold: .2 });
+        cio.observe(cycleHost);
+      }
+
+      /* the engine's SVG rasterizer can't reach document fonts — build the
+         embedded @font-face once from the (preload-cached) woff2, then boot.
+         1.2s race cap so a slow font never stalls the choreography. */
+      var fontCSS = fetch("fonts/schibsted-normal-latin.woff2")
+        .then(function (r) { return r.blob(); })
+        .then(function (b) {
+          return new Promise(function (res) {
+            var fr = new FileReader();
+            fr.onload = function () {
+              w.PixelFXFontCSS = "@font-face{font-family:'Schibsted Grotesk';font-style:normal;font-weight:400 900;src:url(" + fr.result + ") format('woff2');}";
+              res();
+            };
+            fr.onerror = function () { res(); };
+            fr.readAsDataURL(b);
+          });
+        })
+        .catch(function () {
+          /* file:// blocks fetch — classic scripts don't need CORS, so pull
+             the pregenerated base64 build instead (http never loads this) */
+          return new Promise(function (res) {
+            var s = d.createElement("script");
+            s.src = "fonts/schibsted-inline.js";
+            s.onload = s.onerror = function () { res(); };
+            d.head.appendChild(s);
+          });
+        });
+      var fontsReady = d.fonts && d.fonts.ready
+        ? Promise.all([d.fonts.ready, d.fonts.load("820 100px 'Schibsted Grotesk'"), fontCSS])
+        : fontCSS;
+      Promise.race([fontsReady, new Promise(function (r) { setTimeout(r, 1200); })]).then(boot);
+
+      /* ---- AI rotator (word cycle, IO-gated) ---- */
+      (function () {
+        var box = d.querySelector(".ai-rotator .arw-box");
+        if (!box || reduced) return;
+        var ws = box.querySelectorAll(".arw");
+        var i = 0, t = null;
+        var rio = new IntersectionObserver(function (es) {
+          es.forEach(function (e) {
+            if (e.isIntersecting) {
+              if (!t) t = setInterval(function () {
+                ws[i].classList.remove("is-on");
+                i = (i + 1) % ws.length;
+                ws[i].classList.add("is-on");
+              }, 3200);
+            } else { clearInterval(t); t = null; }
+          });
+        }, { threshold: .4 });
+        rio.observe(box);
+      })();
+
+
+      /* ---- statement: word-by-word scroll reveal ---- */
+      (function () {
+        var st = d.getElementById("statement");
+        if (!st) return;
+        var words = st.textContent.split(/\s+/).filter(Boolean);
+        /* word-index match — a char offset would miscount source whitespace */
+        var acidAt = words.indexOf("Senior");
+        st.textContent = "";
+        words.forEach(function (word, idx) {
+          var s = d.createElement("span");
+          s.className = "w" + (acidAt >= 0 && idx >= acidAt ? " acid" : "");
+          s.textContent = word;
+          st.appendChild(s);
+          st.appendChild(d.createTextNode(" "));
+        });
+        var spans = st.querySelectorAll(".w");
+        if (reduced) { spans.forEach(function (s) { s.classList.add("on"); }); return; }
+        var ticking = false;
+        function update() {
+          ticking = false;
+          var r = st.getBoundingClientRect();
+          var vh2 = w.innerHeight;
+          var prog = (vh2 * 0.82 - r.top) / (r.height + vh2 * 0.35);
+          prog = Math.max(0, Math.min(1, prog));
+          var lit = Math.round(prog * spans.length);
+          for (var i = 0; i < spans.length; i++) spans[i].classList.toggle("on", i < lit);
+        }
+        w.addEventListener("scroll", function () {
+          if (!ticking) { ticking = true; requestAnimationFrame(update); }
+        }, { passive: true });
+        update();
+      })();
+
+      /* ---- terminal ghost-typing (invites play, tiny) ---- */
+      (function () {
+        var gt = d.getElementById("ghostType");
+        if (!gt || reduced) return;
+        var cmds = ["recall explain", "recall impact", "help"], ci = 0, pos = 0, dirn = 1, timer = null;
+        function step() {
+          pos += dirn;
+          gt.textContent = cmds[ci].slice(0, pos);
+          var delay = dirn > 0 ? 95 : 45;
+          if (dirn > 0 && pos >= cmds[ci].length) { dirn = -1; delay = 1600; }
+          else if (dirn < 0 && pos <= 0) { dirn = 1; ci = (ci + 1) % cmds.length; delay = 700; }
+          timer = setTimeout(step, delay);
+        }
+        var tio = new IntersectionObserver(function (es) {
+          es.forEach(function (e) {
+            if (e.isIntersecting) { if (!timer) timer = setTimeout(step, 900); }
+            else { clearTimeout(timer); timer = null; }
+          });
+        }, { threshold: .3 });
+        tio.observe(gt.parentNode);
+      })();
+
+      /* ---- pac-bar: the line is FULL on load. Scrolling down, Pac-Man
+             eats it — behind his back it rebuilds in a new colour (that
+             rebuilt part IS the scroll progress). Ported from the live
+             site; body is acid now, bite matches the light canvas. ---- */
+      (function () {
+        if (reduced) return;                 // CSS fallback bar stays
+        var cv = d.getElementById("pacbar");
+        if (!cv || !cv.getContext) return;
+        var ctx = cv.getContext("2d");
+        var cssBar = d.querySelector(".scroll-progress");
+        if (cssBar) cssBar.style.display = "none";
+        cv.style.display = "block";
+        setTimeout(function () { cv.style.opacity = "1"; }, 2000);
+
+        var DPR2 = Math.min(w.devicePixelRatio || 1, 2);
+        var W = 0, H = 150, LY = 17, R = 6.5, PADX = 48;
+        var cta = d.querySelector(".nav-links .nav-cta");
+        /* Pac wears the logo yellow; the line cycles the wild accents */
+        var PAGE_BG = "#F4F4F1", INK = "#0B0B09", PAC = "#F5C518";
+        var COLORS = ["#A3A399", "#7A8C00", "#5B2EFF", "#FF3D8A"];
+        var colorIdx = 0;
+        var dir = 1;
+        var armed = false;
+        var gag = null;
+        var parts = [];
+        var chomp = 0, lastProg = -1, lastMoveT = -1e9, raf = null;
+        var mx = -9999, my = -9999, pokeT = -1e9;
+        var antic = null, anticTimer = null;
+
+        function size() {
+          var vw = d.documentElement.clientWidth;
+          if (vw === W) return;
+          W = vw;
+          PADX = Math.max(34, Math.min(64, Math.round(vw * 0.05)));
+          cv.width = W * DPR2;
+          cv.height = H * DPR2;
+          ctx.setTransform(DPR2, 0, 0, DPR2, 0, 0);
+        }
+        function progress() {
+          var max = d.documentElement.scrollHeight - w.innerHeight;
+          return max > 0 ? Math.max(0, Math.min(1, w.scrollY / max)) : 0;
+        }
+        function pacX(p) { return PADX + p * (W - PADX * 2); }
+        function fatR(p, t) {
+          var frac = dir === 1 ? p : 1 - p;
+          var r = R + frac * 5;
+          if (gag) r = Math.max(R, r - (r - R) * Math.min(1, (t - gag.t0) / 420));
+          return r;
+        }
+        function blocks(x0, x1, color) {
+          x0 = Math.max(x0, PADX); x1 = Math.min(x1, W - PADX);
+          if (x1 - x0 < 2) return;
+          ctx.fillStyle = color;
+          for (var x = Math.floor(x0 / 7) * 7; x < x1; x += 7) {
+            if (x + 4 <= x0) continue;
+            ctx.fillRect(Math.max(x, x0), LY - 1, Math.min(4, x1 - Math.max(x, x0)), 2);
+          }
+        }
+        function vomit(px, faceDir, col, n, r) {
+          for (var i = 0; i < n; i++) {
+            parts.push({
+              x: px + faceDir * (r + 2), y: LY,
+              vx: faceDir * (0.6 + Math.random() * 2.8) + (Math.random() - .5) * 0.8,
+              vy: -(0.4 + Math.random() * 2.2),
+              col: col, life: (70 + Math.random() * 70) | 0
+            });
+          }
+        }
+        var ANTICS = ["look", "bounce", "chomp", "zz", "wander", "spit"];
+        function startAntic() {
+          var t = performance.now();
+          var type = ANTICS[(Math.random() * ANTICS.length) | 0];
+          antic = {
+            type: type, t0: t,
+            dur: type === "zz" ? 2200 : type === "wander" ? 1800 : type === "spit" ? 700 : 1400
+          };
+          if (type === "spit") {
+            var p0 = lastProg < 0 ? 0 : lastProg;
+            vomit(pacX(p0), dir, COLORS[colorIdx], 4, fatR(p0, t));
+          }
+          wake();
+        }
+        function scheduleAntics() {
+          clearTimeout(anticTimer);
+          anticTimer = setTimeout(function () {
+            if (!d.hidden && !gag && !antic && !(my > -9000 && my < 44) &&
+              performance.now() - lastMoveT > 2800) startAntic();
+            scheduleAntics();
+          }, 1600 + Math.random() * 2400);
+        }
+
+        function draw(p, t, r) {
+          ctx.clearRect(0, 0, W, H);
+          var px = pacX(p);
+          var aFace = 0, aMouth = -1, aLabel = null, yOff = 0;
+          if (antic) {
+            var ae = (t - antic.t0) / antic.dur;
+            if (ae >= 1) antic = null;
+            else if (antic.type === "look") aFace = Math.sin(ae * Math.PI * 2.5) > 0 ? -dir : dir;
+            else if (antic.type === "bounce") yOff = -Math.abs(Math.sin(ae * Math.PI * 3)) * 5;
+            else if (antic.type === "chomp") aMouth = 0.1 + Math.abs(Math.sin(t * 0.03)) * 0.6;
+            else if (antic.type === "zz") { aMouth = 0.04; aLabel = "zZ"; }
+            else if (antic.type === "wander") {
+              px += Math.sin(ae * Math.PI) * 26 * dir;
+              aMouth = 0.1 + Math.abs(Math.sin(t * 0.025)) * 0.5;
+            }
+          }
+          var eaten = COLORS[colorIdx];
+          var rebuilt = COLORS[(colorIdx + 1) % COLORS.length];
+          if (dir === 1) {
+            blocks(0, px - r - 3, rebuilt);
+            blocks(px + r + 3, W, eaten);
+          } else {
+            blocks(0, px - r - 3, eaten);
+            blocks(px + r + 3, W, rebuilt);
+          }
+          /* fat pac gnaws the CTA once the shrunken header puts it in
+             belly reach — bite is a canvas-coloured notch */
+          if (cta) {
+            var br = cta.getBoundingClientRect();
+            var rb = r + 1.5;
+            if (br.top > 0 && br.top < 60 && LY + rb > br.top && px > br.left - rb && px < br.right + rb) {
+              ctx.fillStyle = PAGE_BG;
+              var bx0 = Math.max(br.left, Math.floor((px - rb) / 3) * 3);
+              var bx1 = Math.min(br.right, px + rb);
+              for (var bx = bx0; bx < bx1; bx += 3) {
+                var dxc = bx + 1.5 - px;
+                var h2 = rb * rb - dxc * dxc;
+                if (h2 <= 0) continue;
+                var depth = LY + Math.sqrt(h2) - br.top;
+                if (depth <= 0) continue;
+                ctx.fillRect(bx, br.top - 1, 3, Math.ceil(depth / 3) * 3 + 1);
+              }
+            }
+          }
+          for (var i = parts.length - 1; i >= 0; i--) {
+            var q = parts[i];
+            q.x += q.vx; q.y += q.vy;
+            q.vy += 0.07;
+            q.vx *= 0.985;
+            q.life--;
+            if (q.life <= 0 || q.y > H - 3) { parts.splice(i, 1); continue; }
+            ctx.globalAlpha = Math.min(1, q.life / 45);
+            ctx.fillStyle = q.col;
+            ctx.fillRect(q.x, q.y, 2.4, 2.4);
+          }
+          ctx.globalAlpha = 1;
+          var face = aFace || dir, shocked = false, poked = t - pokeT < 380;
+          var near = !gag && my > -9000 && my < 44 && Math.abs(mx - px) < 90;
+          if (near) { antic = null; aMouth = -1; aLabel = null; yOff = 0; }
+          if (gag) {
+            var el = t - gag.t0;
+            if (el > 420) { face = -dir; shocked = el < 1400; }
+          } else if (near) {
+            face = mx >= px ? 1 : -1;
+          }
+          var mouth = gag ? (shocked ? 0.55 : 0.16)
+            : near ? 0.16 + Math.abs(Math.sin(t * 0.022)) * 0.55
+              : aMouth >= 0 ? aMouth
+                : 0.12 + Math.abs(Math.sin(chomp)) * 0.5;
+          var cy = LY + yOff;
+          /* logo-yellow body + ink outline so he pops on the light canvas */
+          ctx.fillStyle = (shocked || poked) ? "#C4554D" : PAC;
+          ctx.strokeStyle = INK;
+          ctx.lineWidth = 1.4;
+          ctx.beginPath();
+          ctx.moveTo(px, cy);
+          if (face === 1) ctx.arc(px, cy, r, mouth, Math.PI * 2 - mouth, false);
+          else ctx.arc(px, cy, r, Math.PI + mouth, Math.PI - mouth, false);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = INK;
+          ctx.beginPath();
+          ctx.arc(px + (face === 1 ? 1 : -1) * (r * 0.15 + 0.4), cy - r * 0.5, 1.1 + r * 0.04, 0, Math.PI * 2);
+          ctx.fill();
+          if (shocked || poked || aLabel) {
+            ctx.fillStyle = INK;
+            ctx.font = "700 11px ui-monospace, Consolas, monospace";
+            ctx.textAlign = "center";
+            ctx.fillText(aLabel || (shocked ? "!?" : "!!"), px, Math.max(8, cy - r - 4));
+          }
+          return near;
+        }
+        function tick(t) {
+          size();
+          var p = progress();
+          if (Math.abs(p - lastProg) > 0.0004) {
+            chomp += Math.abs(p - lastProg) * 260;
+            lastMoveT = t;
+            lastProg = p;
+          }
+          var px = pacX(p);
+          var r = fatR(p, t);
+          if (!gag && armed && ((dir === 1 && p > 0.995) || (dir === -1 && p < 0.005))) {
+            gag = { t0: t };
+            armed = false;
+            vomit(px, dir, COLORS[colorIdx], 64, r);
+          }
+          if (!armed && !gag && ((dir === 1 && p < 0.9) || (dir === -1 && p > 0.1))) armed = true;
+          if (gag && t - gag.t0 > 1500) {
+            gag = null;
+            dir = -dir;
+            colorIdx = (colorIdx + 1) % COLORS.length;
+          }
+          if (!gag && my > -9000 && my < 40 && Math.abs(mx - px) < r + 8 && t - pokeT > 800) {
+            pokeT = t;
+            vomit(px, mx >= px ? 1 : -1, COLORS[colorIdx], 10, r);
+          }
+          var near = draw(p, t, r);
+          if (gag || parts.length || near || antic || t - lastMoveT < 240 || t - pokeT < 420) {
+            raf = w.requestAnimationFrame(tick);
+          } else raf = null;
+        }
+        function wake() { if (!raf) raf = w.requestAnimationFrame(tick); }
+        w.addEventListener("scroll", wake, { passive: true });
+        w.addEventListener("resize", function () { W = 0; wake(); }, { passive: true });
+        w.addEventListener("pointermove", function (e) {
+          if (e.clientY < 160) { mx = e.clientX; my = e.clientY; if (my < 44) wake(); }
+          else { mx = -9999; my = -9999; }
+        }, { passive: true });
+        armed = progress() < 0.9;
+        wake();
+        scheduleAntics();
+      })();
+    })();
+  </script>
+</body>
+
+</html>
