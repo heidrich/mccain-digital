@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>404 — page not found · McCain Digital</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <style>
+    :root {
+      --ink: #0f0e0c;
+      --paper: #ece7dd;
+      --paper-dim: #a8a294;
+      --mute: #6e6a5f;
+      --acc: #f5c518;
+      --acc-soft: #ffd23a;
+      --acc-ink: #4a3800;
+      --line: rgba(236, 231, 221, .1);
+      --ease: cubic-bezier(.16, 1, .3, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      background: var(--ink);
+      color: var(--paper);
+      font-family: "Segoe UI", system-ui, sans-serif;
+      min-height: 100vh
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--acc);
+      outline-offset: 3px
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.6rem;
+      padding: 4rem 1.5rem;
+      text-align: center
+    }
+
+    .logo {
+      position: fixed;
+      top: 1.4rem;
+      left: clamp(1.2rem, 4vw, 3.5rem);
+      font-size: 1.16rem;
+      letter-spacing: -.03em;
+      text-decoration: none;
+      color: var(--paper)
+    }
+
+    .logo b {
+      font-weight: 800
+    }
+
+    .logo span {
+      font-weight: 600;
+      color: var(--acc)
+    }
+
+    .err-stage {
+      position: relative;
+      width: min(560px, 86vw);
+      height: clamp(180px, 32vh, 280px);
+      cursor: crosshair
+    }
+
+    .err-stage h1 {
+      font-size: clamp(7rem, 24vw, 13rem);
+      font-weight: 800;
+      letter-spacing: -.05em;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%
+    }
+
+    .pxsand {
+      position: absolute;
+      inset: 0;
+      display: none;
+      pointer-events: none;
+      z-index: 2
+    }
+
+    .err-meta {
+      font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+      font-size: .82rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--paper-dim);
+      min-height: 1.4em
+    }
+
+    .err-done {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .6s var(--ease), transform .6s var(--ease);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.1rem
+    }
+
+    .err-done.show {
+      opacity: 1;
+      transform: none
+    }
+
+    .err-done p {
+      color: var(--paper);
+      font-size: 1.05rem;
+      max-width: 38ch
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .6em;
+      font-weight: 700;
+      font-size: .95rem;
+      padding: 1rem 1.7rem;
+      border-radius: 99px;
+      border: 0;
+      cursor: pointer;
+      background: var(--acc);
+      color: var(--acc-ink);
+      text-decoration: none;
+      transition: transform .3s var(--ease), background .3s;
+      position: relative
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      background: var(--acc-soft)
+    }
+
+    .pxbtn {
+      position: relative;
+      overflow: visible
+    }
+
+    .pxbtn .pxc {
+      position: absolute;
+      display: none;
+      pointer-events: none;
+      z-index: 3
+    }
+
+    .pxbtn.px-active {
+      color: transparent !important;
+      background: transparent !important;
+      border-color: transparent !important;
+      box-shadow: none !important;
+      transform: none !important;
+      transition: none !important
+    }
+
+    .home {
+      color: var(--mute);
+      font-size: .88rem;
+      text-decoration: none;
+      border-bottom: 1px solid var(--line);
+      transition: color .3s, border-color .3s
+    }
+
+    .home:hover {
+      color: var(--acc-soft);
+      border-color: var(--acc)
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <a class="logo" href="/"><b>mccain</b><span>digital</span></a>
+
+  <div class="err-stage" id="stage">
+    <h1 id="errNum">404</h1>
+  </div>
+  <p class="err-meta" id="errMeta">page not found — it crumbled.</p>
+
+  <div class="err-done" id="errDone">
+    <p>Nice. You like things tidy — so do we.</p>
+    <a class="btn" href="/#contact">Start a project <span aria-hidden="true">→</span></a>
+  </div>
+
+  <a class="home" href="/">← back to mccain-digital.com</a>
+
+  <script src="pixel-engine.js?v=h1" defer></script>
+  <script>
+    "use strict";
+    (function () {
+      function boot() {
+      var stage = document.getElementById("stage");
+      var num = document.getElementById("errNum");
+      var meta = document.getElementById("errMeta");
+      var done = document.getElementById("errDone");
+
+      function win() {
+        meta.textContent = "100% cleaned.";
+        done.classList.add("show");
+      }
+
+      var inst = PixelFX.sand(stage, num, {
+        cell: 4,
+        collect: true,
+        restore: false,
+        onStart: function () {
+          meta.textContent = "000% cleaned — vacuum the pixels with your cursor";
+        },
+        onProgress: function (p) {
+          meta.textContent = String(Math.round(p * 100)).padStart(3, "0") + "% cleaned — keep going";
+        },
+        onComplete: win
+      });
+
+      if (!inst) {
+        // reduced motion: no game, show the offer right away
+        done.classList.add("show");
+      } else {
+        setTimeout(function () { inst.trigger({}); }, 1800);
+        PixelFX.button(document.querySelector(".err-done .btn"));
+      }
+      }
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", boot);
+      } else {
+        boot();
+      }
+    })();
+  </script>
+</body>
+
+</html>

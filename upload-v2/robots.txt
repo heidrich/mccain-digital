@@ -1,0 +1,28 @@
+User-agent: *
+Allow: /
+Disallow: /button-lab.html
+Disallow: /effects-lab.html
+
+# AI crawlers are explicitly welcome — see /llms.txt for a structured summary.
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+Sitemap: https://mccain-digital.com/sitemap.xml

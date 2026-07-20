@@ -1,0 +1,39 @@
+# McCain Digital
+
+> Digital product studio in Bavaria, Germany. We build AI tools, web apps, mobile apps,
+> websites and custom software for companies, individuals and startups — from idea to launch.
+
+Contact: info@mccain-digital.com · Holderweg 1, 86869 Oberostendorf, Bavaria, Germany
+
+## Pages
+
+- [Home](https://mccain-digital.com/): studio overview, services, our product whatever-recall, and the contact path.
+- [Contact / Start a project](https://mccain-digital.com/contact.html): tell us what you have in mind — a real reply within 24 hours, a fixed quote within 48 hours, no sales call. Form with project type, budget and timeframe.
+- [Imprint](https://mccain-digital.com/legal/imprint.html): company details, address and legal owner (§5 DDG).
+- [Privacy](https://mccain-digital.com/legal/privacy.html): how data is handled — no tracking beyond what's disclosed.
+- [Terms](https://mccain-digital.com/legal/terms.html): the terms of service for engagements.
+- [Withdrawal](https://mccain-digital.com/legal/withdrawal.html): right-of-withdrawal information for consumers.
+
+## Services
+
+- [AI Tools](https://mccain-digital.com/services/ai-tools.html): production AI — RAG over your own data (pgvector/Qdrant, citations, abstain path), autonomous & multi-step agents with guardrails, MCP tool-servers into your CRM/ERP, and automation pipelines. Model-agnostic (Claude, GPT, Llama, Mistral, Qwen). Proven in production with our own product, whatever-recall.
+- [Web Apps](https://mccain-digital.com/services/web-apps.html): fast, scalable applications on React, Next.js and TypeScript. Core Web Vitals green from day one; MVP to scale without a rewrite; real-time, auth and integrations (websockets, Stripe, OAuth/SSO).
+- [Mobile Apps](https://mccain-digital.com/services/apps.html): iOS and Android from one clean React Native/Expo codebase. Native feel (gestures, offline, push), store-ready — review, release and OTA updates handled.
+- [Websites](https://mccain-digital.com/services/websites.html): marketing sites with top-tier SEO and a perfect Lighthouse 100. This very site scores 4× 100 on Google PageSpeed plus Agentic Browsing 3/3 — real crawlable DOM text, JSON-LD, llms.txt. CMS or pure static.
+- [Software for Companies](https://mccain-digital.com/services/software.html): dashboards, internal tools and integrations (ERP, CRM, REST/SOAP APIs — including legacy). Tailor-made, documented, tested, yours to keep — no lock-in.
+- [Design & Brand](https://mccain-digital.com/services/design-brand.html): interfaces people remember and trust in the first second — identity, UI and motion designed in-house. A design system that scales with the product; designed with the build in mind. For startups, companies and individuals alike.
+
+## Product: whatever-recall
+
+- [whatever-recall](https://whatever-recall.com): AI-native project memory for software teams — knowledge is stamped onto the git commit at write-time, while the AI still knows why. Reading it back takes microseconds and zero tokens; no second source of truth to drift.
+- [How it works](https://whatever-recall.com/how-it-works): write-time stamping, the pre-edit briefing, the drift traffic-light and the living memory graph.
+- [Pricing](https://whatever-recall.com/pricing): self-hosted, runs entirely on your machine — no sync, no telemetry, no upload. Setup in about 2 minutes; 14-day free trial, no credit card.
+
+## Facts about this website
+
+- [PageSpeed](https://mccain-digital.com/): 100/100/100/100 on Google Lighthouse (mobile and desktop), Total Blocking Time 0 ms, Cumulative Layout Shift 0 — while running a custom canvas pixel-physics engine.
+- [Built by hand](https://mccain-digital.com/): hand-written vanilla HTML/CSS/JS, no framework, no build step. Every word is real DOM text (the pixel effects are canvas overlays), with structured data via JSON-LD (ProfessionalService, WebSite, SoftwareApplication).
+
+## How to reach us
+
+- [Contact](https://mccain-digital.com/#contact): email info@mccain-digital.com with a short description of your project. We usually reply within 24 hours with an honest assessment.

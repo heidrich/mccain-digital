@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Apps — React, Next.js, TypeScript — McCain Digital</title>
+  <meta name="description"
+    content="We build fast, scalable web apps on a modern stack — React, Next.js, TypeScript. MVP to scale without a rewrite, Core Web Vitals green from day one. This site scores 4×100 on Lighthouse; that's the bar.">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#0f0e0c">
+  <link rel="preload" href="../pixel-engine.js?v=h6" as="script">
+  <link rel="stylesheet" href="../styles.css?v=s9">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+  <link rel="canonical" href="https://mccain-digital.com/services/web-apps.html">
+  <link rel="sitemap" type="application/xml" href="../sitemap.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mccain-digital.com/services/web-apps.html">
+  <meta property="og:site_name" content="McCain Digital">
+  <meta property="og:title" content="Web Apps — React, Next.js, TypeScript — McCain Digital">
+  <meta property="og:description"
+    content="Fast, scalable web apps on a modern stack — React, Next.js, TypeScript. MVP to scale without a rewrite, Core Web Vitals green from day one.">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:image" content="https://mccain-digital.com/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="McCain Digital — Web Apps on React, Next.js & TypeScript">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Web Apps — React, Next.js, TypeScript — McCain Digital">
+  <meta name="twitter:description" content="Fast, scalable web apps on a modern stack. MVP to scale without a rewrite, Core Web Vitals green from day one.">
+  <meta name="twitter:image" content="https://mccain-digital.com/og-image.png">
+  <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Service","serviceType":"Web Application Development","provider":{"@type":"ProfessionalService","name":"McCain Digital","url":"https://mccain-digital.com"},"areaServed":"Worldwide","url":"https://mccain-digital.com/services/web-apps.html","description":"Fast, scalable web application development on a modern stack — React, Next.js, TypeScript, server components. Core Web Vitals green from day one, a clean data layer with APIs and auth that scales from MVP to load without a rewrite, plus real-time and third-party integrations. This very site scores 4×100 on Google Lighthouse.","hasOfferCatalog":{"@type":"OfferCatalog","name":"Web app capabilities","itemListElement":[{"@type":"Offer","itemOffered":{"@type":"Service","name":"Modern stack — React, Next.js, TypeScript"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Performance & Core Web Vitals"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Architecture that scales"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Real-time & integrations"}}]}}
+</script>
+  <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://mccain-digital.com/"},{"@type":"ListItem","position":2,"name":"Web Apps","item":"https://mccain-digital.com/services/web-apps.html"}]}
+</script>
+  <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What stack do you build on, and why that one?","acceptedAnswer":{"@type":"Answer","text":"React and Next.js with TypeScript end to end — server components for fast first loads, a typed data layer (Prisma or Drizzle on PostgreSQL), and tRPC or typed routes so the front end and API can't drift apart. It's boring on purpose: a huge talent pool, long-term support, and nothing exotic you'd struggle to hire for in two years. We adapt where it makes sense, but we won't pick a framework just because it's new this month."}},{"@type":"Question","name":"How do you keep it fast as it grows?","acceptedAnswer":{"@type":"Answer","text":"Performance is an architecture decision, not a cleanup task at the end. Server components and streaming keep the JavaScript bundle small, the data layer uses indexed queries and caching (Redis) instead of N+1 loops, and we put a Lighthouse + Core Web Vitals budget in CI so a regression fails the build, not your users. This very site scores 100 on Lighthouse — that's the bar we ship to."}},{"@type":"Question","name":"Can you take over an existing or legacy app?","acceptedAnswer":{"@type":"Answer","text":"Yes. We start with an audit — the data model, the worst bottlenecks, the test coverage — and give you an honest read on whether to refactor in place or migrate incrementally. We don't insist on a big-bang rewrite; usually we strangle the old app route by route, shipping improvements the whole way so you're never frozen waiting for a relaunch."}},{"@type":"Question","name":"What does a web app cost, and how long does it take?","acceptedAnswer":{"@type":"Answer","text":"After a first conversation you get a fixed quote within 48 hours — no open-ended hourly meters. A clickable prototype is typically ready within 7 days, then we build in weekly demos so you see it grow. You get 30 days of support after launch, the code is documented and yours to keep, and there's no lock-in."}}]}
+</script>
+  <style>
+    :root {
+      --ink: #0f0e0c;
+      --ink2: #171511;
+      --ink3: #201d18;
+      --paper: #ece7dd;
+      --paper-2: #cbc6bb;
+      /* deliberate brighter lede tier (11.3:1) — persuasion copy sits between
+         --paper headings and --paper-dim captions */
+      --paper-dim: #a8a294;
+      --mute: #6e6a5f;
+      /* --mute is decorative-only (3.57:1, fails AA as text). For real TEXT on
+         dark use --mute2 (5.31:1 AA). The site sells "Accessibility 100". */
+      --mute2: #8b8678;
+      --acc: #f5c518;
+      --acc-soft: #ffd23a;
+      --acc-deep: #d9a800;
+      --acc-ink: #4a3800;
+      --acc-dim: rgba(245, 197, 24, .12);
+      --line: rgba(236, 231, 221, .1);
+      /* light product section (on --paper) */
+      --p-kicker: #9A7400;
+      /* --p-kicker (3.50:1) + --p-em (2.45:1) FAIL AA as text — keep them only
+         for large display / decorative bits; use the -text variants below for
+         real small text on paper (both AA-verified on --paper) */
+      --p-kicker-text: #7d5e00;
+      --p-em: #9B9484;
+      --p-em-text: #6b665b;
+      --p-text: #54504A;
+      --p-dim: #5E5A53;
+      --t-ok: #9FD98A;
+      --t-bar: #3C3830;
+      --err: #C4554D;
+      --ff-d: "Sora-x", "Segoe UI", system-ui, sans-serif;
+      --ease: cubic-bezier(.16, 1, .3, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 90px
+    }
+
+    .sec-title,
+    h1,
+    h2 {
+      text-wrap: balance
+    }
+
+    p {
+      text-wrap: pretty
+    }
+
+    html,
+    body {
+      background: var(--ink);
+      color: var(--paper);
+      font-family: var(--ff-d);
+      /* clip instead of hidden: hidden turns the body into a scroll container and
+         breaks position:sticky (scrub chapters); clip only clips */
+      overflow-x: hidden;
+      overflow-x: clip
+    }
+
+    body {
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased
+    }
+
+    ::selection {
+      background: var(--acc);
+      color: var(--acc-ink)
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-weight: 700;
+      letter-spacing: -.03em;
+      line-height: 1.04
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--acc);
+      outline-offset: 3px
+    }
+
+    img {
+      max-width: 100%
+    }
+
+    button {
+      font-family: inherit
+    }
+
+    /* ---------- scroll progress: collects pixels while you scroll ----------
+       a thin row of pixel blocks revealed via clip-path (no scaleX — that
+       would stretch the blocks instead of adding new ones). Pure CSS
+       scroll-driven animation; browsers without support never show it. */
+    .scroll-progress {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: repeating-linear-gradient(90deg,
+          var(--acc) 0 4px, transparent 4px 7px,
+          var(--acc-soft) 7px 11px, transparent 11px 14px);
+      clip-path: inset(0 100% 0 0);
+      z-index: 1200;
+      pointer-events: none
+    }
+
+    @supports (animation-timeline: scroll(root)) {
+      .scroll-progress {
+        display: block;
+        animation: sp-grow auto linear both;
+        animation-timeline: scroll(root);
+        animation-timing-function: steps(64)
+      }
+
+      @keyframes sp-grow {
+        from {
+          clip-path: inset(0 100% 0 0)
+        }
+
+        to {
+          clip-path: inset(0 -1% 0 0)
+        }
+      }
+    }
+
+    /* ---------- noise overlay ---------- */
+    .noise {
+      position: fixed;
+      inset: -50%;
+      width: 200%;
+      height: 200%;
+      pointer-events: none;
+      z-index: 9000;
+      opacity: .045;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      animation: grain 7s steps(8) infinite
+    }
+
+    @keyframes grain {
+
+      0%,
+      100% {
+        transform: translate(0, 0)
+      }
+
+      20% {
+        transform: translate(-3%, 2%)
+      }
+
+      40% {
+        transform: translate(2%, -3%)
+      }
+
+      60% {
+        transform: translate(-2%, -2%)
+      }
+
+      80% {
+        transform: translate(3%, 3%)
+      }
+    }
+
+    /* ---------- pac-bar: Pac-Man vs. the progress line ----------
+       replaces the CSS bar when JS runs (the CSS bar stays as the
+       no-JS / reduced-motion fallback). Canvas is taller than the
+       line so the "!?" gag has air above Pac-Man. */
+    #pacbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      /* tall canvas: the line lives in the top ~26px, the puked pixels
+         trickle down through the rest until they dissolve */
+      height: 150px;
+      z-index: 1201;
+      pointer-events: none;
+      display: none;
+      /* eases in 2s after load (JS flips it), then it's always there */
+      opacity: 0;
+      transition: opacity .9s var(--ease)
+    }
+    /* ---------- nav ---------- */
+    #nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      /* extra top room: Pac-Man owns the first ~26px of the viewport */
+      padding: calc(1.4rem + 12px) clamp(1.2rem, 4vw, 3.5rem) 1.4rem;
+      transition: padding .4s;
+    }
+
+    /* scrolled state: plain solid page-ink behind the nav — glass looked
+       off against this site's hard-edged language (owner call). The bg
+       lives on a pseudo-element so it can fade independently. No border,
+       no hairline, no shadow. */
+    #nav::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: var(--ink);
+      opacity: 0;
+      transition: opacity .4s;
+      pointer-events: none
+    }
+
+    #nav.scrolled::before {
+      opacity: 1
+    }
+
+    #nav.scrolled {
+      padding: calc(.9rem + 12px) clamp(1.2rem, 4vw, 3.5rem) .9rem
+    }
+
+    /* clean typographic wordmark — no icon */
+    .logo {
+      font-size: 1.16rem;
+      letter-spacing: -.03em;
+      display: inline-flex;
+      align-items: baseline;
+      gap: .3em;
+      z-index: 1002;
+      line-height: 1
+    }
+
+    .logo b {
+      font-weight: 800;
+      color: var(--paper)
+    }
+
+    .logo span {
+      font-weight: 600;
+      color: var(--acc);
+      transition: color .3s var(--ease)
+    }
+
+    .logo:hover span {
+      color: var(--acc-soft)
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.2rem;
+      align-items: center
+    }
+
+    .nav-links a {
+      font-size: .86rem;
+      font-weight: 500;
+      color: var(--paper-dim);
+      position: relative;
+      transition: color .3s
+    }
+
+    .nav-links a:hover {
+      color: var(--paper)
+    }
+
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -5px;
+      height: 1.5px;
+      width: 0;
+      background: var(--acc);
+      transition: width .35s var(--ease)
+    }
+
+    .nav-links a:hover::after {
+      width: 100%
+    }
+
+    .nav-cta {
+      background: var(--acc);
+      color: var(--acc-ink) !important;
+      padding: .62rem 1.25rem;
+      border-radius: 99px;
+      font-weight: 700 !important;
+      transition: transform .3s var(--ease), box-shadow .3s, background .3s !important
+    }
+
+    .nav-cta::after {
+      display: none
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(245, 197, 24, .35);
+      background: var(--acc-soft)
+    }
+
+    .burger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: 0;
+      cursor: pointer;
+      z-index: 1002;
+      padding: 6px
+    }
+
+    .burger span {
+      width: 26px;
+      height: 2px;
+      background: var(--paper);
+      transition: .35s var(--ease)
+    }
+
+    .burger.open span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg)
+    }
+
+    .burger.open span:nth-child(2) {
+      opacity: 0
+    }
+
+    .burger.open span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg)
+    }
+
+    @media(max-width:860px) {
+      .nav-links {
+        position: fixed;
+        inset: 0;
+        background: var(--ink);
+        flex-direction: column;
+        justify-content: center;
+        gap: 2rem;
+        transform: translateY(-100%);
+        transition: transform .6s var(--ease);
+        z-index: 1001
+      }
+
+      .nav-links.open {
+        transform: translateY(0)
+      }
+
+      .nav-links a {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: var(--paper)
+      }
+
+      .nav-links .nav-cta {
+        font-size: 1.02rem;
+        padding: .8rem 1.6rem;
+        margin-top: .6rem
+      }
+
+      .burger {
+        display: flex
+      }
+    }
+  </style>
+</head>
+
+<body class="svc-page">
+
+  <div class="noise" aria-hidden="true"></div>
+
+  <!-- NAV -->
+  <nav id="nav" aria-label="Main navigation">
+    <a class="logo" href="../index.html#top" aria-label="McCain Digital — home">
+      <b>mccain</b><span>digital</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <button class="menu-trigger" type="button" data-mega-open aria-label="Open menu">
+        <span class="mt-bars" aria-hidden="true"><i></i><i></i></span>Menu
+      </button>
+      <a href="../index.html#product">Product</a>
+      <a href="../contact.html" class="nav-cta">Start a project</a>
+    </div>
+  </nav>
+
+  <!-- MEGA-MENU OVERLAY (shared on every page) -->
+  <div class="mega" id="mega" role="dialog" aria-modal="true" aria-label="Main menu" aria-hidden="true">
+    <div class="mega-top">
+      <a class="logo" href="../index.html#top" aria-label="McCain Digital — home"><b>mccain</b><span>digital</span></a>
+      <button class="mega-close" id="megaClose" type="button" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+
+    <div class="mega-body">
+      <nav class="mega-services" aria-label="Services">
+        <p class="mega-eyebrow">What we do</p>
+        <a class="mega-link" href="../services/ai-tools.html">
+          <span class="ml-title">AI Tools <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">AI agents, RAG and automation wired into your real workflows — not chat toys.</span>
+        </a>
+        <a class="mega-link" href="../services/web-apps.html">
+          <span class="ml-title">Web Apps <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">Fast, scalable apps on React, Next.js &amp; TypeScript — MVP to scale, no rewrite.</span>
+        </a>
+        <a class="mega-link" href="../services/apps.html">
+          <span class="ml-title">Mobile Apps <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">iOS &amp; Android from one clean codebase. Native feel, store-ready.</span>
+        </a>
+        <a class="mega-link" href="../services/websites.html">
+          <span class="ml-title">Websites <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">Sites people remember — perfect Lighthouse 100, SEO from day one.</span>
+        </a>
+        <a class="mega-link" href="../services/software.html">
+          <span class="ml-title">Software for Companies <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">Dashboards, internal tools and integrations — tailor-made, yours to keep.</span>
+        </a>
+        <a class="mega-link" href="../services/design-brand.html">
+          <span class="ml-title">Design &amp; Brand <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">Identity, UI and motion designed in-house — a system that scales.</span>
+        </a>
+      </nav>
+
+      <aside class="mega-rail">
+        <p class="mega-eyebrow">Our product</p>
+        <a class="mega-card" href="../index.html#product">
+          <span class="mc-tag">Live · in production</span>
+          <span class="mc-title"><b>whatever-</b><span class="hl">recall</span></span>
+          <span class="mc-desc">Our own AI-native project memory — the proof that we ship what we sell.</span>
+        </a>
+        <div class="mega-contact">
+          <p class="mc-h">Start a project</p>
+          <a class="mc-mail" href="../contact.html">Get in touch →</a>
+          <div class="mega-social">
+            <a href="mailto:info@mccain-digital.com">info@mccain-digital.com</a>
+            <a href="https://github.com/heidrich" target="_blank" rel="noopener">GitHub</a>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="mega-bottom">
+      <span>© <span class="mega-year">2026</span> McCain Digital · Bavaria, Germany</span>
+      <span class="mb-links">
+        <a href="../legal/imprint.html">Imprint</a>
+        <a href="../legal/privacy.html">Privacy</a>
+        <a href="../legal/terms.html">Terms</a>
+      </span>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- HERO -->
+    <header class="svc-hero" id="top">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html#top">Home</a><span class="sep">/</span>
+        <span>Web Apps</span>
+      </nav>
+      <h1><span class="ph" data-pixel>Web apps that</span><br><span class="ph" data-pixel><span class="accent">scale, not rewrite.</span></span></h1>
+      <p class="svc-hero-lede">Real web applications on a modern stack — React, Next.js, TypeScript — built to grow.
+        MVP today, load tomorrow, without throwing the codebase away when it gets serious. <b>This very site</b>
+        scores 4×100 on Lighthouse — Core Web Vitals green from day one isn't a goal here, it's the baseline.</p>
+      <div class="svc-hero-cta">
+        <a href="../contact.html" class="btn btn-primary">Start a web app <span class="arr">→</span></a>
+        <a href="../index.html#product" class="btn btn-ghost">See whatever-recall</a>
+      </div>
+    </header>
+
+    <!-- CAPABILITIES -->
+    <section class="svc-sec" aria-labelledby="capTitle">
+      <div class="svc-sec-head">
+        <p class="kicker reveal">01 — What we build</p>
+        <h2 id="capTitle"><span class="ph" data-pixel>From MVP to load.</span></h2>
+        <p>Four things, done properly — a real application with a clean data layer, fast from the first paint,
+          and architected so the thing you launch and the thing you scale are the same codebase.</p>
+      </div>
+      <div class="svc-features">
+        <article class="svc-feature reveal">
+          <span class="sf-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 4l-4 8 4 8M16 4l4 8-4 8M14 3l-4 18"/></svg></span>
+          <h3>A modern, typed stack</h3>
+          <p>React and Next.js with TypeScript end to end — server components for fast first loads, App Router,
+            a typed data layer with Prisma or Drizzle on PostgreSQL. Boring on purpose: huge talent pool, long
+            support, nothing exotic you'd struggle to hire for in two years.</p>
+        </article>
+        <article class="svc-feature reveal">
+          <span class="sf-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg></span>
+          <h3>Core Web Vitals, green from day one</h3>
+          <p>Performance is an architecture decision, not a cleanup at the end. Small bundles via server
+            components and streaming, indexed queries and caching instead of N+1 loops, and a Lighthouse budget
+            in CI so a regression fails the build. This site scores 100 — real proof, not a promise.</p>
+        </article>
+        <article class="svc-feature reveal">
+          <span class="sf-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 17.5h7M17.5 14v7"/></svg></span>
+          <h3>Architecture that scales</h3>
+          <p>A clean data layer, typed APIs (tRPC or REST), real auth and roles — designed so the MVP and the
+            scaled app are the same codebase. We do the schema, indexes, caching and queue work up front, so
+            growth means adding load, not starting over.</p>
+        </article>
+        <article class="svc-feature reveal">
+          <span class="sf-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12a7 7 0 0 1 14 0M8 12a4 4 0 0 1 8 0"/><circle cx="12" cy="12" r="1.5"/><path d="M3 18h4M17 18h4"/></svg></span>
+          <h3>Real-time &amp; integrations</h3>
+          <p>Live updates over websockets, Stripe for payments and subscriptions, auth providers (OAuth, magic
+            links, SSO), and the third-party APIs your product leans on — webhooks, retries and idempotency
+            handled, so integrations are reliable instead of the thing that pages you at 2am.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- PROOF / WHY US -->
+    <section class="svc-sec alt-full" aria-labelledby="proofTitle">
+      <div class="svc-sec-inner">
+        <div class="svc-sec-head">
+          <p class="kicker reveal">02 — The proof</p>
+          <h2 id="proofTitle"><span class="ph" data-pixel data-ink="#ece7dd">We ship what we sell.</span></h2>
+          <p>We don't hand you a vitals score we hope to hit. The page you're reading is a McCain Digital build —
+            and it scores a perfect 4×100 on Google Lighthouse. The product behind it, whatever-recall, runs in
+            production. The bar on this page is the bar we build to.</p>
+        </div>
+        <div class="svc-metrics">
+          <div class="svc-metric reveal">
+            <div class="sm-v">4×100<small>&nbsp;LH</small></div>
+            <div class="sm-l">this very site on Google Lighthouse — Performance, Accessibility, Best Practices, SEO, all 100</div>
+          </div>
+          <div class="svc-metric reveal">
+            <div class="sm-v">0.25<small>&nbsp;ms</small></div>
+            <div class="sm-l">lookup at 108,000+ anchors in whatever-recall, our own product — performance that stays flat as data grows</div>
+          </div>
+          <div class="svc-metric reveal">
+            <div class="sm-v">3/3<small>&nbsp;agentic</small></div>
+            <div class="sm-l">Agentic Browsing pass — the markup is clean enough that machines, not just people, parse it</div>
+          </div>
+        </div>
+        <p class="svc-hero-note" style="margin-top:1.6rem">Numbers from this site and whatever-recall, our own product. <a href="../index.html#product" style="color:var(--acc)">See it in production →</a></p>
+      </div>
+    </section>
+
+    <!-- STACK -->
+    <section class="svc-sec" aria-labelledby="stackTitle">
+      <div class="svc-sec-head">
+        <p class="kicker reveal">03 — The stack we build with</p>
+        <h2 id="stackTitle"><span class="ph" data-pixel>Boring stack, fast app.</span></h2>
+        <p>Proven, well-supported tools we know cold — typed end to end, tested, containerised. We pick for
+          longevity and a hiring pool, not for what trended on Hacker News this week. No lock-in.</p>
+      </div>
+      <div class="svc-stack reveal">
+        <span class="svc-chip">React</span>
+        <span class="svc-chip">Next.js</span>
+        <span class="svc-chip">TypeScript</span>
+        <span class="svc-chip">Node.js</span>
+        <span class="svc-chip">PostgreSQL</span>
+        <span class="svc-chip">Prisma</span>
+        <span class="svc-chip">tRPC</span>
+        <span class="svc-chip">Tailwind</span>
+        <span class="svc-chip">Vercel</span>
+        <span class="svc-chip">Supabase</span>
+        <span class="svc-chip">Redis</span>
+        <span class="svc-chip">Stripe</span>
+        <span class="svc-chip">Playwright</span>
+        <span class="svc-chip">Vitest</span>
+        <span class="svc-chip">Docker</span>
+      </div>
+    </section>
+
+    <!-- PROCESS -->
+    <section class="svc-sec alt-full" aria-labelledby="procTitle">
+      <div class="svc-sec-inner">
+        <div class="svc-sec-head">
+          <p class="kicker reveal">04 — How it goes</p>
+          <h2 id="procTitle"><span class="ph" data-pixel data-ink="#ece7dd">Prototype in seven days.</span></h2>
+          <p>We don't disappear for three months and surface with a surprise. You see something clickable in a
+            week, then watch it grow in weekly demos — so the build never drifts from what you actually wanted.</p>
+        </div>
+        <div class="svc-steps">
+          <div class="svc-step reveal"><span class="ss-num">01</span><div><h3>Scope the real thing</h3><p>A working session on the product: the core flows, the data model, what's MVP and what's later. You get a build plan and a fixed quote within 48 hours — not an open-ended hourly meter.</p></div></div>
+          <div class="svc-step reveal"><span class="ss-num">02</span><div><h3>Clickable prototype (7 days)</h3><p>Within a week you have a real, clickable front end on the actual stack — the key screens and flows, so you can judge the feel and direction before we wire up the full backend.</p></div></div>
+          <div class="svc-step reveal"><span class="ss-num">03</span><div><h3>Build with weekly demos</h3><p>Data layer, APIs, auth, integrations — built in the open with a working demo every week. Tested (Vitest, Playwright) and Core-Web-Vitals-budgeted in CI, so quality is locked in as we go, not bolted on later.</p></div></div>
+          <div class="svc-step reveal"><span class="ss-num">04</span><div><h3>Ship Lighthouse-green &amp; hand over</h3><p>Launched, documented, yours to keep, no lock-in — with the vitals green, not just functional. Self-hosted or cloud, your call. Plus 30 days of support after launch.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="svc-sec" aria-labelledby="faqTitle">
+      <div class="svc-sec-head">
+        <p class="kicker reveal">05 — Questions</p>
+        <h2 id="faqTitle"><span class="ph" data-pixel>The things you're actually asking.</span></h2>
+      </div>
+      <div class="svc-faq">
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false"><span>What stack do you build on, and why that one?</span><span class="faq-ico" aria-hidden="true"></span></button>
+          <div class="faq-a"><div class="faq-a-inner">React and Next.js with TypeScript end to end — server components for fast first loads, a typed data layer (Prisma or Drizzle on PostgreSQL), and tRPC or typed routes so the front end and API can't drift apart. It's boring on purpose: a huge talent pool, long-term support, and nothing exotic you'd struggle to hire for in two years. We adapt where it makes sense, but we won't pick a framework just because it's new this month.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false"><span>How do you keep it fast as it grows?</span><span class="faq-ico" aria-hidden="true"></span></button>
+          <div class="faq-a"><div class="faq-a-inner">Performance is an architecture decision, not a cleanup task at the end. Server components and streaming keep the JavaScript bundle small, the data layer uses indexed queries and caching (Redis) instead of N+1 loops, and we put a Lighthouse + Core Web Vitals budget in CI so a regression fails the build, not your users. This very site scores 100 on Lighthouse — that's the bar we ship to.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false"><span>Can you take over an existing or legacy app?</span><span class="faq-ico" aria-hidden="true"></span></button>
+          <div class="faq-a"><div class="faq-a-inner">Yes. We start with an audit — the data model, the worst bottlenecks, the test coverage — and give you an honest read on whether to refactor in place or migrate incrementally. We don't insist on a big-bang rewrite; usually we strangle the old app route by route, shipping improvements the whole way so you're never frozen waiting for a relaunch.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false"><span>What does a web app cost, and how long does it take?</span><span class="faq-ico" aria-hidden="true"></span></button>
+          <div class="faq-a"><div class="faq-a-inner">After a first conversation you get a <b>fixed quote within 48 hours</b> — no open-ended hourly meters. A clickable prototype is typically ready within <b>7 days</b>, then we build in weekly demos so you see it grow. You get 30 days of support after launch, the code is documented and yours to keep, and there's no lock-in.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RELATED -->
+    <section class="svc-sec" aria-labelledby="relTitle">
+      <div class="svc-sec-head"><h2 id="relTitle" style="font-size:clamp(1.4rem,3vw,2rem)">Related services</h2></div>
+      <div class="svc-related">
+        <a class="svc-rel-card" href="ai-tools.html"><span class="rc-name">AI Tools <span class="rc-arr">→</span></span><span class="rc-desc">RAG, agents and automation, wired into the app you ship.</span></a>
+        <a class="svc-rel-card" href="software.html"><span class="rc-name">Software for Companies <span class="rc-arr">→</span></span><span class="rc-desc">Dashboards and internal tools on the same scalable stack.</span></a>
+        <a class="svc-rel-card" href="websites.html"><span class="rc-name">Websites <span class="rc-arr">→</span></span><span class="rc-desc">A marketing site, not an app — fast, polished, Lighthouse-green.</span></a>
+      </div>
+    </section>
+
+    <!-- CTA BAND -->
+    <section class="svc-cta-band" aria-labelledby="ctaTitle">
+      <h2 id="ctaTitle">Got a web app to build?</h2>
+      <p>Tell us the product. Within 24 hours you'll hear back with an honest take on scope and stack — and
+        within 48, a fixed quote and a path to a clickable prototype in a week.</p>
+      <a href="../contact.html" class="btn-dark">Start a web app <span class="arr">→</span></a>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>© <span id="year">2026</span> McCain Digital · Bavaria, Germany</span>
+    <div class="f-links">
+      <a class="f-recall" href="https://whatever-recall.com" target="_blank" rel="noopener"><img
+          src="../recall-logo-128.png" width="18" height="18" alt="" loading="lazy" decoding="async"><span
+          class="recall-wordmark">whatever-<span class="hl">recall</span></span></a>
+      <a class="f-git" href="https://github.com/heidrich" target="_blank" rel="noopener" aria-label="McCain Digital on GitHub"><svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg></a>
+      <a href="../legal/imprint.html">Imprint</a>
+      <a href="../legal/privacy.html">Privacy</a>
+      <a href="../legal/terms.html">Terms</a>
+      <a href="../legal/withdrawal.html">Withdrawal</a>
+      <button type="button" class="consent__reopen" onclick="window.MCD_openConsent&&window.MCD_openConsent()">Cookie settings</button>
+    </div>
+  </footer>
+
+  <script src="../pixel-engine.js?v=h6" defer></script>
+  <script src="../mega.js" defer></script>
+  <script src="../consent.js" defer></script>
+  <script src="../svc-page.js" defer></script>
+</body>
+
+</html>

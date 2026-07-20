@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile Apps — iOS &amp; Android — McCain Digital</title>
+  <meta name="description"
+    content="Native-feeling iOS &amp; Android apps from one clean React Native / Expo codebase — gestures, offline, push, deep links, 60fps — backed by a real backend and shipped to both stores. Built by a studio that runs its own product, whatever-recall, in production.">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#0f0e0c">
+  <link rel="preload" href="../pixel-engine.js?v=h6" as="script">
+  <link rel="stylesheet" href="../styles.css?v=s9">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+  <link rel="canonical" href="https://mccain-digital.com/services/apps.html">
+  <link rel="sitemap" type="application/xml" href="../sitemap.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mccain-digital.com/services/apps.html">
+  <meta property="og:site_name" content="McCain Digital">
+  <meta property="og:title" content="Mobile Apps — iOS &amp; Android — McCain Digital">
+  <meta property="og:description"
+    content="Native-feeling iOS &amp; Android apps from one clean React Native / Expo codebase — offline, push, 60fps — backed by a real backend and shipped to both stores.">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:image" content="https://mccain-digital.com/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="McCain Digital — Mobile Apps for iOS & Android">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Mobile Apps — iOS &amp; Android — McCain Digital">
+  <meta name="twitter:description" content="Native-feeling iOS &amp; Android apps from one React Native / Expo codebase — offline, push, 60fps — shipped to both stores.">
+  <meta name="twitter:image" content="https://mccain-digital.com/og-image.png">
+  <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Service","serviceType":"Mobile App Development for iOS and Android","provider":{"@type":"ProfessionalService","name":"McCain Digital","url":"https://mccain-digital.com"},"areaServed":"Worldwide","url":"https://mccain-digital.com/services/apps.html","description":"Native-feeling iOS and Android apps from one clean React Native / Expo codebase — native modules where needed, gestures, offline, push notifications, deep links and 60fps animation — backed by a real backend (auth, sync, APIs) and shipped to both the App Store and Play Store with OTA updates. Built by a studio that runs its own product, whatever-recall, in production.","hasOfferCatalog":{"@type":"OfferCatalog","name":"Mobile app capabilities","itemListElement":[{"@type":"Offer","itemOffered":{"@type":"Service","name":"One codebase, both stores"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Native feel — gestures, offline, push, 60fps"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Store-ready — review, release, OTA updates"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Backed by a real backend"}}]}}
+</script>
+  <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://mccain-digital.com/"},{"@type":"ListItem","position":2,"name":"Mobile Apps","item":"https://mccain-digital.com/services/apps.html"}]}
+</script>
+  <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Native or cross-platform — why React Native and Expo, not Swift and Kotlin twice?","acceptedAnswer":{"@type":"Answer","text":"Because for most apps it's the same native feel for roughly half the cost. React Native renders real native views — not a webview — so gestures, scrolling and animation hit 60fps, and we drop to Swift or Kotlin for any native module that needs it. You ship one codebase to both stores instead of paying two teams to build the same screens twice. When an app genuinely needs to be fully native, we'll tell you straight."}},{"@type":"Question","name":"Can you publish under our own Apple and Google developer accounts?","acceptedAnswer":{"@type":"Answer","text":"Yes, and we recommend it. The apps go out under your Apple Developer and Google Play accounts, so you own the listings, the reviews and the users — not us. We handle the submission, review back-and-forth, signing and release. If you don't have the accounts yet, we set them up with you. No lock-in: the app and its stores are yours to keep."}},{"@type":"Question","name":"Will it work offline and send push notifications?","acceptedAnswer":{"@type":"Answer","text":"Yes to both. We build offline-first where it matters — local storage and a sync layer so the app keeps working with no signal and reconciles when it's back online. Push notifications go through FCM on Android and APNs on iOS, with deep links so a tap lands the user on the right screen, not just the home screen."}},{"@type":"Question","name":"What does a mobile app cost, and how long does it take?","acceptedAnswer":{"@type":"Answer","text":"A focused first version — the core flow, both stores — is typically 6–10 weeks. After a first conversation you get a fixed quote within 48 hours — no open-ended hourly meters. We scope to the smallest version worth shipping, get it into TestFlight early so you're using it within weeks, then expand."}}]}
+</script>
+  <style>
+    :root {
+      --ink: #0f0e0c;
+      --ink2: #171511;
+      --ink3: #201d18;
+      --paper: #ece7dd;
+      --paper-2: #cbc6bb;
+      /* deliberate brighter lede tier (11.3:1) — persuasion copy sits between
+         --paper headings and --paper-dim captions */
+      --paper-dim: #a8a294;
+      --mute: #6e6a5f;
+      /* --mute is decorative-only (3.57:1, fails AA as text). For real TEXT on
+         dark use --mute2 (5.31:1 AA). The site sells "Accessibility 100". */
+      --mute2: #8b8678;
+      --acc: #f5c518;
+      --acc-soft: #ffd23a;
+      --acc-deep: #d9a800;
+      --acc-ink: #4a3800;
+      --acc-dim: rgba(245, 197, 24, .12);
+      --line: rgba(236, 231, 221, .1);
+      /* light product section (on --paper) */
+      --p-kicker: #9A7400;
+      /* --p-kicker (3.50:1) + --p-em (2.45:1) FAIL AA as text — keep them only
+         for large display / decorative bits; use the -text variants below for
+         real small text on paper (both AA-verified on --paper) */
+      --p-kicker-text: #7d5e00;
+      --p-em: #9B9484;
+      --p-em-text: #6b665b;
+      --p-text: #54504A;
+      --p-dim: #5E5A53;
+      --t-ok: #9FD98A;
+      --t-bar: #3C3830;
+      --err: #C4554D;
+      --ff-d: "Sora-x", "Segoe UI", system-ui, sans-serif;
+      --ease: cubic-bezier(.16, 1, .3, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 90px
+    }
+
+    .sec-title,
+    h1,
+    h2 {
+      text-wrap: balance
+    }
+
+    p {
+      text-wrap: pretty
+    }
+
+    html,
+    body {
+      background: var(--ink);
+      color: var(--paper);
+      font-family: var(--ff-d);
+      /* clip instead of hidden: hidden turns the body into a scroll container and
+         breaks position:sticky (scrub chapters); clip only clips */
+      overflow-x: hidden;
+      overflow-x: clip
+    }
+
+    body {
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased
+    }
+
+    ::selection {
+      background: var(--acc);
+      color: var(--acc-ink)
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-weight: 700;
+      letter-spacing: -.03em;
+      line-height: 1.04
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--acc);
+      outline-offset: 3px
+    }
+
+    img {
+      max-width: 100%
+    }
+
+    button {
+      font-family: inherit
+    }
+
+    /* ---------- scroll progress: collects pixels while you scroll ----------
+       a thin row of pixel blocks revealed via clip-path (no scaleX — that
+       would stretch the blocks instead of adding new ones). Pure CSS
+       scroll-driven animation; browsers without support never show it. */
+    .scroll-progress {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: repeating-linear-gradient(90deg,
+          var(--acc) 0 4px, transparent 4px 7px,
+          var(--acc-soft) 7px 11px, transparent 11px 14px);
+      clip-path: inset(0 100% 0 0);
+      z-index: 1200;
+      pointer-events: none
+    }
+
+    @supports (animation-timeline: scroll(root)) {
+      .scroll-progress {
+        display: block;
+        animation: sp-grow auto linear both;
+        animation-timeline: scroll(root);
+        animation-timing-function: steps(64)
+      }
+
+      @keyframes sp-grow {
+        from {
+          clip-path: inset(0 100% 0 0)
+        }
+
+        to {
+          clip-path: inset(0 -1% 0 0)
+        }
+      }
+    }
+
+    /* ---------- noise overlay ---------- */
+    .noise {
+      position: fixed;
+      inset: -50%;
+      width: 200%;
+      height: 200%;
+      pointer-events: none;
+      z-index: 9000;
+      opacity: .045;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      animation: grain 7s steps(8) infinite
+    }
+
+    @keyframes grain {
+
+      0%,
+      100% {
+        transform: translate(0, 0)
+      }
+
+      20% {
+        transform: translate(-3%, 2%)
+      }
+
+      40% {
+        transform: translate(2%, -3%)
+      }
+
+      60% {
+        transform: translate(-2%, -2%)
+      }
+
+      80% {
+        transform: translate(3%, 3%)
+      }
+    }
+
+    /* ---------- pac-bar: Pac-Man vs. the progress line ----------
+       replaces the CSS bar when JS runs (the CSS bar stays as the
+       no-JS / reduced-motion fallback). Canvas is taller than the
+       line so the "!?" gag has air above Pac-Man. */
+    #pacbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      /* tall canvas: the line lives in the top ~26px, the puked pixels
+         trickle down through the rest until they dissolve */
+      height: 150px;
+      z-index: 1201;
+      pointer-events: none;
+      display: none;
+      /* eases in 2s after load (JS flips it), then it's always there */
+      opacity: 0;
+      transition: opacity .9s var(--ease)
+    }
+    /* ---------- nav ---------- */
+    #nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      /* extra top room: Pac-Man owns the first ~26px of the viewport */
+      padding: calc(1.4rem + 12px) clamp(1.2rem, 4vw, 3.5rem) 1.4rem;
+      transition: padding .4s;
+    }
+
+    /* scrolled state: plain solid page-ink behind the nav — glass looked
+       off against this site's hard-edged language (owner call). The bg
+       lives on a pseudo-element so it can fade independently. No border,
+       no hairline, no shadow. */
+    #nav::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: var(--ink);
+      opacity: 0;
+      transition: opacity .4s;
+      pointer-events: none
+    }
+
+    #nav.scrolled::before {
+      opacity: 1
+    }
+
+    #nav.scrolled {
+      padding: calc(.9rem + 12px) clamp(1.2rem, 4vw, 3.5rem) .9rem
+    }
+
+    /* clean typographic wordmark — no icon */
+    .logo {
+      font-size: 1.16rem;
+      letter-spacing: -.03em;
+      display: inline-flex;
+      align-items: baseline;
+      gap: .3em;
+      z-index: 1002;
+      line-height: 1
+    }
+
+    .logo b {
+      font-weight: 800;
+      color: var(--paper)
+    }
+
+    .logo span {
+      font-weight: 600;
+      color: var(--acc);
+      transition: color .3s var(--ease)
+    }
+
+    .logo:hover span {
+      color: var(--acc-soft)
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.2rem;
+      align-items: center
+    }
+
+    .nav-links a {
+      font-size: .86rem;
+      font-weight: 500;
+      color: var(--paper-dim);
+      position: relative;
+      transition: color .3s
+    }
+
+    .nav-links a:hover {
+      color: var(--paper)
+    }
+
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -5px;
+      height: 1.5px;
+      width: 0;
+      background: var(--acc);
+      transition: width .35s var(--ease)
+    }
+
+    .nav-links a:hover::after {
+      width: 100%
+    }
+
+    .nav-cta {
+      background: var(--acc);
+      color: var(--acc-ink) !important;
+      padding: .62rem 1.25rem;
+      border-radius: 99px;
+      font-weight: 700 !important;
+      transition: transform .3s var(--ease), box-shadow .3s, background .3s !important
+    }
+
+    .nav-cta::after {
+      display: none
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(245, 197, 24, .35);
+      background: var(--acc-soft)
+    }
+
+    .burger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: 0;
+      cursor: pointer;
+      z-index: 1002;
+      padding: 6px
+    }
+
+    .burger span {
+      width: 26px;
+      height: 2px;
+      background: var(--paper);
+      transition: .35s var(--ease)
+    }
+
+    .burger.open span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg)
+    }
+
+    .burger.open span:nth-child(2) {
+      opacity: 0
+    }
+
+    .burger.open span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg)
+    }
+
+    @media(max-width:860px) {
+      .nav-links {
+        position: fixed;
+        inset: 0;
+        background: var(--ink);
+        flex-direction: column;
+        justify-content: center;
+        gap: 2rem;
+        transform: translateY(-100%);
+        transition: transform .6s var(--ease);
+        z-index: 1001
+      }
+
+      .nav-links.open {
+        transform: translateY(0)
+      }
+
+      .nav-links a {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: var(--paper)
+      }
+
+      .nav-links .nav-cta {
+        font-size: 1.02rem;
+        padding: .8rem 1.6rem;
+        margin-top: .6rem
+      }
+
+      .burger {
+        display: flex
+      }
+    }
+  </style>
+</head>
+
+<body class="svc-page">
+
+  <div class="noise" aria-hidden="true"></div>
+
+  <!-- NAV -->
+  <nav id="nav" aria-label="Main navigation">
+    <a class="logo" href="../index.html#top" aria-label="McCain Digital — home">
+      <b>mccain</b><span>digital</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <button class="menu-trigger" type="button" data-mega-open aria-label="Open menu">
+        <span class="mt-bars" aria-hidden="true"><i></i><i></i></span>Menu
+      </button>
+      <a href="../index.html#product">Product</a>
+      <a href="../contact.html" class="nav-cta">Start a project</a>
+    </div>
+  </nav>
+
+  <!-- MEGA-MENU OVERLAY (shared on every page) -->
+  <div class="mega" id="mega" role="dialog" aria-modal="true" aria-label="Main menu" aria-hidden="true">
+    <div class="mega-top">
+      <a class="logo" href="../index.html#top" aria-label="McCain Digital — home"><b>mccain</b><span>digital</span></a>
+      <button class="mega-close" id="megaClose" type="button" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+
+    <div class="mega-body">
+      <nav class="mega-services" aria-label="Services">
+        <p class="mega-eyebrow">What we do</p>
+        <a class="mega-link" href="../services/ai-tools.html">
+          <span class="ml-title">AI Tools <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">AI agents, RAG and automation wired into your real workflows — not chat toys.</span>
+        </a>
+        <a class="mega-link" href="../services/web-apps.html">
+          <span class="ml-title">Web Apps <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">Fast, scalable apps on React, Next.js &amp; TypeScript — MVP to scale, no rewrite.</span>
+        </a>
+        <a class="mega-link" href="../services/apps.html">
+          <span class="ml-title">Mobile Apps <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">iOS &amp; Android from one clean codebase. Native feel, store-ready.</span>
+        </a>
+        <a class="mega-link" href="../services/websites.html">
+          <span class="ml-title">Websites <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">Sites people remember — perfect Lighthouse 100, SEO from day one.</span>
+        </a>
+        <a class="mega-link" href="../services/software.html">
+          <span class="ml-title">Software for Companies <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">Dashboards, internal tools and integrations — tailor-made, yours to keep.</span>
+        </a>
+        <a class="mega-link" href="../services/design-brand.html">
+          <span class="ml-title">Design &amp; Brand <span class="ml-arr" aria-hidden="true">→</span></span>
+          <span class="ml-desc">Identity, UI and motion designed in-house — a system that scales.</span>
+        </a>
+      </nav>
+
+      <aside class="mega-rail">
+        <p class="mega-eyebrow">Our product</p>
+        <a class="mega-card" href="../index.html#product">
+          <span class="mc-tag">Live · in production</span>
+          <span class="mc-title"><b>whatever-</b><span class="hl">recall</span></span>
+          <span class="mc-desc">Our own AI-native project memory — the proof that we ship what we sell.</span>
+        </a>
+        <div class="mega-contact">
+          <p class="mc-h">Start a project</p>
+          <a class="mc-mail" href="../contact.html">Get in touch →</a>
+          <div class="mega-social">
+            <a href="mailto:info@mccain-digital.com">info@mccain-digital.com</a>
+            <a href="https://github.com/heidrich" target="_blank" rel="noopener">GitHub</a>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="mega-bottom">
+      <span>© <span class="mega-year">2026</span> McCain Digital · Bavaria, Germany</span>
+      <span class="mb-links">
+        <a href="../legal/imprint.html">Imprint</a>
+        <a href="../legal/privacy.html">Privacy</a>
+        <a href="../legal/terms.html">Terms</a>
+      </span>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- HERO -->
+    <header class="svc-hero" id="top">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html#top">Home</a><span class="sep">/</span>
+        <span>Mobile Apps</span>
+      </nav>
+      <h1><span class="ph" data-pixel>One codebase.</span><br><span class="ph" data-pixel><span class="accent">Both stores.</span></span></h1>
+      <p class="svc-hero-lede">Native-feeling iOS and Android apps from one clean React Native / Expo codebase —
+        gestures, offline, push, 60fps — not a webview in a wrapper. Backed by a real backend and shipped to
+        both stores, under <b>your</b> developer accounts. Built by a studio that runs its own product,
+        <b>whatever-recall</b>, in production.</p>
+      <div class="svc-hero-cta">
+        <a href="../contact.html" class="btn btn-primary">Start an app project <span class="arr">→</span></a>
+        <a href="../index.html#product" class="btn btn-ghost">See whatever-recall</a>
+      </div>
+    </header>
+
+    <!-- CAPABILITIES -->
+    <section class="svc-sec" aria-labelledby="capTitle">
+      <div class="svc-sec-head">
+        <p class="kicker reveal">01 — What we build</p>
+        <h2 id="capTitle"><span class="ph" data-pixel>From idea to App Store.</span></h2>
+        <p>Four things, done properly — one shared codebase that feels native on both platforms, talks to a
+          real backend, and survives store review and the years of updates after it.</p>
+      </div>
+      <div class="svc-features">
+        <article class="svc-feature reveal">
+          <span class="sf-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="9" height="20" rx="2"/><rect x="14" y="6" width="6" height="13" rx="1.5"/><path d="M9 18.5h1"/></svg></span>
+          <h3>One codebase, both stores</h3>
+          <p>React Native and Expo, written once and shipped to iOS and Android — with real native modules
+            (Swift, Kotlin) dropped in wherever a screen needs to be fully native. One team, one code base,
+            not two builds drifting apart over time.</p>
+        </article>
+        <article class="svc-feature reveal">
+          <span class="sf-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 12c2-3 4-4.5 6-4.5S16 9 18 12c-2 3-4 4.5-6 4.5S8 15 6 12Z"/><path d="M3 20l3-3M21 4l-3 3"/><circle cx="12" cy="12" r="1.5"/></svg></span>
+          <h3>Native feel, not a webview</h3>
+          <p>Real native views: fluid gestures, offline-first storage, push notifications, deep links and
+            60fps animation via Reanimated. It scrolls, swipes and responds the way a native app should —
+            because under the hood it is one.</p>
+        </article>
+        <article class="svc-feature reveal">
+          <span class="sf-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l2.2 4.5 5 .7-3.6 3.5.85 5L12 14.8 7.55 16.7l.85-5L4.8 8.2l5-.7L12 3Z"/></svg></span>
+          <h3>Store-ready, end to end</h3>
+          <p>App Store and Play Store review, signing, release and the review back-and-forth — handled. EAS
+            builds and over-the-air updates ship fixes to users in hours, not a week-long re-review, so the
+            app keeps improving after launch.</p>
+        </article>
+        <article class="svc-feature reveal">
+          <span class="sf-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.66 3.13 3 7 3s7-1.34 7-3V6M5 12v6c0 1.66 3.13 3 7 3s7-1.34 7-3v-6"/></svg></span>
+          <h3>Backed by a real backend</h3>
+          <p>Auth, sync, APIs and storage — the same modern stack we put behind a web app. Supabase or
+            Firebase, REST or GraphQL, your data layer built properly so the app isn't a pretty shell over
+            nothing.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- PROOF / WHY US -->
+    <section class="svc-sec alt-full" aria-labelledby="proofTitle">
+      <div class="svc-sec-inner">
+        <div class="svc-sec-head">
+          <p class="kicker reveal">02 — The proof</p>
+          <h2 id="proofTitle"><span class="ph" data-pixel data-ink="#ece7dd">We ship our own software.</span></h2>
+          <p>We don't just build for clients and disappear. We run our own product in production and obsess
+            over the same things a good app lives or dies on — speed, footprint, and the boring reliability
+            that users only notice when it's missing.</p>
+        </div>
+        <div class="svc-metrics">
+          <div class="svc-metric reveal">
+            <div class="sm-v">0<small>&nbsp;tokens</small></div>
+            <div class="sm-l">to recall a stored fact in whatever-recall — read straight from the index, not re-sent to a model</div>
+          </div>
+          <div class="svc-metric reveal">
+            <div class="sm-v">0.25<small>&nbsp;ms</small></div>
+            <div class="sm-l">lookup at 108,000+ anchors on a real, years-old codebase — it stays flat as the data grows</div>
+          </div>
+          <div class="svc-metric reveal">
+            <div class="sm-v">100<small>%</small></div>
+            <div class="sm-l">self-hosted — the data never leaves the machine, the kind of rigour we bring to your app</div>
+          </div>
+        </div>
+        <p class="svc-hero-note" style="margin-top:1.6rem">Numbers from whatever-recall, our own product. <a href="../index.html#product" style="color:var(--acc)">See it in production →</a></p>
+      </div>
+    </section>
+
+    <!-- STACK -->
+    <section class="svc-sec" aria-labelledby="stackTitle">
+      <div class="svc-sec-head">
+        <p class="kicker reveal">03 — The stack we build with</p>
+        <h2 id="stackTitle"><span class="ph" data-pixel>One stack, both platforms.</span></h2>
+        <p>React Native and Expo do the heavy lifting; native Swift and Kotlin handle the parts that need to
+          be native. The same backend tooling we use on the web sits behind it — no toy stack for mobile.</p>
+      </div>
+      <div class="svc-stack reveal">
+        <span class="svc-chip">React Native</span>
+        <span class="svc-chip">Expo</span>
+        <span class="svc-chip">TypeScript</span>
+        <span class="svc-chip">Reanimated</span>
+        <span class="svc-chip">Swift</span>
+        <span class="svc-chip">Kotlin</span>
+        <span class="svc-chip">EAS Build</span>
+        <span class="svc-chip">EAS Update (OTA)</span>
+        <span class="svc-chip">Push (FCM / APNs)</span>
+        <span class="svc-chip">Supabase</span>
+        <span class="svc-chip">Firebase</span>
+        <span class="svc-chip">REST / GraphQL</span>
+        <span class="svc-chip">Deep Links</span>
+        <span class="svc-chip">Detox</span>
+        <span class="svc-chip">Sentry</span>
+      </div>
+    </section>
+
+    <!-- PROCESS -->
+    <section class="svc-sec alt-full" aria-labelledby="procTitle">
+      <div class="svc-sec-inner">
+        <div class="svc-sec-head">
+          <p class="kicker reveal">04 — How it goes</p>
+          <h2 id="procTitle"><span class="ph" data-pixel data-ink="#ece7dd">In your hands early.</span></h2>
+          <p>You won't wait months to see your app. We get a real build onto your phone via TestFlight and
+            internal tracks within weeks — then iterate on something you can actually hold.</p>
+        </div>
+        <div class="svc-steps">
+          <div class="svc-step reveal"><span class="ss-num">01</span><div><h3>Scope the core flow</h3><p>A working session on what the app must do on day one — the one flow that matters — and what waits for later. You get a build plan and a fixed quote, not a feature wishlist.</p></div></div>
+          <div class="svc-step reveal"><span class="ss-num">02</span><div><h3>Prototype the feel</h3><p>The key screens, real navigation, real gestures — running on a device. We get the native feel right early, because that's the part a mockup can never tell you.</p></div></div>
+          <div class="svc-step reveal"><span class="ss-num">03</span><div><h3>Build with TestFlight &amp; internal builds</h3><p>The full app, wired to its backend, shipped to you continuously via TestFlight and Play internal tracks. You use each build, we fix what's off — no big-bang reveal at the end.</p></div></div>
+          <div class="svc-step reveal"><span class="ss-num">04</span><div><h3>Ship to both stores &amp; hand over</h3><p>Submission, review and release under your developer accounts. Source, signing keys and OTA pipeline are yours to keep, no lock-in. Plus 30 days of support after launch.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="svc-sec" aria-labelledby="faqTitle">
+      <div class="svc-sec-head">
+        <p class="kicker reveal">05 — Questions</p>
+        <h2 id="faqTitle"><span class="ph" data-pixel>The things you're actually asking.</span></h2>
+      </div>
+      <div class="svc-faq">
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false"><span>Native or cross-platform — why React Native and Expo, not Swift and Kotlin twice?</span><span class="faq-ico" aria-hidden="true"></span></button>
+          <div class="faq-a"><div class="faq-a-inner">Because for most apps it's the same native feel for roughly half the cost. React Native renders real native views — not a webview — so gestures, scrolling and animation hit 60fps, and we drop to Swift or Kotlin for any native module that needs it. You ship <b>one codebase to both stores</b> instead of paying two teams to build the same screens twice. When an app genuinely needs to be fully native, we'll tell you straight.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false"><span>Can you publish under our own Apple and Google developer accounts?</span><span class="faq-ico" aria-hidden="true"></span></button>
+          <div class="faq-a"><div class="faq-a-inner">Yes, and we recommend it. The apps go out under <b>your</b> Apple Developer and Google Play accounts, so you own the listings, the reviews and the users — not us. We handle the submission, review back-and-forth, signing and release. If you don't have the accounts yet, we set them up with you. No lock-in: the app and its stores are yours to keep.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false"><span>Will it work offline and send push notifications?</span><span class="faq-ico" aria-hidden="true"></span></button>
+          <div class="faq-a"><div class="faq-a-inner">Yes to both. We build offline-first where it matters — local storage and a sync layer so the app keeps working with no signal and reconciles when it's back online. Push notifications go through <b>FCM</b> on Android and <b>APNs</b> on iOS, with deep links so a tap lands the user on the right screen, not just the home screen.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false"><span>What does a mobile app cost, and how long does it take?</span><span class="faq-ico" aria-hidden="true"></span></button>
+          <div class="faq-a"><div class="faq-a-inner">A focused first version — the core flow, both stores — is typically <b>6–10 weeks</b>. After a first conversation you get a <b>fixed quote within 48 hours</b> — no open-ended hourly meters. We scope to the smallest version worth shipping, get it into TestFlight early so you're using it within weeks, then expand.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RELATED -->
+    <section class="svc-sec" aria-labelledby="relTitle">
+      <div class="svc-sec-head"><h2 id="relTitle" style="font-size:clamp(1.4rem,3vw,2rem)">Related services</h2></div>
+      <div class="svc-related">
+        <a class="svc-rel-card" href="web-apps.html"><span class="rc-name">Web Apps <span class="rc-arr">→</span></span><span class="rc-desc">The same product on the web — fast, scalable, sharing one backend with the app.</span></a>
+        <a class="svc-rel-card" href="ai-tools.html"><span class="rc-name">AI Tools &amp; Agents <span class="rc-arr">→</span></span><span class="rc-desc">AI features in your users' pockets — RAG, agents and automation, in-app.</span></a>
+        <a class="svc-rel-card" href="design-brand.html"><span class="rc-name">Design &amp; Brand <span class="rc-arr">→</span></span><span class="rc-desc">Icon, splash, store screenshots and a brand the app store actually rewards.</span></a>
+      </div>
+    </section>
+
+    <!-- CTA BAND -->
+    <section class="svc-cta-band" aria-labelledby="ctaTitle">
+      <h2 id="ctaTitle">Got an app to get into both stores?</h2>
+      <p>Tell us what it should do on day one. Within 24 hours you'll hear back with an honest take on the
+        approach — native or cross-platform — and what a first version would look like.</p>
+      <a href="../contact.html" class="btn-dark">Start an app project <span class="arr">→</span></a>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>© <span id="year">2026</span> McCain Digital · Bavaria, Germany</span>
+    <div class="f-links">
+      <a class="f-recall" href="https://whatever-recall.com" target="_blank" rel="noopener"><img
+          src="../recall-logo-128.png" width="18" height="18" alt="" loading="lazy" decoding="async"><span
+          class="recall-wordmark">whatever-<span class="hl">recall</span></span></a>
+      <a class="f-git" href="https://github.com/heidrich" target="_blank" rel="noopener" aria-label="McCain Digital on GitHub"><svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg></a>
+      <a href="../legal/imprint.html">Imprint</a>
+      <a href="../legal/privacy.html">Privacy</a>
+      <a href="../legal/terms.html">Terms</a>
+      <a href="../legal/withdrawal.html">Withdrawal</a>
+      <button type="button" class="consent__reopen" onclick="window.MCD_openConsent&&window.MCD_openConsent()">Cookie settings</button>
+    </div>
+  </footer>
+
+  <script src="../pixel-engine.js?v=h6" defer></script>
+  <script src="../mega.js" defer></script>
+  <script src="../consent.js" defer></script>
+  <script src="../svc-page.js" defer></script>
+</body>
+
+</html>
