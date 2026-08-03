@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<!-- Served from any depth, so every asset path here is root-absolute — a
+     relative path would break for /services/typo.html. data-root stays "."
+     for the same reason: menu.js builds "/index.html"-style links from it. -->
+<html lang="en" data-theme="dark" data-root="">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Not found — McCain Digital</title>
+  <meta name="robots" content="noindex, follow">
+  <meta name="description" content="That page does not exist. Everything the site does have is one keystroke away.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#0d0c0a">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/v3.css">
+</head>
+
+<body>
+
+  <nav class="nav" id="nav" aria-label="Main navigation">
+    <a class="logo" href="/index.html#top">mccain <i>digital</i><span class="sr-only"> — home</span></a>
+
+    <span class="nav-status">
+      <i class="ns-dot" aria-hidden="true"></i>
+      <b>München</b> · available for new projects
+    </span>
+
+    <div class="nav-right">
+      <button class="menu-t" type="button" data-menu-open aria-haspopup="dialog" aria-controls="cmenu">
+        <i aria-hidden="true"></i>Menu <kbd data-menu-key>⌘K</kbd>
+      </button>
+      <button class="theme-t" id="themeT" type="button" aria-label="Switch between light and dark">
+        <svg class="t-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.2" />
+          <path d="M12 2v2.6M12 19.4V22M2 12h2.6M19.4 12H22M4.9 4.9l1.9 1.9M17.2 17.2l1.9 1.9M19.1 4.9l-1.9 1.9M6.8 17.2l-1.9 1.9" />
+        </svg>
+        <svg class="t-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <path d="M20 14.2A8.4 8.4 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2Z" />
+        </svg>
+      </button>
+      <a class="btn" href="/contact.html">Start a project</a>
+    </div>
+  </nav>
+
+  <main id="top">
+    <section class="band">
+      <div class="wrap ctaband" style="padding-top:6vh">
+        <p class="label" style="justify-content:center">Error 404</p>
+        <h1 class="hero-h" style="font-size:clamp(2.4rem,7vw,6.2rem);text-align:center">
+          <span class="ph" data-pixel>This page doesn't exist.</span>
+        </h1>
+        <p class="lead">Either it moved, or the link was wrong. Nothing is broken on your side.</p>
+        <!-- data-menu-key: menu.js swaps this for ⌘K or Ctrl K depending on the
+             platform, same as the trigger in the nav -->
+        <p class="lead">Everything the site does have is one keystroke away — press
+          <kbd class="k404" data-menu-key>⌘K</kbd> or <kbd class="k404">/</kbd> and start typing. You can
+          also just ask a question there and get an answer.</p>
+        <div class="hero-ctas" style="justify-content:center;margin-top:2rem">
+          <a class="btn" href="/index.html#top">Back to the start
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </a>
+          <a class="btn btn--ghost" href="/contact.html" data-magnet>Tell us what you were looking for</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="band band--tight">
+      <div class="wrap">
+        <div class="rel">
+          <a class="rel-c" href="/services/ai-tools.html">
+            <span class="rel-n">AI tools <i aria-hidden="true">→</i></span>
+            <span class="rel-d">RAG on your own data, agents with guardrails, MCP into your systems.</span>
+          </a>
+          <a class="rel-c" href="/services/web-apps.html">
+            <span class="rel-n">Web apps <i aria-hidden="true">→</i></span>
+            <span class="rel-d">React and Next.js products, green vitals from day one.</span>
+          </a>
+          <a class="rel-c" href="/services/websites.html">
+            <span class="rel-n">Websites <i aria-hidden="true">→</i></span>
+            <span class="rel-d">Marketing sites with a perfect Lighthouse.</span>
+          </a>
+          <a class="rel-c" href="/services/software.html">
+            <span class="rel-n">Software for companies <i aria-hidden="true">→</i></span>
+            <span class="rel-d">Dashboards, internal tools and integrations.</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-in">
+      <a class="logo" href="/index.html#top">mccain <i>digital</i></a>
+      <span>© 2026 · Bavaria, Germany</span>
+      <div class="foot-links">
+        <a href="/index.html#work">Work</a>
+        <a href="/index.html#services">Services</a>
+        <a href="/index.html#ai">AI</a>
+        <a href="/contact.html">Contact</a>
+      </div>
+      <div class="foot-legal">
+        <a href="/legal/imprint.html">Imprint</a>
+        <a href="/legal/privacy.html">Privacy</a>
+        <a href="/legal/terms.html">Terms</a>
+        <a href="/legal/withdrawal.html">Withdrawal</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ORDER IS LOAD-BEARING — see index.html. No pacman.js: the scroll bar is
+       pointless on a page this short. -->
+  <script src="/data.js" defer></script>
+  <script src="/pixel-engine.js" defer></script>
+  <script src="/common.js" defer></script>
+  <script src="/menu.js" defer></script>
+</body>
+
+</html>

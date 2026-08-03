@@ -1,0 +1,411 @@
+/* ============================================================
+   McCain Digital — the shared page runtime.
+
+   Everything EVERY page needs: the webfont hand-off to the pixel
+   engine, the theme switch, the nav, magnetic buttons, the velocity
+   marquee, the tooltip card and the pixel boot.
+
+   Page-specific widgets live in the page's own script (v3.js for the
+   home page, svc.js for the service pages). This file must load right
+   after data.js and BEFORE those, because it publishes window.MCDUI.
+
+   Nothing in here assumes an element exists — a page that has no
+   marquee simply gets no marquee.
+   ============================================================ */
+(() => {
+  "use strict";
+
+  const d = document;
+  const root = d.documentElement;
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const fine = matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+  // pages below the root set data-root=".." on <html>; same contract as menu.js
+  const ROOT = root.dataset.root || ".";
+
+  /* ============================================================
+     1) WEBFONT → PIXEL ENGINE
+     The rasterizer draws through an SVG foreignObject, which cannot
+     reach document fonts. Embed the face as a data-URI so pixel
+     headlines are built from the REAL typeface, not the fallback.
+     ============================================================ */
+  function embedFont() {
+    return fetch(ROOT + "/fonts/schibsted-normal-latin.woff2")
+      .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error("font"))))
+      .then((buf) => {
+        const bytes = new Uint8Array(buf);
+        let bin = "";
+        for (let i = 0; i < bytes.length; i += 1) bin += String.fromCharCode(bytes[i]);
+        window.PixelFXFontCSS =
+          '@font-face{font-family:"Schibsted Grotesk";font-weight:100 900;src:url(data:font/woff2;base64,' +
+          btoa(bin) + ') format("woff2")}';
+      })
+      .catch(() => { /* fall back to the system face — effect still works */ });
+  }
+
+  /* ============================================================
+     2) THEME
+     ============================================================ */
+  let pixelHosts = [];
+  const themeBtn = d.getElementById("themeT");
+
+  try {
+    const saved = localStorage.getItem("mcd-v3-theme");
+    if (saved === "light" || saved === "dark") root.dataset.theme = saved;
+  } catch { /* private mode — keep the default */ }
+
+  if (themeBtn) {
+    let themeRedraw = null;
+    themeBtn.addEventListener("click", () => {
+      const next = root.dataset.theme === "dark" ? "light" : "dark";
+      root.dataset.theme = next;
+      try { localStorage.setItem("mcd-v3-theme", next); } catch { /* ignore */ }
+
+      // The pixel fields hold the OLD colours and have to be re-sampled — but
+      // NOT before the .5s colour transition has landed, or the rasterizer
+      // captures a half-faded value and the headline stays invisible on paper.
+      clearTimeout(themeRedraw);
+      themeRedraw = setTimeout(() => {
+        pixelHosts.forEach((h) => { if (h && h.redraw) h.redraw(); });
+      }, 600);
+    });
+  }
+
+  /* ============================================================
+     3) NAV — condense on scroll
+     The nav does NOT auto-hide. Pac-Man's line is a separate fixed
+     canvas — sliding the bar away left him drawing over random page
+     content with nothing behind him, which read as a broken element.
+     ============================================================ */
+  const nav = d.getElementById("nav");
+  if (nav) {
+    addEventListener("scroll", () => {
+      nav.classList.toggle("stuck", scrollY > 24);
+    }, { passive: true });
+  }
+
+  /* ============================================================
+     4) MAGNETIC BUTTONS
+     (no custom cursor ring — Pac-Man owns the pointer gags)
+     ============================================================ */
+  if (fine && !reduced) {
+    d.querySelectorAll("[data-magnet]").forEach((el) => {
+      el.addEventListener("pointermove", (e) => {
+        const r = el.getBoundingClientRect();
+        const mx = e.clientX - (r.left + r.width / 2);
+        const my = e.clientY - (r.top + r.height / 2);
+        el.style.transform = `translate(${mx * 0.22}px, ${my * 0.3}px)`;
+      });
+      el.addEventListener("pointerleave", () => { el.style.transform = ""; });
+    });
+  }
+
+  /* ============================================================
+     5) VELOCITY MARQUEE — scroll speed drives speed, skew, direction
+     ============================================================ */
+  const vmq = d.getElementById("vmq");
+  if (vmq && !reduced) {
+    vmq.innerHTML += vmq.innerHTML;          // seamless second copy
+    let x = 0, vel = 0, raf = null, halfW = 0;
+
+    // scrollWidth forces a synchronous layout. Reading it per frame — right
+    // after writing a transform on the same element — was a guaranteed reflow
+    // every frame. The track's width only changes on resize and once the
+    // webfont swaps in, so measure it exactly there.
+    //
+    // And NOT eagerly here: reading it straight after doubling the markup made
+    // the browser lay out the whole, now very wide, track in the middle of the
+    // boot script — 125 ms of forced reflow. run() measures on its first frame
+    // instead, by which point layout has happened anyway.
+    const measureMq = () => { halfW = vmq.scrollWidth / 2; };
+    addEventListener("resize", measureMq);
+    if (d.fonts && d.fonts.ready) d.fonts.ready.then(measureMq);
+
+    if (window.PixelFX && PixelFX.onVelocity) PixelFX.onVelocity((v) => { vel = v; });
+
+    const run = () => {
+      const speed = 0.55 + vel * 0.42;       // scrolling up pushes it backwards
+      x -= speed;
+      if (!halfW) measureMq();               // first frames before layout settles
+      const h = halfW;
+      if (h > 0) {
+        if (x <= -h) x += h;
+        if (x > 0) x -= h;
+      }
+      vmq.style.transform = `translate3d(${x}px,0,0) skewX(${(-vel * 0.28).toFixed(2)}deg)`;
+      raf = requestAnimationFrame(run);
+    };
+
+    // Only animate while the strip is actually on screen. It used to hold a
+    // rAF loop writing a transform for the entire life of the page — invisible
+    // work that still costs main-thread time and battery on every scroll.
+    new IntersectionObserver((entries) => {
+      const on = entries[0].isIntersecting;
+      if (on && !raf) raf = requestAnimationFrame(run);
+      else if (!on && raf) { cancelAnimationFrame(raf); raf = null; }
+    }, { rootMargin: "120px 0px" }).observe(vmq.parentElement);
+  }
+
+  /* ============================================================
+     6) CHIP TOOLTIPS
+     ONE fixed card on <body> — it escapes every section's overflow
+     and never touches layout, so it cannot cost a millisecond of CLS.
+
+     Delegated from the document, not bound per element: the scores on
+     the home page are rendered by a later script, and binding directly
+     would have made this file's load order load-bearing.
+     ============================================================ */
+  (() => {
+    const TIPS = (window.MCD && window.MCD.TIPS) || {};
+    const tip = d.createElement("div");
+    tip.className = "tip";
+    tip.id = "chipTip";
+    tip.setAttribute("role", "tooltip");
+    // hidden from the a11y tree while empty — an empty role="tooltip" fails
+    // the aria-tooltip-name audit, which is a whole Accessibility point
+    tip.setAttribute("aria-hidden", "true");
+    d.body.appendChild(tip);
+    let cur = null;
+
+    function show(el) {
+      const t = TIPS[el.dataset.tip];
+      if (!t) return;
+      cur = el;
+      tip.innerHTML = "";
+      const b = d.createElement("b");
+      b.textContent = t[0];
+      tip.appendChild(b);
+      tip.appendChild(d.createTextNode(t[1]));
+      el.setAttribute("aria-describedby", "chipTip");
+      tip.removeAttribute("aria-hidden");
+      tip.classList.add("show");
+      const r = el.getBoundingClientRect();
+      const x = Math.max(12, Math.min(innerWidth - tip.offsetWidth - 12,
+        r.left + r.width / 2 - tip.offsetWidth / 2));
+      const y = r.top - tip.offsetHeight - 10;
+      tip.style.left = x + "px";
+      tip.style.top = (y < 12 ? r.bottom + 10 : y) + "px";
+    }
+    function hide() {
+      if (cur) cur.removeAttribute("aria-describedby");
+      cur = null;
+      tip.classList.remove("show");
+      tip.setAttribute("aria-hidden", "true");
+    }
+
+    // every chip must be reachable by keyboard, whenever it appears
+    const focusable = (el) => {
+      if (!el.hasAttribute("tabindex") && !/^(A|BUTTON|INPUT)$/.test(el.tagName)) {
+        el.setAttribute("tabindex", "0");
+      }
+    };
+    // One pass, once every deferred script has run — the home page renders its
+    // score chips in v3.js, which loads after this file. NOT a MutationObserver
+    // on <body>: the typewriter rewrites innerHTML every ~9 ms, so the observer
+    // fired a document-wide querySelectorAll for every character typed.
+    const markAll = () => d.querySelectorAll("[data-tip]").forEach(focusable);
+    if (d.readyState === "complete") markAll();
+    else d.addEventListener("DOMContentLoaded", markAll);
+
+    d.addEventListener("pointerover", (e) => {
+      if (e.pointerType !== "mouse") return;
+      const chip = e.target.closest("[data-tip]");
+      if (chip && chip !== cur) show(chip);
+    });
+    d.addEventListener("pointerout", (e) => {
+      const chip = e.target.closest("[data-tip]");
+      if (chip && chip === cur && !chip.contains(e.relatedTarget)) hide();
+    });
+    d.addEventListener("focusin", (e) => {
+      const chip = e.target.closest("[data-tip]");
+      if (chip) show(chip); else if (cur) hide();
+    });
+    // a tap explains the chip instead of doing nothing at all
+    d.addEventListener("click", (e) => {
+      const chip = e.target.closest("[data-tip]");
+      if (chip) { if (cur === chip) hide(); else show(chip); return; }
+      if (cur) hide();
+    });
+    addEventListener("scroll", () => { if (cur) hide(); }, { passive: true });
+    d.addEventListener("keydown", (e) => { if (e.key === "Escape") hide(); });
+  })();
+
+  /* ============================================================
+     7) FAQ TAB WIDGET — one implementation, two content sources
+     The home page feeds it from data.js; a service page authors its
+     questions as real HTML and passes the answer nodes. Either way the
+     roles, the roving tabindex and the streaming are identical.
+
+     `role="tab"` REQUIRES a `role="tablist"` parent — without it axe
+     fails aria-required-parent, and that single rule was the whole
+     reason Accessibility once sat at 95.
+     ============================================================ */
+  function faq(list, panel, answers) {
+    if (!list || !panel || !answers.length) return;
+    const tabs = [...list.querySelectorAll(".faq-q")];
+    if (!tabs.length) return;
+    const stream = window.MCD.stream;
+    let cancel = () => { };
+
+    function show(i, focus) {
+      cancel();
+      tabs.forEach((b, n) => {
+        const on = n === i;
+        b.setAttribute("aria-selected", String(on));
+        // roving tabindex: Tab reaches the group once, arrows move inside it
+        b.tabIndex = on ? 0 : -1;
+        if (on && focus) b.focus();
+      });
+      panel.setAttribute("aria-labelledby", tabs[i].id);
+      panel.innerHTML = '<span class="label"></span><div class="a"></div>';
+      panel.querySelector(".label").textContent = tabs[i].dataset.q || tabs[i].textContent;
+      cancel = stream(panel.querySelector(".a"), answers[i]);
+    }
+
+    list.addEventListener("click", (e) => {
+      const b = e.target.closest(".faq-q");
+      if (b) show(tabs.indexOf(b));
+    });
+
+    list.addEventListener("keydown", (e) => {
+      const at = tabs.indexOf(d.activeElement);
+      if (at < 0) return;
+      const map = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 };
+      let next = null;
+      if (map[e.key]) next = (at + map[e.key] + tabs.length) % tabs.length;
+      else if (e.key === "Home") next = 0;
+      else if (e.key === "End") next = tabs.length - 1;
+      if (next === null) return;
+      e.preventDefault();
+      show(next, true);
+    });
+
+    show(0);
+  }
+
+  /* A page that authors its FAQ in HTML gets it wired here; the home page
+     renders its tabs from data.js and calls faq() itself afterwards.
+
+     The answers are indented markup, so the source has to be un-indented
+     before it reaches a pre-wrap panel: a blank line stays a paragraph break,
+     every other line wrap collapses to a single space. */
+  const clean = (s) => s.trim()
+    .split(/\n[ \t]*\n/)                                  // blank line = new paragraph
+    .map((par) => par.replace(/[ \t]*\n[ \t]*/g, " ").trim())  // a wrap is just a space
+    .join("\n\n");
+
+  const authored = d.getElementById("faqList");
+  const authoredSrc = d.getElementById("faqSrc");
+  if (authored && authoredSrc && authored.querySelector(".faq-q")) {
+    faq(authored, d.getElementById("faqPanel"),
+      [...authoredSrc.children].map((n) => clean(n.innerHTML)));
+  }
+
+  /* ============================================================
+     8) CONTACT FORM — prototype only, never silently "succeeds"
+     The home page and contact.html carry the same form, so the
+     honest-failure note lives here rather than in both.
+     ============================================================ */
+  const cForm = d.getElementById("contactForm");
+  if (cForm) {
+    cForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const note = d.getElementById("cNote");
+      if (!note) return;
+      note.innerHTML =
+        "This is the <b>design prototype</b> — nothing was sent. On the live site this posts to Web3Forms. " +
+        'Mail us directly at <a href="mailto:info@mccain-digital.com" style="text-decoration:underline">info@mccain-digital.com</a>.';
+    });
+  }
+
+  /* ============================================================
+     9) PIXEL ENGINE — headlines, buttons, pictures
+     ============================================================ */
+  // card selector → the box the engine samples, and how coarse the grid is
+  const IMG_TARGETS = [
+    { card: ".case", box: ".case-img", o: { gap: 4, size: 4, radius: 70, force: 2.8 } },
+    { card: ".pcard", box: ".px-img", o: { gap: 3.5, size: 3.5, radius: 60, force: 3.2 } },
+    { card: ".shot", box: ".shot-img", o: { gap: 4, size: 4, radius: 70, force: 2.8 } }
+  ];
+
+  function bootPixels() {
+    if (!window.PixelFX) return;
+    pixelHosts = [...d.querySelectorAll("[data-pixel]")].map(PixelFX.headline);
+
+    // headline() only prepares the field — the page decides WHEN it assembles.
+    // One shot each, the moment it scrolls into view.
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        const inst = pixelHosts.find((h) => h.host === e.target);
+        if (inst) inst.play();
+        io.unobserve(e.target);
+      });
+    }, { threshold: 0.5, rootMargin: "0px 0px -6% 0px" });
+    pixelHosts.forEach((h) => io.observe(h.host));
+
+    let rt = null;
+    addEventListener("resize", () => {
+      clearTimeout(rt);
+      rt = setTimeout(() => pixelHosts.forEach((h) => h.redraw()), 160);
+    });
+
+    // Buttons disintegrate on hover and vacuum the pixels back in on click.
+    // EVERY yellow button gets it — the primary CTAs, the console's send key
+    // and the "Open →" pill on each case — so the effect reads as the rule,
+    // not as a decoration on two of them. Ghost buttons keep the magnetic pull
+    // instead; two effects on one element fight each other.
+    if (PixelFX.button) {
+      d.querySelectorAll(".btn:not(.btn--ghost), .console-send, .case-peek")
+        .forEach((b) => PixelFX.button(b));
+    }
+
+    // Pictures assemble out of a pixel swarm when they scroll in, then hand
+    // themselves back sharp — and re-pixelate under the pointer. The reveal is
+    // NOT gated on hover support: a phone gets the assembly, it just never
+    // gets the black hole.
+    if (PixelFX.image && !reduced) {
+      const imgFx = new Map();
+
+      const revealIO = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          const fx = imgFx.get(e.target);
+          if (fx) fx.reveal();
+          revealIO.unobserve(e.target);
+        });
+      }, { threshold: 0.3 });
+
+      // the engine wants the CONTAINER (it finds the <img> itself and appends
+      // its canvas there); it returns null when there is nothing to sample
+      const wire = (card, box, opts) => {
+        const fx = box && PixelFX.image(box, opts);
+        if (!fx) return;
+        imgFx.set(box, fx);
+        revealIO.observe(box);
+        if (PixelFX.noHover) return;
+        card.addEventListener("pointerenter", () => fx.enter("hover"));
+        card.addEventListener("pointerleave", () => fx.leave("hover"));
+        card.addEventListener("focusin", () => fx.enter("focus"));
+        card.addEventListener("focusout", () => fx.leave("focus"));
+      };
+
+      IMG_TARGETS.forEach((t) => {
+        d.querySelectorAll(t.card).forEach((card) => {
+          wire(card, card.querySelector(t.box), Object.assign({ track: card }, t.o));
+        });
+      });
+    }
+  }
+
+  // The page scripts run between this file and the boot: they clone the work
+  // track and render the service cards synchronously, so by the time the font
+  // promise resolves the DOM the engine walks is already complete.
+  if (d.fonts && d.fonts.ready) {
+    Promise.all([embedFont(), d.fonts.ready]).then(bootPixels);
+  } else {
+    embedFont().then(bootPixels);
+  }
+
+  window.MCDUI = { faq, reduced, fine, ROOT };
+})();
