@@ -3,6 +3,21 @@
 Neuer Homepage-Entwurf. **Nicht live.** `upload/` (live) und `upload-v2/`
 (4×100-Vorwelle) sind unangetastet.
 
+## Git
+
+Alles liegt auf **`v2-homepage-refresh`**, gepusht nach `origin`
+(`heidrich/mccain-digital`). Der v3-Commit ist `16dabe6`, 62 Dateien.
+Der Branch ist zwei Commits vor `main`: der v2-Refresh und dieser hier.
+PR-Link steht in der Push-Ausgabe bereit, ist aber noch nicht angelegt.
+
+**Nicht committet und mit Absicht liegengelassen:** drei geänderte Dateien in
+`upload/` (`services/ai-tools.html`, `styles.css`, `svc-page.js`, zusammen
++717 Zeilen). Die stammen aus einer Session im Juni, nicht aus dieser Arbeit —
+wer sie einsammelt, sollte vorher wissen, was da halbfertig ist.
+
+`CHANGELOG.md` steht in `.gitignore` (bewusst: nur intern), wird aber trotzdem
+gepflegt — der v3-Eintrag steht unter `[Unreleased]`.
+
 ## Starten
 
 ```bash
