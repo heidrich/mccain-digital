@@ -1384,8 +1384,13 @@
     var cv = document.createElement("canvas");
     cv.className = "px-canvas";
     cv.setAttribute("aria-hidden", "true");
-    cv.style.cssText = "position:absolute;inset:0;width:100%;height:100%;opacity:0;" +
-      "transition:opacity .3s ease;pointer-events:none;z-index:2";
+    // display, NOT opacity: photo and mosaic swap with a hard cut. Two opaque
+    // layers cross-dissolving composite to 1-(1-a)^2, a dip to ~75% halfway,
+    // which read as a dark pulse on the dark cards — and the two durations
+    // (.3s canvas / .35s photo) never lined up anyway. PixelFX.button has
+    // always swapped instantly; see showPhoto/showMosaic below.
+    cv.style.cssText = "position:absolute;inset:0;width:100%;height:100%;" +
+      "display:none;pointer-events:none;z-index:2";
     container.appendChild(cv);
     // NOT willReadFrequently: this canvas is only DRAWN to (GPU path). The
     // pixel READBACK happens on a separate offscreen in build(). Mixing a
@@ -1394,6 +1399,50 @@
 
     var parts = null, W = 0, H = 0, raf = null, active = false, tainted = false;
     var mx = -9999, my = -9999;
+    // Particles live on a regular grid, indexed row*COLS+col, so the cells the
+    // black hole disturbs can be addressed by arithmetic instead of a scan.
+    var COLS = 0, ROWS = 0;
+    // The settled mosaic, rendered once. Blitted in a single drawImage per
+    // frame so only the DISTURBED pixels are ever drawn individually — see step().
+    var home = null;
+    // bounding box (grid coords) of everything currently off its home pixel
+    var dc0 = 0, dc1 = -1, dr0 = 0, dr1 = -1, dirty = false;
+
+    /* Photo <-> mosaic dissolve, done INSIDE the canvas.
+
+       Fading the two as separate CSS layers cannot look right: source-over
+       coverage is a + b(1-a), so two opaque layers passing each other dip to
+       ~75% halfway and the dark card shows through as a pulse. Here the sharp
+       photo is painted first at alpha 1 and the mosaic laid over it at alpha
+       `mix` — the composite is opaque at every step, so the picture simply
+       coarsens and resolves again. mix 0 = the photo, pixel for pixel. */
+    var photoCv = null;
+    // The effect on its own layer: the mosaic with the crater carved out of it,
+    // rendered opaque. It is composited over the photo in ONE drawImage, so the
+    // whole picture is photo*(1-mix) + effect*mix by construction and the
+    // disturbed region cannot be blended differently from its surroundings.
+    var fxCv = null, fxCtx = null;
+    // What the crater shows. Painted rather than left transparent — leaving a
+    // hole means coverage below 1 exactly where the effect is strongest, and
+    // that is what made the disturbed rectangle visible against its
+    // surroundings mid-dissolve.
+    var voidCol = "#0d0c0a";
+    /* How far the crater goes toward that colour. 1 is a clean cut-out, which
+       is what the hole used to be — and on the light theme that put a hard
+       white disc in the middle of a dark photo, the case the owner flagged.
+       Below 1 the mosaic stays faintly present inside the hole, so it reads as
+       the picture being pulled apart rather than a shape stamped over it. The
+       Claude-Design original avoids the same problem differently: its blocks
+       are smaller than the grid (`size = gap - 1.2`), so the background shows
+       through everywhere and the hole is never a foreign element. That look
+       screens every picture toward the page colour, which the owner's solid
+       mosaic deliberately does not — hence this knob instead. */
+    var VOID = opts.voidStrength || 0.62;
+    // The one knob for how soft the change reads. What the eye calls "hard" is
+    // the steepest part in the middle, and easeInOutCubic peaks at 3/FADE — so
+    // stretching the duration is what softens it, not a different curve.
+    var FADE = 640;
+    var mix = 0, mixFrom = 0, mixTo = 0, mixT0 = 0, fading = false;
 
     // Assemble-on-reveal. The crisp photo is hidden for one frame, the mosaic
     // swarms in from a scatter, condenses, and hands the picture back sharp.
@@ -1403,37 +1452,168 @@
     var revealState = "idle";            // idle | assembling | done
     var aRaf = null, aT0 = 0;
 
+    /* The LAYOUT box of the picture, never getBoundingClientRect().
+
+       getBoundingClientRect returns the axis-aligned HULL of a transformed
+       element. The portraits under (05) are rotated, and their scroll drift
+       ANIMATES that rotation (-6.5deg to -1.2deg), so the hull runs up to 13%
+       wider and 8% taller than the box — by an amount that depends on where
+       the page happens to be scrolled. The canvas is pinned to the box
+       (`inset:0; width:100%; height:100%`), so a field built at hull size is
+       displayed squashed, unevenly in x and y: the picture visibly changed
+       height the moment hover handed it to the canvas. Computed width/height
+       are used values in the element's own coordinate system — transform-free
+       by definition, and stable while the drift runs. */
+    function boxSize() {
+      var cs = getComputedStyle(container);
+      var w = parseFloat(cs.width), h = parseFloat(cs.height);
+      if (w > 0 && h > 0) return [w, h];
+      var r = container.getBoundingClientRect();   // display:none etc.
+      return [r.width, r.height];
+    }
+
     // Build the particle field from the image once (cover-fit, sampled at GAP).
     function build() {
-      var r = container.getBoundingClientRect();
-      W = Math.max(1, Math.round(r.width)); H = Math.max(1, Math.round(r.height));
+      var sz = boxSize();
+      W = Math.max(1, Math.round(sz[0])); H = Math.max(1, Math.round(sz[1]));
       cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
       if (!img.complete || !img.naturalWidth) return false;
-      // draw a cover-fit copy into an offscreen at CSS resolution, read pixels
+      COLS = Math.ceil(W / GAP); ROWS = Math.ceil(H / GAP);
+      /* Sample at GRID resolution — one texel per cell, so the browser's
+         downscale AVERAGES each cell instead of us point-sampling its top-left
+         pixel. The mosaic stops speckling on fine detail (code, circuitry), and
+         the readback is COLS*ROWS instead of W*H: 14k pixels on a work card
+         rather than 224k. Taken from the Claude-Design original in
+         `_v2-preview/assets/5e7a8095-*.js`, which does the same thing.
+         It also retires the old fractional-GAP hazard: cells are addressed by
+         integer index now, so no coordinate can land between RGBA bytes. */
       var off = document.createElement("canvas");
-      off.width = W; off.height = H;
+      off.width = COLS; off.height = ROWS;
       var octx = off.getContext("2d", { willReadFrequently: true });
-      var ir = img.naturalWidth / img.naturalHeight, cr = W / H, sw, sh, sx, sy;
-      if (ir > cr) { sh = img.naturalHeight; sw = sh * cr; sx = (img.naturalWidth - sw) / 2; sy = 0; }
-      else { sw = img.naturalWidth; sh = sw / cr; sx = 0; sy = (img.naturalHeight - sh) / 2; }
-      octx.drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
+      /* Cover-fit by DESTINATION rect, never by a source rect.
+
+         The tempting version computes a crop from naturalWidth/naturalHeight
+         and passes it as drawImage's 9-argument source rectangle. That is
+         wrong for any <img> fed by srcset: naturalWidth reports the
+         DENSITY-CORRECTED size in CSS px, while drawImage reads its source
+         rectangle in RAW bitmap pixels. code-screen-640.webp is 640x440 on
+         disk and reports 559x384 — so the crop grabbed the top-left 87% and
+         the mosaic sat zoomed over the photo. On a display that picks the
+         1200w candidate at density 2 it grabbed a QUARTER: the picture
+         appeared at 200%, anchored top-left. Every card, every picture.
+
+         The 5-argument form scales the WHOLE image into a destination rect,
+         so no bitmap-space size is ever named and the ambiguity cannot
+         return. Only the ASPECT is read from natural*, and a ratio is
+         density-independent. This is exactly `object-fit: cover`. */
+      var ir = img.naturalWidth / img.naturalHeight, cr = W / H, dw, dh;
+      if (ir > cr) { dh = H; dw = H * ir; }      // wider than the box: crop sides
+      else { dw = W; dh = W / ir; }              // taller: crop top and bottom
+      // the same rectangle expressed in cells. The aspect still comes from the
+      // BOX (W/H), not from COLS/ROWS — those carry a rounding error, and the
+      // crop has to keep matching object-fit:cover exactly (tools/pixel_scale.sh)
+      octx.drawImage(img, (W - dw) / 2 / GAP, (H - dh) / 2 / GAP, dw / GAP, dh / GAP);
       var data;
-      try { data = octx.getImageData(0, 0, W, H).data; }
+      try { data = octx.getImageData(0, 0, COLS, ROWS).data; }
       catch (e) { tainted = true; return false; }   // cross-origin → give up
-      parts = [];
-      for (var y = 0; y < H; y += GAP) {
-        for (var x = 0; x < W; x += GAP) {
-          // index MUST use integer pixel coords — a fractional GAP would land
-          // between RGBA bytes and read garbage (green tint bug). Floor them.
-          var ix = Math.floor(x), iy = Math.floor(y);
-          var i = (iy * W + ix) * 4;
-          parts.push({
-            tx: x, ty: y, cx: x, cy: y, vx: 0, vy: 0,
+      parts = new Array(COLS * ROWS);
+      for (var row = 0; row < ROWS; row++) {
+        for (var col = 0; col < COLS; col++) {
+          var k = row * COLS + col, i = k * 4;
+          parts[k] = {
+            tx: col * GAP, ty: row * GAP, cx: col * GAP, cy: row * GAP, vx: 0, vy: 0,
             col: "rgb(" + data[i] + "," + data[i + 1] + "," + data[i + 2] + ")"
-          });
+          };
         }
       }
+      buildHome();
+      // the sharp photo at device resolution — the opaque floor under the
+      // dissolve, and what the crater shows through while the mosaic fades in
+      photoCv = document.createElement("canvas");
+      photoCv.width = cv.width; photoCv.height = cv.height;
+      var pc = photoCv.getContext("2d");
+      pc.setTransform(DPR, 0, 0, DPR, 0, 0);
+      pc.drawImage(img, (W - dw) / 2, (H - dh) / 2, dw, dh);
+      fxCv = document.createElement("canvas");
+      fxCv.width = cv.width; fxCv.height = cv.height;
+      fxCtx = fxCv.getContext("2d");
+      readVoid();
+      dirty = false;
       return true;
+    }
+
+    // The colour behind the canvas — what the crater used to reveal through a
+    // transparent hole and now gets painted with. First ancestor that actually
+    // has a background wins; it differs per theme and per host (.case is
+    // --card, a .shot sits on the band), so it is read, never assumed.
+    function readVoid() {
+      var el = container;
+      while (el && el !== document.documentElement) {
+        var bg = getComputedStyle(el).backgroundColor;
+        if (bg && bg !== "transparent" && bg.indexOf("rgba(0, 0, 0, 0)") !== 0) {
+          voidCol = bg;
+          return;
+        }
+        el = el.parentElement;
+      }
+    }
+
+    /* easeInOutCubic — slow at both ends. A linear dissolve reads as a switch
+       with a delay in the middle; this one has no moment where it "starts". */
+    function ease(t) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    // start (or reverse) the dissolve. Reversing mid-fade picks up from where
+    // it is, so flicking the pointer on and off never snaps.
+    function fadeTo(target) {
+      if (mixTo === target && fading) return;
+      mixFrom = mix; mixTo = target; mixT0 = performance.now();
+      fading = mix !== target;
+    }
+
+    function tickMix(now) {
+      if (!fading) return;
+      var t = (now - mixT0) / (FADE * Math.abs(mixTo - mixFrom) || 1);
+      if (t >= 1) { mix = mixTo; fading = false; return; }
+      mix = mixFrom + (mixTo - mixFrom) * ease(t);
+    }
+
+    // The mosaic at rest is a still picture, so it is drawn ONCE here and
+    // blitted per frame. Blocks tile exactly (every caller passes size === gap),
+    // so draw order carries no meaning.
+    function buildHome() {
+      home = document.createElement("canvas");
+      home.width = cv.width; home.height = cv.height;
+      var hc = home.getContext("2d");
+      hc.setTransform(DPR, 0, 0, DPR, 0, 0);
+      for (var k = 0; k < parts.length; k++) {
+        var p = parts[k];
+        hc.fillStyle = p.col;
+        hc.fillRect(p.tx, p.ty, SIZE, SIZE);
+      }
+    }
+
+    // grow the disturbed box to cover a cell range, clamped to the grid
+    function markCells(c0, c1, r0, r1) {
+      if (c0 < 0) c0 = 0;
+      if (r0 < 0) r0 = 0;
+      if (c1 > COLS - 1) c1 = COLS - 1;
+      if (r1 > ROWS - 1) r1 = ROWS - 1;
+      if (c1 < c0 || r1 < r0) return;
+      if (!dirty) { dc0 = c0; dc1 = c1; dr0 = r0; dr1 = r1; dirty = true; return; }
+      if (c0 < dc0) dc0 = c0;
+      if (c1 > dc1) dc1 = c1;
+      if (r0 < dr0) dr0 = r0;
+      if (r1 > dr1) dr1 = r1;
+    }
+
+    function parkHome() {
+      for (var k = 0; k < parts.length; k++) {
+        var p = parts[k];
+        p.cx = p.tx; p.cy = p.ty; p.vx = 0; p.vy = 0;
+      }
+      dirty = false;
     }
 
     /* ---- the reveal: scatter → home, then hand back to the real photo ---- */
@@ -1460,21 +1640,30 @@
       settleHome();
     }
 
-    // every particle parked exactly on its home pixel, mosaic out, photo in
+    // every particle parked on its home pixel, then the mosaic resolves back
+    // into focus instead of cutting — same dissolve the hover uses
     function settleHome() {
       revealState = "done";
-      for (var k = 0; k < parts.length; k++) {
-        var p = parts[k];
-        p.cx = p.tx; p.cy = p.ty; p.vx = 0; p.vy = 0;
-      }
-      if (active) return;                        // a hover took over mid-flight
-      showImg();
-      cv.style.opacity = "0";
+      parkHome();
+      mix = 1;
+      if (active) { fading = false; mixTo = 1; return; }  // hover took over mid-flight
+      fadeTo(0);
+      run();
     }
 
-    function showImg() {
-      img.style.transition = "opacity .35s ease";
+    /* The <img> only ever swaps with the canvas at mix 0 or 1, where the two
+       are the same picture — so the swap itself is invisible and all the
+       softness lives in the dissolve inside the canvas. */
+    function showPhoto() {
+      cv.style.display = "none";
+      img.style.transition = "none";
       img.style.opacity = "1";
+    }
+
+    function showMosaic() {
+      img.style.transition = "none";
+      img.style.opacity = "0";
+      cv.style.display = "block";
     }
 
     function reveal() {
@@ -1492,40 +1681,128 @@
         p.cx = p.sx; p.cy = p.sy;
         p.dly = Math.random() * STAGGER;
       }
-      // hide the photo WITHOUT a transition — a cross-fade here would show the
+      // the photo goes without a transition — a cross-fade here would show the
       // sharp picture dissolving, which is the opposite of assembling one
-      img.style.transition = "none";
-      img.style.opacity = "0";
-      cv.style.opacity = "1";
+      showMosaic();
+      mix = 1; fading = false; mixTo = 1;   // the swarm IS the mosaic, no floor under it
       revealState = "assembling";
       aT0 = performance.now();
       aRaf = requestAnimationFrame(assembleStep);
     }
 
-    function step() {
-      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-      ctx.clearRect(0, 0, W, H);
-      var moving = false;
-      for (var k = 0; k < parts.length; k++) {
-        var p = parts[k];
-        // black-hole push (only while pointer is inside)
-        if (mx > -9000) {
-          var dx = p.cx - mx, dy = p.cy - my, d2 = dx * dx + dy * dy;
-          if (d2 < R * R) {
-            var dist = Math.sqrt(d2) || 0.001, fr = (1 - dist / R) * FORCE;
-            p.vx += (dx / dist) * fr; p.vy += (dy / dist) * fr;
+    /* One frame of the black hole.
+
+       The cost of this loop is the whole reason images felt laggy where the
+       buttons never did: a button samples ~400 particles, a work card 14,157,
+       and the old loop cleared the canvas and redrew EVERY one of them —
+       measured at 5.15 ms/frame on the work card at DPR 1, two thirds of it
+       spent re-parsing an "rgb(...)" string per particle. At DPR 2 that alone
+       overruns the frame budget, so it dropped every other frame.
+
+       The hole only ever reaches R around the pointer, so at rest the picture
+       is a still image. It is blitted from `home` in one drawImage, and only
+       the disturbed box is cleared and repainted particle by particle:
+       0.54 ms/frame for the same card. The cost now follows the hole, not the
+       size of the picture. */
+    function step(now) {
+      tickMix(now || performance.now());
+
+      /* --- 1. the effect, on its own layer, at full strength ---
+         Everything the black hole does happens here, opaque throughout: the
+         settled mosaic, then the disturbed box wiped, filled with the colour
+         behind the canvas (the crater) and repainted from the live physics.
+         Earlier this was composited straight onto the main canvas with the
+         photo at `1-mix` inside the box and `1` outside, which blended the
+         disturbed region differently from its surroundings — the faint
+         rectangle the owner could see mid-dissolve. Nothing here knows about
+         `mix`, so that cannot come back. */
+      fxCtx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      fxCtx.globalAlpha = 1;
+      fxCtx.clearRect(0, 0, W, H);
+      fxCtx.drawImage(home, 0, 0, W, H);         // every pixel back at home
+
+      // nothing outside R of the pointer can be pushed this frame
+      if (mx > -9000) {
+        markCells(Math.floor((mx - R) / GAP), Math.ceil((mx + R) / GAP),
+          Math.floor((my - R) / GAP), Math.ceil((my + R) / GAP));
+      }
+
+      var live = false, maxOff = 0;
+      if (dirty) {
+        // Dim the disturbed box toward the page colour, then repaint the pixels
+        // opaquely where the physics put them. No clearRect: a cell whose pixel
+        // is still home gets covered again anyway, and one whose pixel has left
+        // keeps a faded imprint — that faded imprint IS the crater. Pixels
+        // flung beyond the box land on top of the blit; that overlap is the
+        // pile-up at the rim.
+        fxCtx.globalAlpha = VOID;
+        fxCtx.fillStyle = voidCol;
+        fxCtx.fillRect(dc0 * GAP, dr0 * GAP,
+          (dc1 - dc0) * GAP + SIZE, (dr1 - dr0) * GAP + SIZE);
+        fxCtx.globalAlpha = 1;
+        var nc0 = COLS, nc1 = -1, nr0 = ROWS, nr1 = -1;
+        for (var row = dr0; row <= dr1; row++) {
+          var base = row * COLS;
+          for (var col = dc0; col <= dc1; col++) {
+            var p = parts[base + col];
+            // black-hole push (only while pointer is inside)
+            if (mx > -9000) {
+              var dx = p.cx - mx, dy = p.cy - my, d2 = dx * dx + dy * dy;
+              if (d2 < R * R) {
+                var dist = Math.sqrt(d2) || 0.001, fr = (1 - dist / R) * FORCE;
+                p.vx += (dx / dist) * fr; p.vy += (dy / dist) * fr;
+              }
+            }
+            // spring back home + damping
+            p.vx += (p.tx - p.cx) * SPRING; p.vy += (p.ty - p.cy) * SPRING;
+            p.vx *= DAMP; p.vy *= DAMP; p.cx += p.vx; p.cy += p.vy;
+            var off = Math.abs(p.tx - p.cx) + Math.abs(p.ty - p.cy);
+            if (off > maxOff) maxOff = off;
+            // Off-home counts, not just moving: a pixel parked in the crater
+            // under a stationary pointer has no velocity but must stay in the
+            // box, or the next blit would paint it back home behind its back.
+            if (Math.abs(p.vx) + Math.abs(p.vy) > 0.05 || off > 0.5) {
+              live = true;
+              if (col < nc0) nc0 = col;
+              if (col > nc1) nc1 = col;
+              if (row < nr0) nr0 = row;
+              if (row > nr1) nr1 = row;
+            }
+            fxCtx.fillStyle = p.col;
+            fxCtx.fillRect(p.cx, p.cy, SIZE, SIZE);
           }
         }
-        // spring back home + damping
-        p.vx += (p.tx - p.cx) * SPRING; p.vy += (p.ty - p.cy) * SPRING;
-        p.vx *= DAMP; p.vy *= DAMP; p.cx += p.vx; p.cy += p.vy;
-        if (Math.abs(p.vx) + Math.abs(p.vy) > 0.05 ||
-            Math.abs(p.tx - p.cx) + Math.abs(p.ty - p.cy) > 0.5) moving = true;
-        ctx.fillStyle = p.col;
-        ctx.fillRect(p.cx, p.cy, SIZE, SIZE);
+        dirty = nc1 >= nc0;
+        if (dirty) { dc0 = nc0; dc1 = nc1; dr0 = nr0; dr1 = nr1; }
       }
-      if (active || moving || mx > -9000) raf = requestAnimationFrame(step);
-      else { raf = null; cv.style.opacity = "0"; showImg(); }  // settled + left → photo back
+
+      /* --- 2. one dissolve over the whole picture ---
+         Sharp photo as an opaque floor, the finished effect laid over it at
+         `mix`. Both are opaque and cover the full canvas, so coverage is 1 at
+         every step of the fade and every pixel gets the same blend — there is
+         no region with its own recipe, and so no edge and no corners. */
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      ctx.globalAlpha = 1;
+      ctx.clearRect(0, 0, W, H);
+      ctx.drawImage(photoCv, 0, 0, W, H);
+      if (mix > 0) {
+        ctx.globalAlpha = mix;
+        ctx.drawImage(fxCv, 0, 0, W, H);
+        ctx.globalAlpha = 1;
+      }
+
+      // `live && mix > 0`, not `live`: once the dissolve has run out the pixels
+      // are drawn at alpha 0, so simulating the rest of their spring tail would
+      // be work nobody can see.
+      if (active || fading || (live && mix > 0)) { raf = requestAnimationFrame(step); return; }
+
+      // Pointer gone AND the dissolve has run out: at mix 0 the canvas is the
+      // photo pixel for pixel, so handing back to the <img> is invisible. No
+      // spring-tail race and no timer any more — the dissolve, not the
+      // physics, decides when the picture is sharp again.
+      raf = null;
+      parkHome();
+      showPhoto();
     }
     function run() { if (!raf) raf = requestAnimationFrame(step); }
 
@@ -1533,9 +1810,62 @@
     // and canvas overlay don't create dead zones. Coords are mapped into the
     // canvas box; outside the box → no hole (mx set out of range).
     var trackEl = opts.track || container;
+
+    /* Client coords -> canvas coords, correct under a rotated ancestor.
+
+       Subtracting getBoundingClientRect().left/top only works for an
+       axis-aligned box. On the rotated portraits the hull's corner is not the
+       box's corner — at -6.5deg it is off by H*sin(t) ~ 54px, more than the
+       black hole's own radius — so the hole drifted away from the cursor
+       towards the edges. Rather than reconstruct the matrix from computed
+       styles (`translate`/`rotate`/`scale` are separate properties from
+       `transform`, and the drift animates them), measure the mapping: a
+       zero-sized probe placed at three known LOCAL points reports its
+       transformed position, which gives the forward affine matrix directly.
+       Invert once, cache, and drop the cache whenever the mapping can move. */
+    var mA = null, probe = null;
+    function measureMap() {
+      // One probe for the life of the card. Creating and dropping a node per
+      // pointermove is garbage on a path that runs while scrolling — and the
+      // node is 0x0 and aria-hidden, so keeping it costs nothing.
+      if (!probe) {
+        probe = document.createElement("span");
+        probe.setAttribute("aria-hidden", "true");
+        probe.style.cssText = "position:absolute;width:0;height:0;pointer-events:none";
+        container.appendChild(probe);
+      }
+      function at(x, y) {
+        probe.style.left = x + "px"; probe.style.top = y + "px";
+        var r = probe.getBoundingClientRect();   // a point's hull is the point
+        return [r.left, r.top];
+      }
+      var o = at(0, 0), ex = at(100, 0), ey = at(0, 100);
+      // columns of the forward matrix, per local px
+      var axx = (ex[0] - o[0]) / 100, axy = (ex[1] - o[1]) / 100;
+      var ayx = (ey[0] - o[0]) / 100, ayy = (ey[1] - o[1]) / 100;
+      var det = axx * ayy - ayx * axy;
+      mA = det ? {
+        ox: o[0], oy: o[1],
+        ixx: ayy / det, ixy: -ayx / det,
+        iyx: -axy / det, iyy: axx / det
+      } : null;
+    }
+    // The scroll drift animates the rotation, so the mapping is only valid for
+    // the scroll position it was measured at. Listening only while active
+    // keeps a dozen idle cards off the scroll path.
+    function dropMap() { mA = null; }
+
     function onMove(e) {
-      var r = cv.getBoundingClientRect();
-      var x = e.clientX - r.left, y = e.clientY - r.top;
+      if (!mA) measureMap();
+      var x, y;
+      if (mA) {
+        var dx = e.clientX - mA.ox, dy = e.clientY - mA.oy;
+        x = dx * mA.ixx + dy * mA.ixy;
+        y = dx * mA.iyx + dy * mA.iyy;
+      } else {
+        var r = cv.getBoundingClientRect();
+        x = e.clientX - r.left; y = e.clientY - r.top;
+      }
       if (x < -R || y < -R || x > W + R || y > H + R) { mx = -9999; my = -9999; }
       else { mx = x; my = y; }
       run();
@@ -1549,8 +1879,17 @@
     function onResize() {
       clearTimeout(rzt);
       rzt = setTimeout(function () {
-        parts = null;
-        if (active) { if (build()) run(); }
+        // Cancel BEFORE dropping the field: a frame is routinely already queued
+        // against it (a hover or the reveal), and it would run against a null
+        // parts/home one tick later.
+        if (raf) { cancelAnimationFrame(raf); raf = null; }
+        if (aRaf) { cancelAnimationFrame(aRaf); aRaf = null; revealState = "done"; }
+        parts = null; home = null; photoCv = null; fxCv = null; fxCtx = null; dirty = false;
+        dropMap();
+        // Nothing can be drawn until the field is rebuilt, so the picture goes
+        // back to the sharp photo rather than to a frozen half-drawn canvas.
+        if (active && build()) { showMosaic(); run(); }
+        else { mix = 0; fading = false; mixTo = 0; showPhoto(); }
       }, 200);
     }
     addEventListener("resize", onResize);
@@ -1565,21 +1904,30 @@
       if (reduced || noHover || tainted) return;
       if (active) return;                 // idempotent: never double-add / double-rAF
       // hovering mid-reveal hands the swarm straight over to the black hole
-      // instead of restarting it — the pixels never snap
-      if (aRaf) { cancelAnimationFrame(aRaf); aRaf = null; revealState = "done"; }
+      // instead of restarting it — the pixels never snap. The swarm is
+      // scattered across the whole picture at that moment, so the entire grid
+      // counts as disturbed; the box shrinks by itself as the pixels arrive.
+      if (aRaf) {
+        cancelAnimationFrame(aRaf); aRaf = null; revealState = "done";
+        if (parts) markCells(0, COLS - 1, 0, ROWS - 1);
+      }
       if (!parts && !build()) return;
       active = true;
-      img.style.transition = "opacity .35s ease";
-      img.style.opacity = "0";            // re-pixelate: the mosaic is what you touch
-      cv.style.opacity = "1";
+      readVoid();                         // the theme may have flipped since the build
+      showMosaic();                       // canvas takes over at mix 0 — identical picture
+      fadeTo(1);                          // ...and coarsens into the mosaic from there
       trackEl.addEventListener("pointermove", onMove);
+      dropMap();
+      addEventListener("scroll", dropMap, { passive: true });
       run();
     }
     function deactivate() {
       if (!active) return;
       active = false; mx = -9999; my = -9999;
+      fadeTo(0);   // resolves back into focus while the pixels spring home
       trackEl.removeEventListener("pointermove", onMove);
-      run();   // physics settles the pixels home, then step() hides the canvas
+      removeEventListener("scroll", dropMap);
+      run();
     }
     return {
       // one-shot, called when the picture scrolls into view
@@ -1601,10 +1949,12 @@
         srcHover = srcFocus = active = false;
         if (raf) { cancelAnimationFrame(raf); raf = null; }
         if (aRaf) { cancelAnimationFrame(aRaf); aRaf = null; }
-        showImg();
+        showPhoto();
         clearTimeout(rzt);
         removeEventListener("resize", onResize);
+        removeEventListener("scroll", dropMap);
         trackEl.removeEventListener("pointermove", onMove);
+        if (probe) { probe.remove(); probe = null; }
         cv.remove();
       }
     };

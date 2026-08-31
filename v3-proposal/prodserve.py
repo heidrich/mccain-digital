@@ -3,6 +3,17 @@
 python -m http.server sends everything raw and uncached, which makes
 render-blocking CSS look ~6x heavier than it is in production and fails
 both cache audits outright. This is the honest comparison baseline.
+
+    python prodserve.py 8897          MEASURE  — production headers, for Lighthouse
+    python prodserve.py 8898 --dev    LOOK AT  — same gzip, never cached
+
+Use the right one. In measuring mode .css/.js carry
+`max-age=31536000, immutable`, which is correct for a CDN and a trap in a
+browser: an edited stylesheet is never re-fetched, for a year. A bare
+`python -m http.server` is no safer — it sends no cache headers at all, so
+browsers fall back to heuristic caching off Last-Modified and happily serve
+a stale file too. Both have already cost an hour of chasing a fix that was
+long since on disk. --dev sends `no-store` so that cannot happen.
 """
 import gzip
 import io
@@ -21,9 +32,15 @@ class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *a, **kw):
         super().__init__(*a, directory=ROOT, **kw)
 
+    dev = False
+
     def end_headers(self):
         path = self.path.split("?")[0]
-        if path.endswith(".html") or path.endswith("/"):
+        if self.dev:
+            # no-store, not no-cache: no-cache still stores and revalidates,
+            # and a 304 off a stale Last-Modified is exactly the failure mode
+            self.send_header("Cache-Control", "no-store")
+        elif path.endswith(".html") or path.endswith("/"):
             self.send_header("Cache-Control", "no-cache")
         elif path.endswith(IMMUTABLE):
             self.send_header("Cache-Control", "public, max-age=31536000, immutable")
@@ -53,5 +70,9 @@ class Handler(SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8897
+    args = [a for a in sys.argv[1:] if not a.startswith("-")]
+    Handler.dev = "--dev" in sys.argv
+    port = int(args[0]) if args else 8897
+    print("serving %s on 127.0.0.1:%d (%s)" %
+          (ROOT, port, "DEV, no-store" if Handler.dev else "MEASURE, production headers"))
     ThreadingHTTPServer(("127.0.0.1", port), Handler).serve_forever()
