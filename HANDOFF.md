@@ -1,3 +1,64 @@
+# Uebergabe — Stand 2026-08-31, Ende der Session
+
+**Alles committet, gepusht und auf Vercel live verifiziert.** Arbeitsbaum
+sauber. Letzte fuenf Commits:
+
+```
+de13a97  fix(pixel): generate the wave palette by hue, so it stops going muddy
+465f8f9  feat(pixel): a colour wave travelling through the headlines
+6b833bc  feat(color): --acc-text, so the accent can be read on light surfaces
+864f39f  docs(lab): compare the accent yellow on paper, measured in the browser
+4b3e71d  fix(pixel): put the headline grid on whole device pixels, and keep the gap
+```
+
+## Was als Naechstes ansteht (Owner-Liste, in seiner Reihenfolge)
+
+1. **Mitlaufender KI-Assistent am Seitenrand** — Owner-Punkt 2, das groesste
+   offene Stueck: „ich moechte das unsere ai konsole, wenn ich 01. verlasse und
+   nach unten scrolle, als persoenlichen assi am rand der seite mit laufen
+   habe. zum ausklappen etc. … ich moechte zudem das der border der console
+   schoen animiert ist, gern in einen farbverlauf mit glow oder so, der
+   wandert." Die Mechanik dafuer steht: `PixelFX.wavePalette("rainbow")` gibt
+   genau die Stops, die auch die Ueberschriften benutzen — derselbe Effekt an
+   zwei Stellen, aus einer Quelle.
+2. **Mehr Leben / animierte Hintergruende** — Owner-Punkt 4. Vereinbart: EIN
+   Effekt nach dem anderen, jeder vor dem naechsten gezeigt.
+3. **`ANTHROPIC_API_KEY`** in Vercel Production setzen (Owner) plus Spend-Limit
+   in der Anthropic Console, dann `AI_MODE` in `v3.js` auf `"live"`. Ich sehe
+   den Schluessel nie.
+4. **Pixelschrift im hellen Modus** — offene Grundsatzfrage, eigener Abschnitt
+   weiter unten. Owner: „lassen wir das erstmal so."
+5. **Inhalte:** drei Kundenzitate, zwei Work-Cases, echte Portraits. Groesste
+   Luecke vor dem Livegang.
+6. **`noindex` raus** — erst beim Livegang.
+
+## Werkzeuge, die diese Session entstanden sind
+
+| | |
+|---|---|
+| `bash tools/accent_audit.sh` | jeder Akzent-Textknoten gegen seinen echten Grund, 6 Seiten x 2 Themes |
+| `_parked/pixel-lab.html` | Rastervarianten, misst Zelle/Block/Deckung selbst aus |
+| `_parked/accent-lab.html` | Gelb-Kandidaten auf Papier, misst Kontrast selbst |
+| `_parked/wave-lab.html` | Wellen-Paletten, malt die ECHTE Palette als Streifen |
+
+Alle drei Laborseiten liegen unter `_parked/` und sind per `.vercelignore`
+nicht oeffentlich — ausser man ruft sie direkt auf dem Deployment auf, was fuer
+die Abstimmung mit dem Owner genau richtig ist.
+
+## Drei Lehren aus dieser Session, die ich nicht nochmal lernen will
+
+1. **Eine Performance-Zahl gilt nur fuer die Seite und die Geste, die gemessen
+   wurden.** „p90 16,7 ms" war ein Hover auf einer Laborseite; echtes Scrollen
+   auf `index.html` ergab 50 ms.
+2. **Ein Waechter gegen einen Fehler muss mit dem Fehler verschwinden.** Meiner
+   ueberlebte seine Ursache und schaltete die Welle lautlos ab — woraufhin ich
+   zweimal „laeuft, 60 fps" meldete, waehrend nichts lief.
+3. **Vor jeder Aussage ueber eine Animation beweisen, dass sie laeuft.** Zwei
+   Farbmessungen der Canvas im Abstand von 900 ms. Die Bildrate ist kein
+   Beweis: Nichtstun laeuft immer fluessig.
+
+---
+
 # Stand 2026-08-31 — die Seite liegt jetzt im Repo-Wurzelverzeichnis
 
 **Struktur-Umzug (Owner 2026-08-31):** „die originale version die jetzt live
