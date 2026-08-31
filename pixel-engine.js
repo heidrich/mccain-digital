@@ -67,53 +67,11 @@
         var octx = off.getContext("2d");
         octx.scale(DPR, DPR);
         octx.drawImage(img, 0, 0, w, h);
-        cb(octx.getImageData(0, 0, off.width, off.height), off.width, img);
+        cb(octx.getImageData(0, 0, off.width, off.height), off.width);
       } catch (err) { cb(null, 0); }
     };
     img.onerror = function () { cb(null, 0); };
     img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
-  }
-
-  /* Sample by AVERAGING each cell, not by reading one pixel of it.
-
-     sampleField below reads the top-left pixel of every cell. On a glyph edge
-     that single pixel is often an antialiased one below the threshold, so the
-     whole cell is dropped — in the middle of a letter. That is what ate holes
-     out of the pixel headlines and made them read thinner, lighter and
-     smaller than the solid text beside them.
-
-     Drawing the rasterised text into a canvas of exactly COLS x ROWS makes the
-     browser average each cell on the downscale: one texel per cell, computed
-     from everything in it. The same fix the picture mosaic got in wave 8c.
-
-     Cell coordinates come from w/cols, not from gap: cols is ceil(w/gap), so
-     the true cell width is marginally smaller than gap and using gap would
-     drift the field to the right over a long headline. */
-  function sampleAveraged(imgEl, w, h, gap, alphaMin) {
-    var cols = Math.max(1, Math.ceil(w / gap)), rows = Math.max(1, Math.ceil(h / gap));
-    var off = document.createElement("canvas");
-    off.width = cols; off.height = rows;
-    var octx = off.getContext("2d", { willReadFrequently: true });
-    var d;
-    try {
-      octx.drawImage(imgEl, 0, 0, cols, rows);
-      d = octx.getImageData(0, 0, cols, rows).data;
-    } catch (err) { return null; }
-    var cw = w / cols, ch = h / rows, parts = [];
-    for (var r = 0; r < rows; r++) {
-      for (var c = 0; c < cols; c++) {
-        var i = (r * cols + c) * 4, a = d[i + 3];
-        if (a > alphaMin) {
-          var x = c * cw, y = r * ch;
-          parts.push({
-            hx: x, hy: y, x: x, y: y, vx: 0, vy: 0,
-            color: [d[i], d[i + 1], d[i + 2]],
-            alpha: a / 255
-          });
-        }
-      }
-    }
-    return parts;
   }
 
   /* sample an ImageData into colored particles */
@@ -190,13 +148,9 @@
       cv.width = W * DPR; cv.height = H * DPR;
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
       ctx.clearRect(0, 0, W, H);
-      rasterizeNode(txt, W, H, function (img, imgW, imgEl) {
+      rasterizeNode(txt, W, H, function (img, imgW) {
         if (img) {
-          // 70, not 120: an averaged cell on a glyph edge carries genuinely
-          // less alpha than the one interior pixel the point sampler used to
-          // read, so the old threshold would now discard the same edges twice.
-          var sampled = (imgEl && sampleAveraged(imgEl, W, H, GAP, 70)) ||
-            sampleField(img, imgW, W, H, GAP, 120);
+          var sampled = sampleField(img, imgW, W, H, GAP, 120);
           if (sampled.length) {
             parts = sampled.map(function (s) { return initPart(s.hx, s.hy, INK || rgbStr(s.color)); });
             done(true);
@@ -267,27 +221,12 @@
       if (!done) raf = requestAnimationFrame(frame); else settle();
     }
 
-    /* The RESTING field is snapped to whole device pixels.
-
-       `fillRect(x, y, 1.7, 1.7)` at a fractional position is antialiased
-       across three device pixels, none of them opaque — measured mean alpha
-       of the inked pixels was 140/255. Together with a 1.7px block on a 2.4px
-       grid (half the area covered), the white read grey and the yellow read
-       washed out; worst on the light theme, where what shows through the grid
-       is bright. Snapping makes every block solid, which more than doubles
-       the effective coverage without changing the grid.
-
-       Only the resting state: while the particles fly, soft edges are what
-       makes the motion look smooth. */
-    function snap(v) { return Math.round(v * DPR) / DPR; }
-    var BLOCK = Math.max(1, Math.round(SIZE * DPR)) / DPR;
-
     function drawStatic() {
       ctx.clearRect(0, 0, W, H);
       for (var i = 0; i < parts.length; i++) {
         var p = parts[i];
         ctx.fillStyle = p.col;
-        ctx.fillRect(snap(p.cx), snap(p.cy), BLOCK, BLOCK);
+        ctx.fillRect(p.cx, p.cy, SIZE, SIZE);
       }
     }
 
