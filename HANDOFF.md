@@ -408,39 +408,66 @@ Nicht vorab bauen, solange nicht gemessen ist, dass es nötig ist.
 4. Erst wenn die Inhalte stehen: `noindex` raus, Domain umhängen, alte
    Webspace-Fassung abschalten.
 
-## Pixel-Überschriften: Dichte und Deckung (2026-08-31)
+## Pixel-Überschriften: Raster in Gerätepixeln (2026-08-31, dritter Anlauf)
 
-**Owner:** „können wir die pixel dichte bei den pixel überschriften noch
-erhöhen … man kann das weiss und gelb ob super schwer lesen, weil es zu blass
-wirkt" und „keine transparenz bei den farben".
+**Owner:** „man kann das weiss und gelb ob super schwer lesen, weil es zu blass
+wirkt", „keine transparenz bei den farben" — und nach dem zweiten Anlauf:
+„die pixel dichte ist zu hoch, keine pixel mehr zu sehen und die performance
+ist tot."
 
-**Die Blässe war Antialiasing, nicht das Raster.** Ein 1,7-px-Block an einer
-Bruchzahl-Position wird über mehrere Gerätepixel verteilt, keines davon
-deckend — gemessene mittlere Deckkraft **140 von 255**. Jetzt zeichnen **alle
-drei** Pfade (Assemble, Physik, Ruhe) auf ganze Gerätepixel: Deckkraft 255,
-translucenter Anteil 0 %.
+**Zwei Zahlen wurden vorher geraten, jetzt sind beide abgeleitet.** Zelle und
+Block liegen auf **ganzen Gerätepixeln**, und der Block ist per Klemmung immer
+mindestens ein Gerätepixel **kleiner** als die Zelle:
 
-**Defaults 2.4/1.7 → 1.1/1.0.** Vier Mal feineres Raster, ein ganzes
-Gerätepixel pro Zelle, 83 % Zelldeckung. Farbfläche 21 % → **25,2 %**, und das
-Raster bleibt sichtbar. Kosten: keine messbaren — Hover-Sweep p90 16,7 ms bei
-23.600 Zellen statt 5.000.
+```js
+var GRID_DEV  = Math.max(2, Math.round(GAP * DPR));
+var BLOCK_DEV = Math.min(GRID_DEV - 1, Math.max(1, Math.round(SIZE * DPR)));
+```
 
-**Der Fehlversuch davor ist lehrreich und steht als Commit + Revert in der
-Historie** (`a4aee9f`, zurückgerollt mit `a607b64`): ich hatte die Blöcke
-*fetter* gemacht statt das Raster feiner — „pixel dichte erhöhen" heißt mehr
-Pixel, nicht größere. Ergebnis waren „riesen pixel" und „keine pixel mehr",
-weil sich bei Blockgröße ≥ Raster die Lücken schließen. Schlimmer noch: ich
-hatte **nur den Ruhezustand** gesnappt, also wechselte die Darstellung
-sichtbar, sobald das schwarze Loch die Pixel losließ. Daher die Regel: alle
-Zeichenpfade behandeln das Raster gleich.
+Die Klemmung ist der eigentliche Fix: *die Lücke zwischen den Blöcken IST der
+Pixeleffekt*. Sie kann nicht mehr zufallen, egal was jemand einstellt.
+`data-gap` / `data-size` sind seitdem eine **Bitte, kein Ergebnis** — mehrere
+Eingaben landen auf demselben Raster.
 
-**Varianten vergleichen:** `_parked/pixel-lab.html` rendert A–G nebeneinander
-mit echter Schrift, echter Engine und funktionierendem Loch. Sie nutzt nur
-`data-gap` / `data-size`, die die Engine ohnehin pro Überschrift unterstützt —
-also kein Sonderpfad, der veralten kann.
+**Defaults 1.1/1.0 → 3.0/2.0** (bei DPR 1: 3-px-Zelle, 2-px-Block).
+
+| Stand | Zelle/Block | Fläche eingefärbt | Deckkraft | Scroll-Median | Frames >20 ms | Hover-Median |
+|---|---|---|---|---|---|---|
+| 2.4/1.7 (Monate live) | fraktional | 21 % | **140/255** | — | — | — |
+| 1.1/1.0 (verworfen) | 1 px / 1 px | 25,2 % | 255 | **50,0 ms** | **65 %** | **66,6 ms** |
+| **3.0/2.0 (jetzt)** | 3 px / 2 px | 13,4 % | 255 | **16,7 ms** | **0 %** | **16,7 ms** |
+
+Weniger Fläche als 1.1/1.0, aber **mehr sichtbare Farbe als 2.4/1.7**: 13,4 %
+bei voller Deckkraft schlagen 21 % bei 140/255 (≈ 11,5 % effektiv). Und
+**36 % weniger Teilchen als der Stand, mit dem der Owner zufrieden war** —
+7.100 statt 11.100 in der Hero-Zeile, gegen 52.900 beim verworfenen Stand.
+
+### Meine Performance-Messung war blind — das ist die wichtigere Lehre
+
+Beim verworfenen Stand hatte ich „p90 16,7 ms, kostet nichts Messbares"
+geschrieben. Der Owner sah 20 fps. Beide Messungen stimmten: ich hatte einen
+**Hover-Sweep über eine kleine Überschrift auf der Lab-Seite** gemessen, nicht
+**Scrollen über die echte Startseite**, wo alle Felder gleichzeitig gebaut
+werden. Dieselbe Sonde auf `index.html` zeigt den Unterschied sofort und
+brutal (Tabelle oben).
+
+**Regel: eine Performance-Aussage gilt nur für die Seite und die Geste, die
+gemessen wurden.** Und vor jedem „kostet nichts" gegenprüfen, ob das
+Instrument einen bekannten schlechten Stand überhaupt als schlecht erkennt —
+das hier hätte 90 Sekunden gekostet (`git checkout <bad> -- pixel-engine.js`,
+messen, zurück).
+
+**Varianten vergleichen:** `_parked/pixel-lab.html` rendert fünf Einstellungen
+nebeneinander mit echter Schrift, echter Engine und funktionierendem Loch. Sie
+**misst jetzt jede Zeile selbst aus** (Zelle, Block, Fläche, Deckkraft) und
+schreibt das Ergebnis neben die Überschrift, statt es beschriftet zu bekommen
+— die handgeschriebenen Beschriftungen waren nach der Klemmung sofort falsch.
+Eine Zeile wird erst übernommen, wenn sie **fertig eingeblendet** ist
+(`soft > 1 %` → verwerfen); die erste Fassung maß mitten in der Animation und
+meldete „20-px-Zelle, 100 % transparent".
 
 **OFFEN — vom Owner entschieden, noch nicht gebaut:** das Akzent-Gelb misst
-**1,48:1 gegen Papier** (gegen Tinte 11,99:1). Keine Dichte behebt das.
+**1,48:1 gegen Papier** (gegen Tinte 11,99:1). Kein Raster behebt das.
 Beschlossen ist ein **dunkleres Gelb nur für helle Flächen**; gerechnet
 erreicht `#8a6d00` 4,48:1, `#806400` 5,11:1. Logo-Gelb bleibt unangetastet.
 Vor dem Einbau am Bild zeigen.

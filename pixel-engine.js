@@ -99,21 +99,26 @@
         Tunable per host via data-gap / data-size.
      ============================================================ */
   function headline(host) {
-    /* A fine grid of whole device pixels, chosen by measuring rather than by
-       eye (see _parked/pixel-lab.html, which renders these side by side).
+    /* The grid is measured in DEVICE pixels, not CSS pixels.
 
-       The old 2.4/1.7 drew a 1.7px block at a fractional position: antialiased
-       across neighbouring pixels, mean alpha 140/255, so the white read grey
-       and the yellow washed out. Going the other way — a fatter block on the
-       same coarse grid — closes the gaps and stops it reading as pixels at
-       all. 1.1/1.0 is one whole device pixel per cell on a grid four times
-       finer: no transparency anywhere, more colour than before (25% of the
-       canvas against 21%), and the grid still visible. Costs nothing
-       measurable — hover sweep p90 16.7ms, same as the coarse grid. */
-    var GAP = parseFloat(host.dataset.gap) || 1.1;
-    var SIZE = parseFloat(host.dataset.size) || 1.0;
-    // data-ink="#0f0e0c" forces EVERY pixel to one colour — used on the light
-    // paper sections where the sampled (dark-on-light) field reads too faint
+       This is the third setting for these headlines and the first one that is
+       not a guess. 2.4/1.7 drew a 1.7px block at a fractional position: the
+       browser antialiased it across neighbouring pixels and none of them came
+       out opaque — mean alpha 140/255, which is why the white read grey and
+       the yellow washed out. Making the block fatter on the same grid closed
+       the gaps and stopped it reading as pixels. Making the grid four times
+       finer (1.1/1.0) fixed the colour and cost 4.8x the particles, which is
+       both slow and, again, not a pixel effect: at one whole pixel per cell
+       there is no gap left to see.
+
+       So neither number is chosen freely. The cell is a whole number of
+       device pixels and the block is a whole number of device pixels strictly
+       smaller than the cell — that is what a gap between pixels IS. 3.0/2.0
+       gives a 3px cell with a 2px block: 44% of the canvas inked at full
+       opacity, against 50% at 55% opacity before (so ~60% more colour), with
+       36% FEWER particles than 2.4/1.7 and an eighth of 1.1/1.0. */
+    var GAP = parseFloat(host.dataset.gap) || 3.0;
+    var SIZE = parseFloat(host.dataset.size) || 2.0;
     var INK = host.dataset.ink || null;
 
     var txt = document.createElement("span");
@@ -128,19 +133,22 @@
     var W = 0, H = 0, played = false, interactive = false;
     var mouseX = -9999, mouseY = -9999;
 
-    /* Every block is drawn on whole DEVICE pixels, at a size that is a whole
-       number of them.
+    /* Cell and block, both rounded to whole device pixels, once.
 
-       A fractional rect at a fractional position is antialiased across
-       neighbouring pixels and none of them ends up opaque — measured mean
-       alpha of the inked pixels was 140/255, which is what made the white read
-       grey and the yellow wash out. Snapping removes the transparency without
-       touching the colour.
+       GRID is what everything downstream steps by, so the cells land on exact
+       device pixels at any DPR — no rounding per particle, no beating pattern
+       where a fractional stride drifts in and out of alignment. BLOCK is at
+       most GRID minus one device pixel, so the gap can never close however
+       the two are tuned; that clamp is the thing that keeps it a pixel
+       effect.
 
-       Both the moving and the resting path use this. An earlier attempt
-       snapped only the resting state, so the blocks visibly changed size and
-       edge the moment the black hole let go of them. */
-    var BLOCK = Math.max(1, Math.round(SIZE * DPR)) / DPR;
+       Both the moving and the resting path draw with these. An earlier
+       attempt snapped only the resting state, so the blocks visibly changed
+       size the moment the black hole let go of them. */
+    var GRID_DEV = Math.max(2, Math.round(GAP * DPR));
+    var BLOCK_DEV = Math.min(GRID_DEV - 1, Math.max(1, Math.round(SIZE * DPR)));
+    var GRID = GRID_DEV / DPR;
+    var BLOCK = BLOCK_DEV / DPR;
     function snap(v) { return Math.round(v * DPR) / DPR; }
 
     function initPart(x, y, col) {
@@ -176,7 +184,7 @@
       ctx.clearRect(0, 0, W, H);
       rasterizeNode(txt, W, H, function (img, imgW) {
         if (img) {
-          var sampled = sampleField(img, imgW, W, H, GAP, 120);
+          var sampled = sampleField(img, imgW, W, H, GRID, 120);
           if (sampled.length) {
             parts = sampled.map(function (s) { return initPart(s.hx, s.hy, INK || rgbStr(s.color)); });
             done(true);
@@ -208,8 +216,8 @@
       var img = ctx.getImageData(0, 0, cv.width, cv.height).data;
       ctx.clearRect(0, 0, W, H);
       parts = [];
-      for (var y = 0; y < H; y += GAP) {
-        for (var x = 0; x < W; x += GAP) {
+      for (var y = 0; y < H; y += GRID) {
+        for (var x = 0; x < W; x += GRID) {
           var px = Math.floor(x * DPR), py = Math.floor(y * DPR);
           if (img[(py * cv.width + px) * 4 + 3] > 128) {
             // snap pixels just past a measured edge to the nearest segment —

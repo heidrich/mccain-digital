@@ -51,61 +51,50 @@
     <h1>Pixel density — side by side</h1>
     <p class="intro">Same words, same size, same engine. Only the grid differs. Hover each one — the
       black hole works, so you can see how a setting behaves in motion, not just at rest.</p>
-    <p class="intro"><b>A</b> is what is live right now.</p>
+    <p class="intro"><b>A</b> is the old setting, <b>B</b> the one that was too dense, <b>C</b> the default now. Note that A and B measure identically: the engine rounds both numbers to whole device pixels and keeps the block below the cell, so several requests collapse onto the same grid. That rounding is the fix — A used to render as a fractional block at a fractional position, which is what made it pale.</p>
 
     <div class="row">
-      <p class="tag">A — live today</p>
-      <p class="note">gap 2.4 · block 1.7 — block covers 50% of its cell</p>
-      <h2><span class="ph" data-pixel>Things that</span> <span class="dim">actually shipped.</span></h2>
-    </div>
-
-    <div class="row">
-      <p class="tag">B — finer grid, same look</p>
-      <p class="note">gap 1.8 · block 1.3 — more, smaller pixels. Denser in the literal sense.</p>
-      <h2><span class="ph" data-pixel data-gap="1.8" data-size="1.3">Things that</span>
+      <p class="tag">A — what was live before all of this</p>
+      <p class="note">asks for gap 2.4 / block 1.7 — the setting the site shipped with for months</p>
+      <h2><span class="ph" data-pixel data-gap="2.4" data-size="1.7">Things that</span>
         <span class="dim">actually shipped.</span></h2>
     </div>
 
     <div class="row">
-      <p class="tag">C — much finer</p>
-      <p class="note">gap 1.4 · block 1.0 — close to solid type from a normal viewing distance</p>
-      <h2><span class="ph" data-pixel data-gap="1.4" data-size="1.0">Things that</span>
-        <span class="dim">actually shipped.</span></h2>
-    </div>
-
-    <div class="row">
-      <p class="tag">D — same grid, fatter block</p>
-      <p class="note">gap 2.4 · block 2.1 — the grid stays coarse but the gaps nearly close</p>
-      <h2><span class="ph" data-pixel data-gap="2.4" data-size="2.1">Things that</span>
-        <span class="dim">actually shipped.</span></h2>
-    </div>
-
-    <div class="row">
-      <p class="tag">E — finer grid, fatter block</p>
-      <p class="note">gap 1.8 · block 1.7 — fine grid, almost no gaps</p>
-      <h2><span class="ph" data-pixel data-gap="1.8" data-size="1.7">Things that</span>
-        <span class="dim">actually shipped.</span></h2>
-    </div>
-
-    <div class="row">
-      <p class="tag">F — fine grid, gaps nearly closed</p>
-      <p class="note">gap 1.2 · block 1.0 — one whole device pixel per cell, 69% of the cell covered</p>
-      <h2><span class="ph" data-pixel data-gap="1.2" data-size="1.0">Things that</span>
-        <span class="dim">actually shipped.</span></h2>
-    </div>
-
-    <div class="row">
-      <p class="tag">G — finest that still shows a grid</p>
-      <p class="note">gap 1.1 · block 1.0 — 83% covered; below this it stops reading as pixels</p>
+      <p class="tag">B — the rejected one</p>
+      <p class="note">asks for gap 1.1 / block 1.0 — the one that read as ordinary type and dropped the page to 20fps</p>
       <h2><span class="ph" data-pixel data-gap="1.1" data-size="1.0">Things that</span>
         <span class="dim">actually shipped.</span></h2>
     </div>
 
     <div class="row">
-      <p class="tag">The accent, for comparison</p>
-      <p class="note">the same five settings matter most here — yellow is where "washed out" is worst</p>
-      <h2><span class="ph accent-demo" data-pixel data-gap="1.8" data-size="1.3">kind of AI.</span></h2>
+      <p class="tag">C — the default now: 3px cell, 2px block</p>
+      <p class="note">asks for gap 3.0 / block 2.0 — the default</p>
+      <h2><span class="ph" data-pixel>Things that</span>
+        <span class="dim">actually shipped.</span></h2>
     </div>
+
+    <div class="row">
+      <p class="tag">D — same idea, one step finer</p>
+      <p class="note">asks for gap 2.0 / block 1.0 — the smallest cell that can still hold a gap</p>
+      <h2><span class="ph" data-pixel data-gap="2.0" data-size="1.0">Things that</span>
+        <span class="dim">actually shipped.</span></h2>
+    </div>
+
+    <div class="row">
+      <p class="tag">E — same idea, one step coarser</p>
+      <p class="note">asks for gap 4.0 / block 3.0 — chunky on purpose, and the cheapest of the five</p>
+      <h2><span class="ph" data-pixel data-gap="4.0" data-size="3.0">Things that</span>
+        <span class="dim">actually shipped.</span></h2>
+    </div>
+
+    <div class="row">
+      <p class="tag">The accent, for comparison</p>
+      <p class="note">yellow is where "washed out" was worst — C on the left, A on the right</p>
+      <h2><span class="ph accent-demo" data-pixel>kind of AI.</span>
+        <span class="ph accent-demo" data-pixel data-gap="2.4" data-size="1.7">kind of AI.</span></h2>
+    </div>
+
   </div>
 
   <script src="../data.js"></script>
@@ -114,6 +103,82 @@
   <script>
     // replay every headline on demand, so a setting can be judged in motion
     document.getElementById("again").addEventListener("click", () => location.reload());
+
+    /* Read back what was actually drawn, rather than trusting the label.
+
+       data-gap and data-size are a request, not the result: the engine rounds
+       both to whole device pixels and forces the block below the cell, so two
+       different requests can land on the same grid. Labelling these rows by
+       hand produced exactly that mistake once. Every row now measures the
+       canvas it produced and prints cell, block and ink beside its heading. */
+    function readGrid(cv) {
+      const ctx = cv.getContext("2d", { willReadFrequently: true });
+      let d;
+      try { d = ctx.getImageData(0, 0, cv.width, cv.height).data; } catch (e) { return null; }
+      const inkAt = (x, y) => d[(y * cv.width + x) * 4 + 3] > 8;
+
+      let inked = 0, sumA = 0, translucent = 0;
+      for (let i = 3; i < d.length; i += 4) {
+        const a = d[i];
+        if (a > 8) { inked++; sumA += a; if (a < 250) translucent++; }
+      }
+      if (!inked) return null;
+
+      // Longest-run histogram along the densest row: run of ink = block width,
+      // run of ink + following gap = cell width.
+      let best = 0, bestY = 0;
+      for (let y = 0; y < cv.height; y++) {
+        let n = 0;
+        for (let x = 0; x < cv.width; x++) if (inkAt(x, y)) n++;
+        if (n > best) { best = n; bestY = y; }
+      }
+      const runs = [], gaps = [];
+      let run = 0, gap = 0;
+      for (let x = 0; x < cv.width; x++) {
+        if (inkAt(x, bestY)) { if (gap) { gaps.push(gap); gap = 0; } run++; }
+        else { if (run) { runs.push(run); run = 0; } gap++; }
+      }
+      const mode = (a) => {
+        const c = new Map();
+        a.forEach((v) => c.set(v, (c.get(v) || 0) + 1));
+        return [...c.entries()].sort((x, y) => y[1] - x[1])[0][0];
+      };
+      const block = runs.length ? mode(runs) : 0;
+      const hole = gaps.length ? mode(gaps) : 0;
+      return {
+        block, cell: block + hole,
+        ink: (100 * inked / (cv.width * cv.height)).toFixed(1),
+        alpha: Math.round(sumA / inked),
+        soft: (100 * translucent / inked).toFixed(1)
+      };
+    }
+
+    function label() {
+      document.querySelectorAll(".row").forEach((row) => {
+        const cv = row.querySelector(".ph canvas");
+        const note = row.querySelector(".note");
+        if (!cv || !note || note.dataset.done) return;
+        const g = readGrid(cv);
+        if (!g) return;
+        // Never record a reading taken mid-assembly. While the field flies in
+        // every block is drawn at partial alpha, which reports as a huge cell
+        // and 100% translucency — a measurement of the animation, not of the
+        // setting. Only a settled, fully opaque field counts.
+        if (+g.soft > 1) return;
+        note.dataset.done = "1";
+        const b = document.createElement("b");
+        b.style.display = "block";
+        b.style.marginTop = ".25rem";
+        b.textContent = "measured: " + g.cell + "px cell · " + g.block + "px block · " +
+          g.ink + "% of the canvas inked · mean alpha " + g.alpha + " · " +
+          g.soft + "% only partly opaque";
+        note.appendChild(b);
+      });
+    }
+    // Poll rather than guess a delay: a row is only measurable once it has
+    // been scrolled into view and has finished assembling.
+    setInterval(label, 700);
+    addEventListener("load", label);
   </script>
 </body>
 
