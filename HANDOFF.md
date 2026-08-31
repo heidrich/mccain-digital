@@ -408,6 +408,43 @@ Nicht vorab bauen, solange nicht gemessen ist, dass es nötig ist.
 4. Erst wenn die Inhalte stehen: `noindex` raus, Domain umhängen, alte
    Webspace-Fassung abschalten.
 
+## Pixel-Überschriften: Dichte und Deckung (2026-08-31)
+
+**Owner:** „können wir die pixel dichte bei den pixel überschriften noch
+erhöhen … man kann das weiss und gelb ob super schwer lesen, weil es zu blass
+wirkt" und „keine transparenz bei den farben".
+
+**Die Blässe war Antialiasing, nicht das Raster.** Ein 1,7-px-Block an einer
+Bruchzahl-Position wird über mehrere Gerätepixel verteilt, keines davon
+deckend — gemessene mittlere Deckkraft **140 von 255**. Jetzt zeichnen **alle
+drei** Pfade (Assemble, Physik, Ruhe) auf ganze Gerätepixel: Deckkraft 255,
+translucenter Anteil 0 %.
+
+**Defaults 2.4/1.7 → 1.1/1.0.** Vier Mal feineres Raster, ein ganzes
+Gerätepixel pro Zelle, 83 % Zelldeckung. Farbfläche 21 % → **25,2 %**, und das
+Raster bleibt sichtbar. Kosten: keine messbaren — Hover-Sweep p90 16,7 ms bei
+23.600 Zellen statt 5.000.
+
+**Der Fehlversuch davor ist lehrreich und steht als Commit + Revert in der
+Historie** (`a4aee9f`, zurückgerollt mit `a607b64`): ich hatte die Blöcke
+*fetter* gemacht statt das Raster feiner — „pixel dichte erhöhen" heißt mehr
+Pixel, nicht größere. Ergebnis waren „riesen pixel" und „keine pixel mehr",
+weil sich bei Blockgröße ≥ Raster die Lücken schließen. Schlimmer noch: ich
+hatte **nur den Ruhezustand** gesnappt, also wechselte die Darstellung
+sichtbar, sobald das schwarze Loch die Pixel losließ. Daher die Regel: alle
+Zeichenpfade behandeln das Raster gleich.
+
+**Varianten vergleichen:** `_parked/pixel-lab.html` rendert A–G nebeneinander
+mit echter Schrift, echter Engine und funktionierendem Loch. Sie nutzt nur
+`data-gap` / `data-size`, die die Engine ohnehin pro Überschrift unterstützt —
+also kein Sonderpfad, der veralten kann.
+
+**OFFEN — vom Owner entschieden, noch nicht gebaut:** das Akzent-Gelb misst
+**1,48:1 gegen Papier** (gegen Tinte 11,99:1). Keine Dichte behebt das.
+Beschlossen ist ein **dunkleres Gelb nur für helle Flächen**; gerechnet
+erreicht `#8a6d00` 4,48:1, `#806400` 5,11:1. Logo-Gelb bleibt unangetastet.
+Vor dem Einbau am Bild zeigen.
+
 ## `/api/ask` — die Konsole kann jetzt mit Claude antworten
 
 **Owner-Entscheid 2026-08-31:** Haiku 4.5, abgesichert über ein **Spend-Limit

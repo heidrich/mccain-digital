@@ -99,8 +99,19 @@
         Tunable per host via data-gap / data-size.
      ============================================================ */
   function headline(host) {
-    var GAP = parseFloat(host.dataset.gap) || 2.4;
-    var SIZE = parseFloat(host.dataset.size) || 1.7;
+    /* A fine grid of whole device pixels, chosen by measuring rather than by
+       eye (see _parked/pixel-lab.html, which renders these side by side).
+
+       The old 2.4/1.7 drew a 1.7px block at a fractional position: antialiased
+       across neighbouring pixels, mean alpha 140/255, so the white read grey
+       and the yellow washed out. Going the other way — a fatter block on the
+       same coarse grid — closes the gaps and stops it reading as pixels at
+       all. 1.1/1.0 is one whole device pixel per cell on a grid four times
+       finer: no transparency anywhere, more colour than before (25% of the
+       canvas against 21%), and the grid still visible. Costs nothing
+       measurable — hover sweep p90 16.7ms, same as the coarse grid. */
+    var GAP = parseFloat(host.dataset.gap) || 1.1;
+    var SIZE = parseFloat(host.dataset.size) || 1.0;
     // data-ink="#0f0e0c" forces EVERY pixel to one colour — used on the light
     // paper sections where the sampled (dark-on-light) field reads too faint
     var INK = host.dataset.ink || null;
@@ -116,6 +127,21 @@
     var parts = [], raf = null, iraf = null, start = null;
     var W = 0, H = 0, played = false, interactive = false;
     var mouseX = -9999, mouseY = -9999;
+
+    /* Every block is drawn on whole DEVICE pixels, at a size that is a whole
+       number of them.
+
+       A fractional rect at a fractional position is antialiased across
+       neighbouring pixels and none of them ends up opaque — measured mean
+       alpha of the inked pixels was 140/255, which is what made the white read
+       grey and the yellow wash out. Snapping removes the transparency without
+       touching the colour.
+
+       Both the moving and the resting path use this. An earlier attempt
+       snapped only the resting state, so the blocks visibly changed size and
+       edge the moment the black hole let go of them. */
+    var BLOCK = Math.max(1, Math.round(SIZE * DPR)) / DPR;
+    function snap(v) { return Math.round(v * DPR) / DPR; }
 
     function initPart(x, y, col) {
       return {
@@ -215,7 +241,7 @@
         // steep alpha ramp so the canvas never shows as a dim haze
         ctx.globalAlpha = local * local * local;
         ctx.fillStyle = (p.flash && local < .82) ? ACC : p.col;
-        ctx.fillRect(x, y, SIZE, SIZE);
+        ctx.fillRect(snap(x), snap(y), BLOCK, BLOCK);
       }
       ctx.globalAlpha = 1;
       if (!done) raf = requestAnimationFrame(frame); else settle();
@@ -226,7 +252,7 @@
       for (var i = 0; i < parts.length; i++) {
         var p = parts[i];
         ctx.fillStyle = p.col;
-        ctx.fillRect(p.cx, p.cy, SIZE, SIZE);
+        ctx.fillRect(snap(p.cx), snap(p.cy), BLOCK, BLOCK);
       }
     }
 
@@ -309,7 +335,7 @@
         if (Math.abs(p.vx) + Math.abs(p.vy) > 0.05 ||
             Math.abs(p.tx - p.cx) + Math.abs(p.ty - p.cy) > 0.5) moving = true;
         ctx.fillStyle = p.col;
-        ctx.fillRect(p.cx, p.cy, SIZE, SIZE);
+        ctx.fillRect(snap(p.cx), snap(p.cy), BLOCK, BLOCK);
       }
       if (moving || mouseX > -9000 || roam || Math.abs(hVel) > 0.4) iraf = requestAnimationFrame(physics);
       else { iraf = null; drawStatic(); }
