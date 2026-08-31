@@ -12,6 +12,31 @@ die abgelöste Seite liegt unter `old/` (`upload/`, `upload-v2/`, `mockup/`,
 leer, Production Branch `main` — und es muss nichts im Dashboard eingestellt
 werden.
 
+**Deployment steht und ist verifiziert (2026-08-31).**
+`https://mccain-digital.vercel.app` liefert die neue Seite, Production aus
+`main`, kein Dashboard-Eingriff nötig. Nachgemessen auf der Edge:
+
+| Prüfung | Ergebnis |
+| --- | --- |
+| alle 10 Seiten + 404 | 200 bzw. 404 mit unserer eigenen 404-Seite |
+| `v3.css`, `common.js` | `max-age=0, must-revalidate` — greift wie geplant |
+| Bilder, Fonts | `max-age=31536000, immutable` |
+| `/old/…`, `/tools/…`, `/HANDOFF.md`, `/_parked/…` | **404** — `.vercelignore` hält sie draußen |
+| Security-Header | `nosniff`, `strict-origin-when-cross-origin`, `SAMEORIGIN` |
+| Lighthouse Desktop **live** | Perf **99** · A11y **100** · Best Practices **100** · Agentic **100** · SEO 69 (allein das bewusste `noindex`) |
+
+**Die Sorge um den Cache-Kompromiss war unbegründet — gemessen, nicht
+vermutet.** CSS und JS revalidieren statt `immutable` zu sein, und die
+Performance steht trotzdem auf 99 (LCP 0,7 s, TBT 0 ms, CLS 0,002). Die
+geplante `?v=`-Versionierung samt `bump_assets.py` wird also **nicht** gebaut.
+
+**Dabei gefunden und behoben:** `og:title` und `twitter:title` der vier
+Rechtsseiten trugen `Imprint &amp;mdash; McCain Digital` — eine
+Social-Vorschau hätte die Entity wörtlich angezeigt. Ursache an beiden Enden:
+`build_legal.py` schrieb `&mdash;` in den Titel, wo jede andere Seite das
+Zeichen selbst schreibt, und `add_meta.py` liest Titel aus den Seiten zurück,
+also **Markup** — es maskiert jetzt erst nach dem Dekodieren.
+
 **Was dabei brach und repariert wurde:**
 
 - `prodserve.py` hatte das Wurzelverzeichnis **absolut hartcodiert** auf den
