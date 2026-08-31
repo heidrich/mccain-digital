@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en" data-root="..">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Banderole — four takes</title>
+  <link rel="stylesheet" href="../v3.css">
+  <style>
+    /* ---- mockup chrome only, never ships ---- */
+    body { background: var(--paper); color: var(--paper-fg) }
+
+    .mk-head { padding: 3rem var(--gut) 1rem; max-width: 1400px; margin: 0 auto }
+    .mk-head h1 { font-size: 2rem; letter-spacing: -.03em; margin: 0 0 .5rem }
+    .mk-head p { color: #5d574c; max-width: 66ch; margin: 0 0 .4rem }
+
+    .mk-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 5.5rem 4rem; padding: 2.5rem var(--gut) 8rem; max-width: 1400px; margin: 0 auto
+    }
+    @media (max-width: 900px) { .mk-grid { grid-template-columns: 1fr } }
+
+    .mk-cell > h2 {
+      font-family: var(--mono); font-size: var(--t-label); letter-spacing: .12em;
+      text-transform: uppercase; color: #7a736a; margin: 0 0 .3rem
+    }
+    .mk-cell > .why { font-size: var(--t-small); color: #5d574c; margin: 0 0 1.7rem; min-height: 4.2em }
+
+    /* one portrait per cell, upright — the card rotation is the section's
+       business, not the band's */
+    .mk-stage { position: relative; width: min(360px, 100%) }
+    .mk-stage .pcard {
+      position: relative; width: 100%; rotate: 0deg;
+      top: auto; left: auto; right: auto; bottom: auto; z-index: auto; animation: none
+    }
+
+    /* ================= the four takes =================
+
+       Common to all of them: the caption sits ABOVE the pixel canvas instead
+       of underneath it. That one line removes the flicker — the text was never
+       fading, it was being covered by the canvas (z-index 2) the moment hover
+       started, and uncovered again the moment it ended. */
+    .pcard figcaption { position: absolute; z-index: 3 }
+
+    /* A band may only overhang if the card stops clipping — but the card is
+       what rounds the picture's corners. So the rounding moves down onto the
+       picture box itself, which the canvas already inherits from
+       (`.px-canvas { border-radius: inherit }`). Without this the three
+       overhanging takes lose their rounded corners. */
+    .band-out .pcard { overflow: visible }
+    .band-out .px-img { border-radius: var(--r); overflow: hidden }
+
+    /* --- A: banderole proper. A band laid across the bottom edge, standing
+           proud of the picture on both sides, ends notched like a ribbon. --- */
+    .v-a figcaption {
+      inset: auto -14px -18px; padding: .72rem 1.5rem;
+      background: var(--ink); color: var(--ink-fg);
+      box-shadow: 0 10px 26px rgba(8, 7, 5, .28);
+      clip-path: polygon(0 0, 100% 0, calc(100% - 13px) 50%, 100% 100%, 0 100%, 13px 50%);
+      display: flex; align-items: baseline; gap: .7rem; justify-content: center
+    }
+    .v-a figcaption b { font-size: 1.02rem; letter-spacing: -.02em }
+    .v-a figcaption span { font-family: var(--mono); font-size: var(--t-label); color: #b8b1a4 }
+
+    /* --- B: flush strip. Full width, opaque, a hairline of logo yellow on top.
+           The quiet one — nothing overhangs, the picture stays the object. --- */
+    .v-b figcaption {
+      inset: auto 0 0; padding: .8rem 1.1rem .85rem;
+      background: rgba(13, 12, 10, .94); color: var(--ink-fg);
+      border-top: 2px solid var(--acc);
+      display: flex; align-items: baseline; justify-content: space-between; gap: 1rem
+    }
+    .v-b figcaption b { font-size: 1rem; letter-spacing: -.02em }
+    .v-b figcaption span {
+      font-family: var(--mono); font-size: var(--t-label); color: #a9a294; text-align: right
+    }
+
+    /* --- C: pasted label. Paper on ink, narrower than the picture, straddling
+           the bottom edge like a print stuck on with tape. --- */
+    .v-c figcaption {
+      inset: auto 1.6rem -1.5rem; padding: .72rem 1rem;
+      background: var(--paper-2); color: var(--paper-fg);
+      border-radius: 3px; box-shadow: 0 12px 30px rgba(8, 7, 5, .3);
+      text-align: center
+    }
+    .v-c figcaption b { display: block; font-size: 1rem; letter-spacing: -.02em }
+    .v-c figcaption span { font-family: var(--mono); font-size: var(--t-label); color: #6c6559 }
+
+    /* --- D: yellow band. A's geometry in the logo colour, type going dark.
+           Loud on purpose. --- */
+    .v-d figcaption {
+      inset: auto -10px -16px; padding: .7rem 1.4rem;
+      background: var(--acc); color: #17150c;
+      box-shadow: 0 10px 26px rgba(8, 7, 5, .26);
+      clip-path: polygon(0 0, 100% 0, calc(100% - 13px) 50%, 100% 100%, 0 100%, 13px 50%);
+      display: flex; align-items: baseline; gap: .7rem; justify-content: center
+    }
+    .v-d figcaption b { font-size: 1.02rem; letter-spacing: -.02em }
+    .v-d figcaption span { font-family: var(--mono); font-size: var(--t-label); color: #5c5326 }
+  </style>
+</head>
+
+<body>
+  <div class="mk-head">
+    <h1>Banderole — four takes</h1>
+    <p>The caption does not switch off any more: it sits above the pixel canvas, so hovering leaves it
+      alone. <b>Hover a portrait</b> to see each band against the running mosaic — that is the case that
+      matters.</p>
+    <p>Same text, same type, same colours as the site. Pick one and I build it into (05).</p>
+  </div>
+
+  <div class="mk-grid">
+    <div class="mk-cell v-a band-out">
+      <h2>A — banderole</h2>
+      <p class="why">A band laid across the bottom edge, standing proud on both sides, ends notched.
+        Reads as a ribbon around the picture rather than a bar inside it.</p>
+      <div class="mk-stage">
+        <figure class="pcard">
+          <span class="px-img"><img src="../team/portrait-christian-840.webp"
+              srcset="../team/portrait-christian-440.webp 440w, ../team/portrait-christian-840.webp 840w"
+              sizes="360px" alt="Christian, co-founder" width="840" height="1050" decoding="async"></span>
+          <figcaption><b>Christian</b><span>Co-founder · builds &amp; ships</span></figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <div class="mk-cell v-b">
+      <h2>B — flush strip</h2>
+      <p class="why">Full width, opaque, a hairline of logo yellow along the top. Nothing overhangs; the
+        text is simply part of the picture.</p>
+      <div class="mk-stage">
+        <figure class="pcard">
+          <span class="px-img"><img src="../team/portrait-kathi-840.webp"
+              srcset="../team/portrait-kathi-440.webp 440w, ../team/portrait-kathi-840.webp 840w"
+              sizes="360px" alt="Kathi, co-founder" width="840" height="1050" decoding="async"></span>
+          <figcaption><b>Kathi</b><span>Co-founder · design &amp; brand</span></figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <div class="mk-cell v-c band-out">
+      <h2>C — pasted label</h2>
+      <p class="why">Paper on ink, narrower than the picture, straddling the bottom edge like a print
+        stuck on with tape. The warmest of the four.</p>
+      <div class="mk-stage">
+        <figure class="pcard">
+          <span class="px-img"><img src="../team/portrait-christian-840.webp"
+              srcset="../team/portrait-christian-440.webp 440w, ../team/portrait-christian-840.webp 840w"
+              sizes="360px" alt="Christian, co-founder" width="840" height="1050" decoding="async"></span>
+          <figcaption><b>Christian</b><span>Co-founder · builds &amp; ships</span></figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <div class="mk-cell v-d band-out">
+      <h2>D — yellow band</h2>
+      <p class="why">A's geometry in the logo colour, type going dark. It would make the two portraits
+        the brightest thing in (05).</p>
+      <div class="mk-stage">
+        <figure class="pcard">
+          <span class="px-img"><img src="../team/portrait-kathi-840.webp"
+              srcset="../team/portrait-kathi-440.webp 440w, ../team/portrait-kathi-840.webp 840w"
+              sizes="360px" alt="Kathi, co-founder" width="840" height="1050" decoding="async"></span>
+          <figcaption><b>Kathi</b><span>Co-founder · design &amp; brand</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+
+  <script src="../data.js"></script>
+  <script src="../pixel-engine.js"></script>
+  <script src="../common.js"></script>
+</body>
+
+</html>

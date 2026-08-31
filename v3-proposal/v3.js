@@ -62,7 +62,8 @@
       <div>
         <h3 class="scard-h">${s.h}</h3>
         <p class="scard-p">${s.p}</p>
-        <a class="scard-link" href="${s.href}">More on this →</a>
+        <a class="scard-link" href="${s.href}"
+           aria-label="More on this — ${s.h}">More on this →</a>
       </div>
       <div class="scard-get">
         <p class="label">What you get</p>

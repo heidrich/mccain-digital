@@ -1315,15 +1315,16 @@ html[data-theme="light"] .t-moon {
   aspect-ratio: 16/11
 }
 
+/* NO hover zoom here, deliberately. The pixel mosaic is drawn at scale 1 into
+   a canvas pinned over this box, so a scale(1.04) on the photo alone slid the
+   two layers 23px apart across the swap — in and out. PixelFX.button has the
+   same guard for the same reason (.pxbtn.px-active { transform: none }): one
+   element cannot run a CSS transform and a pixel field at once. The card still
+   lifts and the "Open" pill still rises, so the tile is far from static. */
 .case-img img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: transform .9s var(--e-out)
-}
-
-.case:hover .case-img img {
-  transform: scale(1.04)
+  object-fit: cover
 }
 
 /* The affordance: a pill rises out of the cover the moment you point at the
@@ -1570,6 +1571,12 @@ html[data-theme="light"] .t-moon {
 .scard {
   position: sticky;
   top: calc(var(--nav) + 2.2rem);
+  /* The spotlight and the ghost numeral sit BEHIND the copy on a negative
+     z-index, which only stays inside the card while the card is a stacking
+     context. It is one today because v3.js writes a z-index inline; this makes
+     it true regardless, so the decoration can never fall out behind the
+     section. */
+  isolation: isolate;
   overflow: hidden;
   margin-bottom: 1.1rem;
   border-radius: var(--r);
@@ -1618,7 +1625,7 @@ html[data-theme="light"] .t-moon {
   opacity: 0;
   transition: opacity .5s var(--e-io);
   pointer-events: none;
-  z-index: 0
+  z-index: -1
 }
 
 .scard:hover::after {
@@ -1632,7 +1639,7 @@ html[data-theme="light"] .t-moon {
   position: absolute;
   right: -2.2rem;
   top: 50%;
-  z-index: 0;
+  z-index: -1;
   font-size: clamp(5rem, 12vw, 12rem);
   font-weight: 800;
   letter-spacing: -.06em;
@@ -1659,11 +1666,12 @@ html[data-theme="light"] .t-moon {
   }
 }
 
-/* the real content has to clear the spotlight and the ghost numeral */
-.scard>*:not(.scard-ghost) {
-  position: relative;
-  z-index: 1
-}
+/* The copy used to be lifted over the spotlight and the ghost numeral with
+   `position: relative`. It must not be: a positioned wrapper becomes the
+   containing block for the link's full-card overlay, which then covered the
+   middle column instead of the tile (measured: 544x133 of a 1325x225 card, so
+   three quarters of the tile stayed dead). The decoration goes behind the copy
+   instead — same result, no containing block in the way. */
 
 @media (max-width: 900px) {
   .scard {
@@ -1754,6 +1762,30 @@ html[data-theme="light"] .t-moon {
 }
 
 .scard-link:hover {
+  border-color: var(--acc);
+  gap: .9rem
+}
+
+/* The whole tile is the click target, exactly as the work cards already do it:
+   the visible link is only its label. Owner (2026-08-31): "die tafeln, die
+   sollten alle hover pointer aktiv sein, nicht nur der more on this link" —
+   and it matters most on the phone, where the four cards stack into a column
+   of identical labels and the card is what the thumb aims at. The overlay is
+   part of the <a>, so the pointer cursor comes with it and no separate
+   `cursor` declaration can drift out of sync with what is actually clickable.
+   It has to clear the decorative layers inside the card (spotlight 0, ghost
+   numeral 0, the accent rule 2), hence 5. */
+.scard .scard-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5
+}
+
+/* ...and the label has to answer a hover that happens nowhere near it,
+   otherwise the card lights up around a link that looks dead. */
+.scard:hover .scard-link,
+.scard:focus-within .scard-link {
   border-color: var(--acc);
   gap: .9rem
 }
@@ -1872,24 +1904,44 @@ html[data-theme="light"] .t-moon {
   object-fit: cover
 }
 
+/* A band along the bottom edge, not a gradient that the hover switches off.
+
+   `z-index` is the point of this rule. The caption used to sit at `auto` while
+   the engine's canvas sits at 2, so the moment hover started the canvas simply
+   covered the text, and the moment it ended the text reappeared — no fade, no
+   transition, a switch. That is what read as "blendet zu schnell ein und aus".
+   Above the canvas it is never touched by the hover at all.
+
+   Opaque rather than a gradient, because behind it the picture may be a
+   running mosaic with a crater in it; a gradient over that is unreadable. */
 .pcard figcaption {
   position: absolute;
   inset: auto 0 0;
-  padding: 1.6rem .9rem .8rem;
-  background: linear-gradient(transparent, rgba(8, 7, 5, .85));
-  color: #f4f1ea
+  z-index: 3;
+  padding: .8rem 1.1rem .85rem;
+  background: rgba(13, 12, 10, .94);
+  border-top: 2px solid var(--acc);
+  color: var(--ink-fg);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .1rem 1rem
 }
 
 .pcard figcaption b {
-  display: block;
   font-size: 1rem;
   letter-spacing: -.02em
 }
 
+/* `margin-left:auto` rather than `text-align`, so the role sits hard right
+   while it shares the line and stays put when the card is too narrow to hold
+   both and it wraps onto its own. */
 .pcard figcaption span {
   font-size: var(--t-label);
   font-family: var(--mono);
-  color: #cfc9bd
+  color: #a9a294;
+  margin-left: auto
 }
 
 .pstage-note {

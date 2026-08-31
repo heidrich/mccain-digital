@@ -20,11 +20,22 @@ gepflegt — der v3-Eintrag steht unter `[Unreleased]`.
 
 ## Starten
 
+**Zwei Server, zwei Zwecke — nicht verwechseln:**
+
 ```bash
-cd v3-proposal && python -m http.server 8898   # dieser Entwurf
-cd upload-v2   && python -m http.server 8899   # Vorwelle, 4×100
-cd _v2-preview && python -m http.server 8890   # Claude-Design-Vorlage "Fresh v2"
+cd v3-proposal && python prodserve.py 8898 --dev   # ANSCHAUEN, Cache-Control: no-store
+cd v3-proposal && python prodserve.py 8897         # MESSEN (Lighthouse), Produktions-Header
+cd upload-v2   && python -m http.server 8899       # Vorwelle, 4×100
+cd _v2-preview && python -m http.server 8890       # Claude-Design-Vorlage "Fresh v2"
 ```
+
+**Zum Anschauen NIE 8897 benutzen.** Der Messserver schickt für `.css`/`.js`
+`max-age=31536000, immutable` — richtig für ein CDN, im Browser eine Falle: eine
+geänderte Datei wird ein Jahr lang nicht neu geholt. Ein nacktes
+`python -m http.server` ist keine Rettung, es schickt gar keine Cache-Header,
+worauf der Browser heuristisch über `Last-Modified` zwischenspeichert und
+ebenfalls alte Dateien liefert. Beides hat schon je eine Stunde Fehlersuche an
+einem längst behobenen Fehler gekostet. `--dev` schickt `no-store`.
 
 Hell/Dunkel: Sonnen-Icon in der Nav (Zustand in `localStorage`).
 
@@ -138,6 +149,208 @@ Ctrl je nach Plattform.
    zurück. **Nicht** an Hover-Fähigkeit gekoppelt — Touch bekommt den Reveal,
    nur kein Loch. Schlägt `build()` fehl (Bild noch nicht geladen, tainted,
    zu klein), bleibt das scharfe Foto sichtbar; kein Zustand lässt es hängen.
+4. **Bild-Zeichenpfad kostet das Loch, nicht das Bild** (2026-08-03). Vorher
+   wurde pro Frame das ganze Feld neu gemalt: bei der Work-Karte 14 157
+   Partikel, 5,15 ms bei DPR 1 und 6,75 ms bei DPR 2 — davon zwei Drittel
+   allein das Setzen von `fillStyle` (ein `"rgb(...)"`-String pro Partikel,
+   pro Frame). Das ist der ganze Unterschied zu den Buttons, die dieselbe
+   Schleife mit ~400 Partikeln fahren. Jetzt: das ruhende Mosaik einmal in ein
+   Offscreen-Canvas (`home`), pro Frame **ein** `drawImage`, und nur die vom
+   Loch berührten Zellen (~1 370) werden gelöscht und einzeln neu gemalt →
+   **0,54 ms bzw. 0,70 ms**. Die Zeichenkosten hängen ab jetzt am Radius des
+   Lochs, nicht an der Bildgröße; eine doppelt so große Karte kostet gleich
+   viel. Buchführung: `dirty`-Box in Rasterkoordinaten, die jeden Frame um die
+   Zeigerscheibe wächst und auf das schrumpft, was noch nicht daheim ist —
+   „nicht daheim" zählt, nicht „bewegt sich", sonst malt der nächste Blit einen
+   im Krater geparkten Pixel hinter seinem Rücken wieder nach Hause.
+5. **Der Bildausschnitt kam per Ziel-Rechteck, nie per Quell-Rechteck**
+   (2026-08-03) — der Fehler, den der Owner als „das Bild zoomt gewaltig" sah.
+   `build()` hatte den Cover-Ausschnitt aus `naturalWidth/naturalHeight`
+   gerechnet und als 9-Argument-Quellrechteck an `drawImage` gegeben. Für jedes
+   `<img>` mit `srcset` ist das falsch: **`naturalWidth` meldet die
+   dichte-korrigierte Größe in CSS-Pixeln, `drawImage` liest sein Quellrechteck
+   in rohen Bitmap-Pixeln.** `code-screen-640.webp` ist 640×440 auf der Platte
+   und meldet 559×384 — der Ausschnitt griff also die linken oberen 87 %.
+   Auf einer Anzeige, die per DPR die 1200w-Variante mit Dichte 2,14 wählt,
+   griff er ein **Viertel**: das Bild erschien bei 200 %, oben links verankert.
+   Jetzt die 5-Argument-Form, die das **ganze** Bild in ein Ziel-Rechteck
+   skaliert — es wird nie eine Größe im Bitmap-Raum genannt, nur das
+   Seitenverhältnis aus `natural*` gelesen, und ein Verhältnis ist
+   dichte-unabhängig. **Testfalle:** ein Abgleich, der nur nach Verschiebung
+   sucht, findet das nie (eine reine Skalierung hat ihr Optimum bei dx=dy=0) —
+   und auf DPR 1 mit der 640er Variante beträgt der Fehler nur 1,14×. Der Test
+   in `tools/` sucht deshalb über **Skalierung**.
+6. **Weiche Blende zwischen Foto und Mosaik — im Canvas, nicht in CSS.**
+   Erst probiert und verworfen: harter Schnitt in beide Richtungen (wie
+   `PixelFX.button`). Grund für den Verwurf war der Owner-Wunsch „viel viel
+   weicher". CSS-Deckkraft geht dafür nicht: zwei deckende Ebenen, die
+   aneinander vorbeiblenden, ergeben `a + b(1-a)`, in der Mitte ~75 % — auf den
+   dunklen Karten ein sichtbarer dunkler Puls. Lösung: das scharfe Foto liegt
+   als **undurchsichtiger Boden** (`photoCv`, Alpha 1) im Canvas, das Mosaik
+   darüber mit Alpha `mix`. Die Deckung ist damit in jedem Moment 100 %
+   (gemessen: Helligkeit konstant 40,2–40,4 über den ganzen Verlauf). Im
+   Dauer `FADE = 640 ms`, easeInOutCubic — **das ist der einzige Regler für
+   „weicher"**: als hart empfindet man die steilste Stelle in der Mitte, und die
+   liegt bei `3/FADE`. 460 → 640 ms senkte sie von 15,3 auf 11,9 (Blockigkeit
+   pro 100 ms). Der `<img>`-Tausch passiert nur noch bei `mix` 0 oder 1, wo
+   Canvas und Foto dasselbe Bild zeigen — also unsichtbar. Federschwanz-Timer
+   und Rückgabe-Kappe sind damit ersatzlos entfallen: die Blende entscheidet,
+   nicht die Physik.
+7. **Der Effekt liegt auf einer eigenen Ebene (`fxCv`)** — sonst sieht man die
+   aufgeräumte Box. Erster Anlauf von Patch 6 hat die gestörte Box direkt auf
+   die Hauptfläche gerechnet: Foto mit `1-mix` **innerhalb**, mit `1`
+   **außerhalb**. Damit bekam die Box eine andere Mischung als ihre Umgebung
+   und stand mitten in der Blende als schwaches Rechteck im Bild — der Owner
+   hat es gesehen, bevor ich es gemessen hatte. (Meine ersten beiden
+   Herleitungen waren falsch: die Deckung ist überall 255, es war ein reiner
+   Farbunterschied.) Jetzt in zwei Schritten: **(1)** die ganze Wirkung wird
+   deckend auf `fxCv` gebaut — Mosaik, Box freigeräumt, mit `voidCol` gefüllt,
+   Partikel darüber; nichts davon kennt `mix`. **(2)** die Hauptfläche bekommt
+   genau zwei Befehle: Foto mit Alpha 1, `fxCv` mit Alpha `mix`. Kein Bereich
+   hat mehr ein eigenes Rezept, also kann es keine Kante geben — das ist eine
+   Eigenschaft der Konstruktion, nicht eine gut eingestellte Zahl.
+   `voidCol` ist der Hintergrund des ersten Vorfahren, der wirklich einen hat
+   (`readVoid()`, bei jedem `activate()` neu wegen Themenwechsel) — geprüft:
+   Krater `rgb(21,20,15)` = `.case`-Hintergrund. Kosten: zwei zusätzliche
+   Vollflächen-`drawImage` pro Frame, in der Messung nicht nachweisbar
+   (Median 16,7 ms, 0 Frames > 20 ms).
+8. **Zwei Anleihen bei der Claude-Design-Vorlage** (`_v2-preview/assets/
+   5e7a8095-*.js`) — die Architektur dort **nicht** übernehmen, sie malt jedes
+   Frame das ganze Feld neu und ruckelt entsprechend (vom Owner bestätigt).
+   - **Zellweise Mittelung statt Punktabtastung.** Das Bild wird jetzt in ein
+     Offscreen von genau `COLS × ROWS` gezeichnet, ein Texel pro Rasterzelle;
+     der Browser mittelt beim Verkleinern. Vorher wurde je Zelle das linke obere
+     Pixel gegriffen, was auf feinem Inhalt (Code, Platinen) sprenkelte. Der
+     Rückleseaufwand fällt von `W*H` auf `COLS*ROWS` — 14 k statt 224 k Pixel
+     auf einer Work-Karte. Nebenbei entfällt die alte Bruchzahl-`GAP`-Falle:
+     Zellen werden über ganzzahlige Indizes adressiert, keine Koordinate kann
+     mehr zwischen RGBA-Bytes landen. **Wichtig:** der Cover-Ausschnitt wird
+     weiterhin aus `W/H` gerechnet und nur durch `GAP` geteilt — `COLS/ROWS`
+     trägt einen Rundungsfehler und würde `tools/pixel_scale.sh` brechen.
+   - **Der Krater ist kein Ausstanzen mehr, sondern eine Abdunklung.**
+     `VOID = 0.62` (`opts.voidStrength`): die gestörte Box wird mit `voidCol`
+     bei dieser Deckkraft überzogen, die lebenden Pixel danach deckend darüber.
+     Kein `clearRect` mehr — eine Zelle, deren Pixel daheim ist, wird ohnehin
+     wieder überdeckt; eine, deren Pixel weg ist, behält einen verblassten
+     Abdruck, und **dieser Abdruck ist der Krater**. Bei `VOID = 1` ist es
+     wieder das harte Loch von vorher. Grund: im hellen Modus stand sonst eine
+     harte weiße Scheibe mitten im dunklen Foto. Die Vorlage löst dasselbe
+     anders — ihre Blöcke sind kleiner als das Raster (`size = gap - 1.2`), der
+     Hintergrund scheint überall zu 36 % durch, das Loch ist dort nie ein
+     Fremdkörper. Das schleiert aber jedes Bild zur Seitenfarbe hin, was das
+     dichte Mosaik hier bewusst nicht tut — daher der Regler statt des Rasters.
+
+6. **Ein rotiertes Bild wird in seiner LAYOUT-Box gemessen, nie im
+   `getBoundingClientRect`.** Owner (2026-08-31): „unter 05 wenn ich da über die
+   bilder gehe, dann transformiert der die bilder höhe leicht. das darf nicht
+   passieren." Die Porträts unter (05) sind rotiert, und ihre Scroll-Drift
+   **animiert** die Rotation (`pdA` −6,5° → −1,2°). `getBoundingClientRect`
+   liefert für ein transformiertes Element die achsenparallele **Hülle**: bei
+   −6,5° sind das 428 × 513 statt 381 × 477 — 12 % zu breit, 8 % zu hoch, und
+   der Betrag hängt am Scrollstand. Das Canvas hängt per CSS an der Box
+   (`inset:0; width:100%`), also wurde ein in Hüllgröße gebautes Feld
+   **ungleichmäßig gestaucht** dargestellt: das Bild änderte sichtbar die Höhe,
+   sobald der Hover an das Canvas übergab. `build()` nimmt jetzt `boxSize()` —
+   `getComputedStyle().width/height`, also Used Values im eigenen
+   Koordinatensystem des Elements, transformfrei per Definition und stabil
+   während die Drift läuft. Die Work-Karten waren nie betroffen, weil sie nicht
+   rotiert sind.
+
+   Derselbe Denkfehler steckte im **Maus-Handler**: `clientX − rect.left`
+   stimmt nur für eine achsenparallele Box. Gemessen saß der Krater **18 px
+   (Porträt 1) bzw. 22,5 px (Porträt 2)** neben dem Cursor — bei `R = 46` ein
+   halber Radius. Die Matrix aus den Computed Styles zu rekonstruieren wäre
+   brüchig (`translate`/`rotate`/`scale` sind eigene Eigenschaften neben
+   `transform`, und die Drift animiert sie), also wird die Abbildung
+   **gemessen**: eine 0×0-Sonde an drei bekannten lokalen Punkten meldet ihre
+   transformierte Lage, das ergibt die affine Vorwärtsmatrix, die einmal
+   invertiert und zwischengespeichert wird. Fehler danach **1,0–1,1 px**. Der
+   Cache fällt bei `activate()`, `resize` und `scroll` — der Scroll-Listener
+   hängt nur, solange die Karte aktiv ist, und die Sonde lebt so lange wie die
+   Karte (kein DOM-Müll pro Mausbewegung). Kosten: keine — Hover-Sweep p90
+   16,7 ms, 0 Frames über 20 ms, auch beim Sweep **während** des Scrollens, dem
+   Fall, der pro Bewegung neu misst.
+
+   **Der Wächter war auf diesen Defekt blind** und ist nachgeeicht:
+   `tools/pixel_scale_probe.js` maß selbst mit `getBoundingClientRect` und
+   verglich damit Hülle gegen Hülle — er blieb grün, während das Mosaik
+   gestaucht angezeigt wurde. Er rechnet jetzt in der Layout-Box und prüft
+   zusätzlich direkt `Canvas-Backing (CSS-px) == Layout-Box` (`boxOk`).
+   Gegenprobe gefahren: mit dem alten `build()` schlägt er fehl, mit dem neuen
+   ist er grün.
+
+## Die Tafeln unter (04) sind ganzflächig anklickbar
+
+Owner (2026-08-31): „die tafeln, die sollten alle hover pointer aktiv sein,
+nicht nur der more on this link. gerade auch weil mobile das sich wiederholt."
+
+Die Work-Karten machen das seit jeher (`.case .scard-link::after { inset: 0 }`,
+Kommentar dort: „the card is the click target, the visible link is only its
+label"). Die Service-Karten hatten es nie. **Gemessen vorher: 30 von 126
+Prüfpunkten** über eine Tafel landeten auf dem Link; danach 126 von 126,
+Zeigerhand überall, Desktop wie Telefon.
+
+**Warum das nicht mit einer Zeile ging.** `.scard > *:not(.scard-ghost)` stand
+auf `position: relative` (damit der Text über Spotlight und Geisterziffer
+liegt). Ein positionierter Vorfahre wird zum **Bezugsrahmen** für das
+`::after`-Overlay des Links — das Overlay spannte deshalb über die mittlere
+Spalte (544 × 133) statt über die Tafel (1325 × 225). Statt den Text zu heben,
+liegt die Deko jetzt **darunter**:
+
+- `.scard::after` (Spotlight) und `.scard-ghost` auf `z-index: -1`.
+- `.scard { isolation: isolate }` — sonst hinge es daran, dass `v3.js` ein
+  `z-index` inline schreibt; ohne Stacking-Context fiele die Deko hinter die
+  Sektion.
+- Die Regel, die den Inhalt anhob, ist ersatzlos weg.
+
+**Optik unverändert — belegt, nicht behauptet:** Pixel-Diff der gehoverten
+Sektion vorher/nachher ergibt **null** abweichende Pixel unterhalb der
+Kopfzeile; die einzigen Unterschiede waren die Pacman-Leiste und die animierte
+Pixel-Headline, die beide ohnehin laufen.
+
+Dazu: jeder Link trägt `aria-label="More on this — <Service>"`, damit vier
+gleichlautende Beschriftungen unterscheidbar sind, ohne den sichtbaren Text zu
+ändern (der sichtbare Text bleibt im zugänglichen Namen enthalten, WCAG 2.5.3).
+
+**Preis des Musters:** Text innerhalb einer Tafel lässt sich nicht mehr
+markieren — das Overlay liegt darüber. Bei den Work-Karten ist das seit jeher
+so akzeptiert.
+
+## Die Banderole unter (05)
+
+Owner (2026-08-31): „das ein und ausblenden des textes unten ist viel zu
+schnell und wirkt abgehackt, ich würde sagen, den text setzen wir wie eine
+schöne Banderole unten an das Bild."
+
+**Es hat nie geblendet.** Die `figcaption` stand auf `z-index: auto`, das
+Canvas der Engine steht auf 2 — beim Hover wurde der Text schlicht **verdeckt**
+und beim Verlassen wieder freigegeben. Kein Übergang, ein Schalter. Deshalb
+wirkte es abgehackt, und deshalb hätte eine längere Transition das Problem auch
+nicht gelöst.
+
+Gebaut ist **Variante B** aus `_parked/banderole-mockup.html` (vier Entwürfe,
+mit den echten Fotos und laufender Engine; liegt in `_parked/`, weil
+`build_sitemap.py` und `check_links.py` diesen Ordner überspringen — eine
+zusätzliche HTML-Datei anderswo bricht den Sitemap-Wächter):
+
+- Band über die volle Bildbreite, `z-index: 3`, also **über** dem Canvas.
+- **Deckend** (`rgba(13,12,10,.94)`), kein Verlauf: dahinter läuft im Hover ein
+  Mosaik mit einem Krater darin, über dem ein Verlauf unlesbar wird.
+- 2 px Oberkante in `--acc`.
+- Name links, Rolle rechts über `margin-left: auto` statt `text-align` — so
+  sitzt sie hart rechts, solange beide eine Zeile teilen, und bleibt an Ort und
+  Stelle, wenn die Karte zu schmal wird und sie umbricht (mobil bei 203 px
+  Kartenbreite: zwei Zeilen, kein Überlauf).
+
+Kontrast im schlechtesten Fall (helles Foto hinter dem 94-%-Band): Rolle
+**6,8:1**, Name **15,3:1**, gelbe Kante 10,6:1.
+
+**Wenn je eine überstehende Banderole gewünscht wird** (Varianten A/C/D im
+Mockup): `.pcard` muss dann `overflow: visible` bekommen, und der Eck-Radius
+muss auf `.px-img` wandern — sonst verlieren die Fotos ihre runden Ecken, weil
+das Clipping der Karte sie bisher rundet. Das Canvas erbt den Radius bereits
+(`.px-canvas { border-radius: inherit }`). Zu bedenken: die zwei Karten in (05)
+überlappen sich, ein überstehendes Band legt sich also über die Nachbarkarte.
 
 ## Bekannte Fallstricke der Scroll-Choreografie
 
@@ -330,13 +543,20 @@ dabei verlieren würde.
 
 ## Testen
 
-Zwei Skripte im Scratchpad, beide ohne Abhängigkeiten:
+Drei Skripte, alle ohne Abhängigkeiten:
 
 ```bash
 python  tools/check_links.py          # jede Datei, jeder Anker, doppelte IDs
-bash    tools/sweep.sh 1280 820 d     # alle 10 Seiten: Konsolenfehler,
+bash    tools/sweep.sh 1280 820 d     # alle 11 Seiten: Konsolenfehler,
 bash    tools/sweep.sh  390 844 m     # Widgets, Overflow, A11y-Basics
+bash    tools/pixel_scale.sh          # sitzt jedes Mosaik auf seinem Foto?
 ```
+
+`pixel_scale.sh` prüft alle acht Pixelbilder (Work-Karten, Team-Porträts,
+Service-Aufnahmen) und **sucht über Skalierung, nicht über Verschiebung** —
+sonst findet es den srcset-Dichte-Fehler aus Patch 5 nie, denn eine reine
+Skalierung hat ihr Optimum bei dx=dy=0. Erwartet `bestScale 1.00` überall;
+Exit-Code ≠ 0, sobald eine Karte abweicht.
 
 Stand 2026-08-03: 10 Seiten × 2 Viewports, **keine Seitenfehler, keine
 Konsolenfehler, kein horizontaler Overflow, kein fehlendes `alt`, kein
@@ -374,6 +594,15 @@ Formular-Hinweis.
   sonst steht sein Canvas im Fluss und der Button wird ~340px hoch.
 - Die Engine setzt `display:block` **inline** — CSS-Klassen können ihre
   Canvases nicht abschalten.
+- **Ein Element kann nicht gleichzeitig ein CSS-`transform` und ein Pixelfeld
+  fahren.** `.case:hover .case-img img { transform: scale(1.04) }` lief 0,9 s
+  lang, während das Mosaik im Canvas bei Skalierung 1 festgenagelt blieb — die
+  beiden Ebenen schoben sich bei jedem Wechsel 23 px auseinander, rein wie
+  raus. Das las sich als „das Bild zoomt und ruckelt". Regel entfernt;
+  `PixelFX.button` macht dasselbe seit jeher über
+  `.pxbtn.px-active { transform: none !important }`. Wer den Zoom zurückwill,
+  muss ihn auf **beide** Ebenen legen und die Zeigerkoordinaten in `onMove`
+  gegenrechnen (`x * W / rect.width`) — das Mosaik wird dabei weichgerechnet.
 - Nach einem Theme-Wechsel erst **nach** dem 0.5s-Farbübergang neu sampeln,
   sonst wird die Headline im Hellmodus unsichtbar.
 - Bänder-Polster: zwei Sektionen à `11vw` ergaben ~280px Leere dazwischen.
