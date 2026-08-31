@@ -541,6 +541,41 @@ Ruhezustand ueber 4 s identisch mit „Welle aus".
 Sie laeuft nur, wenn die Ueberschrift **im Bild** ist, **fertig aufgebaut** ist
 und **das schwarze Loch ruht**. Alle Zellen bleiben voll deckend.
 
+### Die Palette wird ERZEUGT, nicht aufgezaehlt
+
+**Owner zur ersten Palette:** „statt regenbogen haben wir ein haessliches
+gruen"; zum Gewuenschten: „halt wie ein gradient effekt", „wie als wenn wir
+einen border animieren".
+
+**Der Fehler war nicht die Farbwahl, sondern dass es zwei aufgezaehlte Farben
+waren.** Ein Verlauf zeigt ueberwiegend das, was ZWISCHEN seinen Stops liegt,
+und zwei Farbtoene in sRGB gemischt laufen immer durch eine entsaettigte Mitte
+— Gold nach Gruen verbringt den groessten Teil der Strecke als Oliv. Schoenere
+Endpunkte helfen nicht, weil der Matsch dazwischen sitzt.
+
+Die Stops werden jetzt **erzeugt**: Saettigung und Helligkeit der Akzentfarbe
+bleiben fest, nur der Farbton wandert. Dann kann nichts zwischen zwei Stops
+matter sein als die Stops selbst — genau das macht ein animierter
+Gradient-Border.
+
+| `data-wave-style` | |
+|---|---|
+| `rainbow` | ganzer Farbkreis — **Standard** |
+| `hue` | ±32°, bleibt nah an der Marke |
+| `sheen` | ein Farbton, Helligkeit schwingt — Glanz statt Farbe |
+| `data-wave-colors` | ueberschreibt weiterhin mit einer festen Liste |
+
+Standard ist `rainbow`, weil der Owner den Border-Look wollte und
+ausdruecklich in Kauf nimmt, dass das Gelb mitwandert.
+
+`PixelFX.wavePalette(style)` gibt die erzeugten Stops heraus, und
+`_parked/wave-lab.html` malt pro Zeile die **tatsaechliche** Palette als
+Streifen darunter. Ein von Hand geschriebener Streifen waere ein Bild von dem
+gewesen, was ich meinte, nicht von dem, was laeuft — und genau dieser Streifen
+macht das Oliv sichtbar, ohne auf die wandernde Welle zu warten. Er hat auch
+sofort gezeigt, dass mein „hue"-Bogen mit ±55° Gruen und Rot erreicht, waehrend
+die Beschriftung „bleibt im warmen Bereich" behauptete. Jetzt ±32°.
+
 ### Vier Fehler auf dem Weg, alle gemessen statt gesehen
 
 1. **Die Welle fiel aus, wenn das Loch lief.** Erst tintete nur der

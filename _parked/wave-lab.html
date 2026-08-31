@@ -15,74 +15,96 @@
 
     /* .accent only carries a colour inside .hero-h in the real stylesheet, so
        without this the lab headlines are single-coloured and the accent modes
-       have nothing to move. Second time this exact omission has faked a
-       result on a comparison page. */
+       have nothing to move. This omission has faked a result here twice. */
     .lab .accent { color: var(--acc-text) }
     .lab .dim { color: var(--muted) }
+
     .lab { max-width: 1500px; margin: 0 auto; padding: 2.5rem var(--gut) 6rem }
     .lab h1 { font-size: 1.7rem; letter-spacing: -.03em; margin: 0 0 .4rem }
     .lab .intro { color: var(--muted); max-width: 74ch; margin: 0 0 1.6rem }
 
-    .row { padding: 2.4rem 0; border-top: 1px solid var(--line) }
+    .row { padding: 2.2rem 0; border-top: 1px solid var(--line) }
     .row:first-of-type { border-top: 0 }
     .tag {
       font-family: var(--mono); font-size: var(--t-label); letter-spacing: .12em;
       text-transform: uppercase; color: var(--muted); margin: 0 0 .15rem
     }
-    .note { font-size: var(--t-small); color: var(--muted); margin: 0 0 1.1rem; max-width: 70ch }
+    .note { font-size: var(--t-small); color: var(--muted); margin: 0 0 1rem; max-width: 72ch }
     .note b { display: block; margin-top: .3rem; color: var(--fg) }
     .row h2 {
       font-size: clamp(1.9rem, 4.4vw, 3.8rem); line-height: 1.06;
       letter-spacing: -.045em; font-weight: 800; margin: 0
     }
+
+    /* the palette each row actually generated, painted as a strip, so the mud
+       BETWEEN the stops is visible without waiting for the wave to travel */
+    .strip { height: 14px; border-radius: 7px; margin: .55rem 0 .2rem; max-width: 640px }
   </style>
 </head>
 
 <body>
   <div class="lab">
     <h1>The pixel colour wave</h1>
-    <p class="intro">Same headline, same grid, same engine — only the wave mode changes. Hover each
-      one: the black hole still works, and the wave steps aside while the hole is running rather
-      than fighting it for the canvas. Every row reports its own frame cost, measured while it
-      animates.</p>
+    <p class="intro">Same headline, same grid, same engine — only the palette changes. Under each
+      row is the gradient it generated, painted as a strip: what a wave shows is mostly the colour
+      <em>between</em> its stops, which is exactly where the first attempt went wrong. Hover a
+      headline; the black hole still works and the wave keeps travelling underneath it.</p>
 
     <div class="row">
-      <p class="tag">A — off</p>
-      <p class="note">No wave at all — the reference. It needs data-wave="off" spelled out now
-        that "accent" is the engine default; leaving the attribute off made this row animate and
-        quietly turned the control into a fifth variant.</p>
+      <p class="tag">A — the first attempt, for reference</p>
+      <p class="note">Two brand colours listed as stops: gold and green. Everything between them is
+        interpolated in sRGB, which drops through a desaturated middle — the strip shows the olive
+        that is neither of the two colours and is most of the span.</p>
+      <div class="strip" style="background:linear-gradient(90deg,#f5c518,#ffd85e,#7A8C00,#f5c518)"></div>
+      <h2><span class="ph" data-pixel data-wave="accent"
+          data-wave-colors="#f5c518,#ffd85e,#7A8C00,#f5c518">We build the useful <span class="accent">kind of AI.</span></span></h2>
+    </div>
+
+    <div class="row">
+      <p class="tag">B — rainbow: the animated-border look</p>
+      <p class="note">The full hue circle at the accent colour's own saturation and lightness.
+        Nothing between two stops is duller than the stops, so there is no mud anywhere.</p>
+      <div class="strip" data-strip="rainbow"></div>
+      <h2><span class="ph" data-pixel data-wave="accent" data-wave-style="rainbow">We build the useful <span class="accent">kind of AI.</span></span></h2>
+    </div>
+
+    <div class="row">
+      <p class="tag">C — hue sweep, about 32 degrees each way</p>
+      <p class="note">The same idea kept near the brand: gold travels toward amber one way and
+        toward yellow-green the other, and back. Reads as the accent breathing, not as a rainbow.
+        It was +/-55 first, which reached green and red — wide enough that the label was simply
+        untrue, which the strip showed at a glance.</p>
+      <div class="strip" data-strip="hue"></div>
+      <h2><span class="ph" data-pixel data-wave="accent" data-wave-style="hue">We build the useful <span class="accent">kind of AI.</span></span></h2>
+    </div>
+
+    <div class="row">
+      <p class="tag">D — sheen: one hue, the light travelling</p>
+      <p class="note">No colour change at all — the lightness swings, so a shine runs along the
+        letters the way light runs across metal. The most restrained option.</p>
+      <div class="strip" data-strip="sheen"></div>
+      <h2><span class="ph" data-pixel data-wave="accent" data-wave-style="sheen">We build the useful <span class="accent">kind of AI.</span></span></h2>
+    </div>
+
+    <div class="row">
+      <p class="tag">E — rainbow across the whole line</p>
+      <p class="note">Rainbow, but every cell carries it, the white half included. The loudest
+        thing on offer.</p>
+      <div class="strip" data-strip="rainbow"></div>
+      <h2><span class="ph" data-pixel data-wave="all" data-wave-style="rainbow">We build the useful <span class="accent">kind of AI.</span></span></h2>
+    </div>
+
+    <div class="row">
+      <p class="tag">F — off</p>
+      <p class="note">The control. It needs data-wave="off" spelled out, because "accent" is the
+        engine default — leaving the attribute off once turned the control into an extra variant.</p>
       <h2><span class="ph" data-pixel data-wave="off">We build the useful <span class="accent">kind of AI.</span></span></h2>
     </div>
 
     <div class="row">
-      <p class="tag">B — wave on the accent words only</p>
-      <p class="note">The white half stays white; the colour travels through the accent. The
-        headline keeps its two tones, and the eye is drawn to the phrase that matters. The second
-        line checks the rule against a DIMMED word, which must NOT be treated as an accent.</p>
-      <h2><span class="ph" data-pixel data-wave="accent">We build the useful <span class="accent">kind of AI.</span></span></h2>
-      <h2 style="margin-top:.7rem"><span class="ph" data-pixel data-wave="accent">Things that <span class="dim">actually shipped.</span></span></h2>
-    </div>
-
-    <div class="row">
-      <p class="tag">C — wave across the whole line</p>
-      <p class="note">Every cell carries the wave, so the white/gold split is replaced by the
-        travelling colour. The most movement, and the biggest change to what the headline is.</p>
-      <h2><span class="ph" data-pixel data-wave="all">We build the useful <span class="accent">kind of AI.</span></span></h2>
-    </div>
-
-    <div class="row">
-      <p class="tag">D — accent wave plus random flicker</p>
-      <p class="note">The wave on the accent, and a few dozen cells per frame flipping to a palette
-        colour anywhere in the line — the "random" half of the idea. Costs the same however long
-        the headline is.</p>
-      <h2><span class="ph" data-pixel data-wave="shimmer">We build the useful <span class="accent">kind of AI.</span></span></h2>
-    </div>
-
-    <div class="row">
-      <p class="tag">E — accent wave, gold only</p>
-      <p class="note">Same mechanic as B with no green in the palette: a sheen travelling through
-        the gold rather than a colour change. The most restrained version.</p>
-      <h2><span class="ph" data-pixel data-wave="accent" data-wave-colors="#f5c518,#fff0b0,#c99b00,#f5c518">We build the useful <span class="accent">kind of AI.</span></span></h2>
+      <p class="tag">Regression — a dimmed word is not an accent</p>
+      <p class="note">Grey has to stay grey however loud the palette gets.</p>
+      <h2><span class="ph" data-pixel data-wave="accent" data-wave-style="rainbow">Things that <span class="dim">actually shipped.</span></span></h2>
     </div>
   </div>
 
@@ -90,30 +112,21 @@
   <script src="../pixel-engine.js"></script>
   <script src="../common.js"></script>
   <script>
-    /* Cost each row where it actually runs, rather than trusting that a cached
-       layer must be cheap. A claim about performance is only about the page
-       and the gesture it was measured on, so this measures THIS page while the
-       waves are running, and index.html gets measured separately. */
-    var log = {};
-    function timeRows() {
-      var frames = [], last = performance.now(), stop = false;
-      function tick(t) { frames.push(t - last); last = t; if (!stop) requestAnimationFrame(tick); }
-      requestAnimationFrame(tick);
+    /* Paint each row's ACTUAL generated palette into its strip by asking the
+       engine for it, rather than writing the colours out here. A strip typed
+       by hand is a picture of what I meant, not of what runs. */
+    addEventListener("load", function () {
       setTimeout(function () {
-        stop = true;
-        var f = frames.slice(4).sort(function (a, b) { return a - b; });
-        var p90 = f[Math.floor(f.length * 0.9)] || 0;
-        var over = f.filter(function (x) { return x > 20; }).length;
-        document.querySelectorAll(".row").forEach(function (row) {
-          var b = row.querySelector(".note b");
-          if (!b) { b = document.createElement("b"); row.querySelector(".note").appendChild(b); }
-          b.textContent = "with every row on this page animating at once: median " +
-            (f[Math.floor(f.length / 2)] || 0).toFixed(1) + "ms, p90 " + p90.toFixed(1) +
-            "ms, " + (100 * over / f.length).toFixed(0) + "% of frames over 20ms";
+        document.querySelectorAll("[data-strip]").forEach(function (el) {
+          var pal = window.PixelFX && window.PixelFX.wavePalette
+            ? window.PixelFX.wavePalette(el.dataset.strip)
+            : null;
+          if (!pal) { el.style.background = "var(--line)"; el.title = "engine did not answer"; return; }
+          el.style.background = "linear-gradient(90deg," + pal.join(",") + ")";
+          el.title = pal.join("  ");
         });
-      }, 3000);
-    }
-    addEventListener("load", function () { setTimeout(timeRows, 3000); });
+      }, 1200);
+    });
   </script>
 </body>
 

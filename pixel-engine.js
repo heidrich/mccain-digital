@@ -75,6 +75,68 @@
   }
 
   /* sample an ImageData into colored particles */
+  /* ---------- the wave palette ----------
+
+     The first version listed two brand colours as stops and let the gradient
+     interpolate between them. That is what produced the "ugly green": any two
+     hues mixed in sRGB pass through a desaturated middle, so gold-to-green
+     spends most of its span as olive mud. Choosing nicer endpoints does not
+     help, because the mud is BETWEEN them, not at them.
+
+     So the stops are generated with saturation and lightness held at the
+     accent colour and only the hue moving. Nothing between two stops can then
+     be duller than the stops themselves — which is precisely what an animated
+     gradient border does.
+
+       sheen    one hue, lightness swinging  — a shine, no colour change
+       hue      about 55 degrees each way    — still reads as the brand
+       rainbow  the whole circle             — the animated-border look
+
+     Exposed as PixelFX.wavePalette so a comparison page can paint the palette
+     that actually runs instead of one written out by hand. */
+  function rgbToHsl(c) {
+    var r = c[0] / 255, g = c[1] / 255, b = c[2] / 255;
+    var mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+    var h = 0, l = (mx + mn) / 2;
+    var sat = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+    if (d !== 0) {
+      if (mx === r) h = ((g - b) / d) % 6;
+      else if (mx === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h *= 60;
+      if (h < 0) h += 360;
+    }
+    return [h, sat, l];
+  }
+
+  function hslStr(h, sat, l) {
+    return "hsl(" + h.toFixed(0) + " " + (sat * 100).toFixed(0) + "% " +
+      (l * 100).toFixed(0) + "%)";
+  }
+
+  function wavePalette(style, accRGB) {
+    var hsl = rgbToHsl(accRGB || [245, 197, 24]);
+    var h = hsl[0], sat = Math.max(0.55, hsl[1]), l = hsl[2];
+    var out = [], k;
+
+    if (style === "sheen") {
+      var swing = [l, Math.min(0.92, l + 0.28), l, Math.max(0.28, l - 0.16), l];
+      for (k = 0; k < swing.length; k++) out.push(hslStr(h, sat, swing[k]));
+      return out;
+    }
+    if (style === "rainbow") {
+      // the full circle, ending back on the accent hue so the cycle has no seam
+      for (k = 0; k <= 12; k++) out.push(hslStr((h + 360 * k / 12) % 360, sat, l));
+      return out;
+    }
+    /* "hue": a sweep that starts and ends on the accent. Kept to +/-32 degrees
+       because +/-55 from gold reaches green one way and red the other, which
+       is not "near the brand" however the comment describes it. */
+    var arc = [0, 18, 32, 18, 0, -18, -32, -18, 0];
+    for (k = 0; k < arc.length; k++) out.push(hslStr((h + arc[k] + 360) % 360, sat, l));
+    return out;
+  }
+
   function sampleField(img, imgW, w, h, gap, alphaMin) {
     var parts = [];
     for (var y = 0; y < h; y += gap) {
@@ -130,6 +192,11 @@
     var WAVE = host.dataset.wave || "accent";
     var WAVE_COLS = (host.dataset.waveColors || "").split(",")
       .map(function (c) { return c.trim(); }).filter(Boolean);
+    /* "rainbow" by default: the owner asked for the animated-gradient-border
+       look and accepted that the gold cycles away with it ("das gelb
+       verschwindet dann halt mit der zeit"). data-wave-style="hue" keeps it
+       near the brand, "sheen" drops the colour change entirely. */
+    var WAVE_STYLE = host.dataset.waveStyle || "rainbow";
     var INK = host.dataset.ink || null;
 
     var txt = document.createElement("span");
@@ -291,9 +358,26 @@
     var restCv = null, waveCv = null, scratch = null;
     var waveRaf = null, waveT = 0, waveMix = 0;
 
+    /* The palette.
+
+       The first version listed two brand colours and let the gradient
+       interpolate between them. That is what produced the "ugly green": any
+       two hues mixed in sRGB pass through a desaturated middle, so gold to
+       olive-green spends most of its span as mud. Naming nicer endpoints does
+       not help — the mud is between them, not at them.
+
+       So the stops are GENERATED with saturation and lightness held at the
+       accent colour and only the hue moving. Nothing between two stops can be
+       duller than the stops themselves, which is exactly what an animated
+       gradient border does. data-wave-style picks how far the hue travels:
+
+         sheen    hue fixed, lightness swings   — a metallic shine, no colour
+         hue      +/- 55 degrees                — still reads as the brand
+         rainbow  the full circle               — the animated-border look
+
+       data-wave-colors still overrides everything with a literal list. */
     function paletteFor() {
-      if (WAVE_COLS.length) return WAVE_COLS;
-      return [ACC, "#ffd85e", "#7A8C00", ACC];
+      return WAVE_COLS.length ? WAVE_COLS : wavePalette(WAVE_STYLE, accentRGB());
     }
 
     function offscreen(w, h) {
@@ -2226,6 +2310,9 @@
     voidReveal: voidReveal,
     slides: slides,
     image: pixelImage,
+    /* the palette a given wave style generates, so a comparison page can show
+       what actually runs rather than colours written out by hand */
+    wavePalette: function (style, accRGB) { return wavePalette(style, accRGB); },
     onVelocity: function (fn) { velSubs.push(fn); },
     velocity: function () { return vel; },
     reduced: reduced,
