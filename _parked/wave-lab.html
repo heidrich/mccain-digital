@@ -1,0 +1,120 @@
+<html lang="en" data-theme="dark" data-root="..">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Pixel colour wave — side by side</title>
+  <link rel="stylesheet" href="../v3.css">
+  <style>
+    /* mockup chrome only, never ships */
+    /* Without this the page has no theme: --bg resolves to nothing, the body
+       goes white, the sampled text goes black, and the comparison is of a
+       page the site never shows. */
+    body { background: var(--bg); color: var(--fg) }
+
+    /* .accent only carries a colour inside .hero-h in the real stylesheet, so
+       without this the lab headlines are single-coloured and the accent modes
+       have nothing to move. Second time this exact omission has faked a
+       result on a comparison page. */
+    .lab .accent { color: var(--acc-text) }
+    .lab .dim { color: var(--muted) }
+    .lab { max-width: 1500px; margin: 0 auto; padding: 2.5rem var(--gut) 6rem }
+    .lab h1 { font-size: 1.7rem; letter-spacing: -.03em; margin: 0 0 .4rem }
+    .lab .intro { color: var(--muted); max-width: 74ch; margin: 0 0 1.6rem }
+
+    .row { padding: 2.4rem 0; border-top: 1px solid var(--line) }
+    .row:first-of-type { border-top: 0 }
+    .tag {
+      font-family: var(--mono); font-size: var(--t-label); letter-spacing: .12em;
+      text-transform: uppercase; color: var(--muted); margin: 0 0 .15rem
+    }
+    .note { font-size: var(--t-small); color: var(--muted); margin: 0 0 1.1rem; max-width: 70ch }
+    .note b { display: block; margin-top: .3rem; color: var(--fg) }
+    .row h2 {
+      font-size: clamp(1.9rem, 4.4vw, 3.8rem); line-height: 1.06;
+      letter-spacing: -.045em; font-weight: 800; margin: 0
+    }
+  </style>
+</head>
+
+<body>
+  <div class="lab">
+    <h1>The pixel colour wave</h1>
+    <p class="intro">Same headline, same grid, same engine — only the wave mode changes. Hover each
+      one: the black hole still works, and the wave steps aside while the hole is running rather
+      than fighting it for the canvas. Every row reports its own frame cost, measured while it
+      animates.</p>
+
+    <div class="row">
+      <p class="tag">A — off</p>
+      <p class="note">No wave at all — the reference. It needs data-wave="off" spelled out now
+        that "accent" is the engine default; leaving the attribute off made this row animate and
+        quietly turned the control into a fifth variant.</p>
+      <h2><span class="ph" data-pixel data-wave="off">We build the useful <span class="accent">kind of AI.</span></span></h2>
+    </div>
+
+    <div class="row">
+      <p class="tag">B — wave on the accent words only</p>
+      <p class="note">The white half stays white; the colour travels through the accent. The
+        headline keeps its two tones, and the eye is drawn to the phrase that matters. The second
+        line checks the rule against a DIMMED word, which must NOT be treated as an accent.</p>
+      <h2><span class="ph" data-pixel data-wave="accent">We build the useful <span class="accent">kind of AI.</span></span></h2>
+      <h2 style="margin-top:.7rem"><span class="ph" data-pixel data-wave="accent">Things that <span class="dim">actually shipped.</span></span></h2>
+    </div>
+
+    <div class="row">
+      <p class="tag">C — wave across the whole line</p>
+      <p class="note">Every cell carries the wave, so the white/gold split is replaced by the
+        travelling colour. The most movement, and the biggest change to what the headline is.</p>
+      <h2><span class="ph" data-pixel data-wave="all">We build the useful <span class="accent">kind of AI.</span></span></h2>
+    </div>
+
+    <div class="row">
+      <p class="tag">D — accent wave plus random flicker</p>
+      <p class="note">The wave on the accent, and a few dozen cells per frame flipping to a palette
+        colour anywhere in the line — the "random" half of the idea. Costs the same however long
+        the headline is.</p>
+      <h2><span class="ph" data-pixel data-wave="shimmer">We build the useful <span class="accent">kind of AI.</span></span></h2>
+    </div>
+
+    <div class="row">
+      <p class="tag">E — accent wave, gold only</p>
+      <p class="note">Same mechanic as B with no green in the palette: a sheen travelling through
+        the gold rather than a colour change. The most restrained version.</p>
+      <h2><span class="ph" data-pixel data-wave="accent" data-wave-colors="#f5c518,#fff0b0,#c99b00,#f5c518">We build the useful <span class="accent">kind of AI.</span></span></h2>
+    </div>
+  </div>
+
+  <script src="../data.js"></script>
+  <script src="../pixel-engine.js"></script>
+  <script src="../common.js"></script>
+  <script>
+    /* Cost each row where it actually runs, rather than trusting that a cached
+       layer must be cheap. A claim about performance is only about the page
+       and the gesture it was measured on, so this measures THIS page while the
+       waves are running, and index.html gets measured separately. */
+    var log = {};
+    function timeRows() {
+      var frames = [], last = performance.now(), stop = false;
+      function tick(t) { frames.push(t - last); last = t; if (!stop) requestAnimationFrame(tick); }
+      requestAnimationFrame(tick);
+      setTimeout(function () {
+        stop = true;
+        var f = frames.slice(4).sort(function (a, b) { return a - b; });
+        var p90 = f[Math.floor(f.length * 0.9)] || 0;
+        var over = f.filter(function (x) { return x > 20; }).length;
+        document.querySelectorAll(".row").forEach(function (row) {
+          var b = row.querySelector(".note b");
+          if (!b) { b = document.createElement("b"); row.querySelector(".note").appendChild(b); }
+          b.textContent = "with every row on this page animating at once: median " +
+            (f[Math.floor(f.length / 2)] || 0).toFixed(1) + "ms, p90 " + p90.toFixed(1) +
+            "ms, " + (100 * over / f.length).toFixed(0) + "% of frames over 20ms";
+        });
+      }, 3000);
+    }
+    addEventListener("load", function () { setTimeout(timeRows, 3000); });
+  </script>
+</body>
+
+</html>

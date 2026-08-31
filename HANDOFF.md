@@ -518,12 +518,93 @@ stehen im Skript als Kommentar, weil jeder davon ein stiller Fehlalarm war:**
    Beschriftungen aller Ergebnisse**. Das Theme wird jetzt vor dem Booten
    gesetzt.
 
-**Noch offen:** die Pixel-Ueberschriften auf hellen Flaechen bleiben blasser als
-der Volltext, weil ein Mosaik nur 44 % der Flaeche einfaerbt und das Auge den
-Rest mit dem Papier mittelt. Das dunklere Gold verdreifacht den Abstand zum
-Papier, macht die Zeile aber nicht dunkel. Owner will das erst am fertigen
-Stand ansehen; die Engine hat fuer den Fall `data-ink`, das jede Zelle auf eine
-Farbe zwingt.
+## Farbwelle ueber den Pixeln (2026-08-31)
+
+**Owner:** „koennen wir die pixel animieren mit verschiedenen farben die wie in
+einer welle laufen oder random sind? wuerde auch zum animierten border der
+console passen."
+
+**Standard ist `data-wave="accent"`**: nur die akzentfarbenen Zellen tragen die
+wandernde Farbe, die Zeile behaelt also ihre zwei Toene und die Bewegung landet
+auf der Phrase, um die es geht. `_parked/wave-lab.html` hat „all" (ganze Zeile),
+„shimmer" (Welle plus Flackern) und „off" nebeneinander; umschalten ist EIN
+Attribut, `data-wave-colors` setzt die Palette.
+
+**Warum es nichts kostet.** Der Ruhezustand wird EINMAL in ein Offscreen-Canvas
+gezeichnet; pro Frame kostet die Welle zwei `drawImage` und eine
+Verlaufsfuellung — unabhaengig davon, wie viele Zellen die Ueberschrift hat.
+Der teure Weg waere gewesen, die 7.000 `fillRect` pro Frame zu wiederholen; das
+ist genau die Last, die die Seite schon einmal auf 20 fps gezogen hat. Gemessen
+auf `index.html`: Scroll-Median 16,7 ms, 0 % Frames ueber 20 ms, 0 Long Tasks,
+Ruhezustand ueber 4 s identisch mit „Welle aus".
+
+Sie laeuft nur, wenn die Ueberschrift **im Bild** ist, **fertig aufgebaut** ist
+und **das schwarze Loch ruht**. Alle Zellen bleiben voll deckend.
+
+### Vier Fehler auf dem Weg, alle gemessen statt gesehen
+
+1. **Die Welle fiel aus, wenn das Loch lief.** Erst tintete nur der
+   Ruhe-Pfad; sobald das Loch die Zeile beruehrte, sprang sie auf ihre
+   Grundfarben zurueck. Dieselbe Fehlerklasse wie zwei Zeichenpfade mit
+   verschiedenen Rastern. Jetzt malt der Physik-Pfad mit demselben Verlauf.
+2. **„Akzent" ueber `.accent` zu bestimmen war falsch** — die Klasse traegt nur
+   in `.hero-h` eine Farbe, also passte ueberall sonst JEDE Zelle und die ganze
+   Zeile wellte.
+3. **„Alles, was nicht Grundfarbe ist" war auch falsch** — das faengt die
+   gedimmte Haelfte von „Things that *actually shipped*" mit und haette graue
+   Woerter vergoldet. Die Regel fragt jetzt das **Token** `--acc-text`, das
+   immer definiert ist, egal ob die Seite es benutzt.
+4. **Der Verlauf spannte ueber die ganze Zeile.** Das Akzentwort ist oft nur
+   das letzte Drittel — die Farbe wanderte also die meiste Zeit durch die
+   weisse Haelfte, wo sie nichts aendert, und am Wort stand dauerhaft die
+   Endfarbe. Der Verlauf spannt jetzt ueber die Zellen, die er einfaerbt.
+
+### Und ein Waechter, der laenger lebte als sein Fehler
+
+Gegen (2) und (3) hatte ich eingebaut: „wenn ALLE Zellen als Akzent gelten, ist
+die Regel kaputt — Welle aus". Nach Fix (3) war die Bedingung nicht mehr
+Beweis fuer einen Fehler, sondern ein voellig normaler Fall: **die zweite
+Hero-Zeile besteht komplett aus Akzentfarbe**. Sie schaltete sich also selbst
+ab, und zwar lautlos. Zweimal habe ich in dieser Session „laeuft, 60 fps"
+gemessen, waehrend gar nichts lief.
+
+**Regel daraus: ein Waechter gegen einen Fehler muss mit dem Fehler
+verschwinden.** Bleibt er stehen, ist er nur noch ein Bug mit einer guten
+Begruendung im Kommentar. Und: **vor jeder Aussage ueber eine Animation zuerst
+beweisen, dass sie laeuft** — hier durch zwei Farbmessungen im Abstand von
+900 ms, nicht durch einen Blick auf die Bildrate.
+
+## OFFENE GRUNDSATZFRAGE: Pixelschrift im hellen Modus
+
+**Owner nach dem Einbau von `--acc-text` (2026-08-31):** „hell funktioniert die
+pixel schrift echt garnicht. da muessen wir uns spaeter mal was anderes
+ueberlegen. ggf streichen wir den hell modus ODER wir machen im hellen was ganz
+anderes mit der schrift."
+
+**Das ist keine Feinjustage, sondern eine Entscheidung mit drei Auswegen**, und
+bis sie faellt bleibt der Stand wie er ist — ausdruecklich so vom Owner
+gewuenscht („von daher lassen wir das erstmal so").
+
+*Warum es strukturell und nicht durch Farbe kaputt ist:* ein Mosaik faerbt
+44 % seiner Flaeche, den Rest mittelt das Auge mit dem Grund. Auf Tinte
+arbeitet das FUER die Schrift — helle Pixel auf dunklem Grund lesen sich als
+leuchtende Schrift. Auf Papier arbeitet es dagegen: dunkle Pixel auf hellem
+Grund mitteln sich zu Grau, und je heller der Grund, desto mehr gewinnt er.
+`--acc-ink` verdreifacht den Abstand zum Papier und macht die Zeile trotzdem
+nicht dunkel. **Keine Farbe loest das, weil das Problem die Deckung ist.**
+
+Die drei Wege, wenn es soweit ist:
+1. **Hellen Modus streichen.** Billigste Loesung, kostet einen Schalter, den
+   Besucher erwarten.
+2. **Auf hellem Grund eine andere Behandlung** statt des Mosaiks — z. B.
+   Volltext mit einem Pixel-Effekt nur beim Einblenden, oder invertierte
+   Pixelschrift (helle Pixel in einem dunklen Balken).
+3. **`data-ink` plus dichteres Raster nur auf Papier.** Technisch da, aber es
+   kauft Deckung mit Teilchen — genau die Richtung, die eben zu langsam war,
+   und es bleibt ein Mosaik auf hellem Grund.
+
+Empfehlung, wenn gefragt: Weg 2. Weg 1 wirft ein funktionierendes Feature weg
+wegen EINES Elements darin.
 
 ## `/api/ask` — die Konsole kann jetzt mit Claude antworten
 

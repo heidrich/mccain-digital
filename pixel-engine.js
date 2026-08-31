@@ -119,6 +119,17 @@
        36% FEWER particles than 2.4/1.7 and an eighth of 1.1/1.0. */
     var GAP = parseFloat(host.dataset.gap) || 3.0;
     var SIZE = parseFloat(host.dataset.size) || 2.0;
+    /* data-wave: "accent" (default) | "all" | "shimmer" | "off"
+       data-wave-colors: comma-separated list, overrides the palette
+
+       "accent" is the default because it is the restrained one: only the
+       accent-coloured cells carry the travelling colour, so a headline keeps
+       the two tones it was written with and the movement lands on the phrase
+       that matters. _parked/wave-lab.html has the louder ones side by side;
+       switching is one attribute. */
+    var WAVE = host.dataset.wave || "accent";
+    var WAVE_COLS = (host.dataset.waveColors || "").split(",")
+      .map(function (c) { return c.trim(); }).filter(Boolean);
     var INK = host.dataset.ink || null;
 
     var txt = document.createElement("span");
@@ -257,11 +268,208 @@
 
     function drawStatic() {
       ctx.clearRect(0, 0, W, H);
+      var g = (WAVE !== "off" && !reduced && parts.length) ? waveGradient(ctx) : null;
       for (var i = 0; i < parts.length; i++) {
         var p = parts[i];
-        ctx.fillStyle = p.col;
+        ctx.fillStyle = (p.wave && g) ? g : p.col;
         ctx.fillRect(snap(p.cx), snap(p.cy), BLOCK, BLOCK);
       }
+    }
+
+    /* ---------- the colour wave over the resting mosaic ----------
+
+       The expensive thing about this headline is the per-particle fillRect:
+       7,000 of them for the hero line. Running that every frame forever, on
+       every headline, is the load that took the page to 20fps once already.
+       So the resting mosaic is rendered ONCE into an offscreen canvas and
+       each frame costs two drawImage calls and one gradient fill, whatever
+       the cell count.
+
+       It runs only while the headline is on screen, settled, and the black
+       hole is idle. The hole is the better animation; the wave gets out of
+       its way and comes back when the hole is done. */
+    var restCv = null, waveCv = null, scratch = null;
+    var waveRaf = null, waveT = 0, waveMix = 0;
+
+    function paletteFor() {
+      if (WAVE_COLS.length) return WAVE_COLS;
+      return [ACC, "#ffd85e", "#7A8C00", ACC];
+    }
+
+    function offscreen(w, h) {
+      var c = document.createElement("canvas");
+      c.width = w; c.height = h;
+      return c;
+    }
+
+    /* One scratch canvas per headline, reused: a canvas allocated per frame
+       is garbage per frame, and garbage per frame never stops. */
+    function scratchCv() {
+      if (!scratch || scratch.width !== cv.width || scratch.height !== cv.height) {
+        scratch = offscreen(cv.width, cv.height);
+      }
+      return scratch;
+    }
+
+    /* Which cells are "the accent"?
+
+       Two wrong answers came before this one, and both shipped a visible bug
+       on the comparison page:
+
+       - "the ones matching .accent" — that class only carries a colour inside
+         .hero-h, so everywhere else it returned the ordinary text colour,
+         EVERY cell matched, and the whole line waved.
+       - "the ones that are NOT the base text colour" — that also catches the
+         dimmed half of a heading like "Things that <span class=dim>actually
+         shipped</span>", which would have turned grey words gold.
+
+       The question that survives both is asked of the TOKEN, not of an
+       element: a cell is accent if its colour is close to --acc-text, which
+       is defined on every host whether or not anything on the page uses it. */
+    function tokenRGB(name, fallback) {
+      var raw = getComputedStyle(host).getPropertyValue(name).trim() || fallback;
+      if (raw.charAt(0) === "#") {
+        var h = raw.slice(1);
+        if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+        return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+      }
+      var n = (raw.match(/[\d.]+/g) || []).map(Number);
+      if (raw.indexOf("color(") === 0) n = n.slice(0, 3).map(function (v) { return v * 255; });
+      return n.slice(0, 3);
+    }
+    function accentRGB() { return tokenRGB("--acc-text", ACC); }
+
+    /* Decide ONCE which cells carry the wave, and record it on the particle
+       so that every draw path asks the same question and gets the same
+       answer. In "accent" mode only the non-base-coloured cells move, so a
+       two-tone headline keeps its two tones and the wave reads as a
+       highlight rather than as a repaint of the whole line. */
+    function markWaveParticles() {
+      if (WAVE === "off") return;
+      var acc = accentRGB(), waved = 0, i;
+      for (i = 0; i < parts.length; i++) {
+        var p = parts[i];
+        if (WAVE === "all") { p.wave = true; waved++; continue; }
+        var n = (p.col.match(/[\d.]+/g) || []).map(Number);
+        p.wave = Math.abs(n[0] - acc[0]) + Math.abs(n[1] - acc[1]) +
+          Math.abs(n[2] - acc[2]) < 110;
+        if (p.wave) waved++;
+      }
+      /* A headline with no accent in it marks nothing and animates nothing,
+         which is correct and silent.
+
+         There is deliberately NO guard for "everything matched" any more.
+         The two earlier rules asked an ELEMENT which cells were accent, and
+         when that element carried no colour they answered "all of them" —
+         so a whole-line match really was evidence of a broken rule, and the
+         guard was right to refuse it. This rule asks the TOKEN, which is
+         defined whether or not anything on the page uses it, so a whole-line
+         match now means what it says. Keeping the guard cost real work: the
+         hero's second line is entirely accent-coloured, matched completely,
+         and was silently switched off by its own safety net.
+
+         The lesson generalises: a guard written against one failure keeps
+         firing after that failure is gone, and then it is just a bug with a
+         good reason in its comment. */
+      // the span the gradient has to travel, measured from the marked cells
+      waveX0 = W; waveX1 = 0;
+      for (i = 0; i < parts.length; i++) {
+        if (!parts[i].wave) continue;
+        if (parts[i].tx < waveX0) waveX0 = parts[i].tx;
+        if (parts[i].tx > waveX1) waveX1 = parts[i].tx;
+      }
+      if (waveX1 <= waveX0) { waveX0 = 0; waveX1 = W; }
+    }
+
+    /* The travelling gradient, as a fill style.
+
+       It sweeps the horizontal span of the cells it actually tints, NOT the
+       width of the headline. Those are the same thing only in "all" mode. In
+       "accent" mode the accent is often the last third of the line, so a
+       gradient sized to the whole width spent most of its cycle over the
+       white half — where it changes nothing — and left the accent sitting on
+       an end stop. The wave was running the whole time and was invisible.
+
+       Both the resting path and the physics path paint with this, so the
+       colours do not change when the black hole takes the canvas. An earlier
+       build tinted only at rest and the line snapped back to its base colours
+       the moment the hole touched it: the same defect as two draw paths using
+       different grids. */
+    var waveX0 = 0, waveX1 = 0;
+    function waveGradient(c2d) {
+      var pal = paletteFor();
+      var w = Math.max(24, waveX1 - waveX0);
+      var span = w * 0.75 + 1;
+      var off = waveX0 + (waveT * 1.4) % (w + span) - span;
+      var g = c2d.createLinearGradient(off, 0, off + span, 0);
+      for (var k = 0; k < pal.length; k++) g.addColorStop(k / (pal.length - 1), pal[k]);
+      return g;
+    }
+
+    function buildWaveLayers() {
+      restCv = offscreen(cv.width, cv.height);
+      waveCv = offscreen(cv.width, cv.height);
+      var rc = restCv.getContext("2d"), wc = waveCv.getContext("2d");
+      rc.setTransform(DPR, 0, 0, DPR, 0, 0);
+      wc.setTransform(DPR, 0, 0, DPR, 0, 0);
+      for (var i = 0; i < parts.length; i++) {
+        var p = parts[i], target = p.wave ? wc : rc;
+        target.fillStyle = p.col;
+        target.fillRect(snap(p.cx), snap(p.cy), BLOCK, BLOCK);
+      }
+    }
+
+    /* A handful of cells per frame flip to a palette colour on top of the
+       finished image. Fixed cost, unrelated to how many cells there are. */
+    function sprinkle(pal) {
+      var n = Math.min(90, Math.round(parts.length * 0.012));
+      for (var i = 0; i < n; i++) {
+        var p = parts[(Math.random() * parts.length) | 0];
+        ctx.fillStyle = pal[(Math.random() * pal.length) | 0];
+        ctx.fillRect(snap(p.cx), snap(p.cy), BLOCK, BLOCK);
+      }
+    }
+
+    function waveFrame() {
+      waveRaf = null;
+      if (!waveRunning()) { waveMix = 0; drawStatic(); return; }
+      if (!restCv) buildWaveLayers();
+      waveT += 1;
+      // ease in after a settle, so the colour does not snap on
+      waveMix = Math.min(1, waveMix + 0.03);
+
+      /* Tint a COPY of the wave layer, never the layer itself: tinting in
+         place compounds every frame until the letters are one flat colour. */
+      var tmp = scratchCv(), tc = tmp.getContext("2d");
+      tc.setTransform(1, 0, 0, 1, 0, 0);
+      tc.clearRect(0, 0, tmp.width, tmp.height);
+      tc.drawImage(waveCv, 0, 0);
+      tc.setTransform(DPR, 0, 0, DPR, 0, 0);
+      var g = waveGradient(tc);
+      tc.globalAlpha = waveMix;
+      tc.globalCompositeOperation = "source-atop";
+      tc.fillStyle = g;
+      tc.fillRect(0, 0, W, H);
+      tc.globalCompositeOperation = "source-over";
+      tc.globalAlpha = 1;
+
+      ctx.clearRect(0, 0, W, H);
+      ctx.drawImage(restCv, 0, 0, W, H);
+      ctx.drawImage(tmp, 0, 0, W, H);
+      if (WAVE === "shimmer") sprinkle(paletteFor());
+
+      waveRaf = requestAnimationFrame(waveFrame);
+    }
+
+    function waveRunning() {
+      return WAVE !== "off" && !reduced && onScreen && interactive && iraf === null;
+    }
+    function waveKick() {
+      if (waveRunning() && !waveRaf) waveRaf = requestAnimationFrame(waveFrame);
+    }
+    function waveStop() {
+      if (waveRaf) { cancelAnimationFrame(waveRaf); waveRaf = null; }
+      waveMix = 0;
     }
 
     function settle() {
@@ -269,6 +477,9 @@
       drawStatic();
       interactive = true;
       cv.style.pointerEvents = "auto";
+      restCv = null;          // the colours may have changed since the last build
+      markWaveParticles();
+      waveKick();
     }
 
     var R = 46, FORCE = 2.4, SPRING = 0.10, DAMP = 0.86;
@@ -328,6 +539,10 @@
       } else { holeX = -9999; holeY = -9999; }
 
       ctx.clearRect(0, 0, W, H);
+      // keep the wave travelling while the hole plays, rather than dropping
+      // the whole line back to its base colours for the length of the pass
+      var waveGrad = null;
+      if (WAVE !== "off" && !reduced) { waveT += 1; waveGrad = waveGradient(ctx); }
       var shear = Math.abs(hVel) > 0.4 ? hVel * 0.012 : 0;
       for (var i = 0; i < parts.length; i++) {
         var p = parts[i];
@@ -342,13 +557,18 @@
         p.vx *= DAMP; p.vy *= DAMP; p.cx += p.vx; p.cy += p.vy;
         if (Math.abs(p.vx) + Math.abs(p.vy) > 0.05 ||
             Math.abs(p.tx - p.cx) + Math.abs(p.ty - p.cy) > 0.5) moving = true;
-        ctx.fillStyle = p.col;
+        ctx.fillStyle = (p.wave && waveGrad) ? waveGrad : p.col;
         ctx.fillRect(snap(p.cx), snap(p.cy), BLOCK, BLOCK);
       }
       if (moving || mouseX > -9000 || roam || Math.abs(hVel) > 0.4) iraf = requestAnimationFrame(physics);
-      else { iraf = null; drawStatic(); }
+      else { iraf = null; drawStatic(); waveKick(); }
     }
-    function kick() { if (interactive && !iraf && !reduced) iraf = requestAnimationFrame(physics); }
+    function kick() {
+      if (interactive && !iraf && !reduced) {
+        waveStop();                                  // the hole owns the canvas
+        iraf = requestAnimationFrame(physics);
+      }
+    }
 
     cv.addEventListener("pointermove", function (e) {
       var r = cv.getBoundingClientRect(); mouseX = e.clientX - r.left; mouseY = e.clientY - r.top;
@@ -368,9 +588,11 @@
       onScreen = es[0].isIntersecting;
       if (onScreen) {
         schedulePass(hadPass ? nextPassDelay() : 5000 + Math.random() * 2000);
+        waveKick();
       } else {
         clearTimeout(roamTimer);
         killPass();
+        waveStop();          // nothing animates off screen
       }
     }, { threshold: 0 }).observe(host);
     velSubs.push(function (v) {
@@ -381,6 +603,7 @@
     var buildSeq = 0;
     function play() {
       cancelAnimationFrame(raf); cancelAnimationFrame(iraf); iraf = null;
+      waveStop(); restCv = null;
       interactive = false; start = null; killPass(); zoomIn = false;
       cv.style.pointerEvents = "none"; cv.style.display = "block";
       host.classList.add("assembling");
@@ -396,6 +619,7 @@
     function redraw() {
       if (!played) return;
       cancelAnimationFrame(raf); cancelAnimationFrame(iraf); iraf = null;
+      waveStop(); restCv = null;
       interactive = false; killPass(); zoomIn = false; host.classList.add("assembling");
       var seq = ++buildSeq;
       build(function (ok) { if (seq === buildSeq && ok) settle(); });
