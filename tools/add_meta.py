@@ -3,6 +3,7 @@
 # Title and description are read back OUT of each page, so this stays a single
 # source: edit the <title> and the description on the page, re-run this, and the
 # Open Graph and Twitter cards follow. Idempotent — it replaces its own block.
+import html
 import io
 import os
 import re
@@ -34,7 +35,12 @@ def block(rel, title, desc):
     # the canonical for the front page is the bare domain, not /index.html
     if rel == "index.html":
         url = SITE + "/"
-    esc = lambda s: s.replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;")
+    # What was read back out of the page is MARKUP: a title containing `&mdash;`
+    # is the text "—", not the seven characters. Escaping it straight into an
+    # attribute produced `&amp;mdash;`, and the social card then showed the
+    # entity verbatim. Decode to text first, then escape once.
+    esc = lambda s: (html.unescape(s)
+                     .replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;"))
     t, d = esc(title), esc(desc)
     return "\n".join([
         MARK_A,

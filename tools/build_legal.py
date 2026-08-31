@@ -64,7 +64,7 @@ SHELL = """<!DOCTYPE html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{title} &mdash; McCain Digital</title>
+  <title>{title} — McCain Digital</title>
   <meta name="robots" content="noindex, nofollow">
   <meta name="description" content="{desc}">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
