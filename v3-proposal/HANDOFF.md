@@ -279,6 +279,82 @@ Ctrl je nach Plattform.
    Gegenprobe gefahren: mit dem alten `build()` schlägt er fehl, mit dem neuen
    ist er grün.
 
+## Umzug zu Vercel (Owner-Entscheid 2026-08-31)
+
+**Warum überhaupt.** Punkt 4 der offenen Liste ist `/api/ask` als
+Serverfunktion. Die Seite liegt heute auf **klassischem Apache-Webspace, rein
+statisch** (`upload/.htaccess`, Deploy = Ordner hochladen) — dort gibt es
+keinen Ort, an dem eine Funktion laufen könnte. Zur Wahl standen: nur den
+Endpunkt auslagern, PHP-Proxy, oder die ganze Seite umziehen. **Owner hat den
+Umzug gewählt** und legt das Vercel-Projekt selbst an; deployt wird künftig per
+`git push`, nicht per FTP.
+
+**Punkt 7 der offenen Liste entfällt damit voraussichtlich.** Er lautete:
+`upload/services/apps.html` und `design-brand.html` löschen und Menü, Footer,
+`sitemap.xml`, `llms.txt` nachziehen — also die Live-Seite von sechs auf vier
+Services bringen. `v3-proposal/` ist von vornherein auf vier gebaut; sobald es
+die Live-Seite ist, gibt es dort nichts aufzuräumen. Erst wenn der Umzug doch
+scheitert, wird Punkt 7 wieder aktuell.
+
+### Was der Owner in Vercel einstellt
+
+- Repository `heidrich/mccain-digital` verbinden.
+- **Root Directory: `v3-proposal`**
+- **Framework Preset: Other** — es gibt keinen Build-Schritt, die Dateien
+  werden ausgeliefert wie sie sind. Build Command und Install Command leer.
+- **Production Branch: `v2-homepage-refresh`** (nicht `main`) — auf `main`
+  liegt noch der alte Stand. Solange keine Domain dranhängt, ist die
+  Vercel-URL damit gleich dem aktuellen Entwurf.
+- **Keine Domain verbinden**, solange die Inhalte fehlen (Kundenzitate, zwei
+  Work-Cases, echte Porträts). Bis dahin ist es eine Vorschau-URL, und das
+  bewusste `noindex` in jedem `<head>` bleibt drin.
+
+### Was schon vorbereitet ist
+
+`v3-proposal/vercel.json` übersetzt die Header-Politik von `prodserve.py`
+(gegen die alle 100er gemessen wurden) auf die Edge.
+
+**Zu verifizieren am ersten Deployment:** ob Vercel `vercel.json` bei gesetztem
+Root Directory **in** diesem Verzeichnis liest oder im Repo-Root erwartet. Die
+Doku sagt es nicht eindeutig; die Datei liegt vorerst in `v3-proposal/`.
+Prüfung ist eine Zeile:
+
+```bash
+curl -sI https://<deployment>.vercel.app/v3.css | grep -i cache-control
+```
+
+Kommt `max-age=0, must-revalidate`, greift sie. Kommt Vercels Vorgabe, muss die
+Datei ins Repo-Root und die `source`-Pfade um `v3-proposal` ergänzt werden.
+
+**Eine Sache aus `prodserve.py` wird bewusst NICHT übernommen.** Dort steht
+`.css` und `.js` in `IMMUTABLE`, also `max-age=31536000, immutable`. Für den
+Messserver ist das richtig — für Produktion wäre es ein Zeitzünder: die Dateien
+heißen `v3.css`, `common.js`, **ohne Hash im Namen**. Ein Besucher, der die
+Seite einmal geladen hat, behielte ein Jahr lang die alte Fassung, und
+`immutable` lässt sich nicht einmal per Reload durchbrechen. In `vercel.json`
+stehen CSS und JS deshalb auf `max-age=0, must-revalidate` (ETag-Revalidierung,
+ein 304 ist billig). Bilder und Fonts bleiben ein Jahr immutable — ihre Namen
+tragen die Größe (`-440`, `-840`) und ändern sich nicht in-place.
+
+**Falls Lighthouse deswegen meckert** („efficient cache policy"): erst messen,
+dann optimieren. Der saubere Ausweg ohne Build-Schritt wäre
+Query-Versionierung (`v3.css?v=9`) plus ein `tools/bump_assets.py`, das die
+Zahl in allen elf Seiten hebt — dann können CSS und JS wieder immutable werden.
+Nicht vorab bauen, solange nicht gemessen ist, dass es nötig ist.
+
+### Danach, in dieser Reihenfolge
+
+1. Erstes Deployment abwarten, Header prüfen (siehe oben), `404.html` prüfen
+   (Vercel sollte sie automatisch für 404er nehmen — verifizieren, nicht
+   annehmen), alle elf Seiten einmal durchklicken.
+2. `/api/ask` als Vercel Function unter `api/ask.js`. Offen und vom Owner zu
+   entscheiden: **welches Modell und wessen Key** (die Konsole wirbt mit
+   „model-agnostic"), dazu Rate-Limit und Budget-Deckel. Danach `AI_MODE` in
+   `v3.js` auf `"live"`.
+3. Kontaktformular verdrahten (live läuft Web3Forms).
+4. Erst wenn die Inhalte stehen: `noindex` raus, Domain umhängen, alte
+   Webspace-Fassung abschalten.
+
 ## Die Tafeln unter (04) sind ganzflächig anklickbar
 
 Owner (2026-08-31): „die tafeln, die sollten alle hover pointer aktiv sein,
