@@ -12,3 +12,6 @@ labs/
 assets-src/
 docs/
 CHANGELOG.md
+
+# Node dependencies — only the api/ function needs them; the site itself has none.
+node_modules/

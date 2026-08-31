@@ -172,11 +172,21 @@
      One engine, three consumers: the AI console, the FAQ panel and the menu's
      answer pane. Returns a cancel function — an answer that is still typing
      must stop the moment the next one starts. */
-  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /* Read when it is needed, not when this file loads.
+
+     Two reasons. A visitor who flips the setting mid-session is respected
+     without a reload — the old module-level constant froze the answer at load
+     time. And the file stays loadable outside a browser: api/ask.js requires
+     this very file to get the knowledge base, and a matchMedia call at import
+     time made that impossible. */
+  function prefersReducedMotion() {
+    return typeof matchMedia === "function" &&
+      matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
 
   function stream(el, html, done) {
     el.classList.add("caret");
-    if (reduced) {
+    if (prefersReducedMotion()) {
       el.innerHTML = html;
       el.classList.remove("caret");
       if (done) done();

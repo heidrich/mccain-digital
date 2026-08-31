@@ -1,0 +1,8 @@
+{
+  "name": "mccain-digital",
+  "private": true,
+  "description": "The site itself has no dependencies and no build step — this file exists only so Vercel installs the Anthropic SDK for the function in api/.",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.122.0"
+  }
+}

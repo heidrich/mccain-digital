@@ -25,3 +25,4 @@ assets-src/
 .mind/
 .mcp.json
 .recall/
+node_modules/

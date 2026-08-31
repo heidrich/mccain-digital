@@ -16,11 +16,20 @@
   const { reduced, fine } = window.MCDUI;
 
   /* ---------- AI mode ----------
-     "local" answers from the knowledge base below — no network, no key.
-     "live"  POSTs to /api/ask (serverless function, key stays server-side,
-             rate-limited). Flip once the endpoint is deployed. */
-  const AI_MODE = "local";
+     "auto"  asks /api/ask first and falls back to the local knowledge base
+             whenever the endpoint says it cannot answer — no key configured,
+             rate limited, budget spent, provider down. Nothing to flip when
+             the key is added or removed: the endpoint reports which it is.
+     "local" never touches the network.
+     "live"  is the same as "auto" today, kept because the handover names it.
+
+     The endpoint answers 200 with `{fallback:true}` rather than an error
+     status precisely so this stays a normal path and not an exception. */
+  const AI_MODE = "auto";
   const AI_ENDPOINT = "/api/ask";
+  // Set once the endpoint reports it has no key: asking again every question
+  // would spend a round trip per question to learn the same thing.
+  let aiOffThisSession = false;
 
   /* ============================================================
      1) DATA — services, scores, FAQ, knowledge base
@@ -157,26 +166,42 @@
       `\nWant this properly? <b>info@mccain-digital.com</b>`;
   }
 
+  // The typewriter has just rewritten innerHTML, so reading scrollHeight in the
+  // same tick would force a layout — defer it, exactly as push() does.
+  const toBottom = () => {
+    requestAnimationFrame(() => { body.scrollTop = body.scrollHeight; });
+  };
+
   function answer(q) {
     cancel();
     const out = push(q);
-    if (AI_MODE === "live") {
+
+    // The brief generator is a local form, not a conversation — it never asks
+    // the model, in "auto" as much as in "local".
+    const wantsModel = AI_MODE !== "local" && mode !== "brief" && !aiOffThisSession;
+
+    if (wantsModel) {
       out.textContent = "…";
+      const local = () => { cancel = stream(out, lookup(q), toBottom); };
       fetch(AI_ENDPOINT, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ q, mode })
       })
         .then((r) => (r.ok ? r.json() : Promise.reject(new Error("ai"))))
-        .then((j) => { cancel = stream(out, j.answer || FALLBACK); })
-        .catch(() => { cancel = stream(out, FALLBACK); });
+        .then((j) => {
+          if (j && j.answer) { cancel = stream(out, j.answer, toBottom); return; }
+          // No key means it will not answer for the rest of the visit either.
+          if (j && j.reason === "no key configured") aiOffThisSession = true;
+          local();
+        })
+        // Falling back to lookup(), NOT to FALLBACK: the local knowledge base
+        // answers this question today, so a failed request must never make the
+        // console worse than it is with no endpoint at all.
+        .catch(local);
       return;
     }
-    cancel = stream(out, mode === "brief" ? brief(q) : lookup(q), () => {
-      // same reason as in push(): the typewriter has just rewritten innerHTML,
-      // so reading scrollHeight here would force the layout immediately
-      requestAnimationFrame(() => { body.scrollTop = body.scrollHeight; });
-    });
+    cancel = stream(out, mode === "brief" ? brief(q) : lookup(q), toBottom);
   }
 
   function setMode(next) {
