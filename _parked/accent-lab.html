@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en" data-root="..">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Accent yellow on paper — side by side</title>
+  <link rel="stylesheet" href="../v3.css">
+  <style>
+    /* mockup chrome only, never ships */
+    .lab { max-width: 1500px; margin: 0 auto; padding: 2.5rem var(--gut) 6rem }
+    .lab h1 { font-size: 1.7rem; letter-spacing: -.03em; margin: 0 0 .4rem }
+    .lab .intro { color: var(--muted); max-width: 74ch; margin: 0 0 1.6rem }
+
+    .row { padding: 2.4rem 0; border-top: 1px solid var(--line) }
+    .row:first-of-type { border-top: 0 }
+    .tag {
+      font-family: var(--mono); font-size: var(--t-label); letter-spacing: .12em;
+      text-transform: uppercase; color: var(--muted); margin: 0 0 .15rem
+    }
+    .note { font-size: var(--t-small); color: var(--muted); margin: 0 0 1.2rem }
+    .note b { display: block; margin-top: .25rem; color: var(--fg) }
+    .row h2 {
+      font-size: clamp(1.9rem, 4.2vw, 3.6rem); line-height: 1.06;
+      letter-spacing: -.045em; font-weight: 800; margin: 0 0 .9rem
+    }
+    .body { max-width: 62ch; margin: 0 0 1rem }
+    .pair { display: flex; flex-wrap: wrap; align-items: center; gap: 1.2rem }
+    .swatch { width: 2.6rem; height: 2.6rem; border-radius: .5rem; border: 1px solid var(--line) }
+    .swatch { background: var(--acc) }
+
+    /* In the real stylesheet .accent only carries a colour inside .hero-h.
+       This page needs it everywhere it compares, so it says so here rather
+       than pretending the site already works that way. The first version of
+       this page left it out and every row measured 17.03:1 — the paper text
+       colour, five times over. */
+    .lab .accent { color: var(--acc) }
+  </style>
+</head>
+
+<body class="band--paper">
+  <div class="lab">
+    <h1>The accent yellow, on paper</h1>
+    <p class="intro">Every row is the same words on the same light background, changing only the
+      colour used for accented <em>text</em>. The yellow button keeps the shipping yellow in every
+      row on purpose — a fill does not have to pass a text contrast ratio, and the question is
+      whether the darker text still reads as the same brand next to it. Ratios are measured in the
+      browser against the background actually painted behind the words.</p>
+
+    <div class="row" data-acc="#f5c518" style="--acc:#f5c518">
+      <p class="tag">A — what ships today</p>
+      <p class="note">#f5c518 — the logo yellow, unchanged</p>
+      <h2>The useful <span class="accent">kind of AI.</span></h2>
+      <h2><span class="ph" data-pixel>The useful <span class="accent">kind of AI.</span></span></h2>
+      <p class="body">We build software for companies that have outgrown spreadsheets.
+        <a href="#" class="accent">More on this</a> — this is what an accent link looks like inside
+        a paragraph somebody is actually trying to read.</p>
+      <div class="pair"><span class="swatch"></span><a href="#" class="btn">Start a project</a></div>
+    </div>
+
+    <div class="row" data-acc="#8a6d00" style="--acc:#8a6d00">
+      <p class="tag">B — darker, minimum for body text</p>
+      <p class="note">#8a6d00 — the shallowest change that clears AA for normal text</p>
+      <h2>The useful <span class="accent">kind of AI.</span></h2>
+      <h2><span class="ph" data-pixel>The useful <span class="accent">kind of AI.</span></span></h2>
+      <p class="body">We build software for companies that have outgrown spreadsheets.
+        <a href="#" class="accent">More on this</a> — this is what an accent link looks like inside
+        a paragraph somebody is actually trying to read.</p>
+      <div class="pair"><span class="swatch"></span><a href="#" class="btn" style="--acc:#f5c518">Start a project</a></div>
+    </div>
+
+    <div class="row" data-acc="#806400" style="--acc:#806400">
+      <p class="tag">C — darker still</p>
+      <p class="note">#806400 — a comfortable margin over AA</p>
+      <h2>The useful <span class="accent">kind of AI.</span></h2>
+      <h2><span class="ph" data-pixel>The useful <span class="accent">kind of AI.</span></span></h2>
+      <p class="body">We build software for companies that have outgrown spreadsheets.
+        <a href="#" class="accent">More on this</a> — this is what an accent link looks like inside
+        a paragraph somebody is actually trying to read.</p>
+      <div class="pair"><span class="swatch"></span><a href="#" class="btn" style="--acc:#f5c518">Start a project</a></div>
+    </div>
+
+    <div class="row" data-acc="#7A8C00" style="--acc:#7A8C00">
+      <p class="tag">D — the green you like</p>
+      <p class="note">#7A8C00 — not yellow at all; here because you named it</p>
+      <h2>The useful <span class="accent">kind of AI.</span></h2>
+      <h2><span class="ph" data-pixel>The useful <span class="accent">kind of AI.</span></span></h2>
+      <p class="body">We build software for companies that have outgrown spreadsheets.
+        <a href="#" class="accent">More on this</a> — this is what an accent link looks like inside
+        a paragraph somebody is actually trying to read.</p>
+      <div class="pair"><span class="swatch"></span><a href="#" class="btn" style="--acc:#f5c518">Start a project</a></div>
+    </div>
+
+    <div class="row" data-acc="#6b5400" style="--acc:#6b5400">
+      <p class="tag">E — deepest, reads as bronze</p>
+      <p class="note">#6b5400 — probably too far, included so the range has an end</p>
+      <h2>The useful <span class="accent">kind of AI.</span></h2>
+      <h2><span class="ph" data-pixel>The useful <span class="accent">kind of AI.</span></span></h2>
+      <p class="body">We build software for companies that have outgrown spreadsheets.
+        <a href="#" class="accent">More on this</a> — this is what an accent link looks like inside
+        a paragraph somebody is actually trying to read.</p>
+      <div class="pair"><span class="swatch"></span><a href="#" class="btn" style="--acc:#f5c518">Start a project</a></div>
+    </div>
+  </div>
+
+  <script src="../data.js"></script>
+  <script src="../pixel-engine.js"></script>
+  <script src="../common.js"></script>
+  <script>
+    /* Measure each row against the background actually painted behind the
+       words, not against the token I assume is there. */
+    var lum = function (c) {
+      var v = c.map(function (x) {
+        x /= 255;
+        return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2];
+    };
+    var rgb = function (s) { return s.match(/\d+/g).slice(0, 3).map(Number); };
+    var ratio = function (a, b) {
+      var l = [lum(a), lum(b)].sort(function (x, y) { return y - x; });
+      return (l[0] + 0.05) / (l[1] + 0.05);
+    };
+    var bgOf = function (el) {
+      for (var n = el; n; n = n.parentElement) {
+        var c = getComputedStyle(n).backgroundColor;
+        if (c && c !== "transparent" && c.indexOf("rgba(0, 0, 0, 0)") === -1) return rgb(c);
+      }
+      return [255, 255, 255];
+    };
+    addEventListener("load", function () {
+      setTimeout(function () {
+        document.querySelectorAll(".row").forEach(function (row) {
+          var acc = row.querySelector(".accent");
+          var copy = row.querySelector(".body");
+          var note = row.querySelector(".note");
+          var bg = bgOf(acc);
+          var r = ratio(rgb(getComputedStyle(acc).color), bg);
+          var rb = ratio(rgb(getComputedStyle(copy).color), bg);
+          var b = document.createElement("b");
+          b.textContent = "measured on paper: " + r.toFixed(2) + ":1 — " +
+            (r >= 4.5 ? "passes AA at any text size"
+              : r >= 3 ? "passes AA for large text only (24px+, or 19px bold)"
+                : "fails AA at every size") +
+            " · the body copy beside it sits at " + rb.toFixed(2) + ":1";
+          note.appendChild(b);
+        });
+      }, 2400);
+    });
+  </script>
+</body>
+
+</html>
