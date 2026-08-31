@@ -3486,3 +3486,377 @@
     @media (max-width: 880px) {
       .cp-grid { grid-template-columns: 1fr; gap: 2.6rem }
     }
+
+    /* ============================================================
+       SERVICE-PAGE REDESIGN v2 — anti-text-fatigue layer
+       (use-case cards · light rhythm section · inline-SVG diagrams ·
+        animated counters · process rail · comparison bars)
+       Researched: madebyshape / basement.studio / Stripe / Retool +
+       score-safe SVG playbook. Everything below is inline-SVG/CSS only,
+       CLS=0, reduced-motion-gated, AA-labelled — Lighthouse-100 intact.
+       ============================================================ */
+
+    /* ---------- light rhythm section (break the dark wall) ----------
+       A full-bleed PAPER band, like the homepage slider sits on. Text
+       flips to the AA-verified on-paper tiers. Used for the use-case
+       "what we build for you" block so the heart of the page stands out. */
+    .svc-sec.light-full {
+      max-width: none;
+      margin-inline: 0;
+      background: var(--paper);
+      color: var(--p-text)
+    }
+    .svc-sec.light-full > .svc-sec-inner {
+      max-width: var(--maxw);
+      margin-inline: auto
+    }
+    .svc-sec.light-full .svc-sec-head h2 { color: var(--ink) }
+    .svc-sec.light-full .svc-sec-head p { color: var(--p-text) }
+    .svc-sec.light-full .kicker { color: var(--p-kicker-text) }
+    .svc-sec.light-full .kicker::before { background: var(--p-kicker) }
+
+    /* ---------- USE-CASE GROUPS: "what we build for you" ----------
+       Each group = a situation/role; each card = industry tag +
+       verb-object title + Today / We build / So that triad.
+       This is the section that answers "what do you build for ME". */
+    .uc-groups { display: grid; gap: clamp(2.4rem, 4vw, 3.6rem) }
+    .uc-group > .uc-group-head {
+      display: flex; align-items: baseline; gap: .9rem;
+      margin-bottom: 1.4rem; flex-wrap: wrap
+    }
+    .uc-group-head .uc-g-num {
+      font-size: 1rem; font-weight: 800; letter-spacing: .04em;
+      color: var(--p-kicker-text); font-variant-numeric: tabular-nums
+    }
+    .uc-group-head h3 {
+      font-size: clamp(1.2rem, 2.6vw, 1.6rem); letter-spacing: -.02em; color: var(--ink)
+    }
+    .uc-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 1rem
+    }
+    /* VISUAL-LED card: animated SVG on top, compact text below.
+       The viz dominates; copy is trimmed to a tag + title + one-line outcome,
+       with the today/build detail demoted to a small two-line block. */
+    .uc-card {
+      background: #fff;
+      border: 1px solid rgba(15,14,12,.1);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: border-color .3s var(--ease), transform .3s var(--ease), box-shadow .3s var(--ease)
+    }
+    .uc-card:hover {
+      border-color: var(--acc-deep);
+      transform: translateY(-3px);
+      box-shadow: 0 14px 34px rgba(15,14,12,.1)
+    }
+    .uc-card .viz { border-radius: 0; border: 0; border-bottom: 1px solid rgba(15,14,12,.1) }
+    .uc-body { padding: clamp(1.15rem, 1.8vw, 1.5rem); display: flex; flex-direction: column; gap: .55rem }
+    .uc-tag {
+      align-self: flex-start;
+      font-size: .66rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      color: var(--acc-ink); background: var(--acc);
+      border-radius: 999px; padding: .26rem .65rem
+    }
+    .uc-card h4 {
+      font-size: 1.06rem; letter-spacing: -.01em; color: var(--ink); line-height: 1.22
+    }
+    /* compact detail: a single short line, not the old 3-row triad */
+    .uc-card .uc-sub { font-size: .85rem; line-height: 1.45; color: var(--p-text); margin: 0 }
+    .uc-card .uc-sub b { color: var(--ink); font-weight: 700 }
+    .uc-card .uc-out {
+      margin-top: .15rem; font-size: .82rem; font-weight: 700; color: var(--ink);
+      display: flex; align-items: baseline; gap: .4rem
+    }
+    .uc-card .uc-out::before { content: "→"; color: var(--acc-deep); font-weight: 800 }
+    .uc-card .uc-out span { color: var(--acc-deep) }
+    .uc-card .uc-out span { color: var(--acc-deep) }
+    .uc-honest {
+      margin-top: 1.4rem; font-size: .8rem; color: var(--p-dim); font-style: italic
+    }
+
+    /* ---------- intent-match opener (question-as-headline) ---------- */
+    .svc-intent {
+      max-width: var(--maxw); margin-inline: auto;
+      padding: clamp(2.5rem, 5vw, 4rem) clamp(1.2rem, 4vw, 3.5rem) 0
+    }
+    .svc-intent h2 {
+      font-size: clamp(1.5rem, 3.6vw, 2.4rem); letter-spacing: -.03em;
+      max-width: 24ch; line-height: 1.12
+    }
+    .svc-intent h2 .q-acc { color: var(--acc) }
+    .svc-intent p {
+      margin-top: 1rem; max-width: 56ch; color: var(--paper-dim); font-size: 1.05rem; line-height: 1.6
+    }
+
+    /* ---------- SIGNATURE FLOW DIAGRAM (your data → pipeline → tool) ----------
+       Inline SVG, currentColor-themed, draw-on via pathLength=100. CLS=0
+       (aspect-ratio reserves the box at parse). Animates only after .reveal.in
+       AND only with motion allowed; reduced-motion sees the finished diagram. */
+    .dia { width: 100%; display: block }
+    .dia svg { width: 100%; height: auto; display: block }
+    .flow { aspect-ratio: 760 / 220; color: var(--paper-dim); max-width: 780px; margin-inline: auto }
+    .flow rect { stroke: var(--line); stroke-width: 1.5; fill: var(--ink2) }
+    .flow .flow-mid rect { stroke: var(--acc); fill: var(--acc-dim) }
+    .flow text { fill: var(--paper); font: 700 19px/1 var(--ff-d); letter-spacing: -.02em }
+    .flow .flow-sub { fill: var(--mute2); font-weight: 500; font-size: 12.5px }
+    .flow .flow-link { stroke: var(--acc); stroke-width: 2.2; fill: none }
+    .flow marker path { fill: var(--acc) }
+    @media (prefers-reduced-motion: no-preference) {
+      /* .flow IS the .reveal element (figure carries .reveal); it gains .in when
+         scrolled into view → drive the draw-on off .flow.in, not a descendant. */
+      .flow .flow-link { stroke-dasharray: 100; stroke-dashoffset: 100 }
+      .flow .flow-node rect, .flow .flow-node text { opacity: 0; transition: opacity .5s var(--ease) }
+      .flow.in .flow-link { animation: svc-draw .7s var(--ease) forwards }
+      .flow.in .flow-link:nth-of-type(2) { animation-delay: .35s }
+      .flow.in .flow-node rect, .flow.in .flow-node text { opacity: 1 }
+      .flow.in .flow-node:nth-child(2) rect, .flow.in .flow-node:nth-child(2) text { transition-delay: .25s }
+      .flow.in .flow-node:nth-child(3) rect, .flow.in .flow-node:nth-child(3) text { transition-delay: .5s }
+    }
+    @keyframes svc-draw { to { stroke-dashoffset: 0 } }
+
+    /* ---------- ARCHITECTURE DIAGRAM (boxes + drawn links) ---------- */
+    .arch { aspect-ratio: 760 / 340; color: var(--paper-dim); max-width: 820px; margin-inline: auto }
+    .arch rect { stroke: var(--line); stroke-width: 1.5; fill: var(--ink2) }
+    .arch .hot rect { stroke: var(--acc); fill: var(--acc-dim) }
+    .arch text { fill: var(--paper); font: 600 15px var(--ff-d); text-anchor: middle; dominant-baseline: middle }
+    .arch .a-sub { fill: var(--mute2); font-size: 11.5px; font-weight: 500 }
+    .arch .link { stroke: var(--acc); stroke-width: 1.75; opacity: .85; fill: none }
+    @media (prefers-reduced-motion: no-preference) {
+      .arch .link { stroke-dasharray: 100; stroke-dashoffset: 100 }
+      .arch.in .link { animation: svc-draw .8s var(--ease) forwards }
+      .arch.in .link:nth-of-type(2) { animation-delay: .15s }
+      .arch.in .link:nth-of-type(3) { animation-delay: .3s }
+      .arch.in .link:nth-of-type(4) { animation-delay: .45s }
+      .arch.in .link:nth-of-type(5) { animation-delay: .6s }
+    }
+
+    /* ---------- COMPARISON BARS (off-the-shelf vs tailor-made) ---------- */
+    .cmp { display: grid; gap: 1rem; max-width: 560px }
+    .cmp-row { display: grid; grid-template-columns: 1fr; gap: .4rem }
+    .cmp-top { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem }
+    .cmp-lbl { font-size: .92rem; font-weight: 600; color: var(--paper) }
+    .cmp-val { font-size: .8rem; font-weight: 700; color: var(--paper-dim); font-variant-numeric: tabular-nums }
+    .cmp-bar { display: block; height: 12px; border-radius: 99px; background: var(--ink3); overflow: hidden }
+    .cmp-bar i { display: block; height: 100%; width: var(--v); border-radius: 99px; background: var(--acc) }
+    .cmp-row.alt .cmp-bar i { background: var(--mute2) }
+    @media (prefers-reduced-motion: no-preference) {
+      .cmp-bar i { width: 0; transition: width .9s var(--ease) }
+      .reveal.in .cmp-bar i { width: var(--v) }
+    }
+
+    /* ---------- PROCESS RAIL: connector behind the numbered steps ----------
+       Upgrades the existing .svc-steps into a visual flow on desktop.
+       Decoration via ::before/::after — no box change, CLS=0. */
+    @media (min-width: 760px) {
+      .svc-steps.rail { grid-template-columns: repeat(4, 1fr); position: relative }
+      .svc-steps.rail::before {
+        content: ""; position: absolute; left: 9%; right: 9%; top: calc(clamp(1.6rem, 2.5vw, 2.2rem) + 22px);
+        height: 2px; z-index: 0;
+        background: repeating-linear-gradient(90deg, var(--acc) 0 6px, transparent 6px 12px);
+        opacity: .45
+      }
+      .svc-steps.rail .svc-step { grid-template-columns: 1fr; gap: 1rem; text-align: left }
+      .svc-steps.rail .svc-step .ss-num {
+        position: relative; z-index: 1;
+        display: grid; place-items: center;
+        width: 44px; height: 44px; border-radius: 50%;
+        background: var(--ink); border: 2px solid var(--acc); color: var(--acc);
+        font-size: 1.1rem
+      }
+      .svc-sec.alt .svc-steps.rail .svc-step .ss-num { background: var(--ink2) }
+    }
+
+    /* ---------- ENABLEMENT / TRAINING cluster (AI page) ----------
+       Distinct from "what we build" — offerings, not software builds. */
+    .svc-offer {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem
+    }
+    .offer-card {
+      border: 1px solid var(--line); border-radius: 16px;
+      padding: clamp(1.4rem, 2.2vw, 1.9rem);
+      background: var(--ink2);
+      display: flex; flex-direction: column; gap: .6rem;
+      transition: border-color .3s var(--ease), transform .3s var(--ease)
+    }
+    .offer-card:hover { border-color: var(--acc); transform: translateY(-3px) }
+    .offer-card .of-ico {
+      width: 40px; height: 40px; display: grid; place-items: center;
+      border-radius: 10px; background: var(--acc-dim); color: var(--acc); margin-bottom: .3rem
+    }
+    .offer-card .of-ico svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.7 }
+    .offer-card h3 { font-size: 1.08rem; letter-spacing: -.01em }
+    .offer-card p { font-size: .9rem; line-height: 1.55; color: var(--mute2) }
+    .offer-card .of-meta {
+      margin-top: auto; padding-top: .6rem; font-size: .8rem; font-weight: 700; color: var(--acc)
+    }
+
+    /* ---------- stat-counter: reserve width so count-up never shifts ---------- */
+    .svc-metric .sm-v .count { font-variant-numeric: tabular-nums }
+
+    /* ---------- mobile: process rail collapses to the plain stacked steps ---------- */
+    @media (max-width: 759px) {
+      .svc-steps.rail { grid-template-columns: 1fr }
+    }
+
+    /* ============================================================
+       MCD VIZ — abstract animated inline-SVG visuals (anti-text-wall)
+       Pixel/blocky, mustard-on-dark. 5 reusable keyframes; per-visual
+       CSS is selectors + animation-delay only. Compositor-safe
+       (transform/opacity/stroke-dashoffset), CLS=0 via aspect-ratio,
+       reduced-motion → finished static state. Gated on .viz-N.in
+       (the wrapper IS the .reveal node; .in lands on it).
+       ============================================================ */
+    .viz {
+      display: block; width: 100%; height: auto;
+      aspect-ratio: 16 / 10;
+      background: var(--ink2);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden
+    }
+    .viz.scene { aspect-ratio: 16 / 9 }
+    .viz rect, .viz line, .viz path, .viz circle, .viz polygon { shape-rendering: geometricPrecision }
+    .viz .px { shape-rendering: crispEdges }
+    .viz [class^="p"], .viz [class*=" p"] { transform-box: fill-box; transform-origin: center }
+    .viz .draw { stroke-dasharray: var(--len, 120); stroke-dashoffset: var(--len, 120) }
+
+    @keyframes mcdPop   { from { transform: scale(.4); opacity: 0 }
+                          60% { transform: scale(1.06); opacity: 1 }
+                          to  { transform: scale(1); opacity: 1 } }
+    @keyframes mcdDraw  { to { stroke-dashoffset: 0 } }
+    @keyframes mcdPulse { 0%,100% { transform: scale(1); opacity: .85 }
+                          50% { transform: scale(1.16); opacity: 1 } }
+    @keyframes mcdDrift { 0% { transform: translateX(-26%); opacity: 0 }
+                          18% { opacity: 1 } 82% { opacity: 1 }
+                          100% { transform: translateX(120%); opacity: 0 } }
+    @keyframes mcdSweep { from { transform: translateX(-40%) } to { transform: translateX(140%) } }
+    @keyframes mcdDriftWide { 0% { transform: translateX(0); opacity: 0 }
+                          12% { opacity: 1 } 88% { opacity: 1 }
+                          100% { transform: translateX(86px); opacity: 0 } }
+    @keyframes mcdDrop  { from { transform: translateY(-26px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .viz * { animation: none !important }
+      .viz .draw { stroke-dashoffset: 0 !important }
+      .viz [class^="p"], .viz [class*=" p"] { opacity: 1 !important; transform: none !important }
+    }
+
+    /* -- Mini 1: support bot answers from docs -- */
+    .viz-1 .pA { opacity: 0 }
+    .viz-1.in .pA { animation: mcdPop .5s var(--ease) both }
+    .viz-1.in .pA.d2 { animation-delay: .1s } .viz-1.in .pA.d3 { animation-delay: .2s }
+    .viz-1 .pArr { animation: none }
+    .viz-1.in .pArr { animation: mcdDraw .5s var(--ease) .35s both }
+    .viz-1 .pAns, .viz-1 .pAns2 { opacity: 0 }
+    .viz-1.in .pAns { animation: mcdPop .5s var(--ease) .55s both, mcdPulse 3.2s var(--ease) 1.1s infinite }
+    .viz-1.in .pAns2 { animation: mcdPop .4s var(--ease) .7s both }
+
+    /* -- Mini 2: auto-triage inbox -- */
+    .viz-2 .pIn { opacity: 0 }
+    .viz-2.in .pIn { animation: mcdPop .4s var(--ease) both }
+    .viz-2.in .pIn.i2 { animation-delay: .08s } .viz-2.in .pIn.i3 { animation-delay: .16s } .viz-2.in .pIn.i4 { animation-delay: .24s }
+    .viz-2 .pRoute { opacity: 0 }
+    .viz-2.in .pRoute { animation: mcdDrift 2.6s var(--ease) .5s infinite }
+    .viz-2.in .pRoute.r2 { animation-delay: 1.0s } .viz-2.in .pRoute.r3 { animation-delay: 1.6s }
+
+    /* -- Mini 3: search sweep with citation -- */
+    .viz-3 .pScan { opacity: .9 }
+    .viz-3.in .pScan { animation: mcdSweep 2.4s linear .3s infinite }
+    .viz-3 .pHit { fill: var(--ink3) }
+    .viz-3.in .pHit { animation: mcdPulse 2.4s var(--ease) 1.1s infinite }
+    .viz-3 .pTick { opacity: 0 }
+    .viz-3.in .pTick { animation: mcdDraw .5s var(--ease) 1.1s both }
+    .viz-3.in .pTick { opacity: 1 }
+
+    /* -- Mini 4: knowledge graph -- */
+    .viz-4 .pLink { animation: none }
+    .viz-4.in .pLink { animation: mcdDraw .6s var(--ease) .3s both }
+    .viz-4.in .pLink.l2 { animation-delay: .42s } .viz-4.in .pLink.l3 { animation-delay: .54s } .viz-4.in .pLink.l4 { animation-delay: .66s }
+    .viz-4 .pN { opacity: 0 }
+    .viz-4.in .pN { animation: mcdPop .4s var(--ease) both }
+    .viz-4.in .pN.n2 { animation-delay: .12s } .viz-4.in .pN.n3 { animation-delay: .24s } .viz-4.in .pN.n4 { animation-delay: .36s }
+    .viz-4 .pQ { opacity: 0 }
+    .viz-4.in .pQ { animation: mcdPop .45s var(--ease) .15s both, mcdPulse 3s var(--ease) .9s infinite }
+
+    /* -- Mini 5: document extraction -- */
+    .viz-5 .pDoc { opacity: 0 }
+    .viz-5.in .pDoc { animation: mcdPop .5s var(--ease) both }
+    .viz-5 .pFlow { opacity: 0 }
+    .viz-5.in .pFlow { animation: mcdDrift 2.8s var(--ease) .4s infinite }
+    .viz-5.in .pFlow.f2 { animation-delay: 1.0s } .viz-5.in .pFlow.f3 { animation-delay: 1.7s }
+    .viz-5 .pRow { opacity: 0 }
+    .viz-5.in .pRow { animation: mcdPop .45s var(--ease) .6s both }
+    .viz-5.in .pRow.w2 { animation-delay: .75s } .viz-5.in .pRow.w3 { animation-delay: .9s }
+
+    /* -- Mini 6: MCP hub -- */
+    .viz-6 .pHub { opacity: 0 }
+    .viz-6.in .pHub { animation: mcdPop .5s var(--ease) both, mcdPulse 3.4s var(--ease) .9s infinite }
+    .viz-6 .pWire { animation: none }
+    .viz-6.in .pWire { animation: mcdDraw .5s var(--ease) .3s both }
+    .viz-6.in .pWire.c2 { animation-delay: .42s } .viz-6.in .pWire.c3 { animation-delay: .54s } .viz-6.in .pWire.c4 { animation-delay: .66s }
+    .viz-6 .pTool { opacity: 0 }
+    .viz-6.in .pTool { animation: mcdPop .4s var(--ease) .55s both }
+    .viz-6.in .pTool.t2 { animation-delay: .67s } .viz-6.in .pTool.t3 { animation-delay: .79s } .viz-6.in .pTool.t4 { animation-delay: .91s }
+
+    /* -- Mini 7: self-writing follow-up -- */
+    .viz-7 .pCrm { opacity: 0 }
+    .viz-7.in .pCrm { animation: mcdPop .45s var(--ease) both }
+    .viz-7 .pArr { animation: none }
+    .viz-7.in .pArr { animation: mcdDraw .4s var(--ease) .3s both }
+    .viz-7 .pCard { opacity: 0 }
+    .viz-7.in .pCard { animation: mcdPop .5s var(--ease) .45s both }
+    .viz-7 .pLine { opacity: 0 }
+    .viz-7.in .pLine { animation: mcdPop .35s var(--ease) .7s both }
+    .viz-7.in .pLine.m2 { animation-delay: .85s } .viz-7.in .pLine.m3 { animation-delay: 1.0s } .viz-7.in .pLine.m4 { animation-delay: 1.15s }
+
+    /* -- Scene A: data → AI → stack -- */
+    .scene-a .pInBlk { opacity: 0 }
+    .scene-a.in .pInBlk { animation: mcdPop .4s var(--ease) both }
+    .scene-a.in .pInBlk.b2 { animation-delay: .06s } .scene-a.in .pInBlk.b3 { animation-delay: .12s }
+    .scene-a.in .pInBlk.b4 { animation-delay: .18s } .scene-a.in .pInBlk.b5 { animation-delay: .24s }
+    .scene-a.in .pInBlk.b6 { animation-delay: .3s } .scene-a.in .pInBlk.b7 { animation-delay: .36s }
+    .scene-a .pStream { opacity: 0 }
+    .scene-a.in .pStream { animation: mcdDriftWide 3s var(--ease) .5s infinite }
+    .scene-a.in .pStream.s2 { animation-delay: 1.2s } .scene-a.in .pStream.s3 { animation-delay: 2.0s }
+    .scene-a .pCore, .scene-a .pCoreI { opacity: 0 }
+    .scene-a.in .pCore { animation: mcdPop .6s var(--ease) .4s both, mcdPulse 3.6s var(--ease) 1.1s infinite }
+    .scene-a.in .pCoreI { animation: mcdPop .5s var(--ease) .55s both }
+    .scene-a .pOut { opacity: 0 }
+    .scene-a.in .pOut { animation: mcdPop .45s var(--ease) 1.3s both }
+    .scene-a.in .pOut.o2 { animation-delay: 1.45s } .scene-a.in .pOut.o3 { animation-delay: 1.6s }
+
+    /* -- Scene B: agent lattice -- */
+    .scene-b .pE { animation: none }
+    .scene-b.in .pE { animation: mcdDraw .7s var(--ease) .3s both }
+    .scene-b.in .pE.e2 { animation-delay: .42s } .scene-b.in .pE.e3 { animation-delay: .54s }
+    .scene-b.in .pE.e4 { animation-delay: .66s } .scene-b.in .pE.e5 { animation-delay: .78s }
+    .scene-b.in .pE.e6 { animation-delay: .9s } .scene-b.in .pE.e7 { animation-delay: 1.02s }
+    .scene-b .pNode { opacity: 0 }
+    .scene-b.in .pNode { animation: mcdPop .45s var(--ease) both }
+    .scene-b.in .pNode.nb { animation-delay: .1s } .scene-b.in .pNode.nc { animation-delay: .2s }
+    .scene-b.in .pNode.ne { animation-delay: .4s }
+    .scene-b.in .pNode.nf { animation-delay: .5s } .scene-b.in .pNode.ng { animation-delay: .6s }
+    .scene-b.in .pNode.nd { animation: mcdPop .45s var(--ease) .3s both, mcdPulse 3.8s var(--ease) 1.2s infinite }
+
+    /* -- viz stays a DARK inset even on the light cards (terminal-preview look):
+       keeps the mustard pop + block fills legible without re-theming every fill.
+       A subtle ring separates it from the white card. -- */
+    .light-full .viz { border-color: rgba(15,14,12,.14) }
+
+    /* full-width scene band: an animated centerpiece between content blocks */
+    .svc-scene-band {
+      max-width: var(--maxw); margin-inline: auto;
+      padding: clamp(2rem, 5vw, 4rem) clamp(1.2rem, 4vw, 3.5rem);
+      display: flex; flex-direction: column; align-items: center; gap: 1.4rem
+    }
+    .svc-scene-band .viz.scene {
+      background: transparent; border: 0; max-width: 640px; width: 100%
+    }
+    .svc-scene-band .scene-cap {
+      text-align: center; max-width: 46ch;
+      font-size: 1.05rem; color: var(--paper-dim); line-height: 1.55
+    }

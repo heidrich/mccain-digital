@@ -52,6 +52,30 @@
     }, { threshold: .12, rootMargin: "0px 0px -8% 0px" });
     d.querySelectorAll(".reveal").forEach(function (el) { io.observe(el); });
 
+    // stat count-up (CLS-safe: .sm-v uses tabular-nums so width never changes).
+    // data-to = target, data-suffix = trailing string, data-dec = decimal places.
+    var countEls = d.querySelectorAll(".count");
+    if (countEls.length) {
+      var cIO = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          var el = e.target, to = parseFloat(el.dataset.to);
+          var suf = el.dataset.suffix || "", dec = parseInt(el.dataset.dec || "0", 10);
+          cIO.unobserve(el);
+          if (reduced || isNaN(to)) { el.textContent = (isNaN(to) ? el.textContent : to.toFixed(dec) + suf); return; }
+          var t0 = null, dur = 1000;
+          (function tick(now) {
+            if (t0 === null) t0 = now;
+            var p = Math.min((now - t0) / dur, 1), eased = p * (2 - p); // easeOutQuad
+            el.textContent = (to * eased).toFixed(dec) + suf;
+            if (p < 1) requestAnimationFrame(tick);
+            else el.textContent = to.toFixed(dec) + suf;
+          })();
+        });
+      }, { threshold: .6 });
+      countEls.forEach(function (el) { cIO.observe(el); });
+    }
+
     // FAQ accordion
     d.querySelectorAll(".faq-item").forEach(function (item) {
       var q = item.querySelector(".faq-q");

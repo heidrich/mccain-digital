@@ -10,8 +10,11 @@
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#0f0e0c">
   <link rel="preload" href="../pixel-engine.js?v=h6" as="script">
-  <link rel="preload" href="../styles.css?v=s8" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="../styles.css?v=s8"></noscript>
+  <link rel="preload" href="../styles.css?v=s12" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="../styles.css?v=s12">
+    <style>.reveal{opacity:1;transform:none}.flow .flow-node rect,.flow .flow-node text{opacity:1}.flow .flow-link,.arch .link{stroke-dashoffset:0}.cmp-bar i{width:var(--v)}</style>
+  </noscript>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
   <link rel="canonical" href="https://mccain-digital.com/services/ai-tools.html">
@@ -525,13 +528,260 @@
       </div>
     </header>
 
+    <!-- INTENT OPENER (question-as-headline, mirrors the visitor's situation) -->
+    <section class="svc-intent">
+      <h2 class="reveal">Drowning in repetitive work, or sitting on data nobody can <span class="q-acc">actually search?</span></h2>
+      <p class="reveal">That's where AI earns its keep. Below are the concrete things we'd build for you — grouped by the situation you're probably in. Not "we do RAG"; the actual tool, the problem it removes, and how fast you'd feel it.</p>
+    </section>
+
+    <!-- ★ WHAT WE BUILD FOR YOU — use-case section (light rhythm band) -->
+    <section class="svc-sec light-full" aria-labelledby="ucTitle">
+      <div class="svc-sec-inner">
+        <div class="svc-sec-head">
+          <p class="kicker reveal">01 — What we'd build for you</p>
+          <h2 id="ucTitle"><span class="ph" data-pixel data-ink="#0f0e0c">Concrete AI, not buzzwords.</span></h2>
+          <p>Real projects, grouped by the job you're trying to do. The industries are examples to show the shape — illustrative context, never client references.</p>
+        </div>
+
+        <div class="uc-groups">
+
+          <!-- GROUP A: customer service & support -->
+          <div class="uc-group reveal">
+            <div class="uc-group-head"><span class="uc-g-num">A</span><h3>For customer service &amp; support</h3></div>
+            <div class="uc-cards">
+
+              <article class="uc-card">
+                <svg class="viz viz-1 reveal" viewBox="0 0 160 100" role="img" aria-label="A support bot answering from your own documents">
+                  <title>A support bot answering from your own documents</title>
+                  <rect class="px pA" x="14" y="20" width="26" height="34" rx="2" fill="var(--ink3)" stroke="var(--line)"/>
+                  <rect class="px pA d2" x="20" y="28" width="26" height="34" rx="2" fill="var(--ink3)" stroke="var(--line)"/>
+                  <rect class="px pA d3" x="26" y="36" width="26" height="34" rx="2" fill="var(--ink3)" stroke="var(--line)"/>
+                  <path class="draw pArr" d="M58 45 H92" stroke="var(--mute2)" stroke-width="2" fill="none" style="--len:34"/>
+                  <path class="draw pArr" d="M86 39 L92 45 L86 51" stroke="var(--mute2)" stroke-width="2" fill="none" style="--len:18"/>
+                  <rect class="px pAns" x="100" y="30" width="44" height="40" rx="3" fill="var(--acc-dim)" stroke="var(--acc)" stroke-width="1.5"/>
+                  <rect class="px pAns2" x="108" y="40" width="28" height="4" rx="2" fill="var(--acc)"/>
+                  <rect class="px pAns2" x="108" y="50" width="20" height="4" rx="2" fill="var(--acc-deep)"/>
+                </svg>
+                <div class="uc-body">
+                  <span class="uc-tag">Support teams</span>
+                  <h4>A support bot that answers from your own docs</h4>
+                  <p class="uc-sub">Grounded in your manuals, tickets and FAQs — it cites the source and escalates when unsure.</p>
+                  <p class="uc-out"><span>The same 80% of tickets answer themselves</span>, around the clock.</p>
+                </div>
+              </article>
+
+              <article class="uc-card">
+                <svg class="viz viz-2 reveal" viewBox="0 0 160 100" role="img" aria-label="An overflowing inbox sorting itself into lanes">
+                  <title>An overflowing inbox sorting itself into lanes</title>
+                  <rect class="px" x="10" y="14" width="22" height="72" rx="2" fill="var(--ink3)" stroke="var(--line)"/>
+                  <g fill="var(--mute2)">
+                    <rect class="px pIn" x="14" y="20" width="14" height="8" rx="1"/>
+                    <rect class="px pIn i2" x="14" y="32" width="14" height="8" rx="1"/>
+                    <rect class="px pIn i3" x="14" y="44" width="14" height="8" rx="1"/>
+                    <rect class="px pIn i4" x="14" y="56" width="14" height="8" rx="1"/>
+                  </g>
+                  <g stroke="var(--line)" stroke-width="1" fill="var(--ink3)">
+                    <rect class="px" x="118" y="14" width="34" height="20" rx="2"/>
+                    <rect class="px" x="118" y="40" width="34" height="20" rx="2"/>
+                    <rect class="px" x="118" y="66" width="34" height="20" rx="2"/>
+                  </g>
+                  <rect class="px pRoute" x="122" y="20" width="14" height="8" rx="1" fill="var(--acc)"/>
+                  <rect class="px pRoute r2" x="122" y="46" width="14" height="8" rx="1" fill="var(--acc-deep)"/>
+                  <rect class="px pRoute r3" x="122" y="72" width="14" height="8" rx="1" fill="var(--acc-soft)"/>
+                </svg>
+                <div class="uc-body">
+                  <span class="uc-tag">E-commerce / Retail</span>
+                  <h4>Auto-triage for an overflowing inbox</h4>
+                  <p class="uc-sub">An agent classifies incoming mail, routes it to the right team and drafts a reply to approve.</p>
+                  <p class="uc-out"><span>The inbox sorts itself</span> — replies in minutes, not hours.</p>
+                </div>
+              </article>
+
+            </div>
+          </div>
+
+          <!-- GROUP B: knowledge & operations -->
+          <div class="uc-group reveal">
+            <div class="uc-group-head"><span class="uc-g-num">B</span><h3>For knowledge &amp; operations</h3></div>
+            <div class="uc-cards">
+
+              <article class="uc-card">
+                <svg class="viz viz-3 reveal" viewBox="0 0 160 100" role="img" aria-label="A search sweeping your documents and citing the source">
+                  <title>A search sweeping your documents and citing the source</title>
+                  <g fill="var(--ink3)" stroke="var(--line)">
+                    <rect class="px" x="18" y="18" width="20" height="20" rx="2"/><rect class="px" x="44" y="18" width="20" height="20" rx="2"/>
+                    <rect class="px" x="70" y="18" width="20" height="20" rx="2"/><rect class="px" x="96" y="18" width="20" height="20" rx="2"/>
+                    <rect class="px" x="18" y="44" width="20" height="20" rx="2"/><rect class="px pHit" x="44" y="44" width="20" height="20" rx="2"/>
+                    <rect class="px" x="70" y="44" width="20" height="20" rx="2"/><rect class="px" x="96" y="44" width="20" height="20" rx="2"/>
+                    <rect class="px" x="18" y="70" width="20" height="20" rx="2"/><rect class="px" x="44" y="70" width="20" height="20" rx="2"/>
+                    <rect class="px" x="70" y="70" width="20" height="20" rx="2"/><rect class="px" x="96" y="70" width="20" height="20" rx="2"/>
+                  </g>
+                  <rect class="pScan" x="14" y="14" width="3" height="80" fill="var(--acc)"/>
+                  <path class="draw pTick" d="M48 54 l4 4 l8 -9" stroke="var(--acc)" stroke-width="2.5" fill="none" style="--len:20"/>
+                </svg>
+                <div class="uc-body">
+                  <span class="uc-tag">Law / Legal</span>
+                  <h4>Contract &amp; case search with citations</h4>
+                  <p class="uc-sub">Plain-language search across your whole store, backing every answer with the exact <b>file + page</b>.</p>
+                  <p class="uc-out"><span>Research in seconds</span> — and every answer is traceable.</p>
+                </div>
+              </article>
+
+              <article class="uc-card">
+                <svg class="viz viz-4 reveal" viewBox="0 0 160 100" role="img" aria-label="An assistant linking scattered knowledge into one graph">
+                  <title>An assistant linking scattered knowledge into one graph</title>
+                  <g stroke="var(--acc-deep)" stroke-width="1.5" fill="none">
+                    <path class="draw pLink" d="M80 50 L36 26" style="--len:50"/>
+                    <path class="draw pLink l2" d="M80 50 L128 30" style="--len:54"/>
+                    <path class="draw pLink l3" d="M80 50 L40 76" style="--len:50"/>
+                    <path class="draw pLink l4" d="M80 50 L124 74" style="--len:52"/>
+                  </g>
+                  <g fill="var(--ink3)" stroke="var(--mute2)">
+                    <rect class="px pN" x="28" y="18" width="16" height="16" rx="2"/>
+                    <rect class="px pN n2" x="120" y="22" width="16" height="16" rx="2"/>
+                    <rect class="px pN n3" x="32" y="68" width="16" height="16" rx="2"/>
+                    <rect class="px pN n4" x="116" y="66" width="16" height="16" rx="2"/>
+                  </g>
+                  <rect class="px pQ" x="70" y="40" width="20" height="20" rx="3" fill="var(--acc-dim)" stroke="var(--acc)" stroke-width="1.5"/>
+                </svg>
+                <div class="uc-body">
+                  <span class="uc-tag">Operations / HR</span>
+                  <h4>A knowledge assistant over your wiki &amp; drive</h4>
+                  <p class="uc-sub">Answers in natural language over your Notion, Confluence and drives — with the source linked.</p>
+                  <p class="uc-out"><span>People self-serve answers</span> instead of pinging the team.</p>
+                </div>
+              </article>
+
+              <article class="uc-card">
+                <svg class="viz viz-5 reveal" viewBox="0 0 160 100" role="img" aria-label="Fields extracted from a document into a structured row">
+                  <title>Fields extracted from a document into a structured row</title>
+                  <rect class="px pDoc" x="14" y="20" width="38" height="58" rx="2" fill="var(--ink3)" stroke="var(--line)"/>
+                  <g fill="var(--mute2)">
+                    <rect class="px pDoc" x="20" y="28" width="26" height="4" rx="2"/>
+                    <rect class="px pDoc" x="20" y="38" width="20" height="4" rx="2"/>
+                    <rect class="px pDoc" x="20" y="48" width="24" height="4" rx="2"/>
+                  </g>
+                  <g fill="var(--acc)">
+                    <rect class="px pFlow" x="58" y="34" width="6" height="6" rx="1"/>
+                    <rect class="px pFlow f2" x="58" y="50" width="6" height="6" rx="1"/>
+                    <rect class="px pFlow f3" x="58" y="62" width="6" height="6" rx="1"/>
+                  </g>
+                  <g stroke="var(--acc)" stroke-width="1.2" fill="var(--acc-dim)">
+                    <rect class="px pRow" x="104" y="30" width="44" height="12" rx="2"/>
+                    <rect class="px pRow w2" x="104" y="46" width="44" height="12" rx="2"/>
+                    <rect class="px pRow w3" x="104" y="62" width="44" height="12" rx="2"/>
+                  </g>
+                </svg>
+                <div class="uc-body">
+                  <span class="uc-tag">Insurance / Finance</span>
+                  <h4>Document extraction into your system</h4>
+                  <p class="uc-sub">Pulls structured fields from PDFs and scans and writes them straight into your tools, with review.</p>
+                  <p class="uc-out"><span>Manual data entry disappears</span> — the audit trail stays clean.</p>
+                </div>
+              </article>
+
+            </div>
+          </div>
+
+          <!-- GROUP C: tools & integration -->
+          <div class="uc-group reveal">
+            <div class="uc-group-head"><span class="uc-g-num">C</span><h3>For tools &amp; integration</h3></div>
+            <div class="uc-cards">
+
+              <article class="uc-card">
+                <svg class="viz viz-6 reveal" viewBox="0 0 160 100" role="img" aria-label="Your tools plugging into the model through one hub">
+                  <title>Your tools plugging into the model through one hub</title>
+                  <g stroke="var(--acc-deep)" stroke-width="1.5" fill="none">
+                    <path class="draw pWire" d="M80 50 H30" style="--len:50"/>
+                    <path class="draw pWire c2" d="M80 50 H130" style="--len:50"/>
+                    <path class="draw pWire c3" d="M80 50 V20" style="--len:30"/>
+                    <path class="draw pWire c4" d="M80 50 V80" style="--len:30"/>
+                  </g>
+                  <rect class="px pHub" x="68" y="38" width="24" height="24" rx="4" fill="var(--acc)" stroke="var(--acc-deep)"/>
+                  <g fill="var(--ink3)" stroke="var(--mute2)">
+                    <rect class="px pTool" x="14" y="42" width="16" height="16" rx="2"/>
+                    <rect class="px pTool t2" x="130" y="42" width="16" height="16" rx="2"/>
+                    <rect class="px pTool t3" x="72" y="8" width="16" height="16" rx="2"/>
+                    <rect class="px pTool t4" x="72" y="76" width="16" height="16" rx="2"/>
+                  </g>
+                </svg>
+                <div class="uc-body">
+                  <span class="uc-tag">Agencies / Consultancies</span>
+                  <h4>Your tools, wired into Claude or ChatGPT</h4>
+                  <p class="uc-sub">MCP tool-servers hand your CRM, docs and DB to the model — with auth, rate limits and audit logs.</p>
+                  <p class="uc-out"><span>Query company knowledge in plain language</span>, safely.</p>
+                </div>
+              </article>
+
+              <article class="uc-card">
+                <svg class="viz viz-7 reveal" viewBox="0 0 160 100" role="img" aria-label="A follow-up message assembling itself from CRM data">
+                  <title>A follow-up message assembling itself from CRM data</title>
+                  <rect class="px pCrm" x="14" y="30" width="34" height="40" rx="3" fill="var(--ink3)" stroke="var(--line)"/>
+                  <rect class="px pCrm" x="20" y="38" width="22" height="4" rx="2" fill="var(--mute2)"/>
+                  <circle class="px pCrm" cx="25" cy="56" r="5" fill="var(--acc-deep)"/>
+                  <path class="draw pArr" d="M52 50 H78" stroke="var(--mute2)" stroke-width="2" fill="none" style="--len:26"/>
+                  <rect class="px pCard" x="86" y="24" width="60" height="52" rx="3" fill="var(--acc-dim)" stroke="var(--acc)" stroke-width="1.5"/>
+                  <g fill="var(--acc)">
+                    <rect class="px pLine" x="94" y="34" width="44" height="4" rx="2"/>
+                    <rect class="px pLine m2" x="94" y="44" width="36" height="4" rx="2"/>
+                    <rect class="px pLine m3" x="94" y="54" width="40" height="4" rx="2"/>
+                    <rect class="px pLine m4" x="94" y="64" width="24" height="4" rx="2" fill="var(--acc-deep)"/>
+                  </g>
+                </svg>
+                <div class="uc-body">
+                  <span class="uc-tag">Sales</span>
+                  <h4>Follow-ups that write themselves</h4>
+                  <p class="uc-sub">Personalised drafting pulls from your CRM and proposes the next message — the rep just approves.</p>
+                  <p class="uc-out"><span>No warm lead goes cold</span> waiting for an email.</p>
+                </div>
+              </article>
+
+            </div>
+          </div>
+
+        </div>
+
+
+        <p class="uc-honest">These are typical projects, written to show the shape of what we build — the industries are illustrative context, not customer references. Your situation is different. <a href="../contact.html" style="color:var(--acc-deep);font-weight:700">Tell us yours and we'll sketch the build →</a></p>
+      </div>
+    </section>
+
+    <!-- ENABLEMENT — local AI · image content · training (offerings, not builds) -->
+    <section class="svc-sec" aria-labelledby="enTitle">
+      <div class="svc-sec-head">
+        <p class="kicker reveal">02 — Beyond the build</p>
+        <h2 id="enTitle"><span class="ph" data-pixel>We don't just ship AI. We set you up to run it.</span></h2>
+        <p>Three things most agencies leave out: AI that runs on your own hardware, image content generated on demand, and your team trained to actually use it.</p>
+      </div>
+      <div class="svc-offer">
+        <article class="offer-card reveal">
+          <span class="of-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4M8 9l2 2-2 2M14 9l-2 2 2 2"/></svg></span>
+          <h3>Local &amp; on-premise AI</h3>
+          <p>For a manufacturer or clinic that can't send data to the cloud: open-weight models (Llama, Mistral, Qwen) installed and configured on your own hardware. Your data never leaves the building.</p>
+          <span class="of-meta">Self-hosted · data stays in-house</span>
+        </article>
+        <article class="offer-card reveal">
+          <span class="of-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.8"/><path d="M21 15l-5-5L5 21"/></svg></span>
+          <h3>AI image &amp; content generation</h3>
+          <p>For a marketing team that needs visuals yesterday: on-brand hero images, product shots and illustration generated on demand — set up as a repeatable pipeline, not a one-off.</p>
+          <span class="of-meta">On-brand · on demand</span>
+        </article>
+        <article class="offer-card reveal">
+          <span class="of-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M5 11v5c0 1.5 3.1 3 7 3s7-1.5 7-3v-5"/></svg></span>
+          <h3>Company &amp; team AI training</h3>
+          <p>For a company adopting AI: hands-on workshops for leadership and practical upskilling for staff — on the tools and workflows that move your needle, not generic theory.</p>
+          <span class="of-meta">Workshops · staff upskilling</span>
+        </article>
+      </div>
+    </section>
+
     <!-- CAPABILITIES -->
     <section class="svc-sec" aria-labelledby="capTitle">
       <div class="svc-sec-head">
-        <p class="kicker reveal">01 — What we build</p>
-        <h2 id="capTitle"><span class="ph" data-pixel>From a prompt to a product.</span></h2>
-        <p>Four things, done properly — each one wired into your stack with the guardrails, monitoring and
-          UI that turn a clever demo into something your team relies on every day.</p>
+        <p class="kicker reveal">03 — How deep we go</p>
+        <h2 id="capTitle"><span class="ph" data-pixel>The engine under the use-cases.</span></h2>
+        <p>Those builds above all rest on four capabilities, done properly — each wired into your stack with the
+          guardrails, monitoring and UI that turn a clever demo into something your team relies on every day.</p>
       </div>
       <div class="svc-features">
         <article class="svc-feature reveal">
@@ -562,13 +812,68 @@
             (n8n, custom loops, scheduled jobs) that run quietly in the background and save real hours every week.</p>
         </article>
       </div>
+
+      <!-- SIGNATURE FLOW: your data → our pipeline → your tool -->
+      <figure class="dia flow reveal" role="img" aria-labelledby="flowT flowD" style="margin-top:clamp(2.4rem,4vw,3.4rem)">
+        <svg viewBox="0 0 760 220" fill="none" focusable="false">
+          <title id="flowT">From your data to your tools</title>
+          <desc id="flowD">Your data enters our AI pipeline — clean, retrieve, reason, guardrail — and is delivered back into the tools your team already uses.</desc>
+          <g class="flow-node">
+            <rect x="10" y="74" width="180" height="72" rx="14"/>
+            <text x="100" y="106" text-anchor="middle">Your data</text>
+            <text x="100" y="126" text-anchor="middle" class="flow-sub">docs · DB · tickets</text>
+          </g>
+          <g class="flow-node flow-mid">
+            <rect x="290" y="62" width="180" height="96" rx="14"/>
+            <text x="380" y="100" text-anchor="middle">Our pipeline</text>
+            <text x="380" y="122" text-anchor="middle" class="flow-sub">retrieve · reason · guardrail</text>
+          </g>
+          <g class="flow-node">
+            <rect x="570" y="74" width="180" height="72" rx="14"/>
+            <text x="660" y="106" text-anchor="middle">Your tool</text>
+            <text x="660" y="126" text-anchor="middle" class="flow-sub">CRM · chat · app</text>
+          </g>
+          <path class="flow-link" pathLength="100" d="M190 110 H290" marker-end="url(#svcAr)"/>
+          <path class="flow-link" pathLength="100" d="M470 110 H570" marker-end="url(#svcAr)"/>
+          <defs>
+            <marker id="svcAr" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+              <path d="M0 0 L9 4.5 L0 9"/>
+            </marker>
+          </defs>
+        </svg>
+      </figure>
+    </section>
+
+    <!-- SCENE: agent lattice (full-width animated centerpiece) -->
+    <section class="svc-scene-band" aria-hidden="true">
+      <svg class="viz scene scene-b reveal" viewBox="0 0 320 180" focusable="false">
+        <g stroke="var(--acc-deep)" stroke-width="1.4" fill="none" opacity=".9">
+          <path class="draw pE" d="M40 60 L120 40" style="--len:84"/>
+          <path class="draw pE e2" d="M40 60 L110 110" style="--len:88"/>
+          <path class="draw pE e3" d="M120 40 L200 70" style="--len:86"/>
+          <path class="draw pE e4" d="M110 110 L200 70" style="--len:96"/>
+          <path class="draw pE e5" d="M200 70 L280 50" style="--len:84"/>
+          <path class="draw pE e6" d="M200 70 L270 130" style="--len:92"/>
+          <path class="draw pE e7" d="M110 110 L190 140" style="--len:86"/>
+        </g>
+        <g fill="var(--ink3)" stroke="var(--acc)" stroke-width="1.5">
+          <circle class="px pNode" cx="40" cy="60" r="7"/>
+          <circle class="px pNode nb" cx="120" cy="40" r="7"/>
+          <circle class="px pNode nc" cx="110" cy="110" r="7"/>
+          <circle class="px pNode nd" cx="200" cy="70" r="9" fill="var(--acc-dim)"/>
+          <circle class="px pNode ne" cx="280" cy="50" r="7"/>
+          <circle class="px pNode nf" cx="270" cy="130" r="7"/>
+          <circle class="px pNode ng" cx="190" cy="140" r="7"/>
+        </g>
+      </svg>
+      <p class="scene-cap">Agents that plan, call your tools, and check their own work — wired into your stack.</p>
     </section>
 
     <!-- PROOF / WHY US -->
     <section class="svc-sec alt-full" aria-labelledby="proofTitle">
       <div class="svc-sec-inner">
         <div class="svc-sec-head">
-          <p class="kicker reveal">02 — The proof</p>
+          <p class="kicker reveal">04 — The proof</p>
           <h2 id="proofTitle"><span class="ph" data-pixel data-ink="#ece7dd">We build AI because we build AI.</span></h2>
           <p>Most agencies discovered AI last year. We ship an AI-native product to paying users — so we've
             already hit the hard parts (retrieval quality, token cost, latency, drift) and solved them in
@@ -576,15 +881,15 @@
         </div>
         <div class="svc-metrics">
           <div class="svc-metric reveal">
-            <div class="sm-v">0<small>&nbsp;tokens</small></div>
+            <div class="sm-v"><span class="count" data-to="0" data-dec="0">0</span><small>&nbsp;tokens</small></div>
             <div class="sm-l">to recall a stored fact in whatever-recall — read straight from the index, not re-sent to a model</div>
           </div>
           <div class="svc-metric reveal">
-            <div class="sm-v">0.25<small>&nbsp;ms</small></div>
+            <div class="sm-v"><span class="count" data-to="0.25" data-dec="2">0.25</span><small>&nbsp;ms</small></div>
             <div class="sm-l">lookup at 108,000+ anchors on a real, years-old codebase — it stays flat as the repo grows</div>
           </div>
           <div class="svc-metric reveal">
-            <div class="sm-v">100<small>%</small></div>
+            <div class="sm-v"><span class="count" data-to="100" data-dec="0">100</span><small>%</small></div>
             <div class="sm-l">self-hosted — your data never leaves your machine, the default we engineer for</div>
           </div>
         </div>
@@ -595,7 +900,7 @@
     <!-- STACK -->
     <section class="svc-sec" aria-labelledby="stackTitle">
       <div class="svc-sec-head">
-        <p class="kicker reveal">03 — The stack we build with</p>
+        <p class="kicker reveal">05 — The stack we build with</p>
         <h2 id="stackTitle"><span class="ph" data-pixel>Model-agnostic, on purpose.</span></h2>
         <p>We pick the right model and tools for the job — frontier API models when quality wins, open weights
           when data residency or cost wins. No lock-in to one vendor.</p>
@@ -624,12 +929,12 @@
     <section class="svc-sec alt-full" aria-labelledby="procTitle">
       <div class="svc-sec-inner">
         <div class="svc-sec-head">
-          <p class="kicker reveal">04 — How it goes</p>
+          <p class="kicker reveal">06 — How it goes</p>
           <h2 id="procTitle"><span class="ph" data-pixel data-ink="#ece7dd">Proof of value first.</span></h2>
           <p>We don't start with a 6-month roadmap. We start with the smallest thing that proves the AI earns
             its keep on your real data — then expand from there.</p>
         </div>
-        <div class="svc-steps">
+        <div class="svc-steps rail reveal">
           <div class="svc-step reveal"><span class="ss-num">01</span><div><h3>Map where AI actually pays off</h3><p>A working session on your workflows: we find the highest-leverage spot — and the spots where AI <i>doesn't</i> help. You get a build plan, not a buzzword deck.</p></div></div>
           <div class="svc-step reveal"><span class="ss-num">02</span><div><h3>Proof of value (2–4 weeks)</h3><p>One workflow, your real data, running. You can use it and judge it — retrieval quality, accuracy, speed, cost — before committing to the full build.</p></div></div>
           <div class="svc-step reveal"><span class="ss-num">03</span><div><h3>Productionise</h3><p>Guardrails, evals, monitoring, auth and a UI your team uses. We harden it against the hard parts — hallucination, cost, latency, drift — the ones we already hit in our own product.</p></div></div>
@@ -641,7 +946,7 @@
     <!-- FAQ -->
     <section class="svc-sec" aria-labelledby="faqTitle">
       <div class="svc-sec-head">
-        <p class="kicker reveal">05 — Questions</p>
+        <p class="kicker reveal">07 — Questions</p>
         <h2 id="faqTitle"><span class="ph" data-pixel>The things you're actually asking.</span></h2>
       </div>
       <div class="svc-faq">
