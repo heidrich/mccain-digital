@@ -466,11 +466,64 @@ Eine Zeile wird erst übernommen, wenn sie **fertig eingeblendet** ist
 (`soft > 1 %` → verwerfen); die erste Fassung maß mitten in der Animation und
 meldete „20-px-Zelle, 100 % transparent".
 
-**OFFEN — vom Owner entschieden, noch nicht gebaut:** das Akzent-Gelb misst
-**1,48:1 gegen Papier** (gegen Tinte 11,99:1). Kein Raster behebt das.
-Beschlossen ist ein **dunkleres Gelb nur für helle Flächen**; gerechnet
-erreicht `#8a6d00` 4,48:1, `#806400` 5,11:1. Logo-Gelb bleibt unangetastet.
-Vor dem Einbau am Bild zeigen.
+## Akzentfarbe: `--acc-text` neben `--acc` (2026-08-31)
+
+**Owner-Entscheid:** `#806400` fuer Akzent-**Text** auf hellen Flaechen.
+Ausgewaehlt am Bild (`_parked/accent-lab.html`), gemessen im Browser gegen den
+tatsaechlich gemalten Hintergrund:
+
+| Farbe | auf Papier | |
+|---|---|---|
+| `#f5c518` (Logo-Gelb) | 1,48:1 | faellt bei jeder Groesse durch |
+| `#8a6d00` | 4,48:1 | verfehlt AA fuer Flie&szlig;text um 0,02 |
+| **`#806400` (gewaehlt)** | **5,11:1** | besteht AA in jeder Groesse |
+| `#7A8C00` (Gruen) | 3,42:1 | nur gro&szlig;e Schrift |
+| `#6b5400` | 6,60:1 | besteht, liest sich als Bronze |
+
+**Zwei Token, eine Marke.** `--acc` bleibt ueberall das Logo-Gelb. Neu ist
+`--acc-text`, das auf Tinte `var(--acc)` ist und auf Papier `var(--acc-ink)`
+(`#806400`). Die Regel ist mechanisch und laesst sich pruefen:
+
+- Wer eine **Schriftfarbe** setzt (`color`, und der `-webkit-text-stroke` der
+  hohlen Schriftzuege, wo die Kontur die Letter IST), nimmt `--acc-text`.
+- Wer eine **Flaeche oder Linie** setzt (`background`, `border-color`,
+  `outline-color`, `box-shadow`, Verlaeufe, Glows), behaelt `--acc`. Ein Knopf
+  muss kein Textkontrastverhaeltnis erfuellen.
+
+31 Stellen sind umgestellt, 43 behalten das Logo-Gelb. Auf dunklem Grund
+aendert sich **nichts**, weil `--acc-text` dort auf `--acc` aufloest.
+
+**Die eine bewusste Ausnahme ist die Wortmarke** (`.logo i`, „mccain
+*digital*"). Sie behaelt das Logo-Gelb auf jedem Grund, nach der stehenden
+Owner-Regel, dass das Logo-Gelb nie umgefaerbt wird; WCAG 1.4.3 nimmt
+Logotypen aus. Sie misst 3,72:1 auf der hellen Leiste. Das ist eine
+Entscheidung, kein Versehen, und steht so im Stylesheet.
+
+**Neuer Waechter: `bash tools/accent_audit.sh`.** Misst jedes Element, das
+Akzentfarbe auf Text malt, gegen den Grund, der wirklich dahinter liegt — sechs
+Seiten, beide Themes. Aktuell 0 Fehler ausser der Wortmarke (die zweimal
+auftaucht, Nav und Fu&szlig;). Gegengeprueft: mit dem alten Gelb meldet er 11
+Fehler, erkennt den schlechten Zustand also.
+
+**Drei Fehler in meinem eigenen Pruefskript, alle beim Bauen gefunden — sie
+stehen im Skript als Kommentar, weil jeder davon ein stiller Fehlalarm war:**
+
+1. `color(srgb 1 0.99 0.98 / 0.9)` hat **0–1-Kanaele**, nicht 0–255. Als Bytes
+   gelesen wurde ein fast wei&szlig;es Kaertchen zu fast schwarz und erfand neun
+   Fehler.
+2. Eine **durchscheinende** Flaeche zeigt, was darunter liegt. Der Waechter
+   rechnet den Stapel jetzt bis zur ersten deckenden Schicht zusammen.
+3. Das Theme haengt in `localStorage`. Den Umschalter in einer Schleife zu
+   klicken schleppt das Theme der Vorseite mit und **vertauscht die
+   Beschriftungen aller Ergebnisse**. Das Theme wird jetzt vor dem Booten
+   gesetzt.
+
+**Noch offen:** die Pixel-Ueberschriften auf hellen Flaechen bleiben blasser als
+der Volltext, weil ein Mosaik nur 44 % der Flaeche einfaerbt und das Auge den
+Rest mit dem Papier mittelt. Das dunklere Gold verdreifacht den Abstand zum
+Papier, macht die Zeile aber nicht dunkel. Owner will das erst am fertigen
+Stand ansehen; die Engine hat fuer den Fall `data-ink`, das jede Zelle auf eine
+Farbe zwingt.
 
 ## `/api/ask` — die Konsole kann jetzt mit Claude antworten
 

@@ -21,6 +21,17 @@
 :root {
   --acc: #f5c518;
   /* the logo yellow — never re-tint it */
+  --acc-ink: #806400;
+  /* the same gold, dark enough to READ on paper: 5.11:1 against --paper,
+     where --acc measures 1.48:1 and fails at every size. Not a second brand
+     colour — a second weight of the same one, for text only. */
+
+  /* Accent for TEXT. On ink it is the logo yellow; on paper it is --acc-ink.
+     Fills, borders, outlines and glows keep --acc everywhere: a button does
+     not have to pass a text contrast ratio, and re-tinting the logo yellow
+     into every surface was never the ask. Anything that sets a `color` uses
+     this; anything that sets a background or a line uses --acc. */
+  --acc-text: var(--acc);
   --ok: #8ba62b;
   --ink: #0d0c0a;
   --ink-2: #16150f;
@@ -53,6 +64,7 @@
 }
 
 html[data-theme="dark"] {
+  --acc-text: var(--acc);
   --bg: var(--ink);
   --bg-2: var(--ink-2);
   --fg: var(--ink-fg);
@@ -64,6 +76,7 @@ html[data-theme="dark"] {
 }
 
 html[data-theme="light"] {
+  --acc-text: var(--acc-ink);
   --bg: var(--paper);
   --bg-2: var(--paper-2);
   --fg: var(--paper-fg);
@@ -76,6 +89,7 @@ html[data-theme="light"] {
 
 /* contrast islands — fixed regardless of theme */
 .band--ink {
+  --acc-text: var(--acc);
   --bg: var(--ink);
   --bg-2: var(--ink-2);
   --fg: var(--ink-fg);
@@ -86,6 +100,7 @@ html[data-theme="light"] {
 }
 
 .band--paper {
+  --acc-text: var(--acc-ink);
   --bg: var(--paper);
   --bg-2: var(--paper-2);
   --fg: var(--paper-fg);
@@ -217,7 +232,7 @@ section {
 }
 
 .label b {
-  color: var(--acc);
+  color: var(--acc-text);
   font-weight: 400
 }
 
@@ -390,6 +405,11 @@ section {
 
 .logo i {
   font-style: normal;
+  /* The wordmark keeps the LOGO yellow on every background, on the owner's
+     standing rule that it is never re-tinted — so this is the one accent
+     that does not follow --acc-text. It measures 3.72:1 on the light nav,
+     below the 4.5:1 a word of that size would otherwise need; WCAG exempts
+     logotypes (1.4.3), and it is a decision, not an oversight. */
   color: var(--acc)
 }
 
@@ -735,7 +755,7 @@ html[data-theme="light"] .t-moon {
 }
 
 .hero-h .accent {
-  color: var(--acc)
+  color: var(--acc-text)
 }
 
 .hero-foot {
@@ -893,7 +913,7 @@ html[data-theme="light"] .t-moon {
 
 .vmq-item--out b {
   color: transparent;
-  -webkit-text-stroke: 1px var(--acc)
+  -webkit-text-stroke: 1px var(--acc-text)
 }
 
 .vmq-item::after {
@@ -1044,7 +1064,7 @@ html[data-theme="light"] .t-moon {
 }
 
 .msg-q {
-  color: var(--acc)
+  color: var(--acc-text)
 }
 
 .msg-q::before {
@@ -1058,13 +1078,13 @@ html[data-theme="light"] .t-moon {
 }
 
 .msg-a b {
-  color: var(--acc);
+  color: var(--acc-text);
   font-weight: 600
 }
 
 .caret::after {
   content: "▌";
-  color: var(--acc);
+  color: var(--acc-text);
   animation: blink 1s steps(2) infinite
 }
 
@@ -1557,7 +1577,7 @@ html[data-theme="light"] .t-moon {
 
 .score:hover b {
   background: #0d0c0a;
-  color: var(--acc);
+  color: var(--acc-text);
   transform: scale(1.06)
 }
 
@@ -1656,7 +1676,7 @@ html[data-theme="light"] .t-moon {
 .scard:hover .scard-ghost {
   opacity: 1;
   transform: translate(0, -50%) scale(1);
-  -webkit-text-stroke-color: color-mix(in srgb, var(--acc) 45%, transparent)
+  -webkit-text-stroke-color: color-mix(in srgb, var(--acc-text) 45%, transparent)
 }
 
 /* one column below 900px — there is no spare space for a background numeral */
@@ -1683,7 +1703,7 @@ html[data-theme="light"] .t-moon {
 .scard-n {
   font-family: var(--mono);
   font-size: var(--t-small);
-  color: var(--acc)
+  color: var(--acc-text)
 }
 
 .scard-h {
@@ -1738,7 +1758,7 @@ html[data-theme="light"] .t-moon {
 
 .scard-get em {
   font-style: normal;
-  color: var(--acc);
+  color: var(--acc-text);
   flex: none;
   transition: transform .5s var(--e-out)
 }
@@ -1818,7 +1838,7 @@ html[data-theme="light"] .t-moon {
 .st-lead em {
   font-style: normal;
   font-weight: 700;
-  color: var(--acc)
+  color: var(--acc-text)
 }
 
 .st-facts {
@@ -1847,7 +1867,7 @@ html[data-theme="light"] .t-moon {
   font-family: var(--mono);
   font-size: clamp(1.1rem, 1.8vw, 1.5rem);
   font-weight: 700;
-  color: var(--acc);
+  color: var(--acc-text);
   letter-spacing: -.02em
 }
 
@@ -1988,7 +2008,7 @@ html[data-theme="light"] .t-moon {
   font-style: normal;
   font-family: var(--mono);
   font-size: var(--t-label);
-  color: var(--acc);
+  color: var(--acc-text);
   flex: none
 }
 
@@ -2019,7 +2039,7 @@ html[data-theme="light"] .t-moon {
 }
 
 .faq-panel b {
-  color: var(--acc);
+  color: var(--acc-text);
   font-weight: 600
 }
 
@@ -2175,7 +2195,7 @@ html[data-theme="light"] .t-moon {
 .tip b {
   display: block;
   margin-bottom: .4rem;
-  color: var(--acc);
+  color: var(--acc-text);
   font-family: var(--mono);
   font-size: .68rem;
   font-weight: 700;
@@ -2428,7 +2448,7 @@ html[data-theme="light"] .t-moon {
 
 .cm-brand i {
   font-style: normal;
-  color: var(--acc)
+  color: var(--acc-text)
 }
 
 .cm-x {
@@ -2462,7 +2482,7 @@ html[data-theme="light"] .t-moon {
 }
 
 .cm-prompt {
-  color: var(--acc);
+  color: var(--acc-text);
   font-family: var(--mono);
   font-size: 1.3rem;
   line-height: 1
@@ -2546,7 +2566,7 @@ html[data-theme="light"] .t-moon {
 .cm-n {
   font-family: var(--mono);
   font-size: var(--t-label);
-  color: var(--acc)
+  color: var(--acc-text)
 }
 
 .cm-t {
@@ -2558,7 +2578,7 @@ html[data-theme="light"] .t-moon {
 .cm-go {
   font-family: var(--mono);
   font-size: var(--t-label);
-  color: var(--acc);
+  color: var(--acc-text);
   opacity: 0;
   translate: -6px 0;
   transition: opacity .22s, translate .22s var(--e-out)
@@ -2595,7 +2615,7 @@ html[data-theme="light"] .t-moon {
   font-size: var(--t-label);
   letter-spacing: .16em;
   text-transform: uppercase;
-  color: var(--acc);
+  color: var(--acc-text);
   margin-bottom: .7rem
 }
 
@@ -2635,7 +2655,7 @@ html[data-theme="light"] .t-moon {
   content: "→";
   position: absolute;
   left: 0;
-  color: var(--acc)
+  color: var(--acc-text)
 }
 
 .cm-p-proof {
@@ -2655,7 +2675,7 @@ html[data-theme="light"] .t-moon {
 }
 
 .cm-p-answer b {
-  color: var(--acc);
+  color: var(--acc-text);
   font-weight: 600
 }
 
@@ -2811,7 +2831,7 @@ html[data-theme="light"] .t-moon {
 }
 
 .crumb a:hover {
-  color: var(--acc)
+  color: var(--acc-text)
 }
 
 .crumb i {
@@ -2845,7 +2865,7 @@ html[data-theme="light"] .t-moon {
 
 .intent em {
   font-style: normal;
-  color: var(--acc)
+  color: var(--acc-text)
 }
 
 @media (max-width: 860px) {
@@ -2983,7 +3003,7 @@ html[data-theme="light"] .t-moon {
 }
 
 .uc-note a {
-  color: var(--acc);
+  color: var(--acc-text);
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px
@@ -3027,7 +3047,7 @@ html[data-theme="light"] .t-moon {
   margin-bottom: 1rem;
   border-radius: 9px;
   background: color-mix(in srgb, var(--acc) 14%, transparent);
-  color: var(--acc)
+  color: var(--acc-text)
 }
 
 .cap-i svg {
@@ -3060,7 +3080,7 @@ html[data-theme="light"] .t-moon {
   font-size: var(--t-label);
   letter-spacing: .08em;
   text-transform: uppercase;
-  color: var(--acc)
+  color: var(--acc-text)
 }
 
 /* ---------- the long tail of the stack ----------
@@ -3112,12 +3132,12 @@ html[data-theme="light"] .t-moon {
   font-weight: 700;
   line-height: 1;
   color: transparent;
-  -webkit-text-stroke: 1px var(--acc);
+  -webkit-text-stroke: 1px var(--acc-text);
   transition: color .4s
 }
 
 .step:hover .step-n {
-  color: var(--acc)
+  color: var(--acc-text)
 }
 
 .step h3 {
@@ -3208,7 +3228,7 @@ html[data-theme="light"] .t-moon {
 
 .rel-n i {
   font-style: normal;
-  color: var(--acc);
+  color: var(--acc-text);
   transition: translate .4s var(--e-out)
 }
 
@@ -3306,7 +3326,7 @@ html[data-theme="light"] .t-moon {
   content: "—";
   position: absolute;
   left: -1.3rem;
-  color: var(--acc)
+  color: var(--acc-text)
 }
 
 .legal ol li {
@@ -3320,7 +3340,7 @@ html[data-theme="light"] .t-moon {
 }
 
 .legal a {
-  color: var(--acc);
+  color: var(--acc-text);
   text-decoration: underline;
   text-underline-offset: 3px;
   overflow-wrap: anywhere
@@ -3385,7 +3405,7 @@ html[data-theme="light"] .t-moon {
 }
 
 .foot-legal a:hover {
-  color: var(--acc)
+  color: var(--acc-text)
 }
 
 /* the two key hints in the 404 copy — same look as the menu footer's keys */
