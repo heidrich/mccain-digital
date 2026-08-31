@@ -1,0 +1,27 @@
+# The repository root IS the site, so everything here would otherwise be
+# published. Keep the deployment to what a visitor should be able to reach.
+
+# The retired site (was live on the Apache webspace until the move to Vercel).
+# Kept in the repository as the source of record for the legal wording and for
+# reference — but it must not be reachable, or a search engine would find a
+# second, older copy of the same company under /old/.
+old/
+
+# Build and audit tooling, the local measuring server, and the internal notes.
+tools/
+prodserve.py
+HANDOFF.md
+CHANGELOG.md
+
+# Design studies and parked experiments (the WebGL effects that were rolled
+# back, the banderole mockup). Useful to keep, not meant to be served.
+_parked/
+
+# Source material and screen recordings — large and never requested by a page.
+assets-src/
+*.mp4
+
+# Local tooling state.
+.mind/
+.mcp.json
+.recall/

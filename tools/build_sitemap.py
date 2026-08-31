@@ -28,7 +28,8 @@ if missing:
 
 on_disk = set()
 for base, dirs, files in os.walk(ROOT):
-    dirs[:] = [d for d in dirs if d not in ("_parked", "fonts", "img", "team", "tools")]
+    dirs[:] = [d for d in dirs if d not in
+               ("old", "_parked", "fonts", "img", "team", "tools", "node_modules", ".git")]
     for f in files:
         if f.endswith(".html") and f != "404.html":
             on_disk.add(os.path.relpath(os.path.join(base, f), ROOT).replace(os.sep, "/"))

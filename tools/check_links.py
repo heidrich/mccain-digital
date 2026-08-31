@@ -9,7 +9,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 pages = []
 for base, dirs, files in os.walk(ROOT):
-    dirs[:] = [d for d in dirs if d not in ("_parked", "fonts", "img", "team")]
+    dirs[:] = [d for d in dirs if d not in
+               ("old", "_parked", "fonts", "img", "team", "node_modules", ".git")]
     for f in files:
         if f.endswith(".html"):
             pages.append(os.path.join(base, f))

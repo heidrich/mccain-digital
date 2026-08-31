@@ -21,7 +21,11 @@ import os
 import sys
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
-ROOT = r"C:\Users\Christian\Documents\GitHub\mccain-digital\v3-proposal"
+# Derived from where this file lives, never written out. An absolute path
+# hardcoded here kept serving a folder that no longer existed once the site
+# moved to the repository root, and every page answered 404 with no error in
+# the log — the server was healthy, it was pointed at nothing.
+ROOT = os.path.dirname(os.path.abspath(__file__))
 COMPRESSIBLE = (".html", ".css", ".js", ".svg", ".json", ".txt", ".xml")
 IMMUTABLE = (".woff2", ".webp", ".jpg", ".png", ".svg", ".css", ".js")
 

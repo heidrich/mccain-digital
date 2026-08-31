@@ -28,9 +28,9 @@ It is hand-written **vanilla HTML / CSS / JS** — no framework, no build step, 
 | Build step | **None** — files are served as-authored |
 | Dependencies | **None** |
 | Effects | Custom `<canvas>` 2D **pixel-physics engine** (`window.PixelFX`) |
-| Type | System font stack — no web-font downloads |
+| Type | **Schibsted Grotesk**, self-hosted in `fonts/` |
 | SEO | Per-page meta, Open Graph, JSON-LD structured data, `sitemap.xml`, `robots.txt`, `llms.txt` |
-| Hosting | Classic Apache webspace (static); cache headers via `.htaccess` |
+| Hosting | **Vercel**, deployed from the repository root on `git push`; headers via `vercel.json` |
 
 ---
 
@@ -79,31 +79,65 @@ The five consumers built on that core:
 
 ## Project structure
 
+The repository root **is** the site — what is here is what gets served.
+
 ```
-upload/                 ← the entire webroot — deploy this folder 1:1
-├── index.html          the whole page (inlined CSS + scripts)
-├── pixel-engine.js     the shared canvas pixel-physics engine
-├── 404.html            falling-sand "collect" game
-├── legal/              standalone legal pages (imprint, privacy, terms, withdrawal)
-├── og-image.png        social share card
-├── favicon.svg · apple-touch-icon.png · logo-mark-200.png
-├── robots.txt · sitemap.xml · llms.txt
-└── .htaccess           Apache cache headers + 404 mapping
+index.html              home
+contact.html
+services/               ai-tools · web-apps · websites · software
+legal/                  imprint · privacy · terms · withdrawal
+404.html                falling-sand "collect" game
+
+data.js                 the single content source (services, FAQ, knowledge base)
+pixel-engine.js         the shared canvas pixel-physics engine
+common.js               shared page runtime (theme, nav, marquee, FAQ, tooltips)
+pacman.js · menu.js     scroll-progress Pac-Man · the ⌘K command menu
+v3.js                   what only the home page has
+v3.css                  every style
+
+fonts/ · img/ · team/   assets
+robots.txt · sitemap.xml · llms.txt · og-image.png · favicon.svg
+vercel.json             edge cache + security headers
+.vercelignore           what must NOT be published (old/, tools/, notes)
+
+tools/                  generators and guards, not deployed
+old/                    the retired site, kept for reference — see below
+HANDOFF.md              the working notes
 ```
+
+**Script order is load-bearing:** `data.js` → `pixel-engine.js` → `common.js` →
+`pacman.js` → `menu.js` → page script. `pixel-engine.js` must come before
+`common.js`, because the marquee subscribes to `PixelFX.onVelocity`
+synchronously.
+
+### `old/`
+
+The site that was live on classic Apache webspace until the move to Vercel,
+plus the design studies that led here (`upload/`, `upload-v2/`, `mockup/`,
+`_v2-preview/`). It is kept because it is the source of record for the legal
+wording — `tools/build_legal.py` lifts that text verbatim out of
+`old/upload/legal/` and only ever rewrites hrefs. It is listed in
+`.vercelignore`, so it is never published: a second, older copy of the same
+company reachable under `/old/` would be a genuine SEO problem.
 
 ## Run locally
 
-No build, no install — just serve the folder with any static server:
+No build, no install. Use the small server in the repository rather than
+`python -m http.server`, which sends no compression or cache headers and
+measures roughly 4x worse in Lighthouse for the same files:
 
 ```bash
-cd upload
-python3 -m http.server 8000
-# → http://localhost:8000
+python prodserve.py 8898 --dev   # to look at:  Cache-Control: no-store
+python prodserve.py 8897         # to measure:  production headers + gzip
 ```
 
 ## Deploy
 
-Upload the **contents of `upload/`** to the webroot of any static host. There is nothing to compile.
+`git push` — Vercel builds from the repository root. There is nothing to
+compile. `vercel.json` carries the cache and security headers; `.vercelignore`
+decides what stays unpublished.
+
+---
 
 ---
 

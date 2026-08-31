@@ -1,7 +1,32 @@
-# v3-proposal — Stand 2026-08-03
+# Stand 2026-08-31 — die Seite liegt jetzt im Repo-Wurzelverzeichnis
 
-Neuer Homepage-Entwurf. **Nicht live.** `upload/` (live) und `upload-v2/`
-(4×100-Vorwelle) sind unangetastet.
+**Struktur-Umzug (Owner 2026-08-31):** „die originale version die jetzt live
+ist, packen wir in einen old ordner. die neue version an der wir arbeiten IST
+ab sofort die neue version die auch live gehen wird." Und: „bei dem vercel
+projekt nehmen wir direkt die neue iteration als main, da brauchen wir kein v3
+oder so."
+
+Also: der Inhalt von `v3-proposal/` ist ins **Repo-Wurzelverzeichnis** gezogen,
+die abgelöste Seite liegt unter `old/` (`upload/`, `upload-v2/`, `mockup/`,
+`_v2-preview/`). Damit stimmen Vercels Vorgaben von allein — Root Directory
+leer, Production Branch `main` — und es muss nichts im Dashboard eingestellt
+werden.
+
+**Was dabei brach und repariert wurde:**
+
+- `prodserve.py` hatte das Wurzelverzeichnis **absolut hartcodiert** auf den
+  alten Ordner. Nach dem Umzug antwortete jede Seite 404, ohne eine einzige
+  Fehlermeldung im Log — der Server war gesund und zeigte auf nichts. Jetzt
+  wird es aus dem Ort der Datei abgeleitet.
+- `tools/build_legal.py` liest die Rechtsseiten jetzt aus `old/upload/legal/`.
+- `tools/build_sitemap.py` und `tools/check_links.py` überspringen `old/` —
+  ohne das bricht der Sitemap-Wächter sofort ab („on disk but not listed"),
+  weil er die ganze alte Seite mitzählt.
+- `.vercelignore` hält `old/`, `tools/`, `_parked/`, die Notizen und die
+  Aufzeichnungen aus dem Deployment. **Lokal ist `/old/upload/index.html` mit
+  200 erreichbar** — auf der Edge darf es das nicht sein, sonst steht dieselbe
+  Firma ein zweites Mal, älter, im Index. Nach jedem Struktur-Eingriff prüfen:
+  `curl -sI https://<host>/old/upload/index.html` muss 404 liefern.
 
 ## Git
 
@@ -23,8 +48,8 @@ gepflegt — der v3-Eintrag steht unter `[Unreleased]`.
 **Zwei Server, zwei Zwecke — nicht verwechseln:**
 
 ```bash
-cd v3-proposal && python prodserve.py 8898 --dev   # ANSCHAUEN, Cache-Control: no-store
-cd v3-proposal && python prodserve.py 8897         # MESSEN (Lighthouse), Produktions-Header
+python prodserve.py 8898 --dev   # ANSCHAUEN, Cache-Control: no-store
+python prodserve.py 8897         # MESSEN (Lighthouse), Produktions-Header
 cd upload-v2   && python -m http.server 8899       # Vorwelle, 4×100
 cd _v2-preview && python -m http.server 8890       # Claude-Design-Vorlage "Fresh v2"
 ```
@@ -66,7 +91,7 @@ Hell/Dunkel: Sonnen-Icon in der Nav (Zustand in `localStorage`).
 - `contact.html` — Kontakt
 - `services/*.html` — vier Service-Seiten (ai-tools, web-apps, websites, software)
 - `legal/*.html` — Impressum, Datenschutz, AGB, Widerruf.
-  **Der Fließtext ist wörtlich aus `upload/legal/` übernommen** — juristisch
+  **Der Fließtext ist wörtlich aus `old/upload/legal/` übernommen** — juristisch
   geprüfte Formulierung, nicht neu tippen. Neu erzeugen statt von Hand
   bearbeiten: `scratchpad/build_legal.py` (siehe unten).
 - `v3.css` — Designsystem (Tokens, zwei Themes, Scroll-Choreografie, Menü,
@@ -92,10 +117,10 @@ Eine Service-, Kontakt- oder Rechtsseite braucht **kein eigenes Skript**:
 (`#faqList` + `#faqSrc`). Die Startseite rendert ihre Reiter aus `data.js` und
 ruft `MCDUI.faq()` danach selbst auf — ein Widget, zwei Inhaltsquellen.
 
-**Rechtsseiten neu erzeugen** (nach einer Änderung an `upload/legal/`):
+**Rechtsseiten neu erzeugen** (nach einer Änderung an `old/upload/legal/`):
 
 ```bash
-python tools/build_legal.py     # liest upload/legal/, schreibt v3-proposal/legal/
+python tools/build_legal.py     # liest old/upload/legal/, schreibt legal/
 ```
 
 Das Skript hebt den `<main>`-Inhalt unverändert heraus und setzt ihn in die
@@ -292,14 +317,15 @@ Umzug gewählt** und legt das Vercel-Projekt selbst an; deployt wird künftig pe
 **Punkt 7 der offenen Liste entfällt damit voraussichtlich.** Er lautete:
 `upload/services/apps.html` und `design-brand.html` löschen und Menü, Footer,
 `sitemap.xml`, `llms.txt` nachziehen — also die Live-Seite von sechs auf vier
-Services bringen. `v3-proposal/` ist von vornherein auf vier gebaut; sobald es
+Services bringen. das Repo-Wurzelverzeichnis ist von vornherein auf vier gebaut; sobald es
 die Live-Seite ist, gibt es dort nichts aufzuräumen. Erst wenn der Umzug doch
 scheitert, wird Punkt 7 wieder aktuell.
 
 ### Was der Owner in Vercel einstellt
 
 - Repository `heidrich/mccain-digital` verbinden.
-- **Root Directory: `v3-proposal`**
+- **Root Directory: leer** (Vorgabe) — durch den Struktur-Umzug ist die
+  Repo-Wurzel bereits die Seite.
 - **Framework Preset: Other** — es gibt keinen Build-Schritt, die Dateien
   werden ausgeliefert wie sie sind. Build Command und Install Command leer.
 - **Production Branch: `v2-homepage-refresh`** (nicht `main`) — auf `main`
@@ -311,20 +337,22 @@ scheitert, wird Punkt 7 wieder aktuell.
 
 ### Was schon vorbereitet ist
 
-`v3-proposal/vercel.json` übersetzt die Header-Politik von `prodserve.py`
+`vercel.json` übersetzt die Header-Politik von `prodserve.py`
 (gegen die alle 100er gemessen wurden) auf die Edge.
 
-**Zu verifizieren am ersten Deployment:** ob Vercel `vercel.json` bei gesetztem
-Root Directory **in** diesem Verzeichnis liest oder im Repo-Root erwartet. Die
-Doku sagt es nicht eindeutig; die Datei liegt vorerst in `v3-proposal/`.
-Prüfung ist eine Zeile:
+**Die alte Frage — wo Vercel `vercel.json` bei gesetztem Root Directory sucht —
+erledigt sich durch den Umzug:** die Datei liegt in der Repo-Wurzel, und die ist
+das Deployment-Verzeichnis. Zu prüfen bleibt, ob die Header ankommen:
 
 ```bash
-curl -sI https://<deployment>.vercel.app/v3.css | grep -i cache-control
+curl -sI https://<host>/v3.css   | grep -i cache-control   # max-age=0, must-revalidate
+curl -sI https://<host>/img/…webp | grep -i cache-control   # immutable, ein Jahr
+curl -sI https://<host>/old/upload/index.html               # MUSS 404 sein
 ```
 
-Kommt `max-age=0, must-revalidate`, greift sie. Kommt Vercels Vorgabe, muss die
-Datei ins Repo-Root und die `source`-Pfade um `v3-proposal` ergänzt werden.
+Liefert CSS etwas anderes, stimmen die `source`-Muster in `vercel.json` nicht —
+Vercel benutzt path-to-regexp, und ob `/(.*).(css|js)` den Punkt als Literal
+nimmt, ist genau das, was diese Prüfung beantwortet.
 
 **Eine Sache aus `prodserve.py` wird bewusst NICHT übernommen.** Dort steht
 `.css` und `.js` in `IMMUTABLE`, also `max-age=31536000, immutable`. Für den
@@ -479,7 +507,7 @@ grob falsch: derselbe Stand kam dort auf Speed Index **4.6 s** statt **1.2 s**.
 Immer so messen:
 
 ```bash
-python prodserve.py 8897        # in v3-proposal/
+python prodserve.py 8897        # im Repo-Wurzelverzeichnis
 npx -y lighthouse http://127.0.0.1:8897/services/ai-tools.html   --preset=desktop --quiet --output=json --output-path=lh.json || true
 ```
 
@@ -603,7 +631,7 @@ trotzdem verfolgt werden.
 Nach jeder inhaltlichen Änderung:
 
 ```bash
-python tools/build_legal.py     # nur wenn upload/legal/ sich geändert hat
+python tools/build_legal.py     # nur wenn old/upload/legal/ sich geändert hat
 python tools/build_jsonld.py    # nach jeder Änderung an SERVICES oder FAQ
 python tools/build_sitemap.py   # nach jeder neuen oder gelöschten Seite
 python tools/add_meta.py        # IMMER zuletzt — überschreibt seinen eigenen Block

@@ -7,11 +7,12 @@ import io
 import os
 import re
 
-HERE = os.path.dirname(os.path.abspath(__file__))          # v3-proposal/tools
-PROPOSAL = os.path.dirname(HERE)                           # v3-proposal
-REPO = os.path.dirname(PROPOSAL)                           # mccain-digital
-SRC = os.path.join(REPO, "upload", "legal")                # the live wording
-DST = os.path.join(PROPOSAL, "legal")
+HERE = os.path.dirname(os.path.abspath(__file__))          # <repo>/tools
+SITE = os.path.dirname(HERE)                               # <repo> — the site itself
+# The reviewed wording still lives with the retired site under old/. It is the
+# source of record for the legal text; this script only ever rewrites hrefs.
+SRC = os.path.join(SITE, "old", "upload", "legal")
+DST = os.path.join(SITE, "legal")
 
 # The imprint is the page search engines read for the company identity, so it
 # carries the Organization graph. The other three need none.
@@ -54,7 +55,7 @@ PAGES = [
 SHELL = """<!DOCTYPE html>
 <!-- data-root tells menu.js and common.js how far the site root is from here.
 
-     BODY TEXT IS VERBATIM from the live site (upload/legal/{src}).
+     BODY TEXT IS VERBATIM from the live site (old/upload/legal/{src}).
      It is legally reviewed wording — regenerate this page with
      tools/build_legal.py rather than editing the prose by hand.
      The social/canonical block is added afterwards by tools/add_meta.py. -->
