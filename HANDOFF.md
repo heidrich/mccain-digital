@@ -408,6 +408,79 @@ Nicht vorab bauen, solange nicht gemessen ist, dass es nötig ist.
 4. Erst wenn die Inhalte stehen: `noindex` raus, Domain umhängen, alte
    Webspace-Fassung abschalten.
 
+## `/api/ask` — die Konsole kann jetzt mit Claude antworten
+
+**Owner-Entscheid 2026-08-31:** Haiku 4.5, abgesichert über ein **Spend-Limit
+in der Anthropic Console**. Vorher gemessen statt geschätzt: die Wissensbasis
+ist **777 Token**, eine Frage kostet also rund 1.180 Input- und 250
+Output-Token — **~2,43 $ pro 1.000 Fragen** (Sonnet 5 wären 4,85 $, Opus 5
+12,13 $).
+
+Auf die Frage „geht das nicht über unser Abo": **nein.** Ein Claude-Abo hängt
+am Benutzerkonto, hat keine API-Zugangsdaten, und es als Backend einer
+öffentlichen Seite zu benutzen verstößt gegen die Nutzungsbedingungen.
+
+### Was der Owner noch tun muss (dann ist es live)
+
+1. **Anthropic Console** → API-Key erzeugen.
+2. **Dort ein Spend-Limit setzen** (z. B. 10 $/Monat). Das ist die einzige
+   Grenze, die anbieterseitig durchgesetzt wird und die niemand umgehen kann.
+3. **Vercel** → Project Settings → Environment Variables →
+   `ANTHROPIC_API_KEY`, Environment **Production** (und Preview, wenn dort
+   auch getestet werden soll).
+4. **Einmal neu deployen** — eine Function sieht eine neu gesetzte Variable
+   erst im nächsten Deployment. Ein leerer Commit reicht.
+
+Bis dahin antwortet der Endpunkt `{"fallback": true, "reason": "no key
+configured"}` und die Konsole arbeitet lokal weiter. **Nichts muss umgestellt
+werden, wenn der Key kommt** — `AI_MODE` steht auf `"auto"`.
+
+### Der Leitgedanke: der Endpunkt darf die Seite nie schlechter machen
+
+- **Jeder Fehlerpfad antwortet HTTP 200 mit `{fallback:true}`** — kein Key,
+  Rate-Limit, Budget aufgebraucht, Refusal, Anbieter-Ausfall. Der Client
+  antwortet dann aus der lokalen Wissensbasis, die ohnehin jede Frage abdeckt,
+  für die die Seite gebaut wurde. Der Besucher sieht in jedem Fall eine
+  funktionierende Konsole, keine Fehlermeldung.
+- **Der Client fällt auf `lookup()` zurück, nicht auf `FALLBACK`.** Der alte
+  Live-Zweig zeigte den generischen „dafür habe ich keine Antwort"-Text —
+  damit wäre „live" beim ersten Fehlschlag *schlechter* gewesen als „local".
+- **Der Brief-Generator bleibt lokal.** Er ist ein Formular, kein Gespräch.
+- Meldet der Endpunkt „no key configured", fragt der Client für den Rest des
+  Besuchs nicht mehr, statt pro Frage einen Roundtrip für dieselbe Auskunft zu
+  verbrauchen.
+
+### Warum `data.js` geladen und nicht kopiert wird
+
+Die Function macht `require("../data.js")` — dieselbe Datei, die der Browser
+lädt. Eine zweite Kopie der Wissensbasis wäre an dem Tag veraltet, an dem
+jemand eine der beiden bearbeitet. Dafür war **eine** Änderung an `data.js`
+nötig: die Reduced-Motion-Abfrage lief auf Modulebene und machte die Datei
+außerhalb eines Browsers unladbar. Sie wird jetzt bei Bedarf gelesen — was
+nebenbei einen Besucher respektiert, der die Einstellung mitten im Besuch
+umstellt, statt den Wert beim Laden einzufrieren.
+
+### Das Rate-Limit ist eine Bremse, keine Mauer
+
+8 Anfragen pro IP und 10 Minuten, im Speicher der Instanz. Vercel kann mehrere
+Instanzen fahren, jede hat ihre eigene Map — ein entschlossener Aufrufer
+bekommt also ein Vielfaches. **Die Mauer ist das Spend-Limit.** Was die Bremse
+kauft: ein einzelnes Skript kann nicht das Monatsbudget an einem Nachmittag
+verfeuern und die Konsole für alle anderen bis zum Monatsende totlegen.
+
+*(Der Owner hatte nur das Spend-Limit gewählt; das Limit ist trotzdem drin,
+weil es nichts kostet und einen realen Ausfall verhindert — kann raus, wenn er
+es nicht will.)*
+
+### Geprüft
+
+Lokal: 405 auf GET, 400 ohne Frage, Fallback ohne Key, Rate-Limit greift beim
+9. Aufruf, Wissensbasis erreicht den Prompt (10 Einträge, 4 Services). Live:
+`POST /api/ask` liefert `{"fallback":true,"reason":"no key configured"}`, und
+die Konsole auf `mccain-digital.vercel.app` beantwortet Fragen korrekt aus der
+lokalen Basis, ohne Seitenfehler. **Noch nicht prüfbar, weil kein Key gesetzt
+ist:** der eigentliche Modellpfad und das Rate-Limit im Livebetrieb.
+
 ## Die Tafeln unter (04) sind ganzflächig anklickbar
 
 Owner (2026-08-31): „die tafeln, die sollten alle hover pointer aktiv sein,
