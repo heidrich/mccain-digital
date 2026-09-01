@@ -313,31 +313,44 @@
 
           </div>
 
-          <div class="console rv-s" id="console">
-            <div class="console-bar">
-              <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
-              <div role="tablist" aria-label="AI mode" style="display:flex;gap:.35rem">
-                <button class="tab" type="button" role="tab" id="tabAsk" aria-selected="true"
-                  aria-controls="consoleBody">Ask the site</button>
-                <button class="tab" type="button" role="tab" id="tabBrief" aria-selected="false"
-                  aria-controls="consoleBody">Project brief</button>
+          <!-- The console sits in a travelling rim: an animated gradient border
+               out of the same palette the assistant at the page edge uses. One
+               effect, one source - see .rim in v3.css. The wrappers are markup
+               because a glow has to spill outside the shape while the sheet has
+               to be clipped inside it, and one element cannot do both. -->
+          <div class="rim-hold console-hold rv-s" id="consoleHold">
+            <span class="rim-glow" aria-hidden="true"></span>
+            <div class="rim">
+              <span class="rim-sheet" aria-hidden="true"></span>
+              <div class="rim-in" id="consoleIn">
+                <div class="console" id="console">
+                  <div class="console-bar">
+                    <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                    <div role="tablist" aria-label="AI mode" style="display:flex;gap:.35rem">
+                      <button class="tab" type="button" role="tab" id="tabAsk" aria-selected="true"
+                        aria-controls="consoleBody">Ask the site</button>
+                      <button class="tab" type="button" role="tab" id="tabBrief" aria-selected="false"
+                        aria-controls="consoleBody">Project brief</button>
+                    </div>
+                    <span class="console-live"><i aria-hidden="true"></i> ready</span>
+                  </div>
+
+                  <div class="console-body" id="consoleBody" role="tabpanel" aria-live="polite"></div>
+
+                  <div class="console-chips" id="chips"></div>
+
+                  <form class="console-form" id="consoleForm">
+                    <label class="sr-only" for="consoleInput">Your question</label>
+                    <input id="consoleInput" type="text" autocomplete="off" placeholder="Ask us anything…">
+                    <button class="console-send" type="submit" aria-label="Send">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                        <path d="M5 12h13M12 5.5 18.5 12 12 18.5" />
+                      </svg>
+                    </button>
+                  </form>
+                </div>
               </div>
-              <span class="console-live"><i aria-hidden="true"></i> ready</span>
             </div>
-
-            <div class="console-body" id="consoleBody" role="tabpanel" aria-live="polite"></div>
-
-            <div class="console-chips" id="chips"></div>
-
-            <form class="console-form" id="consoleForm">
-              <label class="sr-only" for="consoleInput">Your question</label>
-              <input id="consoleInput" type="text" autocomplete="off" placeholder="Ask us anything…">
-              <button class="console-send" type="submit" aria-label="Send">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-                  <path d="M5 12h13M12 5.5 18.5 12 12 18.5" />
-                </svg>
-              </button>
-            </form>
           </div>
 
         </div>

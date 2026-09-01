@@ -15,6 +15,12 @@ CHANGELOG.md
 
 # Design studies and parked experiments (the WebGL effects that were rolled
 # back, the banderole mockup). Useful to keep, not meant to be served.
+#
+# The comparison pages are NOT in here - they live in preview/ and are served,
+# because their whole job is to be looked at. Keeping them under _parked/ meant
+# every link to them 404ed, which is exactly what "unter 03 sehe ich nichts zum
+# aussuchen" was. A page nobody can open is not a page that was offered.
+# preview/ carries noindex and a robots Disallow; take it out at go-live.
 _parked/
 
 # Source material and screen recordings — large and never requested by a page.

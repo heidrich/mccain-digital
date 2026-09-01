@@ -269,12 +269,12 @@
   (() => {
     const consoleEl = d.getElementById("console");
     const section = d.getElementById("ai");
-    if (!consoleEl || !section) return;
-
-    // A marker at the exact spot the console came from, so it goes back there
-    // and not merely "into the grid somewhere".
-    const home = d.createComment("console lives here while section 01 is on screen");
-    consoleEl.parentNode.insertBefore(home, consoleEl);
+    // where it lives in section 01: inside its own travelling rim, which stays
+    // behind when the console leaves rather than being carried along - the
+    // dock has a rim of its own and two of them 1.5px apart is a mistake
+    const home = d.getElementById("consoleIn");
+    const homeHold = d.getElementById("consoleHold");
+    if (!consoleEl || !section || !home || !homeHold) return;
 
     /* While the console is away, something its size stands in its place. Two
        reasons, and the second one is the one that bites: section 01 would
@@ -287,19 +287,21 @@
     const dock = d.createElement("div");
     dock.className = "dock";
     dock.innerHTML =
-      '<div class="dock-hold" id="dockHold" hidden>' +
-      '<span class="dock-glow" aria-hidden="true"></span>' +
-      '<div class="dock-panel rim" id="dockPanel" role="region" aria-label="Your assistant">' +
-      '<div class="dock-in"><div class="dock-slot" id="dockSlot"></div></div>' +
+      '<div class="rim-hold dock-hold" id="dockHold" hidden>' +
+      '<span class="rim-glow" aria-hidden="true"></span>' +
+      '<div class="rim dock-panel" id="dockPanel" role="region" aria-label="Your assistant">' +
+      '<span class="rim-sheet" aria-hidden="true"></span>' +
+      '<div class="rim-in"><div class="dock-slot" id="dockSlot"></div></div>' +
       '<button class="dock-x" type="button" id="dockX" aria-label="Collapse the assistant">' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">' +
       '<path d="M6 6l12 12M18 6 6 18"/></svg></button>' +
       '</div></div>' +
-      '<div class="dock-hold">' +
+      '<div class="rim-hold dock-orb-hold">' +
       '<span class="dock-hint" id="dockHint" aria-hidden="true">Ask anything</span>' +
-      '<span class="dock-glow" aria-hidden="true"></span>' +
+      '<span class="rim-glow" aria-hidden="true"></span>' +
       '<button class="dock-orb rim" id="dockOrb" type="button" aria-expanded="false" aria-controls="dockPanel">' +
-      '<span class="dock-orb-in">' +
+      '<span class="rim-sheet" aria-hidden="true"></span>' +
+      '<span class="rim-in">' +
       '<svg class="ic-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
       'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + ICONS.bot + '"/></svg>' +
       '<svg class="ic-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" ' +
@@ -313,17 +315,6 @@
     const slot = dock.querySelector("#dockSlot");
     const hint = dock.querySelector("#dockHint");
     const orbLabel = dock.querySelector("#dockOrbLabel");
-
-    /* The rim travels through the palette the headlines travel through. Asking
-       the engine for it rather than writing the colours out again means the
-       border and the type are one effect with one source - a second list would
-       already be the wrong one the next time the accent changes. */
-    if (window.PixelFX && PixelFX.wavePalette) {
-      const pal = PixelFX.wavePalette("rainbow");
-      // twice across the sheet, so translating it by half its width lands on
-      // an identical picture and the loop has no visible moment
-      dock.style.setProperty("--wave-stops", pal.concat(pal.slice(1)).join(","));
-    }
 
     let docked = false, open = false, hinted = false;
     let hintT = 0;
@@ -349,8 +340,9 @@
       if (next === docked) return;
       docked = next;
       if (next) {
-        spacer.style.height = consoleEl.offsetHeight + "px";
-        consoleEl.parentNode.insertBefore(spacer, consoleEl);
+        spacer.style.height = homeHold.offsetHeight + "px";
+        homeHold.parentNode.insertBefore(spacer, homeHold);
+        homeHold.hidden = true;          // an empty glowing frame is not a frame
         slot.appendChild(consoleEl);
         dock.classList.add("on");
         if (!hinted && !reduced) {
@@ -362,7 +354,8 @@
       }
       // collapse before moving, so the panel is never seen empty
       setOpen(false);
-      home.parentNode.insertBefore(consoleEl, home.nextSibling);
+      home.appendChild(consoleEl);
+      homeHold.hidden = false;
       if (spacer.parentNode) spacer.remove();
       dock.classList.remove("on");
       clearTimeout(hintT);

@@ -114,6 +114,29 @@
       (l * 100).toFixed(0) + "%)";
   }
 
+  /* Read a custom property AS AN ELEMENT SEES IT and hand back bytes.
+
+     Which element matters: --acc-text resolves differently inside a
+     .band--ink section than it does on :root, so a headline has to ask its own
+     host while the page-level rim palette asks the root. That is the only
+     difference, which is why there is one function and not two - the second
+     copy of this was already drifting (it had lost the #abc shorthand).
+
+     Chrome reports some values as `color(srgb 1 .99 .98)`, whose channels are
+     0-1 floats and not bytes; reading those as bytes turns a near-white into a
+     near-black, which has invented a whole audit's worth of failures before. */
+  function tokenRGB(el, name, fallback) {
+    var raw = getComputedStyle(el).getPropertyValue(name).trim() || fallback;
+    if (raw.charAt(0) === "#") {
+      var h = raw.slice(1);
+      if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+      return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+    }
+    var n = (raw.match(/[\d.]+/g) || []).map(Number);
+    if (raw.indexOf("color(") === 0) n = n.slice(0, 3).map(function (v) { return v * 255; });
+    return n.slice(0, 3);
+  }
+
   function hslToRgb(h, sat, l) {
     var c = (1 - Math.abs(2 * l - 1)) * sat, hp = (h % 360) / 60;
     var x = c * (1 - Math.abs(hp % 2 - 1)), m = l - c / 2, r = 0, g = 0, b = 0;
@@ -245,15 +268,21 @@
        36% FEWER particles than 2.4/1.7 and an eighth of 1.1/1.0. */
     var GAP = parseFloat(host.dataset.gap) || 3.0;
     var SIZE = parseFloat(host.dataset.size) || 2.0;
-    /* data-wave: "accent" (default) | "all" | "shimmer" | "off"
+    /* data-wave: "off" (default) | "accent" | "all" | "shimmer"
        data-wave-colors: comma-separated list, overrides the palette
 
-       "accent" is the default because it is the restrained one: only the
-       accent-coloured cells carry the travelling colour, so a headline keeps
-       the two tones it was written with and the movement lands on the phrase
-       that matters. _parked/wave-lab.html has the louder ones side by side;
-       switching is one attribute. */
-    var WAVE = host.dataset.wave || "accent";
+       OFF by default. The owner took it off the h1 - "wir entfernen den
+       gradient von der h1" - and the h1 was the only place on the site with an
+       accent span inside a pixel headline, so it was the only place it ever
+       showed. Defaulting to off rather than spelling out data-wave="off" on
+       two spans means the next headline does not quietly inherit an effect
+       nobody asked it to have.
+
+       The mechanism stays, and it is not idle: the travelling gradient the
+       owner did like now runs on the console's border instead, out of the same
+       palette (see wavePalette and .rim in v3.css). preview/wave-lab.html has
+       every variant side by side; switching one back on is one attribute. */
+    var WAVE = host.dataset.wave || "off";
     var WAVE_COLS = (host.dataset.waveColors || "").split(",")
       .map(function (c) { return c.trim(); }).filter(Boolean);
     /* "rainbow" by default: the owner asked for the animated-gradient-border
@@ -492,18 +521,7 @@
        The question that survives both is asked of the TOKEN, not of an
        element: a cell is accent if its colour is close to --acc-text, which
        is defined on every host whether or not anything on the page uses it. */
-    function tokenRGB(name, fallback) {
-      var raw = getComputedStyle(host).getPropertyValue(name).trim() || fallback;
-      if (raw.charAt(0) === "#") {
-        var h = raw.slice(1);
-        if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
-        return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
-      }
-      var n = (raw.match(/[\d.]+/g) || []).map(Number);
-      if (raw.indexOf("color(") === 0) n = n.slice(0, 3).map(function (v) { return v * 255; });
-      return n.slice(0, 3);
-    }
-    function accentRGB() { return tokenRGB("--acc-text", ACC); }
+    function accentRGB() { return tokenRGB(host, "--acc-text", ACC); }
 
     /* The ground this mosaic is actually painted on: the first ancestor with
        an opaque background. A band on paper and a band on ink need different
@@ -2568,6 +2586,8 @@
     wavePalette: function (style, accRGB, groundRGB) { return wavePalette(style, accRGB, groundRGB); },
     /* a drifting field of cells behind a band - see FIELD above */
     field: field,
+    /* a custom property as a given element sees it, in bytes */
+    tokenRGB: function (el, name, fallback) { return tokenRGB(el, name, fallback); },
     onVelocity: function (fn) { velSubs.push(fn); },
     velocity: function () { return vel; },
     reduced: reduced,

@@ -1,6 +1,10 @@
 User-agent: *
 Allow: /
 
+# Comparison pages for choosing between design options. They carry noindex
+# too; this is the belt to that pair of braces.
+Disallow: /preview/
+
 # AI crawlers are explicitly welcome — /llms.txt is a structured summary of the
 # whole site, written for them rather than scraped out of the markup.
 User-agent: GPTBot

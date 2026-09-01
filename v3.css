@@ -3421,21 +3421,132 @@ html[data-theme="light"] .t-moon {
 
 
 /* ============================================================
+   THE TRAVELLING RIM - one border effect, used in two places
+
+   Owner: "ich moechte zudem das der border der console schoen animiert ist,
+   gern in einen farbverlauf mit glow oder so, der wandert" - and then, once he
+   had seen it running on the assistant: "bitte fuege den sehr guten animierten
+   border gradient zur console bei 01 hinzu", after taking the same gradient
+   off the h1. So it is deliberately ONE mechanism with two users: the console
+   in section 01, and the same console once it has docked. A second
+   implementation of one effect is a second thing to keep looking alike.
+
+   The colours come from PixelFX.wavePalette, handed to :root by v3.js - the
+   same generator the headlines used, so "the brand colour that moves" has one
+   answer on this page and not two.
+
+   The sheet carries the palette twice and moves by exactly half its width, so
+   it lands on an identical picture and the loop has no visible moment. Only a
+   transform animates: the compositor moves a texture it already has.
+   ============================================================ */
+:root {
+  /* replaced at boot with the generated palette; this is only what shows if
+     the engine never answers, so it already has to look like the real thing */
+  --wave-stops: #f5c518, #8ada4a, #45cfae, #55a8f0, #a98cf0, #ef7fb4, #f5a24a, #f5c518,
+    #8ada4a, #45cfae, #55a8f0, #a98cf0, #ef7fb4, #f5a24a, #f5c518;
+  --rim-cycle: 6s
+}
+
+/* Each rimmed thing sits in its own relative box, because the glow has to
+   spill OUTSIDE the shape while the sheet has to be clipped INSIDE it. */
+.rim-hold {
+  --rim-radius: 20px;
+  position: relative;
+  isolation: isolate;
+  max-width: 100%
+}
+
+/* NOT overflow:hidden. The send button disintegrates on hover like every other
+   yellow button and its debris needs about 64px of flight room - clipping the
+   frame would have quietly killed an effect two levels down, which is the kind
+   of thing that gets noticed a week later and blamed on something else. The
+   sheet gets its own clipped layer instead: that is the only thing that ever
+   needed clipping. */
+.rim {
+  position: relative;
+  padding: 1.5px;
+  border-radius: var(--rim-radius)
+}
+
+.rim-sheet {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  border-radius: var(--rim-radius);
+  pointer-events: none
+}
+
+.rim-sheet::before,
+.rim-glow::before {
+  content: "";
+  position: absolute;
+  top: -60%;
+  left: 0;
+  width: 200%;
+  height: 220%;
+  background: linear-gradient(112deg, var(--wave-stops));
+  animation: rim-travel var(--rim-cycle) linear infinite;
+  will-change: transform
+}
+
+.rim-hold.is-still .rim-sheet::before,
+.rim-hold.is-still .rim-glow::before {
+  animation-play-state: paused
+}
+
+@keyframes rim-travel {
+  to {
+    transform: translate3d(-50%, 0, 0)
+  }
+}
+
+/* the opaque inside, which is what leaves only the 1.5px of sheet showing */
+.rim-in {
+  position: relative;
+  z-index: 1;
+  border-radius: calc(var(--rim-radius) - 1.5px);
+  background: var(--card)
+}
+
+/* the same sheet again, clipped to roughly the shape and blurred. The blur is
+   applied to the WRAPPER, so the colour bleeds outward past the clip - which
+   is what a glow is. */
+.rim-glow {
+  position: absolute;
+  inset: -7px;
+  z-index: -1;
+  border-radius: calc(var(--rim-radius) + 7px);
+  overflow: hidden;
+  filter: blur(14px);
+  opacity: .34;
+  pointer-events: none
+}
+
+/* The console keeps its own layout and loses only its frame: the rim is the
+   frame now, and two borders 1.5px apart look like a mistake. */
+.rim-in>.console {
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent
+}
+
+/* ---- the console where it lives, in section 01 ---- */
+.console-hold {
+  --rim-radius: var(--r)
+}
+
+/* ============================================================
    THE DOCKED ASSISTANT - the console, moved to the page edge
 
    Owner: "ich moechte das unsere ai konsole, wenn ich 01. verlasse und nach
    unten scrolle, als persoenlichen assi am rand der seite mit laufen haben.
-   zum ausklappen etc. ... ich moechte zudem das der border der console schoen
-   animiert ist, gern in einen farbverlauf mit glow oder so, der wandert."
+   zum ausklappen etc."
 
    The console is MOVED in here, never copied. One console means one
    conversation: a question asked in section 01 is still on screen two screens
    further down, and there is no second set of handlers to keep in step with
    the first.
-
-   The rim reads the same palette the headlines travel through, handed over by
-   v3.js from PixelFX.wavePalette. Two effects, one source - so "the brand
-   colour that moves" cannot drift into two different answers.
    ============================================================ */
 .dock {
   position: fixed;
@@ -3446,12 +3557,6 @@ html[data-theme="light"] .t-moon {
   flex-direction: column;
   align-items: flex-end;
   gap: .75rem;
-
-  /* Overwritten by v3.js with the real generated palette; this fallback is
-     here so the rim is never a bare grey line if the engine is missing. */
-  --wave-stops: #f5c518, #8ada4a, #45cfae, #55a8f0, #a98cf0, #ef7fb4, #f5a24a, #f5c518,
-                #8ada4a, #45cfae, #55a8f0, #a98cf0, #ef7fb4, #f5a24a, #f5c518;
-  --dock-cycle: 6s;
 
   opacity: 0;
   visibility: hidden;
@@ -3466,93 +3571,9 @@ html[data-theme="light"] .t-moon {
   transition: opacity .5s var(--e-out), transform .5s var(--e-out), visibility 0s
 }
 
-/* Each thing that glows sits in its own relative box, because the glow has to
-   spill OUTSIDE the shape while the rim has to be clipped INSIDE it. One
-   element cannot do both. */
-.dock-hold {
-  position: relative;
-  isolation: isolate;
-  max-width: 100%
-}
-
-/* ---- the travelling rim ----
-   The sheet is twice as wide as the box and carries the palette twice, so
-   moving it by exactly half its width lands on an identical picture. That is
-   the same reason the headline wave tiles instead of sweeping: a loop you
-   cannot see is a loop with no moment to see. */
-.rim {
-  position: relative;
-  overflow: hidden;
-  padding: 1.5px
-}
-
-.rim::before {
-  content: "";
-  position: absolute;
-  top: -60%;
-  left: 0;
-  width: 200%;
-  height: 220%;
-  background: linear-gradient(112deg, var(--wave-stops));
-  animation: dock-travel var(--dock-cycle) linear infinite;
-  will-change: transform
-}
-
-.rim>* {
-  position: relative
-}
-
-@keyframes dock-travel {
-  to {
-    transform: translate3d(-50%, 0, 0)
-  }
-}
-
-/* the same sheet again, blurred. The wrapper clips it to roughly the panel
-   shape and the blur is applied to the WRAPPER, so the colour bleeds outward
-   past the clip - which is what a glow is. */
-.dock-glow {
-  position: absolute;
-  inset: -7px;
-  z-index: -1;
-  border-radius: 26px;
-  overflow: hidden;
-  filter: blur(14px);
-  opacity: .34;
-  pointer-events: none
-}
-
-.dock-glow::before {
-  content: "";
-  position: absolute;
-  top: -60%;
-  left: 0;
-  width: 200%;
-  height: 220%;
-  background: linear-gradient(112deg, var(--wave-stops));
-  animation: dock-travel var(--dock-cycle) linear infinite;
-  will-change: transform
-}
-
-/* ---- the panel ---- */
 .dock-panel {
-  border-radius: 20px;
   width: min(380px, calc(100vw - 1.8rem));
   box-shadow: var(--shadow)
-}
-
-.dock-in {
-  border-radius: 18.5px;
-  overflow: hidden;
-  background: var(--card)
-}
-
-/* The console keeps its own layout and loses only its frame: the rim is the
-   frame now, and two borders 1.5px apart look like a mistake. */
-.dock-slot .console {
-  border-radius: 0;
-  box-shadow: none;
-  background: transparent
 }
 
 .dock-slot .console-body {
@@ -3572,6 +3593,7 @@ html[data-theme="light"] .t-moon {
 
 .dock-x {
   position: absolute;
+  z-index: 2;
   top: .5rem;
   right: .55rem;
   width: 30px;
@@ -3594,8 +3616,11 @@ html[data-theme="light"] .t-moon {
 }
 
 /* ---- the orb ---- */
+.dock-orb-hold {
+  --rim-radius: 50%
+}
+
 .dock-orb {
-  border-radius: 50%;
   width: 58px;
   height: 58px;
   flex: none;
@@ -3606,13 +3631,12 @@ html[data-theme="light"] .t-moon {
   transform: scale(1.07)
 }
 
-.dock-orb-in {
+.dock-orb .rim-in {
+  border-radius: 50%;
   display: grid;
   place-items: center;
   width: 100%;
   height: 100%;
-  border-radius: 50%;
-  background: var(--card);
   color: var(--fg)
 }
 
@@ -3679,12 +3703,12 @@ html[data-theme="light"] .t-moon {
    show for it. */
 @media (prefers-reduced-motion: reduce) {
 
-  .rim::before,
-  .dock-glow::before {
+  .rim-sheet::before,
+  .rim-glow::before {
     animation: none
   }
 
-  .dock-glow {
+  .rim-glow {
     display: none
   }
 
@@ -3692,7 +3716,6 @@ html[data-theme="light"] .t-moon {
     transition: none
   }
 }
-
 
 /* ============================================================
    THE CELL FIELD - the quiet background layer

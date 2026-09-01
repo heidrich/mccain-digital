@@ -38,7 +38,7 @@ de13a97  fix(pixel): generate the wave palette by hue, so it stops going muddy
    Themes: **1,03:1 auf Papier**, also unsichtbar. Kein Gestaltungsproblem,
    eine Ladereihenfolge. Jetzt 4,21:1. Details unten im eigenen Abschnitt.
 4. **„Mehr Leben" liegt zum Aussuchen bereit, ist aber NICHT eingeschaltet.**
-   `https://mccain-digital.vercel.app/_parked/life-lab.html` — vier
+   `https://mccain-digital.vercel.app/preview/life-lab.html` — vier
    bildschirmhohe Baender: aus / Textur ohne Bewegung / zwei driftende Ebenen
    (**mein Vorschlag**) / zu laut. Der Code ist Produktionscode
    (`PixelFX.field`), einschalten ist eine Zeile pro Band. Vereinbart war: ein
@@ -71,10 +71,10 @@ de13a97  fix(pixel): generate the wave palette by hue, so it stops going muddy
 | `bash tools/accent_audit.sh` | jeder Akzent-Textknoten gegen seinen echten Grund, 6 Seiten x 2 Themes |
 | `bash tools/pixel_scale.sh` | sitzt jedes Mosaik im Massstab 1.00 auf seinem Foto |
 | `python tools/check_links.py` | Links, Anker, doppelte IDs |
-| `_parked/wave-lab.html` | Wellen-Paletten UND die Achse: gerade gegen schraeg |
-| `_parked/life-lab.html` | die vier Hintergrund-Kandidaten |
-| `_parked/pixel-lab.html` | Rastervarianten, misst Zelle/Block/Deckung selbst aus |
-| `_parked/accent-lab.html` | Gelb-Kandidaten auf Papier, misst Kontrast selbst |
+| `preview/wave-lab.html` | Wellen-Paletten UND die Achse: gerade gegen schraeg |
+| `preview/life-lab.html` | die vier Hintergrund-Kandidaten |
+| `preview/pixel-lab.html` | Rastervarianten, misst Zelle/Block/Deckung selbst aus |
+| `preview/accent-lab.html` | Gelb-Kandidaten auf Papier, misst Kontrast selbst |
 
 ## Lehren, die ich nicht nochmal lernen will
 
@@ -561,7 +561,7 @@ Instrument einen bekannten schlechten Stand überhaupt als schlecht erkennt —
 das hier hätte 90 Sekunden gekostet (`git checkout <bad> -- pixel-engine.js`,
 messen, zurück).
 
-**Varianten vergleichen:** `_parked/pixel-lab.html` rendert fünf Einstellungen
+**Varianten vergleichen:** `preview/pixel-lab.html` rendert fünf Einstellungen
 nebeneinander mit echter Schrift, echter Engine und funktionierendem Loch. Sie
 **misst jetzt jede Zeile selbst aus** (Zelle, Block, Fläche, Deckkraft) und
 schreibt das Ergebnis neben die Überschrift, statt es beschriftet zu bekommen
@@ -573,7 +573,7 @@ meldete „20-px-Zelle, 100 % transparent".
 ## Akzentfarbe: `--acc-text` neben `--acc` (2026-08-31)
 
 **Owner-Entscheid:** `#806400` fuer Akzent-**Text** auf hellen Flaechen.
-Ausgewaehlt am Bild (`_parked/accent-lab.html`), gemessen im Browser gegen den
+Ausgewaehlt am Bild (`preview/accent-lab.html`), gemessen im Browser gegen den
 tatsaechlich gemalten Hintergrund:
 
 | Farbe | auf Papier | |
@@ -630,7 +630,7 @@ console passen."
 
 **Standard ist `data-wave="accent"`**: nur die akzentfarbenen Zellen tragen die
 wandernde Farbe, die Zeile behaelt also ihre zwei Toene und die Bewegung landet
-auf der Phrase, um die es geht. `_parked/wave-lab.html` hat „all" (ganze Zeile),
+auf der Phrase, um die es geht. `preview/wave-lab.html` hat „all" (ganze Zeile),
 „shimmer" (Welle plus Flackern) und „off" nebeneinander; umschalten ist EIN
 Attribut, `data-wave-colors` setzt die Palette.
 
@@ -673,7 +673,7 @@ Standard ist `rainbow`, weil der Owner den Border-Look wollte und
 ausdruecklich in Kauf nimmt, dass das Gelb mitwandert.
 
 `PixelFX.wavePalette(style)` gibt die erzeugten Stops heraus, und
-`_parked/wave-lab.html` malt pro Zeile die **tatsaechliche** Palette als
+`preview/wave-lab.html` malt pro Zeile die **tatsaechliche** Palette als
 Streifen darunter. Ein von Hand geschriebener Streifen waere ein Bild von dem
 gewesen, was ich meinte, nicht von dem, was laeuft — und genau dieser Streifen
 macht das Oliv sichtbar, ohne auf die wandernde Welle zu warten. Er hat auch
