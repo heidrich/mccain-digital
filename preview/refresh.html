@@ -591,6 +591,368 @@
         #f5c518 480px !important
     }
 
+    /* ============================================================
+       MOTION
+
+       Everything here is checked against the number bands in the
+       `animation-systems` skill rather than against taste:
+
+         micro (hover, press)      120-200ms
+         UI state change           180-260ms
+         small transition          220-320ms
+         section entrance          400-800ms
+         hero sequence             800-1600ms, with inner beats
+         stagger                   40-90ms per item
+         fade+rise                 opacity 0->1, Y 12-24px
+         hover lift                Y -2 to -6px
+         scroll reveal             fires at 20-30% visible, ONCE
+
+       And against its deletion rule: an animation has to explain
+       hierarchy, confirm an action, guide attention, hold continuity, or
+       show craft. Anything that does none of those is not in here.
+
+       Only transform and opacity are animated. Every effect defaults to
+       its END state, so a browser without scroll timelines - and anyone
+       who asked for reduced motion - loses the movement, never the
+       content.
+       ============================================================ */
+
+    /* v3.css reveals from 44px, nearly double the top of the 12-24px band.
+       At that distance the rise reads as a jump rather than as arrival. */
+    @keyframes rv {
+      from {
+        opacity: 0;
+        translate: 0 22px
+      }
+    }
+
+    @keyframes rvs {
+      from {
+        opacity: 0;
+        translate: 0 14px;
+        scale: .988
+      }
+    }
+
+    /* ---------- 1. WORDS RISE THROUGH A MASK ----------
+       The headline is the one place where the type has to carry what the
+       pixel raster used to. Words arriving one after another is what gives
+       a still headline a beat. (masked-reveal, without GSAP: the mask is
+       overflow, the timing is a native view() timeline.)
+
+       The mask would clip descenders unless it is given room, hence the
+       padding/margin pair - and `clip`, not `hidden`, so it never becomes
+       a scroll container. */
+    .w {
+      display: inline-block;
+      overflow: clip;
+      vertical-align: top;
+      padding-bottom: .14em;
+      margin-bottom: -.14em
+    }
+
+    .w>i {
+      display: inline-block;
+      font-style: inherit
+    }
+
+    @supports (animation-timeline: view()) {
+      @media (prefers-reduced-motion: no-preference) {
+
+        /* section headlines: scroll-driven, so the reveal belongs to the
+           scroll rather than to a timer the reader cannot feel */
+        /* The range is measured on `cover`, not `entry`. A headline is
+           only ~60px tall, and its ENTRY range is over almost as soon as it
+           starts - measured, the words went from 62px offset to 0 between
+           two scroll samples 150px apart, which is a snap, not a reveal.
+           `cover` spans from first touching the viewport to fully leaving
+           it, so a percentage there is a comfortable amount of scrolling. */
+        .wr .w>i {
+          animation: wordRise linear both;
+          animation-timeline: view();
+          animation-range: cover calc(4% + var(--wi, 0) * 2%) cover calc(24% + var(--wi, 0) * 2%);
+          /* Measured, not assumed. Forty-three word spans on their own
+             scroll timelines took 9% of frames over 20ms and p99 from 17.1
+             to 32.7 ms; with the words switched off it was 0% and 17.1, so
+             it was them and nothing else. Promoting them puts it back to
+             0% / 17.3.
+
+             will-change is usually a smell because it is left on something
+             that animates once. These are the opposite case: any scroll can
+             re-enter the range, so the animation is genuinely always live.
+             It is NOT on the hero's words - those run one transition and
+             are then finished. */
+          will-change: transform
+        }
+
+        /* The stage's own exit. The copy leaves first and faster, the plate
+           lags behind it: two speeds are what make a hand-over read as one
+           movement instead of a section switching off. Parallax stays under
+           5% of the viewport, per documentary-brutalist-agency. */
+        .stage-copy {
+          animation: stageCopyOut linear both;
+          animation-timeline: view(block);
+          animation-range: exit 0% exit 100%
+        }
+
+        .stage-media {
+          animation: stageMediaOut linear both;
+          animation-timeline: view(block);
+          animation-range: exit 0% exit 100%
+        }
+
+        .stage-foot {
+          animation: fxDim linear both;
+          animation-timeline: view(block);
+          animation-range: exit 0% exit 70%
+        }
+      }
+    }
+
+    @keyframes wordRise {
+      from {
+        transform: translateY(112%)
+      }
+    }
+
+    @keyframes stageCopyOut {
+      to {
+        transform: translateY(-56px);
+        opacity: 0
+      }
+    }
+
+    @keyframes stageMediaOut {
+      to {
+        transform: translateY(34px);
+        opacity: .1
+      }
+    }
+
+    /* ---------- 2. THE HERO IS A SEQUENCE, NOT A REVEAL ----------
+       A view() timeline cannot animate what is already on screen at load:
+       its entry range is behind us before the first frame. So the hero runs
+       on time, inside the 800-1600ms band, with inner beats - rule, then
+       eyebrow, then the words, then the plate and the numbers.
+
+       The hidden state is applied by SCRIPT (.hs), so the headline is fully
+       visible to anyone whose JavaScript never arrives. */
+    .hs .w>i {
+      transform: translateY(115%);
+      opacity: 0
+    }
+
+    .hs.go .w>i {
+      transform: none;
+      opacity: 1;
+      transition: transform .72s var(--e-out), opacity .42s linear;
+      transition-delay: calc(var(--wi, 0) * 48ms)
+    }
+
+    .stage-kicker::before {
+      transform-origin: 0 50%;
+      transition: transform .6s var(--e-out)
+    }
+
+    .stage.hs .stage-kicker::before {
+      transform: scaleX(0)
+    }
+
+    /* the rule has to be given its way BACK. Written without this, the
+       hidden state was the only state and the yellow rule never appeared
+       again - a hidden state with no matching visible state is not an
+       animation, it is a deletion. */
+    .stage.hs.go .stage-kicker::before {
+      transform: none
+    }
+
+    .stage.hs .stage-kicker>span,
+    .stage.hs .stage-intro,
+    .stage.hs .stage-media,
+    .stage.hs .stage-foot {
+      opacity: 0;
+      transform: translateY(16px)
+    }
+
+    .stage.hs.go .stage-kicker>span,
+    .stage.hs.go .stage-intro,
+    .stage.hs.go .stage-media,
+    .stage.hs.go .stage-foot {
+      opacity: 1;
+      transform: none;
+      transition: opacity .55s linear, transform .68s var(--e-out)
+    }
+
+    .stage.hs.go .stage-kicker>span {
+      transition-delay: .12s
+    }
+
+    .stage.hs.go .stage-intro {
+      transition-delay: .2s
+    }
+
+    .stage.hs.go .stage-media {
+      transition-delay: .34s
+    }
+
+    .stage.hs.go .stage-foot {
+      transition-delay: .62s
+    }
+
+    /* ---------- 3. THE RAIL REPORTS WHERE YOU ARE ----------
+       Once the stage is behind you the status line has nothing left to say,
+       so it hands its place to the chapter you are actually in. It guides
+       attention and it is real navigation, which is why it survives the
+       deletion rule. */
+    .r-where {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      min-width: 0;
+      font-family: var(--mono);
+      font-size: var(--t-label);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity .2s linear, transform .24s var(--e-out)
+    }
+
+    .r-where.on {
+      opacity: 1;
+      transform: none
+    }
+
+    .r-where b {
+      color: var(--fg);
+      font-weight: 500
+    }
+
+    .rail.stuck .r-status {
+      display: none
+    }
+
+    .rail:not(.stuck) .r-where {
+      display: none
+    }
+
+    /* ---------- 4. THE SCROLL CUE ----------
+       One job: say that the page continues. It stops the moment you scroll,
+       because a cue that keeps nagging after you obeyed it is decoration. */
+    .cue {
+      position: absolute;
+      left: 50%;
+      bottom: 1.1rem;
+      z-index: 3;
+      translate: -50% 0;
+      display: grid;
+      justify-items: center;
+      gap: .45rem;
+      font-family: var(--mono);
+      font-size: var(--t-label);
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      pointer-events: none;
+      transition: opacity .3s linear
+    }
+
+    .cue i {
+      display: block;
+      width: 1px;
+      height: 26px;
+      background: linear-gradient(var(--acc), transparent);
+      transform-origin: 50% 0;
+      animation: cueDrop 1.9s var(--e-io) infinite
+    }
+
+    .stage.moved .cue {
+      opacity: 0
+    }
+
+    @keyframes cueDrop {
+
+      0%,
+      100% {
+        transform: scaleY(.3);
+        opacity: .35
+      }
+
+      45% {
+        transform: scaleY(1);
+        opacity: 1
+      }
+    }
+
+    /* ---------- 5. HOVER MICROS, all inside 120-200ms ---------- */
+    .worktrack .case,
+    .testi {
+      transition: transform var(--d-micro) var(--e-out)
+    }
+
+    .worktrack .case:hover {
+      transform: translateY(-4px)
+    }
+
+    /* an underline that grows from the side it is read from, instead of a
+       colour that simply appears */
+    .foot-col a,
+    .foot-bar a,
+    .r-nav>a:not(.btn) {
+      position: relative
+    }
+
+    .foot-col a::after,
+    .foot-bar a::after,
+    .r-nav>a:not(.btn)::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -3px;
+      height: 1px;
+      background: var(--acc);
+      transform: scaleX(0);
+      transform-origin: 0 50%;
+      transition: transform var(--d-micro) var(--e-out)
+    }
+
+    .foot-col a:hover::after,
+    .foot-bar a:hover::after,
+    .r-nav>a:not(.btn):hover::after {
+      transform: scaleX(1)
+    }
+
+    .foot-mark {
+      transition: opacity var(--d-ui) linear
+    }
+
+    .foot-mark:hover {
+      opacity: .82
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      .cue i {
+        animation: none
+      }
+
+      .hs .w>i,
+      .stage.hs .stage-kicker>span,
+      .stage.hs .stage-intro,
+      .stage.hs .stage-media,
+      .stage.hs .stage-foot {
+        opacity: 1;
+        transform: none
+      }
+
+      .stage.hs .stage-kicker::before {
+        transform: none
+      }
+    }
+
     /* ---------- chapters: the exposed grid ---------- */
     .guides::before,
     .guides::after {
@@ -786,6 +1148,12 @@
         display: none
       }
 
+      /* the chapter readout needs room the 390px rail does not have - it was
+         printing straight through the Menu button */
+      .rail .r-where {
+        display: none
+      }
+
       .foot-cols {
         grid-template-columns: 1fr 1fr
       }
@@ -817,6 +1185,7 @@
       </a>
 
       <span class="r-status"><i aria-hidden="true"></i> München · open for work</span>
+      <span class="r-where" id="rWhere" aria-hidden="true"></span>
 
       <nav class="r-nav" aria-label="Main">
         <a href="#work">Work</a>
@@ -856,18 +1225,18 @@
         <div class="stage-grid">
           <div class="stage-copy">
             <div>
-              <p class="stage-kicker label rv">Digital product studio · Bavaria · est. 2016</p>
-              <p class="stage-intro rv">Tools, web apps and software that go to <b>production</b> — not to a
+              <p class="stage-kicker label"><span>Digital product studio · Bavaria · est. 2016</span></p>
+              <p class="stage-intro">Tools, web apps and software that go to <b>production</b> — not to a
                 slide deck. Two founders, senior hands only.</p>
             </div>
-            <h1 class="display rv">We build the<br>useful <span class="acc">kind of AI.</span></h1>
+            <h1 class="display">We build the<br>useful <span class="acc">kind of AI.</span></h1>
           </div>
 
           <div class="stage-media">
             <!-- .case + .case-img: common.js wires the pixel mosaic on exactly
                  those two classes, so this plate assembles out of a swarm like
                  every other picture on the page. -->
-            <figure class="shot plate-frame rv-s">
+            <figure class="shot plate-frame">
               <span class="shot-img">
                 <img src="../img/code-screen-1200.webp"
                   srcset="../img/code-screen-640.webp 640w, ../img/code-screen-1200.webp 1200w"
@@ -877,7 +1246,7 @@
               <span class="plate-tag"><span>whatever-recall</span><b>live</b></span>
             </figure>
 
-            <div class="facts rv-s">
+            <div class="facts">
               <div class="fact"><b>20+</b><span>years in the industry</span></div>
               <div class="fact"><b>4×100</b><span>Lighthouse, this build</span></div>
               <div class="fact"><b>0</b><span>account managers</span></div>
@@ -885,7 +1254,7 @@
           </div>
         </div>
 
-        <div class="stage-foot rv">
+        <div class="stage-foot">
           <div class="stage-ctas">
             <a class="btn" href="#ai">Try the AI, right here
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -897,6 +1266,8 @@
           <span class="stage-coords">48.14° N · 11.58° E — reply in 24h, fixed quote in 48h</span>
         </div>
       </div>
+
+      <span class="cue" aria-hidden="true"><i></i>scroll</span>
     </header>
 
     <!-- ============ VELOCITY MARQUEE ============ -->
@@ -1113,7 +1484,7 @@
     </section>
 
     <!-- ================= (03) SCORE BAND ================= -->
-    <section class="band band--tight band--paper guides">
+    <section class="band band--tight band--paper guides" id="score">
       <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
       <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
       <div class="wrap fx-out">
@@ -1390,13 +1761,26 @@
           console, the ⌘K command menu, the FAQ, the service stack, the work track, the scores and the contact
           form are the ones that already work — not copies that would drift apart from day one. The refresh
           changes the system, not the machinery.</p>
-        <p><b>5 · Measured, not judged.</b> Small text on the stage, read from the DELIVERED pixels against
+        <p><b>5 · The motion is checked against numbers, not taste.</b> From the
+          <b>animation-systems</b> skill: micro 120–200 ms, UI 180–260, section entrance 400–800, hero
+          800–1600 with inner beats, stagger 40–90, fade+rise 12–24 px, hover lift −2 to −6 px, reveal at
+          20–30 % visible and once. What is in: <b>words rising through a mask</b> on every headline;
+          the <b>hero as a sequence</b> (rule → eyebrow → words → plate → numbers, ~1.1 s); the
+          <b>stage handing over</b> as it leaves, copy faster than plate; the <b>rail reporting the chapter
+          you are in</b>; a <b>scroll cue</b> that retires once obeyed; and hover micros that grow an
+          underline from the side it is read from. Its deletion rule threw out the rest: an animation has to
+          explain hierarchy, confirm an action, guide attention, hold continuity or show craft.</p>
+        <p><b>6 · Measured, not judged.</b> Small text on the stage, read from the DELIVERED pixels against
           the brightest ground cell under each line: coords 7.28:1, fact labels 4.71:1, intro 13.27:1, plate
           tag 8.39:1. The headline cannot be sampled that way — at leading 0.9 there is no glyph-free strip
           between its lines, so every percentile in its box is already a letter — so it is measured against
           the brightest cell the field actually renders: 16.41:1 white, 11.29:1 yellow. A full scroll:
-          <b>0 long tasks</b>, p90 16.9 ms, 0 % of frames over 20 ms. 390 px: no overflow.</p>
-        <p><b>6 · Still open:</b> real portraits and three cleared client references are the biggest gap before
+          <b>0 long tasks</b>, p90 16.9 ms, p99 17.1, 0 % of frames over 20 ms — with all
+          43 word timelines running. They did not start out free: on their own they took 9 % of frames over
+          20 ms and p99 to 32.7. Switching the words off put it back to 0 %, which proved it was them and
+          nothing else, and promoting them fixed it. 390 px: no overflow. Reduced motion gets the finished
+          page, not a faster one.</p>
+        <p><b>7 · Still open:</b> real portraits and three cleared client references are the biggest gap before
           go-live; the command menu's own wordmark does not carry the pixel mark yet (it is injected by
           menu.js, a live file); and whether the billboard lines get a condensed cut for one more font file.</p>
       </div>
@@ -1454,6 +1838,111 @@
         requestAnimationFrame(railState);
       }, { passive: true });
       addEventListener("resize", railState, { passive: true });
+
+
+      /* ============================================================
+         MOTION
+         ============================================================ */
+      var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      /* ---- split a headline into maskable words ----
+         Walks TEXT NODES only, so the markup around them survives: the
+         <br> in the h1, the <span class="dim"> that greys half a section
+         heading, the <span class="acc"> that carries the yellow. Wrapping
+         the headline as a string would have destroyed all three. */
+      function splitWords(root) {
+        var walk = d.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+        var nodes = [], n, i = 0;
+        while ((n = walk.nextNode())) nodes.push(n);
+        nodes.forEach(function (tn) {
+          if (!tn.nodeValue.trim()) return;
+          var frag = d.createDocumentFragment();
+          tn.nodeValue.split(/(\s+)/).forEach(function (part) {
+            if (!part) return;
+            if (!part.trim()) { frag.appendChild(d.createTextNode(part)); return; }
+            var w = d.createElement("span");
+            w.className = "w";
+            var inner = d.createElement("i");
+            inner.textContent = part;
+            inner.style.setProperty("--wi", i++);
+            w.appendChild(inner);
+            frag.appendChild(w);
+          });
+          tn.parentNode.replaceChild(frag, tn);
+        });
+        return i;
+      }
+
+      if (!reduced) {
+        /* Section headings ride a view() timeline - the reveal belongs to
+           the scroll, not to a timer the reader cannot feel. */
+        d.querySelectorAll(".band .sec-h").forEach(function (h) {
+          splitWords(h);
+          h.classList.add("wr");
+        });
+
+        /* THE HERO IS A SEQUENCE. A view() timeline cannot animate what is
+           already on screen at load - its entry range is behind us before
+           the first frame - so the stage runs on time instead, inside the
+           800-1600ms band with inner beats.
+
+           The hidden state is added HERE rather than in the stylesheet, so
+           a visitor whose JavaScript never arrives gets the finished
+           headline instead of an empty stage. */
+        var h1 = stage.querySelector(".display");
+        splitWords(h1);
+        h1.classList.add("hs");
+        stage.classList.add("hs");
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            h1.classList.add("go");
+            stage.classList.add("go");
+          });
+        });
+      }
+
+      /* ---- the cue retires once it has been obeyed ---- */
+      addEventListener("scroll", function () {
+        if (window.scrollY > 40) stage.classList.add("moved");
+      }, { passive: true, once: false });
+
+      /* ---- the rail reports the chapter you are in ----
+         The margins pick the section crossing the middle of the viewport,
+         so the readout changes when the READER changes chapter, not when a
+         boundary happens to touch the edge of the screen. An observer
+         reports crossings, not states, so the current chapter is held in a
+         set rather than inferred from the last event. */
+      var where = d.getElementById("rWhere");
+      var CHAPTERS = [
+        ["ai", "01", "Ask the AI"],
+        ["work", "02", "Selected work"],
+        ["score", "03", "Perfect score"],
+        ["services", "04", "What we do"],
+        ["studio", "05", "The studio"],
+        ["faq", "06", "Straight answers"],
+        ["proof", "07", "Proof"],
+        ["contact", "08", "Start a project"]
+      ];
+      var here = new Set();
+      var chapIO = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (e.isIntersecting) here.add(e.target.id); else here.delete(e.target.id);
+        });
+        var hit = CHAPTERS.filter(function (c) { return here.has(c[0]); })[0];
+        if (!hit) { where.classList.remove("on"); return; }
+        var txt = hit[1] + " \u2014 " + hit[2];
+        if (where.dataset.now === txt) { where.classList.add("on"); return; }
+        where.dataset.now = txt;
+        where.classList.remove("on");
+        setTimeout(function () {
+          where.innerHTML = "<b>(" + hit[1] + ")</b> " + hit[2];
+          where.classList.add("on");
+        }, 200);
+      }, { rootMargin: "-45% 0px -45% 0px" });
+      CHAPTERS.forEach(function (c) {
+        var el = d.getElementById(c[0]);
+        if (el) chapIO.observe(el);
+      });
 
       /* THE DITHER FIELD — header only, as asked. The engine caps its own ramp
          against the dimmest text on the host, so asking for a brighter top

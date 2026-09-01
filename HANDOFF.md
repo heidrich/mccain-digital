@@ -80,13 +80,75 @@ wichtige Autoren-Regel das ueberstimmt.
 **5 — Der Fuss ist ein Kapitel.** Einladung + drei Spalten (Studio, Leistungen,
 Adresse) + ueberdimensionierte Wortmarke + Rechtsleiste.
 
+### Die Bewegung — gegen Zahlen gebaut, nicht gegen Geschmack
+
+Owner: „ich moechte mehr scroll und motion effekte, einblenden verblassen,
+uebergaenge etc". Die Messlatte ist der `animation-systems`-Skill (siehe
+`reference_motion_number_bands` im Gedaechtnis), nicht mein Auge:
+
+| | |
+|---|---|
+| Micro (Hover, Press) | 120–200 ms |
+| UI-Zustandswechsel | 180–260 ms |
+| Sektionseintritt | 400–800 ms |
+| Hero-Sequenz | 800–1600 ms, mit inneren Beats |
+| Stagger | 40–90 ms |
+| Fade+Rise | 12–24 px |
+| Hover-Lift | −2 bis −6 px |
+| Reveal | bei 20–30 % Sichtbarkeit, **einmal** |
+
+**Was drin ist:**
+
+1. **Woerter steigen durch eine Maske.** Jede Ueberschrift wird in Wort-Spans
+   zerlegt (`TreeWalker` nur ueber Textknoten, damit `<br>`, `.dim` und `.acc`
+   ueberleben — die Ueberschrift als String zu ersetzen haette alle drei
+   zerstoert). Maske = `overflow: clip`, Timing = native `view()`-Timeline.
+   Kein GSAP.
+2. **Der Held ist eine Sequenz, kein Reveal.** Eine `view()`-Timeline kann
+   nichts animieren, was beim Laden schon im Bild steht — ihr `entry`-Bereich
+   liegt vor dem ersten Frame. Also laeuft die Buehne auf Zeit: Linie →
+   Augenbraue → Woerter → Platte → Zahlen, gemessen ~1,1 s.
+3. **Die Buehne uebergibt beim Verlassen.** Copy geht schneller raus als die
+   Platte; zwei Geschwindigkeiten machen daraus eine Bewegung statt eines
+   ausgeschalteten Abschnitts. Parallaxe unter 5 % des Viewports.
+4. **Die Leiste meldet, in welchem Kapitel du bist.** Sobald die Buehne hinter
+   dir liegt, tritt die Status-Zeile ab und macht dem Kapitel Platz.
+5. **Ein Scroll-Hinweis, der abtritt**, sobald man ihm gefolgt ist.
+6. **Hover-Micros**: Unterstriche wachsen von der Seite, von der gelesen wird.
+
+**Was die Loeschregel rausgeworfen hat:** alles, was weder Hierarchie erklaert,
+noch eine Handlung bestaetigt, Aufmerksamkeit fuehrt, Kontinuitaet haelt oder
+Handwerk zeigt.
+
+**Und v3.css' eigener Reveal war ausserhalb der Bandbreite:** `.rv` kam aus
+44 px, fast das Doppelte der Obergrenze; auf die Distanz liest sich das als
+Sprung statt als Ankommen. Jetzt 22 px.
+
+**Drei Fehler beim Bauen, alle durch Messen gefunden:**
+
+- **Ein versteckter Zustand ohne sichtbaren Gegenzustand ist keine Animation,
+  sondern eine Loeschung.** Ich schrieb `.stage.hs .stage-kicker::before {
+  transform: scaleX(0) }` ohne die `.go`-Regel dazu — die gelbe Linie kam nie
+  wieder.
+- **`entry` ist bei einer flachen Ueberschrift zu kurz.** Gemessen sprangen die
+  Woerter zwischen zwei Scroll-Proben 150 px auseinander von 62 px Versatz auf
+  0. Jetzt auf `cover` gemessen, wo ein Prozent eine brauchbare Scroll-Strecke
+  ist: 62 → 38/44/50/56 → 0/5/11/17 → 0.
+- **43 Wort-Timelines waren nicht umsonst.** 9 % der Frames ueber 20 ms, p99 von
+  17,1 auf 32,7. Mit abgeschalteten Woertern wieder 0 % — damit war bewiesen,
+  dass sie es waren. `will-change: transform` bringt es zurueck auf 0 % / 17,3.
+  (Das ist der Fall, fuer den es die Eigenschaft gibt: jeder Scroll kann den
+  Bereich neu betreten, die Animation ist dauerhaft lebendig. Auf den Woertern
+  des Helden steht es **nicht** — die laufen einmal.)
+
 ### Gemessen, nicht beurteilt
 
 | | |
 |---|---|
 | Kleintext auf der Buehne | Koordinaten 7,28:1 · Fakten-Labels 4,71:1 · Intro 13,27:1 · Platten-Tag 8,39:1 |
 | Ueberschrift | 16,41:1 weiss · 11,29:1 gelb |
-| Kompletter Scroll, 1440×900 | **0 Long Tasks**, p90 16,9 ms, **0 %** der Frames ueber 20 ms |
+| Kompletter Scroll, 1440×900 | **0 Long Tasks**, p90 16,9 ms, p99 17,1, **0 %** der Frames ueber 20 ms — mit allen 43 Wort-Timelines |
+| Reduced Motion | 0 Wort-Splits, kein Dither, kein Pac-Man: der FERTIGE Zustand, keine schnellere Animation |
 | A11y-Probe | 0 fehlende alt, 0 leere Links, 0 namenlose Buttons, 1 h1 |
 | Mobil 390×844 | kein horizontaler Ueberlauf; Menue und Theme-Schalter erreichbar |
 
