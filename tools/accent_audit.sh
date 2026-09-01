@@ -25,6 +25,14 @@ W=${1:-1440}
 H=${2:-900}
 S=accaudit
 BASE=http://127.0.0.1:8898
+# A dead server answers every question with an error page, and an error page
+# has no accent text, no mosaics and no console errors - so this whole tool
+# reports a clean pass on nothing at all. It has already done that once.
+if ! curl -fsS -o /dev/null "$BASE/index.html"; then
+  echo "the dev server is not answering on $BASE - start it with: python prodserve.py 8898 --dev" >&2
+  exit 2
+fi
+
 PAGES="index.html contact.html services/ai-tools.html services/web-apps.html services/websites.html services/software.html"
 
 PROBE=$(python -c "import base64,io,sys; print(base64.b64encode(io.open(sys.argv[1],encoding='utf-8').read().encode()).decode())" "$(dirname "$0")/accent_audit_probe.js")
@@ -57,7 +65,14 @@ print('$p [$th] accent nodes %d, pixel canvases %d (%d not settled), failing %d,
       % (d['accentTextNodes'], d['canvasesChecked'], d['canvasesSkipped'], d['failing'], len(real)))
 for f in real:
     print('   ', f['sel'], f['fg'], f['ratio'], '<', f['need'], '|', f['text'])
-print('REAL', len(real))
+# Nothing found is not a pass, it is an absent measurement. Every page on this
+# site has accent text AND at least one pixel headline; a run that sees neither
+# is looking at an error page, a page that never booted, or a probe that threw.
+if d['accentTextNodes'] == 0 and d['canvasesChecked'] == 0:
+    print('    NOTHING MEASURED on this page - the probe saw no accent text and no mosaic')
+    print('REAL 1')
+else:
+    print('REAL', len(real))
 ")
     printf '%s\n' "$line" | grep -v '^REAL'
     case "$(printf '%s' "$line" | tail -1)" in

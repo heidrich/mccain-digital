@@ -12,6 +12,14 @@ H=${2:-900}
 S=pxscale
 BASE=http://127.0.0.1:8898
 
+# A dead server answers every question with an error page, and an error page
+# has no accent text, no mosaics and no console errors - so this whole tool
+# reports a clean pass on nothing at all. It has already done that once.
+if ! curl -fsS -o /dev/null "$BASE/index.html"; then
+  echo "the dev server is not answering on $BASE - start it with: python prodserve.py 8898 --dev" >&2
+  exit 2
+fi
+
 # Pages that carry a pixel image. The work cards need the slider scrolled to.
 PAGES="index.html services/ai-tools.html services/web-apps.html services/websites.html services/software.html"
 

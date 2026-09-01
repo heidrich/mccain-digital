@@ -6,6 +6,14 @@ H=${2:-820}
 S=${3:-sweep}
 BASE=http://127.0.0.1:8898
 
+# A dead server answers every question with an error page, and an error page
+# has no accent text, no mosaics and no console errors - so this whole tool
+# reports a clean pass on nothing at all. It has already done that once.
+if ! curl -fsS -o /dev/null "$BASE/index.html"; then
+  echo "the dev server is not answering on $BASE - start it with: python prodserve.py 8898 --dev" >&2
+  exit 2
+fi
+
 PAGES="index.html 404.html contact.html services/ai-tools.html services/web-apps.html services/websites.html services/software.html legal/imprint.html legal/privacy.html legal/terms.html legal/withdrawal.html"
 
 # probe.js goes in base64-encoded: the shell mangles backslashes and quotes in

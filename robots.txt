@@ -3,38 +3,52 @@ Allow: /
 
 # Comparison pages for choosing between design options. They carry noindex
 # too; this is the belt to that pair of braces.
+#
+# It is repeated in every named group below on purpose: a crawler obeys ONLY
+# the most specific group that matches it (RFC 9309 2.2.1), so a rule that
+# lives only here does not apply to any agent that has a group of its own.
 Disallow: /preview/
 
 # AI crawlers are explicitly welcome — /llms.txt is a structured summary of the
 # whole site, written for them rather than scraped out of the markup.
 User-agent: GPTBot
 Allow: /
+Disallow: /preview/
 
 User-agent: OAI-SearchBot
 Allow: /
+Disallow: /preview/
 
 User-agent: ChatGPT-User
 Allow: /
+Disallow: /preview/
 
 User-agent: ClaudeBot
 Allow: /
+Disallow: /preview/
 
 User-agent: Claude-SearchBot
 Allow: /
+Disallow: /preview/
 
 User-agent: anthropic-ai
 Allow: /
+Disallow: /preview/
 
 User-agent: PerplexityBot
 Allow: /
+Disallow: /preview/
 
 User-agent: Google-Extended
 Allow: /
+Disallow: /preview/
 
 User-agent: Applebot-Extended
 Allow: /
+Disallow: /preview/
 
 User-agent: CCBot
 Allow: /
+Disallow: /preview/
 
 Sitemap: https://mccain-digital.com/sitemap.xml
