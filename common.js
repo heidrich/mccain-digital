@@ -608,5 +608,82 @@
     embedFont().then(bootPixels);
   }
 
+  /* ============================================================
+     THE TAB LOSES FOCUS — the mark scatters, the title says goodbye
+
+     From the original site, which had it before this rebuild did. Two
+     departures from its version:
+
+     - it re-typed the two glyphs onto a canvas to scatter them; this loads
+       the REAL favicon and throws ITS pixels, so changing the logo changes
+       its dissolve with it. A second drawing of a logo is a second logo.
+     - it built the image on the first blur. An SVG has to load first, so
+       this builds it once the page is idle and has it waiting.
+
+     Everything else is the original's: the ink tile stays, only the letters
+     come apart, and they scatter inside a 14px box on a 2px grid.
+     ============================================================ */
+  function bootFavicon() {
+    const link = d.querySelector('link[rel="icon"]');
+    if (!link || !link.href) return;
+
+    const home = link.href;
+    const homeTitle = d.title;
+    let away = null;
+
+    const build = () => new Promise((done) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const c = d.createElement("canvas");
+          c.width = c.height = 64;
+          const x = c.getContext("2d");
+          if (!x || !x.roundRect) return done(null);
+          x.drawImage(img, 0, 0, 64, 64);
+          const src = x.getImageData(0, 0, 64, 64).data;
+
+          // the tile is repainted flat, then the letters are thrown back on
+          x.clearRect(0, 0, 64, 64);
+          x.fillStyle = "#0f0e0c";
+          x.beginPath();
+          x.roundRect(0, 0, 64, 64, 15);
+          x.fill();
+
+          for (let py = 0; py < 64; py += 2) {
+            for (let px = 0; px < 64; px += 2) {
+              const i = (py * 64 + px) * 4;
+              const r = src[i], g = src[i + 1], b = src[i + 2];
+              // the ink tile stays put; only what is brighter than it moves
+              if (src[i + 3] > 40 && (r > 60 || g > 60)) {
+                x.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
+                x.fillRect(px + (Math.random() - .5) * 14,
+                           py + (Math.random() - .5) * 14, 2, 2);
+              }
+            }
+          }
+          done(c.toDataURL("image/png"));
+        } catch (e) {
+          done(null);            // a tainted or unsupported canvas: no effect
+        }
+      };
+      img.onerror = () => done(null);
+      img.src = home;
+    });
+
+    const idle = window.requestIdleCallback || ((f) => setTimeout(f, 800));
+    idle(() => { build().then((url) => { away = url; }); });
+
+    d.addEventListener("visibilitychange", () => {
+      if (d.hidden) {
+        if (away) link.href = away;
+        d.title = "we\u2019ll be here. \u2014 mccain digital";
+      } else {
+        link.href = home;
+        d.title = homeTitle;
+      }
+    });
+  }
+  bootFavicon();
+
   window.MCDUI = { faq, reduced, fine, ROOT };
 })();
