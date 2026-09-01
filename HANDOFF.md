@@ -44,7 +44,13 @@ Startseite gemacht, und danach kam eine Runde Owner-Korrekturen, die gegen
   „we'll be here. — mccain digital". Aus dem Original uebernommen, aber es
   wirft die Pixel des ECHTEN `favicon.svg` statt die Glyphen neu zu setzen.
 - **(05)**: dunkles Band, Akzentschrift im vollen Spektrum der Konsole.
-- **Fusszeile**: full width wie die Leiste, Wortmarke einzeilig via `15cqi`.
+- **Fusszeile**: full width wie die Leiste. Die riesige Wortmarke ist RAUS;
+  signiert wird unten links mit `.logo` — derselben Wortmarke wie oben in
+  der Leiste, gleiche Klasse, gleiche Regel. Einzige Ausnahme von der
+  Regel „das Logo-Gelb wird nie umgefaerbt": hier `--acc-text` statt
+  `--acc`, weil die Fusszeile im hellen Theme Papier ist und `#f5c518`
+  dort 1,45:1 misst. Auf Ink ist `--acc-text` identisch mit `--acc`, die
+  Leiste bleibt also unberuehrt.
 - **Keine Fuehrungsschienen** auf der Startseite; die Service-Seiten behalten
   ihre.
 
