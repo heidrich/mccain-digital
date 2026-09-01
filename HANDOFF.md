@@ -1,19 +1,78 @@
 # Uebergabe — Stand 2026-09-01
 
-**Alles committet, gepusht und auf Vercel live verifiziert.** Arbeitsbaum
-sauber.
+**Alles auf `main`, gepusht, auf Vercel live verifiziert. Arbeitsbaum sauber.**
+Der Branch `refresh-system` ist gemerged und geloescht.
+
+## Fuer eine frische Session: START HIER
+
+Der grosse Refresh ist **entschieden und teilweise uebernommen**. Der Owner:
+„die neue version WESENTLICH besser zu lesen, auch die farben finde ich
+besser" und „das wird immer besser".
+
+**Was fertig ist**
+- Die **Systemebene** liegt in `v3.css` und gilt fuer alle elf Seiten:
+  neutrale Palette, Typo, 4px-Buttons, Ink-Leiste mit choreografierter
+  Transition, `.rv` auf 22px, plus drei geteilte Bauteile (Buehnen-Header,
+  Wort-Reveal, Pixel-Marke). Details im naechsten Abschnitt.
+- **`services/ai-tools.html` ist komplett umgestellt** — die Referenz, gegen
+  die alles Weitere gebaut wird.
+- **`preview/refresh.html`** ist der genehmigte Gesamt-Entwurf der Startseite
+  (ganze Seite, echte Konsole/Menue/FAQ, komplette Motion-Schicht).
+
+**Was als naechstes dran ist — in dieser Reihenfolge**
+
+1. **Die drei uebrigen Service-Seiten** (`web-apps`, `websites`, `software`).
+   Pro Seite derselbe kleine, gleichfoermige Diff — genau wie bei `ai-tools`:
+   - `<span class="ph" data-pixel>X</span>` → `X` (der Wrapper hostete nur das
+     Canvas). Danach muss `data-pixel` auf der Seite **0** mal vorkommen.
+   - `<h2 class="sec-h">` → `<h2 class="sec-h" data-words>`.
+   - Header: `class="hero hero--svc wrap"` → `class="hero hero--svc
+     hero--stage guides" data-field`, die vier `<span class="gmark gmark--tl">`
+     … davor, und `wrap` wandert an `.hero-inner`.
+   - `.hero-side` von `<b>…</b>Text<br>` auf
+     `<span><b>…</b><i>Text</i></span>` pro Zeile.
+   - Optional der `.stage-meta`-Streifen an der Basis.
+   - Die Wortmarke bekommt das `<svg class="mark">` (7×7, siehe `ai-tools`).
+2. **`index.html`** nach demselben Muster — der Entwurf dafuer steht in
+   `preview/refresh.html`, inklusive Buehne, Fuss und Motion-Schicht. Wenn die
+   Startseite umgestellt ist, haben `PixelFX.headline` und `PixelFX.voidReveal`
+   **keinen Aufrufer mehr** und fliegen aus der Engine.
+3. **Inhalte** — drei freigegebene Kundenzitate, zwei Work-Cases, echte
+   Portraits. Groesste Luecke vor dem Livegang, und nichts davon darf erfunden
+   werden.
+4. **`ANTHROPIC_API_KEY`** setzt der Owner selbst in Vercel Production, plus
+   Spend-Limit in der Anthropic Console; danach `AI_MODE` in `v3.js` auf
+   `"live"`. Ich sehe den Schluessel nie.
+5. **Beim Livegang:** `noindex` raus, `preview/` aus dem Deployment.
+
+**Offene Design-Entscheidungen des Owners**
+- Ein **Condensed-Schnitt** fuer die Plakatzeilen? Schibsted 800 eng traegt;
+  ein zweiter Schnitt gaebe einen Gang mehr und kostet eine Font-Datei.
+- Das **Kommandomenue** traegt die Pixel-Marke noch nicht — es injiziert seine
+  eigene Wortmarke aus `menu.js`.
+- **Assistent auf den Unterseiten?** Heute nur die Startseite. Entscheidung,
+  kein Versehen.
+
+**Vor jeder Aenderung, ohne Ausnahme**
+```
+python prodserve.py 8898 --dev     # die Waechter brauchen den Server
+bash tools/sweep.sh 1440 900       # und nochmal mit 390 844
+bash tools/accent_audit.sh
+```
+
+**Die letzten zehn Commits**
 
 ```
+f9b0b10  docs: the system is adopted, and what the sub-page cost to finish
+ae87172  feat(system): the refresh becomes the real system, and one sub-page is finished
+ab05b06  feat(refresh): motion, measured against the bands instead of my eye
+7e73fde  feat(refresh): the whole page, on the real stylesheet and the real scripts
+6e6435d  feat(refresh): the pixel engine leaves the type and signs the studio instead
+6dfb989  docs: bring the handover commit list up to date
 d73393b  feat(bg): a dither field and container guides, from MengTo/Skills
 547b456  docs: the border jump, its cause, and the two defects the review found
 f75acf8  fix(tools): a guard that finds nothing must say so
 a2035d0  fix(rim): state the period instead of inferring it, so the border stops jumping
-afc013f  feat(rim): the travelling border moves from the h1 to the console
-7e9b70d  docs: the light-mode pixel type was a bug, not a dead end
-a06f8e3  fix(theme): apply the saved theme before the stylesheet, and audit the canvases
-4d58954  feat(pixel): a drifting field of cells for the bands, and four to judge
-e9f39a3  feat(ai): the console follows you down the page, with a travelling rim
-d8948b9  fix(pixel): tile the wave and lean its axis
 ```
 
 ## DAS SYSTEM IST ÜBERNOMMEN — und eine Unterseite ist fertig
@@ -361,27 +420,20 @@ Kosten: auf 01 sitzend mit laufendem Rand und Glow Median 16,7 ms, 0 % der
 Frames ueber 20 ms, keine Long Tasks — gegen 16,7 ms und 0,6–1,1 % auf dem
 Stand davor ganz ohne Rand.
 
-## Offene Punkte (in deiner Reihenfolge)
+## Offene Punkte
 
-1. **Hintergrund aussuchen.** Runde 1 (`preview/life-lab.html`) ist
-   durchgefallen — „die bgs gefallen mir alle nicht". Runde 2 steht in
-   `preview/bg-lab.html`: **Dither-Wolke** (grob/fein) und **Guides** (ohne
-   jede Bewegung), beide aus MengTo/Skills, eigener Abschnitt unten. Sobald
-   eine Richtung steht, fliegen die anderen aus der Engine — drei ungenutzte
-   Effekte bleiben nicht liegen.
-2. **Assistent auf den Unterseiten?** Heute nur die Startseite: `v3.js` laedt
-   nirgends sonst, und die Konsolen-Markup steht in `index.html`. Entscheidung,
-   kein Versehen.
-3. **`ANTHROPIC_API_KEY`** in Vercel Production setzen (Owner) plus Spend-Limit
-   in der Anthropic Console, dann `AI_MODE` in `v3.js` auf `"live"`. Ich sehe
-   den Schluessel nie.
-4. **Pixelschrift im hellen Modus — bitte NOCHMAL ansehen.** Was du gesehen
-   hast, war ein Fehler und ist behoben: die erste Ueberschrift jeder Seite
-   rasterte waehrend der Theme-Transition und behielt das Weiss des dunklen
-   Themes (1,03:1 auf Papier). Jetzt 4,21:1. Eigener Abschnitt weiter unten.
-5. **Inhalte:** drei Kundenzitate, zwei Work-Cases, echte Portraits. Groesste
-   Luecke vor dem Livegang.
-6. **`noindex` raus** und `preview/` wieder aus dem Deployment — beim Livegang.
+**Verschoben nach oben** — die aktuelle, gueltige Liste steht im Abschnitt
+„Fuer eine frische Session: START HIER" ganz am Anfang dieser Datei. Was hier
+frueher stand, ist entweder erledigt oder dort neu formuliert:
+
+- Hintergrund aussuchen → **erledigt**: die Dither-Wolke ist gewaehlt und laeuft
+  im Header. `field()` und `.guides` blieben in der Engine, weil die Guides als
+  Rails auf der Buehne jetzt DOCH benutzt werden; `PixelFX.field` hat keinen
+  Aufrufer mehr und kann beim naechsten Aufraeumen raus.
+- Pixelschrift im hellen Modus → **gegenstandslos**: die Pixel-Engine ist aus
+  den Ueberschriften raus. Der damalige Fehler (1,03:1 durch die
+  Theme-Transition) ist trotzdem behoben, und der Theme-Bootstrap im `<head>`
+  bleibt noetig, solange irgendeine Seite noch rastert.
 
 ## Werkzeuge
 
