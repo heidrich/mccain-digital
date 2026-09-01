@@ -4558,7 +4558,10 @@ html[data-theme="light"] .t-moon {
     }
 
 .stage-intro {
-      max-width: 34ch;
+      /* 34ch was about 40 characters a line - three cramped lines in a column
+         961px wide. 44ch is ~52, inside the comfortable measure, and the
+         paragraph settles onto two. */
+      max-width: 44ch;
       color: var(--muted);
       font-size: var(--t-small);
       line-height: 1.7;
@@ -4577,7 +4580,16 @@ html[data-theme="light"] .t-moon {
        nothing between the rail and the headline. */
 .stage-media {
       display: grid;
-      gap: 1.1rem
+      gap: 1.1rem;
+      /* THE RULES HAVE TO END NEAR THEIR OWN TEXT. The lane is one half of a
+         full-bleed grid, so on a 1879px screen it was 712px wide carrying
+         265px of text - every one of the three rules trailed 450 to 500px of
+         nothing across the picture, which is the first thing the eye finds up
+         there. Capped, the trail is 90-140px and reads as a deliberate rule
+         rather than a line pointing at an empty half. It stays pinned to the
+         right gutter, so nothing else in the composition moves. */
+      width: min(100%, 22rem);
+      justify-self: end
     }
 
 /* the numbers are proof, not decoration, so each gets a rule
