@@ -1,84 +1,88 @@
-# Uebergabe — Stand 2026-09-01 (spaeter Abend)
+# Uebergabe — Stand 1. September 2026, Abschluss
 
-**Alles auf `main`, NICHTS gepusht.** Die genaue Zahl steht in
-`git status -sb` — eine Zahl in dieser Datei ist ab dem naechsten
-Commit falsch, und das ist sie hier schon zweimal gewesen.
-Arbeitsbaum sauber. Vercel zeigt noch den Stand von heute Mittag.
+**Alles auf `main`, NICHTS gepusht.** Die genaue Zahl steht in `git status -sb`.
+Arbeitsbaum sauber. Vercel zeigt noch den Stand von gestern Mittag.
+
+---
+
+## ZUERST LESEN: der Befund
+
+Am Ende dieser Session ist eine vollstaendige, **gemessene** Bestandsaufnahme
+entstanden — SEO, Technik, Inhalt, mit Reihenfolge. Sie liegt als Artifact:
+
+**https://claude.ai/code/artifact/4e4374bf-1b38-4c69-8bf0-a6328f77743a**
+
+Eine frische Session liest sie mit dem Artifact-Werkzeug (`action: "read"`,
+diese URL). **Vor jeder weiteren Arbeit an der Seite dort reinschauen** — der
+Rest dieser Datei erklaert den Code, der Befund erklaert, was zu tun ist.
+
+Die drei Kernbefunde in einem Satz:
+
+1. **Beide Gruender-Portraits sind byteweise dieselbe Datei**
+   (`md5 25edd2c1…` fuer christian UND kathi). Zwei benannte Menschen, ein
+   Stockfoto. Darf so nicht live.
+2. **Der Hero zeigt Muenchner Koordinaten** (`48.14° N · 11.58° E`), waehrend
+   Impressum, JSON-LD und llms.txt Oberostendorf sagen — 80 km auseinander.
+   **Das ist eine Owner-Entscheidung, kein Bug:** entweder Koordinaten und
+   Marquee auf Oberostendorf ziehen, oder Muenchen offen als Einzugsgebiet
+   formulieren. NICHT einfach selbst entscheiden.
+3. **Es gibt kein deutsches Wort auf der Seite** (`lang="en"` 11/11, 0×
+   hreflang). Groesster organischer Hebel, teuerster Punkt.
+
+Was heute daraus schon erledigt ist: der zweite Faktenfehler. „The company is
+eight years old" stand an **vier** Stellen — `data.js` (die sichtbare
+FAQ-Antwort), derselbe Satz gespiegelt im FAQPage-JSON-LD von `index.html`,
+der Studio-Absatz, und eine Zeile auf `services/software.html`. Alle vier auf
+„has been going since 2016" gezogen, das altert nicht mehr. JSON-LD gegen die
+sichtbare Antwort gegengeprueft, beide identisch.
+
+---
 
 ## Fuer eine frische Session: START HIER
 
 Der Refresh ist **uebernommen und gemerged**. `index.html` IST jetzt der
-Entwurf — nicht mehr `preview/refresh.html`. Wer den Dev-Server unter
-`http://127.0.0.1:8898/` aufmacht, sieht die neue Startseite.
+Entwurf — nicht mehr `preview/refresh.html`. Dev-Server:
 
-**Was heute passiert ist, in einem Satz:** die drei uebrigen Service-Seiten
-sind auf das System umgestellt, danach wurde der Entwurf zur echten
-Startseite gemacht, und danach kam eine Runde Owner-Korrekturen, die gegen
-**das live laufende Original auf mccain-digital.com** gelesen wurden.
+```
+python prodserve.py 8898 --dev
+```
 
 ### Der Stand der Startseite
 
-- **Hero**: full width, zweizeilige Plakatzeile. Der Hintergrund ist ein
+- **Hero**: full width, zweizeilige Plakatzeile. Hintergrund ist ein
   **Pixelmosaik** von `img/circuit-macro-1200.webp`, gefahren von
-  `PixelFX.image` — also demselben Aufruf wie die Work-Karten. Das schwarze
-  Loch folgt der Maus und zerstoert echte Partikel. **Raster 5px** (Owner:
-  „die pixel halbieren"), also 51.510 Partikel — und dafuer **ohne Schwarm**
-  beim Erscheinen (`swarm: false`): der Schwarm ist der einzige Teil des
-  Effekts, dessen Kosten an der GESAMTZAHL haengen, alles andere haengt am
-  Radius des Lochs. Gemessen: Ruhe und Loch 17ms (60fps), Seitenaufbau
-  3 Long Tasks / 466ms statt 5 / 693ms mit dem groben Raster. Die Stage beginnt bei
-  y=0 und endet bei `100svh`; ihr Inhalt haelt `--nav` Abstand zur Leiste.
-- **Kopfleiste**: oben transparent mit weisser Schrift, ab 8px Scroll faehrt
+  `PixelFX.image` — demselben Aufruf wie die Work-Karten. Das schwarze Loch
+  folgt der Maus und zerstoert echte Partikel. **Raster 5px** (Owner: „die
+  pixel halbieren"), also 51.510 Partikel — und dafuer **ohne Schwarm** beim
+  Erscheinen (`swarm: false`). Der Schwarm ist der einzige Teil des Effekts,
+  dessen Kosten an der GESAMTZAHL haengen; alles andere haengt am Radius des
+  Lochs. Gemessen: Ruhe und Loch 17 ms (60 fps), Seitenaufbau 3 Long Tasks /
+  466 ms statt 5 / 693 ms mit dem groben Raster.
+  Die Stage beginnt bei y=0 und endet bei `100svh`; ihr Inhalt haelt `--nav`
+  Abstand zur Leiste.
+- **Kopfleiste**: oben transparent mit weisser Schrift, ab 8 px Scroll faehrt
   die Platte ein. Keine Haarlinie — Pac-Man ist die Trennung. Alle
-  Bedienelemente 38px, nichts umbricht. Der CTA traegt den Verlauf statt
-  Gelb. Die **Status-Pille** traegt ihn als wandernde Kante — gebaut wie der
-  Rahmen der Konsole (geclipptes Verlaufsblatt + deckende Innenflaeche,
-  1.5px), **nicht** mit `mask-composite`, das Kurven treppt. Beim Scrollen
-  raeumt die Pille ihren Platz fuer die Kapitel-Anzeige; unter 480px verlaesst
-  der CTA die Leiste.
-- **Logo**: die Wortmarke des Originals und nur sie — **kein Icon**. Zwei
-  Woerter, `mccain` in 800/Papier, `digital` in 600/Logo-Gelb, Grundlinie,
-  .3em Wortabstand. Das Original sagt es in seinem eigenen Stylesheet:
+  Bedienelemente 38 px, nichts umbricht. Die **Status-Pille** traegt den
+  Verlauf als wandernde Kante — gebaut wie der Rahmen der Konsole
+  (geclipptes Verlaufsblatt + deckende Innenflaeche, 1.5 px), **nicht** mit
+  `mask-composite`, das Kurven treppt. Beim Scrollen raeumt die Pille ihren
+  Platz fuer die Kapitel-Anzeige; unter 480 px verlaesst der CTA die Leiste.
+- **Logo**: die Wortmarke des Originals und nur sie — **kein Icon**.
+  `mccain` 800/Papier, `digital` 600/Logo-Gelb, Grundlinie, .3em Wortabstand.
+  Das Original sagt es in seinem eigenen Stylesheet:
   `/* clean typographic wordmark - no icon */`.
 - **Favicon**: zerfaellt bei Tab-Wechsel in lose Pixel, Titel wird
-  „we'll be here. — mccain digital". Aus dem Original uebernommen, aber es
-  wirft die Pixel des ECHTEN `favicon.svg` statt die Glyphen neu zu setzen.
+  „we'll be here. — mccain digital". Wirft die Pixel des ECHTEN
+  `favicon.svg`, statt die Glyphen neu zu setzen.
 - **(05)**: dunkles Band, Akzentschrift im vollen Spektrum der Konsole.
 - **Fusszeile**: full width wie die Leiste. Die riesige Wortmarke ist RAUS;
-  signiert wird unten links mit `.logo` — derselben Wortmarke wie oben in
-  der Leiste, gleiche Klasse, gleiche Regel. Einzige Ausnahme von der
-  Regel „das Logo-Gelb wird nie umgefaerbt": hier `--acc-text` statt
-  `--acc`, weil die Fusszeile im hellen Theme Papier ist und `#f5c518`
-  dort 1,45:1 misst. Auf Ink ist `--acc-text` identisch mit `--acc`, die
-  Leiste bleibt also unberuehrt.
+  signiert wird unten links mit `.logo` — derselben Wortmarke wie oben,
+  gleiche Klasse, gleiche Regel. Einzige Ausnahme von der Regel „das
+  Logo-Gelb wird nie umgefaerbt": hier `--acc-text` statt `--acc`, weil die
+  Fusszeile im hellen Theme Papier ist und `#f5c518` dort 1,45:1 misst. Auf
+  Ink ist `--acc-text` identisch mit `--acc`, die Leiste bleibt unberuehrt.
 - **Keine Fuehrungsschienen** auf der Startseite; die Service-Seiten behalten
   ihre.
-
-### Was als naechstes dran ist
-
-1. **`preview/refresh.html` aufraeumen.** Es hat sein altes `<style>` noch
-   inline und ist damit eine Dublette zu `v3.css` — es rendert inzwischen
-   ANDERS als die echte Startseite und wird nur noch verwirren. Entweder auf
-   `v3.css` umstellen oder loeschen. **Owner-Entscheidung, noch offen.**
-2. **Pushen.** `git status -sb` sagt, wie viele.
-3. **Inhalte** — drei freigegebene Kundenzitate, zwei Work-Cases, echte
-   Portraits. Groesste Luecke vor dem Livegang, nichts davon darf erfunden
-   werden.
-4. **`ANTHROPIC_API_KEY`** setzt der Owner selbst in Vercel Production, plus
-   Spend-Limit; danach `AI_MODE` in `v3.js` auf `"live"`.
-5. **Beim Livegang:** `noindex` raus, `preview/` aus dem Deployment. Der
-   Owner zieht gerade **mccain-digital.com auf Vercel** um — dort laeuft
-   aktuell noch die alte Einzeldatei-Version, und die ist die Referenz fuer
-   „das Original".
-
-### CHANGELOG.md reist nicht mit
-
-`CHANGELOG.md` steht in `.gitignore`, unter der Ueberschrift „internal — kept
-on disk for development, never part of the public site", seit dem ersten
-oeffentlichen Release. Er wird gepflegt und ist aktuell, aber ein `git push`
-nimmt ihn nicht mit. Wer das aendern will, aendert eine Zeile in `.gitignore`
-— und macht damit interne Notizen in einem oeffentlichen Repo sichtbar. Das
-ist eine Owner-Entscheidung, keine Aufraeumarbeit.
 
 ### Die Typo-Skala, und was „dynamisch" hier heisst
 
@@ -87,10 +91,8 @@ Alle 121 `font-size` in `v3.css` sind relativ — 81 Tokens, 26 fluide
 `em`: `em` multipliziert sich, `rem` nicht. Einziger fester Wert im Projekt:
 `pacman.js:214`, die Sprechblase des Easter Eggs auf dem Canvas.
 
-Was das Fenster steuert (Stand nach der Verkleinerung):
-
 ```
-   vw x vh    display   h2
+   vw x vh    display   h2      (nach der Verkleinerung vom 1.9.)
  1920x1080        128   58
  1920x 614         80   58     <- die 13vh-Decke greift
  1512x 850        101   58
@@ -98,16 +100,43 @@ Was das Fenster steuert (Stand nach der Verkleinerung):
   390x 844         42   30
 ```
 
-Die Decke `8rem` ist bei 1910px erreicht — breiter wird die Zeile nie mehr.
+Die Decke `8rem` ist bei 1910 px erreicht — breiter wird die Zeile nie mehr.
 Service-Seiten, Kontakt und 404 haben ihr **eigenes** Token
-(`.hero--svc .hero-h`, 99px bei 1920) und sind absichtlich nicht mitgezogen.
+(`.hero--svc .hero-h`, 99 px bei 1920) und sind absichtlich nicht mitgezogen.
 
 **Was NICHT mitwaechst:** `vw`-Groessen ignorieren sowohl die
 Browser-Schriftgroesse als auch den Zoom — ein `vw`-Wert ist in Geraetepixeln
-konstant. Fliesstext waechst um +25% bei 20px-Root und verdoppelt sich bei
-200% Zoom, die Ueberschriften nicht. Wenn das mal gewuenscht ist, muss die
+konstant. Fliesstext waechst um +25 % bei 20px-Root und verdoppelt sich bei
+200 % Zoom, die Ueberschriften nicht. Wenn das gewuenscht wird, muss die
 fluide Mitte von reinem `vw` auf `rem + vw` — das aendert dann aber die
 Groessen bei allen anderen Breiten mit, ist also eine Design-Entscheidung.
+
+### Was als naechstes dran ist
+
+Reihenfolge steht im Befund (Artifact-Link oben). Kurzfassung:
+
+1. **Ortskonflikt** — braucht deine Entscheidung, siehe oben.
+2. **Inhalte** — Portraits, zwei Kundenfaelle, drei freigegebene Zitate.
+   Der eigentliche Engpass, nichts davon darf erfunden werden.
+3. **Formular verdrahten, `noindex` raus, `AI_MODE` auf `"live"`.**
+   `ANTHROPIC_API_KEY` setzt der Owner selbst in Vercel Production, plus
+   Spend-Limit. Formular danach mit einer echten Einsendung gegenpruefen,
+   nicht nur optisch.
+4. **Prozess-Abschnitt und Preisrahmen** — das Loch im Kaufpfad.
+5. **Interne Verlinkung, `Person`-Schema, 404-Metadaten** — gebuendelt.
+6. **Deutsche Sprachversion** — groesster Hebel, nicht vor 1–4 anfangen.
+7. **`preview/refresh.html`** ist eine Dublette mit veraltetem Inline-CSS und
+   rendert inzwischen ANDERS als die echte Startseite. Umstellen auf
+   `v3.css` oder loeschen. **Owner-Entscheidung, offen.**
+8. **Pushen.**
+
+### CHANGELOG.md reist nicht mit
+
+`CHANGELOG.md` steht in `.gitignore`, unter „internal — kept on disk for
+development, never part of the public site", seit dem ersten oeffentlichen
+Release. Er wird gepflegt und ist aktuell, aber ein `git push` nimmt ihn nicht
+mit. Wer das aendern will, aendert eine Zeile in `.gitignore` — und macht
+damit interne Notizen in einem oeffentlichen Repo sichtbar. Owner-Entscheidung.
 
 ### Vor jeder Aenderung, ohne Ausnahme
 
@@ -115,71 +144,77 @@ Groessen bei allen anderen Breiten mit, ist also eine Design-Entscheidung.
 python prodserve.py 8898 --dev     # die Waechter brauchen den Server
 bash tools/sweep.sh 1090 614       # und 390 844, 1512 850, 1920 1080
 bash tools/accent_audit.sh
+bash tools/pixel_scale.sh 1512 850
 ```
 
-**1090x614 gehoert ab jetzt in jede Messreihe.** Das ist ein 1920x1080-Schirm
-bei 175% Windows-Skalierung — ein echtes Geraet, auf dem der Owner liest, und
-das Fenster, auf dem der Hero heute zerbrochen ist.
+**1090x614 gehoert in jede Messreihe.** Das ist ein 1920x1080-Schirm bei
+175 % Windows-Skalierung — ein echtes Geraet, auf dem der Owner liest, und
+das Fenster, auf dem der Hero am 1.9. zerbrochen ist.
 
 `tools/stage_probe.js` misst den Kontrast jedes Textblocks im Hero gegen die
-GELIEFERTEN Pixel. Es liest jetzt die Ebene, die tatsaechlich sichtbar ist
-(Mosaik oder Foto), bildet ueber das Rechteck DIESER Ebene ab und rechnet den
+GELIEFERTEN Pixel. Es liest die Ebene, die tatsaechlich sichtbar ist (Mosaik
+oder Foto), bildet ueber das Rechteck DIESER Ebene ab und rechnet den
 CSS-Filter heraus, durch den man sie sieht. Per `agent-browser eval -b` mit
 base64 einspeisen, so wie `sweep.sh` es mit `probe.js` macht.
 
-### Was diese Runde gekostet hat, und was daraus zu lernen ist
+**Kontrast ehrlich messen:** der Probe zieht die Scrims NICHT ab, ist also
+pessimistisch. Fuer eine belastbare Zahl den Screenshot-Weg gehen — Glyphen
+per `color: transparent` verstecken, dazu `.stage-kicker::before` und
+`.cue i` (das sind Dekorationen, keine Grundflaeche), dann den hellsten Pixel
+in jeder Textbox messen. Sonst misst man den gelben Strich statt des Grundes.
+
+### Was diese Session gekostet hat, und was daraus zu lernen ist
 
 - **Ein Waechter, der auf einen umbenannten Selektor zeigt, meldet nichts.**
   `stage_probe.js` suchte `.dither-l` — ein Canvas, das der Hero seit dem
   Mosaik nicht mehr hat — und antwortete `no field canvas` statt einer Zahl.
-  Dahinter lag ein echter Fehler: `--muted` auf der Stage mass 4,46:1 gegen
-  den hellsten ausgelieferten Pixel unter dem Intro. Dieselbe Form ein
-  zweites Mal am selben Tag: `.rail .nav-where` in `v3.css`, nach dem Merger
-  auf nichts mehr gerichtet. **Nach jedem Umbenennen nach dem ALTEN Namen
-  grepen.**
+  Dahinter lag ein echter Fehler: `--muted` auf der Stage mass 4,46:1.
+  Dieselbe Form zweimal mehr am selben Tag: `.rail .nav-where` in `v3.css`
+  (nach dem Merger auf nichts gerichtet) und `.shot` in `pixel_scale.sh`, das
+  den Hero (`​.stage-shot`) nie geprueft hat. **Nach jedem Umbenennen nach
+  dem ALTEN Namen grepen.**
 - **Ein negatives Margin gegen eine `fixed` Leiste kompensiert nichts.**
   `.stage` hatte `margin-top: -var(--nav)` UND `padding-top: var(--nav)`.
-  Die Leiste nimmt im Fluss keinen Platz, also hoben sich beide auf: der Text
-  sass hinter der Leiste, die Box endete 68px ueber der Falzkante. Auf einem
-  hohen Fenster hat `align-content: center` das verdeckt. **Layout auch auf
-  dem KURZEN Viewport messen.**
-- **`mask-composite` treppt Kurven.** Es verrechnet zwei einzeln geglaettete
-  Masken per XOR. Der Nachbar im selben Stylesheet — der Rahmen der Konsole,
-  den der Owner mag — loest dasselbe Problem ohne Maske. Zum zweiten Mal in
-  zwei Tagen war die Antwort: **die Mechanik von nebenan nehmen, nicht eine
-  zweite bauen, die so aussieht.**
+  Beide hoben sich auf: der Text sass hinter der Leiste, die Box endete 68 px
+  ueber der Falzkante. Auf einem hohen Fenster hat `align-content: center`
+  das verdeckt. **Layout auch auf dem KURZEN Viewport messen.**
+- **Eine Regel, die gegen einen spaeter verschobenen Wert geschrieben wurde,
+  dreht ihre Wirkung um.** `@media (max-height:820px)` verschaerfte einst das
+  alte `--t-display`; gegen das neue war sie in jedem Term groesser und setzte
+  die Ueberschrift bei 1090x614 auf 105 px zurueck, waehrend das Root-Token
+  73 wollte. Der Kommentar blieb dabei richtig klingen.
+- **`mask-composite` treppt Kurven.** Der Nachbar im selben Stylesheet — der
+  Rahmen der Konsole — loest dasselbe Problem ohne Maske. Zum wiederholten
+  Mal war die Antwort: **die Mechanik von nebenan nehmen, nicht eine zweite
+  bauen, die so aussieht.**
+- **Der Augenschein hat einmal danebengelegen und die Messung hat es
+  gerettet.** Die Schlagzeile sah optisch eingerueckt aus (3–6 px im
+  Screenshot). `TextMetrics` sagt: „We" hat 0,009 em Vorbreite, also EINEN
+  Pixel — der Rest war Kantenglaettung. Haette ich nach Augenschein
+  korrigiert, waere die erste Zeile 3 px in den Gutter gerutscht.
 - **Das Original ist die Quelle, nicht mein Gedaechtnis.** Die Logo-Frage war
   drei Anlaeufe lang offen und stand die ganze Zeit als Kommentar im
-  Stylesheet der laufenden Seite.
+  Stylesheet der laufenden Seite auf mccain-digital.com.
 
-### Die fuenfzehn Commits, die lokal liegen
+### Gemessen am Ende dieser Session
 
-```
-c58f21b  fix(css): wordmark type, pill edge, footer width, hero on a short screen
-9805d8d  fix(logo): the wordmark has no icon, and never had one
-b463ff4  feat(runtime): the favicon dissolves when the tab goes away
-f5428d1  fix(tools): the hero's contrast guard was reading a canvas that is gone
-b80b57f  docs: the handover, written for the session after the merge
-988ae66  feat(nav): the bar goes transparent over a stage, one height
-57d9d6e  perf(hero): the mosaic costs what a card costs, bar drops hairline
-27c82c1  fix(home): the real logo, the spectrum back, no rails, one-line mark
-91e16f2  feat(home): the merger — index.html IS the refresh now
-439997e  feat(studio): (05) takes the console's gradient as its text colour
-2fb2b00  fix(field): the protection map reads cell CENTRES
-c461b51  fix(stage): the hole is the images' hole
-41c0efe  feat(stage): the void follows the hand
-65b53a3  feat(system): the other three service pages join the system
-```
-
-### Gemessen am Ende dieser Runde
-
-- Jeder Textkasten im Hero 4,65–13,70:1 gegen den hellsten ausgelieferten
-  Pixel unter ihm, bei 1090x614 und 1512x850.
+- Jeder Textkasten im Hero **4,74–13,39:1** gegen den hellsten ausgelieferten
+  Pixel unter ihm — bei 1879x864, 1512x850 und 1090x614, mit Mosaik UND mit
+  Foto.
 - Akzentschrift besteht auf allen 11 Seiten in beiden Themes (die Wortmarke
   ist per Entscheidung ausgenommen, WCAG 1.4.3).
 - 11 Seiten: keine Page-Errors, keine Konsolenfehler, kein horizontaler
-  Ueberlauf bei 390, 1090, 1512, 1920.
-- Der Hero fuellt bei 1090x614 und 1512x850 exakt einen Bildschirm.
+  Ueberlauf bei 390, 1090, 1512, 1879, 1920.
+- Der Hero fuellt exakt einen Bildschirm, bei jeder geprueften Groesse.
+- Jedes Mosaik sitzt auf seinem Foto bei `bestScale 1.00` — inklusive Hero,
+  der bis heute ausserhalb dieses Waechters lag.
+- Core Web Vitals gegen den gzip-Server: **CLS 0**, TTFB 47 ms, FCP 1204 ms,
+  LCP 1936 ms (LCP-Element ist die `h1`, haengt also am Webfont).
+  Service-Seite: FCP 304 ms, LCP 1488 ms. **Der FCP-Unterschied ist ein
+  Verdacht, keine Diagnose — erst messen, was die Startseite zusaetzlich
+  blockiert, bevor irgendetwas optimiert wird.**
+
+---
 
 ## DAS SYSTEM IST ÜBERNOMMEN — und eine Unterseite ist fertig
 
