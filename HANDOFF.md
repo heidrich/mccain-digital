@@ -1,6 +1,6 @@
 # Uebergabe — Stand 2026-09-01 (spaeter Abend)
 
-**Alles auf `main`, aber NICHT gepusht: 14 Commits liegen lokal.**
+**Alles auf `main`, aber NICHT gepusht: 15 Commits liegen lokal.**
 Arbeitsbaum sauber. Vercel zeigt noch den Stand von heute Mittag.
 
 ## Fuer eine frische Session: START HIER
@@ -47,7 +47,7 @@ Startseite gemacht, und danach kam eine Runde Owner-Korrekturen, die gegen
    inline und ist damit eine Dublette zu `v3.css` — es rendert inzwischen
    ANDERS als die echte Startseite und wird nur noch verwirren. Entweder auf
    `v3.css` umstellen oder loeschen. **Owner-Entscheidung, noch offen.**
-2. **Pushen.** 14 Commits liegen lokal.
+2. **Pushen.** 15 Commits liegen lokal.
 3. **Inhalte** — drei freigegebene Kundenzitate, zwei Work-Cases, echte
    Portraits. Groesste Luecke vor dem Livegang, nichts davon darf erfunden
    werden.
@@ -110,7 +110,7 @@ base64 einspeisen, so wie `sweep.sh` es mit `probe.js` macht.
   drei Anlaeufe lang offen und stand die ganze Zeit als Kommentar im
   Stylesheet der laufenden Seite.
 
-### Die vierzehn Commits von heute
+### Die fuenfzehn Commits, die lokal liegen
 
 ```
 c58f21b  fix(css): wordmark type, pill edge, footer width, hero on a short screen
