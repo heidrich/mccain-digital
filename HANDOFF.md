@@ -74,6 +74,35 @@ nimmt ihn nicht mit. Wer das aendern will, aendert eine Zeile in `.gitignore`
 — und macht damit interne Notizen in einem oeffentlichen Repo sichtbar. Das
 ist eine Owner-Entscheidung, keine Aufraeumarbeit.
 
+### Die Typo-Skala, und was „dynamisch" hier heisst
+
+Alle 121 `font-size` in `v3.css` sind relativ — 81 Tokens, 26 fluide
+`clamp()`, 10 `rem`, 3 `em`, 1 `cqi`, **null px**. Einheit ist `rem`, nicht
+`em`: `em` multipliziert sich, `rem` nicht. Einziger fester Wert im Projekt:
+`pacman.js:214`, die Sprechblase des Easter Eggs auf dem Canvas.
+
+Was das Fenster steuert (Stand nach der Verkleinerung):
+
+```
+   vw x vh    display   h2
+ 1920x1080        128   58
+ 1920x 614         80   58     <- die 13vh-Decke greift
+ 1512x 850        101   58
+ 1090x 614         73   45
+  390x 844         42   30
+```
+
+Die Decke `8rem` ist bei 1910px erreicht — breiter wird die Zeile nie mehr.
+Service-Seiten, Kontakt und 404 haben ihr **eigenes** Token
+(`.hero--svc .hero-h`, 99px bei 1920) und sind absichtlich nicht mitgezogen.
+
+**Was NICHT mitwaechst:** `vw`-Groessen ignorieren sowohl die
+Browser-Schriftgroesse als auch den Zoom — ein `vw`-Wert ist in Geraetepixeln
+konstant. Fliesstext waechst um +25% bei 20px-Root und verdoppelt sich bei
+200% Zoom, die Ueberschriften nicht. Wenn das mal gewuenscht ist, muss die
+fluide Mitte von reinem `vw` auf `rem + vw` — das aendert dann aber die
+Groessen bei allen anderen Breiten mit, ist also eine Design-Entscheidung.
+
 ### Vor jeder Aenderung, ohne Ausnahme
 
 ```
