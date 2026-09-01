@@ -16,6 +16,85 @@ e9f39a3  feat(ai): the console follows you down the page, with a travelling rim
 d8948b9  fix(pixel): tile the wave and lean its axis
 ```
 
+## DAS SYSTEM IST ÜBERNOMMEN — und eine Unterseite ist fertig
+
+Owner 2026-09-01, nach dem Entwurf: „die neue version WESENTLICH besser zu
+lesen, auch die farben finde ich besser" → „kannst du die farben, schriften und
+header bg und button form mal auf die alte seite anwenden" → „bau mal eine
+unterseite fertig".
+
+Auf `main`. Eine Unterseite ist komplett umgestellt, die anderen zehn erben die
+Systemebene und laufen unverändert weiter.
+
+→ **https://mccain-digital.vercel.app/services/ai-tools.html**
+
+### In `v3.css`, also für alle elf Seiten
+
+- **Grund neutral** `#0b0b0c` statt `#0d0c0a` (Rot und Grün über Blau = Sepia
+  neben dem warmen Gelb). Papier, Karten und Haarlinien folgen. Grau von warm
+  `#9b958a` (6,61:1) auf neutral `#a3a3a0` (7,78:1).
+- **Das gemochte Grün `#7a8c00` ist zweites Signal** (`--sig` / `--sig-text` /
+  `--sig-ink`) — dieselbe Zwei-Gewichte-einer-Farbe-Regel wie beim Gelb.
+- **Der wandernde Rand ist kein Regenbogen mehr.** Die Stops stehen als Token
+  in `v3.css` (Gelb → Grün → Gelb); `common.js` rechnet nur noch die
+  Geometrie, also den Teil, der gerechnet werden MUSS.
+- **Typo trägt selbst:** `.sec-h` Gewicht 780, Laufweite -0.028em, Zeile 0.96;
+  `.hero-h` Zeile 0.92.
+- **Eine Knopfform:** 4px statt 100px-Pille. Die Pille war das einzige Runde in
+  einem System aus Haarlinien, Eckmarken und Mono-Labels. Hover-Lift 2px.
+- **Die Leiste ist nie durchsichtig über dem Kopf** (Owner-Regel) und **Ink in
+  BEIDEN Themes** — im hellen Modus schwebte vorher eine blasse Leiste über der
+  immer dunklen Bühne und die Wortmarke verschwand fast. Bei der ersten
+  Bewegung (8px statt 24) kommt die tiefere Hülle **choreografiert**: eine
+  Fläche schiebt sich in 280 ms von oben herein, dann zieht eine Haarlinie in
+  520 ms von links durch. Eine Leiste, die ANKOMMT, liest sich als
+  Entscheidung; eine, die einblendet, als Render-Artefakt.
+- **`.rv` von 44 px auf 22 px** — 44 war fast das Doppelte der Bandbreite.
+- **Drei geteilte Bauteile:** Bühnen-Header, Wort-Reveal, Pixel-Marke. Beide
+  **opt-in aus dem Markup** (`data-field`, `data-words`), weil die Seiten, die
+  ihre Überschriften noch rastern, denselben Text nicht zusätzlich in
+  Wort-Spans zerlegt bekommen dürfen.
+
+### `services/ai-tools.html` — fertig
+
+Bühnen-Header über die volle Breite mit Dither-Feld, Rails und Eckmarken,
+gerippter Fakten-Spalte und einem Mono-Streifen an der Basis. **Acht
+Pixel-Hosts entfernt** — die Überschriften sind echte, lesbare Type, ihre
+Wörter steigen durch eine Maske. Die Wortmarke trägt die 7×7-Pixelmarke.
+
+### Gemessen
+
+| | |
+|---|---|
+| Alle 11 Seiten, 1440 und 390 | booten sauber, keine Page-/Console-Fehler, kein horizontaler Überlauf |
+| Akzent-Text | besteht auf jeder Seite in beiden Themes |
+| Text auf der Bühne | 4,85–14,49:1 (aus ausgelieferten Pixeln, Grund aus einem glyphenfreien Streifen) |
+| Überschrift | 10,44:1 weiß · 7,19:1 gelb gegen die hellste Zelle, die das Feld rendert |
+| Kompletter Scroll | 0 Long Tasks, p90 17 ms, 0,4 % der Frames über 20 ms |
+
+### Drei Fehler, alle durch Messen gefunden
+
+- **`.hero` ist ein Spalten-Flex-Container**, und `margin-inline: auto` auf
+  einem Flex-Item hebt `stretch` auf — `.hero-inner.wrap` schrumpfte auf seinen
+  Inhalt, die Copy sass 145 px INNERHALB der Rails, die ihre Kante markieren
+  sollen. Dieselbe Falle wie bei der Leiste im Entwurf.
+- **Bei 390 px machte die Pixelmarke die Wortmarke ~30 px breiter** und schob
+  den CTA aus der Leiste. **Gegen `main` gemessen: dort kein Überlauf** — also
+  meiner, nicht vorher da. Der doppelte CTA fällt unter 720 px weg, das
+  Kommandomenü trägt ihn ohnehin.
+- **Der Perzentil-Waechter hat wieder gelogen.** Das Fakten-Label mass exakt
+  4,50:1 — die AA-Zahl selbst. Es war nicht Grund gegen Type: ein dichtes
+  Mono-Label deckt weit mehr als ein Fünftel seiner Box, p80 war schon
+  Buchstabe. Gegen einen Streifen gemessen, der keinen Glyphen enthalten KANN:
+  4,85:1 — und die rechte Abdunklung von .04 auf .3 ist, was diese Marge
+  gekauft hat.
+
+### Nächster Schritt
+
+Die restlichen drei Service-Seiten und `index.html` nach demselben Muster:
+`data-pixel` raus, `data-words` rein, Header auf `hero--stage guides
+data-field`, Wortmarke mit `.mark`. Pro Seite ein kleiner, gleichförmiger Diff.
+
 ## DER REFRESH — `preview/refresh.html`
 
 Owner 2026-09-01: neue Hintergruende „echt klasse", aber **nur im Header** und
