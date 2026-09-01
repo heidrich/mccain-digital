@@ -598,6 +598,55 @@
       color: var(--muted)
     }
 
+
+    /* ---------- THE WAVE, AS A TEXT COLOUR ----------
+       The studio band's accents stop being a flat darkened yellow - which on
+       paper is simply brown - and take the console's own journey instead:
+       the logo yellow travelling through the green and back, on the same
+       angle, over the same period, at the same speed.
+
+       --wave-stops-text is computed per band by common.js: every stop keeps
+       its hue and gives up only its lightness, until it clears the bar
+       against THAT band's ground. On paper that lands as a deep gold through
+       an olive; on ink it is the console's stops untouched.
+
+       The fill is animated by moving the background, not the element, so
+       nothing is promoted to its own layer for a line of text. */
+    [data-wavetext] .st-lead em,
+    [data-wavetext] .st-fact b {
+      background-image: repeating-linear-gradient(var(--rim-angle), var(--wave-stops-text, var(--wave-stops)));
+      background-size: var(--rim-shift) 100%;
+      animation: wave-text var(--rim-cycle) linear infinite
+    }
+
+    /* Only where the fill can actually be clipped to the glyphs. Without the
+       guard, `color: transparent` in a browser that ignores background-clip
+       is not a fallback, it is an erasure. */
+    @supports (background-clip: text) or (-webkit-background-clip: text) {
+
+      [data-wavetext] .st-lead em,
+      [data-wavetext] .st-fact b {
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent
+      }
+    }
+
+    @keyframes wave-text {
+      to {
+        background-position: var(--rim-shift) 0
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      [data-wavetext] .st-lead em,
+      [data-wavetext] .st-fact b {
+        animation: none
+      }
+    }
+
     /* ---------- the travelling rim, brought into the palette ----------
        common.js paints --wave-stops from PixelFX.wavePalette("rainbow"), and
        a full rainbow was the loudest thing on a page whose whole point is
@@ -1548,7 +1597,7 @@
     <!-- ================= (05) STUDIO ================= -->
     <!-- fx-dim: the portraits run their own view() timelines, and an animated
          ancestor transform would feed back into them -->
-    <section class="band band--paper guides" id="studio">
+    <section class="band band--paper guides" id="studio" data-wavetext>
       <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
       <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
       <div class="wrap fx-dim">

@@ -101,6 +101,43 @@
        cycle. Computed here so the angle is written in exactly one place. */
     root.style.setProperty("--rim-shift",
       (period / Math.sin(angle * Math.PI / 180)).toFixed(2) + "px");
+
+    paintWaveText(cs);
+  }
+
+  /* THE WAVE AS A TEXT COLOUR.
+
+     The console's rim is the one place on the page where the accent is not a
+     flat colour but a journey - yellow through the green and back - and the
+     owner asked for that journey on the studio band's type. It cannot be
+     painted there at its own brightness: #f5c518 on paper is 1.48:1.
+
+     So each stop keeps its hue and gives up only its lightness, which is the
+     rule the rest of the system already follows (--acc for fills, --acc-ink
+     for text). The engine's legible() does exactly that and moves in
+     whichever direction the ground demands, so this same call produces the
+     untouched stops on an ink band and a deep gold-to-olive on paper.
+
+     Per element rather than per theme: the ground that matters is the BAND's
+     background, and a paper band stays paper in either theme. */
+  function paintWaveText(cs) {
+    const hosts = d.querySelectorAll("[data-wavetext]");
+    if (!hosts.length || !window.PixelFX || !PixelFX.legibleStops) return;
+    const raw = (cs || getComputedStyle(root)).getPropertyValue("--wave-stops");
+    // "#f5c518 0px, #d9c40f 96px, ..." -> colours and their positions
+    const parts = raw.split(",").map((s) => s.trim()).filter(Boolean);
+    const cols = [], pos = [];
+    parts.forEach((p) => {
+      const m = p.match(/^(\S+)\s+(\S+)$/);
+      if (m) { cols.push(m[1]); pos.push(m[2]); }
+    });
+    if (!cols.length) return;
+    hosts.forEach((el) => {
+      const ground = PixelFX.tokenRGB(el, "--bg", "#f2f2ef");
+      const fixed = PixelFX.legibleStops(cols, ground, 5.2);
+      el.style.setProperty("--wave-stops-text",
+        fixed.map((cc, i) => cc + " " + pos[i]).join(", "));
+    });
   }
   paintRimPalette();
 

@@ -3172,6 +3172,24 @@
     morph: morph,
     sand: sand,
     voidReveal: voidReveal,
+    /* Take a list of CSS colours and hand back the same hues at a lightness
+       that clears `min` against `ground`. The wave's own stops, made legible
+       on whichever surface they are about to be painted on - see legible(). */
+    legibleStops: function (colours, ground, min) {
+        var gl = relLum(ground || [242, 242, 239]);
+        return colours.map(function (c) {
+          var m = typeof c === "string" && c.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+          var rgb = c, h6;
+          if (m) {
+            h6 = m[1].length === 3
+              ? m[1][0] + m[1][0] + m[1][1] + m[1][1] + m[1][2] + m[1][2] : m[1];
+            rgb = [parseInt(h6.slice(0, 2), 16), parseInt(h6.slice(2, 4), 16),
+                   parseInt(h6.slice(4, 6), 16)];
+          }
+          var hsl = rgbToHsl(rgb);
+          return hslStr(hsl[0], hsl[1], legible(hsl[0], hsl[1], hsl[2], gl, min || 5.2));
+        });
+      },
     slides: slides,
     image: pixelImage,
     /* the palette a given wave style generates, so a comparison page can show
