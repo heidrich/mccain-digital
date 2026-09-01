@@ -1,0 +1,127 @@
+<html lang="en" data-theme="dark" data-root="..">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>More life — background candidates</title>
+  <link rel="stylesheet" href="../v3.css">
+  <style>
+    /* mockup chrome only, never ships */
+    /* Without this the page has no theme: --bg resolves to nothing and the
+       comparison is of a page the site never shows. */
+    body { background: var(--bg); color: var(--fg) }
+
+    .lab-top { max-width: 1500px; margin: 0 auto; padding: 2.5rem var(--gut) 1rem }
+    .lab-top h1 { font-size: 1.7rem; letter-spacing: -.03em; margin: 0 0 .4rem }
+    .lab-top p { color: var(--muted); max-width: 78ch; margin: 0 0 .7rem }
+
+    /* Each candidate is a real band at a real height, because a texture judged
+       in a 200px strip is a texture judged at the wrong scale. */
+    .cand { padding: clamp(3rem, 7vw, 6rem) 0; border-top: 1px solid var(--line) }
+    .cand .wrap { max-width: 1500px; margin: 0 auto; padding: 0 var(--gut) }
+    .cand h2 { font-size: clamp(1.9rem, 4.2vw, 3.4rem); line-height: 1.06;
+      letter-spacing: -.045em; font-weight: 800; margin: .2rem 0 .9rem }
+    .cand .lead { color: var(--muted); max-width: 56ch; margin: 0 0 1.6rem }
+    .tag { font-family: var(--mono); font-size: var(--t-label); letter-spacing: .12em;
+      text-transform: uppercase; color: var(--muted); margin: 0 }
+    .verdict { font-size: var(--t-small); color: var(--muted); max-width: 68ch;
+      border-left: 2px solid var(--line); padding-left: .9rem; margin: 1.4rem 0 0 }
+    .verdict b { color: var(--fg) }
+    .pick { border-left-color: var(--acc-text) }
+  </style>
+</head>
+
+<body>
+  <div class="lab-top">
+    <h1>More life — the background, four ways</h1>
+    <p>Owner: „mehr leben". The same 3px cell the headlines are built from, a few per cent of
+      them lit, drifting slowly. It is the page's own material rather than an effect borrowed
+      from somewhere else — and it costs nothing per frame: one tile is drawn once and handed to
+      CSS as a repeating background, and the drift is a transform the compositor can do without
+      repainting.</p>
+    <p>Scroll through all four. They are full-height bands on purpose: a texture judged in a
+      narrow strip is a texture judged at the wrong scale.</p>
+  </div>
+
+  <section class="cand band band--ink" id="c-off">
+    <div class="wrap">
+      <p class="tag">A — off</p>
+      <h2>The control.</h2>
+      <p class="lead">What the site does today. Nothing wrong with it — which is the point of
+        having it here: the next three have to earn the difference.</p>
+      <p class="verdict">Flat black. Reads as clean on a big screen and as empty on a long
+        scroll.</p>
+    </div>
+  </section>
+
+  <section class="cand band band--ink" id="c-still">
+    <div class="wrap">
+      <p class="tag">B — texture, standing still</p>
+      <h2>Material, not motion.</h2>
+      <p class="lead">The field is there but never moves. It gives the black a grain, so the band
+        stops looking like an empty rectangle, and it asks nothing of the eye.</p>
+      <p class="verdict">The safe one. Costs literally nothing after the first paint — no
+        animation at all, so it is also exactly what a visitor with reduced motion sees in every
+        other candidate.</p>
+    </div>
+  </section>
+
+  <section class="cand band band--ink" id="c-drift">
+    <div class="wrap">
+      <p class="tag">C — two layers, drifting</p>
+      <h2>Alive, quietly.</h2>
+      <p class="lead">Two fields at different densities and speeds. The difference between them
+        is what reads as depth — one layer alone reads as a texture that happens to slide, which
+        is the thing that looks cheap.</p>
+      <p class="verdict pick"><b>The recommendation.</b> A full drift takes about a minute, so
+        nothing ever competes with the type; you notice it the way you notice that a room has
+        air. One tile per layer, one composited transform each, paused off screen.</p>
+    </div>
+  </section>
+
+  <section class="cand band band--ink" id="c-loud">
+    <div class="wrap">
+      <p class="tag">D — denser, with more of the yellow</p>
+      <h2>Turned up.</h2>
+      <p class="lead">The same thing with roughly twice the cells and the accent appearing far
+        more often. Here to mark the far end of the range, so C can be judged against something
+        and not against nothing.</p>
+      <p class="verdict">Starts to read as a pattern rather than a surface, and the yellow cells
+        pull the eye away from the yellow that means something. Useful as a boundary.</p>
+    </div>
+  </section>
+
+  <script src="../data.js"></script>
+  <script src="../pixel-engine.js"></script>
+  <script src="../common.js"></script>
+  <script>
+    /* Every candidate is built by the SHIPPING function with different
+       options. A lab that draws its own version of the effect proves nothing
+       about the effect. */
+    addEventListener("load", function () {
+      var acc = getComputedStyle(document.documentElement).getPropertyValue("--acc").trim() || "#f5c518";
+
+      // B: the same first layer, standing still
+      var still = PixelFX.field(document.getElementById("c-still"), {
+        accent: acc,
+        layers: [{ density: 0.05, alpha: [0.10, 0.30], secs: 64, cols: ["#fff"] }]
+      });
+      still.layers.forEach(function (el) { el.style.animation = "none"; });
+
+      // C: the default — two layers, two speeds
+      PixelFX.field(document.getElementById("c-drift"), { accent: acc });
+
+      // D: the loud end
+      PixelFX.field(document.getElementById("c-loud"), {
+        accent: acc,
+        layers: [
+          { density: 0.10, alpha: [0.14, 0.40], secs: 48, cols: ["#fff"] },
+          { density: 0.05, alpha: [0.30, 0.70], secs: 28, cols: ["#fff", acc, acc] }
+        ]
+      });
+    });
+  </script>
+</body>
+
+</html>

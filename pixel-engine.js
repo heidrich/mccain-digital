@@ -2363,6 +2363,103 @@
     };
   }
 
+  /* ============================================================
+     FIELD - a slow field of cells behind a band
+
+     "Mehr Leben" without noise: the same 3px cell the headlines are built
+     from, a few per cent of them lit, drifting. It says the page is made of
+     pixels rather than decorating it with something else.
+
+     The cost is the point. One tile is drawn ONCE into a canvas and handed to
+     CSS as a repeating background; the drift is a transform on that layer, so
+     there is no per-frame JavaScript and nothing to repaint - the compositor
+     moves a texture it already has. A canvas the size of a band would have
+     been 38MB of pixels per layer; a 256px tile is 260KB whatever the band.
+
+     It loops by travelling exactly one tile: a repeating pattern shifted by
+     its own period is the same picture, which is the same reason the headline
+     wave and the assistant's rim tile instead of sweeping. Three effects, one
+     idea, no visible seam in any of them.
+     ============================================================ */
+  function fieldTile(cell, cols, density, alphaLo, alphaHi) {
+    var N = 64, T = cell * N;                       // tile side in CSS px
+    var cv = document.createElement("canvas");
+    cv.width = Math.round(T * DPR);
+    cv.height = Math.round(T * DPR);
+    var c = cv.getContext("2d");
+    c.setTransform(DPR, 0, 0, DPR, 0, 0);
+    // one device pixel of gap, exactly as the headlines do it - a block the
+    // size of its cell is a solid sheet, not a pixel
+    var block = Math.max(1, Math.round(cell * DPR) - 1) / DPR;
+    for (var y = 0; y < N; y++) {
+      for (var x = 0; x < N; x++) {
+        if (Math.random() > density) continue;
+        c.globalAlpha = alphaLo + Math.random() * (alphaHi - alphaLo);
+        c.fillStyle = cols[(Math.random() * cols.length) | 0];
+        c.fillRect(Math.round(x * cell * DPR) / DPR, Math.round(y * cell * DPR) / DPR,
+          block, block);
+      }
+    }
+    return { url: cv.toDataURL("image/png"), size: T };
+  }
+
+  /* host: the element the field sits behind (a band, usually). It gets one
+     layer per entry in LAYERS, back to front. */
+  function field(host, opts) {
+    if (!host) return null;
+    opts = opts || {};
+    var cell = +(host.dataset.fieldCell || opts.cell || 3);
+    var accent = opts.accent || "#f5c518";
+    var ink = opts.ink || "#ffffff";
+
+    /* Two layers at different speeds and densities read as depth. One layer
+       reads as a texture that happens to slide, which is the thing that looks
+       cheap. */
+    var LAYERS = opts.layers || [
+      { density: 0.05, alpha: [0.10, 0.30], secs: 64, cols: [ink] },
+      { density: 0.018, alpha: [0.22, 0.55], secs: 38, cols: [ink, ink, accent] }
+    ];
+
+    var made = [];
+    LAYERS.forEach(function (L) {
+      var tile = fieldTile(cell, L.cols, L.density, L.alpha[0], L.alpha[1]);
+      var el = document.createElement("div");
+      el.className = "field-l";
+      el.setAttribute("aria-hidden", "true");
+      el.style.backgroundImage = "url(" + tile.url + ")";
+      el.style.backgroundSize = tile.size + "px " + tile.size + "px";
+      // the layer is one tile larger than the box in both directions, so the
+      // travelling edge never enters the frame
+      el.style.inset = -tile.size + "px";
+      el.style.setProperty("--field-x", -2 * tile.size + "px");
+      el.style.setProperty("--field-y", -tile.size + "px");
+      if (!reduced) el.style.animationDuration = L.secs + "s";
+      host.insertBefore(el, host.firstChild);
+      made.push(el);
+    });
+
+    /* The layer deliberately overhangs its box by a whole tile, so the class
+       that clips it is not decoration: without it every field bleeds a tile
+       into its neighbours and four candidates on one page become one mess.
+       `clip` rather than `hidden` - hidden would make the band a scroll
+       container and break any sticky child inside it. */
+    host.classList.add("has-field");
+    if (getComputedStyle(host).position === "static") host.style.position = "relative";
+
+    /* Off screen it stops. A composited transform is cheap, and "cheap"
+       multiplied by every band on a long page is no longer cheap. */
+    if (!reduced && "IntersectionObserver" in window) {
+      new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          made.forEach(function (el) {
+            el.style.animationPlayState = e.isIntersecting ? "running" : "paused";
+          });
+        });
+      }, { rootMargin: "120px" }).observe(host);
+    }
+    return { layers: made, destroy: function () { made.forEach(function (el) { el.remove(); }); } };
+  }
+
   window.PixelFX = {
     headline: headline,
     button: button,
@@ -2374,6 +2471,8 @@
     /* the palette a given wave style generates, so a comparison page can show
        what actually runs rather than colours written out by hand */
     wavePalette: function (style, accRGB) { return wavePalette(style, accRGB); },
+    /* a drifting field of cells behind a band - see FIELD above */
+    field: field,
     onVelocity: function (fn) { velSubs.push(fn); },
     velocity: function () { return vel; },
     reduced: reduced,

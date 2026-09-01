@@ -3692,3 +3692,44 @@ html[data-theme="light"] .t-moon {
     transition: none
   }
 }
+
+
+/* ============================================================
+   THE CELL FIELD - the quiet background layer
+
+   The layer is one tile larger than its box on every side and drifts by
+   exactly one whole number of tiles, so the pattern repeats onto itself and
+   the loop has no seam and no visible edge. Only `transform` animates, which
+   the compositor can do without repainting anything.
+   ============================================================ */
+/* The layer overhangs by a whole tile so its travelling edge never enters the
+   frame; this is what keeps the overhang out of the band next door. */
+.has-field {
+  overflow: clip
+}
+
+.field-l {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  animation: field-drift 60s linear infinite;
+  will-change: transform
+}
+
+/* everything a band actually shows has to sit above it */
+.field-l~* {
+  position: relative;
+  z-index: 1
+}
+
+@keyframes field-drift {
+  to {
+    transform: translate3d(var(--field-x), var(--field-y), 0)
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field-l {
+    animation: none
+  }
+}
