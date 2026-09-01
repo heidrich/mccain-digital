@@ -1,57 +1,64 @@
-# Uebergabe — Stand 2026-09-01, Nacht
+# Uebergabe — Stand 2026-09-01
 
 **Alles committet, gepusht und auf Vercel live verifiziert.** Arbeitsbaum
-sauber. Diese Nacht dazugekommen:
+sauber.
 
 ```
+afc013f  feat(rim): the travelling border moves from the h1 to the console
+7e9b70d  docs: the light-mode pixel type was a bug, not a dead end
 a06f8e3  fix(theme): apply the saved theme before the stylesheet, and audit the canvases
 4d58954  feat(pixel): a drifting field of cells for the bands, and four to judge
 e9f39a3  feat(ai): the console follows you down the page, with a travelling rim
-d8948b9  fix(pixel): tile the wave and lean its axis, so it never sits on plain yellow
-e84c1c3  docs: a handover header on HANDOFF, so the state does not live in a chat
-de13a97  fix(pixel): generate the wave palette by hue, so it stops going muddy
+d8948b9  fix(pixel): tile the wave and lean its axis
 ```
 
-## Was zuerst anzusehen ist
+## Zum Aussuchen — diese Seiten sind JETZT erreichbar
 
-1. **Der Farbverlauf laeuft jetzt durch.** Die drei Beobachtungen („zu schnell
-   wieder reines gelb", „zwischen woertern angehackt", „als ob der gradient neu
-   geladen wird") hatten EINE Ursache: der Verlauf war ein Band, und alles
-   ausserhalb bekam den geklemmten Endstop — und beide Endstops sind das
-   Akzentgelb. Jetzt wird die Palette **gekachelt**: sie wiederholt sich ueber
-   beide Raender hinaus, nichts ist je geklemmt, und weil sie auf demselben
-   Farbton anfaengt und aufhoert, ist die Naht unsichtbar. Die Achse ist
-   schraeg (34 Grad), die Geschwindigkeit kommt aus der Uhr statt aus einem
-   Frame-Zaehler (also gleich auf 30Hz und 144Hz), und die Phase aus der
-   SEITEN-Position: zwei Ueberschriften sind zwei Fenster auf EINE Welle.
-   Stellschrauben: `data-wave-angle` (34), `data-wave-period` (460px),
-   `data-wave-cycle` (2s).
-2. **Der Assistent laeuft mit.** Unter Sektion 01 wandert die Konsole an den
-   rechten Rand — **verschoben, nicht kopiert**, also mit dem Gespraech darin.
-   Frage oben stellen, zwei Bildschirme weiter runter, die Antwort steht noch
-   da. Eingeklappt ein 58px-Knopf, aufgeklappt das Chatfenster; Rand und Glow
-   wandern in derselben Palette wie die Ueberschriften
-   (`PixelFX.wavePalette("rainbow")` — eine Quelle, zwei Effekte).
-3. **Die Pixelschrift im hellen Modus ist repariert** — sieh sie dir an, bevor
-   du ueber den hellen Modus entscheidest. Die erste Ueberschrift jeder Seite
-   rasterte waehrend der Theme-Transition und behielt das Weiss des dunklen
-   Themes: **1,03:1 auf Papier**, also unsichtbar. Kein Gestaltungsproblem,
-   eine Ladereihenfolge. Jetzt 4,21:1. Details unten im eigenen Abschnitt.
-4. **„Mehr Leben" liegt zum Aussuchen bereit, ist aber NICHT eingeschaltet.**
-   `https://mccain-digital.vercel.app/preview/life-lab.html` — vier
-   bildschirmhohe Baender: aus / Textur ohne Bewegung / zwei driftende Ebenen
-   (**mein Vorschlag**) / zu laut. Der Code ist Produktionscode
-   (`PixelFX.field`), einschalten ist eine Zeile pro Band. Vereinbart war: ein
-   Effekt nach dem anderen, jeder vorher gezeigt — deshalb liegt er nur da.
+Sie lagen unter `_parked/`, und das haelt `.vercelignore` vom Deployment fern:
+jeder Link darauf war ein 404. Ich hatte im Handover behauptet, man koenne sie
+direkt auf dem Deployment aufrufen, ohne das je zu pruefen. Sie liegen jetzt
+unter `preview/` und werden ausgeliefert (noindex + `Disallow: /preview/`; beim
+Livegang fliegt der Ordner raus).
 
-## Offene Punkte (Owner-Liste, in seiner Reihenfolge)
+| | |
+|---|---|
+| [Hintergruende, vier Varianten](https://mccain-digital.vercel.app/preview/life-lab.html) | **wartet auf deine Wahl** — aus / Textur / driftend (mein Vorschlag) / zu laut |
+| [Wellen-Paletten und die Achse](https://mccain-digital.vercel.app/preview/wave-lab.html) | falls der Verlauf auf Schrift doch nochmal ein Thema wird |
+| [Gelb auf Papier](https://mccain-digital.vercel.app/preview/accent-lab.html) | misst den Kontrast selbst |
+| [Rastervarianten](https://mccain-digital.vercel.app/preview/pixel-lab.html) | Zelle/Block/Deckung, selbst gemessen |
 
-1. **Hintergrund aussuchen** — life-lab, dann schalte ich ihn ein. Und danach
+## Was zuletzt passiert ist
+
+1. **Der Verlauf ist von der h1 runter.** `data-wave` steht in der Engine jetzt
+   auf `"off"` als Standard, statt es auf zwei Spans hinzuschreiben — so erbt
+   die naechste Ueberschrift den Effekt nicht aus Versehen. Die h1 war die
+   einzige Stelle mit einem Akzent-Span in einer Pixel-Ueberschrift, also die
+   einzige, an der er je zu sehen war.
+2. **Derselbe Verlauf laeuft jetzt auf dem Rand der Konsole in 01** — und auf
+   demselben Rand, wenn die Konsole unten am Seitenrand angedockt ist. Ein
+   Bauteil (`.rim` in `v3.css`), zwei Nutzer, eine Palette auf `:root`. Der
+   Rand liest `--acc` (das Logo-Gelb), NICHT `--acc-text`: das dunkle Gold fuer
+   Papier machte den Rand im hellen Modus matt, ohne dass es etwas bringt —
+   die Konsole sitzt in beiden Themes auf demselben dunklen Band, und ein
+   1,5px-Zierrand ist keine Schrift.
+3. **Der Rahmen beschneidet nicht.** `.console` traegt einen ausdruecklichen
+   Kommentar, dass ihr Senden-Knopf beim Hover zerfaellt und die Truemmer ~64px
+   Flugraum brauchen. Ein `overflow: hidden` um sie herum haette diesen Effekt
+   still getoetet. Beschnitten wird nur die wandernde Flaeche, in einer eigenen
+   Ebene — sie war das Einzige, was je beschnitten werden musste.
+4. Off screen pausiert der Rand, wie das Zellenfeld.
+
+Kosten: auf 01 sitzend mit laufendem Rand und Glow Median 16,7 ms, 0 % der
+Frames ueber 20 ms, keine Long Tasks — gegen 16,7 ms und 0,6–1,1 % auf dem
+Stand davor ganz ohne Rand.
+
+## Offene Punkte (in deiner Reihenfolge)
+
+1. **Hintergrund aussuchen** — life-lab oben, dann schalte ich ihn ein. Danach
    der naechste Effekt, einer nach dem anderen.
 2. **Assistent auf den Unterseiten?** Heute nur die Startseite: `v3.js` laedt
-   nirgends sonst, und die Konsolen-Markup steht in `index.html`. Das ist eine
-   Entscheidung, kein Versehen — soll er ueberall mitlaufen, zieht die Konsole
-   ins JS um und laeuft auf jeder Seite.
+   nirgends sonst, und die Konsolen-Markup steht in `index.html`. Entscheidung,
+   kein Versehen.
 3. **`ANTHROPIC_API_KEY`** in Vercel Production setzen (Owner) plus Spend-Limit
    in der Anthropic Console, dann `AI_MODE` in `v3.js` auf `"live"`. Ich sehe
    den Schluessel nie.
@@ -61,44 +68,36 @@ de13a97  fix(pixel): generate the wave palette by hue, so it stops going muddy
    Themes (1,03:1 auf Papier). Jetzt 4,21:1. Eigener Abschnitt weiter unten.
 5. **Inhalte:** drei Kundenzitate, zwei Work-Cases, echte Portraits. Groesste
    Luecke vor dem Livegang.
-6. **`noindex` raus** — erst beim Livegang.
+6. **`noindex` raus** und `preview/` wieder aus dem Deployment — beim Livegang.
 
 ## Werkzeuge
 
 | | |
 |---|---|
 | `bash tools/sweep.sh` | jede Seite laden, Konsolenfehler + Overflow + a11y |
-| `bash tools/accent_audit.sh` | jeder Akzent-Textknoten gegen seinen echten Grund, 6 Seiten x 2 Themes |
+| `bash tools/accent_audit.sh` | jeder Akzent-Textknoten UND jede Pixel-Leinwand gegen ihren echten Grund, 6 Seiten x 2 Themes |
 | `bash tools/pixel_scale.sh` | sitzt jedes Mosaik im Massstab 1.00 auf seinem Foto |
 | `python tools/check_links.py` | Links, Anker, doppelte IDs |
-| `preview/wave-lab.html` | Wellen-Paletten UND die Achse: gerade gegen schraeg |
-| `preview/life-lab.html` | die vier Hintergrund-Kandidaten |
-| `preview/pixel-lab.html` | Rastervarianten, misst Zelle/Block/Deckung selbst aus |
-| `preview/accent-lab.html` | Gelb-Kandidaten auf Papier, misst Kontrast selbst |
 
 ## Lehren, die ich nicht nochmal lernen will
 
-1. **Ein IntersectionObserver meldet UEBERGAENGE, keine Zustaende.** „unter dem
-   Fenster" und „ueber dem Fenster" sind beide Verhaeltnis null — wer springt
-   (Deep-Link, Reload auf halber Hoehe, Skript), wechselt zwischen zwei
-   Zustaenden, die er fuer denselben haelt, und es passiert nichts. Von Hand
-   scrollen geht immer durch die Sektion hindurch, deshalb war das Loch
-   unsichtbar. Der Dock leitet seinen Zustand jetzt aus einer **gemessenen
-   Kante** ab.
-2. **Eine Schwelle, die sich beim Ueberqueren verschiebt, wird zweimal
-   ueberquert.** Die Konsole aus Sektion 01 zu nehmen aenderte deren Hoehe —
-   also genau die Kante, gegen die gemessen wird. Ein Platzhalter haelt die
-   Groesse.
-3. **Ein Verlauf zeigt ueberwiegend, was ZWISCHEN seinen Stops liegt** — und
-   ein Band zeigt ausserhalb seiner selbst nur den geklemmten Endstop. Beide
-   Male ist die Antwort dieselbe: kacheln statt wischen, erzeugen statt
-   aufzaehlen.
-4. **Eine Performance-Zahl gilt nur fuer die Seite und die Geste, die gemessen
-   wurden** — und nur gegen eine Vergleichsmessung. Der neue Verlauf sah mit
-   35ms Median schlecht aus, bis dieselbe Sonde dem alten Stand 35ms gab.
-5. **Vor jeder Aussage ueber eine Animation beweisen, dass sie laeuft.** Und
-   das Messinstrument gegen den bekannt schlechten Zustand pruefen: mein
-   Achsen-Messer las erst zweimal dasselbe, weil er vor dem Einblenden mass.
+1. **Ein Link, den niemand oeffnen kann, ist kein Angebot.** Die
+   Vergleichsseiten lagen hinter `.vercelignore`, und ich hatte das Gegenteil
+   ins Handover geschrieben, ohne es zu pruefen. Eine Behauptung ueber
+   Erreichbarkeit kostet einen `curl`.
+2. **Ein IntersectionObserver meldet UEBERGAENGE, keine Zustaende.** „unter dem
+   Fenster" und „ueber dem Fenster" sind beide Verhaeltnis null; wer springt,
+   bekommt gar nichts. Zustand aus einer gemessenen Kante ableiten.
+3. **Eine Schwelle, die sich beim Ueberqueren verschiebt, wird zweimal
+   ueberquert.** Platzhalter in Originalgroesse, bevor etwas aus dem Fluss
+   genommen wird.
+4. **Eine Theme-Transition vergiftet jeden, der die Farbe LIEST.** Theme inline
+   im `<head>` setzen, vor dem Stylesheet.
+5. **Ein Waechter muss lesen, was der Besucher SIEHT** — Leinwand statt
+   `getComputedStyle` — und erst, wenn sie fertig ist.
+6. **Ein zu kurzes Warten faelscht jede Messung.** Viermal in zwei Sitzungen:
+   ein glatt scrollendes `scrollIntoView` war nicht angekommen, ein Mosaik noch
+   im Aufbau, ein Rand noch pausiert. Erst die Fertig-Bedingung, dann messen.
 
 ---
 
