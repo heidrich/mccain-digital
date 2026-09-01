@@ -219,16 +219,11 @@
   <!-- ================= NAV ================= -->
   <nav class="nav" id="nav" aria-label="Main navigation">
     <a class="logo" href="#top">
-      <!-- seven by seven cells, the same grid the pixel engine draws on -->
-      <svg class="mark" viewBox="0 0 7 7" aria-hidden="true">
-        <rect x="0" y="0" width="1" height="7" />
-        <rect x="6" y="0" width="1" height="7" />
-        <rect x="1" y="1" width="1" height="1" />
-        <rect x="5" y="1" width="1" height="1" />
-        <rect x="2" y="2" width="1" height="1" />
-        <rect x="4" y="2" width="1" height="1" />
-        <rect x="3" y="3" width="1" height="1" />
-      </svg>
+      <!-- the real mark: md, the one on the favicon and the app icon.
+           It was a seven-by-seven grid for a while, which was an invention,
+           and a logo is the one thing on a page that may not be invented. -->
+      <img class="mark" src="favicon.svg" width="26" height="26" alt=""
+        aria-hidden="true">
       mccain <i>digital</i><span class="sr-only"> — home</span>
     </a>
 
@@ -269,7 +264,7 @@
          travelling across the field instead, on the field's own cell grid.
          circuit-macro rather than the code screenshot: at a 9px cell a
          screenshot is mush, and an abstract macro reads as texture. -->
-    <header class="stage stage--wide guides" id="stage">
+    <header class="stage stage--wide" id="stage">
       <!-- The picture the hero is built on, as a pixel mosaic: .shot +
            .shot-img is exactly what common.js wires the engine to on every
            other image, so the black hole here IS the black hole there -
@@ -281,9 +276,6 @@
             sizes="100vw" alt="" width="1200" height="800" fetchpriority="high" decoding="async">
         </span>
       </figure>
-
-      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
-      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
 
       <div class="stage-body">
         <div class="stage-grid">
@@ -337,9 +329,7 @@
     </div>
 
     <!-- ================= (01) AI CONSOLE ================= -->
-    <section class="band band--ink ai guides" id="ai">
-      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
-      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+    <section class="band band--ink ai" id="ai">
       <div class="wrap fx-out">
         <div class="ai-grid">
 
@@ -412,9 +402,7 @@
     </section>
 
     <!-- ================= (02) WORK ================= -->
-    <section class="band workwrap guides" id="work">
-      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
-      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+    <section class="band workwrap" id="work">
       <div class="wrap">
         <div class="sec-head rv">
           <div>
@@ -536,9 +524,7 @@
     </section>
 
     <!-- ================= (03) SCORE BAND ================= -->
-    <section class="band band--tight band--paper guides" id="score">
-      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
-      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+    <section class="band band--tight band--paper" id="score">
       <div class="wrap fx-out">
         <div class="sec-head rv" style="margin-bottom:1rem">
           <div>
@@ -556,9 +542,7 @@
     <!-- ================= (04) SERVICES ================= -->
     <!-- fx-dim, not fx-out: the cards inside are position:sticky and a
          transform on this wrapper would re-parent them -->
-    <section class="band guides" id="services">
-      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
-      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+    <section class="band" id="services">
       <div class="wrap fx-dim">
         <div class="sec-head rv">
           <div>
@@ -575,9 +559,7 @@
     <!-- ================= (05) STUDIO ================= -->
     <!-- fx-dim: the portraits run their own view() timelines, and an animated
          ancestor transform would feed back into them -->
-    <section class="band band--ink guides" id="studio" data-wavetext>
-      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
-      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+    <section class="band band--ink" id="studio" data-wavetext>
       <div class="wrap fx-dim">
         <div class="studio-grid">
           <div class="rv">
@@ -621,9 +603,7 @@
 
     <!-- ================= (06) FAQ ================= -->
     <!-- fx-dim: the answer panel is position:sticky -->
-    <section class="band band--ink guides" id="faq">
-      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
-      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+    <section class="band band--ink" id="faq">
       <div class="wrap fx-dim">
         <div class="sec-head rv">
           <div>
@@ -642,9 +622,7 @@
     </section>
 
     <!-- ================= (07) PROOF ================= -->
-    <section class="band band--tight guides" id="proof">
-      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
-      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+    <section class="band band--tight" id="proof">
       <div class="wrap fx-out">
         <div class="sec-head rv">
           <div>
@@ -707,9 +685,7 @@
     </section>
 
     <!-- ================= (08) CONTACT ================= -->
-    <section class="band guides" id="contact">
-      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
-      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+    <section class="band" id="contact">
       <div class="wrap">
         <div class="contact-grid">
           <div class="rv">
@@ -743,8 +719,7 @@
   </main>
 
   <!-- ================= FOOTER ================= -->
-  <footer class="foot guides">
-    <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+  <footer class="foot">
     <div class="wrap">
 
       <div class="foot-top">

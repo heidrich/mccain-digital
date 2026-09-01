@@ -1685,9 +1685,14 @@ html[data-theme="light"] .t-moon {
   transform: rotate(-12deg) scale(1.15)
 }
 
+/* --acc, not --acc-text. The chip paints its OWN near-black ground on
+   hover, and --acc-text is tuned for the ground the chip normally sits on -
+   so on a paper band the number turned the darkened yellow, which on
+   near-black is a brown smudge. A token chosen for the surface underneath
+   stops being right the moment the element brings its own surface. */
 .score:hover b {
   background: #0d0c0a;
-  color: var(--acc-text);
+  color: var(--acc);
   transform: scale(1.06)
 }
 
@@ -3578,10 +3583,16 @@ html[data-theme="light"] .t-moon {
      ONE accent punctuates a restrained system. Same motion, same period:
      the logo yellow travelling through the green and back. common.js no
      longer repaints it - see paintRimPalette there. */
-  --wave-stops: #f5c518 0px, #d9c40f 96px, #a4bd00 192px, #7a8c00 288px, #c9a814 384px, #f5c518 480px;
-  --wave-stops-old: #f5c518 0px, #a8d43a 40px, #4fcf8c 80px, #3fc9c2 120px, #4aa6ef 160px,
+  /* THE FULL SPECTRUM, ending back on the logo yellow so the cycle has no
+     seam. It was replaced by a yellow-through-green pair for a while on the
+     argument that one accent should punctuate a restrained system - which is
+     a good rule for the PALETTE and the wrong one for this border, the single
+     place the page is allowed to be loud. Owner: "keine bunten border
+     gradient, wo ist der eigentlich hin?" */
+  --wave-stops: #f5c518 0px, #a8d43a 40px, #4fcf8c 80px, #3fc9c2 120px, #4aa6ef 160px,
     #7b86f0 200px, #a86ee8 240px, #d95fd0 280px, #ef5f9e 320px, #ef7a5f 360px,
     #efa03a 400px, #f0b62a 440px, #f5c518 480px;
+  --wave-stops-quiet: #f5c518 0px, #d9c40f 96px, #a4bd00 192px, #7a8c00 288px, #c9a814 384px, #f5c518 480px;
   --rim-angle: 112deg;
   --rim-period: 480px;
   /* --rim-period / sin(--rim-angle); recomputed by common.js from the two
@@ -4019,15 +4030,14 @@ html[data-theme="light"] .t-moon {
   gap: .6rem
 }
 
+/* The mark is the app icon itself, so the bar, the tab and the phone's
+   home screen can never drift apart. */
 .mark {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   flex: none;
-  color: var(--acc)
-}
-
-.mark rect {
-  fill: currentColor
+  border-radius: 6px;
+  display: block
 }
 
 /* ---------- THE STAGE ----------
@@ -4856,15 +4866,27 @@ html[data-theme="light"] .t-moon {
       color: var(--fg)
     }
 
-/* the oversized wordmark. documentary-brutalist-agency asks the page to
-       finish on one — it is the last thing seen, and it should be the name. */
+/* THE NAME, ONCE, AS THE LAST THING SEEN.
+
+   Owner: "mach sie kleiner, farben anpassen und one line."
+
+   One line is not a hope here, it is arithmetic. "mccain digital" measures
+   6.269em wide at this weight and tracking - measured in the browser, not
+   guessed - so at 100/6.269 = 15.9 container-widths per em it fills the line
+   exactly. Round down to 15 for the margin every measurement deserves, and
+   it can no longer wrap at any width. The 240px clamp it had before wrapped
+   at every real width and then overlapped itself, its leading being .78.
+
+   The colours are the logo's own: the name in the foreground, the second
+   word in the logo yellow, exactly as the bar spells it. */
 .foot-mark {
       display: block;
       width: 100%;
-      font-size: clamp(3.2rem, 15.4vw, 15rem);
+      font-size: 15cqi;
       font-weight: 800;
       letter-spacing: -.052em;
-      line-height: .78;
+      line-height: 1;
+      white-space: nowrap;
       margin: 0;
       padding-top: clamp(1.2rem, 3vw, 2rem);
       border-top: 1px solid var(--line);
@@ -4872,9 +4894,14 @@ html[data-theme="light"] .t-moon {
       text-decoration: none
     }
 
+/* the container the line is measured against */
+.foot>.wrap {
+      container-type: inline-size
+    }
+
 .foot-mark i {
       font-style: normal;
-      color: var(--muted)
+      color: var(--acc)
     }
 
 .foot-bar {
