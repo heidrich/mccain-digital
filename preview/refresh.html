@@ -1,108 +1,97 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="dark" data-root="..">
 
 <head>
   <meta charset="utf-8">
+  <!-- The saved theme BEFORE the stylesheet resolves. Same reason as on the
+       live page: anything that reads a computed colour during a theme
+       transition reads the OUTGOING one. -->
+  <script>try{var t=localStorage.getItem("mcd-v3-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>McCain Digital — refresh mockup</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
-  <script>try{var t=localStorage.getItem("mcd-refresh-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
   <link rel="preload" href="../fonts/schibsted-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- ============================================================
+       THE REFRESH SITS ON TOP OF THE REAL STYLESHEET.
+
+       v3.css first, then the overrides below. That is deliberate: the
+       console, the command menu, the FAQ, the service stack, the work
+       track, the scores and the contact form are already built and
+       already work. Rebuilding them beside the real ones would mean two
+       of everything, drifting apart from the first day, and the mockup
+       would stop being a proposal for THIS site.
+
+       So the refresh changes the SYSTEM — palette, type, the stage, the
+       controls, the footer, and where the pixel engine runs — and
+       inherits the machinery. When it is adopted, the diff against
+       v3.css is small enough to read in one sitting.
+       ============================================================ -->
+  <link rel="stylesheet" href="../v3.css">
 
   <style>
     /* ============================================================
-       McCain Digital — REFRESH MOCKUP
-       Nothing here touches the live site. Own tokens, own CSS,
-       one shared script (../pixel-engine.js) in its new roles.
-
-       Five decisions, each traceable to a skill in MengTo/Skills
-       and to what the owner asked for:
+       McCain Digital — REFRESH
 
        1  The header is a full-bleed STAGE. Dither underneath, guide
-          rails and corner marks over it, content anchored low.
+          rails over it, content anchored low. Header only, as asked.
           -> image-first-grid-layout + dither-laser-dark-mode
-       2  Headlines are REAL TYPE at billboard scale. The pixel
-          engine is out of the type entirely.
+       2  Headlines are REAL TYPE at billboard scale. The pixel engine
+          is out of the type entirely.
           -> documentary-brutalist-agency + agency-grid-layout-minimal
-       3  The pixel engine moves to IMAGES, BUTTONS and the LOGO —
-          it becomes the identity instead of an effect on words.
-       4  The palette loses its brown cast. Neutral near-black, the
-          logo yellow untouched, the green promoted to second signal.
-       5  The grid is EXPOSED: rails, corner marks, mono metadata,
-          hard chapter cuts, oversized footer wordmark.
+       3  The pixel engine moves to IMAGES, BUTTONS and the LOGO.
+       4  The palette loses its brown cast.
+       5  The grid is EXPOSED, and the footer becomes a chapter.
           -> editorial-tech + nested-container-frames + number-details
        ============================================================ */
 
-    @font-face {
-      font-family: "Schibsted Grotesk";
-      src: url("../fonts/schibsted-normal-latin.woff2") format("woff2");
-      font-weight: 100 900;
-      font-style: normal;
-      font-display: swap
-    }
-
-    /* ---------- tokens ---------- */
+    /* ---------- 1. PALETTE ----------
+       The old ground was #0d0c0a: red and green above blue, which is a
+       brown cast at very low light. Beside a warm yellow it read sepia.
+       Neutral now, so the logo yellow is the only warm thing on the page. */
     :root {
-      /* GROUND. The old --ink was #0d0c0a: red and green above blue, which
-         is a brown cast at very low light. On a page that also carries a
-         warm yellow it read as sepia. This one is neutral - the yellow is
-         then the only warm thing on the page, which is the point. */
       --ink: #0b0b0c;
       --ink-2: #131316;
-      --ink-3: #1b1b1f;
       --ink-fg: #f2f2ef;
 
       --paper: #f2f2ef;
       --paper-2: #fbfbf9;
       --paper-fg: #101011;
 
-      /* THE LOGO YELLOW. Never re-tinted. 12.07:1 on the new ground. */
+      /* THE LOGO YELLOW, untouched. 12.07:1 on the new ground. */
       --acc: #f5c518;
-      /* the same gold, dark enough to read on paper (5.11:1) */
       --acc-ink: #806400;
 
-      /* SECOND SIGNAL - the green. #7a8c00 is the one that was asked for and
-         it clears AA on the dark ground on its own (5.23:1). --sig-text is
-         the same hue lifted for small type and dots: 9.24:1 on ink,
-         5.26:1 on paper. Fills and markers use --sig, text uses --sig-text.
-         Same two-weights-of-one-colour rule the yellow already follows. */
+      /* SECOND SIGNAL — the green that was asked for. It clears AA on the
+         dark ground on its own (5.23:1); --sig-text is the same hue lifted
+         for small type and dots (9.24:1 on ink, 5.26:1 on paper). Fills and
+         markers use --sig, text uses --sig-text: the same
+         two-weights-of-one-colour rule the yellow already follows. */
       --sig: #7a8c00;
       --sig-text: #a4bd00;
       --sig-ink: #5c6b00;
 
-      --sans: "Schibsted Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
-
-      --gut: clamp(1.25rem, 4vw, 4.5rem);
-      --maxw: 1560px;
       --r: 12px;
 
-      --e-out: cubic-bezier(.16, 1, .3, 1);
-
-      /* TYPE. The pixel engine used to supply the presence; now the type has
-         to. Weight 800, tracking pulled in hard, leading under 1 - that is
-         what makes a grotesk read as a display face without a second file. */
+      /* TYPE. The pixel raster used to supply the presence; now the type
+         has to. Weight 800, tracking pulled in hard, leading under 1 —
+         that is what makes a grotesk read as a display face without a
+         second font file. */
       --t-display: clamp(2.6rem, 6.4vw, 6.6rem);
-      --t-h2: clamp(2rem, 4.6vw, 4rem);
-      --t-h3: clamp(1.25rem, 1.9vw, 1.75rem);
-      --t-body: clamp(1rem, .46vw + .88rem, 1.16rem);
-      --t-small: clamp(.82rem, .2vw + .76rem, .9rem);
-      --t-label: clamp(.66rem, .12vw + .63rem, .74rem);
+      --t-h2: clamp(1.9rem, 4.2vw, 3.6rem);
 
-      /* motion, from animation-systems: micro 120-200, UI 180-260,
-         section entrance 400-800, stagger 40-90 */
+      /* motion, from animation-systems: micro 120-200, UI 180-260 */
       --d-micro: .16s;
-      --d-ui: .22s;
-      --d-in: .62s;
+      --d-ui: .22s
     }
 
     html[data-theme="dark"] {
       --bg: var(--ink);
       --bg-2: var(--ink-2);
       --fg: var(--ink-fg);
+      /* neutral grey at 7.78:1 — the old #9b958a was warm and dimmer */
       --muted: #a3a3a0;
-      /* neutral grey, 7.78:1 - the old #9b958a was warm and dimmer */
       --line: rgba(242, 242, 239, .15);
       --line-2: rgba(242, 242, 239, .07);
       --card: #131316;
@@ -122,8 +111,7 @@
       --sig-fg: var(--sig-ink)
     }
 
-    /* chapters that keep their colour in both themes - the hard cuts */
-    .ink {
+    .band--ink {
       --bg: var(--ink);
       --bg-2: var(--ink-2);
       --fg: var(--ink-fg);
@@ -132,18 +120,10 @@
       --line-2: rgba(242, 242, 239, .07);
       --card: #131316;
       --acc-text: var(--acc);
-      --sig-fg: var(--sig-text);
-      background: var(--bg);
-      color: var(--fg)
+      --sig-fg: var(--sig-text)
     }
 
-    /* the alternating chapter - follows the theme, one step off the page */
-    .alt {
-      background: var(--bg-2);
-      color: var(--fg)
-    }
-
-    .paper {
+    .band--paper {
       --bg: var(--paper);
       --bg-2: var(--paper-2);
       --fg: var(--paper-fg);
@@ -152,187 +132,24 @@
       --line-2: rgba(16, 16, 17, .07);
       --card: #fbfbf9;
       --acc-text: var(--acc-ink);
-      --sig-fg: var(--sig-ink);
+      --sig-fg: var(--sig-ink)
+    }
+
+    body {
       background: var(--bg);
       color: var(--fg)
     }
 
-    /* ---------- base ---------- */
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box
+    /* ---------- 2. TYPE ---------- */
+    .sec-h {
+      font-size: var(--t-h2);
+      font-weight: 780;
+      letter-spacing: -.028em;
+      line-height: .96
     }
 
-    html {
-      -webkit-text-size-adjust: 100%;
-      scroll-behavior: smooth
-    }
-
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--fg);
-      font-family: var(--sans);
-      font-size: var(--t-body);
-      line-height: 1.55;
-      font-synthesis-weight: none;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden
-    }
-
-    img {
-      max-width: 100%;
-      display: block
-    }
-
-    a {
-      color: inherit
-    }
-
-    ::selection {
-      background: var(--acc);
-      color: #0b0b0c
-    }
-
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0 0 0 0);
-      white-space: nowrap;
-      border: 0
-    }
-
-    :focus-visible {
-      outline: 2px solid var(--acc);
-      outline-offset: 3px
-    }
-
-    /* ---------- the pixel engine's CSS contract ----------
-       Copied verbatim from v3.css. The engine appends its canvases and
-       expects these rules to exist; without .pxbtn .pxc the button's canvas
-       lands IN the flow and inflates the control to 711x337. It did exactly
-       that on the first run of this mockup. */
-    .pxbtn {
-      position: relative;
-      overflow: visible
-    }
-
-    .pxbtn .pxc {
-      position: absolute;
-      display: none;
-      pointer-events: none;
-      z-index: 3
-    }
-
-    .pxbtn.px-active {
-      color: transparent !important;
-      background: transparent !important;
-      border-color: transparent !important;
-      box-shadow: none !important;
-      transform: none !important;
-      transition: none !important
-    }
-
-    .px-canvas {
-      border-radius: inherit
-    }
-
-    .has-field {
-      overflow: clip
-    }
-
-    /* ---------- the exposed grid ----------
-       One container definition. The rails and the corner marks are
-       positioned from the SAME two tokens the content uses, so the
-       structure can never drift away from the column it describes.
-       (container-lines / nested-container-frames) */
-    .wrap {
-      max-width: var(--maxw);
-      margin-inline: auto;
-      padding-inline: var(--gut)
-    }
-
-    .rails {
-      position: relative;
-      isolation: isolate
-    }
-
-    .rails::before,
-    .rails::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      z-index: 0;
-      width: 1px;
-      background: var(--line-2);
-      pointer-events: none
-    }
-
-    .rails::before {
-      left: max(var(--gut), calc((100% - var(--maxw)) / 2 + var(--gut)))
-    }
-
-    .rails::after {
-      right: max(var(--gut), calc((100% - var(--maxw)) / 2 + var(--gut)))
-    }
-
-    .mk {
-      position: absolute;
-      width: 5px;
-      height: 5px;
-      z-index: 1;
-      background: var(--line);
-      pointer-events: none
-    }
-
-    .stage>.mk--tl,
-    .stage>.mk--tr {
-      top: var(--rail-h, 68px)
-    }
-
-    .mk--tl {
-      top: 0;
-      left: max(var(--gut), calc((100% - var(--maxw)) / 2 + var(--gut)));
-      transform: translate(-50%, -50%)
-    }
-
-    .mk--tr {
-      top: 0;
-      right: max(var(--gut), calc((100% - var(--maxw)) / 2 + var(--gut)));
-      transform: translate(50%, -50%)
-    }
-
-    .mk--bl {
-      bottom: 0;
-      left: max(var(--gut), calc((100% - var(--maxw)) / 2 + var(--gut)));
-      transform: translate(-50%, 50%)
-    }
-
-    .mk--br {
-      bottom: 0;
-      right: max(var(--gut), calc((100% - var(--maxw)) / 2 + var(--gut)));
-      transform: translate(50%, 50%)
-    }
-
-    /* ---------- type ---------- */
     .label {
-      font-family: var(--mono);
-      font-size: var(--t-label);
-      letter-spacing: .19em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin: 0
-    }
-
-    .label b {
-      color: var(--acc-text);
-      font-weight: 500
+      letter-spacing: .19em
     }
 
     .display {
@@ -343,46 +160,15 @@
       line-height: .9
     }
 
-    .h2 {
-      margin: 0;
-      font-size: var(--t-h2);
-      font-weight: 780;
-      letter-spacing: -.028em;
-      line-height: .96
+    .display .acc {
+      color: var(--acc)
     }
 
-    .h3 {
-      margin: 0;
-      font-size: var(--t-h3);
-      font-weight: 700;
-      letter-spacing: -.02em;
-      line-height: 1.1
-    }
-
-    .dim {
-      color: var(--muted)
-    }
-
-    .lead {
-      font-size: var(--t-body);
-      color: var(--muted);
-      max-width: 46ch;
-      margin: 0
-    }
-
-    .lead b {
-      color: var(--fg);
-      font-weight: 600
-    }
-
-    /* ---------- controls ----------
+    /* ---------- 3. CONTROLS ----------
        One button shape. Solid = the primary action, hairline = everything
-       else. Small caps mono label, crisp geometry, no oversized marketing
-       pill. (agency-grid-layout-minimal / editorial-tech) */
+       else. Crisp geometry, small label — not an oversized marketing pill.
+       (agency-grid-layout-minimal / editorial-tech) */
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: .6rem;
       padding: .85rem 1.35rem;
       border: 1px solid var(--acc);
       border-radius: 4px;
@@ -390,42 +176,32 @@
       color: #0b0b0c;
       font: 600 var(--t-small)/1 var(--sans);
       letter-spacing: .01em;
-      text-decoration: none;
-      cursor: pointer;
-      position: relative;
+      box-shadow: none;
       transition: transform var(--d-micro) var(--e-out), filter var(--d-micro)
-    }
-
-    .btn svg {
-      width: 15px;
-      height: 15px;
-      transition: transform var(--d-ui) var(--e-out)
     }
 
     .btn:hover {
       transform: translateY(-2px);
-      filter: brightness(1.06)
+      filter: brightness(1.06);
+      box-shadow: none
     }
 
-    .btn:hover svg {
-      transform: translateX(3px)
-    }
-
-    .btn--line {
+    .btn--ghost {
       background: transparent;
       border-color: var(--line);
       color: var(--fg)
     }
 
-    .btn--line:hover {
+    .btn--ghost:hover {
       border-color: var(--fg);
       filter: none
     }
 
-    /* ---------- the pixel mark ----------
-       The engine's shape, standing still, as the identity. This is the
-       move the whole refresh turns on: the pixel stops being something
-       done TO the words and becomes the thing the studio is signed with. */
+    /* ---------- 4. THE PIXEL MARK ----------
+       The engine's shape standing still, as the identity. This is the move
+       the refresh turns on: the pixel stops being something done TO the
+       words and becomes the thing the studio signs with. Static SVG — an
+       identity may not depend on a script. */
     .mark {
       width: 26px;
       height: 26px;
@@ -437,10 +213,52 @@
       fill: currentColor
     }
 
-    .wordmark {
+    .logo {
       display: inline-flex;
       align-items: center;
-      gap: .6rem;
+      gap: .6rem
+    }
+
+    /* ============================================================
+       THE RAIL
+       Outside the stage on purpose: the stage carries overflow:clip for
+       the dither field, and a sticky element only sticks inside its own
+       clipping ancestor. Left inside, the navigation scrolled away and
+       never came back.
+       ============================================================ */
+    .rail {
+      position: sticky;
+      top: 0;
+      z-index: 500;
+      /* the rail always sits on ink — over the stage at the top of the
+         page, and as its own shell once the stage is behind it */
+      color: var(--ink-fg);
+      --fg: var(--ink-fg);
+      --muted: #a3a3a0;
+      --line: rgba(242, 242, 239, .18);
+      --line-2: rgba(242, 242, 239, .12);
+      --acc-text: var(--acc);
+      --sig-fg: var(--sig-text);
+      border-bottom: 1px solid transparent;
+      transition: background-color var(--d-ui), border-color var(--d-ui)
+    }
+
+    .rail.stuck {
+      background: rgba(11, 11, 12, .82);
+      backdrop-filter: blur(14px) saturate(1.2);
+      -webkit-backdrop-filter: blur(14px) saturate(1.2);
+      border-bottom-color: var(--line-2)
+    }
+
+    .rail-in {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 1.4rem;
+      padding-block: 1.05rem
+    }
+
+    .rail-in .logo {
       font-weight: 800;
       letter-spacing: -.02em;
       font-size: 1.06rem;
@@ -448,14 +266,103 @@
       color: var(--fg)
     }
 
-    .wordmark i {
+    .rail-in .logo i {
       font-style: normal;
       color: var(--muted);
       font-weight: 500
     }
 
+    .r-status {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      white-space: nowrap;
+      font-family: var(--mono);
+      font-size: var(--t-label);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted)
+    }
+
+    .r-status i {
+      width: 6px;
+      height: 6px;
+      background: var(--sig-text);
+      border-radius: 50%;
+      flex: none;
+      box-shadow: 0 0 0 3px rgba(164, 189, 0, .16)
+    }
+
+    .r-nav {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 1.3rem
+    }
+
+    .r-nav>a:not(.btn) {
+      font-size: var(--t-small);
+      color: var(--muted);
+      text-decoration: none;
+      transition: color var(--d-micro)
+    }
+
+    .r-nav>a:not(.btn):hover {
+      color: var(--fg)
+    }
+
+    .r-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      height: 34px;
+      padding: 0 .75rem;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: transparent;
+      color: var(--muted);
+      font: 500 var(--t-small)/1 var(--sans);
+      cursor: pointer;
+      transition: color var(--d-micro), border-color var(--d-micro)
+    }
+
+    .r-btn:hover {
+      color: var(--fg);
+      border-color: var(--fg)
+    }
+
+    .r-btn kbd {
+      font: 500 .68rem/1 var(--mono);
+      letter-spacing: .06em;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      padding: .18rem .3rem
+    }
+
+    .r-btn svg {
+      width: 16px;
+      height: 16px
+    }
+
+    .r-btn--icon {
+      width: 34px;
+      padding: 0;
+      display: grid;
+      place-items: center
+    }
+
+    .r-btn--icon svg {
+      grid-area: 1/1
+    }
+
+    html[data-theme="dark"] .t-moon,
+    html[data-theme="light"] .t-sun {
+      display: none
+    }
+
     /* ============================================================
-       THE STAGE — full-bleed header
+       THE STAGE — full bleed, dither underneath, content anchored low
        ============================================================ */
     .stage {
       position: relative;
@@ -467,31 +374,18 @@
       overflow: clip;
       background: var(--ink);
       color: var(--ink-fg);
-      --line: rgba(242, 242, 239, .18);
-      /* on the stage the rails sit ON the dither field, so they need more
-         than the .07 that reads fine on flat ink */
-      --line-2: rgba(242, 242, 239, .12);
-      --muted: #a3a3a0;
       --fg: var(--ink-fg);
+      --muted: #a3a3a0;
+      --line: rgba(242, 242, 239, .18);
+      /* the rails sit ON the field here, so they need more than the .07
+         that reads fine on flat ink */
+      --line-2: rgba(242, 242, 239, .12);
       --acc-text: var(--acc);
       --sig-fg: var(--sig-text)
     }
 
-    /* The dither canvas is inserted by the engine as the first child and
-       carries .dither-l. Its size is set by the engine in CSS pixels (one
-       backing pixel per cell, scaled up), so DO NOT force width/height here -
-       that stretches the backing store and the cells stop being square.
-       Two washes sit above it: readability without flattening the field.
+    /* two washes over the field: readability without flattening it
        (image-first-grid-layout) */
-    .dither-l {
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 0;
-      image-rendering: pixelated;
-      pointer-events: none
-    }
-
     .stage::after {
       content: "";
       position: absolute;
@@ -508,162 +402,13 @@
       z-index: 2
     }
 
-    /* --- top rail --- */
-    .rail {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      /* the rail always sits on ink: over the stage at the top of the page,
-         and as its own shell once the stage is gone */
-      color: var(--ink-fg);
-      --fg: var(--ink-fg);
-      --muted: #a3a3a0;
-      --line: rgba(242, 242, 239, .18);
-      --line-2: rgba(242, 242, 239, .12);
-      --acc-text: var(--acc);
-      --sig-fg: var(--sig-text);
-      border-bottom: 1px solid transparent;
-      transition: background-color var(--d-ui), border-color var(--d-ui), backdrop-filter var(--d-ui)
+    /* the stage is pulled up under the rail, so its top corner marks would
+       land behind it and read as two stray dots */
+    .stage>.gmark--tl,
+    .stage>.gmark--tr {
+      top: var(--rail-h, 68px)
     }
 
-    .rail.stuck {
-      background: rgba(11, 11, 12, .82);
-      backdrop-filter: blur(14px) saturate(1.2);
-      -webkit-backdrop-filter: blur(14px) saturate(1.2);
-      border-bottom-color: var(--line-2)
-    }
-
-    .top {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      gap: 1.4rem;
-      padding-block: 1.1rem
-    }
-
-    .status {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      font-family: var(--mono);
-      font-size: var(--t-label);
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      color: var(--muted);
-      white-space: nowrap
-    }
-
-    .status i {
-      width: 6px;
-      height: 6px;
-      background: var(--sig-text);
-      border-radius: 50%;
-      flex: none;
-      box-shadow: 0 0 0 3px rgba(164, 189, 0, .16)
-    }
-
-    .top nav {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 1.6rem
-    }
-
-    .top nav a {
-      font-size: var(--t-small);
-      color: var(--muted);
-      text-decoration: none;
-      transition: color var(--d-micro)
-    }
-
-    .top nav a:hover {
-      color: var(--fg)
-    }
-
-    .menu-t {
-      display: none;
-      align-items: center;
-      gap: .5rem;
-      padding: .55rem .9rem;
-      border: 1px solid var(--line);
-      border-radius: 4px;
-      background: transparent;
-      color: var(--fg);
-      font: 600 var(--t-small)/1 var(--sans);
-      cursor: pointer
-    }
-
-    /* the overlay: a real menu, not a placeholder - a mockup that shows a
-       dead control is showing something the visitor cannot have */
-    .menu {
-      position: fixed;
-      inset: 0;
-      z-index: 100;
-      background: var(--ink);
-      color: var(--ink-fg);
-      display: grid;
-      align-content: center;
-      gap: .4rem;
-      padding: var(--gut);
-      border: 0
-    }
-
-    .menu[hidden] {
-      display: none
-    }
-
-    .menu a {
-      font-size: clamp(2rem, 11vw, 3rem);
-      font-weight: 800;
-      letter-spacing: -.03em;
-      text-decoration: none;
-      padding: .35rem 0;
-      border-bottom: 1px solid rgba(242, 242, 239, .12)
-    }
-
-    .menu .menu-x {
-      justify-self: end;
-      margin-bottom: 1.5rem;
-      padding: .55rem .9rem;
-      border: 1px solid rgba(242, 242, 239, .18);
-      border-radius: 4px;
-      background: transparent;
-      color: inherit;
-      font: 600 var(--t-small)/1 var(--sans);
-      cursor: pointer
-    }
-
-    .tt {
-      display: grid;
-      place-items: center;
-      width: 34px;
-      height: 34px;
-      padding: 0;
-      border: 1px solid var(--line);
-      border-radius: 4px;
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-      transition: color var(--d-micro), border-color var(--d-micro)
-    }
-
-    .tt:hover {
-      color: var(--fg);
-      border-color: var(--fg)
-    }
-
-    .tt svg {
-      width: 16px;
-      height: 16px;
-      grid-area: 1/1
-    }
-
-    html[data-theme="dark"] .t-moon,
-    html[data-theme="light"] .t-sun {
-      display: none
-    }
-
-    /* --- the composition --- */
     .stage-body {
       width: 100%;
       flex: 1;
@@ -680,13 +425,30 @@
       align-items: end
     }
 
+    /* eyebrow and intro ride at the TOP, aligned with the plate; the
+       billboard line stays anchored at the bottom. Open space has to be
+       deliberate, not left over. (agency-grid-layout-minimal) */
     .stage-copy {
       align-self: stretch;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 2rem;
-      padding-bottom: .4rem
+      gap: 2rem
+    }
+
+    .stage-kicker {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 0
+    }
+
+    .stage-kicker::before {
+      content: "";
+      width: 46px;
+      height: 1px;
+      background: var(--acc);
+      flex: none
     }
 
     .stage-intro {
@@ -702,13 +464,11 @@
       font-weight: 600
     }
 
-    /* The inset media panel. editorial-tech asks for "a cinematic band or
-       inset media strip crossing the composition"; this is that, and it is
-       also where the pixel engine now earns its keep - the plate assembles
-       out of a swarm on load instead of a headline doing it.
-
-       It also solves a plain compositional problem: without it the stage was
-       400px of nothing between the rail and the headline. */
+    /* The inset media panel. editorial-tech asks for a cinematic band or
+       inset media strip crossing the composition; this is that, and it is
+       where the pixel engine earns its keep above the fold. It also fixes
+       a plain compositional problem: without it the stage was 400px of
+       nothing between the rail and the headline. */
     .stage-media {
       display: grid;
       gap: 1.1rem
@@ -716,25 +476,25 @@
 
     .plate-frame {
       position: relative;
+      margin: 0;
       aspect-ratio: 4 / 3;
       border: 1px solid var(--line);
       border-radius: var(--r);
       overflow: hidden;
-      background: var(--ink-2)
-    }
-
-    .plate-frame {
+      background: var(--ink-2);
+      box-shadow: none;
+      /* the screenshot is full of syntax colours, and editorial-tech is
+         explicit that ONE accent punctuates a restrained palette */
       filter: saturate(.5) contrast(1.05)
     }
 
-    .plate-frame img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover
+    /* .shot-img brings its own 16/10 from the service pages; here the frame
+       decides the shape and the box just fills it */
+    .plate-frame .shot-img {
+      aspect-ratio: auto;
+      height: 100%
     }
 
-    /* mono chrome on the frame, so it reads as an instrument panel and not
-       as a stock photo dropped on the page (split-layout-technical) */
     .plate-tag {
       position: absolute;
       z-index: 3;
@@ -757,30 +517,10 @@
       font-weight: 500
     }
 
-    .kicker {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 0
-    }
-
-    .kicker::before {
-      content: "";
-      width: 46px;
-      height: 1px;
-      background: var(--acc);
-      flex: none
-    }
-
-    .display .acc {
-      color: var(--acc)
-    }
-
-    /* The metadata lane. Small, mono, in its own column - the numbers are
-       proof, not decoration, so they get a rule each. (number-details) */
+    /* the numbers are proof, not decoration, so each gets a rule
+       (number-details) */
     .facts {
       display: grid;
-      gap: 0;
       border-top: 1px solid var(--line)
     }
 
@@ -788,7 +528,7 @@
       display: flex;
       align-items: baseline;
       gap: .8rem;
-      padding: .85rem 0;
+      padding: .8rem 0;
       border-bottom: 1px solid var(--line-2)
     }
 
@@ -815,13 +555,13 @@
       gap: 1rem 2rem
     }
 
-    .ctas {
+    .stage-ctas {
       display: flex;
       flex-wrap: wrap;
       gap: .7rem
     }
 
-    .coords {
+    .stage-coords {
       margin-left: auto;
       font-family: var(--mono);
       font-size: var(--t-label);
@@ -830,318 +570,143 @@
       color: var(--muted)
     }
 
-    /* ============================================================
-       TICKER
-       ============================================================ */
-    .ticker {
-      border-block: 1px solid var(--line);
-      overflow: hidden;
-      background: var(--bg);
-      padding-block: .85rem
+    /* ---------- the travelling rim, brought into the palette ----------
+       common.js paints --wave-stops from PixelFX.wavePalette("rainbow"), and
+       a full rainbow was the loudest thing on a page whose whole point is
+       that ONE accent punctuates a restrained system (editorial-tech). Same
+       motion, same period, two brand signals instead of the spectrum: the
+       logo yellow travelling through the green and back.
+
+       !important because common.js writes this as an inline style on :root,
+       and an important author rule is the one thing that outranks that. The
+       period is untouched, so --rim-shift (period / sin angle) still lands
+       on a seamless loop. */
+    :root {
+      --wave-stops:
+        #f5c518 0px,
+        #d9c40f 96px,
+        #a4bd00 192px,
+        #7a8c00 288px,
+        #c9a814 384px,
+        #f5c518 480px !important
     }
 
-    .ticker-track {
-      display: flex;
-      gap: 3rem;
-      width: max-content;
-      animation: run 38s linear infinite;
-      /* the fade is a mask, not a gradient overlay - it works on any ground
-         behind it (css-alpha-masking) */
+    /* ---------- chapters: the exposed grid ---------- */
+    .guides::before,
+    .guides::after {
+      background: var(--line-2)
     }
 
-    .ticker {
-      mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
-      -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent)
+    .sec-head {
+      align-items: end
     }
 
-    .ticker span {
-      font-family: var(--mono);
-      font-size: var(--t-label);
-      letter-spacing: .2em;
-      text-transform: uppercase;
-      color: var(--muted);
-      white-space: nowrap
-    }
-
-    .ticker span b {
-      color: var(--fg);
-      font-weight: 500
-    }
-
-    .ticker span em {
-      color: var(--acc-text);
-      font-style: normal
-    }
-
-    @keyframes run {
-      to {
-        transform: translate3d(-50%, 0, 0)
-      }
-    }
-
-    /* ============================================================
-       CHAPTERS
-       ============================================================ */
-    .chapter {
-      padding-block: clamp(4.5rem, 11vh, 9rem)
-    }
-
-    .chead {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
-      gap: clamp(1.6rem, 4vw, 4rem);
-      align-items: end;
-      margin-bottom: clamp(2.4rem, 5vw, 4rem)
-    }
-
-    .chead .label {
-      margin-bottom: 1rem
-    }
-
-    /* --- statement chapter --- */
-    .statement {
-      font-size: clamp(1.5rem, 3vw, 2.6rem);
-      font-weight: 500;
-      letter-spacing: -.02em;
-      line-height: 1.22;
-      max-width: 24ch;
-      margin: 0
-    }
-
-    .statement b {
-      font-weight: 800
-    }
-
-    .statement .acc {
-      color: var(--acc-text);
-      font-weight: 800
-    }
-
-    /* --- work --- */
-    .work {
-      display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: clamp(1.4rem, 2.6vw, 2.4rem)
-    }
-
-    .case {
-      grid-column: span 4;
-      display: flex;
-      flex-direction: column;
-      gap: 1.1rem;
-      text-decoration: none
-    }
-
-    /* the lead case takes the whole grid and a cinematic crop - hierarchy
-       from scale, not from a badge (documentary-brutalist-agency) */
-    .case--lead {
-      grid-column: 1 / -1;
-      display: grid;
-      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-      gap: clamp(1.4rem, 3vw, 3rem);
-      align-items: center;
-      margin-bottom: clamp(.6rem, 2vw, 1.6rem)
-    }
-
-    .case--lead .case-img {
-      aspect-ratio: 16 / 9
-    }
-
-    .case--lead .case-body {
-      display: grid;
-      gap: 1rem;
-      align-content: center
-    }
-
-    .case--lead .h3 {
-      font-size: clamp(1.6rem, 2.8vw, 2.6rem)
-    }
-
-    /* Every image box is reserved before the media loads, and the box keeps
-       its frame if the photo never arrives. (documentary-brutalist-agency) */
     .case-img {
-      position: relative;
-      aspect-ratio: 4 / 3;
-      overflow: hidden;
-      border: 1px solid var(--line);
-      border-radius: var(--r);
-      background: var(--bg-2)
+      border-radius: var(--r)
     }
 
-    .case-img img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform .7s var(--e-out)
-    }
-
-    .case:hover .case-img img {
-      transform: scale(1.02)
-    }
-
-    .case-no {
-      position: absolute;
-      top: .7rem;
-      left: .8rem;
-      z-index: 3;
-      font-family: var(--mono);
-      font-size: var(--t-label);
-      letter-spacing: .14em;
-      color: var(--ink-fg);
-      mix-blend-mode: difference
-    }
-
-    .case-meta {
-      display: flex;
-      align-items: baseline;
-      gap: .8rem;
-      flex-wrap: wrap
-    }
-
-    .tag {
-      font-family: var(--mono);
-      font-size: var(--t-label);
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      color: var(--muted);
-      border: 1px solid var(--line);
-      border-radius: 3px;
-      padding: .2rem .5rem
-    }
-
-    .tag--live {
-      color: var(--sig-fg);
-      border-color: color-mix(in srgb, var(--sig) 55%, transparent)
-    }
-
-    .case-h {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 1rem
-    }
-
-    .case-h .arrow {
-      color: var(--muted);
-      transition: transform var(--d-ui) var(--e-out), color var(--d-ui)
-    }
-
-    .case:hover .arrow {
-      transform: translate(4px, -4px);
-      color: var(--acc-text)
-    }
-
-    /* --- services: rows, not cards --- */
-    .rows {
-      border-top: 1px solid var(--line)
-    }
-
-    .row {
-      display: grid;
-      grid-template-columns: 4rem minmax(0, 15rem) minmax(0, 1fr) 2rem;
-      gap: clamp(1rem, 3vw, 2.4rem);
-      align-items: baseline;
-      padding: clamp(1.4rem, 2.6vw, 2.1rem) 0;
-      border-bottom: 1px solid var(--line-2);
-      text-decoration: none;
-      transition: border-color var(--d-ui)
-    }
-
-    .row:hover {
-      border-bottom-color: var(--acc)
-    }
-
-    .row .n {
-      font-family: var(--mono);
-      font-size: var(--t-label);
-      letter-spacing: .14em;
-      color: var(--muted);
-      transition: color var(--d-ui)
-    }
-
-    .row:hover .n {
-      color: var(--acc-text)
-    }
-
-    .row .arrow {
-      justify-self: end;
-      color: var(--muted);
-      transition: transform var(--d-ui) var(--e-out), color var(--d-ui)
-    }
-
-    .row:hover .arrow {
-      transform: translateX(4px);
-      color: var(--fg)
-    }
-
-    /* --- studio --- */
-    .studio {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
-      gap: clamp(1.4rem, 3vw, 2.4rem)
-    }
-
-    .person {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem
-    }
-
-    .plate {
-      position: relative;
-      aspect-ratio: 4 / 5;
-      border: 1px solid var(--line);
-      border-radius: var(--r);
-      overflow: hidden;
-      background: var(--bg-2)
-    }
-
-    .plate img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover
-    }
-
-    /* No silhouettes, no initials, no generated faces standing in for real
-       people. An empty frame that SAYS it is empty is honest; a drawn head
-       is a claim. (build-awwwards-quality-sites, honesty section) */
-    .plate--pending {
-      display: grid;
-      place-content: center;
-      gap: .5rem;
-      text-align: center;
-      padding: 1.5rem;
-      border-style: dashed
-    }
-
-    .plate--pending .label {
+    .testi--open blockquote {
       color: var(--muted)
     }
 
-    /* --- CTA: a dark block nested in the paper shell --- */
-    .cta {
-      border-radius: 20px;
-      padding: clamp(2.4rem, 6vw, 5rem);
-      display: grid;
-      gap: 1.6rem;
-      justify-items: start;
-      position: relative;
-      overflow: hidden
-    }
-
-    /* --- footer --- */
+    /* ============================================================
+       THE FOOTER — a chapter, not a leftover strip
+       ============================================================ */
     .foot {
-      padding-block: clamp(3rem, 6vh, 5rem) 2rem
+      background: var(--ink);
+      color: var(--ink-fg);
+      --fg: var(--ink-fg);
+      --muted: #a3a3a0;
+      --line: rgba(242, 242, 239, .15);
+      --line-2: rgba(242, 242, 239, .07);
+      --acc-text: var(--acc);
+      --sig-fg: var(--sig-text);
+      padding-block: clamp(3.5rem, 8vh, 6rem) 1.6rem
     }
 
+    .foot-top {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 32rem);
+      gap: clamp(2rem, 5vw, 4rem);
+      align-items: start;
+      padding-bottom: clamp(2.5rem, 6vw, 4rem)
+    }
+
+    .foot-say {
+      font-size: clamp(1.5rem, 3vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -.025em;
+      line-height: 1.15;
+      margin: 1rem 0 1.6rem;
+      max-width: 20ch
+    }
+
+    .foot-say .acc {
+      color: var(--acc)
+    }
+
+    .foot-mail {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      font-family: var(--mono);
+      font-size: var(--t-small);
+      letter-spacing: .06em;
+      color: var(--acc-text);
+      text-decoration: none;
+      border-bottom: 1px solid color-mix(in srgb, var(--acc) 45%, transparent);
+      padding-bottom: .15rem;
+      transition: border-color var(--d-micro)
+    }
+
+    .foot-mail:hover {
+      border-bottom-color: var(--acc)
+    }
+
+    .foot-cols {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.6rem
+    }
+
+    .foot-col {
+      display: grid;
+      align-content: start;
+      gap: .55rem
+    }
+
+    .foot-col .label {
+      margin-bottom: .35rem
+    }
+
+    .foot-col a,
+    .foot-col span:not(.r-status) {
+      font-size: var(--t-small);
+      color: var(--muted);
+      text-decoration: none;
+      width: fit-content;
+      line-height: 1.7;
+      transition: color var(--d-micro)
+    }
+
+    .foot-col a:hover {
+      color: var(--fg)
+    }
+
+    /* the oversized wordmark. documentary-brutalist-agency asks the page to
+       finish on one — it is the last thing seen, and it should be the name. */
     .foot-mark {
-      font-size: clamp(3.4rem, 16vw, 15rem);
+      display: block;
+      width: 100%;
+      font-size: clamp(3.2rem, 15.4vw, 15rem);
       font-weight: 800;
-      letter-spacing: -.05em;
-      line-height: .8;
-      margin: 0 0 2rem;
+      letter-spacing: -.052em;
+      line-height: .78;
+      margin: 0;
+      padding-top: clamp(1.2rem, 3vw, 2rem);
+      border-top: 1px solid var(--line);
       color: var(--fg);
-      opacity: .96
+      text-decoration: none
     }
 
     .foot-mark i {
@@ -1152,112 +717,93 @@
     .foot-bar {
       display: flex;
       flex-wrap: wrap;
-      gap: .8rem 2rem;
+      gap: .6rem 2rem;
       align-items: center;
-      padding-top: 1.4rem;
-      border-top: 1px solid var(--line)
+      margin-top: 1.8rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--line-2)
     }
 
-    .foot-bar .label:last-child {
-      margin-left: auto
+    .foot-legal {
+      margin-left: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.1rem
     }
 
-    /* ---------- entrance ----------
-       Fade + rise, 12-24px, once, at 25% visible, 60ms stagger.
-       Reduced motion gets the END STATE, not a shorter animation. */
-    .rv {
-      opacity: 0;
-      transform: translateY(18px);
-      transition: opacity var(--d-in) var(--e-out), transform var(--d-in) var(--e-out);
-      transition-delay: calc(var(--i, 0) * 60ms)
+    .foot-bar a {
+      font-size: var(--t-small);
+      color: var(--muted);
+      text-decoration: none;
+      transition: color var(--d-micro)
     }
 
-    .rv.in {
-      opacity: 1;
-      transform: none
+    .foot-bar a:hover {
+      color: var(--fg)
     }
 
-    @media (prefers-reduced-motion: reduce) {
-
-      html {
-        scroll-behavior: auto
-      }
-
-      .rv {
-        opacity: 1;
-        transform: none;
-        transition: none
-      }
-
-      .ticker-track {
-        animation: none
-      }
-    }
-
-    /* ---------- responsive ---------- */
-    @media (max-width: 900px) {
-
-      .stage-grid,
-      .chead {
-        grid-template-columns: 1fr
-      }
-
-      .case,
-      .case--lead {
-        grid-column: 1 / -1;
-        grid-template-columns: 1fr
-      }
-
-      .row {
-        grid-template-columns: 3rem 1fr 1.5rem
-      }
-
-      .row .desc {
-        grid-column: 2 / -1;
-        margin-top: .4rem
-      }
-
-      .status,
-      .top nav a,
-      .top nav .btn {
-        display: none
-      }
-
-      .menu-t {
-        display: inline-flex
-      }
-    }
-
-    /* the mockup's own note strip - not part of the design */
-    .note {
+    /* ---------- the mockup's own note, not part of the design ---------- */
+    .mnote {
       font-family: var(--mono);
       font-size: .72rem;
-      letter-spacing: .06em;
-      line-height: 1.7;
+      letter-spacing: .04em;
+      line-height: 1.8;
       color: var(--muted);
       border: 1px dashed var(--line);
       border-radius: 6px;
-      padding: 1rem 1.2rem;
-      max-width: 70ch
+      padding: 1.1rem 1.3rem;
+      margin-top: 2.5rem;
+      max-width: 78ch
     }
 
-    .note b {
+    .mnote b {
       color: var(--acc-text);
       font-weight: 500
+    }
+
+    .mnote p {
+      margin: 0 0 .7rem
+    }
+
+    .mnote p:last-child {
+      margin-bottom: 0
+    }
+
+    /* ---------- responsive ---------- */
+    @media (max-width: 940px) {
+
+      .stage-grid,
+      .foot-top {
+        grid-template-columns: 1fr
+      }
+    }
+
+    @media (max-width: 760px) {
+
+      .r-status,
+      .r-nav>a:not(.btn),
+      .r-nav>.btn {
+        display: none
+      }
+
+      .foot-cols {
+        grid-template-columns: 1fr 1fr
+      }
     }
   </style>
 </head>
 
 <body>
 
-  <!-- ============================================================
-       THE STAGE — full bleed, dither underneath, content anchored low
-       ============================================================ -->
+  <!-- scroll progress: the CSS bar is the fallback, Pac-Man replaces it -->
+  <div class="prog" aria-hidden="true"></div>
+  <canvas id="pacbar" aria-hidden="true"></canvas>
+
+  <!-- ================= RAIL ================= -->
   <div class="rail" id="rail">
-    <div class="wrap top">
-      <a class="wordmark" href="#">
-        <!-- The pixel mark. Seven by seven cells, the same grid the engine
-             draws on. Static SVG: an identity may not depend on a script. -->
+    <div class="wrap rail-in">
+      <a class="logo" href="#top">
+        <!-- seven by seven cells, the same grid the engine draws on -->
         <svg class="mark" viewBox="0 0 7 7" aria-hidden="true">
           <rect x="0" y="0" width="1" height="7" />
           <rect x="6" y="0" width="1" height="7" />
@@ -1267,20 +813,27 @@
           <rect x="4" y="2" width="1" height="1" />
           <rect x="3" y="3" width="1" height="1" />
         </svg>
-        mccain <i>digital</i>
+        mccain <i>digital</i><span class="sr-only"> — home</span>
       </a>
 
-      <span class="status"><i aria-hidden="true"></i> München · open for work</span>
+      <span class="r-status"><i aria-hidden="true"></i> München · open for work</span>
 
-      <nav aria-label="Main">
+      <nav class="r-nav" aria-label="Main">
         <a href="#work">Work</a>
         <a href="#services">Services</a>
-        <a href="#studio">Studio</a>
-        <button class="tt" id="themeT" type="button" aria-label="Switch between light and dark">
+        <a href="#ai">AI</a>
+        <button class="r-btn" type="button" data-menu-open aria-haspopup="dialog" aria-controls="cmenu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h10" />
+          </svg>
+          Menu <kbd data-menu-key>⌘K</kbd>
+        </button>
+        <button class="r-btn r-btn--icon" id="themeT" type="button" aria-label="Switch between light and dark">
           <svg class="t-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
             aria-hidden="true">
             <circle cx="12" cy="12" r="4.2" />
-            <path d="M12 2v2.6M12 19.4V22M2 12h2.6M19.4 12H22M4.9 4.9l1.9 1.9M17.2 17.2l1.9 1.9M19.1 4.9l-1.9 1.9M6.8 17.2l-1.9 1.9" />
+            <path
+              d="M12 2v2.6M12 19.4V22M2 12h2.6M19.4 12H22M4.9 4.9l1.9 1.9M17.2 17.2l1.9 1.9M19.1 4.9l-1.9 1.9M6.8 17.2l-1.9 1.9" />
           </svg>
           <svg class="t-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
             aria-hidden="true">
@@ -1288,385 +841,607 @@
           </svg>
         </button>
         <a class="btn" href="#contact">Start a project</a>
-        <button class="menu-t" type="button" id="menuT" aria-haspopup="dialog" aria-controls="menu">Menu</button>
       </nav>
     </div>
   </div>
 
-  <div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu" hidden>
-    <button class="menu-x" type="button" id="menuX">Close</button>
-    <a href="#work">Work</a>
-    <a href="#services">Services</a>
-    <a href="#studio">Studio</a>
-    <a href="#contact">Start a project</a>
-  </div>
+  <main id="top">
 
-  <header class="stage rails" id="stage">
-    <span class="mk mk--tl"></span><span class="mk mk--tr"></span>
-    <span class="mk mk--bl"></span><span class="mk mk--br"></span>
+    <!-- ================= THE STAGE ================= -->
+    <header class="stage guides" id="stage">
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
 
-    <div class="wrap stage-body">
-      <div class="stage-grid">
-        <div class="stage-copy">
-          <div>
-            <p class="kicker label rv" style="--i:0">Digital product studio · Bavaria · est. 2016</p>
-            <p class="stage-intro rv" style="--i:1">Tools, web apps and software that go to
-              <b>production</b> — not to a slide deck. Two founders, senior hands only.</p>
-          </div>
-          <h1 class="display rv" style="--i:2">
-            We build the<br>useful <span class="acc">kind of AI.</span>
-          </h1>
-        </div>
-
-        <div class="stage-media">
-          <div class="plate-frame rv" style="--i:1" data-mosaic>
-            <img src="../img/code-screen-1200.webp"
-              srcset="../img/code-screen-640.webp 640w, ../img/code-screen-1200.webp 1200w"
-              sizes="(max-width:900px) 92vw, 42vw" alt="whatever-recall running in a terminal" width="1200"
-              height="825" fetchpriority="high" decoding="async">
-            <span class="plate-tag"><span>whatever-recall</span><b>live</b></span>
-          </div>
-
-          <div class="facts rv" style="--i:2">
-            <div class="fact"><b>20+</b><span>years in the industry</span></div>
-            <div class="fact"><b>4×100</b><span>Lighthouse, this build</span></div>
-            <div class="fact"><b>0</b><span>account managers</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="stage-foot rv" style="--i:3">
-        <div class="ctas">
-          <a class="btn" href="#contact">Start a project
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path d="M5 12h14M13 6l6 6-6 6" />
-            </svg>
-          </a>
-          <a class="btn btn--line" href="#work">See the work</a>
-        </div>
-        <span class="coords">48.14° N · 11.58° E — reply in 24h, fixed quote in 48h</span>
-      </div>
-    </div>
-  </header>
-
-  <!-- ============================================================ -->
-  <div class="ticker ink">
-    <div class="ticker-track" id="ticker">
-      <span>Idea <b>→</b> Design <b>→</b> Code <b>→</b> <em>Launch</em></span>
-      <span>RAG on <b>your</b> data</span>
-      <span>Agents with <b>guardrails</b></span>
-      <span>Self-hosted, <b>your keys</b></span>
-      <span>Shipped, <em>not slideware</em></span>
-      <span>Est. <b>2016</b> · München</span>
-    </div>
-  </div>
-
-  <!-- ============================================================
-       (01) POSITIONING — the paper cut
-       ============================================================ -->
-  <section class="chapter alt rails">
-    <span class="mk mk--tl"></span><span class="mk mk--tr"></span>
-    <span class="mk mk--bl"></span><span class="mk mk--br"></span>
-    <div class="wrap">
-      <div class="chead">
-        <div>
-          <p class="label rv">(01) — What we actually are</p>
-          <p class="statement rv" style="--i:1">Two founders, senior hands only. The people you
-            <b>talk to</b> are the people who <span class="acc">build it.</span>
-          </p>
-        </div>
-        <p class="lead rv" style="--i:2">No account layer, no hand-off, no discovery theatre. You get a reply in
-          24 hours and a fixed quote in 48 — from someone who will still be on the project in month six.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================================
-       (02) WORK — image-led, mosaic reveal
-       ============================================================ -->
-  <section class="chapter ink rails" id="work">
-    <span class="mk mk--tl"></span><span class="mk mk--tr"></span>
-    <span class="mk mk--bl"></span><span class="mk mk--br"></span>
-    <div class="wrap">
-      <div class="chead">
-        <div>
-          <p class="label rv">(02) — Selected work</p>
-          <h2 class="h2 rv" style="--i:1">Things that <span class="dim">actually shipped.</span></h2>
-        </div>
-        <p class="lead rv" style="--i:2">Everything here is ours and live. Client cases follow once they're
-          cleared — we don't show work we can't name.</p>
-      </div>
-
-      <div class="work">
-        <a class="case case--lead rv" href="#" style="--i:0">
-          <div class="case-img" data-mosaic>
-            <span class="case-no">01</span>
-            <img src="../img/screen-work-1200.webp" srcset="../img/screen-work-640.webp 640w, ../img/screen-work-1200.webp 1200w"
-              sizes="(max-width:900px) 92vw, 58vw" alt="whatever-recall running in a terminal" width="1200" height="825"
-              loading="lazy" decoding="async">
-          </div>
-          <div class="case-body">
-            <div class="case-meta"><span class="tag">Our product</span><span class="tag tag--live">Live</span></div>
-            <div class="case-h">
-              <h3 class="h3">whatever-recall</h3>
-              <span class="arrow" aria-hidden="true">↗</span>
+      <div class="wrap stage-body">
+        <div class="stage-grid">
+          <div class="stage-copy">
+            <div>
+              <p class="stage-kicker label rv">Digital product studio · Bavaria · est. 2016</p>
+              <p class="stage-intro rv">Tools, web apps and software that go to <b>production</b> — not to a
+                slide deck. Two founders, senior hands only.</p>
             </div>
-            <p class="lead">AI-native project memory. Knowledge is stamped onto the git commit at write
-              time, read back in microseconds for zero tokens — the thing we needed and nobody sold.</p>
+            <h1 class="display rv">We build the<br>useful <span class="acc">kind of AI.</span></h1>
           </div>
-        </a>
 
-        <a class="case rv" href="#" style="--i:1">
-          <div class="case-img" data-mosaic>
-            <span class="case-no">02</span>
-            <img src="../img/circuit-macro-1200.webp" srcset="../img/circuit-macro-640.webp 640w, ../img/circuit-macro-1200.webp 1200w"
-              sizes="(max-width:900px) 92vw, 40vw" alt="A circuit board photographed close up" width="1200" height="825"
+          <div class="stage-media">
+            <!-- .case + .case-img: common.js wires the pixel mosaic on exactly
+                 those two classes, so this plate assembles out of a swarm like
+                 every other picture on the page. -->
+            <figure class="shot plate-frame rv-s">
+              <span class="shot-img">
+                <img src="../img/code-screen-1200.webp"
+                  srcset="../img/code-screen-640.webp 640w, ../img/code-screen-1200.webp 1200w"
+                  sizes="(max-width: 940px) 92vw, 40vw" alt="whatever-recall running in a terminal" width="1200"
+                  height="825" fetchpriority="high" decoding="async">
+              </span>
+              <span class="plate-tag"><span>whatever-recall</span><b>live</b></span>
+            </figure>
+
+            <div class="facts rv-s">
+              <div class="fact"><b>20+</b><span>years in the industry</span></div>
+              <div class="fact"><b>4×100</b><span>Lighthouse, this build</span></div>
+              <div class="fact"><b>0</b><span>account managers</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stage-foot rv">
+          <div class="stage-ctas">
+            <a class="btn" href="#ai">Try the AI, right here
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </a>
+            <a class="btn btn--ghost" href="#work" data-magnet>See the work</a>
+          </div>
+          <span class="stage-coords">48.14° N · 11.58° E — reply in 24h, fixed quote in 48h</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============ VELOCITY MARQUEE ============ -->
+    <!-- Six items, not five: common.js duplicates the track for the seamless
+         loop, so an odd count would flip the solid/hollow parity at the seam. -->
+    <div class="vmq" aria-hidden="true">
+      <div class="vmq-track" id="vmq">
+        <span class="vmq-item">Idea <b>→</b> Design <b>→</b> Code <b>→</b> <b>Launch</b></span>
+        <span class="vmq-item vmq-item--out">RAG on <b>your</b> data</span>
+        <span class="vmq-item">Agents with <b>guardrails</b></span>
+        <span class="vmq-item vmq-item--out">Self-hosted, <b>your keys</b></span>
+        <span class="vmq-item">Shipped, <b>not slideware</b></span>
+        <span class="vmq-item vmq-item--out">Est. <b>2016</b> · München</span>
+      </div>
+    </div>
+
+    <!-- ================= (01) AI CONSOLE ================= -->
+    <section class="band band--ink ai guides" id="ai">
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+      <div class="wrap fx-out">
+        <div class="ai-grid">
+
+          <div class="ai-copy rv">
+            <p class="label">(01) — AI, actually built in</p>
+            <h2 class="sec-h">Ask this page <span class="dim">anything.</span></h2>
+            <p class="lead">Most agency sites <b>say</b> they do AI. This one <b>is</b> one. Ask it what we
+              cost, whether we're right for you, or what we'd actually build — or hand it your project and
+              watch it write the brief.</p>
+            <p class="ai-note">Runs on a serverless function with a rate limit — the key never touches your
+              browser. Right now this prototype answers from a local knowledge base; flip
+              <code>AI_MODE</code> to <code>live</code> in <code>v3.js</code> once the endpoint is deployed.</p>
+          </div>
+
+          <!-- The console sits in a travelling rim: an animated gradient border
+               out of the same palette the docked assistant uses. The wrappers
+               are markup because a glow has to spill outside the shape while
+               the sheet has to be clipped inside it, and one element cannot
+               do both. -->
+          <div class="rim-hold console-hold rv-s" id="consoleHold">
+            <span class="rim-glow" aria-hidden="true"></span>
+            <div class="rim">
+              <span class="rim-sheet" aria-hidden="true"></span>
+              <div class="rim-in" id="consoleIn">
+                <div class="console" id="console">
+                  <div class="console-bar">
+                    <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                    <div role="tablist" aria-label="AI mode" style="display:flex;gap:.35rem">
+                      <button class="tab" type="button" role="tab" id="tabAsk" aria-selected="true"
+                        aria-controls="consoleBody">Ask the site</button>
+                      <button class="tab" type="button" role="tab" id="tabBrief" aria-selected="false"
+                        aria-controls="consoleBody">Project brief</button>
+                    </div>
+                    <span class="console-live"><i aria-hidden="true"></i> ready</span>
+                  </div>
+
+                  <div class="console-body" id="consoleBody" role="tabpanel" aria-live="polite"></div>
+
+                  <div class="console-chips" id="chips"></div>
+
+                  <form class="console-form" id="consoleForm">
+                    <label class="sr-only" for="consoleInput">Your question</label>
+                    <input id="consoleInput" type="text" autocomplete="off" placeholder="Ask us anything…">
+                    <button class="console-send" type="submit" aria-label="Send">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        aria-hidden="true">
+                        <path d="M5 12h13M12 5.5 18.5 12 12 18.5" />
+                      </svg>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Real vendor marks (simple-icons), painted through a CSS mask so
+             one file covers both themes and the hover tint. Never redraw a
+             wordmark by hand — that is exactly what looked wrong before. -->
+        <div class="stack stagger">
+          <span class="stack-l" style="--i:0">The stack we build with</span>
+          <span class="tool" style="--i:1" data-tip="claude"><i class="tl-claude" aria-hidden="true"></i>Claude</span>
+          <span class="tool" style="--i:2" data-tip="gpt"><i class="tl-openai" aria-hidden="true"></i>GPT</span>
+          <span class="tool" style="--i:3" data-tip="mcp"><i class="tl-mcp" aria-hidden="true"></i>MCP</span>
+          <span class="tool" style="--i:4" data-tip="n8n"><i class="tl-n8n" aria-hidden="true"></i>n8n</span>
+          <span class="tool" style="--i:5" data-tip="pgvector"><i class="tl-pg" aria-hidden="true"></i>pgvector</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= (02) WORK ================= -->
+    <section class="band workwrap guides" id="work">
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+      <div class="wrap">
+        <div class="sec-head rv">
+          <div>
+            <p class="label">(02) — Selected work</p>
+            <h2 class="sec-h">Things that <span class="dim">actually shipped.</span></h2>
+          </div>
+          <p class="lead">Scroll sideways, or use the arrows. Everything here is ours and live —
+            client cases follow once they're cleared.</p>
+        </div>
+      </div>
+
+      <div class="worktrack stagger" id="worktrack" tabindex="0" aria-label="Work, horizontally scrollable">
+
+        <article class="case" style="--i:0">
+          <div class="case-img"><img src="../img/code-screen-1200.webp"
+              srcset="../img/code-screen-640.webp 640w, ../img/code-screen-1200.webp 1200w"
+              sizes="(max-width: 820px) 80vw, 560px" alt="whatever-recall running in a terminal" width="1200"
+              height="825" loading="lazy" decoding="async">
+            <a class="case-peek" href="https://whatever-recall.com" target="_blank" rel="noopener" aria-hidden="true"
+              tabindex="-1">Open <b>→</b></a>
+          </div>
+          <div>
+            <div class="case-tags"><span class="hot">Our product</span><span>Live</span></div>
+            <h3 class="case-h">whatever-recall</h3>
+            <p class="case-p">AI-native project memory. Knowledge is stamped onto the git commit at write-time,
+              read back in microseconds for zero tokens.</p>
+            <div class="case-meta">
+              <div><span class="k">Stack</span><span>TypeScript · Python · pgvector · MCP</span></div>
+              <div><span class="k">Scope</span><span>Product, brand, site, licensing</span></div>
+              <div><span class="k">Status</span><span>Live · self-hosted</span></div>
+            </div>
+            <a class="scard-link" href="https://whatever-recall.com" target="_blank" rel="noopener">Visit the
+              product →</a>
+          </div>
+        </article>
+
+        <article class="case" style="--i:1">
+          <div class="case-img"><img src="../img/screen-work-1200.webp"
+              srcset="../img/screen-work-640.webp 640w, ../img/screen-work-1200.webp 1200w"
+              sizes="(max-width: 820px) 80vw, 560px" alt="This website on a laptop screen" width="1200" height="825"
               loading="lazy" decoding="async">
+            <a class="case-peek" href="#contact" aria-hidden="true" tabindex="-1">Open <b>→</b></a>
           </div>
-          <div class="case-meta"><span class="tag">Client</span><span class="tag tag--live">Live</span></div>
-          <div class="case-h">
-            <h3 class="h3">whatever.cms</h3>
-            <span class="arrow" aria-hidden="true">↗</span>
+          <div>
+            <div class="case-tags"><span class="hot">4×100</span><span>This site</span></div>
+            <h3 class="case-h">mccain-digital.com</h3>
+            <p class="case-p">Hand-written vanilla HTML/CSS/JS. No framework, no build step — while running a
+              custom canvas pixel-physics engine.</p>
+            <div class="case-meta">
+              <div><span class="k">Stack</span><span>Vanilla · canvas · JSON-LD</span></div>
+              <div><span class="k">Proof</span><span>100/100/100/100 · CLS 0 · TBT 0 ms</span></div>
+              <div><span class="k">Status</span><span>Live</span></div>
+            </div>
+            <a class="scard-link" href="#contact">Want one like it →</a>
           </div>
-          <p class="lead">A multi-tenant CMS with row-level security on every table and an audit trail on
-            every mutation.</p>
-        </a>
+        </article>
 
-        <a class="case rv" href="#" style="--i:2">
-          <div class="case-img" data-mosaic>
-            <span class="case-no">03</span>
-            <img src="../img/code-screen-1200.webp" srcset="../img/code-screen-640.webp 640w, ../img/code-screen-1200.webp 1200w"
-              sizes="(max-width:900px) 92vw, 30vw" alt="Code on screen" width="1200" height="825"
-              loading="lazy" decoding="async">
+        <article class="case" style="--i:2">
+          <div class="case-img"><img src="../img/circuit-macro-1200.webp"
+              srcset="../img/circuit-macro-640.webp 640w, ../img/circuit-macro-1200.webp 1200w"
+              sizes="(max-width: 820px) 80vw, 560px" alt="Placeholder image for a client case" width="1200"
+              height="825" loading="lazy" decoding="async">
+            <a class="case-peek" href="#contact" aria-hidden="true" tabindex="-1">Open <b>→</b></a>
           </div>
-          <div class="case-meta"><span class="tag">Our product</span><span class="tag">Beta</span></div>
-          <div class="case-h">
-            <h3 class="h3">ZwoelfStuff</h3>
-            <span class="arrow" aria-hidden="true">↗</span>
+          <div>
+            <div class="case-tags"><span>Placeholder</span><span>Needs your input</span></div>
+            <h3 class="case-h">Client case #1</h3>
+            <p class="case-p">Reserved for a real, cleared client project — the structure is built, the content
+              is yours to supply. Name, one honest result, the stack.</p>
+            <div class="case-meta">
+              <div><span class="k">Stack</span><span>—</span></div>
+              <div><span class="k">Scope</span><span>—</span></div>
+              <div><span class="k">Status</span><span>Awaiting clearance</span></div>
+            </div>
+            <a class="scard-link" href="#contact">Placeholder →</a>
           </div>
-          <p class="lead">A game add-on with 40k installs. Written to the same standard as the paid work —
-            which is the point of shipping it.</p>
-        </a>
+        </article>
 
-        <a class="case rv" href="#" style="--i:3">
-          <div class="case-img" data-mosaic>
-            <span class="case-no">04</span>
-            <img src="../img/hands-keyboard-1200.webp" srcset="../img/hands-keyboard-640.webp 640w, ../img/hands-keyboard-1200.webp 1200w"
-              sizes="(max-width:900px) 92vw, 55vw" alt="Hands on a keyboard" width="1200" height="825" loading="lazy"
-              decoding="async">
+        <article class="case" style="--i:3">
+          <div class="case-img"><img src="../img/hands-keyboard-1200.webp"
+              srcset="../img/hands-keyboard-640.webp 640w, ../img/hands-keyboard-1200.webp 1200w"
+              sizes="(max-width: 820px) 80vw, 560px" alt="Placeholder image for a client case" width="1200"
+              height="825" loading="lazy" decoding="async">
+            <a class="case-peek" href="#contact" aria-hidden="true" tabindex="-1">Open <b>→</b></a>
           </div>
-          <div class="case-meta"><span class="tag">Client</span><span class="tag tag--live">Live</span></div>
-          <div class="case-h">
-            <h3 class="h3">Meza</h3>
-            <span class="arrow" aria-hidden="true">↗</span>
+          <div>
+            <div class="case-tags"><span>Placeholder</span><span>Needs your input</span></div>
+            <h3 class="case-h">Client case #2</h3>
+            <p class="case-p">Same again. Two real client names here do more for trust than any amount of copy
+              about how much we care.</p>
+            <div class="case-meta">
+              <div><span class="k">Stack</span><span>—</span></div>
+              <div><span class="k">Scope</span><span>—</span></div>
+              <div><span class="k">Status</span><span>Awaiting clearance</span></div>
+            </div>
+            <a class="scard-link" href="#contact">Placeholder →</a>
           </div>
-          <p class="lead">Brand, site and booking flow for a restaurant group — Core Web Vitals green on
-            every page, on day one.</p>
-        </a>
+        </article>
+
       </div>
-    </div>
-  </section>
 
-  <!-- ============================================================
-       (03) SERVICES — rows, not cards
-       ============================================================ -->
-  <section class="chapter alt rails" id="services">
-    <span class="mk mk--tl"></span><span class="mk mk--tr"></span>
-    <span class="mk mk--bl"></span><span class="mk mk--br"></span>
+      <div class="wrap">
+        <div class="work-foot">
+          <p class="work-count"><b id="wCur">01</b> / <span id="wTot">04</span></p>
+          <div class="work-arrows">
+            <button class="arrow" type="button" id="wPrev" aria-label="Previous case">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M19 12H5M11 6l-6 6 6 6" />
+              </svg>
+            </button>
+            <button class="arrow" type="button" id="wNext" aria-label="Next case">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= (03) SCORE BAND ================= -->
+    <section class="band band--tight band--paper guides">
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+      <div class="wrap fx-out">
+        <div class="sec-head rv" style="margin-bottom:1rem">
+          <div>
+            <p class="label">(03) — P.S.</p>
+            <h2 class="sec-h">Best-looking <span class="dim">and</span> a perfect score.<br>
+              <span class="dim">This page does both.</span></h2>
+          </div>
+        </div>
+        <div class="scores stagger" id="scores"></div>
+        <p class="lead" style="margin-top:2rem">Readable by people <b>and</b> agents — every word is real DOM
+          text, structured with JSON-LD and summarised in <b>llms.txt</b>.</p>
+      </div>
+    </section>
+
+    <!-- ================= (04) SERVICES ================= -->
+    <!-- fx-dim, not fx-out: the cards inside are position:sticky and a
+         transform on this wrapper would re-parent them -->
+    <section class="band guides" id="services">
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+      <div class="wrap fx-dim">
+        <div class="sec-head rv">
+          <div>
+            <p class="label">(04) — What we do</p>
+            <h2 class="sec-h">Four things, <span class="dim">done properly.</span></h2>
+          </div>
+          <p class="lead">Cards stack as you scroll — the one you're reading stays, the next slides over it.</p>
+        </div>
+
+        <div class="stack-list" id="stackList"></div>
+      </div>
+    </section>
+
+    <!-- ================= (05) STUDIO ================= -->
+    <!-- fx-dim: the portraits run their own view() timelines, and an animated
+         ancestor transform would feed back into them -->
+    <section class="band band--paper guides" id="studio">
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+      <div class="wrap fx-dim">
+        <div class="studio-grid">
+          <div class="rv">
+            <p class="label">(05) — Who we are</p>
+            <p class="st-lead">An independent studio that cares about <em>what happens after launch</em> —
+              because we're still the ones who get the call.</p>
+            <p class="lead">The company is <b>eight years old</b>. The two of us have been doing this for
+              <b>over twenty</b> — for Deutsches Museum, Blizzard, Microsoft, Apple, Travian and Ravensburger,
+              long before McCain Digital had a name.</p>
+            <div class="st-facts stagger">
+              <div class="st-fact" style="--i:0"><b>2016</b><span>the year the company was founded</span></div>
+              <div class="st-fact" style="--i:1"><b>20+</b><span>years in the industry between the two of
+                  us</span></div>
+              <div class="st-fact" style="--i:2"><b>2</b><span>people you talk to — and the same two who build
+                  it</span></div>
+              <div class="st-fact" style="--i:3"><b>0</b><span>juniors, account managers or hand-offs</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pstage">
+            <figure class="pcard">
+              <span class="px-img"><img src="../team/portrait-christian-840.webp"
+                  srcset="../team/portrait-christian-440.webp 440w, ../team/portrait-christian-840.webp 840w"
+                  sizes="(max-width: 940px) 58vw, 410px" alt="Christian, co-founder" width="840" height="1050"
+                  loading="lazy" decoding="async"></span>
+              <figcaption><b>Christian</b><span>Co-founder · builds &amp; ships</span></figcaption>
+            </figure>
+            <figure class="pcard">
+              <span class="px-img"><img src="../team/portrait-kathi-840.webp"
+                  srcset="../team/portrait-kathi-440.webp 440w, ../team/portrait-kathi-840.webp 840w"
+                  sizes="(max-width: 940px) 58vw, 410px" alt="Kathi, co-founder" width="840" height="1050"
+                  loading="lazy" decoding="async"></span>
+              <figcaption><b>Kathi</b><span>Co-founder · design &amp; brand</span></figcaption>
+            </figure>
+            <p class="pstage-note">Hover a portrait — placeholders until the real photos land.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= (06) FAQ ================= -->
+    <!-- fx-dim: the answer panel is position:sticky -->
+    <section class="band band--ink guides" id="faq">
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+      <div class="wrap fx-dim">
+        <div class="sec-head rv">
+          <div>
+            <p class="label">(06) — Straight answers</p>
+            <h2 class="sec-h">The questions <span class="dim">everyone asks.</span></h2>
+          </div>
+          <p class="lead">Pick one — the answer streams in, same engine as the console above.</p>
+        </div>
+
+        <div class="faq-grid">
+          <div class="stagger" id="faqList" role="tablist" aria-orientation="vertical"
+            aria-label="Frequently asked questions"></div>
+          <div class="faq-panel" id="faqPanel" role="tabpanel" tabindex="0" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= (07) PROOF ================= -->
+    <section class="band band--tight guides" id="proof">
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+      <div class="wrap fx-out">
+        <div class="sec-head rv">
+          <div>
+            <p class="label">(07) — Proof</p>
+            <h2 class="sec-h">Twenty years <span class="dim">of receipts.</span></h2>
+          </div>
+          <p class="lead">The brands below are where the work happened. The quotes are the part we're still
+            collecting — three slots, three real clients, no invented praise.</p>
+        </div>
+
+        <!-- LEGAL (UWG §5): these are brands the two founders WORKED FOR over
+             twenty years, not clients of this studio. The hedge is visible in
+             the label and repeated for screen readers — do not soften it to
+             "trusted by" or "our clients". -->
+        <div class="brandstrip stagger"
+          aria-label="Brands from over twenty years of the founders' prior work — a career reference, not a client list">
+          <span class="brandstrip-l" style="--i:0">20+ years<br>worked for</span>
+          <b style="--i:1">Porsche</b>
+          <b style="--i:2">Deutsche Bank</b>
+          <b style="--i:3">Apple</b>
+          <b style="--i:4">Microsoft</b>
+          <b style="--i:5">Blizzard</b>
+          <b style="--i:6">Deutsches Museum</b>
+          <b style="--i:7">Ravensburger</b>
+          <b style="--i:8">Travian</b>
+          <b style="--i:9">AOK</b>
+        </div>
+        <p class="brand-note rv">Career reference from two decades of prior work — <b>not</b> a client list of
+          this studio, and not a claim that any of them commissioned McCain Digital.</p>
+
+        <!-- Three open slots. There is not one real customer reference anywhere
+             in this repo, so nothing here is invented. -->
+        <div class="rev-grid stagger">
+          <figure class="testi testi--open" style="--i:0">
+            <blockquote>Reserved for a real, cleared client quote. One honest sentence about what changed after
+              launch beats a page of adjectives.</blockquote>
+            <figcaption>
+              <span class="t-ava" aria-hidden="true">01</span>
+              <p class="t-who"><b>Awaiting reference</b>Name · role · company</p>
+            </figcaption>
+          </figure>
+          <figure class="testi testi--open" style="--i:1">
+            <blockquote>Second slot. Ideally the one who can name a number — hours saved, load time halved,
+              enquiries doubled.</blockquote>
+            <figcaption>
+              <span class="t-ava" aria-hidden="true">02</span>
+              <p class="t-who"><b>Awaiting reference</b>Name · role · company</p>
+            </figcaption>
+          </figure>
+          <figure class="testi testi--open" style="--i:2">
+            <blockquote>Third slot. Best used for the long-running client — the one who proves we're still here
+              in year three.</blockquote>
+            <figcaption>
+              <span class="t-ava" aria-hidden="true">03</span>
+              <p class="t-who"><b>Awaiting reference</b>Name · role · company</p>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= (08) CONTACT ================= -->
+    <section class="band guides" id="contact">
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+      <div class="wrap">
+        <div class="contact-grid">
+          <div class="rv">
+            <p class="label">(08) — Start a project</p>
+            <h2 class="sec-h">Tell us what <span class="dim">you have in mind.</span></h2>
+            <p class="lead" style="margin:1.4rem 0">A real reply within 24 hours, a fixed quote within 48 —
+              from one of the two people who'd build it. No sales call.</p>
+            <a class="contact-mail" href="mailto:info@mccain-digital.com">info@mccain-digital.com</a>
+            <p class="lead" style="margin-top:1.6rem;font-size:var(--t-small)">
+              Holderweg 1 · 86869 Oberostendorf · Bavaria, Germany<br>Mon–Fri · 9:00–18:00 CET</p>
+          </div>
+
+          <form class="rv-s" id="contactForm" novalidate>
+            <div class="field"><label for="cName">Your name</label><input id="cName" type="text"
+                autocomplete="name"></div>
+            <div class="field"><label for="cMail">Email</label><input id="cMail" type="email"
+                autocomplete="email"></div>
+            <div class="field"><label for="cMsg">What's it about?</label><textarea id="cMsg"></textarea></div>
+            <button class="btn" type="submit">Send it
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </button>
+            <p class="lead" style="font-size:var(--t-small);margin-top:1rem" id="cNote">
+              Prototype — this form is not wired up. The live site posts to Web3Forms.</p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="foot guides">
+    <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
     <div class="wrap">
-      <div class="chead">
+
+      <div class="foot-top">
         <div>
-          <p class="label rv">(03) — What we do</p>
-          <h2 class="h2 rv" style="--i:1">Four things, <span class="dim">done properly.</span></h2>
-        </div>
-        <p class="lead rv" style="--i:2">No packages, no tiers. We scope the thing you actually need and put a
-          number on it.</p>
-      </div>
-
-      <div class="rows">
-        <a class="row rv" href="#" style="--i:0">
-          <span class="n">01</span>
-          <h3 class="h3">AI tools</h3>
-          <p class="lead desc">RAG on your own data with citations and an abstain path, agents with
-            guardrails, MCP servers into your CRM. Model-agnostic.</p>
-          <span class="arrow" aria-hidden="true">→</span>
-        </a>
-        <a class="row rv" href="#" style="--i:1">
-          <span class="n">02</span>
-          <h3 class="h3">Web apps</h3>
-          <p class="lead desc">React, Next.js, TypeScript. Green Core Web Vitals from day one, MVP to scale
-            without a rewrite.</p>
-          <span class="arrow" aria-hidden="true">→</span>
-        </a>
-        <a class="row rv" href="#" style="--i:2">
-          <span class="n">03</span>
-          <h3 class="h3">Websites</h3>
-          <p class="lead desc">Fast, accessible, editable by you. Design and build in the same pair of
-            hands.</p>
-          <span class="arrow" aria-hidden="true">→</span>
-        </a>
-        <a class="row rv" href="#" style="--i:3">
-          <span class="n">04</span>
-          <h3 class="h3">Custom software</h3>
-          <p class="lead desc">The internal tool nobody sells you off the shelf, built to outlive the person
-            who asked for it.</p>
-          <span class="arrow" aria-hidden="true">→</span>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================================
-       (04) STUDIO
-       ============================================================ -->
-  <section class="chapter ink rails" id="studio">
-    <span class="mk mk--tl"></span><span class="mk mk--tr"></span>
-    <span class="mk mk--bl"></span><span class="mk mk--br"></span>
-    <div class="wrap">
-      <div class="chead">
-        <div>
-          <p class="label rv">(04) — The studio</p>
-          <h2 class="h2 rv" style="--i:1">Two people. <span class="dim">That's the whole company.</span></h2>
-        </div>
-        <p class="lead rv" style="--i:2">You will meet both of us in the first call, and both of us stay on
-          the project until it's live.</p>
-      </div>
-
-      <div class="studio">
-        <div class="person rv" style="--i:0">
-          <div class="plate plate--pending">
-            <p class="label">Photo pending</p>
-            <p class="label">Christian</p>
-          </div>
-          <div>
-            <h3 class="h3">Christian Mc Cain</h3>
-            <p class="lead">Builds &amp; ships. Twenty years of production code, most of it still running.</p>
-          </div>
+          <p class="label">Next step</p>
+          <p class="foot-say">One mail is enough to find out whether we're the
+            <span class="acc">right two people.</span>
+          </p>
+          <a class="foot-mail" href="mailto:info@mccain-digital.com">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              aria-hidden="true">
+              <rect x="3" y="5.5" width="18" height="13" rx="2" />
+              <path d="m3.6 6.8 8.4 6 8.4-6" />
+            </svg>
+            info@mccain-digital.com
+          </a>
         </div>
 
-        <div class="person rv" style="--i:1">
-          <div class="plate plate--pending">
-            <p class="label">Photo pending</p>
-            <p class="label">Kathrin</p>
+        <div class="foot-cols">
+          <div class="foot-col">
+            <p class="label">Studio</p>
+            <a href="#work">Work</a>
+            <a href="#services">Services</a>
+            <a href="#studio">The two of us</a>
+            <a href="#faq">Straight answers</a>
           </div>
-          <div>
-            <h3 class="h3">Kathrin Mc Cain</h3>
-            <p class="lead">Design &amp; brand. Decides what the thing looks like and why.</p>
+          <div class="foot-col">
+            <p class="label">Services</p>
+            <a href="../services/ai-tools.html">AI tools</a>
+            <a href="../services/web-apps.html">Web apps</a>
+            <a href="../services/websites.html">Websites</a>
+            <a href="../services/software.html">Custom software</a>
           </div>
-        </div>
-
-        <div class="person rv" style="--i:2">
-          <div class="plate" data-mosaic>
-            <img src="../img/hands-keyboard-1200.webp" srcset="../img/hands-keyboard-640.webp 640w, ../img/hands-keyboard-1200.webp 1200w"
-              sizes="(max-width:900px) 92vw, 22vw" alt="Working at the desk" width="1200" height="825" loading="lazy"
-              decoding="async">
-          </div>
-          <div>
-            <h3 class="h3">The workshop</h3>
-            <p class="lead">Oberostendorf, Bavaria. Remote for everything, in person when it's worth the
-              drive.</p>
+          <div class="foot-col">
+            <p class="label">Where we are</p>
+            <span>Holderweg 1<br>86869 Oberostendorf<br>Bavaria, Germany</span>
+            <span class="r-status" style="margin-top:.5rem"><i aria-hidden="true"></i> open for work</span>
           </div>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- ============================================================
-       (05) CTA — a dark block nested in the paper shell
-       ============================================================ -->
-  <section class="chapter alt rails" id="contact">
-    <span class="mk mk--tl"></span><span class="mk mk--tr"></span>
-    <span class="mk mk--bl"></span><span class="mk mk--br"></span>
-    <div class="wrap">
-      <div class="cta ink rv">
-        <p class="label">(05) — Next step</p>
-        <h2 class="h2">Tell us what you're<br>trying to <span style="color:var(--acc)">get done.</span></h2>
-        <p class="lead">One mail is enough. You get a reply within 24 hours and, if it's a fit, a fixed quote
-          within 48.</p>
-        <a class="btn" href="#">Start a project
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M5 12h14M13 6l6 6-6 6" />
-          </svg>
-        </a>
-      </div>
-    </div>
-  </section>
+      <a class="foot-mark" href="#top">mccain <i>digital</i></a>
 
-  <!-- ============================================================
-       FOOTER — the oversized wordmark
-       ============================================================ -->
-  <footer class="foot ink rails">
-    <span class="mk mk--tl"></span><span class="mk mk--tr"></span>
-    <div class="wrap">
-      <p class="foot-mark">mccain <i>digital</i></p>
       <div class="foot-bar">
-        <span class="label">© 2026 — Oberostendorf, Bavaria</span>
-        <span class="label"><b>info@mccain-digital.com</b></span>
-        <span class="label">Imprint · Privacy</span>
+        <span class="label">© 2026 — built by the two people who quote it</span>
+        <span class="foot-legal">
+          <a href="../legal/imprint.html">Imprint</a>
+          <a href="../legal/privacy.html">Privacy</a>
+          <a href="../legal/terms.html">Terms</a>
+          <a href="../legal/withdrawal.html">Withdrawal</a>
+        </span>
       </div>
 
-      <div class="note" style="margin-top:2.5rem">
-        <p style="margin:0 0 .9rem"><b>MOCKUP — what changed and why</b></p>
-        <p style="margin:0 0 .7rem">1 · <b>The pixel engine left the type.</b> Dotted stems at
-          display size are hard to read, and the hover scatter was mangling whole words. The
-          engine now runs on the <b>images</b> (they assemble out of a swarm on the way in and
-          re-pixelate under the pointer), on the <b>solid buttons</b>, and it <b>is the logo
-          mark</b> — a 7×7 M on the same grid the engine draws on. It stopped being an effect
-          done to words and became the thing the studio is signed with.</p>
-        <p style="margin:0 0 .7rem">2 · <b>The header is a full-bleed stage</b> and the dither
-          field runs there and nowhere else, as asked. Guide rails and corner marks sit over it,
-          the copy is anchored low-left, the media plate high-right.</p>
-        <p style="margin:0 0 .7rem">3 · <b>The palette lost its brown.</b> The old ground was
-          #0d0c0a — red and green above blue, which reads sepia next to a warm yellow. Now
-          #0b0b0c, neutral, so the logo yellow is the only warm thing on the page. Yellow
-          untouched. The green #7a8c00 is promoted to second signal; it clears AA on the dark
-          ground on its own (5.23:1) and gets a lifted cut for small type.</p>
-        <p style="margin:0 0 .7rem">4 · <b>Measured, not judged.</b> Text over the dither field:
-          coords 7.28:1, fact labels 5.22:1, intro 15.27:1 — all against the brightest ground
-          cell under the line, from the delivered pixels. Headline 15.0:1 white, 10.3:1 yellow.
-          Scroll from the top: 0 long tasks, p90 16.9 ms, 3.1 % of frames over 20 ms.</p>
-        <p style="margin:0">5 · <b>Still open:</b> the two portraits are honest empty frames,
-          not silhouettes — real photos are the biggest gap before go-live. And the second
-          display face: this runs on Schibsted at weight 800 with the tracking pulled in, which
-          is genuinely strong, but a condensed cut would give the billboard lines another gear
-          for one extra font file.</p>
+      <div class="mnote">
+        <p><b>MOCKUP — what changed, and what deliberately did not</b></p>
+        <p><b>1 · The pixel engine left the type.</b> Dotted stems at display size are hard to read and the
+          hover scatter was pulling words apart mid-line. It now runs on every <b>image</b> (they assemble out
+          of a swarm on the way in and re-pixelate under the pointer), on the <b>solid buttons</b>, and it
+          <b>is the logo</b> — a 7×7 mark on the same grid the engine draws on.</p>
+        <p><b>2 · The header is a full-bleed stage</b> and the dither field runs there and nowhere else, as
+          asked. Rails and corner marks over it, copy anchored low-left, media plate high-right.</p>
+        <p><b>3 · The palette lost its brown.</b> #0d0c0a had red and green above blue, which reads sepia
+          beside a warm yellow. Now #0b0b0c — the logo yellow is the only warm thing on the page, untouched.
+          The green #7a8c00 is the second signal and clears AA on the dark ground on its own (5.23:1).</p>
+        <p><b>4 · Nothing was rebuilt.</b> This page loads the real <b>v3.css</b> and the real scripts, so the
+          console, the ⌘K command menu, the FAQ, the service stack, the work track, the scores and the contact
+          form are the ones that already work — not copies that would drift apart from day one. The refresh
+          changes the system, not the machinery.</p>
+        <p><b>5 · Measured, not judged.</b> Small text on the stage, read from the DELIVERED pixels against
+          the brightest ground cell under each line: coords 7.28:1, fact labels 4.71:1, intro 13.27:1, plate
+          tag 8.39:1. The headline cannot be sampled that way — at leading 0.9 there is no glyph-free strip
+          between its lines, so every percentile in its box is already a letter — so it is measured against
+          the brightest cell the field actually renders: 16.41:1 white, 11.29:1 yellow. A full scroll:
+          <b>0 long tasks</b>, p90 16.9 ms, 0 % of frames over 20 ms. 390 px: no overflow.</p>
+        <p><b>6 · Still open:</b> real portraits and three cleared client references are the biggest gap before
+          go-live; the command menu's own wordmark does not carry the pixel mark yet (it is injected by
+          menu.js, a live file); and whether the billboard lines get a condensed cut for one more font file.</p>
       </div>
+
     </div>
   </footer>
 
-  <script src="../pixel-engine.js"></script>
+  <!-- ORDER IS LOAD-BEARING:
+       data.js       — the content every other script reads (window.MCD)
+       pixel-engine  — common.js hooks its velocity feed synchronously
+       common.js     — the shared runtime, publishes window.MCDUI
+       pacman.js     — standalone
+       menu.js       — needs MCD
+       v3.js         — needs MCD and MCDUI -->
+  <script src="../data.js" defer></script>
+  <script src="../pixel-engine.js" defer></script>
+  <script src="../common.js" defer></script>
+  <script src="../pacman.js" defer></script>
+  <script src="../menu.js" defer></script>
+  <script src="../v3.js" defer></script>
+
   <script>
+    /* Only what the refresh itself adds. Everything else is the real runtime
+       loaded above. */
     (function () {
       var d = document;
-      var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-      /* ---- entrance: once, at 25% visible ---- */
-      var io = new IntersectionObserver(function (es) {
-        es.forEach(function (e) {
-          if (!e.isIntersecting) return;
-          e.target.classList.add("in");
-          io.unobserve(e.target);
-        });
-      }, { threshold: .25, rootMargin: "0px 0px -8% 0px" });
-      d.querySelectorAll(".rv").forEach(function (el) { io.observe(el); });
-
-      /* the stage is already on screen at load - reveal it without waiting
-         for a scroll that may never come */
-      requestAnimationFrame(function () {
-        d.querySelectorAll("#stage .rv").forEach(function (el) { el.classList.add("in"); });
-      });
-
-      /* ---- the rail: its real height feeds the stage's top offset, and it
-              gains its shell the moment the stage is behind it ---- */
       var rail = d.getElementById("rail");
       var stage = d.getElementById("stage");
 
+      /* the rail's real height feeds the stage's top offset, so the stage can
+         start underneath it without a magic number */
       function railHeight() {
-        d.documentElement.style.setProperty("--rail-h", rail.offsetHeight + "px");
+        var h = rail.offsetHeight;
+        d.documentElement.style.setProperty("--rail-h", h + "px");
+        /* --nav is the token the REST of v3.css means by "how tall is the
+           bar": the sticky service cards and the FAQ panel offset themselves
+           from it. The refresh's rail is taller than the old nav, so leaving
+           it at 68px parked every sticky element under the bar. */
+        d.documentElement.style.setProperty("--nav", h + "px");
       }
       railHeight();
       new ResizeObserver(railHeight).observe(rail);
 
+      /* the shell arrives when the stage is behind the rail, not at 24px — a
+         blurred bar floating over the stage reads as a mistake */
       var queued = false;
       function railState() {
         queued = false;
@@ -1678,76 +1453,18 @@
         queued = true;
         requestAnimationFrame(railState);
       }, { passive: true });
+      addEventListener("resize", railState, { passive: true });
 
-      /* ---- menu ---- */
-      var menu = d.getElementById("menu");
-      var menuT = d.getElementById("menuT");
-      var openMenu = function (on) {
-        menu.hidden = !on;
-        d.body.style.overflow = on ? "hidden" : "";
-        (on ? d.getElementById("menuX") : menuT).focus();
-      };
-      menuT.addEventListener("click", function () { openMenu(true); });
-      d.getElementById("menuX").addEventListener("click", function () { openMenu(false); });
-      menu.addEventListener("click", function (e) {
-        if (e.target.tagName === "A") openMenu(false);
-      });
-      addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && !menu.hidden) openMenu(false);
-      });
-
-      /* ---- theme ---- */
-      var themeT = d.getElementById("themeT");
-      themeT.addEventListener("click", function () {
-        var next = d.documentElement.dataset.theme === "light" ? "dark" : "light";
-        d.documentElement.dataset.theme = next;
-        try { localStorage.setItem("mcd-refresh-theme", next); } catch (e) { }
-      });
-
-      /* ---- ticker: duplicate the track so -50% is a seamless loop ---- */
-      var t = d.getElementById("ticker");
-      t.innerHTML += t.innerHTML;
-
-      if (!window.PixelFX) return;
-
-      /* ---- 1. the dither field, HEADER ONLY ---- */
-      if (PixelFX.dither && !reduced) {
-        PixelFX.dither(d.getElementById("stage"), { cell: 9, top: .5 });
+      /* THE DITHER FIELD — header only, as asked. The engine caps its own ramp
+         against the dimmest text on the host, so asking for a brighter top
+         cannot make the header fail contrast; it simply gets clamped. */
+      function field() {
+        if (!window.PixelFX || !PixelFX.dither) return;
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        PixelFX.dither(stage, { cell: 9, top: .5 });
       }
-
-      /* ---- 2. the pixel engine on IMAGES ----
-         assemble out of a swarm on the way in, re-pixelate under the pointer.
-         The reveal is not gated on hover support; a phone gets the assembly. */
-      if (PixelFX.image && !reduced) {
-        var revealIO = new IntersectionObserver(function (es) {
-          es.forEach(function (e) {
-            if (!e.isIntersecting) return;
-            var fx = e.target.__fx;
-            if (fx) fx.reveal();
-            revealIO.unobserve(e.target);
-          });
-        }, { threshold: .3 });
-
-        d.querySelectorAll("[data-mosaic]").forEach(function (box) {
-          var fx = PixelFX.image(box, { gap: 4, size: 4, track: box });
-          if (!fx) return;
-          box.__fx = fx;
-          revealIO.observe(box);
-          if (PixelFX.noHover) return;
-          var card = box.closest("a, .person") || box;
-          card.addEventListener("pointerenter", function () { fx.enter("hover"); });
-          card.addEventListener("pointerleave", function () { fx.leave("hover"); });
-          card.addEventListener("focusin", function () { fx.enter("focus"); });
-          card.addEventListener("focusout", function () { fx.leave("focus"); });
-        });
-      }
-
-      /* ---- 3. the pixel engine on BUTTONS ----
-         every solid button, so it reads as the rule and not as a decoration
-         on two of them. Hairline buttons keep their plain hover. */
-      if (PixelFX.button) {
-        d.querySelectorAll(".btn:not(.btn--line)").forEach(function (b) { PixelFX.button(b); });
-      }
+      if (d.readyState === "complete") field();
+      else addEventListener("load", field);
     })();
   </script>
 </body>

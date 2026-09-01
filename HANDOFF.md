@@ -18,89 +18,99 @@ d8948b9  fix(pixel): tile the wave and lean its axis
 
 ## DER REFRESH — `preview/refresh.html`
 
-Owner am 2026-09-01: die neuen Hintergruende „echt klasse", aber **nur im
-Header** und der Header **full width**; die Seite „braucht noch was"; die
-**Pixel-Schriften sitzen nicht** und sind mit Sehschwaeche schlecht lesbar —
-„pixel engine behalten, aber raus aus den headings", stattdessen „gezielt in
-mehr bildern oder die buttons"; Schriftfarben anpassen; und ein **kompletter
-Refresh-Mockup** aus der Skill-Sammlung. Auf Nachfrage: „du kannst ALLES
-veraendern — auch farben, logo alles".
+Owner 2026-09-01: neue Hintergruende „echt klasse", aber **nur im Header** und
+der Header **full width**; die Seite „braucht noch was"; die **Pixel-Schriften
+sitzen nicht** und sind mit Sehschwaeche schlecht lesbar — „pixel engine
+behalten, aber raus aus den headings", stattdessen „gezielt in mehr bildern
+oder die buttons"; Schriftfarben anpassen; kompletter Refresh aus der
+Skill-Sammlung; „du kannst ALLES veraendern — auch farben, logo alles".
+
+Dann, nach der ersten Runde: „das ist recht cool geworden … tune das mal
+weiter. **die console und den chat bot will ich drin**, **alle bereiche auf der
+main page die wir schon haben sollen auch drin sein**" — plus „schoener
+footer", „tolles menue".
 
 → **https://mccain-digital.vercel.app/preview/refresh.html**
 
-Eine eigenstaendige Seite mit eigenen Tokens und eigenem CSS. Sie fasst
-`index.html`, `v3.css` und `v3.js` **nicht** an; das einzige geteilte Stueck ist
-`pixel-engine.js`, und zwar in seinen neuen Rollen.
+### Die Architektur ist die wichtigste Entscheidung
+
+Die Seite laedt **`v3.css` und danach ihre eigenen Overrides**, und sie laedt
+**alle sechs echten Skripte** (`data.js`, `pixel-engine.js`, `common.js`,
+`pacman.js`, `menu.js`, `v3.js`).
+
+Damit sind Konsole, ⌘K-Kommandomenue, FAQ, Service-Stack, Work-Track, Scores,
+Kontaktformular, Pac-Man und der angedockte Assistent **die echten** — keine
+Kopien, die ab Tag eins auseinanderlaufen. Der Refresh aendert das **System**
+(Palette, Typo, Buehne, Bedienelemente, Fuss, wo die Pixel-Engine laeuft) und
+erbt die **Maschinerie**. Beim Uebernehmen ist der Diff gegen `v3.css` deshalb
+in einer Sitzung lesbar.
+
+Alle acht Bereiche der Hauptseite sind drin, in derselben Reihenfolge und mit
+denselben IDs: (01) AI-Konsole + Stack-Rail · (02) Work · (03) Scores ·
+(04) Services · (05) Studio · (06) FAQ · (07) Proof · (08) Kontakt.
 
 ### Die fuenf Entscheidungen
 
 **1 — Die Pixel-Engine verlaesst die Schrift.** Der Beweis stand im eigenen
-Screenshot: „Things that" in Punktrastern war schlicht nicht lesbar, und der
-Hover-Scatter zerlegte mitten im Wort ein „useful". Die Engine laeuft jetzt auf
+Screenshot: „Things that" in Punktrastern war nicht lesbar, der Hover-Scatter
+zerlegte mitten im Wort ein „useful". `[data-pixel]` auf der Seite: **0**.
+Sie laeuft jetzt auf **27 Bildern** (Schwarm beim Reinscrollen, Verpixeln unter
+dem Zeiger), auf **16 Buttons**, und sie **ist das Logo** — eine 7×7-Marke auf
+demselben Raster, das die Engine zeichnet, als statisches SVG.
 
-- **Bildern** — sechs Stueck: sie bauen sich beim Reinscrollen aus einem
-  Partikelschwarm zusammen und verpixeln wieder unter dem Zeiger. Das ist der
-  Effekt, den der Owner an den Case-Bildern immer gut fand;
-- **den vollen Buttons** — Hover, wie bisher;
-- **dem Logo** — eine 7×7-Marke auf demselben Raster, das die Engine zeichnet.
-  Statisches SVG: eine Identitaet darf nicht von einem Skript abhaengen.
-
-Damit ist das Pixel nicht mehr etwas, das man MIT Woertern macht, sondern das,
-womit die Bude unterschreibt. `[data-pixel]` auf der Seite: **0**.
-
-**2 — Der Header ist eine Buehne ueber die volle Breite.** Das Dither-Feld
-laeuft dort und nirgendwo sonst, wie gewuenscht. Darueber die Guide-Rails und
-vier Eckmarken, die Copy links unten verankert, die Medienplatte rechts oben.
-Die Leiste liegt **ausserhalb** der Buehne: die traegt fuer das Feld
-`overflow: clip`, und ein `sticky` klebt nur innerhalb seines eigenen
-Clip-Vorfahren — in der Buehne waere die Navigation beim Scrollen weg gewesen.
+**2 — Der Header ist eine Buehne ueber die volle Breite.** Dither dort und
+nirgendwo sonst. Guide-Rails und Eckmarken darueber, Copy links unten, Platte
+rechts oben. Die Leiste liegt **ausserhalb** der Buehne: die traegt fuer das
+Feld `overflow: clip`, und `sticky` klebt nur innerhalb seines eigenen
+Clip-Vorfahren.
 
 **3 — Die Palette verliert ihr Braun.** `#0d0c0a` hatte Rot und Gruen ueber
-Blau; neben einem warmen Gelb liest sich das als Sepia. Jetzt `#0b0b0c`,
-neutral, damit das Logo-Gelb das einzige Warme auf der Seite ist. Gelb
-unangetastet. Das gemochte Gruen `#7a8c00` wird **zweites Signal** und besteht
-auf dem dunklen Grund fuer sich (5,23:1); fuer Kleinschrift gibt es eine
-gehobene Fassung (`#a4bd00`, 9,24:1) — dieselbe Zwei-Gewichte-einer-Farbe-Regel,
-die das Gelb schon faehrt. Grau neutral statt warm: `#a3a3a0`, 7,78:1 statt
-6,61:1.
+Blau; neben warmem Gelb liest sich das als Sepia. Jetzt `#0b0b0c`. Gelb
+unangetastet und das einzige Warme auf der Seite. Das gemochte Gruen `#7a8c00`
+wird zweites Signal (5,23:1 auf Ink fuer sich). Grau neutral: `#a3a3a0`,
+7,78:1 statt 6,61:1.
 
-**4 — Die Schrift traegt jetzt selbst.** Vorher lieferte das Pixelraster die
-Praesenz. Jetzt: Gewicht 800, Laufweite auf -0.035em zusammengezogen,
-Zeilenabstand unter 1. Das macht aus einer Grotesk eine Display-Schrift ohne
-zweite Datei.
+**4 — Auch der wandernde Rand kommt in die Palette.** `common.js` malte
+`--wave-stops` aus `wavePalette("rainbow")` — ein volles Spektrum war das
+Lauteste auf einer Seite, deren ganzer Punkt eine zurueckgenommene Palette ist.
+Gleiche Bewegung, gleiche Periode, aber Gelb → Gruen → Gelb. Als
+`!important`-Regel, weil `common.js` inline auf `:root` schreibt und nur eine
+wichtige Autoren-Regel das ueberstimmt.
 
-**5 — Das Raster liegt offen.** Rails, Eckmarken, Mono-Metadaten,
-Kapitelwechsel, ueberdimensionierte Wortmarke im Fuss. Kapitel wechseln
-weiterhin mit dem Theme — sonst haette der Umschalter nichts mehr zu tun.
+**5 — Der Fuss ist ein Kapitel.** Einladung + drei Spalten (Studio, Leistungen,
+Adresse) + ueberdimensionierte Wortmarke + Rechtsleiste.
 
 ### Gemessen, nicht beurteilt
 
 | | |
 |---|---|
-| Text ueber dem Dither-Feld | Koordinaten 7,28:1 · Fakten-Labels 5,22:1 · Intro 15,27:1 |
-| Ueberschrift | 15,0:1 weiss · 10,3:1 gelb |
-| Scroll von oben, 1440×900 | **0 Long Tasks**, p90 16,9 ms, 3,1 % der Frames ueber 20 ms |
-| A11y-Probe | 0 fehlende alt, 0 leere Links, 0 namenlose Buttons, 1 h1, kein Ueberlauf |
-| Mobil 390×844 | kein horizontaler Ueberlauf, echtes Menue (kein Platzhalter) |
+| Kleintext auf der Buehne | Koordinaten 7,28:1 · Fakten-Labels 4,71:1 · Intro 13,27:1 · Platten-Tag 8,39:1 |
+| Ueberschrift | 16,41:1 weiss · 11,29:1 gelb |
+| Kompletter Scroll, 1440×900 | **0 Long Tasks**, p90 16,9 ms, **0 %** der Frames ueber 20 ms |
+| A11y-Probe | 0 fehlende alt, 0 leere Links, 0 namenlose Buttons, 1 h1 |
+| Mobil 390×844 | kein horizontaler Ueberlauf; Menue und Theme-Schalter erreichbar |
 
-Die Kontrastwerte sind aus den **ausgelieferten Pixeln** des Screenshots
-gelesen, gegen die **hellste** Grundzelle unter der Zeile — nicht gegen den
-Token. Erster Anlauf nahm die dunkelste Zelle als Grund, was schmeichelt; und
-bei der Riesenschrift traf das 80.-Perzentil schon den Buchstaben statt den
-Grund, weshalb dort die analytische Zahl steht. Ein Messwert ist nur so viel
-wert wie die Annahme darunter.
+Der Kleintext ist aus den **ausgelieferten Pixeln** gelesen, gegen die
+**hellste** Grundzelle unter der Zeile. Die Ueberschrift **nicht** — bei
+Zeilenabstand 0,9 gibt es zwischen ihren Zeilen keinen glyphenfreien Streifen,
+jedes Perzentil ihrer Box ist schon Buchstabe. Sie ist deshalb gegen die
+hellste Zelle gemessen, die das Feld **tatsaechlich rendert** (aus dem Canvas
+gelesen, 20/255). Zwei Anlaeufe davor waren Instrumentenfehler, keine
+Designfehler: erst die dunkelste Zelle als Grund (schmeichelt), dann dasselbe
+Perzentil auf Plakatschrift angewandt, das dort 1,01:1 meldete.
 
 ### Was noch offen ist
 
-- **Portraits.** Die zwei Rahmen sind ehrlich leer beschriftet, keine
-  Silhouetten, keine erfundenen Koepfe — so will es der Ehrlichkeits-Teil der
-  Skills und so steht es hier seit Wochen als groesste Luecke.
-- **Zweiter Schriftschnitt.** Laeuft auf Schibsted 800 eng, das traegt. Ein
-  Condensed-Schnitt gaebe den Plakatzeilen noch einen Gang, kostet eine
-  Font-Datei. Entscheidung des Owners.
-- **Uebernahme.** Der Refresh ist eine Vorschauseite. Wenn er steht, wandert er
-  in `index.html`/`v3.css`, und `PixelFX.headline`/`voidReveal` fliegen aus der
-  Engine — sie haetten dann keinen Aufrufer mehr.
+- **Portraits und Referenzen.** Die Portrait-Platzhalter und die drei
+  Testimonial-Slots sind ehrlich als solche beschriftet. Groesste Luecke vor
+  dem Livegang.
+- **Das Kommandomenue traegt die Pixel-Marke noch nicht** — es injiziert seine
+  eigene Wortmarke aus `menu.js`, einer Live-Datei. Kommt beim Uebernehmen mit.
+- **Zweiter Schriftschnitt.** Schibsted 800 eng traegt. Ein Condensed-Schnitt
+  gaebe den Plakatzeilen einen Gang mehr, kostet eine Font-Datei.
+- **Uebernahme.** Wenn der Entwurf steht, wandern die Overrides in `v3.css`
+  und die Buehne in `index.html`; `PixelFX.headline` und `voidReveal` fliegen
+  dann aus der Engine, weil sie keinen Aufrufer mehr haetten.
 
 ## Zum Aussuchen — diese Seiten sind JETZT erreichbar
 
