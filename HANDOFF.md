@@ -21,7 +21,12 @@ Startseite gemacht, und danach kam eine Runde Owner-Korrekturen, die gegen
 - **Hero**: full width, zweizeilige Plakatzeile. Der Hintergrund ist ein
   **Pixelmosaik** von `img/circuit-macro-1200.webp`, gefahren von
   `PixelFX.image` — also demselben Aufruf wie die Work-Karten. Das schwarze
-  Loch folgt der Maus und zerstoert echte Partikel. Die Stage beginnt bei
+  Loch folgt der Maus und zerstoert echte Partikel. **Raster 5px** (Owner:
+  „die pixel halbieren"), also 51.510 Partikel — und dafuer **ohne Schwarm**
+  beim Erscheinen (`swarm: false`): der Schwarm ist der einzige Teil des
+  Effekts, dessen Kosten an der GESAMTZAHL haengen, alles andere haengt am
+  Radius des Lochs. Gemessen: Ruhe und Loch 17ms (60fps), Seitenaufbau
+  3 Long Tasks / 466ms statt 5 / 693ms mit dem groben Raster. Die Stage beginnt bei
   y=0 und endet bei `100svh`; ihr Inhalt haelt `--nav` Abstand zur Leiste.
 - **Kopfleiste**: oben transparent mit weisser Schrift, ab 8px Scroll faehrt
   die Platte ein. Keine Haarlinie — Pac-Man ist die Trennung. Alle
