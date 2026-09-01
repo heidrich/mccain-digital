@@ -4,6 +4,8 @@
 sauber.
 
 ```
+d73393b  feat(bg): a dither field and container guides, from MengTo/Skills
+547b456  docs: the border jump, its cause, and the two defects the review found
 f75acf8  fix(tools): a guard that finds nothing must say so
 a2035d0  fix(rim): state the period instead of inferring it, so the border stops jumping
 afc013f  feat(rim): the travelling border moves from the h1 to the console
