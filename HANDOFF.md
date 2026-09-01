@@ -1,28 +1,51 @@
-# Uebergabe — Stand 2026-08-31, Ende der Session
+# Uebergabe — Stand 2026-09-01, Nacht
 
 **Alles committet, gepusht und auf Vercel live verifiziert.** Arbeitsbaum
-sauber. Letzte fuenf Commits:
+sauber. Diese Nacht dazugekommen:
 
 ```
+4d58954  feat(pixel): a drifting field of cells for the bands, and four to judge
+e9f39a3  feat(ai): the console follows you down the page, with a travelling rim
+d8948b9  fix(pixel): tile the wave and lean its axis, so it never sits on plain yellow
+e84c1c3  docs: a handover header on HANDOFF, so the state does not live in a chat
 de13a97  fix(pixel): generate the wave palette by hue, so it stops going muddy
-465f8f9  feat(pixel): a colour wave travelling through the headlines
-6b833bc  feat(color): --acc-text, so the accent can be read on light surfaces
-864f39f  docs(lab): compare the accent yellow on paper, measured in the browser
-4b3e71d  fix(pixel): put the headline grid on whole device pixels, and keep the gap
 ```
 
-## Was als Naechstes ansteht (Owner-Liste, in seiner Reihenfolge)
+## Was zuerst anzusehen ist
 
-1. **Mitlaufender KI-Assistent am Seitenrand** — Owner-Punkt 2, das groesste
-   offene Stueck: „ich moechte das unsere ai konsole, wenn ich 01. verlasse und
-   nach unten scrolle, als persoenlichen assi am rand der seite mit laufen
-   habe. zum ausklappen etc. … ich moechte zudem das der border der console
-   schoen animiert ist, gern in einen farbverlauf mit glow oder so, der
-   wandert." Die Mechanik dafuer steht: `PixelFX.wavePalette("rainbow")` gibt
-   genau die Stops, die auch die Ueberschriften benutzen — derselbe Effekt an
-   zwei Stellen, aus einer Quelle.
-2. **Mehr Leben / animierte Hintergruende** — Owner-Punkt 4. Vereinbart: EIN
-   Effekt nach dem anderen, jeder vor dem naechsten gezeigt.
+1. **Der Farbverlauf laeuft jetzt durch.** Die drei Beobachtungen („zu schnell
+   wieder reines gelb", „zwischen woertern angehackt", „als ob der gradient neu
+   geladen wird") hatten EINE Ursache: der Verlauf war ein Band, und alles
+   ausserhalb bekam den geklemmten Endstop — und beide Endstops sind das
+   Akzentgelb. Jetzt wird die Palette **gekachelt**: sie wiederholt sich ueber
+   beide Raender hinaus, nichts ist je geklemmt, und weil sie auf demselben
+   Farbton anfaengt und aufhoert, ist die Naht unsichtbar. Die Achse ist
+   schraeg (34 Grad), die Geschwindigkeit kommt aus der Uhr statt aus einem
+   Frame-Zaehler (also gleich auf 30Hz und 144Hz), und die Phase aus der
+   SEITEN-Position: zwei Ueberschriften sind zwei Fenster auf EINE Welle.
+   Stellschrauben: `data-wave-angle` (34), `data-wave-period` (460px),
+   `data-wave-cycle` (2s).
+2. **Der Assistent laeuft mit.** Unter Sektion 01 wandert die Konsole an den
+   rechten Rand — **verschoben, nicht kopiert**, also mit dem Gespraech darin.
+   Frage oben stellen, zwei Bildschirme weiter runter, die Antwort steht noch
+   da. Eingeklappt ein 58px-Knopf, aufgeklappt das Chatfenster; Rand und Glow
+   wandern in derselben Palette wie die Ueberschriften
+   (`PixelFX.wavePalette("rainbow")` — eine Quelle, zwei Effekte).
+3. **„Mehr Leben" liegt zum Aussuchen bereit, ist aber NICHT eingeschaltet.**
+   `https://mccain-digital.vercel.app/_parked/life-lab.html` — vier
+   bildschirmhohe Baender: aus / Textur ohne Bewegung / zwei driftende Ebenen
+   (**mein Vorschlag**) / zu laut. Der Code ist Produktionscode
+   (`PixelFX.field`), einschalten ist eine Zeile pro Band. Vereinbart war: ein
+   Effekt nach dem anderen, jeder vorher gezeigt — deshalb liegt er nur da.
+
+## Offene Punkte (Owner-Liste, in seiner Reihenfolge)
+
+1. **Hintergrund aussuchen** — life-lab, dann schalte ich ihn ein. Und danach
+   der naechste Effekt, einer nach dem anderen.
+2. **Assistent auf den Unterseiten?** Heute nur die Startseite: `v3.js` laedt
+   nirgends sonst, und die Konsolen-Markup steht in `index.html`. Das ist eine
+   Entscheidung, kein Versehen — soll er ueberall mitlaufen, zieht die Konsole
+   ins JS um und laeuft auf jeder Seite.
 3. **`ANTHROPIC_API_KEY`** in Vercel Production setzen (Owner) plus Spend-Limit
    in der Anthropic Console, dann `AI_MODE` in `v3.js` auf `"live"`. Ich sehe
    den Schluessel nie.
@@ -32,30 +55,42 @@ de13a97  fix(pixel): generate the wave palette by hue, so it stops going muddy
    Luecke vor dem Livegang.
 6. **`noindex` raus** — erst beim Livegang.
 
-## Werkzeuge, die diese Session entstanden sind
+## Werkzeuge
 
 | | |
 |---|---|
+| `bash tools/sweep.sh` | jede Seite laden, Konsolenfehler + Overflow + a11y |
 | `bash tools/accent_audit.sh` | jeder Akzent-Textknoten gegen seinen echten Grund, 6 Seiten x 2 Themes |
+| `bash tools/pixel_scale.sh` | sitzt jedes Mosaik im Massstab 1.00 auf seinem Foto |
+| `python tools/check_links.py` | Links, Anker, doppelte IDs |
+| `_parked/wave-lab.html` | Wellen-Paletten UND die Achse: gerade gegen schraeg |
+| `_parked/life-lab.html` | die vier Hintergrund-Kandidaten |
 | `_parked/pixel-lab.html` | Rastervarianten, misst Zelle/Block/Deckung selbst aus |
 | `_parked/accent-lab.html` | Gelb-Kandidaten auf Papier, misst Kontrast selbst |
-| `_parked/wave-lab.html` | Wellen-Paletten, malt die ECHTE Palette als Streifen |
 
-Alle drei Laborseiten liegen unter `_parked/` und sind per `.vercelignore`
-nicht oeffentlich — ausser man ruft sie direkt auf dem Deployment auf, was fuer
-die Abstimmung mit dem Owner genau richtig ist.
+## Lehren, die ich nicht nochmal lernen will
 
-## Drei Lehren aus dieser Session, die ich nicht nochmal lernen will
-
-1. **Eine Performance-Zahl gilt nur fuer die Seite und die Geste, die gemessen
-   wurden.** „p90 16,7 ms" war ein Hover auf einer Laborseite; echtes Scrollen
-   auf `index.html` ergab 50 ms.
-2. **Ein Waechter gegen einen Fehler muss mit dem Fehler verschwinden.** Meiner
-   ueberlebte seine Ursache und schaltete die Welle lautlos ab — woraufhin ich
-   zweimal „laeuft, 60 fps" meldete, waehrend nichts lief.
-3. **Vor jeder Aussage ueber eine Animation beweisen, dass sie laeuft.** Zwei
-   Farbmessungen der Canvas im Abstand von 900 ms. Die Bildrate ist kein
-   Beweis: Nichtstun laeuft immer fluessig.
+1. **Ein IntersectionObserver meldet UEBERGAENGE, keine Zustaende.** „unter dem
+   Fenster" und „ueber dem Fenster" sind beide Verhaeltnis null — wer springt
+   (Deep-Link, Reload auf halber Hoehe, Skript), wechselt zwischen zwei
+   Zustaenden, die er fuer denselben haelt, und es passiert nichts. Von Hand
+   scrollen geht immer durch die Sektion hindurch, deshalb war das Loch
+   unsichtbar. Der Dock leitet seinen Zustand jetzt aus einer **gemessenen
+   Kante** ab.
+2. **Eine Schwelle, die sich beim Ueberqueren verschiebt, wird zweimal
+   ueberquert.** Die Konsole aus Sektion 01 zu nehmen aenderte deren Hoehe —
+   also genau die Kante, gegen die gemessen wird. Ein Platzhalter haelt die
+   Groesse.
+3. **Ein Verlauf zeigt ueberwiegend, was ZWISCHEN seinen Stops liegt** — und
+   ein Band zeigt ausserhalb seiner selbst nur den geklemmten Endstop. Beide
+   Male ist die Antwort dieselbe: kacheln statt wischen, erzeugen statt
+   aufzaehlen.
+4. **Eine Performance-Zahl gilt nur fuer die Seite und die Geste, die gemessen
+   wurden** — und nur gegen eine Vergleichsmessung. Der neue Verlauf sah mit
+   35ms Median schlecht aus, bis dieselbe Sonde dem alten Stand 35ms gab.
+5. **Vor jeder Aussage ueber eine Animation beweisen, dass sie laeuft.** Und
+   das Messinstrument gegen den bekannt schlechten Zustand pruefen: mein
+   Achsen-Messer las erst zweimal dasselbe, weil er vor dem Einblenden mass.
 
 ---
 
