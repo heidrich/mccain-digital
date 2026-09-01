@@ -49,6 +49,10 @@
       row is the gradient it generated, painted as a strip: what a wave shows is mostly the colour
       <em>between</em> its stops, which is exactly where the first attempt went wrong. Hover a
       headline; the black hole still works and the wave keeps travelling underneath it.</p>
+    <p class="intro">The palette is tiled rather than swept, so it repeats past both edges and no
+      cell is ever outside the gradient. The band version left everything beyond its own width on
+      a clamped end stop — and both end stops are the accent hue, which is why the line kept
+      going back to plain yellow and why the edge of the band looked like a cut through a word.</p>
 
     <div class="row">
       <p class="tag">A — the first attempt, for reference</p>
@@ -99,6 +103,21 @@
       <p class="note">The control. It needs data-wave="off" spelled out, because "accent" is the
         engine default — leaving the attribute off once turned the control into an extra variant.</p>
       <h2><span class="ph" data-pixel data-wave="off">We build the useful <span class="accent">kind of AI.</span></span></h2>
+    </div>
+
+    <div class="row">
+      <p class="tag">G — the axis: straight across, then leaning</p>
+      <p class="note">Same palette, same speed, two axes. Straight across reads as a wipe: every
+        pixel in a column carries one colour, so the change arrives as a vertical edge sliding
+        past. Leaning cuts the bands across the letters, which is what an animated gradient
+        border actually looks like. These two rows are also the counter-test for the measurement:
+        the top and the bottom of one column differ by about a third of a hue step when the axis
+        leans, and by nothing at all when it does not — a probe that cannot tell these two
+        apart is not measuring the axis.</p>
+      <h2><span class="ph" id="axis0" data-pixel data-wave="all" data-wave-style="rainbow"
+          data-wave-angle="0">straight across</span></h2>
+      <h2><span class="ph" id="axis34" data-pixel data-wave="all" data-wave-style="rainbow"
+          data-wave-angle="34">leaning over</span></h2>
     </div>
 
     <div class="row">

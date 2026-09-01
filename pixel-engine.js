@@ -89,7 +89,7 @@
      gradient border does.
 
        sheen    one hue, lightness swinging  — a shine, no colour change
-       hue      about 55 degrees each way    — still reads as the brand
+       hue      about 32 degrees each way    — still reads as the brand
        rainbow  the whole circle             — the animated-border look
 
      Exposed as PixelFX.wavePalette so a comparison page can paint the palette
@@ -197,6 +197,17 @@
        verschwindet dann halt mit der zeit"). data-wave-style="hue" keeps it
        near the brand, "sheen" drops the colour change entirely. */
     var WAVE_STYLE = host.dataset.waveStyle || "rainbow";
+    /* The axis the colour travels along, in degrees clockwise from "left to
+       right". Straight across reads as a wipe; leaning makes the bands cut
+       across the letters the way an animated gradient border does. */
+    var WAVE_ANGLE = parseFloat(host.dataset.waveAngle);
+    if (!isFinite(WAVE_ANGLE)) WAVE_ANGLE = 34;
+    /* How long one full palette is on screen, in CSS pixels, and how long a
+       cell takes to travel through all of it. Both are page-wide constants
+       rather than fractions of the element, so two headlines of different
+       widths show the same wave at the same speed. */
+    var WAVE_PERIOD = parseFloat(host.dataset.wavePeriod) || 460;
+    var WAVE_CYCLE = parseFloat(host.dataset.waveCycle) || 2;
     var INK = host.dataset.ink || null;
 
     var txt = document.createElement("span");
@@ -356,7 +367,7 @@
        hole is idle. The hole is the better animation; the wave gets out of
        its way and comes back when the hole is done. */
     var restCv = null, waveCv = null, scratch = null;
-    var waveRaf = null, waveT = 0, waveMix = 0;
+    var waveRaf = null, waveMix = 0;
 
     /* The palette.
 
@@ -430,14 +441,13 @@
        highlight rather than as a repaint of the whole line. */
     function markWaveParticles() {
       if (WAVE === "off") return;
-      var acc = accentRGB(), waved = 0, i;
+      var acc = accentRGB(), i;
       for (i = 0; i < parts.length; i++) {
         var p = parts[i];
-        if (WAVE === "all") { p.wave = true; waved++; continue; }
+        if (WAVE === "all") { p.wave = true; continue; }
         var n = (p.col.match(/[\d.]+/g) || []).map(Number);
         p.wave = Math.abs(n[0] - acc[0]) + Math.abs(n[1] - acc[1]) +
           Math.abs(n[2] - acc[2]) < 110;
-        if (p.wave) waved++;
       }
       /* A headline with no accent in it marks nothing and animates nothing,
          which is correct and silent.
@@ -455,38 +465,90 @@
          The lesson generalises: a guard written against one failure keeps
          firing after that failure is gone, and then it is just a bug with a
          good reason in its comment. */
-      // the span the gradient has to travel, measured from the marked cells
-      waveX0 = W; waveX1 = 0;
-      for (i = 0; i < parts.length; i++) {
-        if (!parts[i].wave) continue;
-        if (parts[i].tx < waveX0) waveX0 = parts[i].tx;
-        if (parts[i].tx > waveX1) waveX1 = parts[i].tx;
-      }
-      if (waveX1 <= waveX0) { waveX0 = 0; waveX1 = W; }
+      /* The bounding box of the marked cells used to be measured here, so
+         that the band could be sized to it. The tiled gradient covers the
+         whole canvas at every moment, so there is no span to fit any more
+         and keeping the measurement would be work whose result nobody
+         reads. */
+      measurePagePos();
     }
 
     /* The travelling gradient, as a fill style.
 
-       It sweeps the horizontal span of the cells it actually tints, NOT the
-       width of the headline. Those are the same thing only in "all" mode. In
-       "accent" mode the accent is often the last third of the line, so a
-       gradient sized to the whole width spent most of its cycle over the
-       white half — where it changes nothing — and left the accent sitting on
-       an end stop. The wave was running the whole time and was invisible.
+       The first version was a BAND: one pass of the palette, sized to the
+       cells it tints, sliding across them. Everything outside the band took
+       the clamped end stop - and both end stops are the accent hue. That one
+       fact produced all three of the owner's complaints at once:
+
+         "das wird zu schnell wieder reines gelb"  most of the line was sitting
+                                                   on a clamped end
+         "der uebergang zwischen woertern ist      the edge of the band ran
+          komisch angehackt"                       through the middle of a word
+         "als ob der gradient neu geladen wird"    the band teleported back when
+                                                   its offset wrapped
+
+       So the palette is TILED instead: it repeats end to end, past both edges
+       of the canvas. Nothing is ever clamped, because nothing is ever outside
+       the gradient - and since the palette starts and ends on the same hue,
+       the joins are invisible and a shift of exactly one period leaves an
+       identical picture. That is what makes the wrap unseeable: there is no
+       longer a moment to see.
+
+       The axis leans ("gradient bitte schraeger machen, nicht gerade"), and
+       the phase comes from wall-clock time and PAGE position rather than from
+       a frame counter and element position - so the speed is the same on a
+       30Hz and a 120Hz screen, and two headlines are two windows onto one
+       wave instead of two waves that merely look alike.
 
        Both the resting path and the physics path paint with this, so the
        colours do not change when the black hole takes the canvas. An earlier
        build tinted only at rest and the line snapped back to its base colours
        the moment the hole touched it: the same defect as two draw paths using
        different grids. */
-    var waveX0 = 0, waveX1 = 0;
+    var pageP = 0;
+
+    /* Where this canvas sits along the wave axis, measured in PAGE pixels, so
+       that the phase below can be shared between headlines. Page coordinates
+       do not change when the visitor scrolls, so this is measured on settle
+       and on resize, never per frame - getBoundingClientRect forces layout. */
+    function measurePagePos() {
+      var r = cv.getBoundingClientRect(), a = WAVE_ANGLE * Math.PI / 180;
+      pageP = (r.left + (window.scrollX || 0)) * Math.cos(a) +
+        (r.top + (window.scrollY || 0)) * Math.sin(a);
+    }
+
     function waveGradient(c2d) {
-      var pal = paletteFor();
-      var w = Math.max(24, waveX1 - waveX0);
-      var span = w * 0.75 + 1;
-      var off = waveX0 + (waveT * 1.4) % (w + span) - span;
-      var g = c2d.createLinearGradient(off, 0, off + span, 0);
-      for (var k = 0; k < pal.length; k++) g.addColorStop(k / (pal.length - 1), pal[k]);
+      var pal = paletteFor(), n = pal.length;
+      if (n < 2) return pal[0] || "#fff";
+      var a = WAVE_ANGLE * Math.PI / 180, ux = Math.cos(a), uy = Math.sin(a);
+      var per = Math.max(80, WAVE_PERIOD);
+
+      /* the canvas projected onto the axis, via its four corners, so that a
+         negative angle is covered just as completely as a positive one */
+      var c1 = W * ux, c2 = H * uy;
+      var base = Math.min(0, c1, c2, c1 + c2);
+      var reach = Math.max(0, c1, c2, c1 + c2) - base;
+
+      /* one tile per period plus one, so the repeats reach past both edges
+         and no cell is ever outside the gradient */
+      var reps = Math.ceil(reach / per) + 1;
+
+      /* The phase is wall-clock time offset by the page position: the colour
+         at a point depends on where that point is ON THE PAGE, not on where
+         it sits inside its element, so neighbouring headlines are two windows
+         onto one wave. */
+      var shift = (Date.now() / 1000 / Math.max(0.2, WAVE_CYCLE)) * per - pageP;
+      var start = base - per + (((shift - base + per) % per) + per) % per;
+      var end = start + reps * per;
+
+      var g = c2d.createLinearGradient(start * ux, start * uy, end * ux, end * uy);
+      for (var r = 0; r < reps; r++) {
+        for (var k = 0; k < n; k++) {
+          // the last stop of one tile IS the first of the next: place it once
+          if (r && k === 0) continue;
+          g.addColorStop((r + k / (n - 1)) / reps, pal[k]);
+        }
+      }
       return g;
     }
 
@@ -518,7 +580,6 @@
       waveRaf = null;
       if (!waveRunning()) { waveMix = 0; drawStatic(); return; }
       if (!restCv) buildWaveLayers();
-      waveT += 1;
       // ease in after a settle, so the colour does not snap on
       waveMix = Math.min(1, waveMix + 0.03);
 
@@ -626,7 +687,7 @@
       // keep the wave travelling while the hole plays, rather than dropping
       // the whole line back to its base colours for the length of the pass
       var waveGrad = null;
-      if (WAVE !== "off" && !reduced) { waveT += 1; waveGrad = waveGradient(ctx); }
+      if (WAVE !== "off" && !reduced) waveGrad = waveGradient(ctx);
       var shear = Math.abs(hVel) > 0.4 ? hVel * 0.012 : 0;
       for (var i = 0; i < parts.length; i++) {
         var p = parts[i];
