@@ -458,6 +458,31 @@ section {
   transition: background .3s
 }
 
+/* AT THE TOP THE BAR IS NOT A BAR. It sits on the stage, which is a picture
+   the page already dimmed for exactly this - so it carries nothing of its
+   own there and its type goes to full white instead of the muted grey it
+   uses against a surface. The panel arrives with .stuck, and the muted grey
+   comes back with it.
+
+   ONLY ON PAGES THAT HAVE A STAGE. The bar is ink in both themes, so its
+   white type over a PAPER page is white on white: measured 1:1 on the legal
+   pages, contact and 404 in light mode, which is not low contrast, it is an
+   invisible masthead. Those pages start on paper and keep their panel.
+
+   If :has() is not understood the whole rule is dropped and every page keeps
+   the panel - the safe direction to fail in. */
+body:has(.stage, .hero--stage) .nav:not(.stuck) {
+  background: transparent;
+  backdrop-filter: none
+}
+
+body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-link,
+body:has(.stage, .hero--stage) .nav:not(.stuck) .menu-t,
+body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-status,
+body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
+  color: var(--ink-fg)
+}
+
 /* The bar used to arrive in two beats: a panel sliding down, then a hairline
    drawing across from the left. The hairline is gone - Pac-Man runs along the
    bottom edge of the bar and is already the line between the header and the
@@ -4406,6 +4431,21 @@ html[data-theme="light"] .t-moon {
       z-index: 1;
       pointer-events: none;
       background:
+        /* THE BAR'S OWN GROUND, given by the picture instead of by a panel.
+           The masthead is transparent at the top by request - "damit man
+           besser lesen kann" - and transparent over a photograph is the one
+           thing that cannot be read: measured against the delivered mosaic,
+           the brightest cell under "Menu" was 224,193,149 and the label came
+           out at 1.53:1 where it needs 4.5.
+
+           So the PICTURE gives way at its top edge rather than the bar
+           growing a panel. .82 is not a taste value either: the worst cell
+           is luminance .55, white type needs its ground under .158, and
+           (.55 - .158) / (.55 - .0045) = .72 is the least that does it -
+           .82 with the margin every measurement deserves. It is gone again
+           160px down, which is why it reads as the image darkening at its
+           edge and not as a second bar. */
+        linear-gradient(to bottom, rgba(11, 11, 12, .82) 0, rgba(11, 11, 12, .62) 72px, rgba(11, 11, 12, 0) 160px),
         linear-gradient(to right, rgba(11, 11, 12, .72) 0%, rgba(11, 11, 12, .34) 44%, rgba(11, 11, 12, .22) 100%),
         linear-gradient(to top, rgba(11, 11, 12, .84) 0%, rgba(11, 11, 12, .12) 40%, rgba(11, 11, 12, .06) 100%)
     }
@@ -5007,5 +5047,78 @@ html[data-theme="light"] .t-moon {
   .stage-coords {
     margin-left: 0;
     white-space: normal
+  }
+}
+
+/* ============================================================
+   THE MASTHEAD'S CONTROLS — one height, one loud thing
+   ============================================================ */
+
+/* THE STATUS PILL wears the travelling spectrum as its edge. The border is
+   a gradient behind the pill, masked to everything BUT the padding box, so
+   one element carries a 1px moving edge without a wrapper and without a
+   second box to keep in sync. Same angle, period and speed as the console's
+   rim, because it is the same material. */
+.nav .nav-status {
+  position: relative;
+  height: 38px;
+  padding-inline: .95rem;
+  border-radius: 100px;
+  isolation: isolate
+}
+
+.nav .nav-status::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1px;
+  background: repeating-linear-gradient(var(--rim-angle), var(--wave-stops));
+  background-size: var(--rim-shift) 100%;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: wave-text var(--rim-cycle) linear infinite
+}
+
+/* the ring it used to draw for itself would now sit under the spectrum */
+.nav .nav-status {
+  box-shadow: none
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav .nav-status::after {
+    animation: none
+  }
+}
+
+/* THE CALL TO ACTION. Measured, not judged: the menu button, the theme
+   toggle and the links are 38px and this was 51 - the one control in the row
+   standing on a different line. And it takes the spectrum instead of the
+   flat yellow, on near-black text: every stop clears 7:1 that way, the
+   darkest of them (#4aa6ef) included. */
+.nav .btn {
+  height: 38px;
+  padding-block: 0;
+  padding-inline: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  border-color: transparent;
+  background: repeating-linear-gradient(var(--rim-angle), var(--wave-stops));
+  background-size: var(--rim-shift) 100%;
+  color: #0b0b0c;
+  animation: wave-text var(--rim-cycle) linear infinite
+}
+
+.nav .btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08)
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav .btn {
+    animation: none
   }
 }
