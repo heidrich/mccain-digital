@@ -67,17 +67,32 @@
   --e-out: cubic-bezier(.16, 1, .3, 1);
   --e-io: cubic-bezier(.65, 0, .35, 1);
 
-  /* fluid type — tuned so the long headline line spans the container
-     (~8.7em of advance width); the vh cap keeps short windows sane */
-  /* Fluid on width, with a CEILING ON HEIGHT: at 1.8em for two lines, 18vh
-     per em keeps the billboard under a third of the screen. It changes
-     nothing at 1512x850 or 1090x614 - 9.6vw is the smaller number at both -
-     and catches the window that is wide and short, where a headline sized
-     off the width alone eats the whole hero. */
-  --t-display: clamp(2.6rem, min(9.6vw, 18vh), 11rem);
-  /* section headings live in HALF-width columns on most bands — at 6.2vw
-     they wrapped to three lines and broke across the viewport */
-  --t-h2: clamp(2rem, 4.6vw, 4.2rem);
+  /* FLUID TYPE.
+
+     The billboard used to be tuned so its long line spanned the container
+     exactly (~9.6em of advance width). That is no longer the rule: owner,
+     "mach die h1 mal kleiner" and "auf 1900 monitoren ist das alles sehr
+     gross" - and on a real 1920x1080 it was 176px, a 317px block, close to a
+     third of the screen before a word of anything else. It now stops at about
+     70% of the container, which reads as a headline instead of as type
+     stretched to fit. Do not "restore" the span; it was deliberately given up.
+
+     6.7vw lands on 128px at 1920, 101 at 1512, 73 at 1090. The 8rem ceiling
+     is reached at 1910px, so nothing wider than the monitor in question gets
+     a bigger headline at all. Below 621px the 2.6rem floor takes over, which
+     is the same number the phone had before - the complaint was about big
+     screens, so small ones are untouched.
+
+     The vh cap comes down with it (18 -> 13, the same ratio): it exists for
+     the window that is wide and SHORT, where a headline sized off the width
+     alone eats the whole hero, and it has to stay proportional to the term it
+     is guarding. */
+  --t-display: clamp(2.6rem, min(6.7vw, 13vh), 8rem);
+  /* Section headings live in HALF-width columns on most bands — at 6.2vw they
+     wrapped to three lines and broke across the viewport. Down "ein wenig"
+     with the billboard: 4.6vw/4.2rem -> 4.1vw/3.65rem, about 13% smaller
+     everywhere - 58px at 1512 and above, 45 at 1090. */
+  --t-h2: clamp(1.9rem, 4.1vw, 3.65rem);
   --t-h3: clamp(1.35rem, 2.1vw, 2rem);
   --t-body: clamp(1rem, .48vw + .88rem, 1.18rem);
   --t-small: clamp(.8rem, .2vw + .74rem, .89rem);
@@ -939,12 +954,17 @@ html[data-theme="light"] .t-moon {
 }
 
 /* short windows (laptops at 100%, browsers with lots of chrome): the hero
-   has to survive at ~620px of viewport, so it tightens instead of spilling */
-@media (max-height: 820px) {
-  :root {
-    --t-display: clamp(2.4rem, min(9.6vw, 21vh), 9rem)
-  }
+   has to survive at ~620px of viewport, so it tightens instead of spilling.
 
+   It used to redefine --t-display here as clamp(2.4rem, min(9.6vw, 21vh), 9rem),
+   which TIGHTENED the old root token (9.6vw, 26vh cap, 11rem). Against the
+   present one - 6.7vw, 13vh cap, 8rem - the same numbers are larger in every
+   term, so the rule had quietly turned into the opposite of its own comment:
+   at 1090x614 it put the headline back to 105px while the root asked for 73.
+   A guard written against a value that later moved does not become wrong
+   loudly; it keeps its comment and reverses its effect. The root's own vh cap
+   is what does this job now. */
+@media (max-height: 820px) {
   .hero {
     padding-top: calc(var(--nav) + 1.5vh)
   }
