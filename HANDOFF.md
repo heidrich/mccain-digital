@@ -16,6 +16,92 @@ e9f39a3  feat(ai): the console follows you down the page, with a travelling rim
 d8948b9  fix(pixel): tile the wave and lean its axis
 ```
 
+## DER REFRESH — `preview/refresh.html`
+
+Owner am 2026-09-01: die neuen Hintergruende „echt klasse", aber **nur im
+Header** und der Header **full width**; die Seite „braucht noch was"; die
+**Pixel-Schriften sitzen nicht** und sind mit Sehschwaeche schlecht lesbar —
+„pixel engine behalten, aber raus aus den headings", stattdessen „gezielt in
+mehr bildern oder die buttons"; Schriftfarben anpassen; und ein **kompletter
+Refresh-Mockup** aus der Skill-Sammlung. Auf Nachfrage: „du kannst ALLES
+veraendern — auch farben, logo alles".
+
+→ **https://mccain-digital.vercel.app/preview/refresh.html**
+
+Eine eigenstaendige Seite mit eigenen Tokens und eigenem CSS. Sie fasst
+`index.html`, `v3.css` und `v3.js` **nicht** an; das einzige geteilte Stueck ist
+`pixel-engine.js`, und zwar in seinen neuen Rollen.
+
+### Die fuenf Entscheidungen
+
+**1 — Die Pixel-Engine verlaesst die Schrift.** Der Beweis stand im eigenen
+Screenshot: „Things that" in Punktrastern war schlicht nicht lesbar, und der
+Hover-Scatter zerlegte mitten im Wort ein „useful". Die Engine laeuft jetzt auf
+
+- **Bildern** — sechs Stueck: sie bauen sich beim Reinscrollen aus einem
+  Partikelschwarm zusammen und verpixeln wieder unter dem Zeiger. Das ist der
+  Effekt, den der Owner an den Case-Bildern immer gut fand;
+- **den vollen Buttons** — Hover, wie bisher;
+- **dem Logo** — eine 7×7-Marke auf demselben Raster, das die Engine zeichnet.
+  Statisches SVG: eine Identitaet darf nicht von einem Skript abhaengen.
+
+Damit ist das Pixel nicht mehr etwas, das man MIT Woertern macht, sondern das,
+womit die Bude unterschreibt. `[data-pixel]` auf der Seite: **0**.
+
+**2 — Der Header ist eine Buehne ueber die volle Breite.** Das Dither-Feld
+laeuft dort und nirgendwo sonst, wie gewuenscht. Darueber die Guide-Rails und
+vier Eckmarken, die Copy links unten verankert, die Medienplatte rechts oben.
+Die Leiste liegt **ausserhalb** der Buehne: die traegt fuer das Feld
+`overflow: clip`, und ein `sticky` klebt nur innerhalb seines eigenen
+Clip-Vorfahren — in der Buehne waere die Navigation beim Scrollen weg gewesen.
+
+**3 — Die Palette verliert ihr Braun.** `#0d0c0a` hatte Rot und Gruen ueber
+Blau; neben einem warmen Gelb liest sich das als Sepia. Jetzt `#0b0b0c`,
+neutral, damit das Logo-Gelb das einzige Warme auf der Seite ist. Gelb
+unangetastet. Das gemochte Gruen `#7a8c00` wird **zweites Signal** und besteht
+auf dem dunklen Grund fuer sich (5,23:1); fuer Kleinschrift gibt es eine
+gehobene Fassung (`#a4bd00`, 9,24:1) — dieselbe Zwei-Gewichte-einer-Farbe-Regel,
+die das Gelb schon faehrt. Grau neutral statt warm: `#a3a3a0`, 7,78:1 statt
+6,61:1.
+
+**4 — Die Schrift traegt jetzt selbst.** Vorher lieferte das Pixelraster die
+Praesenz. Jetzt: Gewicht 800, Laufweite auf -0.035em zusammengezogen,
+Zeilenabstand unter 1. Das macht aus einer Grotesk eine Display-Schrift ohne
+zweite Datei.
+
+**5 — Das Raster liegt offen.** Rails, Eckmarken, Mono-Metadaten,
+Kapitelwechsel, ueberdimensionierte Wortmarke im Fuss. Kapitel wechseln
+weiterhin mit dem Theme — sonst haette der Umschalter nichts mehr zu tun.
+
+### Gemessen, nicht beurteilt
+
+| | |
+|---|---|
+| Text ueber dem Dither-Feld | Koordinaten 7,28:1 · Fakten-Labels 5,22:1 · Intro 15,27:1 |
+| Ueberschrift | 15,0:1 weiss · 10,3:1 gelb |
+| Scroll von oben, 1440×900 | **0 Long Tasks**, p90 16,9 ms, 3,1 % der Frames ueber 20 ms |
+| A11y-Probe | 0 fehlende alt, 0 leere Links, 0 namenlose Buttons, 1 h1, kein Ueberlauf |
+| Mobil 390×844 | kein horizontaler Ueberlauf, echtes Menue (kein Platzhalter) |
+
+Die Kontrastwerte sind aus den **ausgelieferten Pixeln** des Screenshots
+gelesen, gegen die **hellste** Grundzelle unter der Zeile — nicht gegen den
+Token. Erster Anlauf nahm die dunkelste Zelle als Grund, was schmeichelt; und
+bei der Riesenschrift traf das 80.-Perzentil schon den Buchstaben statt den
+Grund, weshalb dort die analytische Zahl steht. Ein Messwert ist nur so viel
+wert wie die Annahme darunter.
+
+### Was noch offen ist
+
+- **Portraits.** Die zwei Rahmen sind ehrlich leer beschriftet, keine
+  Silhouetten, keine erfundenen Koepfe — so will es der Ehrlichkeits-Teil der
+  Skills und so steht es hier seit Wochen als groesste Luecke.
+- **Zweiter Schriftschnitt.** Laeuft auf Schibsted 800 eng, das traegt. Ein
+  Condensed-Schnitt gaebe den Plakatzeilen noch einen Gang, kostet eine
+  Font-Datei. Entscheidung des Owners.
+- **Uebernahme.** Der Refresh ist eine Vorschauseite. Wenn er steht, wandert er
+  in `index.html`/`v3.css`, und `PixelFX.headline`/`voidReveal` fliegen aus der
+  Engine — sie haetten dann keinen Aufrufer mehr.
+
 ## Zum Aussuchen — diese Seiten sind JETZT erreichbar
 
 Sie lagen unter `_parked/`, und das haelt `.vercelignore` vom Deployment fern:
@@ -26,6 +112,7 @@ Livegang fliegt der Ordner raus).
 
 | | |
 |---|---|
+| [**Refresh-Mockup**](https://mccain-digital.vercel.app/preview/refresh.html) | **das Neue** — ganze Seite, Pixel raus aus der Schrift, Dither nur im Header |
 | [Hintergruende Runde 2](https://mccain-digital.vercel.app/preview/bg-lab.html) | **wartet auf deine Wahl** — Dither-Wolke grob/fein, Guides ohne Bewegung, beides kombiniert |
 | [Hintergruende Runde 1](https://mccain-digital.vercel.app/preview/life-lab.html) | durchgefallen; bleibt als Vergleich stehen |
 | [Wellen-Paletten und die Achse](https://mccain-digital.vercel.app/preview/wave-lab.html) | falls der Verlauf auf Schrift doch nochmal ein Thema wird |
