@@ -248,6 +248,178 @@
   }
 
   /* ============================================================
+     3b) THE DOCKED ASSISTANT
+
+     Owner: "ich moechte das unsere ai konsole, wenn ich 01. verlasse und nach
+     unten scrolle, als persoenlichen assi am rand der seite mit laufen haben.
+     zum ausklappen etc. den ich jederzeit fragen stellen kann wann ich es
+     will, das quasi ein chat fenster aufgeht."
+
+     So the console MOVES to the edge of the page rather than a second one
+     being built there. Everything above binds to #console, #consoleBody,
+     #consoleInput and friends, so moving the node carries the handlers, the
+     typewriter, the mode and - the point of it - the conversation so far. A
+     copy would have been a second console that starts empty and drifts out of
+     step with the first the moment anyone types in either of them.
+
+     It appears only BELOW section 01. Scrolling up into the hero also takes
+     the section off screen, and summoning a floating console one screen above
+     the real one would be answering "where am I" with "somewhere else".
+     ============================================================ */
+  (() => {
+    const consoleEl = d.getElementById("console");
+    const section = d.getElementById("ai");
+    if (!consoleEl || !section) return;
+
+    // A marker at the exact spot the console came from, so it goes back there
+    // and not merely "into the grid somewhere".
+    const home = d.createComment("console lives here while section 01 is on screen");
+    consoleEl.parentNode.insertBefore(home, consoleEl);
+
+    /* While the console is away, something its size stands in its place. Two
+       reasons, and the second one is the one that bites: section 01 would
+       otherwise change height the moment the console leaves it, which moves
+       the very edge this whole thing is measured against - and a threshold
+       that moves when you cross it is a threshold you cross twice. */
+    const spacer = d.createElement("div");
+    spacer.setAttribute("aria-hidden", "true");
+
+    const dock = d.createElement("div");
+    dock.className = "dock";
+    dock.innerHTML =
+      '<div class="dock-hold" id="dockHold" hidden>' +
+      '<span class="dock-glow" aria-hidden="true"></span>' +
+      '<div class="dock-panel rim" id="dockPanel" role="region" aria-label="Your assistant">' +
+      '<div class="dock-in"><div class="dock-slot" id="dockSlot"></div></div>' +
+      '<button class="dock-x" type="button" id="dockX" aria-label="Collapse the assistant">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">' +
+      '<path d="M6 6l12 12M18 6 6 18"/></svg></button>' +
+      '</div></div>' +
+      '<div class="dock-hold">' +
+      '<span class="dock-hint" id="dockHint" aria-hidden="true">Ask anything</span>' +
+      '<span class="dock-glow" aria-hidden="true"></span>' +
+      '<button class="dock-orb rim" id="dockOrb" type="button" aria-expanded="false" aria-controls="dockPanel">' +
+      '<span class="dock-orb-in">' +
+      '<svg class="ic-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + ICONS.bot + '"/></svg>' +
+      '<svg class="ic-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" ' +
+      'stroke-linecap="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>' +
+      '</span><span class="sr-only" id="dockOrbLabel">Open the assistant</span></button>' +
+      '</div>';
+    d.body.appendChild(dock);
+
+    const hold = dock.querySelector("#dockHold");
+    const orb = dock.querySelector("#dockOrb");
+    const slot = dock.querySelector("#dockSlot");
+    const hint = dock.querySelector("#dockHint");
+    const orbLabel = dock.querySelector("#dockOrbLabel");
+
+    /* The rim travels through the palette the headlines travel through. Asking
+       the engine for it rather than writing the colours out again means the
+       border and the type are one effect with one source - a second list would
+       already be the wrong one the next time the accent changes. */
+    if (window.PixelFX && PixelFX.wavePalette) {
+      const pal = PixelFX.wavePalette("rainbow");
+      // twice across the sheet, so translating it by half its width lands on
+      // an identical picture and the loop has no visible moment
+      dock.style.setProperty("--wave-stops", pal.concat(pal.slice(1)).join(","));
+    }
+
+    let docked = false, open = false, hinted = false;
+    let hintT = 0;
+
+    function setOpen(next) {
+      if (next === open) return;
+      open = next;
+      hold.hidden = !next;
+      orb.setAttribute("aria-expanded", String(next));
+      orb.classList.toggle("is-open", next);
+      // the icon swaps, so the name has to swap with it: a button that still
+      // says "open" while it closes is a button that lies to a screen reader
+      orbLabel.textContent = next ? "Collapse the assistant" : "Open the assistant";
+      if (!next) return;
+      clearTimeout(hintT);
+      hint.classList.remove("on");
+      // a chat that opens with the cursor somewhere else is a chat you have to
+      // click twice to use
+      requestAnimationFrame(() => input.focus({ preventScroll: true }));
+    }
+
+    function setDocked(next) {
+      if (next === docked) return;
+      docked = next;
+      if (next) {
+        spacer.style.height = consoleEl.offsetHeight + "px";
+        consoleEl.parentNode.insertBefore(spacer, consoleEl);
+        slot.appendChild(consoleEl);
+        dock.classList.add("on");
+        if (!hinted && !reduced) {
+          hinted = true;
+          requestAnimationFrame(() => hint.classList.add("on"));
+          hintT = setTimeout(() => hint.classList.remove("on"), 4600);
+        }
+        return;
+      }
+      // collapse before moving, so the panel is never seen empty
+      setOpen(false);
+      home.parentNode.insertBefore(consoleEl, home.nextSibling);
+      if (spacer.parentNode) spacer.remove();
+      dock.classList.remove("on");
+      clearTimeout(hintT);
+      hint.classList.remove("on");
+    }
+
+    orb.addEventListener("click", () => setOpen(!open));
+    dock.querySelector("#dockX").addEventListener("click", () => { setOpen(false); orb.focus(); });
+
+    /* Escape only while the focus is inside the dock. The command menu listens
+       for Escape too, and a key that closes two unrelated things at once is a
+       key nobody trusts. */
+    dock.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape" || !open) return;
+      setOpen(false);
+      orb.focus();
+    });
+
+    /* Where section 01 ends, in page coordinates.
+
+       This was an IntersectionObserver first, and it was wrong in a way that
+       only shows up when you jump: an observer reports THRESHOLD CROSSINGS,
+       and "below the viewport" and "above the viewport" are both ratio zero.
+       Landing on a deep link, reloading half way down the page or scripting a
+       jump moves between two states it considers the same, so it says nothing
+       at all and the assistant simply is not there. Scrolling by hand always
+       passes through the section, which is exactly why the hole was invisible
+       until something jumped.
+
+       So the edge is measured instead, and the state is derived from where we
+       are rather than from having been seen to arrive. A ResizeObserver keeps
+       the number honest across font loading, reflow and the reveal
+       animations; the scroll handler itself only compares two numbers, and
+       never reads layout. */
+    let edge = 0;
+    const measure = () => { edge = section.getBoundingClientRect().bottom + window.scrollY; };
+    measure();
+
+    let queued = false;
+    const evaluate = () => {
+      queued = false;
+      // a band around the edge, so a page that settles a pixel or two while
+      // sitting exactly on the boundary cannot flap the console in and out
+      if (window.scrollY > edge) setDocked(true);
+      else if (window.scrollY < edge - 24) setDocked(false);
+    };
+    addEventListener("scroll", () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(evaluate);
+    }, { passive: true });
+
+    new ResizeObserver(() => { measure(); evaluate(); }).observe(section);
+    evaluate();
+  })();
+
+  /* ============================================================
      4) WORK — an endless track with arrows and a counter
      ============================================================ */
   const track = d.getElementById("worktrack");
