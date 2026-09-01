@@ -83,24 +83,22 @@
      Regenerated on a theme switch anyway. It costs one call and it is what
      keeps this honest if --acc ever becomes theme-dependent. */
   function paintRimPalette() {
-    if (!window.PixelFX || !PixelFX.wavePalette) return;
     const cs = getComputedStyle(root);
     const period = parseFloat(cs.getPropertyValue("--rim-period")) || 480;
     const angle = parseFloat(cs.getPropertyValue("--rim-angle")) || 112;
-    const pal = PixelFX.wavePalette("rainbow", PixelFX.tokenRGB(root, "--acc", "#f5c518"));
 
-    /* Positions, not just colours: the rim is a repeating-linear-gradient and
-       a repeat needs a length to repeat over. The palette starts and ends on
-       the same hue, so the joins between repeats are invisible. */
-    const step = period / (pal.length - 1);
-    root.style.setProperty("--wave-stops",
-      pal.map((c, i) => c + " " + (i * step).toFixed(2) + "px").join(","));
+    /* The COLOURS are no longer generated here. They used to come from
+       PixelFX.wavePalette("rainbow"), and a full spectrum was the loudest
+       thing on a page whose whole argument is that one accent punctuates a
+       restrained system. They are --wave-stops in v3.css now, where they can
+       be read and argued with: the logo yellow travelling through the green
+       and back, over the same period.
 
-    /* How far sideways one period is. A horizontal move of dX advances an
-       angled gradient by dX * sin(angle) ALONG ITS LINE, so the move that
-       covers exactly one period is period / sin(angle) - and getting this
-       wrong is what made the border visibly restart every cycle. Computed
-       here so the angle is written in exactly one place. */
+       What still has to be COMPUTED is the geometry. A horizontal move of dX
+       advances an angled gradient by dX * sin(angle) along its line, so the
+       move that covers exactly one period is period / sin(angle) - and
+       getting that wrong is what made the border visibly restart every
+       cycle. Computed here so the angle is written in exactly one place. */
     root.style.setProperty("--rim-shift",
       (period / Math.sin(angle * Math.PI / 180)).toFixed(2) + "px");
   }
@@ -144,7 +142,10 @@
   const nav = d.getElementById("nav");
   if (nav) {
     addEventListener("scroll", () => {
-      nav.classList.toggle("stuck", scrollY > 24);
+      /* 8, not 24: the owner asked for the transition to belong to the
+         first movement. At 24 there was a stretch of scrolling where the
+         bar had not decided yet. */
+      nav.classList.toggle("stuck", scrollY > 8);
     }, { passive: true });
   }
 
@@ -461,6 +462,88 @@
       });
     }
   }
+
+
+  /* ============================================================
+     8) THE REFRESH — word reveals and the header field
+
+     Both are OPT-IN from the markup, on purpose: the pages that still
+     rasterise their headlines with the pixel engine must not have the
+     same text split into word spans underneath the raster. A page joins
+     the refresh by saying so.
+
+       data-words   on a heading  -> its words rise through a mask
+       data-field   on a header   -> the dither field runs behind it
+     ============================================================ */
+
+  /* Walks TEXT NODES only, so the markup around them survives: the <br>
+     in a hero headline, the .dim span that greys half a section heading,
+     the .accent span that carries the yellow. Rewriting the heading as a
+     string would have destroyed all three. */
+  function splitWords(root) {
+    const walk = d.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    let n, i = 0;
+    while ((n = walk.nextNode())) nodes.push(n);
+    nodes.forEach((tn) => {
+      if (!tn.nodeValue.trim()) return;
+      const frag = d.createDocumentFragment();
+      tn.nodeValue.split(/(\s+)/).forEach((part) => {
+        if (!part) return;
+        if (!part.trim()) { frag.appendChild(d.createTextNode(part)); return; }
+        const w = d.createElement("span");
+        w.className = "w";
+        const inner = d.createElement("i");
+        inner.textContent = part;
+        inner.style.setProperty("--wi", i++);
+        w.appendChild(inner);
+        frag.appendChild(w);
+      });
+      tn.parentNode.replaceChild(frag, tn);
+    });
+    return i;
+  }
+
+  if (!reduced) {
+    d.querySelectorAll("[data-words]").forEach((h) => {
+      splitWords(h);
+      h.classList.add("wr");
+    });
+
+    /* The header is a SEQUENCE, not a reveal: a view() timeline cannot
+       animate what is already on screen at load, because its entry range
+       is behind us before the first frame. The hidden state is added
+       here rather than in the stylesheet, so a visitor whose JavaScript
+       never arrives gets the finished headline instead of an empty
+       header. */
+    const stage = d.querySelector(".hero--stage");
+    if (stage) {
+      const h1 = stage.querySelector(".hero-h");
+      if (h1) {
+        h1.classList.remove("wr");
+        splitWords(h1);
+        h1.classList.add("hs");
+      }
+      stage.classList.add("hs");
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        if (h1) h1.classList.add("go");
+        stage.classList.add("go");
+      }));
+    }
+  }
+
+  /* The dither field, behind the header and nowhere else - the owner
+     asked for it there only. The engine caps its own ramp against the
+     dimmest text on the host, so asking for a brighter top cannot make
+     the header fail contrast; it simply gets clamped. */
+  function bootField() {
+    if (reduced || !window.PixelFX || !PixelFX.dither) return;
+    d.querySelectorAll("[data-field]").forEach((el) => {
+      PixelFX.dither(el, { cell: 9, top: .5 });
+    });
+  }
+  if (d.readyState === "complete") bootField();
+  else addEventListener("load", bootField);
 
   // The page scripts run between this file and the boot: they clone the work
   // track and render the service cards synchronously, so by the time the font

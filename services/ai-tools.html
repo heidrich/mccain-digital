@@ -92,7 +92,19 @@
 
   <!-- ================= NAV ================= -->
   <nav class="nav" id="nav" aria-label="Main navigation">
-    <a class="logo" href="../index.html#top">mccain <i>digital</i><span class="sr-only"> — home</span></a>
+    <a class="logo" href="../index.html#top">
+      <!-- seven by seven cells, the same grid the pixel engine draws on -->
+      <svg class="mark" viewBox="0 0 7 7" aria-hidden="true">
+        <rect x="0" y="0" width="1" height="7" />
+        <rect x="6" y="0" width="1" height="7" />
+        <rect x="1" y="1" width="1" height="1" />
+        <rect x="5" y="1" width="1" height="1" />
+        <rect x="2" y="2" width="1" height="1" />
+        <rect x="4" y="2" width="1" height="1" />
+        <rect x="3" y="3" width="1" height="1" />
+      </svg>
+      mccain <i>digital</i><span class="sr-only"> — home</span>
+    </a>
 
     <span class="nav-status">
       <i class="ns-dot" aria-hidden="true"></i>
@@ -122,8 +134,14 @@
   <main id="top">
 
     <!-- ================= HERO ================= -->
-    <header class="hero hero--svc wrap">
-      <div class="hero-inner">
+    <!-- A full-bleed stage: the dither field runs behind it (data-field,
+         wired in common.js), the guide rails sit over it, and the content
+         keeps its own container. The header drops .wrap so the field can
+         reach the viewport edges. -->
+    <header class="hero hero--svc hero--stage guides" data-field>
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+      <div class="hero-inner wrap">
         <nav class="crumb" aria-label="Breadcrumb">
           <a href="../index.html#top">Home</a><i aria-hidden="true">/</i>
           <a href="../index.html#services">Services</a><i aria-hidden="true">/</i>
@@ -135,9 +153,12 @@
              it does on the home page -->
         <p class="hero-eyebrow label">RAG · agents · MCP · self-hostable</p>
 
+        <!-- Real type, not a pixel raster. Dotted stems at display size are
+             hard to read - which was the whole reason for the refresh - and
+             the words rise through a mask instead. -->
         <h1 class="hero-h">
-          <span class="line"><span class="ph" data-pixel>We don't talk AI.</span></span>
-          <span class="line"><span class="ph" data-pixel><span class="accent">We ship it.</span></span></span>
+          <span class="line">We don't talk AI.</span>
+          <span class="line"><span class="accent">We ship it.</span></span>
         </h1>
 
         <div class="hero-foot">
@@ -156,11 +177,17 @@
             </div>
           </div>
           <div class="hero-side">
-            <b>2–4 weeks</b> to a working proof of value<br>
-            <b>48 h</b> to a fixed quote<br>
-            <b>100%</b> self-hostable
+            <span><b>2–4 wk</b><i>to a working proof of value</i></span>
+            <span><b>48 h</b><i>to a fixed quote</i></span>
+            <span><b>100%</b><i>self-hostable</i></span>
           </div>
         </div>
+
+        <p class="stage-meta">
+          <span>Model-agnostic · your keys · your data</span>
+          <span>Claude · GPT · MCP · pgvector</span>
+          <span><b>whatever-recall</b> — our own AI product, live</span>
+        </p>
       </div>
     </header>
 
@@ -203,7 +230,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(02) — What we'd build for you</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Concrete AI,</span>
+            <h2 class="sec-h" data-words>Concrete AI,
               <span class="dim">not buzzwords.</span></h2>
           </div>
           <p class="lead">Real projects, grouped by the job you're trying to do. The industries are examples
@@ -292,7 +319,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(03) — How deep we go</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>The engine</span>
+            <h2 class="sec-h" data-words>The engine
               <span class="dim">under the use-cases.</span></h2>
           </div>
           <p class="lead">Those builds all rest on four capabilities, done properly — each wired into your
@@ -366,7 +393,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(04) — Beyond the build</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>We don't just ship it.</span>
+            <h2 class="sec-h" data-words>We don't just ship it.
               <span class="dim">We set you up to run it.</span></h2>
           </div>
           <p class="lead">Three things most agencies leave out: AI that runs on your own hardware, image
@@ -424,7 +451,7 @@
         <div class="studio-grid">
           <div class="rv">
             <p class="label">(05) — The proof</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>We build AI</span>
+            <h2 class="sec-h" data-words>We build AI
               <span class="dim">because we build AI.</span></h2>
             <p class="lead" style="margin-top:1.4rem">Most agencies discovered AI last year. We ship an
               AI-native product to real users — so we've already hit the hard parts (retrieval quality,
@@ -459,7 +486,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(06) — The stack we build with</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Model-agnostic,</span>
+            <h2 class="sec-h" data-words>Model-agnostic,
               <span class="dim">on purpose.</span></h2>
           </div>
           <p class="lead">We pick the right model for the job — frontier APIs when quality wins, open weights
@@ -500,7 +527,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(07) — How it goes</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Proof of value</span>
+            <h2 class="sec-h" data-words>Proof of value
               <span class="dim">first.</span></h2>
           </div>
           <p class="lead">No six-month roadmap. We start with the smallest thing that proves the AI earns its
@@ -552,7 +579,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(08) — Questions</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>The things</span>
+            <h2 class="sec-h" data-words>The things
               <span class="dim">you're actually asking.</span></h2>
           </div>
           <p class="lead">Pick one — the answer streams in, same engine as the console on the home page.</p>
@@ -658,7 +685,7 @@
     <section class="band band--paper" id="contact">
       <div class="wrap ctaband">
         <p class="label rv" style="justify-content:center">Start a project</p>
-        <h2 class="rv"><span class="ph" data-pixel>Have an idea where AI could help?</span></h2>
+        <h2 class="rv" data-words>Have an idea where AI could help?</h2>
         <p class="lead rv">Tell us the workflow. Within 24 hours you'll hear back with an honest take on
           whether AI is the right tool — and what a proof of value would look like. If the answer is
           "you don't need us for this", you get that answer too.</p>

@@ -33,12 +33,26 @@
      this; anything that sets a background or a line uses --acc. */
   --acc-text: var(--acc);
   --ok: #8ba62b;
-  --ink: #0d0c0a;
-  --ink-2: #16150f;
-  --ink-fg: #f4f1ea;
-  --paper: #f6f4ef;
-  --paper-2: #fffefb;
-  --paper-fg: #131210;
+
+  /* GROUND. The old ink was #0d0c0a - red and green above blue, which is a
+     brown cast at very low light. Beside a warm yellow it read as sepia, and
+     the owner's standing rule on this project is no brown. Neutral now, so
+     the logo yellow is the only warm thing on the page. Paper follows. */
+  --ink: #0b0b0c;
+  --ink-2: #131316;
+  --ink-fg: #f2f2ef;
+  --paper: #f2f2ef;
+  --paper-2: #fbfbf9;
+  --paper-fg: #101011;
+
+  /* SECOND SIGNAL - the green the owner named. It clears AA on the dark
+     ground on its own (5.23:1); --sig-text is the same hue lifted for small
+     type and dots (9.24:1 on ink, 5.26:1 on paper). Fills and markers use
+     --sig, anything that sets a `color` uses --sig-text / --sig-ink. The
+     same two-weights-of-one-colour rule the yellow already follows. */
+  --sig: #7a8c00;
+  --sig-text: #a4bd00;
+  --sig-ink: #5c6b00;
 
   --sans: "Schibsted Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
@@ -65,49 +79,54 @@
 
 html[data-theme="dark"] {
   --acc-text: var(--acc);
+  --sig-fg: var(--sig-text);
   --bg: var(--ink);
   --bg-2: var(--ink-2);
   --fg: var(--ink-fg);
-  --muted: #9b958a;
-  --line: rgba(244, 241, 234, .14);
-  --line-2: rgba(244, 241, 234, .07);
-  --card: #15140f;
+  /* neutral grey at 7.78:1 - the old #9b958a was warm and dimmer (6.61:1) */
+  --muted: #a3a3a0;
+  --line: rgba(242, 242, 239, .15);
+  --line-2: rgba(242, 242, 239, .07);
+  --card: #131316;
   --shadow: 0 30px 80px -30px rgba(0, 0, 0, .8);
 }
 
 html[data-theme="light"] {
   --acc-text: var(--acc-ink);
+  --sig-fg: var(--sig-ink);
   --bg: var(--paper);
   --bg-2: var(--paper-2);
   --fg: var(--paper-fg);
-  --muted: #5f594f;
-  --line: rgba(19, 18, 16, .14);
-  --line-2: rgba(19, 18, 16, .07);
-  --card: #fffefb;
+  --muted: #5f5f5c;
+  --line: rgba(16, 16, 17, .16);
+  --line-2: rgba(16, 16, 17, .07);
+  --card: #fbfbf9;
   --shadow: 0 30px 70px -34px rgba(20, 18, 12, .34);
 }
 
 /* contrast islands — fixed regardless of theme */
 .band--ink {
   --acc-text: var(--acc);
+  --sig-fg: var(--sig-text);
   --bg: var(--ink);
   --bg-2: var(--ink-2);
   --fg: var(--ink-fg);
-  --muted: #9b958a;
-  --line: rgba(244, 241, 234, .14);
-  --line-2: rgba(244, 241, 234, .07);
-  --card: #15140f;
+  --muted: #a3a3a0;
+  --line: rgba(242, 242, 239, .15);
+  --line-2: rgba(242, 242, 239, .07);
+  --card: #131316;
 }
 
 .band--paper {
   --acc-text: var(--acc-ink);
+  --sig-fg: var(--sig-ink);
   --bg: var(--paper);
   --bg-2: var(--paper-2);
   --fg: var(--paper-fg);
-  --muted: #5f594f;
-  --line: rgba(19, 18, 16, .14);
-  --line-2: rgba(19, 18, 16, .07);
-  --card: #fffefb;
+  --muted: #5f5f5c;
+  --line: rgba(16, 16, 17, .16);
+  --line-2: rgba(16, 16, 17, .07);
+  --card: #fbfbf9;
 }
 
 /* ---------- base ---------- */
@@ -245,12 +264,15 @@ section {
   margin-bottom: clamp(1.8rem, 3.2vw, 3.2rem)
 }
 
+/* The pixel raster used to supply the presence; where a headline is real
+   type it has to carry that itself. Heavier, tracked in, leading under one -
+   that is what makes a grotesk read as a display face without a second
+   font file. */
 .sec-h {
   font-size: var(--t-h2);
-  /* same reason as .hero-h — pixel fields must not overlap between lines */
-  line-height: .98;
-  letter-spacing: -.035em;
-  font-weight: 700;
+  line-height: .96;
+  letter-spacing: -.028em;
+  font-weight: 780;
   text-wrap: balance
 }
 
@@ -291,28 +313,45 @@ section {
 }
 
 /* ---------- buttons ---------- */
+/* One button shape. Crisp geometry and a small label instead of an
+   oversized marketing pill - a 100px radius on a page built out of
+   hairlines, corner marks and mono labels was the one round thing in a
+   square system. The hover lift is 2px, inside the -2..-6px band.
+   (agency-grid-layout-minimal / editorial-tech) */
 .btn {
   --btn-bg: var(--acc);
-  --btn-fg: #0d0c0a;
+  --btn-fg: #0b0b0c;
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: .6rem;
-  padding: .95rem 1.6rem;
-  border-radius: 100px;
+  padding: .85rem 1.35rem;
+  border: 1px solid var(--acc);
+  border-radius: 4px;
   background: var(--btn-bg);
   color: var(--btn-fg);
   font-weight: 600;
   font-size: var(--t-small);
   letter-spacing: .01em;
   will-change: transform;
-  transition: transform .5s var(--e-out), background .3s
+  transition: transform .16s var(--e-out), filter .16s, background .2s, border-color .2s
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06)
 }
 
 .btn--ghost {
   --btn-bg: transparent;
   --btn-fg: var(--fg);
-  box-shadow: inset 0 0 0 1px var(--line)
+  border-color: var(--line);
+  box-shadow: none
+}
+
+.btn--ghost:hover {
+  filter: none;
+  border-color: var(--fg)
 }
 
 .btn--ghost:hover {
@@ -377,6 +416,20 @@ section {
 }
 
 /* ---------- nav ---------- */
+/* THE RAIL.
+
+   It is never transparent over the hero - owner's call, and the honest one:
+   navigation floating on a photograph is the first thing that stops being
+   legible. What changes on the first movement is not whether it is there
+   but how firmly: the shell DEEPENS, and it is choreographed rather than
+   cross-faded.
+
+   Two pieces, both transform/opacity only:
+     ::before  the deeper panel, sliding down into place (280ms)
+     ::after   a hairline drawing across from the left (520ms, after it)
+
+   A bar that arrives reads as a decision. A bar that fades reads as a
+   rendering artefact. */
 .nav {
   position: fixed;
   inset: 0 0 auto;
@@ -386,14 +439,68 @@ section {
   align-items: center;
   gap: 1.4rem;
   padding-inline: var(--gut);
-  background: color-mix(in srgb, var(--bg) 78%, transparent);
-  backdrop-filter: blur(18px) saturate(140%);
-  border-bottom: 1px solid transparent;
-  transition: border-color .4s, background .4s, transform .5s var(--e-out)
+  /* INK IN BOTH THEMES. The header underneath is an ink stage whatever the
+     theme is, and in light mode a pale bar floated over it with pale text on
+     it - the wordmark all but disappeared. A masthead that keeps its colour
+     is also one less thing that can clash with whatever scrolls under it. */
+  --bg: var(--ink);
+  --bg-2: var(--ink-2);
+  --fg: var(--ink-fg);
+  --muted: #a3a3a0;
+  --line: rgba(242, 242, 239, .18);
+  --line-2: rgba(242, 242, 239, .12);
+  --card: #131316;
+  --acc-text: var(--acc);
+  --sig-fg: var(--sig-text);
+  color: var(--ink-fg);
+  background: color-mix(in srgb, var(--ink) 62%, transparent);
+  backdrop-filter: blur(14px) saturate(130%);
+  transition: background .3s
 }
 
-.nav.stuck {
-  border-bottom-color: var(--line-2)
+.nav::before,
+.nav::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none
+}
+
+.nav::before {
+  top: 0;
+  bottom: 0;
+  z-index: -1;
+  background: color-mix(in srgb, var(--ink) 94%, transparent);
+  opacity: 0;
+  transform: translateY(-100%);
+  transition: opacity .28s linear, transform .28s var(--e-out)
+}
+
+.nav::after {
+  bottom: 0;
+  height: 1px;
+  background: var(--line);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform .52s var(--e-out) .1s
+}
+
+.nav.stuck::before {
+  opacity: 1;
+  transform: none
+}
+
+.nav.stuck::after {
+  transform: scaleX(1)
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .nav::before,
+  .nav::after {
+    transition: none
+  }
 }
 
 .logo {
@@ -622,18 +729,21 @@ html[data-theme="light"] .t-moon {
 /* These animate the INDEPENDENT translate/scale/rotate properties, not
    `transform`. An animation on `transform` outranks every :hover transform on
    the same element, which silently killed the chip and card lifts. */
+/* 44px was nearly double the top of the 12-24px band the animation-systems
+   skill gives for a fade+rise; at that distance the move reads as a jump
+   rather than as arrival. */
 @keyframes rv {
   from {
     opacity: 0;
-    translate: 0 44px
+    translate: 0 22px
   }
 }
 
 @keyframes rvs {
   from {
     opacity: 0;
-    translate: 0 20px;
-    scale: .985
+    translate: 0 14px;
+    scale: .988
   }
 }
 
@@ -732,8 +842,8 @@ html[data-theme="light"] .t-moon {
    tight line-height no longer smears the pixel fields into each other. */
 .hero-h {
   font-size: var(--t-display);
-  line-height: 1.04;
-  letter-spacing: -.045em;
+  line-height: .92;
+  letter-spacing: -.035em;
   font-weight: 800;
   margin-bottom: clamp(1.6rem, 3.4vw, 3rem)
 }
@@ -2163,7 +2273,7 @@ html[data-theme="light"] .t-moon {
   border-radius: 12px;
   background: var(--ink-2);
   color: #d9d4c9;
-  box-shadow: inset 0 0 0 1px rgba(244, 241, 234, .14), 0 18px 50px -12px rgba(0, 0, 0, .65);
+  box-shadow: inset 0 0 0 1px rgba(242, 242, 239, .15), 0 18px 50px -12px rgba(0, 0, 0, .65);
   font-family: var(--sans);
   font-size: .82rem;
   font-weight: 400;
@@ -3463,7 +3573,13 @@ html[data-theme="light"] .t-moon {
      This fallback is what shows if the engine never answers, so it already has
      to look like the real thing - positions included, or the repeat has no
      length to repeat over. */
-  --wave-stops: #f5c518 0px, #a8d43a 40px, #4fcf8c 80px, #3fc9c2 120px, #4aa6ef 160px,
+  /* The rim used to be painted from wavePalette("rainbow"). A full
+     spectrum was the loudest thing on a page whose whole argument is that
+     ONE accent punctuates a restrained system. Same motion, same period:
+     the logo yellow travelling through the green and back. common.js no
+     longer repaints it - see paintRimPalette there. */
+  --wave-stops: #f5c518 0px, #d9c40f 96px, #a4bd00 192px, #7a8c00 288px, #c9a814 384px, #f5c518 480px;
+  --wave-stops-old: #f5c518 0px, #a8d43a 40px, #4fcf8c 80px, #3fc9c2 120px, #4aa6ef 160px,
     #7b86f0 200px, #a86ee8 240px, #d95fd0 280px, #ef5f9e 320px, #ef7a5f 360px,
     #efa03a 400px, #f0b62a 440px, #f5c518 480px;
   --rim-angle: 112deg;
@@ -3882,5 +3998,316 @@ html[data-theme="light"] .t-moon {
 @media (prefers-reduced-motion: reduce) {
   .field-l {
     animation: none
+  }
+}
+
+/* ============================================================
+   THE REFRESH — stage header, word reveal, pixel mark
+
+   Three shared components the refreshed pages use. They are here
+   rather than on one page because every page is meant to end up
+   wearing them.
+   ============================================================ */
+
+/* ---------- THE PIXEL MARK ----------
+   The engine's shape standing still, as the identity. The pixel stops
+   being something done TO the words and becomes the thing the studio
+   signs with. Static SVG - an identity may not depend on a script. */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem
+}
+
+.mark {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  color: var(--acc)
+}
+
+.mark rect {
+  fill: currentColor
+}
+
+/* ---------- THE STAGE ----------
+   A full-bleed header with the dither field underneath it and the
+   guide rails over it. `.hero--stage` drops the container so the
+   field can reach the viewport edges; the content keeps its .wrap
+   inside. (image-first-grid-layout + dither-laser-dark-mode)
+
+   Ink in both themes on purpose: the field is a dark material, and a
+   header that flips to paper would need a second field to sit on. */
+.hero--stage {
+  position: relative;
+  padding-inline: 0;
+  --bg: var(--ink);
+  --bg-2: var(--ink-2);
+  --fg: var(--ink-fg);
+  --muted: #a3a3a0;
+  --line: rgba(242, 242, 239, .18);
+  /* the rails sit ON the field here, so they need more than the .07
+     that reads fine on flat ink */
+  --line-2: rgba(242, 242, 239, .12);
+  --card: #131316;
+  --acc-text: var(--acc);
+  --sig-fg: var(--sig-text);
+  background: var(--ink);
+  color: var(--ink-fg)
+}
+
+/* two washes over the field: readability without flattening it */
+.hero--stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    /* The right end used to fade to .04 and the facts lane sits there. Measured
+       from the delivered pixels, its mono labels landed on exactly 4.50:1 -
+       the AA number itself, which is a boundary, not a pass. .3 at the right
+       edge gives them real margin and still lets the field read. */
+    linear-gradient(to right, rgba(11, 11, 12, .8) 0%, rgba(11, 11, 12, .42) 46%, rgba(11, 11, 12, .3) 100%),
+    linear-gradient(to top, rgba(11, 11, 12, .86) 0%, rgba(11, 11, 12, .14) 42%, rgba(11, 11, 12, 0) 100%)
+}
+
+.hero--stage>*:not(.dither-l) {
+  position: relative;
+  z-index: 2
+}
+
+/* .hero is a column flex container, and `margin-inline: auto` on a flex item
+   overrides the default stretch - so .hero-inner.wrap shrink-wrapped to its
+   own content and the copy sat 145px inside the rails that are supposed to
+   mark its edges. Same trap as the rail on the mockup. */
+.hero--stage .hero-inner {
+  width: 100%
+}
+
+/* the stage runs under the fixed rail, so its top corner marks would
+   land behind it and read as two stray dots */
+.hero--stage>.gmark--tl,
+.hero--stage>.gmark--tr {
+  top: var(--nav)
+}
+
+/* The facts lane. The numbers are proof, not decoration, so each one
+   gets a rule of its own. (number-details) */
+.hero--stage .hero-side {
+  display: grid;
+  text-align: left;
+  white-space: normal;
+  line-height: 1.4;
+  border-top: 1px solid var(--line);
+  min-width: min(100%, 20rem)
+}
+
+.hero--stage .hero-side>span {
+  display: flex;
+  align-items: baseline;
+  gap: .8rem;
+  padding: .8rem 0;
+  border-bottom: 1px solid var(--line-2)
+}
+
+.hero--stage .hero-side b {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  line-height: 1;
+  min-width: 5.4rem
+}
+
+.hero--stage .hero-side i {
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: var(--t-label);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted)
+}
+
+/* the strip along the base of the stage - mono metadata, the way the
+   rest of the page already talks (editorial-tech) */
+.stage-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem 2rem;
+  align-items: center;
+  margin-top: clamp(1.6rem, 4vw, 3rem);
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--line-2);
+  font-family: var(--mono);
+  font-size: var(--t-label);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted)
+}
+
+.stage-meta b {
+  color: var(--acc-text);
+  font-weight: 500
+}
+
+.stage-meta>span:last-child {
+  margin-left: auto
+}
+
+/* ---------- WORDS RISE THROUGH A MASK ----------
+   The headline is where the type has to carry what the pixel raster
+   used to. Words arriving one after another is what gives a still
+   headline a beat. (masked-reveal, without GSAP: the mask is overflow,
+   the timing is a native view() timeline.)
+
+   The mask would clip descenders unless given room, hence the
+   padding/margin pair - and `clip`, not `hidden`, so it never becomes
+   a scroll container.
+
+   Default is VISIBLE. A browser without scroll timelines, and anyone
+   who asked for reduced motion, loses the movement and never the
+   words - and the spans are only ever created by script, so a visitor
+   without JavaScript sees the finished headline. */
+.w {
+  display: inline-block;
+  overflow: clip;
+  vertical-align: top;
+  padding-bottom: .14em;
+  margin-bottom: -.14em
+}
+
+.w>i {
+  display: inline-block;
+  font-style: inherit
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+
+    /* The range is measured on `cover`, not `entry`. A headline is only
+       ~60px tall and its entry range is over almost as soon as it
+       starts: measured, the words went from 62px of offset to 0 between
+       two scroll samples 150px apart, which is a snap, not a reveal.
+       `cover` runs from first touching the viewport to fully leaving
+       it, so a percentage there is a comfortable amount of scrolling. */
+    .wr .w>i {
+      animation: wordRise linear both;
+      animation-timeline: view();
+      animation-range: cover calc(4% + var(--wi, 0) * 2%) cover calc(24% + var(--wi, 0) * 2%);
+      /* Measured, not assumed: forty-three of these on one page took 9%
+         of frames over 20ms and p99 from 17.1 to 32.7. With the words
+         switched off it was 0%, which proved it was them; promoting them
+         puts it back. will-change is usually a smell because it is left
+         on something that animates once - a scroll timeline is the
+         opposite case, any scroll can re-enter the range. It is NOT on
+         the hero's words below, which run one transition and are done. */
+      will-change: transform
+    }
+  }
+}
+
+@keyframes wordRise {
+  from {
+    transform: translateY(112%)
+  }
+}
+
+/* ---------- THE HERO IS A SEQUENCE, NOT A REVEAL ----------
+   A view() timeline cannot animate what is already on screen at load:
+   its entry range is behind us before the first frame. So the header
+   runs on time instead, inside the 800-1600ms band, with inner beats.
+   The hidden state is added by SCRIPT (.hs), never by this file. */
+.hs .w>i {
+  transform: translateY(115%);
+  opacity: 0
+}
+
+.hs.go .w>i {
+  transform: none;
+  opacity: 1;
+  transition: transform .72s var(--e-out), opacity .42s linear;
+  transition-delay: calc(var(--wi, 0) * 48ms)
+}
+
+.hero--stage.hs .crumb,
+.hero--stage.hs .hero-eyebrow,
+.hero--stage.hs .hero-foot,
+.hero--stage.hs .stage-meta {
+  opacity: 0;
+  transform: translateY(16px)
+}
+
+.hero--stage.hs.go .crumb,
+.hero--stage.hs.go .hero-eyebrow,
+.hero--stage.hs.go .hero-foot,
+.hero--stage.hs.go .stage-meta {
+  opacity: 1;
+  transform: none;
+  transition: opacity .55s linear, transform .68s var(--e-out)
+}
+
+.hero--stage.hs.go .hero-eyebrow {
+  transition-delay: .12s
+}
+
+.hero--stage.hs.go .hero-foot {
+  transition-delay: .4s
+}
+
+.hero--stage.hs.go .stage-meta {
+  transition-delay: .58s
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .hs .w>i,
+  .hero--stage.hs .crumb,
+  .hero--stage.hs .hero-eyebrow,
+  .hero--stage.hs .hero-foot,
+  .hero--stage.hs .stage-meta {
+    opacity: 1;
+    transform: none
+  }
+}
+
+/* ---------- hover micros, all inside the 120-200ms band ---------- */
+.foot-links a,
+.foot-legal a {
+  position: relative
+}
+
+.foot-links a::after,
+.foot-legal a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1px;
+  background: var(--acc);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform .16s var(--e-out)
+}
+
+.foot-links a:hover::after,
+.foot-legal a:hover::after {
+  transform: scaleX(1)
+}
+
+@media (max-width: 860px) {
+  .hero--stage .hero-side {
+    min-width: 0
+  }
+}
+
+/* The pixel mark makes the wordmark ~30px wider, and at 390px that was
+   enough to push the rail's CTA off the right edge - checked against main,
+   which does not overflow there, so this is mine. The Menu button opens the
+   command palette, which carries "Start a project" as its own entry, so the
+   duplicate is the one that goes. */
+@media (max-width: 720px) {
+  .nav-right>.btn {
+    display: none
   }
 }
