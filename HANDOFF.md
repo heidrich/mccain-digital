@@ -4,6 +4,7 @@
 sauber. Diese Nacht dazugekommen:
 
 ```
+a06f8e3  fix(theme): apply the saved theme before the stylesheet, and audit the canvases
 4d58954  feat(pixel): a drifting field of cells for the bands, and four to judge
 e9f39a3  feat(ai): the console follows you down the page, with a travelling rim
 d8948b9  fix(pixel): tile the wave and lean its axis, so it never sits on plain yellow
@@ -31,7 +32,12 @@ de13a97  fix(pixel): generate the wave palette by hue, so it stops going muddy
    da. Eingeklappt ein 58px-Knopf, aufgeklappt das Chatfenster; Rand und Glow
    wandern in derselben Palette wie die Ueberschriften
    (`PixelFX.wavePalette("rainbow")` — eine Quelle, zwei Effekte).
-3. **„Mehr Leben" liegt zum Aussuchen bereit, ist aber NICHT eingeschaltet.**
+3. **Die Pixelschrift im hellen Modus ist repariert** — sieh sie dir an, bevor
+   du ueber den hellen Modus entscheidest. Die erste Ueberschrift jeder Seite
+   rasterte waehrend der Theme-Transition und behielt das Weiss des dunklen
+   Themes: **1,03:1 auf Papier**, also unsichtbar. Kein Gestaltungsproblem,
+   eine Ladereihenfolge. Jetzt 4,21:1. Details unten im eigenen Abschnitt.
+4. **„Mehr Leben" liegt zum Aussuchen bereit, ist aber NICHT eingeschaltet.**
    `https://mccain-digital.vercel.app/_parked/life-lab.html` — vier
    bildschirmhohe Baender: aus / Textur ohne Bewegung / zwei driftende Ebenen
    (**mein Vorschlag**) / zu laut. Der Code ist Produktionscode
@@ -49,8 +55,10 @@ de13a97  fix(pixel): generate the wave palette by hue, so it stops going muddy
 3. **`ANTHROPIC_API_KEY`** in Vercel Production setzen (Owner) plus Spend-Limit
    in der Anthropic Console, dann `AI_MODE` in `v3.js` auf `"live"`. Ich sehe
    den Schluessel nie.
-4. **Pixelschrift im hellen Modus** — offene Grundsatzfrage, eigener Abschnitt
-   weiter unten. Owner: „lassen wir das erstmal so."
+4. **Pixelschrift im hellen Modus — bitte NOCHMAL ansehen.** Was du gesehen
+   hast, war ein Fehler und ist behoben: die erste Ueberschrift jeder Seite
+   rasterte waehrend der Theme-Transition und behielt das Weiss des dunklen
+   Themes (1,03:1 auf Papier). Jetzt 4,21:1. Eigener Abschnitt weiter unten.
 5. **Inhalte:** drei Kundenzitate, zwei Work-Cases, echte Portraits. Groesste
    Luecke vor dem Livegang.
 6. **`noindex` raus** — erst beim Livegang.
@@ -705,37 +713,53 @@ Begruendung im Kommentar. Und: **vor jeder Aussage ueber eine Animation zuerst
 beweisen, dass sie laeuft** — hier durch zwei Farbmessungen im Abstand von
 900 ms, nicht durch einen Blick auf die Bildrate.
 
-## OFFENE GRUNDSATZFRAGE: Pixelschrift im hellen Modus
+## Pixelschrift im hellen Modus — war ein FEHLER, keine Grundsatzfrage
 
-**Owner nach dem Einbau von `--acc-text` (2026-08-31):** „hell funktioniert die
-pixel schrift echt garnicht. da muessen wir uns spaeter mal was anderes
-ueberlegen. ggf streichen wir den hell modus ODER wir machen im hellen was ganz
-anderes mit der schrift."
+**Owner (2026-08-31):** „hell funktioniert die pixel schrift echt garnicht. da
+muessen wir uns spaeter mal was anderes ueberlegen. ggf streichen wir den hell
+modus ODER wir machen im hellen was ganz anderes mit der schrift."
 
-**Das ist keine Feinjustage, sondern eine Entscheidung mit drei Auswegen**, und
-bis sie faellt bleibt der Stand wie er ist — ausdruecklich so vom Owner
-gewuenscht („von daher lassen wir das erstmal so").
+**Gefunden und behoben in der Nacht auf 2026-09-01. Bitte nochmal ansehen,
+bevor irgendwas gestrichen wird.**
 
-*Warum es strukturell und nicht durch Farbe kaputt ist:* ein Mosaik faerbt
-44 % seiner Flaeche, den Rest mittelt das Auge mit dem Grund. Auf Tinte
-arbeitet das FUER die Schrift — helle Pixel auf dunklem Grund lesen sich als
-leuchtende Schrift. Auf Papier arbeitet es dagegen: dunkle Pixel auf hellem
-Grund mitteln sich zu Grau, und je heller der Grund, desto mehr gewinnt er.
-`--acc-ink` verdreifacht den Abstand zum Papier und macht die Zeile trotzdem
-nicht dunkel. **Keine Farbe loest das, weil das Problem die Deckung ist.**
+Die Ueberschrift ueber der Falz stand im hellen Modus bei **1,03:1** — nahezu
+weisse Zellen auf Papier, praktisch unsichtbar. Das war kein Gestaltungsproblem,
+sondern eine Ladereihenfolge:
 
-Die drei Wege, wenn es soweit ist:
-1. **Hellen Modus streichen.** Billigste Loesung, kostet einen Schalter, den
-   Besucher erwarten.
-2. **Auf hellem Grund eine andere Behandlung** statt des Mosaiks — z. B.
-   Volltext mit einem Pixel-Effekt nur beim Einblenden, oder invertierte
-   Pixelschrift (helle Pixel in einem dunklen Balken).
-3. **`data-ink` plus dichteres Raster nur auf Papier.** Technisch da, aber es
-   kauft Deckung mit Teilchen — genau die Richtung, die eben zu langsam war,
-   und es bleibt ein Mosaik auf hellem Grund.
+- Die Seite liefert `data-theme="dark"` im HTML, `common.js` stellt nach dem
+  Parsen auf `light` um — und das startet eine 0,5s-Farbtransition.
+- Die Pixel-Engine rastert den ECHTEN DOM-Text und liest seine Farbe per
+  `getComputedStyle`.
+- Die erste Ueberschrift baut genau in diesem Fenster, faengt das Weiss des
+  alten Themes ein und behaelt es fuer den Rest des Besuchs. Nur die erste —
+  alle spaeteren bauen, wenn die Transition laengst gelandet ist. Deshalb war
+  es genau EIN Element pro Seite, immer dasselbe, immer nur hell.
 
-Empfehlung, wenn gefragt: Weg 2. Weg 1 wirft ein funktionierendes Feature weg
-wegen EINES Elements darin.
+Behoben an der Wurzel: das gespeicherte Theme wird jetzt **inline im `<head>`**
+gesetzt, vor dem Stylesheet. Beim Laden gibt es dann gar keine Transition, also
+nichts, was man mitten im Flug einfangen kann — und das dunkle Aufblitzen beim
+Laden im hellen Modus ist damit auch weg.
+
+**Was jetzt gemessen wird** (schlechteste gezeichnete Zelle gegen den echten
+Grund, `bash tools/accent_audit.sh` prueft es bei jedem Lauf mit):
+
+| | dunkel | hell |
+|---|---|---|
+| schlechteste Zelle | 3,42:1 | 4,21:1 |
+| noetig (grosse Schrift) | 3:1 | 3:1 |
+
+**Meine frueher hier notierte Begruendung war falsch** — ich hatte
+argumentiert, ein Mosaik faerbe nur 44 % seiner Flaeche und mittle sich auf
+Papier zu Grau, das sei „strukturell und nicht durch Farbe" kaputt. Das war
+eine Theorie ueber einen Effekt, dessen echte Ursache ich nicht gemessen hatte.
+Die Deckung ist auf Papier weiterhin geringer als bei Volltext — aber das ist
+eine Geschmacksfrage und keine Sackgasse, und es ist NICHT das, was der Owner
+gesehen hat.
+
+**Also: bitte einmal im hellen Modus ansehen.** Wenn es dann immer noch nicht
+gefaellt, stehen die alten Auswege weiter offen (hellen Modus streichen; auf
+Papier eine andere Behandlung; `data-ink` mit dichterem Raster nur dort) — aber
+dann als Geschmacksentscheidung, nicht als Reparatur.
 
 ## `/api/ask` — die Konsole kann jetzt mit Claude antworten
 
