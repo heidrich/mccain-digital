@@ -164,6 +164,16 @@
       color: var(--acc)
     }
 
+    /* One line that FILLS the stage. The size is not a taste value: it is
+       the container width divided by the line's own width at 1em, measured
+       once in the browser and written down here as a vw coefficient - which
+       is why it fills at every desktop width instead of at one. Below the
+       breakpoint it wraps and the clamp floor takes over. */
+    .display--fill {
+      font-size: clamp(2.6rem, 6.55vw, 13rem);
+      text-wrap: balance
+    }
+
     /* ---------- 3. CONTROLS ----------
        One button shape. Solid = the primary action, hairline = everything
        else. Crisp geometry, small label — not an oversized marketing pill.
@@ -393,8 +403,8 @@
       z-index: 1;
       pointer-events: none;
       background:
-        linear-gradient(to right, rgba(11, 11, 12, .78) 0%, rgba(11, 11, 12, .34) 44%, rgba(11, 11, 12, 0) 100%),
-        linear-gradient(to top, rgba(11, 11, 12, .88) 0%, rgba(11, 11, 12, .12) 40%, rgba(11, 11, 12, 0) 100%)
+        linear-gradient(to right, rgba(11, 11, 12, .72) 0%, rgba(11, 11, 12, .34) 44%, rgba(11, 11, 12, .22) 100%),
+        linear-gradient(to top, rgba(11, 11, 12, .84) 0%, rgba(11, 11, 12, .12) 40%, rgba(11, 11, 12, .06) 100%)
     }
 
     .stage>*:not(.dither-l) {
@@ -415,25 +425,43 @@
       display: grid;
       align-content: center;
       gap: clamp(1.6rem, 3.2vw, 2.6rem);
-      padding-block: clamp(2rem, 5vh, 4rem)
+      padding-block: clamp(2rem, 5vh, 4rem);
+      padding-inline: var(--gut)
     }
+
+    /* ---------- FULL WIDTH ----------
+       The stage drops the 1560px container: on a wide monitor the field ran
+       edge to edge while the words it is behind stopped two hundred pixels
+       short, and a header whose background is wider than its own content
+       reads as a background with a page on top of it.
+
+       The rails have to come with it. They mark where the copy ends - that
+       is their whole job - so on the wide stage they sit on the gutter, not
+       on a container this header no longer has. */
+    .stage--wide>.gmark--tl,
+    .stage--wide>.gmark--bl,
+    .stage--wide::before {
+      left: var(--gut)
+    }
+
+    .stage--wide>.gmark--tr,
+    .stage--wide>.gmark--br {
+      right: var(--gut)
+    }
+
+    /* NOT ::after here: on the stage that pseudo-element is already the pair
+       of washes over the field, and pulling it in by a gutter would move the
+       wash, not a rail. */
 
     .stage-grid {
       display: grid;
       grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
       gap: clamp(2rem, 4vw, 3.5rem);
-      align-items: end
+      align-items: start
     }
 
-    /* eyebrow and intro ride at the TOP, aligned with the plate; the
-       billboard line stays anchored at the bottom. Open space has to be
-       deliberate, not left over. (agency-grid-layout-minimal) */
     .stage-copy {
-      align-self: stretch;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 2rem
+      align-self: start
     }
 
     .stage-kicker {
@@ -768,6 +796,7 @@
 
     .stage.hs .stage-kicker>span,
     .stage.hs .stage-intro,
+    .stage.hs .display,
     .stage.hs .stage-media,
     .stage.hs .stage-foot {
       opacity: 0;
@@ -776,6 +805,7 @@
 
     .stage.hs.go .stage-kicker>span,
     .stage.hs.go .stage-intro,
+    .stage.hs.go .display,
     .stage.hs.go .stage-media,
     .stage.hs.go .stage-foot {
       opacity: 1;
@@ -1217,35 +1247,26 @@
   <main id="top">
 
     <!-- ================= THE STAGE ================= -->
-    <header class="stage guides" id="stage">
+    <!-- data-hole: the picture that lies BEHIND the cloud. The plate that
+         used to sit in the layout is gone; the image is exposed by the void
+         travelling across the field instead, on the field's own cell grid.
+         circuit-macro rather than the code screenshot: at a 9px cell a
+         screenshot is mush, and an abstract macro reads as texture. -->
+    <header class="stage stage--wide guides" id="stage" data-field
+      data-hole="../img/circuit-macro-1200.webp"
+      data-hole-quiet=".stage-kicker, .stage-intro, .fact b, .fact span, .display, .stage-coords, .cue, .btn">
       <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
       <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
 
-      <div class="wrap stage-body">
+      <div class="stage-body">
         <div class="stage-grid">
           <div class="stage-copy">
-            <div>
-              <p class="stage-kicker label"><span>Digital product studio · Bavaria · est. 2016</span></p>
-              <p class="stage-intro">Tools, web apps and software that go to <b>production</b> — not to a
-                slide deck. Two founders, senior hands only.</p>
-            </div>
-            <h1 class="display">We build the<br>useful <span class="acc">kind of AI.</span></h1>
+            <p class="stage-kicker label"><span>Digital product studio · Bavaria · est. 2016</span></p>
+            <p class="stage-intro">Tools, web apps and software that go to <b>production</b> — not to a
+              slide deck. Two founders, senior hands only.</p>
           </div>
 
           <div class="stage-media">
-            <!-- .case + .case-img: common.js wires the pixel mosaic on exactly
-                 those two classes, so this plate assembles out of a swarm like
-                 every other picture on the page. -->
-            <figure class="shot plate-frame">
-              <span class="shot-img">
-                <img src="../img/code-screen-1200.webp"
-                  srcset="../img/code-screen-640.webp 640w, ../img/code-screen-1200.webp 1200w"
-                  sizes="(max-width: 940px) 92vw, 40vw" alt="whatever-recall running in a terminal" width="1200"
-                  height="825" fetchpriority="high" decoding="async">
-              </span>
-              <span class="plate-tag"><span>whatever-recall</span><b>live</b></span>
-            </figure>
-
             <div class="facts">
               <div class="fact"><b>20+</b><span>years in the industry</span></div>
               <div class="fact"><b>4×100</b><span>Lighthouse, this build</span></div>
@@ -1253,6 +1274,10 @@
             </div>
           </div>
         </div>
+
+        <!-- the billboard line owns the full width now that nothing shares
+             the row with it -->
+        <h1 class="display display--fill">We build the useful <span class="acc">kind of AI.</span></h1>
 
         <div class="stage-foot">
           <div class="stage-ctas">
@@ -1944,16 +1969,11 @@
         if (el) chapIO.observe(el);
       });
 
-      /* THE DITHER FIELD — header only, as asked. The engine caps its own ramp
-         against the dimmest text on the host, so asking for a brighter top
-         cannot make the header fail contrast; it simply gets clamped. */
-      function field() {
-        if (!window.PixelFX || !PixelFX.dither) return;
-        if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-        PixelFX.dither(stage, { cell: 9, top: .5 });
-      }
-      if (d.readyState === "complete") field();
-      else addEventListener("load", field);
+      /* THE DITHER FIELD is wired by common.js off data-field on the stage -
+         the same path the real page uses. It used to be started here as well,
+         and two fields on one host is not twice the same picture: the second
+         canvas matches `.dither-l ~ *`, which puts it in the FLOW at full
+         height and pushes the whole header 900px down the page. */
     })();
   </script>
 </body>

@@ -2658,11 +2658,54 @@
 
   function dither(host, opts) {
     if (!host) return null;
+    /* Twice on one host is never intended, and it does not merely draw the
+       cloud twice: the second canvas matches `.dither-l ~ *` in the sheet,
+       which takes it OUT of the absolute layer and into the flow at full
+       height, pushing everything below it down by a viewport. */
+    if (host.classList.contains("has-field")) return null;
     opts = opts || {};
     var CELL = +(host.dataset.ditherCell || opts.cell || 7);
     var TOP = opts.top === undefined ? 0.22 : opts.top;
     var FPS = opts.fps || 12;
     var pal = opts.palette || ditherRamp(host, 6, TOP);
+
+    /* ---------- THE VOID ----------
+       A dark disc with an accent rim travels across the field, and what it
+       passes over is not empty: an image lies BEHIND the cloud, and the void
+       exposes it - as pixels, on the field's own grid, so the picture arrives
+       in the same material the rest of the header is made of. It lingers in
+       the wake and closes again.
+
+       The image is sampled ONCE per size into one byte triple per cell. Per
+       frame this costs a lookup and a lerp, not a decode - the cost follows
+       the effect, not the area.
+
+         data-hole       the image to expose (a URL). No URL, no void.
+         data-hole-r     disc radius as a fraction of the field height (.34)
+         data-hole-wake  how far the exposure trails behind, in radii (2.2)
+         data-hole-quiet a selector for the boxes the void must keep out of
+
+       IT FOLLOWS THE POINTER. Same mechanic as the hole in the pixel images
+       - live pointer wins, 0.22 easing on the way in, gone on pointerleave -
+       so the two read as one behaviour rather than two. It does NOT traverse
+       on its own, by request. On a device without hover there is no pointer
+       and so no void, exactly as the images already behave there.
+
+       HOW IT DAMPS: not by a fraction of the rim, but by a CEILING on the
+       delivered cell. Damping the rim assumed the rim paints over the
+       ground; it paints over the exposed picture, and the two together
+       measured 3.01:1 under the kicker. A ceiling in luminance holds
+       whichever term produced the brightness.
+
+       The ceiling is per box, from the colour and size of the text actually
+       in it - 3:1 for the display line, 4.5:1 for an 11px mono label - so
+       the disc keeps its rim behind the billboard type, where the type can
+       take it, and gives way under the small print, where it cannot.
+       ---------------------------------------------------------------- */
+    var HOLE = host.dataset.hole || opts.hole || "";
+    var HR = +(host.dataset.holeR || opts.holeR || 0.34);
+    var HWAKE = +(host.dataset.holeWake || opts.holeWake || 2.2);
+    var HQUIET = host.dataset.holeQuiet || opts.holeQuiet || "";
 
     var cv = document.createElement("canvas");
     cv.className = "dither-l";
@@ -2694,6 +2737,27 @@
        through it. */
     var cols = 0, rows = 0, img = null, ring = null, vign = null;
     var head = 0, seedX = 0, raf = null, last = -1e9, onScreen = true;
+    // the void: the sampled image, its geometry, and where the disc is now
+    var back = null, srcImg = null, R = 0, WAKE = 0, hx = -1e9, hy = 0;
+    // per cell: the brightest luminance the type over it can survive.
+    // 1 = nothing to protect here.
+    var quiet = null, qt = null;
+    var LIN = new Float32Array(256);
+    (function () {
+      for (var i = 0, v; i < 256; i++) {
+        v = i / 255;
+        LIN[i] = v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+      }
+    })();
+    function enc(v) {
+      v = v <= 0.0031308 ? v * 12.92 : 1.055 * Math.pow(v, 1 / 2.4) - 0.055;
+      return v < 0 ? 0 : (v > 1 ? 255 : v * 255);
+    }
+    var lastPaint = -1e9;
+    // the pointer, in cells; hstr fades the whole void in and out so it
+    // arrives and leaves instead of blinking
+    var mx = -1e9, my = 0, hasPtr = false, hstr = 0, easing = false;
+    var vx = 1, vy = 0;                       // travel direction, for the wake
 
     function column(nx, out, at) {
       var y, ny, wave, cloud;
@@ -2733,16 +2797,197 @@
       seedX = cols;
     }
 
+    /* The image, on the field's grid. Cover-fit is computed over the SOURCE
+       rectangle - a drawImage that only scales would squash it, and the cell
+       grid has the host's aspect, not the picture's.
+
+       Then it is DARKENED until it cannot eat the type. Same rule the ramp
+       already follows: the brightest cell is the worst case every word over
+       this header has to survive, so the effect is not allowed to decide its
+       own ceiling. The washes over the field are ignored on purpose - the
+       right edge of the stage has none, so the picture has to clear the bar
+       on its own. */
+    function sampleBack() {
+      if (!srcImg || !cols || !rows) { back = null; return; }
+      var oc = document.createElement("canvas");
+      oc.width = cols; oc.height = rows;
+      var octx = oc.getContext("2d", { willReadFrequently: true });
+      if (!octx) { back = null; return; }
+      var sw = srcImg.naturalWidth || srcImg.width, sh = srcImg.naturalHeight || srcImg.height;
+      if (!sw || !sh) { back = null; return; }
+      var tr = cols / rows, sr = sw / sh, cw, ch;
+      if (sr > tr) { ch = sh; cw = sh * tr; } else { cw = sw; ch = sw / tr; }
+      octx.drawImage(srcImg, (sw - cw) / 2, (sh - ch) / 2, cw, ch, 0, 0, cols, rows);
+      var px;
+      try { px = octx.getImageData(0, 0, cols, rows).data; }
+      catch (e) { back = null; return; }          // a tainted canvas answers nothing
+
+      // the brightest cell decides the scale for all of them
+      var i, bright = [0, 0, 0], bl = -1, l;
+      for (i = 0; i < px.length; i += 4) {
+        l = relLum([px[i], px[i + 1], px[i + 2]]);
+        if (l > bl) { bl = l; bright = [px[i], px[i + 1], px[i + 2]]; }
+      }
+      var txt = relLum(tokenRGB(host, "--muted", "#8a8578"));
+      var k = 1;
+      while (k > 0.06 && contrast(relLum([bright[0] * k, bright[1] * k, bright[2] * k]), txt) < 4.6) k -= 0.02;
+
+      back = new Uint8Array(cols * rows * 3);
+      var j = 0;
+      for (i = 0; i < px.length; i += 4) {
+        back[j] = px[i] * k; back[j + 1] = px[i + 1] * k; back[j + 2] = px[i + 2] * k;
+        j += 3;
+      }
+      R = Math.max(4, rows * HR);
+      WAKE = R * HWAKE;
+    }
+
+    /* One multiplier per cell: 0 inside a box of type, 1 well clear of it,
+       and a soft ramp of about a third of a disc radius between the two, so
+       the void reads as parting around the words rather than being clipped
+       by a rectangle. Measured from the live boxes, so it follows the text
+       when the layout reflows instead of being written down twice. */
+    /* One ceiling per cell: the brightest the field may be delivered where a
+       given piece of type sits, derived from that type's own colour and size
+       (WCAG's 3:1 for large, 4.5:1 for the rest, with a little margin), and
+       ramped back to "no limit" over about a third of a disc radius so the
+       void reads as giving way rather than being clipped by a rectangle.
+
+       An element with an opaque background is skipped: nothing behind the
+       solid button shows through it, so its contrast is not this effect's
+       business - and measuring it against the field is how a probe invents
+       a 1.07:1 failure that does not exist. */
+    /* Re-measure, coalesced. The boxes have to be read AFTER they have
+       stopped moving: the header's entry animation translates the intro, the
+       headline and the foot on their way in, so a map built at load time
+       protects where the words WERE. Measured 16px out, which is most of a
+       line's descender - and every contrast failure left on the stage was
+       exactly that strip along the bottom of each box. */
+    function remeasure() {
+      clearTimeout(qt);
+      qt = setTimeout(function () { buildQuiet(); paint(); }, 60);
+    }
+
+    function buildQuiet() {
+      quiet = null;
+      if (!HQUIET || !cols || !rows) return;
+      var boxes = host.querySelectorAll(HQUIET);
+      if (!boxes.length) return;
+      var hr = host.getBoundingClientRect();
+      var soft = Math.max(3, R * 0.34), rects = [], k, b, cs, fg, lf, need, ceil;
+      for (k = 0; k < boxes.length; k++) {
+        cs = getComputedStyle(boxes[k]);
+        if (/^rgba?\([^)]*?(,\s*1)?\)$/.test(cs.backgroundColor) &&
+            cs.backgroundColor !== "rgba(0, 0, 0, 0)" &&
+            !/,\s*0?\.\d+\)$/.test(cs.backgroundColor)) continue;  // opaque: nothing shows through
+        b = boxes[k].getBoundingClientRect();
+        if (b.width < 2 || b.height < 2) continue;
+        /* the element's OWN colour, which is why the selector has to name
+           the leaves and not their containers: .stage-copy inherits the
+           stage's near-white and would hand its muted children a ceiling
+           four times too generous. Measured: 0.154 where 0.038 was needed. */
+        fg = (cs.color.match(/[\d.]+/g) || [255, 255, 255]).map(Number);
+        lf = relLum(fg);
+        /* aimed above the bar on purpose. The clamp reads its luminance
+           from a 256-entry table indexed by the truncated byte, which reads
+           a shade dark and so scales a shade too little: measured 4.34:1
+           against a 4.6 target. The margin is what covers that. */
+        need = parseFloat(cs.fontSize) >= 24 ? 3.35 : 4.95;
+        ceil = (lf + 0.05) / need - 0.05;
+        if (ceil <= 0.002) continue;             // dark type: not this effect's problem
+        rects.push([(b.left - hr.left) / CELL, (b.top - hr.top) / CELL,
+                    (b.right - hr.left) / CELL, (b.bottom - hr.top) / CELL, ceil]);
+      }
+      if (!rects.length) return;
+      quiet = new Float32Array(cols * rows);
+      var x, y, j, r, dxq, dyq, dq, m, t;
+      for (y = 0; y < rows; y++) {
+        for (x = 0; x < cols; x++) {
+          m = 1;
+          for (j = 0; j < rects.length; j++) {
+            r = rects[j];
+            // distance OUTSIDE the rectangle; 0 anywhere inside it
+            dxq = r[0] - x > 0 ? r[0] - x : (x - r[2] > 0 ? x - r[2] : 0);
+            dyq = r[1] - y > 0 ? r[1] - y : (y - r[3] > 0 ? y - r[3] : 0);
+            dq = Math.sqrt(dxq * dxq + dyq * dyq);
+            if (dq < soft) {
+              t = r[4] + (1 - r[4]) * dsmooth(0, soft, dq);
+              if (t < m) m = t;
+            }
+          }
+          quiet[y * cols + x] = m;
+        }
+      }
+    }
+
     function paint() {
       var d = img.data, n = pal.length, x, y, i = 0, src, v, step, c;
+      var dx, dy = 0, ady = 0, dd, a, w, lat, q, core, rimv, bi, cr, cg, cb, rowOn = false;
+      var lum, f, lr, lg, lb;
+      var reach = R * 2.1;
       for (y = 0; y < rows; y++) {
+        dy = y - hy; ady = dy < 0 ? -dy : dy;
+        rowOn = !!back && hstr > 0 && ady < reach;
         for (x = 0; x < cols; x++) {
           src = ((head + x) % cols) * rows + y;
           v = ring[src] * vign[x * rows + y];
           step = (Math.max(0, Math.min(0.999,
             v + BAYER4[(y % 4) * 4 + (x % 4)] * 0.18)) * n) | 0;
           c = pal[step < n ? step : n - 1];
-          d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2]; d[i + 3] = 255;
+          cr = c[0]; cg = c[1]; cb = c[2];
+
+          if (rowOn) {
+            dx = x - hx;
+            q = quiet ? quiet[y * cols + x] : 1;
+            if (dx < reach && dx > -(reach + WAKE)) {
+              dd = Math.sqrt(dx * dx + dy * dy);
+              // exposed around the disc ...
+              a = 1 - dsmooth(R * 0.9, R * 1.8, dd);
+              // ... and trailing behind it, along the direction of travel,
+              // with the falloff taken across that direction
+              w = -(dx * vx + dy * vy);
+              if (w > 0) {
+                lat = Math.abs(dx * -vy + dy * vx);
+                w = (1 - dsmooth(0, WAKE, w)) * (1 - dsmooth(R * 0.8, R * 2.0, lat));
+                if (w > a) a = w;
+              }
+              a *= hstr;
+              if (a > 0) {
+                bi = (y * cols + x) * 3;
+                cr += (back[bi] - cr) * a;
+                cg += (back[bi + 1] - cg) * a;
+                cb += (back[bi + 2] - cb) * a;
+              }
+              // the disc: a black core with an accent rim, over both
+              core = (1 - dsmooth(R * 0.42, R * 0.64, dd)) * hstr;
+              if (core > 0) {
+                core *= 0.97;
+                cr += (8 - cr) * core; cg += (7 - cg) * core; cb += (6 - cb) * core;
+              }
+              rimv = dsmooth(R * 0.56, R * 0.70, dd) * (1 - dsmooth(R * 0.70, R * 0.98, dd)) * hstr;
+              if (rimv > 0) {
+                rimv *= 0.85;
+                cr += (245 - cr) * rimv; cg += (197 - cg) * rimv; cb += (24 - cb) * rimv;
+              }
+
+              /* the ceiling, last, so it holds no matter which term got
+                 bright. Scaling sRGB by f scales luminance by about f^2.4,
+                 which is the exponent used to come back the other way. */
+              if (q < 0.999) {
+                lr = LIN[(cr + 0.5) | 0]; lg = LIN[(cg + 0.5) | 0]; lb = LIN[(cb + 0.5) | 0];
+                lum = 0.2126 * lr + 0.7152 * lg + 0.0722 * lb;
+                if (lum > q) {
+                  // scaling LINEAR light scales luminance by exactly the same
+                  // factor; scaling the sRGB bytes only approximately does,
+                  // and the approximation overshot the ceiling by a tenth
+                  f = q / lum;
+                  cr = enc(lr * f); cg = enc(lg * f); cb = enc(lb * f);
+                }
+              }
+            }
+          }
+
+          d[i] = cr; d[i + 1] = cg; d[i + 2] = cb; d[i + 3] = 255;
           i += 4;
         }
       }
@@ -2758,15 +3003,83 @@
       seedX++;
     }
 
+    /* Resolve the disc. The pointer wins outright once it has been caught
+       up with; the ease is only there so a pointer arriving from off the
+       header does not teleport the void across the whole width. Same 0.22 as
+       the images. */
+    function moveHole() {
+      var pdx, pdy, len, ox = hx, oy = hy;
+      if (hasPtr) {
+        if (easing) {
+          hx += (mx - hx) * 0.22; hy += (my - hy) * 0.22;
+          if (Math.abs(mx - hx) + Math.abs(my - hy) < 0.5) easing = false;
+        } else { hx = mx; hy = my; }
+        hstr += (1 - hstr) * 0.14;
+      } else {
+        hstr += (0 - hstr) * 0.10;
+        if (hstr < 0.01) hstr = 0;
+      }
+      // the wake trails opposite to travel, so it follows the hand
+      pdx = hx - ox; pdy = hy - oy;
+      len = Math.sqrt(pdx * pdx + pdy * pdy);
+      if (len > 0.35) { vx = pdx / len; vy = pdy / len; }
+    }
+
+    /* The cloud and the disc keep different clocks. Advancing the cloud is
+       one column of four-octave noise; moving the disc is arithmetic - and
+       a disc under the hand has to keep up with the hand, so it is painted
+       every frame while it is out and the noise still only twelve times a
+       second. Paying the noise at the pointer's frame rate would be paying
+       the expensive half for the cheap half's benefit. */
     function frame(t) {
       raf = null;
       if (!onScreen) return;
-      if (t - last >= 1000 / FPS) { last = t; advance(); paint(); }
+      var due = false;
+      if (t - last >= 1000 / FPS) { last = t; advance(); due = true; }
+      if (back && (hasPtr || hstr > 0)) { lastPaint = t; moveHole(); due = true; }
+      if (due) paint();
       raf = requestAnimationFrame(frame);
     }
 
     size();
     paint();
+
+    if (HOLE && !reduced) {
+      var im = new Image();
+      im.decoding = "async";
+      im.onload = function () { srcImg = im; sampleBack(); buildQuiet(); paint(); };
+      im.src = HOLE;
+
+      if (HQUIET) {
+        // the entry animation, and a font that arrives after first layout
+        host.addEventListener("transitionend", remeasure);
+        host.addEventListener("animationend", remeasure);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasure);
+      }
+
+      if (!noHover) {
+        host.addEventListener("pointermove", function (e) {
+          var r = host.getBoundingClientRect();
+          var nx = (e.clientX - r.left) / CELL, ny = (e.clientY - r.top) / CELL;
+          if (!hasPtr) {
+            // arriving: start the ease from the edge it came in over, so the
+            // void slides in rather than appearing under the cursor
+            hasPtr = true; easing = true;
+            if (hx < -1e8) {
+              hx = nx < cols / 2 ? -R : cols + R;
+              hy = ny;
+            }
+          }
+          mx = nx; my = ny;
+          if (!raf && onScreen) raf = requestAnimationFrame(frame);
+        }, { passive: true });
+        host.addEventListener("pointerleave", function () {
+          hasPtr = false; easing = false;
+          if (!raf && onScreen) raf = requestAnimationFrame(frame);
+        }, { passive: true });
+      }
+    }
+
     if (!reduced) {
       new IntersectionObserver(function (es) {
         onScreen = es[0].isIntersecting;
@@ -2777,7 +3090,7 @@
     var rt = null;
     addEventListener("resize", function () {
       clearTimeout(rt);
-      rt = setTimeout(function () { size(); paint(); }, 160);
+      rt = setTimeout(function () { size(); sampleBack(); buildQuiet(); paint(); }, 160);
     }, { passive: true });
 
     return {
