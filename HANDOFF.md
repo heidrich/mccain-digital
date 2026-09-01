@@ -1,79 +1,110 @@
-# Uebergabe — Stand 2026-09-01
+# Uebergabe — Stand 2026-09-01 (Abend)
 
-**Alles auf `main`, gepusht, auf Vercel live verifiziert. Arbeitsbaum sauber.**
-Der Branch `refresh-system` ist gemerged und geloescht.
+**Alles auf `main`, aber NICHT gepusht: 9 Commits liegen lokal.**
+Arbeitsbaum sauber. Vercel zeigt noch den Stand von heute Mittag.
 
 ## Fuer eine frische Session: START HIER
 
-Der grosse Refresh ist **entschieden und teilweise uebernommen**. Der Owner:
-„die neue version WESENTLICH besser zu lesen, auch die farben finde ich
-besser" und „das wird immer besser".
+Der Refresh ist **uebernommen und gemerged**. `index.html` IST jetzt der
+Entwurf — nicht mehr `preview/refresh.html`. Wer den Dev-Server unter
+`http://127.0.0.1:8898/` aufmacht, sieht die neue Startseite.
 
-**Was fertig ist**
-- Die **Systemebene** liegt in `v3.css` und gilt fuer alle elf Seiten:
-  neutrale Palette, Typo, 4px-Buttons, Ink-Leiste mit choreografierter
-  Transition, `.rv` auf 22px, plus drei geteilte Bauteile (Buehnen-Header,
-  Wort-Reveal, Pixel-Marke). Details im naechsten Abschnitt.
-- **`services/ai-tools.html` ist komplett umgestellt** — die Referenz, gegen
-  die alles Weitere gebaut wird.
-- **`preview/refresh.html`** ist der genehmigte Gesamt-Entwurf der Startseite
-  (ganze Seite, echte Konsole/Menue/FAQ, komplette Motion-Schicht).
+**Was heute passiert ist, in einem Satz:** die drei uebrigen Service-Seiten
+sind auf das System umgestellt, und danach wurde der Entwurf zur echten
+Startseite gemacht — mit rund fuenfzehn Korrekturen des Owners, die alle in
+den Commit-Messages einzeln begruendet sind.
 
-**Was als naechstes dran ist — in dieser Reihenfolge**
+### Der Stand der Startseite
 
-1. **Die drei uebrigen Service-Seiten** (`web-apps`, `websites`, `software`).
-   Pro Seite derselbe kleine, gleichfoermige Diff — genau wie bei `ai-tools`:
-   - `<span class="ph" data-pixel>X</span>` → `X` (der Wrapper hostete nur das
-     Canvas). Danach muss `data-pixel` auf der Seite **0** mal vorkommen.
-   - `<h2 class="sec-h">` → `<h2 class="sec-h" data-words>`.
-   - Header: `class="hero hero--svc wrap"` → `class="hero hero--svc
-     hero--stage guides" data-field`, die vier `<span class="gmark gmark--tl">`
-     … davor, und `wrap` wandert an `.hero-inner`.
-   - `.hero-side` von `<b>…</b>Text<br>` auf
-     `<span><b>…</b><i>Text</i></span>` pro Zeile.
-   - Optional der `.stage-meta`-Streifen an der Basis.
-   - Die Wortmarke bekommt das `<svg class="mark">` (7×7, siehe `ai-tools`).
-2. **`index.html`** nach demselben Muster — der Entwurf dafuer steht in
-   `preview/refresh.html`, inklusive Buehne, Fuss und Motion-Schicht. Wenn die
-   Startseite umgestellt ist, haben `PixelFX.headline` und `PixelFX.voidReveal`
-   **keinen Aufrufer mehr** und fliegen aus der Engine.
+- **Hero**: full width, zweizeilige Plakatzeile, kein Bild im Layout. Der
+  Hintergrund ist ein **Pixelmosaik** von `img/circuit-macro-1200.webp`,
+  gefahren von `PixelFX.image` — also demselben Aufruf wie die Work-Karten.
+  Das schwarze Loch folgt der Maus und zerstoert echte Partikel.
+- **Kopfleiste**: oben transparent mit weisser Schrift, ab 8px Scroll faehrt
+  die Platte ein. Keine Haarlinie mehr — Pac-Man ist die Trennung. Alle
+  Bedienelemente 38px. Der CTA traegt den Verlauf statt Gelb, die
+  Status-Pille traegt ihn als wandernde Kante.
+- **Logo**: `favicon.svg` (die echte md-Marke) in der Leiste, auf allen
+  fuenf Seiten, die vorher die erfundene 7x7-Marke hatten.
+- **(05)**: dunkles Band, Akzentschrift im vollen Spektrum der Konsole.
+- **Fusszeile**: die aus dem Entwurf, Wortmarke einzeilig via `15cqi`.
+- **Keine Fuehrungsschienen** mehr auf der Startseite (Owner-Entscheidung);
+  die Service-Seiten behalten ihre.
+
+### Was als naechstes dran ist
+
+1. **`preview/refresh.html` aufraeumen.** Es hat sein altes `<style>` noch
+   inline und ist damit eine Dublette zu `v3.css` — es rendert inzwischen
+   ANDERS als die echte Startseite und wird nur noch verwirren. Entweder auf
+   `v3.css` umstellen oder loeschen.
+2. **Pushen.** 9 Commits liegen lokal. Vorher CHANGELOG.md nachziehen.
 3. **Inhalte** — drei freigegebene Kundenzitate, zwei Work-Cases, echte
-   Portraits. Groesste Luecke vor dem Livegang, und nichts davon darf erfunden
+   Portraits. Groesste Luecke vor dem Livegang, nichts davon darf erfunden
    werden.
 4. **`ANTHROPIC_API_KEY`** setzt der Owner selbst in Vercel Production, plus
-   Spend-Limit in der Anthropic Console; danach `AI_MODE` in `v3.js` auf
-   `"live"`. Ich sehe den Schluessel nie.
-5. **Beim Livegang:** `noindex` raus, `preview/` aus dem Deployment.
+   Spend-Limit; danach `AI_MODE` in `v3.js` auf `"live"`.
+5. **Beim Livegang:** `noindex` raus, `preview/` aus dem Deployment. Der
+   Owner zieht gerade **mccain-digital.com auf Vercel** um.
 
-**Offene Design-Entscheidungen des Owners**
-- Ein **Condensed-Schnitt** fuer die Plakatzeilen? Schibsted 800 eng traegt;
-  ein zweiter Schnitt gaebe einen Gang mehr und kostet eine Font-Datei.
-- Das **Kommandomenue** traegt die Pixel-Marke noch nicht — es injiziert seine
-  eigene Wortmarke aus `menu.js`.
-- **Assistent auf den Unterseiten?** Heute nur die Startseite. Entscheidung,
-  kein Versehen.
+### Vor jeder Aenderung, ohne Ausnahme
 
-**Vor jeder Aenderung, ohne Ausnahme**
 ```
 python prodserve.py 8898 --dev     # die Waechter brauchen den Server
 bash tools/sweep.sh 1440 900       # und nochmal mit 390 844
 bash tools/accent_audit.sh
 ```
 
-**Die letzten zehn Commits**
+`tools/stage_probe.js` ist neu: misst den Kontrast jedes Textblocks im Hero
+gegen die GELIEFERTEN Pixel des Feldes. Per `agent-browser eval -b` mit
+base64 einspeisen, so wie `sweep.sh` es mit `probe.js` macht.
+
+### Die neun Commits von heute
 
 ```
-f9b0b10  docs: the system is adopted, and what the sub-page cost to finish
-ae87172  feat(system): the refresh becomes the real system, and one sub-page is finished
-ab05b06  feat(refresh): motion, measured against the bands instead of my eye
-7e73fde  feat(refresh): the whole page, on the real stylesheet and the real scripts
-6e6435d  feat(refresh): the pixel engine leaves the type and signs the studio instead
-6dfb989  docs: bring the handover commit list up to date
-d73393b  feat(bg): a dither field and container guides, from MengTo/Skills
-547b456  docs: the border jump, its cause, and the two defects the review found
-f75acf8  fix(tools): a guard that finds nothing must say so
-a2035d0  fix(rim): state the period instead of inferring it, so the border stops jumping
+988ae66  feat(nav): the bar goes transparent over a stage, one height
+57d9d6e  perf(hero): the mosaic costs what a card costs, bar drops hairline
+27c82c1  fix(home): the real logo, the spectrum back, no rails, one-line mark
+91e16f2  feat(home): the merger — index.html IS the refresh now
+439997e  feat(studio): (05) takes the console's gradient as its text colour
+2fb2b00  fix(field): the protection map reads cell CENTRES
+c461b51  fix(stage): the hole is the images' hole
+41c0efe  feat(stage): the void follows the hand (spaeter verworfen)
+65b53a3  feat(system): the other three service pages join the system
 ```
+
+### Was heute am meisten gekostet hat — bitte nicht nochmal
+
+- **Ich habe das schwarze Loch NACHGEBAUT statt es zu benutzen.** Drei
+  Anlaeufe auf dem Dither-Feld, ~275 Zeilen, und es konnte nie Pixel
+  zerstoeren, weil ein Raster keine Partikel hat. Die Engine hatte die
+  Mechanik zweimal (`pixelImage`, `headline`). Owner: „das ist doch EXAKT
+  das gleiche wie bei den bildern, warum kannst du das nicht einfach
+  kopieren". **Erst suchen, ob es das schon gibt.**
+- **Eine Teilstring-Pruefung ist keine Selektor-Pruefung.** Beim CSS-Merge
+  galt `.stage` als vorhanden, weil `.hero--stage` den Text enthaelt — jede
+  Buehnenregel flog raus, `min-height:100svh` mit ihr, und der Kopf war
+  780px statt einer Bildschirmhoehe. Regel-KOEPFE matchen.
+- **Zweimal verdrahtet ist unsichtbar kaputt.** Die Hero-Figur trug `shot`
+  UND `stage-shot` und traf zwei `IMG_TARGETS`: zwei Mosaike, das zweite
+  gewinnt, das erste haelt Handler und rAF am Leben. Dasselbe war beim
+  Dither-Feld passiert (zweites Canvas trifft `.dither-l ~ *`, landet im
+  FLUSS, schiebt die Seite 900px runter). Beide Funktionen verweigern jetzt
+  den zweiten Anlauf.
+- **Ein Token ist auf einen Grund geeicht.** `--acc-text` in `.score:hover b`
+  war fuer den Grund des BANDES gewaehlt — beim Hover malt die Pille ihren
+  eigenen fast schwarzen Grund, und das abgedunkelte Gelb wurde zum braunen
+  Fleck. Sobald ein Element seinen eigenen Untergrund mitbringt, ist das
+  Token des Untergrunds falsch.
+- **Global gesetzte Transparenz laesst den Kopf verschwinden.** Der Balken
+  ist in BEIDEN Themes dunkel; transparent ueber einer Papier-Seite ist
+  weiss auf weiss (1:1 auf legal/contact/404). Auf Seiten mit Buehne
+  begrenzen.
+- **Und viermal war die SONDE der Fehler**, nicht die Seite: nach aussen
+  gerundete Boxen lesen eine Zelle neben dem Element; der Pixel-Button malt
+  sein Label aufs Canvas und laesst `color` transparent (las sich als
+  Schwarz auf Schwarz, 1,05:1); die Schutzkarte rechnete mit Zell-Indizes
+  statt Zell-Mittelpunkten. **Bevor man der Seite misstraut, dem Messgeraet
+  misstrauen.**
 
 ## DAS SYSTEM IST ÜBERNOMMEN — und eine Unterseite ist fertig
 
