@@ -79,7 +79,7 @@
     },
     {
       q: "Who actually builds it?",
-      a: "<b>The two of us.</b> Christian builds and ships, Kathi does design and brand.\n\nNo juniors learning on your budget, no account manager between you and the work, no agency that subcontracts it to someone you never meet. The company is eight years old; between us we have <b>over twenty years</b> in the industry."
+      a: "<b>The two of us.</b> Christian builds and ships, Kathi does design and brand.\n\nNo juniors learning on your budget, no account manager between you and the work, no agency that subcontracts it to someone you never meet. The company has been going since 2016; between us we have <b>over twenty years</b> in the industry."
     },
     {
       q: "Do you really do AI, or is that a buzzword?",
