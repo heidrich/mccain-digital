@@ -427,7 +427,17 @@
   const IMG_TARGETS = [
     { card: ".case", box: ".case-img", o: { gap: 4, size: 4, radius: 70, force: 2.8 } },
     { card: ".pcard", box: ".px-img", o: { gap: 3.5, size: 3.5, radius: 60, force: 3.2 } },
-    { card: ".shot", box: ".shot-img", o: { gap: 4, size: 4, radius: 70, force: 2.8 } }
+    { card: ".shot", box: ".shot-img", o: { gap: 4, size: 4, radius: 70, force: 2.8 } },
+    /* THE HERO. Not a second implementation of the black hole - the same one,
+       on the same call, because it is the same thing: pixels that scatter
+       when the hole passes and spring back behind it. Rebuilding it on the
+       dither field could push the cloud around but never destroy anything,
+       there being no particles there to destroy.
+
+       The card is the STAGE and not the picture, so the pointer is still
+       tracked when it is over the headline - the copy sits above the canvas
+       and would otherwise swallow every move. */
+    { card: ".stage", box: ".stage-shot .shot-img", o: { gap: 5, size: 5, radius: 70, force: 2.8 } }
   ];
 
   function bootPixels() {

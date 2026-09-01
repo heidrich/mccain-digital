@@ -4311,3 +4311,682 @@ html[data-theme="light"] .t-moon {
     display: none
   }
 }
+
+
+/* ============================================================
+   THE HOME PAGE'S OWN LAYER — adopted from preview/refresh.html
+
+   The refresh was built on top of this stylesheet rather than beside
+   it, so what follows is only the part that had nowhere to live yet:
+   the stage, the billboard type, the facts lane, the scroll cue, the
+   chapter readout, the footer-as-a-chapter, and the wave as a text
+   colour. Everything the mockup shared with this file was adopted
+   when the system landed and is NOT repeated here - a second copy of
+   a rule is a rule that changes in one place and not the other.
+
+   Left behind with the mockup: its own masthead (the site has one,
+   and eleven pages should not carry two), the media plate the owner
+   removed from the stage, and the mockup's notes.
+   ============================================================ */
+
+.display {
+      margin: 0;
+      font-size: var(--t-display);
+      font-weight: 800;
+      letter-spacing: -.035em;
+      line-height: .9
+    }
+
+.display .acc {
+      color: var(--acc)
+    }
+
+/* One line that FILLS the stage. The size is not a taste value: it is
+       the container width divided by the line's own width at 1em, measured
+       once in the browser and written down here as a vw coefficient - which
+       is why it fills at every desktop width instead of at one. Below the
+       breakpoint it wraps and the clamp floor takes over. */
+.display--fill {
+      font-size: clamp(2.6rem, 6.55vw, 13rem);
+      text-wrap: balance
+    }
+
+.nav-status {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      white-space: nowrap;
+      font-family: var(--mono);
+      font-size: var(--t-label);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted)
+    }
+
+.nav-status i {
+      width: 6px;
+      height: 6px;
+      background: var(--sig-text);
+      border-radius: 50%;
+      flex: none;
+      box-shadow: 0 0 0 3px rgba(164, 189, 0, .16)
+    }
+
+/* ============================================================
+       THE STAGE — full bleed, dither underneath, content anchored low
+       ============================================================ */
+.stage {
+      position: relative;
+      min-height: 100svh;
+      margin-top: calc(-1 * var(--nav));
+      padding-top: var(--nav);
+      display: flex;
+      flex-direction: column;
+      overflow: clip;
+      background: var(--ink);
+      color: var(--ink-fg);
+      --fg: var(--ink-fg);
+      --muted: #a3a3a0;
+      --line: rgba(242, 242, 239, .18);
+      /* the rails sit ON the field here, so they need more than the .07
+         that reads fine on flat ink */
+      --line-2: rgba(242, 242, 239, .12);
+      --acc-text: var(--acc);
+      --sig-fg: var(--sig-text)
+    }
+
+/* two washes over the field: readability without flattening it
+       (image-first-grid-layout) */
+.stage::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        linear-gradient(to right, rgba(11, 11, 12, .72) 0%, rgba(11, 11, 12, .34) 44%, rgba(11, 11, 12, .22) 100%),
+        linear-gradient(to top, rgba(11, 11, 12, .84) 0%, rgba(11, 11, 12, .12) 40%, rgba(11, 11, 12, .06) 100%)
+    }
+
+.stage>*:not(.dither-l) {
+      position: relative;
+      z-index: 2
+    }
+
+/* the stage is pulled up under the rail, so its top corner marks would
+       land behind it and read as two stray dots */
+.stage>.gmark--tl,
+    .stage>.gmark--tr {
+      top: var(--nav)
+    }
+
+.stage-body {
+      width: 100%;
+      flex: 1;
+      display: grid;
+      align-content: center;
+      gap: clamp(1.6rem, 3.2vw, 2.6rem);
+      padding-block: clamp(2rem, 5vh, 4rem);
+      padding-inline: var(--gut)
+    }
+
+/* ---------- FULL WIDTH ----------
+       The stage drops the 1560px container: on a wide monitor the field ran
+       edge to edge while the words it is behind stopped two hundred pixels
+       short, and a header whose background is wider than its own content
+       reads as a background with a page on top of it.
+
+       The rails have to come with it. They mark where the copy ends - that
+       is their whole job - so on the wide stage they sit on the gutter, not
+       on a container this header no longer has. */
+.stage--wide>.gmark--tl,
+    .stage--wide>.gmark--bl,
+    .stage--wide::before {
+      left: var(--gut)
+    }
+
+.stage--wide>.gmark--tr,
+    .stage--wide>.gmark--br {
+      right: var(--gut)
+    }
+
+/* NOT ::after here: on the stage that pseudo-element is already the pair
+       of washes over the field, and pulling it in by a gutter would move the
+       wash, not a rail. */
+.stage-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+      gap: clamp(2rem, 4vw, 3.5rem);
+      align-items: start
+    }
+
+.stage-copy {
+      align-self: start
+    }
+
+.stage-kicker {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 0
+    }
+
+.stage-kicker::before {
+      content: "";
+      width: 46px;
+      height: 1px;
+      background: var(--acc);
+      flex: none
+    }
+
+.stage-intro {
+      max-width: 34ch;
+      color: var(--muted);
+      font-size: var(--t-small);
+      line-height: 1.7;
+      margin: 1.2rem 0 0
+    }
+
+.stage-intro b {
+      color: var(--fg);
+      font-weight: 600
+    }
+
+/* The inset media panel. editorial-tech asks for a cinematic band or
+       inset media strip crossing the composition; this is that, and it is
+       where the pixel engine earns its keep above the fold. It also fixes
+       a plain compositional problem: without it the stage was 400px of
+       nothing between the rail and the headline. */
+.stage-media {
+      display: grid;
+      gap: 1.1rem
+    }
+
+/* the numbers are proof, not decoration, so each gets a rule
+       (number-details) */
+.facts {
+      display: grid;
+      border-top: 1px solid var(--line)
+    }
+
+.fact {
+      display: flex;
+      align-items: baseline;
+      gap: .8rem;
+      padding: .8rem 0;
+      border-bottom: 1px solid var(--line-2)
+    }
+
+.fact b {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -.03em;
+      line-height: 1;
+      min-width: 4.2rem
+    }
+
+.fact span {
+      font-family: var(--mono);
+      font-size: var(--t-label);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted)
+    }
+
+.stage-foot {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem 2rem
+    }
+
+.stage-ctas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .7rem
+    }
+
+.stage-coords {
+      margin-left: auto;
+      font-family: var(--mono);
+      font-size: var(--t-label);
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--muted)
+    }
+
+/* ---------- THE WAVE, AS A TEXT COLOUR ----------
+       The studio band's accents stop being a flat darkened yellow - which on
+       paper is simply brown - and take the console's own journey instead:
+       the logo yellow travelling through the green and back, on the same
+       angle, over the same period, at the same speed.
+
+       --wave-stops-text is computed per band by common.js: every stop keeps
+       its hue and gives up only its lightness, until it clears the bar
+       against THAT band's ground. On paper that lands as a deep gold through
+       an olive; on ink it is the console's stops untouched.
+
+       The fill is animated by moving the background, not the element, so
+       nothing is promoted to its own layer for a line of text. */
+[data-wavetext] .st-lead em,
+    [data-wavetext] .st-fact b {
+      background-image: repeating-linear-gradient(var(--rim-angle), var(--wave-stops-text, var(--wave-stops)));
+      background-size: var(--rim-shift) 100%;
+      animation: wave-text var(--rim-cycle) linear infinite
+    }
+
+/* Only where the fill can actually be clipped to the glyphs. Without the
+       guard, `color: transparent` in a browser that ignores background-clip
+       is not a fallback, it is an erasure. */
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+
+      [data-wavetext] .st-lead em,
+      [data-wavetext] .st-fact b {
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent
+      }
+    }
+
+@keyframes wave-text {
+      to {
+        background-position: var(--rim-shift) 0
+      }
+    }
+
+@keyframes stageCopyOut {
+      to {
+        transform: translateY(-56px);
+        opacity: 0
+      }
+    }
+
+@keyframes stageMediaOut {
+      to {
+        transform: translateY(34px);
+        opacity: .1
+      }
+    }
+
+.stage-kicker::before {
+      transform-origin: 0 50%;
+      transition: transform .6s var(--e-out)
+    }
+
+.stage.hs .stage-kicker::before {
+      transform: scaleX(0)
+    }
+
+/* the rule has to be given its way BACK. Written without this, the
+       hidden state was the only state and the yellow rule never appeared
+       again - a hidden state with no matching visible state is not an
+       animation, it is a deletion. */
+.stage.hs.go .stage-kicker::before {
+      transform: none
+    }
+
+.stage.hs .stage-kicker>span,
+    .stage.hs .stage-intro,
+    .stage.hs .display,
+    .stage.hs .stage-media,
+    .stage.hs .stage-foot {
+      opacity: 0;
+      transform: translateY(16px)
+    }
+
+.stage.hs.go .stage-kicker>span,
+    .stage.hs.go .stage-intro,
+    .stage.hs.go .display,
+    .stage.hs.go .stage-media,
+    .stage.hs.go .stage-foot {
+      opacity: 1;
+      transform: none;
+      transition: opacity .55s linear, transform .68s var(--e-out)
+    }
+
+.stage.hs.go .stage-kicker>span {
+      transition-delay: .12s
+    }
+
+.stage.hs.go .stage-intro {
+      transition-delay: .2s
+    }
+
+.stage.hs.go .stage-media {
+      transition-delay: .34s
+    }
+
+.stage.hs.go .stage-foot {
+      transition-delay: .62s
+    }
+
+/* ---------- 3. THE RAIL REPORTS WHERE YOU ARE ----------
+       Once the stage is behind you the status line has nothing left to say,
+       so it hands its place to the chapter you are actually in. It guides
+       attention and it is real navigation, which is why it survives the
+       deletion rule. */
+.nav-where {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      min-width: 0;
+      font-family: var(--mono);
+      font-size: var(--t-label);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity .2s linear, transform .24s var(--e-out)
+    }
+
+.nav-where.on {
+      opacity: 1;
+      transform: none
+    }
+
+.nav-where b {
+      color: var(--fg);
+      font-weight: 500
+    }
+
+/* ---------- 4. THE SCROLL CUE ----------
+       One job: say that the page continues. It stops the moment you scroll,
+       because a cue that keeps nagging after you obeyed it is decoration. */
+.cue {
+      position: absolute;
+      left: 50%;
+      bottom: 1.1rem;
+      z-index: 3;
+      translate: -50% 0;
+      display: grid;
+      justify-items: center;
+      gap: .45rem;
+      font-family: var(--mono);
+      font-size: var(--t-label);
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      pointer-events: none;
+      transition: opacity .3s linear
+    }
+
+.cue i {
+      display: block;
+      width: 1px;
+      height: 26px;
+      background: linear-gradient(var(--acc), transparent);
+      transform-origin: 50% 0;
+      animation: cueDrop 1.9s var(--e-io) infinite
+    }
+
+.stage.moved .cue {
+      opacity: 0
+    }
+
+@keyframes cueDrop {
+
+      0%,
+      100% {
+        transform: scaleY(.3);
+        opacity: .35
+      }
+
+      45% {
+        transform: scaleY(1);
+        opacity: 1
+      }
+    }
+
+/* ---------- 5. HOVER MICROS, all inside 120-200ms ---------- */
+.worktrack .case,
+    .testi {
+      transition: transform var(--d-micro) var(--e-out)
+    }
+
+.worktrack .case:hover {
+      transform: translateY(-4px)
+    }
+
+/* an underline that grows from the side it is read from, instead of a
+       colour that simply appears */
+.foot-col a,
+.foot-bar a{
+      position: relative
+    }
+
+.foot-col a::after,
+.foot-bar a::after{
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -3px;
+      height: 1px;
+      background: var(--acc);
+      transform: scaleX(0);
+      transform-origin: 0 50%;
+      transition: transform var(--d-micro) var(--e-out)
+    }
+
+.foot-col a:hover::after,
+.foot-bar a:hover::after{
+      transform: scaleX(1)
+    }
+
+.foot-mark {
+      transition: opacity var(--d-ui) linear
+    }
+
+.foot-mark:hover {
+      opacity: .82
+    }
+
+.foot-top {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 32rem);
+      gap: clamp(2rem, 5vw, 4rem);
+      align-items: start;
+      padding-bottom: clamp(2.5rem, 6vw, 4rem)
+    }
+
+.foot-say {
+      font-size: clamp(1.5rem, 3vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -.025em;
+      line-height: 1.15;
+      margin: 1rem 0 1.6rem;
+      max-width: 20ch
+    }
+
+.foot-say .acc {
+      /* --acc-text, not --acc: the mockup's footer was ink in both themes and
+         the raw logo yellow was fine there. On the real page the footer is
+         paper in light mode, where the same token measures 1.45:1. */
+      color: var(--acc-text)
+    }
+
+.foot-mail {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      font-family: var(--mono);
+      font-size: var(--t-small);
+      letter-spacing: .06em;
+      color: var(--acc-text);
+      text-decoration: none;
+      border-bottom: 1px solid color-mix(in srgb, var(--acc) 45%, transparent);
+      padding-bottom: .15rem;
+      transition: border-color var(--d-micro)
+    }
+
+.foot-mail:hover {
+      border-bottom-color: var(--acc)
+    }
+
+.foot-cols {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.6rem
+    }
+
+.foot-col {
+      display: grid;
+      align-content: start;
+      gap: .55rem
+    }
+
+.foot-col .label {
+      margin-bottom: .35rem
+    }
+
+.foot-col a,
+    .foot-col span:not(.nav-status) {
+      font-size: var(--t-small);
+      color: var(--muted);
+      text-decoration: none;
+      width: fit-content;
+      line-height: 1.7;
+      transition: color var(--d-micro)
+    }
+
+.foot-col a:hover {
+      color: var(--fg)
+    }
+
+/* the oversized wordmark. documentary-brutalist-agency asks the page to
+       finish on one — it is the last thing seen, and it should be the name. */
+.foot-mark {
+      display: block;
+      width: 100%;
+      font-size: clamp(3.2rem, 15.4vw, 15rem);
+      font-weight: 800;
+      letter-spacing: -.052em;
+      line-height: .78;
+      margin: 0;
+      padding-top: clamp(1.2rem, 3vw, 2rem);
+      border-top: 1px solid var(--line);
+      color: var(--fg);
+      text-decoration: none
+    }
+
+.foot-mark i {
+      font-style: normal;
+      color: var(--muted)
+    }
+
+.foot-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .6rem 2rem;
+      align-items: center;
+      margin-top: 1.8rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--line-2)
+    }
+
+.foot-bar a {
+      font-size: var(--t-small);
+      color: var(--muted);
+      text-decoration: none;
+      transition: color var(--d-micro)
+    }
+
+.foot-bar a:hover {
+      color: var(--fg)
+    }
+
+@media (max-width: 760px) {
+
+      .nav-status,
+      .r-nav>a:not(.btn),
+      .r-nav>.btn {
+        display: none
+      }
+
+      /* the chapter readout needs room the 390px rail does not have - it was
+         printing straight through the Menu button */
+      .rail .nav-where {
+        display: none
+      }
+
+      .foot-cols {
+        grid-template-columns: 1fr 1fr
+      }
+    }
+
+/* ---------- THE HERO'S PICTURE ----------
+   Full bleed, behind everything, and dim: it is the ground the words stand
+   on, not a photograph the page is about. The engine paints its mosaic into
+   .shot-img, so that is what has to fill the stage.
+
+   The selector is `.stage>.stage-shot` and not `.stage-shot`, because the
+   stage lifts EVERY child it does not know about onto z-index 2 with
+   position:relative - which put the picture in the flow at height 0 and left
+   the header black. */
+.stage>.stage-shot {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  margin: 0;
+  overflow: clip;
+  pointer-events: none
+}
+
+.stage-shot .shot-img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  /* the photograph carries its own colour, and the page argues that ONE
+     accent punctuates a restrained system */
+  filter: saturate(.4) brightness(.55)
+}
+
+.stage-shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover
+}
+
+/* the footer's status line is the masthead's component at label size */
+.nav-status--mini {
+  font-size: var(--t-label)
+}
+
+/* ---------- THE STAGE ON A PHONE ----------
+   The facts lane is a two-column flex row per fact, and at 390px "years in
+   the industry" cannot sit beside a 1.5rem number in the space that is left:
+   both the row and its label pushed past the viewport. It wraps to two lines
+   there instead, and the number keeps its own rule. */
+@media (max-width: 620px) {
+
+  .stage-grid {
+    grid-template-columns: minmax(0, 1fr)
+  }
+
+  .fact {
+    flex-wrap: wrap;
+    gap: .1rem .8rem
+  }
+
+  .fact b {
+    min-width: 0
+  }
+
+  .fact span {
+    flex: 1 0 100%;
+    min-width: 0;
+    white-space: normal
+  }
+
+  .stage-coords {
+    margin-left: 0;
+    white-space: normal
+  }
+}

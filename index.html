@@ -212,19 +212,34 @@
 
 <body>
 
-  <!-- scroll progress: the CSS bar is the fallback, Pac-Man replaces it
-       (he hides the bar himself once he boots) -->
+  <!-- scroll progress: the CSS bar is the fallback, Pac-Man replaces it -->
   <div class="prog" aria-hidden="true"></div>
   <canvas id="pacbar" aria-hidden="true"></canvas>
 
   <!-- ================= NAV ================= -->
   <nav class="nav" id="nav" aria-label="Main navigation">
-    <a class="logo" href="#top">mccain <i>digital</i><span class="sr-only"> — home</span></a>
+    <a class="logo" href="#top">
+      <!-- seven by seven cells, the same grid the pixel engine draws on -->
+      <svg class="mark" viewBox="0 0 7 7" aria-hidden="true">
+        <rect x="0" y="0" width="1" height="7" />
+        <rect x="6" y="0" width="1" height="7" />
+        <rect x="1" y="1" width="1" height="1" />
+        <rect x="5" y="1" width="1" height="1" />
+        <rect x="2" y="2" width="1" height="1" />
+        <rect x="4" y="2" width="1" height="1" />
+        <rect x="3" y="3" width="1" height="1" />
+      </svg>
+      mccain <i>digital</i><span class="sr-only"> — home</span>
+    </a>
 
     <span class="nav-status">
       <i class="ns-dot" aria-hidden="true"></i>
       <b>München</b> · available for new projects
     </span>
+
+    <!-- Once the stage is behind you the status line has nothing left to
+         say, so it hands its place to the chapter you are actually in. -->
+    <span class="nav-where" id="navWhere"></span>
 
     <div class="nav-right">
       <a class="nav-link hide-s" href="#work">Work</a>
@@ -248,43 +263,68 @@
 
   <main id="top">
 
-    <!-- ================= HERO ================= -->
-    <header class="hero wrap">
-      <div class="hero-inner">
-        <p class="hero-eyebrow label">Digital product studio · Bavaria · est. 2016</p>
+    <!-- ================= THE STAGE ================= -->
+    <!-- data-hole: the picture that lies BEHIND the cloud. The plate that
+         used to sit in the layout is gone; the image is exposed by the void
+         travelling across the field instead, on the field's own cell grid.
+         circuit-macro rather than the code screenshot: at a 9px cell a
+         screenshot is mush, and an abstract macro reads as texture. -->
+    <header class="stage stage--wide guides" id="stage">
+      <!-- The picture the hero is built on, as a pixel mosaic: .shot +
+           .shot-img is exactly what common.js wires the engine to on every
+           other image, so the black hole here IS the black hole there -
+           same call, same physics, same scatter and spring. -->
+      <figure class="stage-shot">
+        <span class="shot-img">
+          <img src="img/circuit-macro-1200.webp"
+            srcset="img/circuit-macro-640.webp 640w, img/circuit-macro-1200.webp 1200w"
+            sizes="100vw" alt="" width="1200" height="800" fetchpriority="high" decoding="async">
+        </span>
+      </figure>
 
-        <h1 class="hero-h">
-          <span class="line"><span class="ph" data-pixel>We build the useful</span></span>
-          <span class="line"><span class="ph" data-pixel><span class="accent">kind of AI.</span></span></span>
-        </h1>
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
 
-        <div class="hero-foot">
-          <div>
-            <p class="lead">Tools, web apps and software that go to <b>production</b> — not to a slide deck.
-              Two founders, senior hands only, and the people you talk to are the people who build.</p>
-            <div class="hero-ctas">
-              <a class="btn" href="#ai">Try the AI, right here
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
-              </a>
-              <a class="btn btn--ghost" href="#work" data-magnet>See the work</a>
-            </div>
+      <div class="stage-body">
+        <div class="stage-grid">
+          <div class="stage-copy">
+            <p class="stage-kicker label"><span>Digital product studio · Bavaria · est. 2016</span></p>
+            <p class="stage-intro">Tools, web apps and software that go to <b>production</b> — not to a
+              slide deck. Two founders, senior hands only.</p>
           </div>
-          <div class="hero-side">
-            <b>20+ years</b> in the industry<br>
-            <b>4×100</b> Lighthouse on this build<br>
-            <b>0</b> account managers
+
+          <div class="stage-media">
+            <div class="facts">
+              <div class="fact"><b>20+</b><span>years in the industry</span></div>
+              <div class="fact"><b>4×100</b><span>Lighthouse, this build</span></div>
+              <div class="fact"><b>0</b><span>account managers</span></div>
+            </div>
           </div>
         </div>
 
-        <p class="scrollcue"><i aria-hidden="true"></i> Scroll — the page reacts</p>
+        <!-- the billboard line owns the full width now that nothing shares
+             the row with it -->
+        <h1 class="display">We build the<br>useful <span class="acc">kind of AI.</span></h1>
+
+        <div class="stage-foot">
+          <div class="stage-ctas">
+            <a class="btn" href="#ai">Try the AI, right here
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </a>
+            <a class="btn btn--ghost" href="#work" data-magnet>See the work</a>
+          </div>
+          <span class="stage-coords">48.14° N · 11.58° E — reply in 24h, fixed quote in 48h</span>
+        </div>
       </div>
+
+      <span class="cue" aria-hidden="true"><i></i>scroll</span>
     </header>
 
     <!-- ============ VELOCITY MARQUEE ============ -->
-    <!-- Six items, not five: v3.js duplicates the track for the seamless loop,
-         so an odd count would flip the solid/hollow parity at the seam. -->
+    <!-- Six items, not five: common.js duplicates the track for the seamless
+         loop, so an odd count would flip the solid/hollow parity at the seam. -->
     <div class="vmq" aria-hidden="true">
       <div class="vmq-track" id="vmq">
         <span class="vmq-item">Idea <b>→</b> Design <b>→</b> Code <b>→</b> <b>Launch</b></span>
@@ -296,28 +336,29 @@
       </div>
     </div>
 
-    <!-- ================= AI CONSOLE ================= -->
-    <section class="band band--ink ai" id="ai">
+    <!-- ================= (01) AI CONSOLE ================= -->
+    <section class="band band--ink ai guides" id="ai">
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
       <div class="wrap fx-out">
         <div class="ai-grid">
 
           <div class="ai-copy rv">
             <p class="label">(01) — AI, actually built in</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Ask this page</span> <span class="dim">anything.</span></h2>
-            <p class="lead">Most agency sites <b>say</b> they do AI. This one <b>is</b> one. Ask it what we cost,
-              whether we're right for you, or what we'd actually build — or hand it your project and
+            <h2 class="sec-h">Ask this page <span class="dim">anything.</span></h2>
+            <p class="lead">Most agency sites <b>say</b> they do AI. This one <b>is</b> one. Ask it what we
+              cost, whether we're right for you, or what we'd actually build — or hand it your project and
               watch it write the brief.</p>
             <p class="ai-note">Runs on a serverless function with a rate limit — the key never touches your
               browser. Right now this prototype answers from a local knowledge base; flip
               <code>AI_MODE</code> to <code>live</code> in <code>v3.js</code> once the endpoint is deployed.</p>
-
           </div>
 
           <!-- The console sits in a travelling rim: an animated gradient border
-               out of the same palette the assistant at the page edge uses. One
-               effect, one source - see .rim in v3.css. The wrappers are markup
-               because a glow has to spill outside the shape while the sheet has
-               to be clipped inside it, and one element cannot do both. -->
+               out of the same palette the docked assistant uses. The wrappers
+               are markup because a glow has to spill outside the shape while
+               the sheet has to be clipped inside it, and one element cannot
+               do both. -->
           <div class="rim-hold console-hold rv-s" id="consoleHold">
             <span class="rim-glow" aria-hidden="true"></span>
             <div class="rim">
@@ -343,7 +384,8 @@
                     <label class="sr-only" for="consoleInput">Your question</label>
                     <input id="consoleInput" type="text" autocomplete="off" placeholder="Ask us anything…">
                     <button class="console-send" type="submit" aria-label="Send">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        aria-hidden="true">
                         <path d="M5 12h13M12 5.5 18.5 12 12 18.5" />
                       </svg>
                     </button>
@@ -355,10 +397,9 @@
 
         </div>
 
-        <!-- Full-width rail under BOTH columns. Real vendor marks
-             (simple-icons), painted through a CSS mask so one file covers both
-             themes and the hover tint. Never redraw a wordmark by hand — that
-             is exactly what looked wrong before. -->
+        <!-- Real vendor marks (simple-icons), painted through a CSS mask so
+             one file covers both themes and the hover tint. Never redraw a
+             wordmark by hand — that is exactly what looked wrong before. -->
         <div class="stack stagger">
           <span class="stack-l" style="--i:0">The stack we build with</span>
           <span class="tool" style="--i:1" data-tip="claude"><i class="tl-claude" aria-hidden="true"></i>Claude</span>
@@ -370,14 +411,15 @@
       </div>
     </section>
 
-    <!-- ================= WORK ================= -->
-    <section class="band workwrap" id="work">
+    <!-- ================= (02) WORK ================= -->
+    <section class="band workwrap guides" id="work">
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
       <div class="wrap">
         <div class="sec-head rv">
           <div>
             <p class="label">(02) — Selected work</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Things that</span> <span class="dim">actually shipped.</span>
-            </h2>
+            <h2 class="sec-h">Things that <span class="dim">actually shipped.</span></h2>
           </div>
           <p class="lead">Scroll sideways, or use the arrows. Everything here is ours and live —
             client cases follow once they're cleared.</p>
@@ -387,15 +429,12 @@
       <div class="worktrack stagger" id="worktrack" tabindex="0" aria-label="Work, horizontally scrollable">
 
         <article class="case" style="--i:0">
-          <!-- WebP, pre-cropped to the 16/11 the card actually shows. The JPEG
-               sources stay in the repo untouched; regenerate with the snippet
-               in HANDOFF.md when the real photos land. -->
           <div class="case-img"><img src="img/code-screen-1200.webp"
-              srcset="img/code-screen-640.webp 640w, img/code-screen-1200.webp 1200w"
+              srcset="img/code-screen-640.webp 640w, ../img/code-screen-1200.webp 1200w"
               sizes="(max-width: 820px) 80vw, 560px" alt="whatever-recall running in a terminal" width="1200"
               height="825" loading="lazy" decoding="async">
-            <a class="case-peek" href="https://whatever-recall.com" target="_blank" rel="noopener"
-              aria-hidden="true" tabindex="-1">Open <b>→</b></a>
+            <a class="case-peek" href="https://whatever-recall.com" target="_blank" rel="noopener" aria-hidden="true"
+              tabindex="-1">Open <b>→</b></a>
           </div>
           <div>
             <div class="case-tags"><span class="hot">Our product</span><span>Live</span></div>
@@ -407,13 +446,14 @@
               <div><span class="k">Scope</span><span>Product, brand, site, licensing</span></div>
               <div><span class="k">Status</span><span>Live · self-hosted</span></div>
             </div>
-            <a class="scard-link" href="https://whatever-recall.com" target="_blank" rel="noopener">Visit the product →</a>
+            <a class="scard-link" href="https://whatever-recall.com" target="_blank" rel="noopener">Visit the
+              product →</a>
           </div>
         </article>
 
         <article class="case" style="--i:1">
           <div class="case-img"><img src="img/screen-work-1200.webp"
-              srcset="img/screen-work-640.webp 640w, img/screen-work-1200.webp 1200w"
+              srcset="img/screen-work-640.webp 640w, ../img/screen-work-1200.webp 1200w"
               sizes="(max-width: 820px) 80vw, 560px" alt="This website on a laptop screen" width="1200" height="825"
               loading="lazy" decoding="async">
             <a class="case-peek" href="#contact" aria-hidden="true" tabindex="-1">Open <b>→</b></a>
@@ -434,7 +474,7 @@
 
         <article class="case" style="--i:2">
           <div class="case-img"><img src="img/circuit-macro-1200.webp"
-              srcset="img/circuit-macro-640.webp 640w, img/circuit-macro-1200.webp 1200w"
+              srcset="img/circuit-macro-640.webp 640w, ../img/circuit-macro-1200.webp 1200w"
               sizes="(max-width: 820px) 80vw, 560px" alt="Placeholder image for a client case" width="1200"
               height="825" loading="lazy" decoding="async">
             <a class="case-peek" href="#contact" aria-hidden="true" tabindex="-1">Open <b>→</b></a>
@@ -455,7 +495,7 @@
 
         <article class="case" style="--i:3">
           <div class="case-img"><img src="img/hands-keyboard-1200.webp"
-              srcset="img/hands-keyboard-640.webp 640w, img/hands-keyboard-1200.webp 1200w"
+              srcset="img/hands-keyboard-640.webp 640w, ../img/hands-keyboard-1200.webp 1200w"
               sizes="(max-width: 820px) 80vw, 560px" alt="Placeholder image for a client case" width="1200"
               height="825" loading="lazy" decoding="async">
             <a class="case-peek" href="#contact" aria-hidden="true" tabindex="-1">Open <b>→</b></a>
@@ -495,8 +535,10 @@
       </div>
     </section>
 
-    <!-- ================= SCORE BAND ================= -->
-    <section class="band band--tight band--paper">
+    <!-- ================= (03) SCORE BAND ================= -->
+    <section class="band band--tight band--paper guides" id="score">
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
       <div class="wrap fx-out">
         <div class="sec-head rv" style="margin-bottom:1rem">
           <div>
@@ -506,21 +548,22 @@
           </div>
         </div>
         <div class="scores stagger" id="scores"></div>
-        <p class="lead" style="margin-top:2rem">Readable by people <b>and</b> agents — every word is real DOM text,
-          structured with JSON-LD and summarised in <b>llms.txt</b>.</p>
+        <p class="lead" style="margin-top:2rem">Readable by people <b>and</b> agents — every word is real DOM
+          text, structured with JSON-LD and summarised in <b>llms.txt</b>.</p>
       </div>
     </section>
 
-    <!-- ================= SERVICES ================= -->
+    <!-- ================= (04) SERVICES ================= -->
     <!-- fx-dim, not fx-out: the cards inside are position:sticky and a
          transform on this wrapper would re-parent them -->
-    <section class="band" id="services">
+    <section class="band guides" id="services">
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
       <div class="wrap fx-dim">
         <div class="sec-head rv">
           <div>
             <p class="label">(04) — What we do</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Four things,</span> <span class="dim">done properly.</span>
-            </h2>
+            <h2 class="sec-h">Four things, <span class="dim">done properly.</span></h2>
           </div>
           <p class="lead">Cards stack as you scroll — the one you're reading stays, the next slides over it.</p>
         </div>
@@ -529,10 +572,12 @@
       </div>
     </section>
 
-    <!-- ================= STUDIO ================= -->
+    <!-- ================= (05) STUDIO ================= -->
     <!-- fx-dim: the portraits run their own view() timelines, and an animated
          ancestor transform would feed back into them -->
-    <section class="band band--paper" id="studio">
+    <section class="band band--ink guides" id="studio" data-wavetext>
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
       <div class="wrap fx-dim">
         <div class="studio-grid">
           <div class="rv">
@@ -544,27 +589,26 @@
               long before McCain Digital had a name.</p>
             <div class="st-facts stagger">
               <div class="st-fact" style="--i:0"><b>2016</b><span>the year the company was founded</span></div>
-              <div class="st-fact" style="--i:1"><b>20+</b><span>years in the industry between the two of us</span>
-              </div>
+              <div class="st-fact" style="--i:1"><b>20+</b><span>years in the industry between the two of
+                  us</span></div>
               <div class="st-fact" style="--i:2"><b>2</b><span>people you talk to — and the same two who build
                   it</span></div>
-              <div class="st-fact" style="--i:3"><b>0</b><span>juniors, account managers or hand-offs</span></div>
+              <div class="st-fact" style="--i:3"><b>0</b><span>juniors, account managers or hand-offs</span>
+              </div>
             </div>
           </div>
 
-          <!-- no .rv-s here: the two portraits run their own view() timelines
-               and an animated transform on this box would feed back into them -->
           <div class="pstage">
             <figure class="pcard">
               <span class="px-img"><img src="team/portrait-christian-840.webp"
-                  srcset="team/portrait-christian-440.webp 440w, team/portrait-christian-840.webp 840w"
+                  srcset="team/portrait-christian-440.webp 440w, ../team/portrait-christian-840.webp 840w"
                   sizes="(max-width: 940px) 58vw, 410px" alt="Christian, co-founder" width="840" height="1050"
                   loading="lazy" decoding="async"></span>
               <figcaption><b>Christian</b><span>Co-founder · builds &amp; ships</span></figcaption>
             </figure>
             <figure class="pcard">
               <span class="px-img"><img src="team/portrait-kathi-840.webp"
-                  srcset="team/portrait-kathi-440.webp 440w, team/portrait-kathi-840.webp 840w"
+                  srcset="team/portrait-kathi-440.webp 440w, ../team/portrait-kathi-840.webp 840w"
                   sizes="(max-width: 940px) 58vw, 410px" alt="Kathi, co-founder" width="840" height="1050"
                   loading="lazy" decoding="async"></span>
               <figcaption><b>Kathi</b><span>Co-founder · design &amp; brand</span></figcaption>
@@ -575,15 +619,16 @@
       </div>
     </section>
 
-    <!-- ================= FAQ ================= -->
+    <!-- ================= (06) FAQ ================= -->
     <!-- fx-dim: the answer panel is position:sticky -->
-    <section class="band band--ink" id="faq">
+    <section class="band band--ink guides" id="faq">
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
       <div class="wrap fx-dim">
         <div class="sec-head rv">
           <div>
             <p class="label">(06) — Straight answers</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>The questions</span> <span class="dim">everyone asks.</span>
-            </h2>
+            <h2 class="sec-h">The questions <span class="dim">everyone asks.</span></h2>
           </div>
           <p class="lead">Pick one — the answer streams in, same engine as the console above.</p>
         </div>
@@ -596,14 +641,15 @@
       </div>
     </section>
 
-    <!-- ================= PROOF ================= -->
-    <section class="band band--tight" id="proof">
+    <!-- ================= (07) PROOF ================= -->
+    <section class="band band--tight guides" id="proof">
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
       <div class="wrap fx-out">
         <div class="sec-head rv">
           <div>
             <p class="label">(07) — Proof</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Twenty years</span> <span class="dim">of receipts.</span>
-            </h2>
+            <h2 class="sec-h">Twenty years <span class="dim">of receipts.</span></h2>
           </div>
           <p class="lead">The brands below are where the work happened. The quotes are the part we're still
             collecting — three slots, three real clients, no invented praise.</p>
@@ -626,12 +672,11 @@
           <b style="--i:8">Travian</b>
           <b style="--i:9">AOK</b>
         </div>
-        <p class="brand-note rv">Career reference from two decades of prior work — <b>not</b> a client list of this
-          studio, and not a claim that any of them commissioned McCain Digital.</p>
+        <p class="brand-note rv">Career reference from two decades of prior work — <b>not</b> a client list of
+          this studio, and not a claim that any of them commissioned McCain Digital.</p>
 
         <!-- Three open slots. There is not one real customer reference anywhere
-             in this repo, so nothing here is invented. Owner supplies quote,
-             name, role and company; then drop the --open modifier. -->
+             in this repo, so nothing here is invented. -->
         <div class="rev-grid stagger">
           <figure class="testi testi--open" style="--i:0">
             <blockquote>Reserved for a real, cleared client quote. One honest sentence about what changed after
@@ -650,8 +695,8 @@
             </figcaption>
           </figure>
           <figure class="testi testi--open" style="--i:2">
-            <blockquote>Third slot. Best used for the long-running client — the one who proves we're still here in
-              year three.</blockquote>
+            <blockquote>Third slot. Best used for the long-running client — the one who proves we're still here
+              in year three.</blockquote>
             <figcaption>
               <span class="t-ava" aria-hidden="true">03</span>
               <p class="t-who"><b>Awaiting reference</b>Name · role · company</p>
@@ -661,14 +706,15 @@
       </div>
     </section>
 
-    <!-- ================= CONTACT ================= -->
-    <section class="band" id="contact">
+    <!-- ================= (08) CONTACT ================= -->
+    <section class="band guides" id="contact">
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
       <div class="wrap">
         <div class="contact-grid">
           <div class="rv">
             <p class="label">(08) — Start a project</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Tell us what</span> <span class="dim">you have in
-                mind.</span></h2>
+            <h2 class="sec-h">Tell us what <span class="dim">you have in mind.</span></h2>
             <p class="lead" style="margin:1.4rem 0">A real reply within 24 hours, a fixed quote within 48 —
               from one of the two people who'd build it. No sales call.</p>
             <a class="contact-mail" href="mailto:info@mccain-digital.com">info@mccain-digital.com</a>
@@ -677,10 +723,10 @@
           </div>
 
           <form class="rv-s" id="contactForm" novalidate>
-            <div class="field"><label for="cName">Your name</label><input id="cName" type="text" autocomplete="name">
-            </div>
-            <div class="field"><label for="cMail">Email</label><input id="cMail" type="email" autocomplete="email">
-            </div>
+            <div class="field"><label for="cName">Your name</label><input id="cName" type="text"
+                autocomplete="name"></div>
+            <div class="field"><label for="cMail">Email</label><input id="cMail" type="email"
+                autocomplete="email"></div>
             <div class="field"><label for="cMsg">What's it about?</label><textarea id="cMsg"></textarea></div>
             <button class="btn" type="submit">Send it
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -697,39 +743,206 @@
   </main>
 
   <!-- ================= FOOTER ================= -->
-  <footer class="foot">
-    <div class="wrap foot-in">
-      <a class="logo" href="#top">mccain <i>digital</i></a>
-      <span>© 2026 · Bavaria, Germany</span>
-      <span class="nav-status"><i class="ns-dot" aria-hidden="true"></i> available for new projects</span>
-      <div class="foot-links">
-        <a href="#work">Work</a>
-        <a href="#services">Services</a>
-        <a href="#ai">AI</a>
-        <a href="contact.html">Contact</a>
+  <footer class="foot guides">
+    <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+    <div class="wrap">
+
+      <div class="foot-top">
+        <div>
+          <p class="label">Next step</p>
+          <p class="foot-say">One mail is enough to find out whether we're the
+            <span class="acc">right two people.</span>
+          </p>
+          <a class="foot-mail" href="mailto:info@mccain-digital.com">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              aria-hidden="true">
+              <rect x="3" y="5.5" width="18" height="13" rx="2" />
+              <path d="m3.6 6.8 8.4 6 8.4-6" />
+            </svg>
+            info@mccain-digital.com
+          </a>
+        </div>
+
+        <div class="foot-cols">
+          <div class="foot-col">
+            <p class="label">Studio</p>
+            <a href="#work">Work</a>
+            <a href="#services">Services</a>
+            <a href="#studio">The two of us</a>
+            <a href="#faq">Straight answers</a>
+          </div>
+          <div class="foot-col">
+            <p class="label">Services</p>
+            <a href="services/ai-tools.html">AI tools</a>
+            <a href="services/web-apps.html">Web apps</a>
+            <a href="services/websites.html">Websites</a>
+            <a href="services/software.html">Custom software</a>
+          </div>
+          <div class="foot-col">
+            <p class="label">Where we are</p>
+            <span>Holderweg 1<br>86869 Oberostendorf<br>Bavaria, Germany</span>
+            <span class="nav-status nav-status--mini" style="margin-top:.5rem"><i aria-hidden="true"></i> open for work</span>
+          </div>
+        </div>
       </div>
-      <div class="foot-legal">
-        <a href="legal/imprint.html">Imprint</a>
-        <a href="legal/privacy.html">Privacy</a>
-        <a href="legal/terms.html">Terms</a>
-        <a href="legal/withdrawal.html">Withdrawal</a>
+
+      <a class="foot-mark" href="#top">mccain <i>digital</i></a>
+
+      <div class="foot-bar">
+        <span class="label">© 2026 — built by the two people who quote it</span>
+        <span class="foot-legal">
+          <a href="legal/imprint.html">Imprint</a>
+          <a href="legal/privacy.html">Privacy</a>
+          <a href="legal/terms.html">Terms</a>
+          <a href="legal/withdrawal.html">Withdrawal</a>
+        </span>
       </div>
+
+
     </div>
   </footer>
 
-  <!-- ORDER IS LOAD-BEARING, on every page:
+  <!-- ORDER IS LOAD-BEARING:
        data.js       — the content every other script reads (window.MCD)
        pixel-engine  — common.js hooks its velocity feed synchronously
        common.js     — the shared runtime, publishes window.MCDUI
        pacman.js     — standalone
        menu.js       — needs MCD
-       page script   — needs MCD and MCDUI -->
+       v3.js         — needs MCD and MCDUI -->
   <script src="data.js" defer></script>
   <script src="pixel-engine.js" defer></script>
   <script src="common.js" defer></script>
   <script src="pacman.js" defer></script>
   <script src="menu.js" defer></script>
   <script src="v3.js" defer></script>
+
+  <script>
+    /* Only what the refresh itself adds. Everything else is the real runtime
+       loaded above. */
+    (function () {
+      var d = document;
+      var nav = d.getElementById("nav");
+      var stage = d.getElementById("stage");
+
+      /* The bar's real height feeds the stage's top offset, so the stage can
+         start underneath it without a magic number. --nav is what the REST of
+         v3.css means by "how tall is the bar" - the sticky service cards and
+         the FAQ panel offset themselves from it - so both are written from
+         the one measurement. */
+      function navHeight() {
+        var h = nav.offsetHeight;
+        d.documentElement.style.setProperty("--rail-h", h + "px");
+        d.documentElement.style.setProperty("--nav", h + "px");
+      }
+      navHeight();
+      new ResizeObserver(navHeight).observe(nav);
+
+      /* ============================================================
+         MOTION
+         ============================================================ */
+      var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      /* ---- split a headline into maskable words ----
+         Walks TEXT NODES only, so the markup around them survives: the
+         <br> in the h1, the <span class="dim"> that greys half a section
+         heading, the <span class="acc"> that carries the yellow. Wrapping
+         the headline as a string would have destroyed all three. */
+      function splitWords(root) {
+        var walk = d.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+        var nodes = [], n, i = 0;
+        while ((n = walk.nextNode())) nodes.push(n);
+        nodes.forEach(function (tn) {
+          if (!tn.nodeValue.trim()) return;
+          var frag = d.createDocumentFragment();
+          tn.nodeValue.split(/(\s+)/).forEach(function (part) {
+            if (!part) return;
+            if (!part.trim()) { frag.appendChild(d.createTextNode(part)); return; }
+            var w = d.createElement("span");
+            w.className = "w";
+            var inner = d.createElement("i");
+            inner.textContent = part;
+            inner.style.setProperty("--wi", i++);
+            w.appendChild(inner);
+            frag.appendChild(w);
+          });
+          tn.parentNode.replaceChild(frag, tn);
+        });
+        return i;
+      }
+
+      if (!reduced) {
+        /* Section headings ride a view() timeline - the reveal belongs to
+           the scroll, not to a timer the reader cannot feel. */
+        d.querySelectorAll(".band .sec-h").forEach(function (h) {
+          splitWords(h);
+          h.classList.add("wr");
+        });
+
+        /* THE HERO IS A SEQUENCE. A view() timeline cannot animate what is
+           already on screen at load - its entry range is behind us before
+           the first frame - so the stage runs on time instead, inside the
+           800-1600ms band with inner beats.
+
+           The hidden state is added HERE rather than in the stylesheet, so
+           a visitor whose JavaScript never arrives gets the finished
+           headline instead of an empty stage. */
+        var h1 = stage.querySelector(".display");
+        splitWords(h1);
+        h1.classList.add("hs");
+        stage.classList.add("hs");
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            h1.classList.add("go");
+            stage.classList.add("go");
+          });
+        });
+      }
+
+      /* ---- the cue retires once it has been obeyed ---- */
+      addEventListener("scroll", function () {
+        if (window.scrollY > 40) stage.classList.add("moved");
+      }, { passive: true, once: false });
+
+      /* ---- the rail reports the chapter you are in ----
+         The margins pick the section crossing the middle of the viewport,
+         so the readout changes when the READER changes chapter, not when a
+         boundary happens to touch the edge of the screen. An observer
+         reports crossings, not states, so the current chapter is held in a
+         set rather than inferred from the last event. */
+      var where = d.getElementById("navWhere");
+      var CHAPTERS = [
+        ["ai", "01", "Ask the AI"],
+        ["work", "02", "Selected work"],
+        ["score", "03", "Perfect score"],
+        ["services", "04", "What we do"],
+        ["studio", "05", "The studio"],
+        ["faq", "06", "Straight answers"],
+        ["proof", "07", "Proof"],
+        ["contact", "08", "Start a project"]
+      ];
+      var here = new Set();
+      var chapIO = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (e.isIntersecting) here.add(e.target.id); else here.delete(e.target.id);
+        });
+        var hit = CHAPTERS.filter(function (c) { return here.has(c[0]); })[0];
+        if (!hit) { where.classList.remove("on"); return; }
+        var txt = hit[1] + " \u2014 " + hit[2];
+        if (where.dataset.now === txt) { where.classList.add("on"); return; }
+        where.dataset.now = txt;
+        where.classList.remove("on");
+        setTimeout(function () {
+          where.innerHTML = "<b>(" + hit[1] + ")</b> " + hit[2];
+          where.classList.add("on");
+        }, 200);
+      }, { rootMargin: "-45% 0px -45% 0px" });
+      CHAPTERS.forEach(function (c) {
+        var el = d.getElementById(c[0]);
+        if (el) chapIO.observe(el);
+      });
+
+    })();
+  </script>
 </body>
 
 </html>
