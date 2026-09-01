@@ -1,6 +1,8 @@
 # Uebergabe — Stand 2026-09-01 (spaeter Abend)
 
-**Alles auf `main`, aber NICHT gepusht: 15 Commits liegen lokal.**
+**Alles auf `main`, NICHTS gepusht.** Die genaue Zahl steht in
+`git status -sb` — eine Zahl in dieser Datei ist ab dem naechsten
+Commit falsch, und das ist sie hier schon zweimal gewesen.
 Arbeitsbaum sauber. Vercel zeigt noch den Stand von heute Mittag.
 
 ## Fuer eine frische Session: START HIER
@@ -47,7 +49,7 @@ Startseite gemacht, und danach kam eine Runde Owner-Korrekturen, die gegen
    inline und ist damit eine Dublette zu `v3.css` — es rendert inzwischen
    ANDERS als die echte Startseite und wird nur noch verwirren. Entweder auf
    `v3.css` umstellen oder loeschen. **Owner-Entscheidung, noch offen.**
-2. **Pushen.** 15 Commits liegen lokal.
+2. **Pushen.** `git status -sb` sagt, wie viele.
 3. **Inhalte** — drei freigegebene Kundenzitate, zwei Work-Cases, echte
    Portraits. Groesste Luecke vor dem Livegang, nichts davon darf erfunden
    werden.
