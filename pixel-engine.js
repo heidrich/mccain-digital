@@ -2906,7 +2906,7 @@
            from a 256-entry table indexed by the truncated byte, which reads
            a shade dark and so scales a shade too little: measured 4.34:1
            against a 4.6 target. The margin is what covers that. */
-        need = parseFloat(cs.fontSize) >= 24 ? 3.35 : 4.95;
+        need = parseFloat(cs.fontSize) >= 24 ? 3.5 : 5.4;
         ceil = (lf + 0.05) / need - 0.05;
         if (ceil <= 0.002) continue;             // dark type: not this effect's problem
         rects.push([(b.left - hr.left) / CELL, (b.top - hr.top) / CELL,
@@ -2914,15 +2914,21 @@
       }
       if (!rects.length) return;
       quiet = new Float32Array(cols * rows);
-      var x, y, j, r, dxq, dyq, dq, m, t;
+      var x, y, xc, yc, j, r, dxq, dyq, dq, m, t;
       for (y = 0; y < rows; y++) {
+        yc = y + 0.5;
         for (x = 0; x < cols; x++) {
+          xc = x + 0.5;
           m = 1;
           for (j = 0; j < rects.length; j++) {
             r = rects[j];
-            // distance OUTSIDE the rectangle; 0 anywhere inside it
-            dxq = r[0] - x > 0 ? r[0] - x : (x - r[2] > 0 ? x - r[2] : 0);
-            dyq = r[1] - y > 0 ? r[1] - y : (y - r[3] > 0 ? y - r[3] : 0);
+            /* distance OUTSIDE the rectangle from the cell's CENTRE, which is
+               the rasterisation rule - measuring from the cell's index put
+               the whole grid half a cell out, and once the hole shrank to the
+               images' size that half cell was a sixth of the ramp: the kicker
+               read 3.38:1 while its own ceiling said 5.4. */
+            dxq = r[0] - xc > 0 ? r[0] - xc : (xc - r[2] > 0 ? xc - r[2] : 0);
+            dyq = r[1] - yc > 0 ? r[1] - yc : (yc - r[3] > 0 ? yc - r[3] : 0);
             dq = Math.sqrt(dxq * dxq + dyq * dyq);
             if (dq < soft) {
               t = r[4] + (1 - r[4]) * dsmooth(0, soft, dq);
