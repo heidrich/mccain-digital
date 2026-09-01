@@ -1970,6 +1970,19 @@
     // Deliberately NOT gated on hover support — touch devices get the reveal,
     // they just never get the black hole.
     var ASSEMBLE = 900, STAGGER = 500;
+    /* THE SWARM IS OPTIONAL, and it is the one part of this effect whose cost
+       is the whole picture. Every other frame the mosaic draws is either a
+       single blit of `home` or the handful of cells inside the hole's radius;
+       the swarm walks all of them and pays a fillStyle and a fillRect for each
+       one, sixty times a second. On a 1512x850 header at a 5px stride that is
+       51,510 of each per frame, and the entrance measured p95 100ms.
+
+       Opting out does not remove the reveal - it keeps its second half. The
+       picture arrives AS the mosaic and resolves into the photo over FADE,
+       which is the same dissolve the hover uses. A card wants the swarm: the
+       card is a picture you look at. A full-bleed header is the ground behind
+       a headline that is running its own entrance over the same 1.4s. */
+    var SWARM = opts.swarm !== false;
     var revealState = "idle";            // idle | assembling | done
     var aRaf = null, aT0 = 0;
 
@@ -2047,7 +2060,7 @@
           };
         }
       }
-      buildHome();
+      buildHome(off);
       // the sharp photo at device resolution — the opaque floor under the
       // dissolve, and what the crater shows through while the mosaic fades in
       photoCv = document.createElement("canvas");
@@ -2100,14 +2113,30 @@
       mix = mixFrom + (mixTo - mixFrom) * ease(t);
     }
 
-    // The mosaic at rest is a still picture, so it is drawn ONCE here and
-    // blitted per frame. Blocks tile exactly (every caller passes size === gap),
-    // so draw order carries no meaning.
-    function buildHome() {
+    /* The mosaic at rest is a still picture, so it is drawn ONCE here and
+       blitted per frame.
+
+       `grid` is the COLS x ROWS canvas build() already sampled the colours
+       from - one texel per cell. When the blocks tile (size === gap, which is
+       what every caller passes) the mosaic IS that canvas scaled up with
+       smoothing off: destination pixel x belongs to texel floor(x / GAP),
+       which is exactly the span fillRect(col*GAP, .., GAP, GAP) covers. So the
+       whole picture is one drawImage instead of one fillStyle and one fillRect
+       per cell - 51,510 of each on a 1512x850 header at a 5px stride, which
+       measured ~200ms of blocked main thread on its own.
+
+       The loop stays for the case the shortcut cannot express: blocks smaller
+       than the grid leave gaps that an upscale would fill in. */
+    function buildHome(grid) {
       home = document.createElement("canvas");
       home.width = cv.width; home.height = cv.height;
       var hc = home.getContext("2d");
       hc.setTransform(DPR, 0, 0, DPR, 0, 0);
+      if (grid && SIZE === GAP) {
+        hc.imageSmoothingEnabled = false;
+        hc.drawImage(grid, 0, 0, COLS * GAP, ROWS * GAP);
+        return;
+      }
       for (var k = 0; k < parts.length; k++) {
         var p = parts[k];
         hc.fillStyle = p.col;
@@ -2195,6 +2224,16 @@
         return;
       }
       if (!parts && !build()) return;            // tainted or too small → stay crisp
+
+      /* No swarm: skip straight to the settle. Every particle is already on
+         its home pixel from build(), so this is the mosaic at rest - shown,
+         then dissolved back into the sharp photo. */
+      if (!SWARM) {
+        showMosaic();
+        settleHome();
+        return;
+      }
+
       for (var k = 0; k < parts.length; k++) {
         var p = parts[k];
         p.sx = p.tx + (Math.random() - 0.5) * W * 0.5;

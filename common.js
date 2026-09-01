@@ -438,13 +438,23 @@
        tracked when it is over the headline - the copy sits above the canvas
        and would otherwise swallow every move.
 
-       AND A COARSER GRID THAN THE CARDS USE, because the particle count is
-       an AREA: at the cards' 4px stride a full-bleed header is 57,600
-       particles against a card's 13,900, and the entrance cost 14 long tasks
-       and a 117ms frame. 10px puts the count back where the cards are, and
-       on a background that is not a loss - it is a coarser mosaic, which is
-       what a ground should be next to type. */
-    { card: ".stage", box: ".stage-shot .shot-img", o: { gap: 10, size: 10, radius: 70, force: 2.8 } }
+       A 5px STRIDE AND NO SWARM. The owner asked for the pixels halved, and
+       the count is an AREA: 10 -> 5 is 12,920 particles -> 51,510 on a
+       1512x850 header. Measured with the mosaic's own frames separated from
+       the rest of the page, all of that cost sits in ONE place - the entrance
+       swarm, which walks every particle every frame:
+
+                              assemble p95   long tasks   blocked
+           gap 10                  34 ms          5         693 ms
+           gap 5, swarm on        100 ms         18        1386 ms
+           gap 5, swarm off        17 ms          4         500 ms
+
+       At rest the mosaic is a single blit and the black hole only touches the
+       cells inside its radius, so neither cares how fine the grid is. The
+       hero therefore takes the fine grid and gives up the swarm; it keeps the
+       dissolve that follows it, which is the half that reads as the picture
+       resolving rather than as confetti behind the headline. */
+    { card: ".stage", box: ".stage-shot .shot-img", o: { gap: 5, size: 5, radius: 70, force: 2.8, swarm: false } }
   ];
 
   function bootPixels() {

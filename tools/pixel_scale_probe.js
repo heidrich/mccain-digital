@@ -15,7 +15,13 @@
   const boxes = [
     [".case", ".case-img"],
     [".pcard", ".px-img"],
-    [".shot", ".shot-img"]
+    [".shot", ".shot-img"],
+    /* The hero, which is now the largest mosaic on the site and was outside
+       this guard entirely: its figure is `.stage-shot`, not `.shot`, so the
+       row above never matched it. It is also the one that builds its resting
+       picture by upscaling the sample grid instead of laying 51,510 blocks -
+       exactly the kind of shortcut this tool exists to catch. */
+    [".stage-shot", ".shot-img"]
   ];
   for (const [cardSel, boxSel] of boxes) {
     for (const card of document.querySelectorAll(cardSel)) {
