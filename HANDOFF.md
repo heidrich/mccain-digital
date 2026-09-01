@@ -1,6 +1,6 @@
-# Uebergabe — Stand 2026-09-01 (Abend)
+# Uebergabe — Stand 2026-09-01 (spaeter Abend)
 
-**Alles auf `main`, aber NICHT gepusht: 9 Commits liegen lokal.**
+**Alles auf `main`, aber NICHT gepusht: 14 Commits liegen lokal.**
 Arbeitsbaum sauber. Vercel zeigt noch den Stand von heute Mittag.
 
 ## Fuer eine frische Session: START HIER
@@ -10,57 +10,114 @@ Entwurf — nicht mehr `preview/refresh.html`. Wer den Dev-Server unter
 `http://127.0.0.1:8898/` aufmacht, sieht die neue Startseite.
 
 **Was heute passiert ist, in einem Satz:** die drei uebrigen Service-Seiten
-sind auf das System umgestellt, und danach wurde der Entwurf zur echten
-Startseite gemacht — mit rund fuenfzehn Korrekturen des Owners, die alle in
-den Commit-Messages einzeln begruendet sind.
+sind auf das System umgestellt, danach wurde der Entwurf zur echten
+Startseite gemacht, und danach kam eine Runde Owner-Korrekturen, die gegen
+**das live laufende Original auf mccain-digital.com** gelesen wurden.
 
 ### Der Stand der Startseite
 
-- **Hero**: full width, zweizeilige Plakatzeile, kein Bild im Layout. Der
-  Hintergrund ist ein **Pixelmosaik** von `img/circuit-macro-1200.webp`,
-  gefahren von `PixelFX.image` — also demselben Aufruf wie die Work-Karten.
-  Das schwarze Loch folgt der Maus und zerstoert echte Partikel.
+- **Hero**: full width, zweizeilige Plakatzeile. Der Hintergrund ist ein
+  **Pixelmosaik** von `img/circuit-macro-1200.webp`, gefahren von
+  `PixelFX.image` — also demselben Aufruf wie die Work-Karten. Das schwarze
+  Loch folgt der Maus und zerstoert echte Partikel. Die Stage beginnt bei
+  y=0 und endet bei `100svh`; ihr Inhalt haelt `--nav` Abstand zur Leiste.
 - **Kopfleiste**: oben transparent mit weisser Schrift, ab 8px Scroll faehrt
-  die Platte ein. Keine Haarlinie mehr — Pac-Man ist die Trennung. Alle
-  Bedienelemente 38px. Der CTA traegt den Verlauf statt Gelb, die
-  Status-Pille traegt ihn als wandernde Kante.
-- **Logo**: `favicon.svg` (die echte md-Marke) in der Leiste, auf allen
-  fuenf Seiten, die vorher die erfundene 7x7-Marke hatten.
+  die Platte ein. Keine Haarlinie — Pac-Man ist die Trennung. Alle
+  Bedienelemente 38px, nichts umbricht. Der CTA traegt den Verlauf statt
+  Gelb. Die **Status-Pille** traegt ihn als wandernde Kante — gebaut wie der
+  Rahmen der Konsole (geclipptes Verlaufsblatt + deckende Innenflaeche,
+  1.5px), **nicht** mit `mask-composite`, das Kurven treppt. Beim Scrollen
+  raeumt die Pille ihren Platz fuer die Kapitel-Anzeige; unter 480px verlaesst
+  der CTA die Leiste.
+- **Logo**: die Wortmarke des Originals und nur sie — **kein Icon**. Zwei
+  Woerter, `mccain` in 800/Papier, `digital` in 600/Logo-Gelb, Grundlinie,
+  .3em Wortabstand. Das Original sagt es in seinem eigenen Stylesheet:
+  `/* clean typographic wordmark - no icon */`.
+- **Favicon**: zerfaellt bei Tab-Wechsel in lose Pixel, Titel wird
+  „we'll be here. — mccain digital". Aus dem Original uebernommen, aber es
+  wirft die Pixel des ECHTEN `favicon.svg` statt die Glyphen neu zu setzen.
 - **(05)**: dunkles Band, Akzentschrift im vollen Spektrum der Konsole.
-- **Fusszeile**: die aus dem Entwurf, Wortmarke einzeilig via `15cqi`.
-- **Keine Fuehrungsschienen** mehr auf der Startseite (Owner-Entscheidung);
-  die Service-Seiten behalten ihre.
+- **Fusszeile**: full width wie die Leiste, Wortmarke einzeilig via `15cqi`.
+- **Keine Fuehrungsschienen** auf der Startseite; die Service-Seiten behalten
+  ihre.
 
 ### Was als naechstes dran ist
 
 1. **`preview/refresh.html` aufraeumen.** Es hat sein altes `<style>` noch
    inline und ist damit eine Dublette zu `v3.css` — es rendert inzwischen
    ANDERS als die echte Startseite und wird nur noch verwirren. Entweder auf
-   `v3.css` umstellen oder loeschen.
-2. **Pushen.** 9 Commits liegen lokal. Vorher CHANGELOG.md nachziehen.
+   `v3.css` umstellen oder loeschen. **Owner-Entscheidung, noch offen.**
+2. **Pushen.** 14 Commits liegen lokal.
 3. **Inhalte** — drei freigegebene Kundenzitate, zwei Work-Cases, echte
    Portraits. Groesste Luecke vor dem Livegang, nichts davon darf erfunden
    werden.
 4. **`ANTHROPIC_API_KEY`** setzt der Owner selbst in Vercel Production, plus
    Spend-Limit; danach `AI_MODE` in `v3.js` auf `"live"`.
 5. **Beim Livegang:** `noindex` raus, `preview/` aus dem Deployment. Der
-   Owner zieht gerade **mccain-digital.com auf Vercel** um.
+   Owner zieht gerade **mccain-digital.com auf Vercel** um — dort laeuft
+   aktuell noch die alte Einzeldatei-Version, und die ist die Referenz fuer
+   „das Original".
+
+### CHANGELOG.md reist nicht mit
+
+`CHANGELOG.md` steht in `.gitignore`, unter der Ueberschrift „internal — kept
+on disk for development, never part of the public site", seit dem ersten
+oeffentlichen Release. Er wird gepflegt und ist aktuell, aber ein `git push`
+nimmt ihn nicht mit. Wer das aendern will, aendert eine Zeile in `.gitignore`
+— und macht damit interne Notizen in einem oeffentlichen Repo sichtbar. Das
+ist eine Owner-Entscheidung, keine Aufraeumarbeit.
 
 ### Vor jeder Aenderung, ohne Ausnahme
 
 ```
 python prodserve.py 8898 --dev     # die Waechter brauchen den Server
-bash tools/sweep.sh 1440 900       # und nochmal mit 390 844
+bash tools/sweep.sh 1090 614       # und 390 844, 1512 850, 1920 1080
 bash tools/accent_audit.sh
 ```
 
-`tools/stage_probe.js` ist neu: misst den Kontrast jedes Textblocks im Hero
-gegen die GELIEFERTEN Pixel des Feldes. Per `agent-browser eval -b` mit
+**1090x614 gehoert ab jetzt in jede Messreihe.** Das ist ein 1920x1080-Schirm
+bei 175% Windows-Skalierung — ein echtes Geraet, auf dem der Owner liest, und
+das Fenster, auf dem der Hero heute zerbrochen ist.
+
+`tools/stage_probe.js` misst den Kontrast jedes Textblocks im Hero gegen die
+GELIEFERTEN Pixel. Es liest jetzt die Ebene, die tatsaechlich sichtbar ist
+(Mosaik oder Foto), bildet ueber das Rechteck DIESER Ebene ab und rechnet den
+CSS-Filter heraus, durch den man sie sieht. Per `agent-browser eval -b` mit
 base64 einspeisen, so wie `sweep.sh` es mit `probe.js` macht.
 
-### Die neun Commits von heute
+### Was diese Runde gekostet hat, und was daraus zu lernen ist
+
+- **Ein Waechter, der auf einen umbenannten Selektor zeigt, meldet nichts.**
+  `stage_probe.js` suchte `.dither-l` — ein Canvas, das der Hero seit dem
+  Mosaik nicht mehr hat — und antwortete `no field canvas` statt einer Zahl.
+  Dahinter lag ein echter Fehler: `--muted` auf der Stage mass 4,46:1 gegen
+  den hellsten ausgelieferten Pixel unter dem Intro. Dieselbe Form ein
+  zweites Mal am selben Tag: `.rail .nav-where` in `v3.css`, nach dem Merger
+  auf nichts mehr gerichtet. **Nach jedem Umbenennen nach dem ALTEN Namen
+  grepen.**
+- **Ein negatives Margin gegen eine `fixed` Leiste kompensiert nichts.**
+  `.stage` hatte `margin-top: -var(--nav)` UND `padding-top: var(--nav)`.
+  Die Leiste nimmt im Fluss keinen Platz, also hoben sich beide auf: der Text
+  sass hinter der Leiste, die Box endete 68px ueber der Falzkante. Auf einem
+  hohen Fenster hat `align-content: center` das verdeckt. **Layout auch auf
+  dem KURZEN Viewport messen.**
+- **`mask-composite` treppt Kurven.** Es verrechnet zwei einzeln geglaettete
+  Masken per XOR. Der Nachbar im selben Stylesheet — der Rahmen der Konsole,
+  den der Owner mag — loest dasselbe Problem ohne Maske. Zum zweiten Mal in
+  zwei Tagen war die Antwort: **die Mechanik von nebenan nehmen, nicht eine
+  zweite bauen, die so aussieht.**
+- **Das Original ist die Quelle, nicht mein Gedaechtnis.** Die Logo-Frage war
+  drei Anlaeufe lang offen und stand die ganze Zeit als Kommentar im
+  Stylesheet der laufenden Seite.
+
+### Die vierzehn Commits von heute
 
 ```
+c58f21b  fix(css): wordmark type, pill edge, footer width, hero on a short screen
+9805d8d  fix(logo): the wordmark has no icon, and never had one
+b463ff4  feat(runtime): the favicon dissolves when the tab goes away
+f5428d1  fix(tools): the hero's contrast guard was reading a canvas that is gone
+b80b57f  docs: the handover, written for the session after the merge
 988ae66  feat(nav): the bar goes transparent over a stage, one height
 57d9d6e  perf(hero): the mosaic costs what a card costs, bar drops hairline
 27c82c1  fix(home): the real logo, the spectrum back, no rails, one-line mark
@@ -68,43 +125,19 @@ base64 einspeisen, so wie `sweep.sh` es mit `probe.js` macht.
 439997e  feat(studio): (05) takes the console's gradient as its text colour
 2fb2b00  fix(field): the protection map reads cell CENTRES
 c461b51  fix(stage): the hole is the images' hole
-41c0efe  feat(stage): the void follows the hand (spaeter verworfen)
+41c0efe  feat(stage): the void follows the hand
 65b53a3  feat(system): the other three service pages join the system
 ```
 
-### Was heute am meisten gekostet hat — bitte nicht nochmal
+### Gemessen am Ende dieser Runde
 
-- **Ich habe das schwarze Loch NACHGEBAUT statt es zu benutzen.** Drei
-  Anlaeufe auf dem Dither-Feld, ~275 Zeilen, und es konnte nie Pixel
-  zerstoeren, weil ein Raster keine Partikel hat. Die Engine hatte die
-  Mechanik zweimal (`pixelImage`, `headline`). Owner: „das ist doch EXAKT
-  das gleiche wie bei den bildern, warum kannst du das nicht einfach
-  kopieren". **Erst suchen, ob es das schon gibt.**
-- **Eine Teilstring-Pruefung ist keine Selektor-Pruefung.** Beim CSS-Merge
-  galt `.stage` als vorhanden, weil `.hero--stage` den Text enthaelt — jede
-  Buehnenregel flog raus, `min-height:100svh` mit ihr, und der Kopf war
-  780px statt einer Bildschirmhoehe. Regel-KOEPFE matchen.
-- **Zweimal verdrahtet ist unsichtbar kaputt.** Die Hero-Figur trug `shot`
-  UND `stage-shot` und traf zwei `IMG_TARGETS`: zwei Mosaike, das zweite
-  gewinnt, das erste haelt Handler und rAF am Leben. Dasselbe war beim
-  Dither-Feld passiert (zweites Canvas trifft `.dither-l ~ *`, landet im
-  FLUSS, schiebt die Seite 900px runter). Beide Funktionen verweigern jetzt
-  den zweiten Anlauf.
-- **Ein Token ist auf einen Grund geeicht.** `--acc-text` in `.score:hover b`
-  war fuer den Grund des BANDES gewaehlt — beim Hover malt die Pille ihren
-  eigenen fast schwarzen Grund, und das abgedunkelte Gelb wurde zum braunen
-  Fleck. Sobald ein Element seinen eigenen Untergrund mitbringt, ist das
-  Token des Untergrunds falsch.
-- **Global gesetzte Transparenz laesst den Kopf verschwinden.** Der Balken
-  ist in BEIDEN Themes dunkel; transparent ueber einer Papier-Seite ist
-  weiss auf weiss (1:1 auf legal/contact/404). Auf Seiten mit Buehne
-  begrenzen.
-- **Und viermal war die SONDE der Fehler**, nicht die Seite: nach aussen
-  gerundete Boxen lesen eine Zelle neben dem Element; der Pixel-Button malt
-  sein Label aufs Canvas und laesst `color` transparent (las sich als
-  Schwarz auf Schwarz, 1,05:1); die Schutzkarte rechnete mit Zell-Indizes
-  statt Zell-Mittelpunkten. **Bevor man der Seite misstraut, dem Messgeraet
-  misstrauen.**
+- Jeder Textkasten im Hero 4,65–13,70:1 gegen den hellsten ausgelieferten
+  Pixel unter ihm, bei 1090x614 und 1512x850.
+- Akzentschrift besteht auf allen 11 Seiten in beiden Themes (die Wortmarke
+  ist per Entscheidung ausgenommen, WCAG 1.4.3).
+- 11 Seiten: keine Page-Errors, keine Konsolenfehler, kein horizontaler
+  Ueberlauf bei 390, 1090, 1512, 1920.
+- Der Hero fuellt bei 1090x614 und 1512x850 exakt einen Bildschirm.
 
 ## DAS SYSTEM IST ÜBERNOMMEN — und eine Unterseite ist fertig
 
