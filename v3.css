@@ -20,6 +20,8 @@
 /* ---------- tokens ---------- */
 :root {
   --acc: #f5c518;
+  /* the wordmark's hover, from the original */
+  --acc-soft: #ffd23a;
   /* the logo yellow — never re-tint it */
   --acc-ink: #806400;
   /* the same gold, dark enough to READ on paper: 5.11:1 against --paper,
@@ -67,7 +69,12 @@
 
   /* fluid type — tuned so the long headline line spans the container
      (~8.7em of advance width); the vh cap keeps short windows sane */
-  --t-display: clamp(2.6rem, min(9.6vw, 26vh), 11rem);
+  /* Fluid on width, with a CEILING ON HEIGHT: at 1.8em for two lines, 18vh
+     per em keeps the billboard under a third of the screen. It changes
+     nothing at 1512x850 or 1090x614 - 9.6vw is the smaller number at both -
+     and catches the window that is wide and short, where a headline sized
+     off the width alone eats the whole hero. */
+  --t-display: clamp(2.6rem, min(9.6vw, 18vh), 11rem);
   /* section headings live in HALF-width columns on most bands — at 6.2vw
      they wrapped to three lines and broke across the viewport */
   --t-h2: clamp(2rem, 4.6vw, 4.2rem);
@@ -520,15 +527,25 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
   }
 }
 
+/* THE WORDMARK, as the original draws it: two words, no icon, the second
+   one LIGHTER than the first. Its own stylesheet says "clean typographic
+   wordmark - no icon", and I had put the app icon in front of it - the third
+   invention on the one element of a page that may not be invented. Baseline
+   alignment and a .3em word space are the original's too. */
 .logo {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .3em;
   font-weight: 800;
-  font-size: 1.06rem;
+  font-size: 1.16rem;
   letter-spacing: -.03em;
+  line-height: 1;
   white-space: nowrap
 }
 
 .logo i {
   font-style: normal;
+  font-weight: 600;
   /* The wordmark keeps the LOGO yellow on every background, on the owner's
      standing rule that it is never re-tinted — so this is the one accent
      that does not follow --acc-text. It measures 3.72:1 on the light nav,
@@ -4041,21 +4058,8 @@ html[data-theme="light"] .t-moon {
    The engine's shape standing still, as the identity. The pixel stops
    being something done TO the words and becomes the thing the studio
    signs with. Static SVG - an identity may not depend on a script. */
-.logo {
-  display: inline-flex;
-  align-items: center;
-  gap: .6rem
-}
-
-/* The mark is the app icon itself, so the bar, the tab and the phone's
-   home screen can never drift apart. */
-.mark {
-  width: 26px;
-  height: 26px;
-  flex: none;
-  border-radius: 6px;
-  display: block
-}
+/* .logo's box lives with the rest of the wordmark, near the top of this
+   file. The .mark rule went with the icon it sized. */
 
 /* ---------- THE STAGE ----------
    A full-bleed header with the dither field underneath it and the
@@ -4405,7 +4409,11 @@ html[data-theme="light"] .t-moon {
 .stage {
       position: relative;
       min-height: 100svh;
-      margin-top: calc(-1 * var(--nav));
+      /* NO negative top margin. The bar is fixed, so this box already starts
+         at the top of the screen and its background already runs underneath
+         it; the padding is only there to keep the WORDS out from under the
+         bar. A margin that lifted the box by the same amount cancelled that
+         and pushed the copy back under it. */
       padding-top: var(--nav);
       display: flex;
       flex-direction: column;
@@ -4413,7 +4421,15 @@ html[data-theme="light"] .t-moon {
       background: var(--ink);
       color: var(--ink-fg);
       --fg: var(--ink-fg);
-      --muted: #a3a3a0;
+      /* BRIGHTER THAN THE REST OF THE INK SURFACES, because this one's ground
+         is a photograph. Measured from the delivered pixels - the picture
+         through its filter, under both washes - the brightest spot inside the
+         intro's box is luminance .0432, and #a3a3a0 lands on 4.46:1 there:
+         under AA, and it had been under it since the stage was built. The
+         probe never said so because it was reading a canvas the hero no
+         longer has. 5.42:1 at #b4b4b1, still plainly subordinate to the
+         near-white headline. */
+      --muted: #b4b4b1;
       --line: rgba(242, 242, 239, .18);
       /* the rails sit ON the field here, so they need more than the .07
          that reads fine on flat ink */
@@ -4926,8 +4942,13 @@ html[data-theme="light"] .t-moon {
       text-decoration: none
     }
 
-/* the container the line is measured against */
+/* THE FOOTER IS CHROME, NOT CONTENT. The bar at the top of the page runs
+   edge to edge on every page; the block that closes it now does the same, so
+   the page is bracketed by two full-width rules with the contained columns
+   between them. The wordmark is measured in cqi against this box, so it
+   still ends exactly on the right-hand gutter - it just has more box. */
 .foot>.wrap {
+      max-width: none;
       container-type: inline-size
     }
 
@@ -4965,9 +4986,11 @@ html[data-theme="light"] .t-moon {
         display: none
       }
 
-      /* the chapter readout needs room the 390px rail does not have - it was
-         printing straight through the Menu button */
-      .rail .nav-where {
+      /* the chapter readout needs room the 390px bar does not have - it was
+         printing straight through the Menu button. `.rail` here until now,
+         which the merge renamed to `.nav`: a guard aimed at an element that
+         no longer exists reads as protection and is none. */
+      .nav .nav-where {
         display: none
       }
 
@@ -5067,20 +5090,32 @@ html[data-theme="light"] .t-moon {
   isolation: isolate
 }
 
-.nav .nav-status::after {
+/* the sheet: the travelling spectrum, clipped by its own rounded box */
+.nav .nav-status::before {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: -2;
   border-radius: inherit;
-  padding: 1px;
   background: repeating-linear-gradient(var(--rim-angle), var(--wave-stops));
   background-size: var(--rim-shift) 100%;
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
   animation: wave-text var(--rim-cycle) linear infinite
+}
+
+/* the opaque inside, which is what leaves only the 1px of sheet showing.
+   Opaque and not a tint: anything see-through here lets the sheet colour the
+   middle of the pill, and the label has to stay readable over a photograph. */
+.nav .nav-status::after {
+  content: "";
+  position: absolute;
+  /* 1.5px, the console's own edge. A 1px ring lands on a fraction of a
+     device pixel on a scaled display - which is where the owner reads this
+     page - and a thin line whose colour changes along its length shows that
+     as grain. Half a pixel more gives the rasteriser something to work with. */
+  inset: 1.5px;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--ink)
 }
 
 /* the ring it used to draw for itself would now sit under the spectrum */
@@ -5089,7 +5124,7 @@ html[data-theme="light"] .t-moon {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nav .nav-status::after {
+  .nav .nav-status::before {
     animation: none
   }
 }
@@ -5120,5 +5155,72 @@ html[data-theme="light"] .t-moon {
 @media (prefers-reduced-motion: reduce) {
   .nav .btn {
     animation: none
+  }
+}
+
+/* the second word lifts on hover, as it does on the original */
+.logo:hover i {
+  color: var(--acc-soft)
+}
+
+/* ============================================================
+   SHORT SCREENS — the rhythm follows the height too
+
+   A 1090x614 desktop window has a laptop's width and a phone's height, and
+   every vertical measure on the stage was sized off the width. Measured
+   there, the hero needed 98% of the screen; at 1512x850 the same layout
+   needs 87%. So on a short window the stage's own spacing switches to vh and
+   the hero gets its air back. The TYPE is untouched - the owner approved
+   that scale, and it is not what was wrong.
+   ============================================================ */
+@media (max-height: 780px) {
+  .stage-body {
+    padding-block: clamp(1rem, 3.2vh, 4rem);
+    gap: clamp(1rem, 4.4vh, 2.6rem)
+  }
+
+  .hero {
+    padding-top: calc(var(--nav) + 2vh);
+    padding-bottom: 2rem
+  }
+}
+
+/* ============================================================
+   ONE SLOT, TWO SPEAKERS
+
+   The status pill is what the bar says while you are still on the stage.
+   The chapter readout is what it says afterwards. Both at once is two
+   answers to one question, and at 1090 it was also literally two labels
+   printed through each other: "(03) PERFECT SCORE" ran into "Work".
+
+   The readout was hidden with opacity, which hides a thing and keeps its
+   space - so it was crowding the row even at the top of the page, where it
+   has nothing to say at all.
+   ============================================================ */
+.nav.stuck .nav-status:not(.nav-status--mini) {
+  display: none
+}
+
+.nav:not(.stuck) .nav-where {
+  display: none
+}
+
+/* A control that wraps is a control that no longer matches the row it was
+   measured into: "Start a project" broke over two lines at 1090 and took the
+   38px height with it. */
+.nav .btn,
+.nav .menu-t {
+  white-space: nowrap
+}
+
+/* On a phone the bar cannot hold four controls. Measured at 390: logo 121 +
+   Menu 80 + theme 38 + gaps leaves 78px, and "Start a project" needs 135 -
+   which is why it had been wrapping onto two lines and standing 51px tall in
+   a 68px bar. Nothing is lost by dropping it here: the same call is the
+   first item in the Menu, twice more above the fold, and once again in the
+   footer. Below 480 the bar's job is who we are and a way in. */
+@media (max-width: 480px) {
+  .nav .btn {
+    display: none
   }
 }
