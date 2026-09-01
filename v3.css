@@ -3435,16 +3435,43 @@ html[data-theme="light"] .t-moon {
    same generator the headlines used, so "the brand colour that moves" has one
    answer on this page and not two.
 
-   The sheet carries the palette twice and moves by exactly half its width, so
-   it lands on an identical picture and the loop has no visible moment. Only a
-   transform animates: the compositor moves a texture it already has.
+   Only a transform animates: the compositor moves a texture it already has.
+
+   THE LOOP. The first version carried the palette twice across a sheet twice
+   the width of its box and moved by half of that, on the reasoning that half a
+   sheet is one palette and therefore one period. Owner: "warum wird denn die
+   border animation zurueckgesetzt alle 5 sekunden, das sieht sehr unnatuerlich
+   und abgehakt aus".
+
+   The reasoning holds only for a HORIZONTAL gradient. An angled gradient is
+   laid along its gradient line, whose length is |W*sin T| + |H*cos T| - so the
+   height of the box is part of the period, while a horizontal move of dX only
+   advances the pattern by dX*sin T. Measured on the real console: one period
+   was 761px and the animation moved 588px, so every cycle jumped 173px, 23% of
+   a period. The orb jumped 31%.
+
+   So the period is stated instead of being left to fall out of the geometry.
+   repeating-linear-gradient repeats every --rim-period ALONG THE LINE, and the
+   sheet moves --rim-period / sin(angle) sideways, which is exactly that
+   distance along the line. It is now seamless at any box size - and every rim
+   on the page travels at the same speed, which the old version could not do
+   either: the console ran at 127px/s and the orb at 9px/s, because each was
+   scaled to its own box.
    ============================================================ */
 :root {
-  /* replaced at boot with the generated palette; this is only what shows if
-     the engine never answers, so it already has to look like the real thing */
-  --wave-stops: #f5c518, #8ada4a, #45cfae, #55a8f0, #a98cf0, #ef7fb4, #f5a24a, #f5c518,
-    #8ada4a, #45cfae, #55a8f0, #a98cf0, #ef7fb4, #f5a24a, #f5c518;
-  --rim-cycle: 6s
+  /* replaced at boot with the generated palette, laid out over --rim-period.
+     This fallback is what shows if the engine never answers, so it already has
+     to look like the real thing - positions included, or the repeat has no
+     length to repeat over. */
+  --wave-stops: #f5c518 0px, #a8d43a 40px, #4fcf8c 80px, #3fc9c2 120px, #4aa6ef 160px,
+    #7b86f0 200px, #a86ee8 240px, #d95fd0 280px, #ef5f9e 320px, #ef7a5f 360px,
+    #efa03a 400px, #f0b62a 440px, #f5c518 480px;
+  --rim-angle: 112deg;
+  --rim-period: 480px;
+  /* --rim-period / sin(--rim-angle); recomputed by common.js from the two
+     tokens above, so the angle stays the single place either is written */
+  --rim-shift: 518px;
+  --rim-cycle: 4s
 }
 
 /* Each rimmed thing sits in its own relative box, because the glow has to
@@ -3477,15 +3504,18 @@ html[data-theme="light"] .t-moon {
   pointer-events: none
 }
 
+/* Wide enough that the box stays covered for the whole shift, in both
+   directions - the gradient itself repeats forever, so this is only about the
+   element's own edges. */
 .rim-sheet::before,
 .rim-glow::before {
   content: "";
   position: absolute;
-  top: -60%;
-  left: 0;
-  width: 200%;
-  height: 220%;
-  background: linear-gradient(112deg, var(--wave-stops));
+  top: 0;
+  bottom: 0;
+  left: -40px;
+  right: calc(-1 * var(--rim-shift) - 40px);
+  background: repeating-linear-gradient(var(--rim-angle), var(--wave-stops));
   animation: rim-travel var(--rim-cycle) linear infinite;
   will-change: transform
 }
@@ -3497,7 +3527,7 @@ html[data-theme="light"] .t-moon {
 
 @keyframes rim-travel {
   to {
-    transform: translate3d(-50%, 0, 0)
+    transform: translate3d(calc(-1 * var(--rim-shift)), 0, 0)
   }
 }
 
@@ -3524,8 +3554,17 @@ html[data-theme="light"] .t-moon {
 }
 
 /* The console keeps its own layout and loses only its frame: the rim is the
-   frame now, and two borders 1.5px apart look like a mistake. */
-.rim-in>.console {
+   frame now, and two borders 1.5px apart look like a mistake.
+
+   DESCENDANT, not child. In section 01 the console is a direct child of
+   .rim-in; in the dock it sits one level deeper, inside .dock-slot. Written as
+   `.rim-in>.console` this rule reached only the first of the two, so the
+   docked console kept its 14px radius inside an 18.5px frame, its 1px inset
+   hairline 1.5px inside the travelling rim, and a second drop shadow - the
+   exact defect the comment above says the rule prevents. The rule it replaced
+   was a descendant selector, and turning it into a child selector was the
+   whole of the mistake. */
+.rim-in .console {
   border-radius: 0;
   box-shadow: none;
   background: transparent

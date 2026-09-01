@@ -410,6 +410,40 @@
 
     new ResizeObserver(() => { measure(); evaluate(); }).observe(section);
     evaluate();
+
+    /* The spacer's height is frozen at the moment the console leaves, and a
+       viewport change while it is away turns that number into a lie. Measured:
+       docked at 1440x1000, then shrunk to 1440x620, section 01 still claimed
+       926px while its real height had become 782px - so scrolling back up
+       collapsed it by 144px, far past the 24px band, and moved the very edge
+       the visitor was in the middle of crossing. Which is the exact defect the
+       spacer exists to prevent, let back in through the side door.
+
+       So the number is taken again: the console goes home for one measurement
+       and comes straight back. It is off screen the whole time a visitor can
+       be docked, so there is nothing to see - and the caret is put back
+       afterwards, because somebody may be typing in the dock while they resize
+       the window. */
+    let remeasure = null;
+    addEventListener("resize", () => {
+      if (!docked) return;
+      clearTimeout(remeasure);
+      remeasure = setTimeout(() => {
+        const typing = d.activeElement === input;
+        const caret = typing ? [input.selectionStart, input.selectionEnd] : null;
+        homeHold.hidden = false;
+        home.appendChild(consoleEl);
+        spacer.style.height = homeHold.offsetHeight + "px";
+        slot.appendChild(consoleEl);
+        homeHold.hidden = true;
+        if (caret) {
+          input.focus({ preventScroll: true });
+          input.setSelectionRange(caret[0], caret[1]);
+        }
+        measure();
+        evaluate();
+      }, 180);
+    }, { passive: true });
   })();
 
   /* ============================================================

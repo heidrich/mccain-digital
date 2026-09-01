@@ -84,10 +84,25 @@
      keeps this honest if --acc ever becomes theme-dependent. */
   function paintRimPalette() {
     if (!window.PixelFX || !PixelFX.wavePalette) return;
+    const cs = getComputedStyle(root);
+    const period = parseFloat(cs.getPropertyValue("--rim-period")) || 480;
+    const angle = parseFloat(cs.getPropertyValue("--rim-angle")) || 112;
     const pal = PixelFX.wavePalette("rainbow", PixelFX.tokenRGB(root, "--acc", "#f5c518"));
-    // twice across the sheet, so translating it by half its width lands on an
-    // identical picture and the loop has no visible moment
-    root.style.setProperty("--wave-stops", pal.concat(pal.slice(1)).join(","));
+
+    /* Positions, not just colours: the rim is a repeating-linear-gradient and
+       a repeat needs a length to repeat over. The palette starts and ends on
+       the same hue, so the joins between repeats are invisible. */
+    const step = period / (pal.length - 1);
+    root.style.setProperty("--wave-stops",
+      pal.map((c, i) => c + " " + (i * step).toFixed(2) + "px").join(","));
+
+    /* How far sideways one period is. A horizontal move of dX advances an
+       angled gradient by dX * sin(angle) ALONG ITS LINE, so the move that
+       covers exactly one period is period / sin(angle) - and getting this
+       wrong is what made the border visibly restart every cycle. Computed
+       here so the angle is written in exactly one place. */
+    root.style.setProperty("--rim-shift",
+      (period / Math.sin(angle * Math.PI / 180)).toFixed(2) + "px");
   }
   paintRimPalette();
 
