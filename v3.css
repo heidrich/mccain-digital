@@ -4854,20 +4854,16 @@ html[data-theme="light"] .t-moon {
       transform: scaleX(1)
     }
 
-.foot-mark {
-      transition: opacity var(--d-ui) linear
-    }
-
-.foot-mark:hover {
-      opacity: .82
-    }
-
 .foot-top {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 32rem);
       gap: clamp(2rem, 5vw, 4rem);
       align-items: start;
-      padding-bottom: clamp(2.5rem, 6vw, 4rem)
+      /* was clamp(2.5rem, 6vw, 4rem) - 64px at 1512, measured against a 209px
+         wordmark standing below it. With the wordmark gone that padding, the
+         bar's own margin and its padding stacked into 112px of nothing in a
+         409px footer. A removal makes its neighbours load-bearing. */
+      padding-bottom: clamp(1.4rem, 2.6vw, 2.2rem)
     }
 
 .foot-say {
@@ -4934,47 +4930,57 @@ html[data-theme="light"] .t-moon {
       color: var(--fg)
     }
 
-/* THE NAME, ONCE, AS THE LAST THING SEEN.
+/* THE NAME, ONCE, AT THE FOOT OF THE PAGE.
 
-   Owner: "mach sie kleiner, farben anpassen und one line."
+   It was 15cqi - a line measured to span the footer exactly, ~209px at 1512
+   and ~275px once the footer went full width. Owner: "entferne bitte das mega
+   grosse logo aus dem footer" / "und hau ein normales links rein". So it is
+   the masthead's `.logo`, unchanged, as the first item of the bottom bar -
+   not a third drawing of the same two words. The row it used to occupy is
+   gone with it, and so is the divider it carried; the bar keeps its own.
 
-   One line is not a hope here, it is arithmetic. "mccain digital" measures
-   6.269em wide at this weight and tracking - measured in the browser, not
-   guessed - so at 100/6.269 = 15.9 container-widths per em it fills the line
-   exactly. Round down to 15 for the margin every measurement deserves, and
-   it can no longer wrap at any width. The 240px clamp it had before wrapped
-   at every real width and then overlapped itself, its leading being .78.
-
-   The colours are the logo's own: the name in the foreground, the second
-   word in the logo yellow, exactly as the bar spells it. */
-.foot-mark {
-      display: block;
-      width: 100%;
-      font-size: 15cqi;
-      font-weight: 800;
-      letter-spacing: -.052em;
-      line-height: 1;
-      white-space: nowrap;
-      margin: 0;
-      padding-top: clamp(1.2rem, 3vw, 2rem);
-      border-top: 1px solid var(--line);
-      color: var(--fg);
-      text-decoration: none
-    }
-
-/* THE FOOTER IS CHROME, NOT CONTENT. The bar at the top of the page runs
-   edge to edge on every page; the block that closes it now does the same, so
-   the page is bracketed by two full-width rules with the contained columns
-   between them. The wordmark is measured in cqi against this box, so it
-   still ends exactly on the right-hand gutter - it just has more box. */
+   `.foot>.wrap` kept `container-type: inline-size` for the cqi measurement.
+   Nothing in the footer is measured in container units any more, so the
+   containment goes too - it is not free, and a property left behind after
+   the thing it served is what makes a stylesheet unreadable. `max-width:
+   none` stays: that is the full-width footer, a separate decision. */
 .foot>.wrap {
-      max-width: none;
-      container-type: inline-size
+      max-width: none
     }
 
-.foot-mark i {
-      font-style: normal;
-      color: var(--acc)
+/* The wordmark is a link inside .foot-bar and would otherwise grow the
+   bar's underline on hover - that animation belongs to the legal links,
+   not to the signature. */
+.foot-bar>.logo {
+      /* .foot-bar a sizes and colours every link in the row - --t-small and
+         --muted - and wins on specificity. That put the signature at 14px in
+         grey: fine print, not a signature. Back to the masthead's own size
+         and the surface's own foreground. */
+      font-size: 1.16rem;
+      color: var(--fg);
+      margin-right: .4rem
+    }
+
+/* THE ONE PLACE THE WORDMARK IS RE-TINTED, and it is worth saying why.
+
+   The standing rule is that the logo yellow is never touched - and it costs
+   nothing in the masthead, which is ink in BOTH themes, so #f5c518 always
+   sits on something dark. The footer is not: in light mode its ground is
+   #f2f2ef, where the same yellow measures 1.45:1. That is not a formal
+   failure (WCAG 1.4.3 exempts logotypes) and it is a real one - the second
+   word all but disappears.
+
+   --acc-text is exactly this distinction: it IS --acc on every ink surface,
+   so nothing changes in dark mode or in the bar, and it becomes the darkened
+   gold only on paper. The same call was already made one block up for
+   .foot-say .acc. Reverse it by writing --acc here if the yellow matters more
+   than reading it. */
+.foot-bar>.logo i {
+      color: var(--acc-text)
+    }
+
+.foot-bar>.logo::after {
+      content: none
     }
 
 .foot-bar {
@@ -4982,7 +4988,7 @@ html[data-theme="light"] .t-moon {
       flex-wrap: wrap;
       gap: .6rem 2rem;
       align-items: center;
-      margin-top: 1.8rem;
+      margin-top: 1.2rem;
       padding-top: 1.2rem;
       border-top: 1px solid var(--line-2)
     }
