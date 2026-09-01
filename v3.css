@@ -458,8 +458,12 @@ section {
   transition: background .3s
 }
 
-.nav::before,
-.nav::after {
+/* The bar used to arrive in two beats: a panel sliding down, then a hairline
+   drawing across from the left. The hairline is gone - Pac-Man runs along the
+   bottom edge of the bar and is already the line between the header and the
+   page. Two things doing one job means one of them is decoration, and the one
+   that also shows how far you have read is not the one to drop. */
+.nav::before {
   content: "";
   position: absolute;
   left: 0;
@@ -477,28 +481,16 @@ section {
   transition: opacity .28s linear, transform .28s var(--e-out)
 }
 
-.nav::after {
-  bottom: 0;
-  height: 1px;
-  background: var(--line);
-  transform: scaleX(0);
-  transform-origin: 0 50%;
-  transition: transform .52s var(--e-out) .1s
-}
 
 .nav.stuck::before {
   opacity: 1;
   transform: none
 }
 
-.nav.stuck::after {
-  transform: scaleX(1)
-}
 
 @media (prefers-reduced-motion: reduce) {
 
-  .nav::before,
-  .nav::after {
+  .nav::before {
     transition: none
   }
 }

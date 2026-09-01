@@ -436,8 +436,15 @@
 
        The card is the STAGE and not the picture, so the pointer is still
        tracked when it is over the headline - the copy sits above the canvas
-       and would otherwise swallow every move. */
-    { card: ".stage", box: ".stage-shot .shot-img", o: { gap: 5, size: 5, radius: 70, force: 2.8 } }
+       and would otherwise swallow every move.
+
+       AND A COARSER GRID THAN THE CARDS USE, because the particle count is
+       an AREA: at the cards' 4px stride a full-bleed header is 57,600
+       particles against a card's 13,900, and the entrance cost 14 long tasks
+       and a 117ms frame. 10px puts the count back where the cards are, and
+       on a background that is not a loss - it is a coarser mosaic, which is
+       what a ground should be next to type. */
+    { card: ".stage", box: ".stage-shot .shot-img", o: { gap: 10, size: 10, radius: 70, force: 2.8 } }
   ];
 
   function bootPixels() {
