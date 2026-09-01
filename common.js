@@ -49,6 +49,11 @@
   let pixelHosts = [];
   const themeBtn = d.getElementById("themeT");
 
+  /* Every page also applies this inline in <head>, before the stylesheet
+     resolves - that is what stops the dark flash AND stops a pixel headline
+     from rasterizing the outgoing theme's colour mid-transition. This stays as
+     the fallback for any page that ever ships without the snippet; assigning
+     the value it already has costs nothing and starts no transition. */
   try {
     const saved = localStorage.getItem("mcd-v3-theme");
     if (saved === "light" || saved === "dark") root.dataset.theme = saved;

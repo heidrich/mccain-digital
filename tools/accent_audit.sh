@@ -14,6 +14,12 @@
 # the logo yellow is never re-tinted, and WCAG 1.4.3 exempts logotypes. It
 # appears twice per page (nav + footer). Any OTHER failure is a real one.
 #
+# It also measures the PIXEL HEADLINES, by reading their canvases. Those are
+# not text by the time anyone sees them, and the colour on them is a travelling
+# gradient no stylesheet declares - this audit passed while the wave's
+# blue-violet sat at 2.64:1 on the near-black band, because everything else
+# here asks getComputedStyle and a canvas answers to nobody.
+#
 # Exits non-zero if anything but the wordmark fails.
 W=${1:-1440}
 H=${2:-900}
@@ -47,8 +53,8 @@ for p in $PAGES; do
 import sys, json
 d = json.loads(json.loads(sys.stdin.read()))
 real = [f for f in d['fails'] if f['sel'] != 'i']
-print('$p [$th] accent nodes %d, failing %d, excluding the wordmark %d'
-      % (d['accentTextNodes'], d['failing'], len(real)))
+print('$p [$th] accent nodes %d, pixel canvases %d (%d not settled), failing %d, excluding the wordmark %d'
+      % (d['accentTextNodes'], d['canvasesChecked'], d['canvasesSkipped'], d['failing'], len(real)))
 for f in real:
     print('   ', f['sel'], f['fg'], f['ratio'], '<', f['need'], '|', f['text'])
 print('REAL', len(real))

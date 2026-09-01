@@ -59,6 +59,53 @@
       ratio: +r.toFixed(2), need, pass: r >= need
     });
   });
-  const fails = out.filter(o => !o.pass);
-  return JSON.stringify({ accentTextNodes: out.length, failing: fails.length, fails: fails.slice(0, 12) }, null, 1);
+  /* The pixel headlines are not text any more by the time anyone reads them -
+     they are a canvas, and the colour on it is a travelling gradient the
+     stylesheet knows nothing about. This audit passed for a week while the
+     wave's deep blue-violet measured 2.64:1 on the near-black band, because
+     everything above reads getComputedStyle and the canvas answers to nobody.
+     A checker that reads only the declaration checks only the declaration. */
+  const canvasFails = [];
+  let canvasesChecked = 0, canvasesSkipped = 0;
+  document.querySelectorAll(".ph canvas").forEach((cv) => {
+    const host = cv.parentElement;
+    /* Only a settled field says anything about colour. In flight a sixth of
+       the cells carry the mustard flash, which on paper measures 1.5:1 - so an
+       audit that does not wait reports the animation and not the page. This
+       cost an hour of chasing a hero headline that was innocent. */
+    if (host.dataset.pxSettled !== "1") { canvasesSkipped++; return; }
+    let d;
+    try {
+      d = cv.getContext("2d", { willReadFrequently: true })
+        .getImageData(0, 0, cv.width, cv.height).data;
+    } catch (e) { canvasesSkipped++; return; }        // tainted, nothing to say
+    const bg = bgOf(host);
+    let worst = 99, wc = null, ink = 0;
+    for (let i = 0; i < d.length; i += 8) {
+      if (d[i + 3] < 250) continue;                    // only fully painted cells
+      ink++;
+      const r = ratio([d[i], d[i + 1], d[i + 2]], bg);
+      if (r < worst) { worst = r; wc = [d[i], d[i + 1], d[i + 2]]; }
+    }
+    // A headline that has not assembled yet has nothing to measure, and
+    // measuring it anyway is how a lab reports "20px cell, fully translucent".
+    if (ink < 200) { canvasesSkipped++; return; }
+    canvasesChecked++;
+    const cs = getComputedStyle(host);
+    const px = parseFloat(cs.fontSize), bold = parseInt(cs.fontWeight, 10) >= 700;
+    const need = (px >= 24 || (bold && px >= 18.66)) ? 3 : 4.5;
+    if (worst < need) {
+      canvasFails.push({
+        sel: "canvas.ph", text: (host.textContent || "").trim().slice(0, 30),
+        fg: "rgb(" + wc.map(Math.round).join(",") + ")", px: Math.round(px),
+        large: need === 3, ratio: +worst.toFixed(2), need, pass: false
+      });
+    }
+  });
+
+  const fails = out.filter(o => !o.pass).concat(canvasFails);
+  return JSON.stringify({
+    accentTextNodes: out.length, canvasesChecked, canvasesSkipped,
+    failing: fails.length, fails: fails.slice(0, 12)
+  }, null, 1);
 })()

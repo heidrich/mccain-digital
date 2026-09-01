@@ -9,6 +9,16 @@
 
 <head>
   <meta charset="utf-8">
+  <!-- The saved theme, applied BEFORE the stylesheet resolves.
+
+       Not only to stop the dark flash on a light-theme load. The pixel
+       headlines rasterize the real DOM text, and they read its colour through
+       getComputedStyle - so while the theme transition is still running, the
+       colour they read is the OLD one. The headline above the fold builds
+       first, catches the dark-theme white, and then sits on a paper background
+       at 1.03:1, which is invisible. Applying the theme here means there is no
+       transition on load and nothing to catch mid-flight. -->
+  <script>try{var t=localStorage.getItem("mcd-v3-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Terms — McCain Digital</title>
   <meta name="robots" content="noindex, nofollow">

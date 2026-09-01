@@ -114,26 +114,90 @@
       (l * 100).toFixed(0) + "%)";
   }
 
-  function wavePalette(style, accRGB) {
+  function hslToRgb(h, sat, l) {
+    var c = (1 - Math.abs(2 * l - 1)) * sat, hp = (h % 360) / 60;
+    var x = c * (1 - Math.abs(hp % 2 - 1)), m = l - c / 2, r = 0, g = 0, b = 0;
+    if (hp < 1) { r = c; g = x; }
+    else if (hp < 2) { r = x; g = c; }
+    else if (hp < 3) { g = c; b = x; }
+    else if (hp < 4) { g = x; b = c; }
+    else if (hp < 5) { r = x; b = c; }
+    else { r = c; b = x; }
+    return [(r + m) * 255, (g + m) * 255, (b + m) * 255];
+  }
+
+  /* WCAG relative luminance. The channels have to be LINEARISED first -
+     weighting the gamma-encoded bytes produces a number that looks like
+     luminance, ranks colours in roughly the right order, and is wrong by
+     enough to reverse a verdict. It told me the light theme was failing and
+     the dark one was fine; both were the other way round. */
+  function relLum(rgb) {
+    var o = 0, i, c;
+    var w = [0.2126, 0.7152, 0.0722];
+    for (i = 0; i < 3; i++) {
+      c = rgb[i] / 255;
+      o += w[i] * (c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+    }
+    return o;
+  }
+
+  function contrast(a, b) {
+    return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  }
+
+  /* Keep a stop's hue and move only its lightness until it clears the bar
+     against the ground it will be painted on.
+
+     A rainbow generated at the accent's own lightness is not uniformly
+     readable, because lightness is not luminance: at HSL 53% a yellow is far
+     brighter than a blue. On the near-black band the deep blue-violet measured
+     2.64:1 where large text needs 3:1 - the one colour in twelve that the eye
+     forgives and a contrast checker does not.
+
+     Lightness is the right dial: it keeps the hue, so the palette still reads
+     as the same wave, and it moves in the direction the ground demands - up on
+     a dark band, down on a light one. */
+  function legible(h, sat, l, groundLum, min) {
+    var up = groundLum < 0.18, i, rgb;
+    for (i = 0; i < 44; i++) {
+      rgb = hslToRgb(h, sat, l);
+      if (contrast(relLum(rgb), groundLum) >= min) break;
+      l += up ? 0.02 : -0.02;
+      if (l > 0.97 || l < 0.03) break;
+    }
+    return Math.min(0.97, Math.max(0.03, l));
+  }
+
+  function wavePalette(style, accRGB, groundRGB) {
     var hsl = rgbToHsl(accRGB || [245, 197, 24]);
     var h = hsl[0], sat = Math.max(0.55, hsl[1]), l = hsl[2];
-    var out = [], k;
+    var out = [], k, hue;
+    /* Comfortably over the 3:1 large-text bar rather than exactly on it. The
+       painted pixel is a point on a gradient BETWEEN two stops, so stops that
+       each just clear the bar can still draw a colour that does not: at 3.2
+       the worst drawn cell measured 3.15, which passes and has no room in it
+       for a rounding, a blend, or the next edit to this palette. */
+    var gl = groundRGB ? relLum(groundRGB) : 0.005, MIN = 3.5;
+    var keep = function (hh, ll) { return hslStr(hh, sat, legible(hh, sat, ll, gl, MIN)); };
 
     if (style === "sheen") {
       var swing = [l, Math.min(0.92, l + 0.28), l, Math.max(0.28, l - 0.16), l];
-      for (k = 0; k < swing.length; k++) out.push(hslStr(h, sat, swing[k]));
+      for (k = 0; k < swing.length; k++) out.push(keep(h, swing[k]));
       return out;
     }
     if (style === "rainbow") {
       // the full circle, ending back on the accent hue so the cycle has no seam
-      for (k = 0; k <= 12; k++) out.push(hslStr((h + 360 * k / 12) % 360, sat, l));
+      for (k = 0; k <= 12; k++) out.push(keep((h + 360 * k / 12) % 360, l));
       return out;
     }
     /* "hue": a sweep that starts and ends on the accent. Kept to +/-32 degrees
        because +/-55 from gold reaches green one way and red the other, which
        is not "near the brand" however the comment describes it. */
     var arc = [0, 18, 32, 18, 0, -18, -32, -18, 0];
-    for (k = 0; k < arc.length; k++) out.push(hslStr((h + arc[k] + 360) % 360, sat, l));
+    for (k = 0; k < arc.length; k++) {
+      hue = (h + arc[k] + 360) % 360;
+      out.push(keep(hue, l));
+    }
     return out;
   }
 
@@ -387,8 +451,15 @@
          rainbow  the full circle               — the animated-border look
 
        data-wave-colors still overrides everything with a literal list. */
+    /* Built once, not once per frame. It used to allocate thirteen strings
+       every frame for a list that only changes when the theme does - and
+       garbage per frame never stops. Cleared in markWaveParticles(), which is
+       exactly where a theme switch lands. */
+    var palCache = null;
     function paletteFor() {
-      return WAVE_COLS.length ? WAVE_COLS : wavePalette(WAVE_STYLE, accentRGB());
+      if (WAVE_COLS.length) return WAVE_COLS;
+      if (!palCache) palCache = wavePalette(WAVE_STYLE, accentRGB(), groundRGB());
+      return palCache;
     }
 
     function offscreen(w, h) {
@@ -434,12 +505,27 @@
     }
     function accentRGB() { return tokenRGB("--acc-text", ACC); }
 
+    /* The ground this mosaic is actually painted on: the first ancestor with
+       an opaque background. A band on paper and a band on ink need different
+       stops from the same palette, and asking the token would answer for the
+       page rather than for this headline. */
+    function groundRGB() {
+      var el = host, n;
+      while (el) {
+        n = (getComputedStyle(el).backgroundColor.match(/[\d.]+/g) || []).map(Number);
+        if (n.length >= 3 && (n[3] === undefined || n[3] > 0.99)) return n.slice(0, 3);
+        el = el.parentElement;
+      }
+      return [13, 12, 10];
+    }
+
     /* Decide ONCE which cells carry the wave, and record it on the particle
        so that every draw path asks the same question and gets the same
        answer. In "accent" mode only the non-base-coloured cells move, so a
        two-tone headline keeps its two tones and the wave reads as a
        highlight rather than as a repaint of the whole line. */
     function markWaveParticles() {
+      palCache = null;                       // the theme may have changed under us
       if (WAVE === "off") return;
       var acc = accentRGB(), i;
       for (i = 0; i < parts.length; i++) {
@@ -620,6 +706,13 @@
     function settle() {
       for (var i = 0; i < parts.length; i++) { var p = parts[i]; p.cx = p.tx; p.cy = p.ty; p.vx = 0; p.vy = 0; }
       drawStatic();
+      /* "the field has finished assembling and holds its real colours".
+         `assembling` cannot answer that - it stays on for good, because it is
+         what keeps the real text hidden behind the canvas. A measuring tool
+         needs a settle CONDITION and not a longer wait: mid-flight the field
+         carries the mustard flash on a sixth of its cells, which measures 1.5:1
+         on paper and turns every audit run into a false alarm. */
+      host.dataset.pxSettled = "1";
       interactive = true;
       cv.style.pointerEvents = "auto";
       restCv = null;          // the colours may have changed since the last build
@@ -752,6 +845,7 @@
       interactive = false; start = null; killPass(); zoomIn = false;
       cv.style.pointerEvents = "none"; cv.style.display = "block";
       host.classList.add("assembling");
+      delete host.dataset.pxSettled;
       var seq = ++buildSeq;
       build(function (ok) {
         if (seq !== buildSeq) return;          // superseded by a newer play
@@ -766,6 +860,7 @@
       cancelAnimationFrame(raf); cancelAnimationFrame(iraf); iraf = null;
       waveStop(); restCv = null;
       interactive = false; killPass(); zoomIn = false; host.classList.add("assembling");
+      delete host.dataset.pxSettled;
       var seq = ++buildSeq;
       build(function (ok) { if (seq === buildSeq && ok) settle(); });
     }
@@ -2470,7 +2565,7 @@
     image: pixelImage,
     /* the palette a given wave style generates, so a comparison page can show
        what actually runs rather than colours written out by hand */
-    wavePalette: function (style, accRGB) { return wavePalette(style, accRGB); },
+    wavePalette: function (style, accRGB, groundRGB) { return wavePalette(style, accRGB, groundRGB); },
     /* a drifting field of cells behind a band - see FIELD above */
     field: field,
     onVelocity: function (fn) { velSubs.push(fn); },
