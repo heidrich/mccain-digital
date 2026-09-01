@@ -2573,6 +2573,220 @@
     return { layers: made, destroy: function () { made.forEach(function (el) { el.remove(); }); } };
   }
 
+  /* ============================================================
+     DITHER - an ordered-dither field behind a band
+
+     Adapted from the MIT-licensed `dither-background` skill in
+     github.com/MengTo/Skills (agent-skills/web-design). The idea is theirs:
+     a near-black field of enlarged square pixels thresholded through a 4x4
+     Bayer matrix, shaped by fractal noise into broad cloud masses rather than
+     grain. It reads as material, not as decoration - which is why it is worth
+     borrowing for a page already built out of pixels.
+
+     TWO THINGS ARE OURS, and both matter.
+
+     1. Their loop calls fillRect once per cell per frame: at 1440x900 with a
+        7px cell that is ~26,000 fillRects, sixty times a second. That is the
+        exact shape of the work that took this page to 20fps once already. So
+        the field is written into an ImageData at CELL resolution - one byte
+        write per cell, not one draw call - and the canvas is then scaled up by
+        CSS with image-rendering: pixelated. The enlarged squares come from the
+        scaling, free, instead of from 26,000 rectangles.
+     2. A slow cloud does not need 60fps. It renders at ~12fps, which is four
+        times less work for a drift nobody can see move.
+
+     The palette is ours too: it climbs from --ink toward --fg and stops well
+     short of it, so body text keeps its contrast over the brightest cell.
+     ============================================================ */
+  var BAYER4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5]
+    .map(function (v) { return (v + 0.5) / 16; });
+
+  function dsmooth(a, b, v) {
+    var t = Math.max(0, Math.min(1, (v - a) / (b - a)));
+    return t * t * (3 - 2 * t);
+  }
+
+  function dnoise(x, y) {
+    var v = Math.sin(x * 127.1 + y * 311.7) * 43758.5453123;
+    return v - Math.floor(v);
+  }
+
+  function dvalue(x, y) {
+    var ix = Math.floor(x), iy = Math.floor(y);
+    var fx = x - ix, fy = y - iy;
+    var ux = fx * fx * (3 - 2 * fx), uy = fy * fy * (3 - 2 * fy);
+    return dnoise(ix, iy) * (1 - ux) * (1 - uy) +
+      dnoise(ix + 1, iy) * ux * (1 - uy) +
+      dnoise(ix, iy + 1) * (1 - ux) * uy +
+      dnoise(ix + 1, iy + 1) * ux * uy;
+  }
+
+  function dfbm(x, y) {
+    var v = 0, amp = 0.5, f = 1;
+    for (var i = 0; i < 4; i++) { v += dvalue(x * f, y * f) * amp; f *= 2.02; amp *= 0.5; }
+    return v;
+  }
+
+  /* A ramp from the band's own ink toward its own foreground, stopping at
+     `top` of the way there. Derived rather than written out, so the field is
+     the same material as the band in either theme.
+
+     And CAPPED so it cannot eat the text. The brightest cell is the worst
+     case every word on the band has to survive, and at the value that looked
+     right by eye the small print measured 3.58:1 where it needs 4.5. So the
+     top of the ramp is walked down until the dimmest text on the band clears
+     the bar - the effect is not allowed to decide that for itself. */
+  function ditherRamp(host, steps, top) {
+    var lo = tokenRGB(host, "--ink", "#0d0c0a");
+    var hi = tokenRGB(host, "--fg", "#f3f1e9");
+    var txt = relLum(tokenRGB(host, "--muted", "#8a8578"));
+    var mix = function (t) {
+      return [lo[0] + (hi[0] - lo[0]) * t, lo[1] + (hi[1] - lo[1]) * t, lo[2] + (hi[2] - lo[2]) * t];
+    };
+    while (top > 0.02 && contrast(relLum(mix(top)), txt) < 4.6) top -= 0.005;
+    var out = [], i, t;
+    for (i = 0; i < steps; i++) {
+      t = (i / (steps - 1)) * top;
+      out.push([
+        Math.round(lo[0] + (hi[0] - lo[0]) * t),
+        Math.round(lo[1] + (hi[1] - lo[1]) * t),
+        Math.round(lo[2] + (hi[2] - lo[2]) * t)
+      ]);
+    }
+    return out;
+  }
+
+  function dither(host, opts) {
+    if (!host) return null;
+    opts = opts || {};
+    var CELL = +(host.dataset.ditherCell || opts.cell || 7);
+    var TOP = opts.top === undefined ? 0.22 : opts.top;
+    var FPS = opts.fps || 12;
+    var pal = opts.palette || ditherRamp(host, 6, TOP);
+
+    var cv = document.createElement("canvas");
+    cv.className = "dither-l";
+    cv.setAttribute("aria-hidden", "true");
+    var ctx = cv.getContext("2d", { alpha: false });
+    if (!ctx) return null;
+    host.classList.add("has-field");
+    if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    host.insertBefore(cv, host.firstChild);
+
+    /* ---------- why this is a ring of columns ----------
+
+       The first version recomputed the whole field every rendered frame. The
+       drawing was cheap by then - one ImageData byte per cell, not a fillRect
+       - but that was the wrong half: the cost is the NOISE. Four octaves of
+       value noise is sixteen sines per cell, and at a 3px cell that is two
+       million sines a frame. Measured: 68 long tasks and 4 seconds of blocked
+       main thread over one scroll.
+
+       So the cloud is not recomputed, it SCROLLS. The field lives in a ring of
+       columns; each tick computes exactly one new column - rows noise
+       evaluations instead of cols x rows - and the read window advances by
+       one. The cloud keeps evolving forever and never repeats, because the
+       noise coordinate simply keeps going. What is left per frame is one
+       array read and four byte writes per cell, which is arithmetic.
+
+       The vignette is a property of the FRAME, not of the cloud, so it is
+       computed once at each size and stays put while the cloud drifts
+       through it. */
+    var cols = 0, rows = 0, img = null, ring = null, vign = null;
+    var head = 0, seedX = 0, raf = null, last = -1e9, onScreen = true;
+
+    function column(nx, out, at) {
+      var y, ny, wave, cloud;
+      for (y = 0; y < rows; y++) {
+        ny = (y / rows - 0.5) * 2;
+        wave = Math.sin(nx * 1.1 + ny * 1.2) * 0.16 + Math.sin(nx * -0.6 + ny * 3.2) * 0.12;
+        cloud = dfbm(nx * 0.55, ny * 0.55);
+        out[at + y] = dsmooth(0.52, 1.02, cloud + wave);
+      }
+    }
+
+    function size() {
+      var r = host.getBoundingClientRect();
+      cols = Math.max(1, Math.ceil(r.width / CELL));
+      rows = Math.max(1, Math.ceil(r.height / CELL));
+      // one backing pixel per cell; CSS blows it up by exactly CELL, so the
+      // squares land on whole pixels and stay hard-edged
+      cv.width = cols; cv.height = rows;
+      cv.style.width = (cols * CELL) + "px";
+      cv.style.height = (rows * CELL) + "px";
+      img = ctx.createImageData(cols, rows);
+
+      var aspect = cols / rows, x, y, nx, ny;
+      ring = new Float32Array(cols * rows);
+      vign = new Float32Array(cols * rows);
+      head = 0; seedX = 0;
+      for (x = 0; x < cols; x++) {
+        nx = (x / cols - 0.5) * 2 * aspect;
+        column(nx, ring, x * rows);
+        for (y = 0; y < rows; y++) {
+          ny = (y / rows - 0.5) * 2;
+          vign[x * rows + y] =
+            (1 - dsmooth(0.35, 1.35, Math.sqrt(nx * nx / (aspect * aspect) * 0.9 + ny * ny * 1.2))) * 1.15 +
+            dsmooth(1.25, 0.25, Math.hypot((nx + 0.5 * aspect) / aspect, ny - 0.08)) * 0.10;
+        }
+      }
+      seedX = cols;
+    }
+
+    function paint() {
+      var d = img.data, n = pal.length, x, y, i = 0, src, v, step, c;
+      for (y = 0; y < rows; y++) {
+        for (x = 0; x < cols; x++) {
+          src = ((head + x) % cols) * rows + y;
+          v = ring[src] * vign[x * rows + y];
+          step = (Math.max(0, Math.min(0.999,
+            v + BAYER4[(y % 4) * 4 + (x % 4)] * 0.18)) * n) | 0;
+          c = pal[step < n ? step : n - 1];
+          d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2]; d[i + 3] = 255;
+          i += 4;
+        }
+      }
+      ctx.putImageData(img, 0, 0);
+    }
+
+    function advance() {
+      // the oldest column becomes the newest one, one cell further along the
+      // noise - the cloud never repeats because the coordinate never resets
+      var aspect = cols / rows;
+      column((seedX / cols - 0.5) * 2 * aspect, ring, head * rows);
+      head = (head + 1) % cols;
+      seedX++;
+    }
+
+    function frame(t) {
+      raf = null;
+      if (!onScreen) return;
+      if (t - last >= 1000 / FPS) { last = t; advance(); paint(); }
+      raf = requestAnimationFrame(frame);
+    }
+
+    size();
+    paint();
+    if (!reduced) {
+      new IntersectionObserver(function (es) {
+        onScreen = es[0].isIntersecting;
+        if (onScreen && !raf) raf = requestAnimationFrame(frame);
+        else if (!onScreen && raf) { cancelAnimationFrame(raf); raf = null; }
+      }, { rootMargin: "120px" }).observe(host);
+    }
+    var rt = null;
+    addEventListener("resize", function () {
+      clearTimeout(rt);
+      rt = setTimeout(function () { size(); paint(); }, 160);
+    }, { passive: true });
+
+    return {
+      canvas: cv,
+      palette: pal,
+      destroy: function () { if (raf) cancelAnimationFrame(raf); cv.remove(); }
+    };
+  }
+
   window.PixelFX = {
     headline: headline,
     button: button,
@@ -2586,6 +2800,8 @@
     wavePalette: function (style, accRGB, groundRGB) { return wavePalette(style, accRGB, groundRGB); },
     /* a drifting field of cells behind a band - see FIELD above */
     field: field,
+    /* an ordered-dither cloud behind a band - see DITHER above */
+    dither: dither,
     /* a custom property as a given element sees it, in bytes */
     tokenRGB: function (el, name, fallback) { return tokenRGB(el, name, fallback); },
     onVelocity: function (fn) { velSubs.push(fn); },

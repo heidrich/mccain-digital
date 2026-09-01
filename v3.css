@@ -3770,6 +3770,95 @@ html[data-theme="light"] .t-moon {
   overflow: clip
 }
 
+/* ============================================================
+   GUIDES - the container drawn as two hairlines and four corner marks
+
+   The idea is from the MIT-licensed `container-lines` skill in
+   github.com/MengTo/Skills. It is the opposite answer to "more life": no
+   motion at all, just the page admitting where its container is. On a site
+   already written in mono labels and (01)/(02) markers that reads as
+   structure rather than decoration - and it costs one paint, forever.
+
+   The lines sit exactly on --maxw/--gut, the same two tokens the content
+   uses, so they can never drift away from the column they are describing.
+   ============================================================ */
+.guides {
+  position: relative;
+  isolation: isolate
+}
+
+.guides::before,
+.guides::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: -1;
+  width: 1px;
+  background: var(--line);
+  pointer-events: none
+}
+
+.guides::before {
+  left: max(var(--gut), calc((100% - var(--maxw)) / 2 + var(--gut)))
+}
+
+.guides::after {
+  right: max(var(--gut), calc((100% - var(--maxw)) / 2 + var(--gut)))
+}
+
+/* Four small squares on the real corners of the section, not on arbitrary
+   positions - they are only worth anything if they mark something. */
+.guides>.gmark {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  z-index: -1;
+  background: var(--line-2);
+  pointer-events: none
+}
+
+.guides>.gmark--tl {
+  top: 0;
+  left: max(var(--gut), calc((100% - var(--maxw)) / 2 + var(--gut)));
+  transform: translate(-50%, -50%)
+}
+
+.guides>.gmark--tr {
+  top: 0;
+  right: max(var(--gut), calc((100% - var(--maxw)) / 2 + var(--gut)));
+  transform: translate(50%, -50%)
+}
+
+.guides>.gmark--bl {
+  bottom: 0;
+  left: max(var(--gut), calc((100% - var(--maxw)) / 2 + var(--gut)));
+  transform: translate(-50%, 50%)
+}
+
+.guides>.gmark--br {
+  bottom: 0;
+  right: max(var(--gut), calc((100% - var(--maxw)) / 2 + var(--gut)));
+  transform: translate(50%, 50%)
+}
+
+/* One backing pixel per cell, blown up by CSS. `pixelated` is the whole
+   effect: without it the browser smooths the scale-up and the enlarged squares
+   turn back into a blur. */
+.dither-l {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  pointer-events: none;
+  image-rendering: pixelated
+}
+
+.dither-l~* {
+  position: relative;
+  z-index: 1
+}
+
 .field-l {
   position: absolute;
   pointer-events: none;

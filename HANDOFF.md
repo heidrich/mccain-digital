@@ -24,10 +24,58 @@ Livegang fliegt der Ordner raus).
 
 | | |
 |---|---|
-| [Hintergruende, vier Varianten](https://mccain-digital.vercel.app/preview/life-lab.html) | **wartet auf deine Wahl** — aus / Textur / driftend (mein Vorschlag) / zu laut |
+| [Hintergruende Runde 2](https://mccain-digital.vercel.app/preview/bg-lab.html) | **wartet auf deine Wahl** — Dither-Wolke grob/fein, Guides ohne Bewegung, beides kombiniert |
+| [Hintergruende Runde 1](https://mccain-digital.vercel.app/preview/life-lab.html) | durchgefallen; bleibt als Vergleich stehen |
 | [Wellen-Paletten und die Achse](https://mccain-digital.vercel.app/preview/wave-lab.html) | falls der Verlauf auf Schrift doch nochmal ein Thema wird |
 | [Gelb auf Papier](https://mccain-digital.vercel.app/preview/accent-lab.html) | misst den Kontrast selbst |
 | [Rastervarianten](https://mccain-digital.vercel.app/preview/pixel-lab.html) | Zelle/Block/Deckung, selbst gemessen |
+
+## MengTo/Skills — was davon brauchbar ist
+
+Owner: „schau dir doch mal diese skills an … koennen wir davon was gebrauchen".
+`github.com/MengTo/Skills/tree/main/agent-skills/web-design`, **MIT**, ~5.700
+Sterne, zuletzt Ende August aktualisiert. Rund 90 Ordner, jeder mit einer
+`SKILL.md`. Das eigene README sagt „draft set … pending: finalize each skill's
+SKILL.md" — es ist also eine Sammlung von Ideen unterschiedlicher Reife, keine
+gepruefte Bibliothek. Entsprechend gelesen.
+
+**Eingebaut (beides opt-in, nichts ist eingeschaltet):**
+
+| Skill | was wir daraus gemacht haben |
+|---|---|
+| `dither-background` | `PixelFX.dither()` — Bayer-Dither-Wolke hinter einem Band. Die Idee ist ihre, die Umsetzung nicht (siehe unten). |
+| `container-lines` | `.guides` in `v3.css` — zwei Haarlinien auf den Container-Kanten plus vier Eckmarken, aus `--maxw`/`--gut` positioniert. |
+
+**Warum die Umsetzung nicht uebernommen werden konnte:** ihre Referenz ruft
+`fillRect` **pro Zelle pro Frame** — bei 3px-Zelle ~26.000 Zeichenaufrufe pro
+Frame, also genau die Arbeitsform, die diese Seite schon einmal auf 20fps
+gebracht hat. Und das Zeichnen zu reparieren war die falsche Haelfte: teuer ist
+das **Rauschen** (vier Oktaven = sechzehn Sinus pro Zelle). Gemessen mit drei
+Feldern: 68 Long Tasks, 4 Sekunden blockierter Hauptthread. Jetzt wird die
+Wolke nicht neu gerechnet, sondern **gescrollt**: ein Ring aus Spalten, pro
+Takt genau eine neue Spalte. Danach 0 Long Tasks, 0 % der Frames ueber 20 ms.
+
+**Brauchbar, aber noch nicht gebaut:**
+- `css-border-gradient` — die Maskenvariante (`mask-composite: exclude`) ist
+  eine saubere Art, einen reinen Rand-Layer zu bekommen. Fuer unseren
+  *wandernden* Rand nicht noetig (wir brauchen ein bewegtes Blatt), fuer
+  statische Karten-Raender aber die kuerzere Loesung als eine Extra-Ebene.
+- `css-alpha-masking`, `progressive-blur` — Kantenabdunklung per
+  `mask-image` bzw. gestufte `backdrop-filter`. Der Progressive-Blur waere
+  unter der Navigation denkbar, kostet aber `backdrop-filter` ueber einem
+  laufenden Canvas; erst messen.
+
+**Nichts zu holen:**
+- `number-details`, `beautiful-shadows` — ersteres machen wir laengst ((01),
+  (02) in Mono), zweiteres sind woertliche Tailwind-Klassen.
+- Rund die Haelfte der Ordner umhuellt **three.js, GSAP, Vanta, globe.gl,
+  Matter.js, Unicorn Studio**. Das kollidiert mit „alles selbst bauen, keine
+  externen Libraries" und mit der schon gefallenen WebGL-Absage.
+
+**Was die Sammlung wirklich taugt:** als *Ideenliste* und als Wortschatz fuer
+Effekte, die man sonst nicht benennen kann. Als Code nur dort, wo sie reines
+CSS zeigt. Jeder Canvas-Rezept-Teil ist ungemessen und muss vor dem Einbau
+durch dieselbe Performance-Pruefung wie alles andere hier.
 
 ## Was zuletzt passiert ist
 
@@ -75,8 +123,12 @@ Stand davor ganz ohne Rand.
 
 ## Offene Punkte (in deiner Reihenfolge)
 
-1. **Hintergrund aussuchen** — life-lab oben, dann schalte ich ihn ein. Danach
-   der naechste Effekt, einer nach dem anderen.
+1. **Hintergrund aussuchen.** Runde 1 (`preview/life-lab.html`) ist
+   durchgefallen — „die bgs gefallen mir alle nicht". Runde 2 steht in
+   `preview/bg-lab.html`: **Dither-Wolke** (grob/fein) und **Guides** (ohne
+   jede Bewegung), beide aus MengTo/Skills, eigener Abschnitt unten. Sobald
+   eine Richtung steht, fliegen die anderen aus der Engine — drei ungenutzte
+   Effekte bleiben nicht liegen.
 2. **Assistent auf den Unterseiten?** Heute nur die Startseite: `v3.js` laedt
    nirgends sonst, und die Konsolen-Markup steht in `index.html`. Entscheidung,
    kein Versehen.

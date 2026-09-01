@@ -1,0 +1,173 @@
+<html lang="en" data-theme="dark" data-root="..">
+
+<head>
+  <meta charset="utf-8">
+  <script>try{var t=localStorage.getItem("mcd-v3-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Background, round two — dither and guides</title>
+  <link rel="stylesheet" href="../v3.css">
+  <style>
+    /* mockup chrome only, never ships */
+    body { background: var(--bg); color: var(--fg) }
+
+    .lab-top { max-width: var(--maxw); margin: 0 auto; padding: 2.5rem var(--gut) 1rem }
+    .lab-top h1 { font-size: 1.7rem; letter-spacing: -.03em; margin: 0 0 .5rem }
+    .lab-top p { color: var(--muted); max-width: 78ch; margin: 0 0 .7rem }
+    .lab-top b { color: var(--fg) }
+
+    /* full-height bands, because a background judged in a strip is judged at
+       the wrong scale */
+    .cand { padding: clamp(3.5rem, 8vw, 7rem) 0; border-top: 1px solid var(--line) }
+    .cand .wrap { max-width: var(--maxw); margin: 0 auto; padding-inline: var(--gut) }
+    .cand h2 {
+      font-size: clamp(1.9rem, 4.2vw, 3.4rem); line-height: 1.06;
+      letter-spacing: -.045em; font-weight: 800; margin: .2rem 0 .9rem
+    }
+    .cand .lead { color: var(--muted); max-width: 58ch; margin: 0 0 1.4rem }
+    .tag {
+      font-family: var(--mono); font-size: var(--t-label); letter-spacing: .12em;
+      text-transform: uppercase; color: var(--muted); margin: 0
+    }
+    .verdict {
+      font-size: var(--t-small); color: var(--muted); max-width: 70ch;
+      border-left: 2px solid var(--line); padding-left: .9rem; margin: 1.4rem 0 0
+    }
+    .verdict b { color: var(--fg) }
+    .pick { border-left-color: var(--acc-text) }
+    .meas {
+      font-family: var(--mono); font-size: var(--t-label); color: var(--muted);
+      margin-top: 1rem; white-space: pre-line
+    }
+  </style>
+</head>
+
+<body>
+  <div class="lab-top">
+    <h1>Background, round two</h1>
+    <p>The first four were all the same idea at four volumes — cells lit at random, drifting. None
+      of them landed, so this round is two <em>different</em> ideas rather than four settings of
+      one.</p>
+    <p><b>A dither field</b> is not scattered cells: it is a picture made of enlarged square
+      pixels, thresholded through a 4×4 Bayer matrix, with brightness driven by fractal noise so
+      it forms broad cloud masses. It has structure. It reads as material — as if the band itself
+      were made of the same pixels the headlines are.</p>
+    <p><b>Guides</b> are the opposite answer: no motion at all. The page simply admits where its
+      container is, with two hairlines and four corner marks. On a site written in mono labels and
+      (01)/(02) markers that reads as structure, and it costs one paint, forever.</p>
+    <p>Both borrow from <b>MengTo/Skills</b> (MIT). The dither idea is theirs; the way it is drawn
+      here is not — see the note under row C.</p>
+  </div>
+
+  <section class="cand band band--ink" id="c-off">
+    <div class="wrap">
+      <p class="tag">A — off</p>
+      <h2>The control.</h2>
+      <p class="lead">What the site does today. The rest have to earn the difference.</p>
+    </div>
+  </section>
+
+  <section class="cand band band--ink" id="c-d7">
+    <div class="wrap">
+      <p class="tag">B — dither, coarse cell</p>
+      <h2>Cloud, at a distance.</h2>
+      <p class="lead">7px cells — deliberately coarser than the 3px the headlines are built from,
+        so the background reads as further away. Bigger pixels, lower resolution, back of the
+        room.</p>
+      <p class="verdict pick"><b>My first choice.</b> The coarser grid keeps it clearly separate
+        from the type instead of competing with it.</p>
+      <p class="meas" data-meas="c-d7"></p>
+    </div>
+  </section>
+
+  <section class="cand band band--ink" id="c-d3">
+    <div class="wrap">
+      <p class="tag">C — dither, the headline's own cell</p>
+      <h2>Same grid as the type.</h2>
+      <p class="lead">3px cells, exactly the grid the pixel headlines use. Everything on the band
+        is then made of one size of pixel.</p>
+      <p class="verdict">Tidier in theory, and finer than the Bayer pattern really wants — at 3px
+        the ordered structure starts to disappear into grain, which is the one thing this effect
+        is supposed not to be.
+        <br><br><b>How it is drawn:</b> the reference implementation calls fillRect once per cell
+        per frame — about 26,000 draw calls a frame at this size, sixty times a second, which is
+        the exact shape of the work that took this page to 20fps once already. Here the field is
+        written into an ImageData, one pixel per cell, and blown up by CSS with
+        <code>image-rendering: pixelated</code>, at 12fps. The enlarged squares come from the
+        scaling, for free.</p>
+      <p class="meas" data-meas="c-d3"></p>
+    </div>
+  </section>
+
+  <section class="cand band band--ink guides" id="c-guides">
+    <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+    <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+    <div class="wrap">
+      <p class="tag">D — guides, no motion at all</p>
+      <h2>Structure, not atmosphere.</h2>
+      <p class="lead">Two hairlines on the container edges and four small squares on the section's
+        real corners. Nothing moves, nothing costs anything after the first paint.</p>
+      <p class="verdict"><b>Worth a serious look.</b> It answers "the band looks empty" without
+        adding a single moving thing, and it fits a page that already talks in mono labels and
+        numbered sections. It also combines with any of the others.</p>
+    </div>
+  </section>
+
+  <section class="cand band band--ink guides" id="c-both">
+    <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+    <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+    <div class="wrap">
+      <p class="tag">E — both</p>
+      <h2>Material and measure.</h2>
+      <p class="lead">The coarse dither with the guides on top of it.</p>
+      <p class="meas" data-meas="c-both"></p>
+    </div>
+  </section>
+
+  <script src="../data.js"></script>
+  <script src="../pixel-engine.js"></script>
+  <script src="../common.js"></script>
+  <script>
+    /* Every candidate is built by the SHIPPING function. A lab that draws its
+       own version of an effect proves nothing about the effect. */
+    addEventListener("load", function () {
+      var made = {
+        "c-d7": PixelFX.dither(document.getElementById("c-d7"), { cell: 7 }),
+        "c-d3": PixelFX.dither(document.getElementById("c-d3"), { cell: 3 }),
+        "c-both": PixelFX.dither(document.getElementById("c-both"), { cell: 7 })
+      };
+
+      /* Each row measures its own worst case: the text over the brightest cell
+         the field can produce. A background that quietly eats the type is the
+         one failure mode this effect has, and it is not visible by eye until
+         it is too late. */
+      var lin = function (c) { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4); };
+      var lum = function (c) { return .2126 * lin(c[0]) + .7152 * lin(c[1]) + .0722 * lin(c[2]); };
+      var ratio = function (a, b) {
+        var l = [lum(a), lum(b)].sort(function (x, y) { return y - x; });
+        return (l[0] + .05) / (l[1] + .05);
+      };
+      var rgb = function (s) { return (s.match(/[\d.]+/g) || []).slice(0, 3).map(Number); };
+
+      setTimeout(function () {
+        Object.keys(made).forEach(function (id) {
+          var fx = made[id];
+          var el = document.querySelector('[data-meas="' + id + '"]');
+          if (!fx || !el) return;
+          var top = fx.palette[fx.palette.length - 1];
+          var body = rgb(getComputedStyle(el).color);
+          var head = rgb(getComputedStyle(el.closest(".wrap").querySelector("h2")).color);
+          el.textContent =
+            "brightest cell      rgb(" + top.join(",") + ")\n" +
+            "small text over it  " + ratio(body, top).toFixed(2) + ":1   (needs 4.5)\n" +
+            "headline over it    " + ratio(head, top).toFixed(2) + ":1   (needs 3)\n" +
+            "backing store       " + fx.canvas.width + "x" + fx.canvas.height +
+            " px for " + Math.round(parseFloat(fx.canvas.style.width)) + "x" +
+            Math.round(parseFloat(fx.canvas.style.height)) + " css";
+        });
+      }, 900);
+    });
+  </script>
+</body>
+
+</html>
