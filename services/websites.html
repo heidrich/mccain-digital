@@ -87,7 +87,19 @@
 
   <!-- ================= NAV ================= -->
   <nav class="nav" id="nav" aria-label="Main navigation">
-    <a class="logo" href="../index.html#top">mccain <i>digital</i><span class="sr-only"> — home</span></a>
+    <a class="logo" href="../index.html#top">
+      <!-- seven by seven cells, the same grid the pixel engine draws on -->
+      <svg class="mark" viewBox="0 0 7 7" aria-hidden="true">
+        <rect x="0" y="0" width="1" height="7" />
+        <rect x="6" y="0" width="1" height="7" />
+        <rect x="1" y="1" width="1" height="1" />
+        <rect x="5" y="1" width="1" height="1" />
+        <rect x="2" y="2" width="1" height="1" />
+        <rect x="4" y="2" width="1" height="1" />
+        <rect x="3" y="3" width="1" height="1" />
+      </svg>
+      mccain <i>digital</i><span class="sr-only"> — home</span>
+    </a>
 
     <span class="nav-status">
       <i class="ns-dot" aria-hidden="true"></i>
@@ -117,8 +129,14 @@
   <main id="top">
 
     <!-- ================= HERO ================= -->
-    <header class="hero hero--svc wrap">
-      <div class="hero-inner">
+    <!-- A full-bleed stage: the dither field runs behind it (data-field,
+         wired in common.js), the guide rails sit over it, and the content
+         keeps its own container. The header drops .wrap so the field can
+         reach the viewport edges. -->
+    <header class="hero hero--svc hero--stage guides" data-field>
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+      <div class="hero-inner wrap">
         <nav class="crumb" aria-label="Breadcrumb">
           <a href="../index.html#top">Home</a><i aria-hidden="true">/</i>
           <a href="../index.html#services">Services</a><i aria-hidden="true">/</i>
@@ -127,9 +145,12 @@
 
         <p class="hero-eyebrow label">Hand-built · 4×100 Lighthouse · found from day one</p>
 
+        <!-- Real type, not a pixel raster. Dotted stems at display size are
+             hard to read - which was the whole reason for the refresh - and
+             the words rise through a mask instead. -->
         <h1 class="hero-h">
-          <span class="line"><span class="ph" data-pixel>Sites people</span></span>
-          <span class="line"><span class="ph" data-pixel><span class="accent">remember.</span></span></span>
+          <span class="line">Sites people</span>
+          <span class="line"><span class="accent">remember.</span></span>
         </h1>
 
         <div class="hero-foot">
@@ -148,11 +169,17 @@
             </div>
           </div>
           <div class="hero-side">
-            <b>3–6 weeks</b> from brief to live<br>
-            <b>4×100</b> Lighthouse, measured<br>
-            <b>0</b> page builders
+            <span><b>3–6 wk</b><i>from brief to live</i></span>
+            <span><b>4×100</b><i>Lighthouse, measured</i></span>
+            <span><b>0</b><i>page builders</i></span>
           </div>
         </div>
+
+        <p class="stage-meta">
+          <span>Hand-built · vanilla · no page builder</span>
+          <span>JSON-LD · llms.txt · readable by agents</span>
+          <span><b>This page</b> — the sample</span>
+        </p>
       </div>
     </header>
 
@@ -192,7 +219,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(02) — What we'd build for you</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Fast, found,</span>
+            <h2 class="sec-h" data-words>Fast, found,
               <span class="dim">premium.</span></h2>
           </div>
           <p class="lead">Grouped by what the site has to do for you. The industries are examples to show the
@@ -263,7 +290,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(03) — How deep we go</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>The right tool,</span>
+            <h2 class="sec-h" data-words>The right tool,
               <span class="dim">no bloat.</span></h2>
           </div>
           <p class="lead">Four things decide whether a site is fast and found — or merely pretty in the
@@ -334,7 +361,7 @@
         <div class="studio-grid">
           <div class="rv">
             <p class="label">(04) — The proof</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>This page</span>
+            <h2 class="sec-h" data-words>This page
               <span class="dim">is the case study.</span></h2>
             <p class="lead" style="margin-top:1.4rem">There's no need to take our word for the numbers. Open
               the developer tools on the page you're reading and run the audit yourself — while a canvas
@@ -368,7 +395,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(05) — The stack we build with</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Less is</span>
+            <h2 class="sec-h" data-words>Less is
               <span class="dim">measurably faster.</span></h2>
           </div>
           <p class="lead">Every dependency is a decision we have to defend. Most sites don't need a framework
@@ -400,7 +427,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(06) — How it goes</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Design first,</span>
+            <h2 class="sec-h" data-words>Design first,
               <span class="dim">ship fast.</span></h2>
           </div>
           <p class="lead">Three to six weeks from brief to live, with the score measured as we go rather than
@@ -452,7 +479,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(07) — Questions</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>The things</span>
+            <h2 class="sec-h" data-words>The things
               <span class="dim">you're actually asking.</span></h2>
           </div>
           <p class="lead">Pick one — the answer streams in, same engine as the console on the home page.</p>
@@ -550,7 +577,7 @@
     <section class="band band--paper" id="contact">
       <div class="wrap ctaband">
         <p class="label rv" style="justify-content:center">Start a project</p>
-        <h2 class="rv"><span class="ph" data-pixel>Need a site that's fast and gets found?</span></h2>
+        <h2 class="rv" data-words>Need a site that's fast and gets found?</h2>
         <p class="lead rv">Tell us who you're talking to and what you need them to do. Within 24 hours you'll
           hear back from one of the two people who'd build it — and a fixed quote within 48.</p>
         <div class="hero-ctas rv-s" style="justify-content:center">
