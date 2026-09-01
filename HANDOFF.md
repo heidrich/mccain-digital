@@ -4,6 +4,8 @@
 sauber.
 
 ```
+f75acf8  fix(tools): a guard that finds nothing must say so
+a2035d0  fix(rim): state the period instead of inferring it, so the border stops jumping
 afc013f  feat(rim): the travelling border moves from the h1 to the console
 7e9b70d  docs: the light-mode pixel type was a bug, not a dead end
 a06f8e3  fix(theme): apply the saved theme before the stylesheet, and audit the canvases
@@ -47,6 +49,25 @@ Livegang fliegt der Ordner raus).
    still getoetet. Beschnitten wird nur die wandernde Flaeche, in einer eigenen
    Ebene — sie war das Einzige, was je beschnitten werden musste.
 4. Off screen pausiert der Rand, wie das Zellenfeld.
+5. **Der Rand sprang alle 6 Sekunden zurueck** („sehr unnatuerlich und
+   abgehakt") — behoben. Meine Begruendung „halbe Blattbreite = eine Periode"
+   gilt nur fuer einen WAAGERECHTEN Verlauf: ein schraeger liegt auf seiner
+   Gradient-Linie, deren Laenge `|W*sin T| + |H*cos T|` ist, also steckt die
+   Hoehe des Kastens in der Periode — waehrend eine waagerechte Verschiebung um
+   dX nur `dX*sin T` weiterrueckt. Gemessen: Periode 761px, Verschiebung 588px,
+   also 23 % Sprung pro Umlauf (am Knopf 31 %). Jetzt steht die Periode als
+   Token da (`--rim-period: 480px`) und verschoben wird um
+   `period / sin(winkel)`. Nachweis: Blatt bei Versatz 0 und bei Versatz „ein
+   voller Umlauf" gerendert und die Pixel verglichen — mittlere Kanalabweichung
+   **98,5 vorher, 0,2 nachher**.
+6. **Zwei Fehler aus der Gegenpruefung**, beide am laufenden Bild bestaetigt
+   und behoben: `.rim-in>.console` erreichte die angedockte Konsole nie (dort
+   liegt sie eine Ebene tiefer, in `.dock-slot`), also behielt sie ihren
+   eigenen 14px-Rahmen im 18,5px-Rahmen plus zweiten Schatten — genau das
+   Doppelrand-Problem, das der Kommentar darueber zu verhindern behauptet. Und
+   die Platzhalterhoehe war beim Andocken eingefroren: nach einem Resize im
+   angedockten Zustand kollabierte Sektion 01 beim Zurueckscrollen um 144px.
+   Sie wird jetzt neu gemessen.
 
 Kosten: auf 01 sitzend mit laufendem Rand und Glow Median 16,7 ms, 0 % der
 Frames ueber 20 ms, keine Long Tasks — gegen 16,7 ms und 0,6–1,1 % auf dem
@@ -95,7 +116,14 @@ Stand davor ganz ohne Rand.
    im `<head>` setzen, vor dem Stylesheet.
 5. **Ein Waechter muss lesen, was der Besucher SIEHT** — Leinwand statt
    `getComputedStyle` — und erst, wenn sie fertig ist.
-6. **Ein zu kurzes Warten faelscht jede Messung.** Viermal in zwei Sitzungen:
+6. **Ein Waechter, der NICHTS findet, hat nicht bestanden — er ist
+   ausgefallen.** Der Dev-Server war tot, der Kontrast-Audit pruefte die
+   Fehlerseite und meldete „accent nodes 0 ... passes on every page". Alle
+   Runner pruefen jetzt zuerst per `curl`, ob der Server antwortet, und eine
+   Seite ohne Akzent-Text UND ohne Mosaik gilt als Fehler.
+7. **Ein SCHRAEGER Verlauf verschiebt sich nicht um seine eigene Breite.**
+   Periode = Breite UND Hoehe. Hinschreiben statt ableiten.
+8. **Ein zu kurzes Warten faelscht jede Messung.** Viermal in zwei Sitzungen:
    ein glatt scrollendes `scrollIntoView` war nicht angekommen, ein Mosaik noch
    im Aufbau, ein Rand noch pausiert. Erst die Fertig-Bedingung, dann messen.
 
