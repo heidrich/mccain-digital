@@ -12,9 +12,9 @@ It is hand-written **vanilla HTML / CSS / JS** — no framework, no build step, 
 
 ## What makes it interesting
 
-- **One HTML file, one JS file, zero build.** [`upload/index.html`](upload/index.html) is the whole page (inlined CSS + scripts); [`upload/pixel-engine.js`](upload/pixel-engine.js) is the shared effect engine. Drop the `upload/` folder on any static host and it runs.
-- **No dependencies, no web fonts.** A system font stack (`system-ui`) means nothing is downloaded for type; the only network requests are the page, the engine and a handful of images.
-- **The text is always real DOM.** Every word is selectable, crawlable HTML — the pixel effects are `aria-hidden` `<canvas>` overlays drawn *on top*. Structured data via JSON-LD (`ProfessionalService`, `WebSite`, `SoftwareApplication`).
+- **Eleven pages, zero build.** The repository root *is* the site: [`index.html`](index.html) is the home page, [`pixel-engine.js`](pixel-engine.js) the shared effect engine, [`v3.css`](v3.css) the single stylesheet. `git push` deploys it, and everything except [`api/ask.js`](api/ask.js) runs on any static host as-authored.
+- **No dependencies, no third-party requests.** Type is one self-hosted, preloaded `woff2` (Schibsted Grotesk) in [`fonts/`](fonts/) — no font CDN; the only network requests are the page, its scripts and a handful of images.
+- **The text is always real DOM.** Every word is selectable, crawlable HTML — the pixel effects are `aria-hidden` `<canvas>` overlays drawn *on top*. Structured data via JSON-LD (`ProfessionalService`, `WebSite`, `FAQPage` on the home page, `Service` + `BreadcrumbList` per service page).
 - **Graceful by default.** Touch devices and `prefers-reduced-motion` get the native, effect-free site. The canvas is presentation only; it can fail and the page still works.
 - **Frame-frugal.** Every animation loop runs *only* while something is actually moving and on-screen, then parks itself — an idle page burns zero frames. That is how the effects coexist with a 0 ms Total Blocking Time.
 
@@ -36,7 +36,7 @@ It is hand-written **vanilla HTML / CSS / JS** — no framework, no build step, 
 
 ## The pixel engine — how the particles are calculated
 
-[`upload/pixel-engine.js`](upload/pixel-engine.js) is one physics core feeding five effects. The pipeline is the same everywhere:
+[`pixel-engine.js`](pixel-engine.js) is one physics core feeding five effects. The pipeline is the same everywhere:
 
 **1. Rasterize → sample into particles.** The engine takes a real DOM node (a headline, a button face, a tile), clones it with its computed styles inlined, and renders it into an `<svg><foreignObject>` which is drawn to an offscreen canvas. It then reads the raw pixels back with `getImageData` and walks them on a fixed grid (`gap` px). Every sampled pixel above an alpha threshold becomes a **particle** carrying its colour `[r,g,b]`, its alpha, and its **home position** `(hx, hy)`. Everything is `devicePixelRatio`-aware (capped at 3) so it stays crisp on retina without over-drawing.
 
