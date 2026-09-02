@@ -219,7 +219,19 @@
 
   <!-- ================= NAV ================= -->
   <nav class="nav" id="nav" aria-label="Main navigation">
-    <a class="logo" href="#top">mccain <i>digital</i><span class="sr-only"> — home</span></a>
+    <a class="logo" href="#top">
+      <!-- seven by seven cells, the same grid the pixel engine draws on -->
+      <svg class="mark" viewBox="0 0 7 7" aria-hidden="true">
+        <rect x="0" y="0" width="1" height="7" />
+        <rect x="6" y="0" width="1" height="7" />
+        <rect x="1" y="1" width="1" height="1" />
+        <rect x="5" y="1" width="1" height="1" />
+        <rect x="2" y="2" width="1" height="1" />
+        <rect x="4" y="2" width="1" height="1" />
+        <rect x="3" y="3" width="1" height="1" />
+      </svg>
+      mccain <i>digital</i><span class="sr-only"> — home</span>
+    </a>
 
     <span class="nav-status">
       <i class="ns-dot" aria-hidden="true"></i>
@@ -249,13 +261,15 @@
   <main id="top">
 
     <!-- ================= HERO ================= -->
-    <header class="hero wrap">
-      <div class="hero-inner">
+    <header class="hero hero--stage guides" data-field>
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+      <div class="hero-inner wrap">
         <p class="hero-eyebrow label">Digital product studio · Bavaria · est. 2016</p>
 
         <h1 class="hero-h">
-          <span class="line"><span class="ph" data-pixel>We build the useful</span></span>
-          <span class="line"><span class="ph" data-pixel><span class="accent">kind of AI.</span></span></span>
+          <span class="line">We build the useful</span>
+          <span class="line"><span class="accent">kind of AI.</span></span>
         </h1>
 
         <div class="hero-foot">
@@ -272,9 +286,9 @@
             </div>
           </div>
           <div class="hero-side">
-            <b>20+ years</b> in the industry<br>
-            <b>4×100</b> Lighthouse on this build<br>
-            <b>0</b> account managers
+            <span><b>20+ years</b><i>in the industry</i></span>
+            <span><b>4×100</b><i>Lighthouse on this build</i></span>
+            <span><b>0</b><i>account managers</i></span>
           </div>
         </div>
 
@@ -303,7 +317,7 @@
 
           <div class="ai-copy rv">
             <p class="label">(01) — AI, actually built in</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Ask this page</span> <span class="dim">anything.</span></h2>
+            <h2 class="sec-h" data-words>Ask this page <span class="dim">anything.</span></h2>
             <p class="lead">Most agency sites <b>say</b> they do AI. This one <b>is</b> one. Ask it what we cost,
               whether we're right for you, or what we'd actually build — or hand it your project and
               watch it write the brief.</p>
@@ -376,7 +390,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(02) — Selected work</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Things that</span> <span class="dim">actually shipped.</span>
+            <h2 class="sec-h" data-words>Things that <span class="dim">actually shipped.</span>
             </h2>
           </div>
           <p class="lead">Scroll sideways, or use the arrows. Everything here is ours and live —
@@ -519,7 +533,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(04) — What we do</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Four things,</span> <span class="dim">done properly.</span>
+            <h2 class="sec-h" data-words>Four things, <span class="dim">done properly.</span>
             </h2>
           </div>
           <p class="lead">Cards stack as you scroll — the one you're reading stays, the next slides over it.</p>
@@ -582,7 +596,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(06) — Straight answers</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>The questions</span> <span class="dim">everyone asks.</span>
+            <h2 class="sec-h" data-words>The questions <span class="dim">everyone asks.</span>
             </h2>
           </div>
           <p class="lead">Pick one — the answer streams in, same engine as the console above.</p>
@@ -602,7 +616,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(07) — Proof</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Twenty years</span> <span class="dim">of receipts.</span>
+            <h2 class="sec-h" data-words>Twenty years <span class="dim">of receipts.</span>
             </h2>
           </div>
           <p class="lead">The brands below are where the work happened. The quotes are the part we're still
@@ -667,7 +681,7 @@
         <div class="contact-grid">
           <div class="rv">
             <p class="label">(08) — Start a project</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Tell us what</span> <span class="dim">you have in
+            <h2 class="sec-h" data-words>Tell us what <span class="dim">you have in
                 mind.</span></h2>
             <p class="lead" style="margin:1.4rem 0">A real reply within 24 hours, a fixed quote within 48 —
               from one of the two people who'd build it. No sales call.</p>

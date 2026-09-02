@@ -1,7 +1,14 @@
-# Uebergabe — Stand 2026-09-01
+# Uebergabe — Stand 2026-09-02
 
-**Alles auf `main`, gepusht, auf Vercel live verifiziert. Arbeitsbaum sauber.**
+**Alles auf `main`, gepusht. Arbeitsbaum sauber.**
 Der Branch `refresh-system` ist gemerged und geloescht.
+
+> ⚡ **Neueste Sitzung (2026-09-02, Mac):** Schritt 1 und 2 sind erledigt — die
+> drei uebrigen Service-Seiten UND `index.html` tragen jetzt dasselbe Muster wie
+> `ai-tools`. Neun der elf Seiten haben `data-pixel` **0** mal. Was NICHT
+> passiert ist: die weitergehende Entwurfs-Schicht aus `preview/refresh.html`
+> (Rail-Navigation, Medien-Platte, Fuss-Kapitel) — die haengt an einer
+> Owner-Entscheidung, siehe „Der offene Rest des Entwurfs" unten.
 
 ## Fuer eine frische Session: START HIER
 
@@ -21,22 +28,23 @@ besser" und „das wird immer besser".
 
 **Was als naechstes dran ist — in dieser Reihenfolge**
 
-1. **Die drei uebrigen Service-Seiten** (`web-apps`, `websites`, `software`).
-   Pro Seite derselbe kleine, gleichfoermige Diff — genau wie bei `ai-tools`:
-   - `<span class="ph" data-pixel>X</span>` → `X` (der Wrapper hostete nur das
-     Canvas). Danach muss `data-pixel` auf der Seite **0** mal vorkommen.
-   - `<h2 class="sec-h">` → `<h2 class="sec-h" data-words>`.
-   - Header: `class="hero hero--svc wrap"` → `class="hero hero--svc
-     hero--stage guides" data-field`, die vier `<span class="gmark gmark--tl">`
-     … davor, und `wrap` wandert an `.hero-inner`.
-   - `.hero-side` von `<b>…</b>Text<br>` auf
-     `<span><b>…</b><i>Text</i></span>` pro Zeile.
-   - Optional der `.stage-meta`-Streifen an der Basis.
-   - Die Wortmarke bekommt das `<svg class="mark">` (7×7, siehe `ai-tools`).
-2. **`index.html`** nach demselben Muster — der Entwurf dafuer steht in
-   `preview/refresh.html`, inklusive Buehne, Fuss und Motion-Schicht. Wenn die
-   Startseite umgestellt ist, haben `PixelFX.headline` und `PixelFX.voidReveal`
-   **keinen Aufrufer mehr** und fliegen aus der Engine.
+1. ~~**Die drei uebrigen Service-Seiten**~~ — **erledigt 2026-09-02.**
+   `web-apps`, `websites` und `software` tragen den Buehnen-Header, das
+   Wort-Reveal, die Fakten-Spalte und die Pixel-Marke. Je 9 Raster entfernt,
+   je 7 Ueberschriften auf `data-words`. Der `.stage-meta`-Streifen wurde
+   bewusst NICHT gesetzt: er braucht drei Zeilen Text, die es fuer diese
+   Seiten noch nicht gibt, und erfunden wird hier nichts.
+2. ~~**`index.html`**~~ — **erledigt 2026-09-02**, nach demselben Muster:
+   8 Raster raus, 6 Ueberschriften auf `data-words`, Hero auf
+   `hero hero--stage guides` mit `data-field`, Fakten-Spalte, Pixel-Marke.
+   Die `.scrollcue` bleibt an der Basis der Buehne (die Service-Seiten haben
+   dort ihren `.stage-meta`-Streifen).
+   **Korrektur zur frueheren Fassung dieser Zeile:** `PixelFX.headline` hat
+   sehr wohl noch Aufrufer — `contact.html` (4 Hosts) und `404.html` (1) sind
+   nie erwaehnt worden, und `common.js:398` mappt jedes `[data-pixel]` darauf.
+   `PixelFX.voidReveal` dagegen hat **heute schon** keinen einzigen Aufrufer
+   mehr in der ausgelieferten Seite (nur noch in `old/mockup/`) — das ist
+   bereits totes Gewicht in der Engine, unabhaengig von der Startseite.
 3. **Inhalte** — drei freigegebene Kundenzitate, zwei Work-Cases, echte
    Portraits. Groesste Luecke vor dem Livegang, und nichts davon darf erfunden
    werden.
@@ -44,6 +52,26 @@ besser" und „das wird immer besser".
    Spend-Limit in der Anthropic Console; danach `AI_MODE` in `v3.js` auf
    `"live"`. Ich sehe den Schluessel nie.
 5. **Beim Livegang:** `noindex` raus, `preview/` aus dem Deployment.
+
+**Der offene Rest des Entwurfs — eine Owner-Entscheidung**
+
+`preview/refresh.html` enthaelt mehr als das Muster, das jetzt auf allen vier
+Seiten sitzt. Gemessen gegen `v3.css`: **119 Selektoren, die es dort nicht
+gibt**, plus 19, die denselben Selektor anders belegen. Darunter zwei Stuecke,
+die keine Detailfrage sind:
+
+- **Eine andere Navigation.** Der Entwurf ersetzt `.nav` durch `.rail` /
+  `.r-nav` / `.r-btn`. Global uebernommen gestaltet das alle elf Seiten um;
+  nur auf der Startseite uebernommen haette die Seite zwei verschiedene
+  Navigationsleisten.
+- **Ein anderer Fuss** (Kapitel statt Leiste) und die Buehne mit
+  **Medien-Platte** (`.stage-grid` / `.stage-media` / `.plate-frame`) statt der
+  Text-Buehne, die jetzt ueberall steht.
+
+Dazu kaeme, dass `--t-display`, `--t-h2`, `--r`, `.label`-Laufweite und die
+Marken-Groesse im Entwurf andere Werte tragen als das uebernommene System —
+global gezogen aendert das jede Seite. Deshalb ist an dieser Stelle bewusst
+nichts passiert: es ist eine Design-Entscheidung, keine Umsetzung.
 
 **Offene Design-Entscheidungen des Owners**
 - Ein **Condensed-Schnitt** fuer die Plakatzeilen? Schibsted 800 eng traegt;

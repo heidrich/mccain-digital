@@ -87,7 +87,19 @@
 
   <!-- ================= NAV ================= -->
   <nav class="nav" id="nav" aria-label="Main navigation">
-    <a class="logo" href="../index.html#top">mccain <i>digital</i><span class="sr-only"> — home</span></a>
+    <a class="logo" href="../index.html#top">
+      <!-- seven by seven cells, the same grid the pixel engine draws on -->
+      <svg class="mark" viewBox="0 0 7 7" aria-hidden="true">
+        <rect x="0" y="0" width="1" height="7" />
+        <rect x="6" y="0" width="1" height="7" />
+        <rect x="1" y="1" width="1" height="1" />
+        <rect x="5" y="1" width="1" height="1" />
+        <rect x="2" y="2" width="1" height="1" />
+        <rect x="4" y="2" width="1" height="1" />
+        <rect x="3" y="3" width="1" height="1" />
+      </svg>
+      mccain <i>digital</i><span class="sr-only"> — home</span>
+    </a>
 
     <span class="nav-status">
       <i class="ns-dot" aria-hidden="true"></i>
@@ -117,8 +129,10 @@
   <main id="top">
 
     <!-- ================= HERO ================= -->
-    <header class="hero hero--svc wrap">
-      <div class="hero-inner">
+    <header class="hero hero--svc hero--stage guides" data-field>
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+      <div class="hero-inner wrap">
         <nav class="crumb" aria-label="Breadcrumb">
           <a href="../index.html#top">Home</a><i aria-hidden="true">/</i>
           <a href="../index.html#services">Services</a><i aria-hidden="true">/</i>
@@ -128,8 +142,8 @@
         <p class="hero-eyebrow label">Dashboards · integrations · on-prem or cloud</p>
 
         <h1 class="hero-h">
-          <span class="line"><span class="ph" data-pixel>Software for how</span></span>
-          <span class="line"><span class="ph" data-pixel><span class="accent">you actually work.</span></span></span>
+          <span class="line">Software for how</span>
+          <span class="line"><span class="accent">you actually work.</span></span>
         </h1>
 
         <div class="hero-foot">
@@ -148,9 +162,9 @@
             </div>
           </div>
           <div class="hero-side">
-            <b>Your repo</b>, your source, no lock-in<br>
-            <b>On-prem</b> or cloud — your call<br>
-            <b>0</b> per-seat licence to us
+            <span><b>Your repo</b><i>your source, no lock-in</i></span>
+            <span><b>On-prem</b><i>or cloud — your call</i></span>
+            <span><b>0</b><i>per-seat licence to us</i></span>
           </div>
         </div>
       </div>
@@ -192,7 +206,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(02) — What we'd build for you</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Tools your team</span>
+            <h2 class="sec-h" data-words>Tools your team
               <span class="dim">relies on.</span></h2>
           </div>
           <p class="lead">Grouped by the job you're trying to do. The industries are examples to show the
@@ -264,7 +278,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(03) — How deep we go</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Boring tech,</span>
+            <h2 class="sec-h" data-words>Boring tech,
               <span class="dim">on purpose.</span></h2>
           </div>
           <p class="lead">Internal software has to outlive the project — and the people who built it. That
@@ -338,7 +352,7 @@
         <div class="studio-grid">
           <div class="rv">
             <p class="label">(04) — The proof</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>We run</span>
+            <h2 class="sec-h" data-words>We run
               <span class="dim">our own software.</span></h2>
             <p class="lead" style="margin-top:1.4rem">whatever-recall is our own product, self-hosted and in
               daily use. Everything we ask of your systems — documentation, tests, an honest handover — we
@@ -372,7 +386,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(05) — The stack we build with</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Hireable</span>
+            <h2 class="sec-h" data-words>Hireable
               <span class="dim">in five years.</span></h2>
           </div>
           <p class="lead">Internal software gets inherited. Every choice here is one your own IT can staff and
@@ -404,7 +418,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(06) — How it goes</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Discover</span>
+            <h2 class="sec-h" data-words>Discover
               <span class="dim">the real process.</span></h2>
           </div>
           <p class="lead">The process on the org chart and the process in the building are rarely the same
@@ -456,7 +470,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(07) — Questions</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>The things</span>
+            <h2 class="sec-h" data-words>The things
               <span class="dim">you're actually asking.</span></h2>
           </div>
           <p class="lead">Pick one — the answer streams in, same engine as the console on the home page.</p>
@@ -555,7 +569,7 @@
     <section class="band band--paper" id="contact">
       <div class="wrap ctaband">
         <p class="label rv" style="justify-content:center">Start a project</p>
-        <h2 class="rv"><span class="ph" data-pixel>Got a process that should be software?</span></h2>
+        <h2 class="rv" data-words>Got a process that should be software?</h2>
         <p class="lead rv">Describe how it runs today — spreadsheet, inbox, the person who knows. Within 24
           hours you'll hear back from one of the two people who'd build it, and a fixed quote within 48.</p>
         <div class="hero-ctas rv-s" style="justify-content:center">

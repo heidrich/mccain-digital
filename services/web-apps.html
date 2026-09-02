@@ -87,7 +87,19 @@
 
   <!-- ================= NAV ================= -->
   <nav class="nav" id="nav" aria-label="Main navigation">
-    <a class="logo" href="../index.html#top">mccain <i>digital</i><span class="sr-only"> — home</span></a>
+    <a class="logo" href="../index.html#top">
+      <!-- seven by seven cells, the same grid the pixel engine draws on -->
+      <svg class="mark" viewBox="0 0 7 7" aria-hidden="true">
+        <rect x="0" y="0" width="1" height="7" />
+        <rect x="6" y="0" width="1" height="7" />
+        <rect x="1" y="1" width="1" height="1" />
+        <rect x="5" y="1" width="1" height="1" />
+        <rect x="2" y="2" width="1" height="1" />
+        <rect x="4" y="2" width="1" height="1" />
+        <rect x="3" y="3" width="1" height="1" />
+      </svg>
+      mccain <i>digital</i><span class="sr-only"> — home</span>
+    </a>
 
     <span class="nav-status">
       <i class="ns-dot" aria-hidden="true"></i>
@@ -117,8 +129,10 @@
   <main id="top">
 
     <!-- ================= HERO ================= -->
-    <header class="hero hero--svc wrap">
-      <div class="hero-inner">
+    <header class="hero hero--svc hero--stage guides" data-field>
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+      <div class="hero-inner wrap">
         <nav class="crumb" aria-label="Breadcrumb">
           <a href="../index.html#top">Home</a><i aria-hidden="true">/</i>
           <a href="../index.html#services">Services</a><i aria-hidden="true">/</i>
@@ -128,8 +142,8 @@
         <p class="hero-eyebrow label">React · Next.js · TypeScript · green vitals</p>
 
         <h1 class="hero-h">
-          <span class="line"><span class="ph" data-pixel>Web apps that scale,</span></span>
-          <span class="line"><span class="ph" data-pixel><span class="accent">not rewrite.</span></span></span>
+          <span class="line">Web apps that scale,</span>
+          <span class="line"><span class="accent">not rewrite.</span></span>
         </h1>
 
         <div class="hero-foot">
@@ -148,9 +162,9 @@
             </div>
           </div>
           <div class="hero-side">
-            <b>7 days</b> to a clickable prototype<br>
-            <b>48 h</b> to a fixed quote<br>
-            <b>Weekly</b> demos, never a big reveal
+            <span><b>7 days</b><i>to a clickable prototype</i></span>
+            <span><b>48 h</b><i>to a fixed quote</i></span>
+            <span><b>Weekly</b><i>demos, never a big reveal</i></span>
           </div>
         </div>
       </div>
@@ -192,7 +206,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(02) — What we'd build for you</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Products,</span>
+            <h2 class="sec-h" data-words>Products,
               <span class="dim">not prototypes that stall.</span></h2>
           </div>
           <p class="lead">Grouped by the job you're trying to do. The industries are examples to show the
@@ -264,7 +278,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(03) — How deep we go</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Boring stack,</span>
+            <h2 class="sec-h" data-words>Boring stack,
               <span class="dim">fast app.</span></h2>
           </div>
           <p class="lead">Four decisions decide whether an app scales or gets rewritten. We make them at the
@@ -336,7 +350,7 @@
         <div class="studio-grid">
           <div class="rv">
             <p class="label">(04) — The proof</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>We ship</span>
+            <h2 class="sec-h" data-words>We ship
               <span class="dim">what we sell.</span></h2>
             <p class="lead" style="margin-top:1.4rem">Every number below is measured on something we built and
               run ourselves. If we couldn't hit them on our own work, quoting them on yours would be a
@@ -370,7 +384,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(05) — The stack we build with</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Nothing exotic.</span>
+            <h2 class="sec-h" data-words>Nothing exotic.
               <span class="dim">That's the point.</span></h2>
           </div>
           <p class="lead">Every choice here has a large talent pool and a long support horizon. Your next
@@ -403,7 +417,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(06) — How it goes</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Prototype</span>
+            <h2 class="sec-h" data-words>Prototype
               <span class="dim">in seven days.</span></h2>
           </div>
           <p class="lead">You judge direction on something you can click, in week one — not on a document
@@ -456,7 +470,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(07) — Questions</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>The things</span>
+            <h2 class="sec-h" data-words>The things
               <span class="dim">you're actually asking.</span></h2>
           </div>
           <p class="lead">Pick one — the answer streams in, same engine as the console on the home page.</p>
@@ -552,7 +566,7 @@
     <section class="band band--paper" id="contact">
       <div class="wrap ctaband">
         <p class="label rv" style="justify-content:center">Start a project</p>
-        <h2 class="rv"><span class="ph" data-pixel>Got a web app to build?</span></h2>
+        <h2 class="rv" data-words>Got a web app to build?</h2>
         <p class="lead rv">Tell us the product. Within 24 hours you'll hear back from one of the two people
           who'd build it — with an honest read on scope, and a fixed quote within 48.</p>
         <div class="hero-ctas rv-s" style="justify-content:center">
