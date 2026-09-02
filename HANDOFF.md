@@ -1,7 +1,56 @@
-# Uebergabe — Stand 1. September 2026, Abschluss
+# Uebergabe — Stand 2. September 2026
 
-**Alles auf `main`, NICHTS gepusht.** Die genaue Zahl steht in `git status -sb`.
-Arbeitsbaum sauber. Vercel zeigt noch den Stand von gestern Mittag.
+**Gepusht.** `main` == `origin/main` == `f54e126`. Arbeitsbaum sauber.
+`https://mccain-digital.vercel.app/` liefert diesen Stand.
+
+## ACHTUNG: parallel gearbeitet — nicht zurueckdrehen
+
+Am 2.9. lagen um 10:09 und 10:40 zwei Commits von einer ZWEITEN Maschine auf
+dem Remote:
+
+```
+0710833  docs(readme): the layout section was right, the highlights were not
+1a36a82  feat(refresh): the pattern reaches the last four pages
+```
+
+`1a36a82` ist **dieselbe Arbeit** wie `65b53a3` hier — die drei uebrigen
+Service-Seiten auf das System umgestellt. Zwei unabhaengige Umsetzungen
+derselben Aufgabe an denselben fuenf Dateien.
+
+**Owner-Entscheidung:** „der Mac hat falsch gepusht, deine Version muss die
+neue Index werden." Der Merge `f54e126` loest deshalb jede Datei, die beide
+angefasst haben, zugunsten DIESES Zweiges auf:
+`HANDOFF.md`, `index.html`, `services/{software,web-apps,websites}.html`.
+
+Das ist keine Muenzwurf-Entscheidung: die andere Fassung traegt noch zwei
+Dinge, die der Owner spaeter entfernen liess — die **7x7-SVG-Marke** im Logo
+(„logo ist nicht wie das original") und **„Muenchen"** in der Status-Pille —
+und ihr fehlt der `.stage-meta`-Streifen. Nachgeprueft: 0 Vorkommen von
+`class="mark"` und 0 von „Muenchen" auf index und allen vier Service-Seiten.
+
+`README.md` kam VON dort und ist bewusst behalten: dieser Zweig hat sie nie
+angefasst, und der Commit behebt einen echten Fehler (Link auf
+`upload/pixel-engine.js`, ein Pfad, den es seit dem Merger nicht mehr gibt).
+
+**Nichts wurde force-gepusht.** Beide fremden Commits sind weiter in der
+Historie erreichbar — ueberholt, nicht geloescht.
+
+**Lehre, teuer bezahlt:** zwei Maschinen am selben Repo, dieselbe Aufgabe
+zweimal gebaut. Vor dem Anfangen `git fetch && git log origin/main..main`
+UND `main..origin/main` — beide Richtungen.
+
+## Zwei Dinge, die NICHT mitreisen
+
+1. **`https://mccain-digital.com/` zeigt weiter die ALTE Einzeldatei-Version**
+   (Titel „We build digital products.", 100 kB, keiner der neuen Marker). Die
+   Domain haengt also noch nicht an diesem Vercel-Projekt. Live ist der neue
+   Stand nur unter `mccain-digital.vercel.app`.
+2. **`CHANGELOG.md` steht in `.gitignore`** und kommt deshalb auf keiner
+   zweiten Maschine an. Der gesamte Detailverlauf der letzten zwei Tage liegt
+   nur auf der Windows-Platte. Wer auf dem Mac weitermacht, hat diese Datei
+   NICHT. Entweder eine Zeile aus `.gitignore` streichen (macht interne
+   Notizen in einem oeffentlichen Repo sichtbar) oder die Datei von Hand
+   mitnehmen. **Owner-Entscheidung, offen.**
 
 ---
 
