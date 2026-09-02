@@ -23,6 +23,10 @@ CHANGELOG.md
 # preview/ carries noindex and a robots Disallow; take it out at go-live.
 _parked/
 
+# Der Audit-Befund. Getrackt, damit er zwischen den Maschinen reist - aber
+# nichts davon gehoert auf die ausgelieferte Seite.
+audit/
+
 # Source material and screen recordings — large and never requested by a page.
 assets-src/
 *.mp4

@@ -1,7 +1,31 @@
 # Uebergabe — Stand 2. September 2026
 
-**Gepusht.** `main` == `origin/main` == `f54e126`. Arbeitsbaum sauber.
+**Gepusht.** `main` == `origin/main`. Arbeitsbaum sauber.
 `https://mccain-digital.vercel.app/` liefert diesen Stand.
+
+> ⚡ **Neuestes (2.9., Mac): Award-Audit liegt in [`audit/`](audit/).**
+> 68 Funde aus acht Pruef-Linsen gegen die laufende Seite, read-only erhoben.
+> **Hier anfangen:** [`audit/2026-09-02-award-audit.md`](audit/2026-09-02-award-audit.md) —
+> Ursachen, Reihenfolge, was fehlt. Gerenderte Fassung:
+> `audit/2026-09-02-award-audit.html` (im Browser oeffnen). Rohdaten mit Beleg pro Fund:
+> `audit/2026-09-02-findings.json`.
+>
+> **Drei P0, alle nachgemessen:** (1) Der Haupt-CTA „Start a project" wird beim Hover
+> **unsichtbar** — `pixel-engine.js:928` liest nur `backgroundColor`, der Button traegt aber
+> einen Gradient, also wird die helle Pille nie gemalt und die fast schwarze Schrift landet
+> auf fast schwarzem Grund. (2) Der Index-Footer bricht unter 760 px: `.foot-top` steht
+> top-level ohne Mobile-Query, gemessen `grid-template-columns: 0px 318px`. (3) Der
+> Kauf-Funnel endet auf der alten `contact.html`.
+>
+> **Regression aus der Uebernahme:** `--d-micro` und `--d-ui` existieren nur in
+> `preview/refresh.html:85-86`, nie in `v3.css` — dort aber fuenfmal benutzt. Ungueltiges
+> `var()` heisst Dauer `0s`: fuenf Hover-Uebergaenge springen. Zwei Zeilen in `:root`.
+>
+> **Wichtig zur Belastbarkeit:** die Skeptiker-Stufe des Audits ist am Session-Limit
+> gescheitert. **11 Funde sind von Hand nachgemessen, 57 sind ungeprueft** (Erfahrungswert
+> 30-60 % Fehlalarm). Nicht an einem ungeprueften Fund bauen, ohne ihn selbst anzusehen.
+>
+> `audit/` steht in `.vercelignore` — es reist zwischen den Maschinen, geht aber nie live.
 
 ## ACHTUNG: parallel gearbeitet — nicht zurueckdrehen
 

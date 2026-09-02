@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Diese Datei wird NICHT ausgeliefert (audit/ steht in .vercelignore).
+     Sie ist zum lokalen Oeffnen gedacht: Doppelklick genuegt. Ausser den
+     Google-Fonts laedt sie nichts nach; ohne Netz faellt die Schrift auf den
+     System-Stack zurueck und die Seite bleibt vollstaendig lesbar. -->
+<style>html{color-scheme:light dark}body{margin:0}img{max-width:100%}</style>
+<title>Award-Audit mccain-digital</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#f2f2ef; --bg-2:#fbfbf9; --fg:#101011; --muted:#5f594f;
+  --line:rgba(19,18,16,.16); --line-2:rgba(19,18,16,.07);
+  --acc:#806400; --acc-flat:#f5c518; --sig:#5c6b00;
+  --p0:#a33d1c; --p1:#8a6a00; --p2:#5c6b00; --p3:#7a746a;
+  --sans:"Schibsted Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Consolas,monospace;
+  --maxw:60rem; --gut:clamp(1.1rem,4vw,3rem);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b0b0c; --bg-2:#131316; --fg:#f2f2ef; --muted:#a3a3a0;
+    --line:rgba(242,242,239,.15); --line-2:rgba(242,242,239,.07);
+    --acc:#f5c518; --sig:#a4bd00;
+    --p0:#e2714f; --p1:#f5c518; --p2:#a4bd00; --p3:#8d8a85;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b0b0c; --bg-2:#131316; --fg:#f2f2ef; --muted:#a3a3a0;
+  --line:rgba(242,242,239,.15); --line-2:rgba(242,242,239,.07);
+  --acc:#f5c518; --sig:#a4bd00;
+  --p0:#e2714f; --p1:#f5c518; --p2:#a4bd00; --p3:#8d8a85;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:16px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;padding-bottom:5rem}
+.rim{height:3px;background:repeating-linear-gradient(112deg,#f5c518 0,#d9c40f 96px,#a4bd00 192px,#7a8c00 288px,#c9a814 384px,#f5c518 480px)}
+.wrap{max-width:var(--maxw);margin-inline:auto;padding-inline:var(--gut)}
+.label{font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0}
+h1,h2,h3{text-wrap:balance;margin:0}
+h1{font-size:clamp(2.1rem,5.4vw,3.4rem);font-weight:800;letter-spacing:-.028em;line-height:.98}
+h1 .dim{color:var(--muted)}
+h2{font-size:clamp(1.5rem,3.4vw,2.2rem);font-weight:800;letter-spacing:-.026em;line-height:1.02}
+h3{font-size:1rem;font-weight:600;line-height:1.35;margin-top:.5rem}
+p{margin:0}
+header.top{padding-block:clamp(2.5rem,7vh,4.5rem) 2rem}
+header.top .lede{max-width:36em;color:var(--muted);margin-top:1.1rem;font-size:1.05rem}
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(8.5rem,1fr));gap:1px;
+  background:var(--line-2);border:1px solid var(--line-2);margin-top:2.2rem}
+.cell{background:var(--bg);padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.35rem}
+.cell b{font-size:1.9rem;font-weight:800;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.note{margin-top:1.4rem;padding:1rem 1.15rem;border:1px solid var(--line);border-left:3px solid var(--acc);
+  background:var(--bg-2);font-size:.92rem;max-width:44em}
+section.ch{padding-block:clamp(2.4rem,6vh,3.6rem);border-top:1px solid var(--line-2)}
+.ch-h{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;align-items:baseline;margin-bottom:1.6rem}
+.ch-h .lead{color:var(--muted);font-size:.95rem;max-width:38em;flex:1 1 18rem}
+.f{border-top:1px solid var(--line-2);padding:1rem 0 1.05rem;padding-left:.9rem;position:relative}
+.f::before{content:"";position:absolute;left:0;top:1rem;bottom:1.05rem;width:2px;background:var(--p3)}
+.f--p0::before{background:var(--p0)}.f--p1::before{background:var(--p1)}.f--p2::before{background:var(--p2)}
+.f--no{opacity:.55}
+.f-h{display:flex;flex-wrap:wrap;gap:.55rem;align-items:center;font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase}
+.sev{font-weight:600;color:var(--p3)}
+.f--p0 .sev{color:var(--p0)}.f--p1 .sev{color:var(--p1)}.f--p2 .sev{color:var(--p2)}
+.fid{color:var(--muted)}
+.eff{margin-left:auto;color:var(--muted);border:1px solid var(--line);padding:.05rem .4rem}
+.st{padding:.05rem .45rem;border:1px solid var(--line)}
+.st--ok{color:var(--sig);border-color:var(--sig)}
+.st--no{color:var(--muted);text-decoration:line-through}
+.st--open{color:var(--muted)}
+.ev{margin-top:.85rem;display:grid;gap:.3rem;font-size:.9rem;color:var(--muted);max-width:52em}
+.ev p{overflow-wrap:anywhere}
+.ev-l{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--fg);margin-top:.5rem}
+.lensgrp{margin-bottom:2rem}
+.lens-l{font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--fg);
+  padding-bottom:.5rem;border-bottom:1px solid var(--line)}
+.lens-l b{color:var(--muted);font-weight:400}
+ol.plan{list-style:none;padding:0;margin:0;counter-reset:s;display:grid;gap:0}
+ol.plan li{counter-increment:s;border-top:1px solid var(--line-2);padding:1.05rem 0 1.05rem 3.2rem;position:relative}
+ol.plan li::before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:1.15rem;
+  font-family:var(--mono);font-size:.8rem;color:var(--acc);font-weight:600}
+ol.plan b{display:block;font-weight:600}
+ol.plan span{color:var(--muted);font-size:.93rem}
+code{font-family:var(--mono);font-size:.86em;background:var(--bg-2);border:1px solid var(--line-2);padding:.05rem .3rem}
+footer.end{padding-block:2.5rem;border-top:1px solid var(--line-2);color:var(--muted);font-size:.86rem}
+@media (prefers-reduced-motion:no-preference){.f{transition:none}}
+</style>
+</head>
+<body>
+<div class="rim"></div>
+<div class="wrap">
+
+<header class="top">
+  <p class="label">Befund · 2. September 2026 · mccain-digital.vercel.app</p>
+  <h1 style="margin-top:.8rem">Was die Seite<br><span class="dim">noch nicht ist.</span></h1>
+  <p class="lede">Acht Prüf-Linsen sind mit einem echten Browser durch die laufende Seite gegangen —
+    Layout auf vier Viewports, Motion, Mikrointeraktion, Informationsarchitektur, Award-Benchmark,
+    Seiten-Konsistenz, A11y und Performance. 68 Funde. Elf davon habe ich anschließend selbst
+    nachgemessen; drei sind P0.</p>
+
+  <div class="board">
+    <div class="cell"><p class="label">Funde</p><b>68</b></div>
+    <div class="cell"><p class="label">P0</p><b style="color:var(--p0)">3</b></div>
+    <div class="cell"><p class="label">P1</p><b style="color:var(--p1)">17</b></div>
+    <div class="cell"><p class="label">Nachgemessen</p><b style="color:var(--sig)">11</b></div>
+    <div class="cell"><p class="label">Ungeprüft</p><b>57</b></div>
+  </div>
+
+  <p class="note"><b>Zum Status der Prüfung.</b> Der Audit war zweistufig angelegt: acht Befund-Linsen,
+    danach vier Skeptiker, die jeden Fund widerlegen sollten. Die Befund-Stufe lief vollständig
+    (1,16 Mio Token, 545 Werkzeugaufrufe). Die vier Skeptiker sind am Session-Limit gescheitert.
+    Ich habe deshalb die schwersten Funde selbst nachgemessen — die sind unten als
+    <span class="st st--ok">nachgemessen</span> markiert und tragen ihre Messwerte. Alles andere ist
+    <span class="st st--open">ungeprüft</span>: plausibel und mit Beleg versehen, aber nicht
+    gegengeprüft. Erfahrungswert bei dieser Methode: 30–60 % Fehlalarm.</p>
+</header>
+
+<section class="ch">
+  <div class="ch-h">
+    <div><p class="label">(01)</p><h2>Nachgemessen</h2></div>
+    <p class="lead">Diese elf habe ich selbst im Browser reproduziert und mit Zahlen belegt.
+      Einen davon konnte ich widerlegen.</p>
+  </div>
+  <article class="f f--p0"><div class="f-h"><span class="sev">P0</span><span class="fid">LM-1</span><span class="st st--ok">nachgemessen</span><span class="eff" title="Aufwand">S</span></div><h3>index-Footer bricht unter 760px: CTA-Spalte kollabiert auf 0px, Text ueberlagert die Linkspalten</h3><div class="ev"><p class="ev-l">Beleg</p><p>Screenshot m390-16-contact-b.png: &#x27;One mail is enough…&#x27; laeuft Wort fuer Wort ueber die Spalten &#x27;STUDIO/SERVICES/WHERE WE ARE&#x27;, Labels drucken als &#x27;NEXTSTUDIO STEP&#x27; uebereinander. eval auf .foot-top bei 390px: computed grid-template-columns &#x27;0px 303px&#x27;, .foot-say Rect w=0/h=359. Ursache: v3.css:4869-4877 (.foot-top { grid-template-columns: minmax(0,1fr) minmax(0,32rem) }) — die Mobile-Query v3.css:5019 (max-width:760px) stellt nur .foot-cols auf 2 Spalten um, .foot-top nie. Betrifft nur index.html; die Service-Seiten nutzen den einfachen Footer (svc390-14.png ok). Bei 1090px korrekt (w1090-01-footer.png).</p><p class="ev-l">Vorschlag</p><p>Im bestehenden @media (max-width:760px)-Block (v3.css:5019) zusaetzlich .foot-top { grid-template-columns: 1fr } setzen (CTA-Block ueber die Linkspalten stapeln); optional bei ~900px schon auf 1 Spalte gehen, weil die CTA-Spalte dort bereits unter 200px faellt.</p></div></article>
+<article class="f f--p0"><div class="f-h"><span class="sev">P0</span><span class="fid">UI-1</span><span class="st st--ok">nachgemessen</span><span class="eff" title="Aufwand">S</span></div><h3>Header-CTA &quot;Start a project&quot; wird beim Hover komplett unsichtbar (Pixel-Engine sampelt Gradient-Button falsch)</h3><div class="ev"><p class="ev-l">Beleg</p><p>Screenshots ui-03-hover-primary.png + ui-04-header-btn-check.png: rechte obere Ecke leer, Button weg, solange der Mauszeiger auf ihm steht. eval: Button hat Klasse &#x27;btn pxbtn px-active&#x27;, computed color/background rgba(0,0,0,0); Canvas-Auslese: 386 gemalte Pixel mit Durchschnittsfarbe rgb(11,11,12) = #0b0b0c auf #0b0b0c-Header — unsichtbar in beiden Themes (Header bleibt auch im Light-Theme schwarz, ui-10). Ursache: pixel-engine.js build() liest nur cs.backgroundColor (transparent, weil .nav .btn per v3.css:5175 ein repeating-linear-gradient als background-image traegt) und cs.color (#0b0b0c) — gesampelt wird also nur near-black Text auf nichts. Verdrahtet via common.js:488 (&#x27;.btn:not(.btn--ghost)&#x27;). Erholung erst bei pointerleave (px-active wird wieder entfernt, verifiziert per eval).</p><p class="ev-l">Vorschlag</p><p>In pixel-engine.js build() den Fall &#x27;backgroundColor transparent, aber backgroundImage gesetzt&#x27; behandeln: entweder (a) diese Buttons gar nicht verpixeln (in common.js:488 &#x27;.nav .btn&#x27; ausschliessen — der native Hover translateY+brightness bleibt), oder (b) beim Sampling eine Fallback-Face zeichnen (Accent-Gelb als Pill-Grund + #0b0b0c-Text), damit die Pixel auf dem dunklen Header sichtbar sind. Variante (a) ist die kleinste sichere Loesung, (b) erhaelt den Effekt.</p></div></article>
+<article class="f f--p0"><div class="f-h"><span class="sev">P0</span><span class="fid">IA-1</span><span class="st st--ok">nachgemessen</span><span class="eff" title="Aufwand">M</span></div><h3>Kauf-Funnel endet auf der ALTEN contact.html — sichtbarer Systembruch am Punkt der hoechsten Kaufabsicht</h3><div class="ev"><p class="ev-l">Beleg</p><p>Screenshots ia-12-contact-page.png / ia-13-contact-page2.png: contact.html rendert das Altdesign mit gerasterter Pixel-Ueberschrift (&#x27;Tell us what you have in mind.&#x27;) und alter Pillen-Statusleiste — direkt neben dem neuen Index-Look. Dorthin verlinken: alle 4 Service-Seiten (services/ai-tools.html:683 CTA-Band &#x27;../contact.html&#x27; + Footer :705), legal/* (je 2x), 404.html (:52, :75), das Cmd+K-Menue (&#x27;Start a project&#x27; → contact.html, data.js:59, Screenshot ia-17-cmdk.png) und sitemap.xml (Eintrag https://mccain-digital.com/contact.html). Die neue index.html verlinkt contact.html dagegen 0x (grep: nur #contact-Anker + mailto).</p><p class="ev-l">Vorschlag</p><p>Beides bauen, wie der Owner es will (&#x27;wir brauchen eine kontakt seite&#x27;): (1) #contact-Anker auf index bleibt der Schnellweg (Formular + Mail). (2) contact.html im neuen System neu aufbauen — hero--stage-Kopf wie services/ai-tools.html, Formular, plus die drei Module, die es heute exklusiv traegt (siehe IA-2/IA-3): 4-Schritte-Prozess, Anti-Fit-Liste, Service-Router &#x27;Not sure which one it is?&#x27;. Alle bestehenden Links (Services, Legal, 404, Cmd+K, Sitemap) bleiben dann gueltig — kein Link muss angefasst werden, nur die Seite selbst. Optional danach: &#x27;Contact&#x27; als vierten Punkt in die Index-Footer-Spalte &#x27;Studio&#x27;.</p></div></article>
+<article class="f f--p1"><div class="f-h"><span class="sev">P1</span><span class="fid">LM-2</span><span class="st st--ok">nachgemessen</span><span class="eff" title="Aufwand">S</span></div><h3>Alle Eingabefelder 12.8px Font — iOS Safari zoomt beim Fokus (Formular, AI-Konsole)</h3><div class="ev"><p class="ev-l">Beleg</p><p>eval bei 390px: #contact input 12.8px, #contact textarea 12.8px, Konsolen-Input (#ai) 12.8px; viewport-meta &#x27;width=device-width, initial-scale=1&#x27; ohne Zoom-Sperre (korrekt fuer A11y — dadurch greift aber der bekannte iOS-Auto-Zoom bei Input-Font &lt; 16px). Auf echten iPhones springt der Viewport beim Antippen von YOUR NAME/EMAIL/&#x27;Ask us anything…&#x27; auf ~125% und bleibt verschoben — genau auf den zwei Conversion-Flaechen der Seite.</p><p class="ev-l">Vorschlag</p><p>Fuer Formularfelder und Konsolen-Input unterhalb 760px (oder via @media (pointer:coarse)) font-size: max(16px, var(--t-small)) setzen; Optik auf Desktop bleibt unveraendert. Vanilla-CSS, kein JS.</p></div></article>
+<article class="f f--p1"><div class="f-h"><span class="sev">P1</span><span class="fid">LM-3</span><span class="st st--ok">nachgemessen</span><span class="eff" title="Aufwand">M</span></div><h3>Touch-Targets unter 44px: Konsolen-Chips 34px, Karten-Links 23px, Header-Controls 36/38px</h3><div class="ev"><p class="ev-l">Beleg</p><p>Nachgemessen per eval bei 390px (index.html): .chip 34px hoch (v3.css:1268 — die Vorschlags-Chips sind DIE Interaktion der AI-Sektion), .scard-link 23px (&#x27;Visit the product →&#x27;/&#x27;More on this →&#x27; — auf Touch der einzige Weg in Cases/Services, weil .case-peek nur per :hover erscheint, v3.css:1543, aria-hidden), .contact-mail 30px, .menu-t 80x36, .theme-t 38x38, Footer-Links 20-22px. services/ai-tools.html: Breadcrumb-Links 16px, Inline-CTA &#x27;Tell us yours and we&#x27;ll sketch the build&#x27; 242x16, Footer-Links 16-20px. FAQ-Rows (59px), Tabs (45px), Pager-Pfeile (46px), Formular (49px) sind sauber.</p><p class="ev-l">Vorschlag</p><p>min-height per Padding aufstocken statt Font vergroessern: .chip auf &gt;=44px (padding-block erhoehen), .scard-link/.contact-mail/Breadcrumb/Inline-CTAs padding-block ~ .6rem + negative margin fuer unveraenderte Optik, .menu-t/.theme-t auf 44px Boxhoehe (Icon-Groesse gleich lassen). Footer-Linkliste line-height/gap leicht erhoehen.</p></div></article>
+<article class="f f--p1"><div class="f-h"><span class="sev">P1</span><span class="fid">FX-1</span><span class="st st--ok">nachgemessen</span><span class="eff" title="Aufwand">S</span></div><h3>--d-micro/--d-ui werden benutzt, sind aber nirgends definiert — 5 Hover-Transitions laufen mit 0s (Snap statt Micro)</h3><div class="ev"><p class="ev-l">Beleg</p><p>v3.css definiert nur --e-out/--e-io (Z. 67-68); grep nach &#x27;--d-micro:&#x27; / &#x27;--d-ui:&#x27; findet KEINE Definition. Benutzt wird var(--d-micro) aber in v3.css:4836 (.worktrack .case + .testi Hover-Lift), 4861 (.foot-col/.foot-bar a::after Underline-Wipe), 4908 (.foot-mail border-color), 4938 + 5012 (Footer-Link-Farben). Browser-Messung (eval): getComputedStyle(.worktrack .case).transitionDuration === &#x27;0s&#x27;, ::after der Footer-Links ebenfalls &#x27;0s&#x27;, :root --d-micro === &#x27;&#x27;. Ungueltige var() macht die ganze Shorthand invalid-at-computed-value-time -&gt; transition: all 0s. Direkt daneben animiert die Parallel-Implementierung .foot-links/.foot-legal a::after (v3.css:4341) mit hartem .16s — derselbe Footer verhaelt sich je nach Linkgruppe unterschiedlich.</p><p class="ev-l">Vorschlag</p><p>Auf :root die Tokens definieren: --d-micro: .16s; --d-ui: .22s (eine Zeile neben --e-out in v3.css Z. 67). Danach optional die Literal-.16s-Zwillinge (4341, 359) auf var(--d-micro) ziehen, damit es genau eine Quelle gibt.</p></div></article>
+<article class="f f--p1"><div class="f-h"><span class="sev">P1</span><span class="fid">FX-2</span><span class="st st--ok">nachgemessen</span><span class="eff" title="Aufwand">S</span></div><h3>Nav-CTA &#x27;Start a project&#x27; verschwindet beim Hover komplett — Pixel-Zerfall erzeugt auf dem Spektrum-Button keine sichtbaren Partikel</h3><div class="ev"><p class="ev-l">Beleg</p><p>Screenshots fx-14-navcta-hover.png und fx-15-navcta-hover-80ms.png: schon 80ms nach Hover ist der Button eine leere Stelle in der Leiste, keinerlei Debris (Vergleich: Hero-CTA in fx-06-btn-hover-mid.png zeigt eine dichte gelbe Partikelwolke). eval: das Button-Canvas (265x166 device-px) enthaelt nur 409 opake Subpixel. Ursache im Code: pixel-engine.js button()/build() rendert das Face aus cs.backgroundColor (Z. ~927-944) — der Nav-CTA hat aber background: repeating-linear-gradient (v3.css:5182), also backgroundColor transparent -&gt; hasBg=false; border-color: transparent (5181) -&gt; kein Stroke; bleibt nur der Text in #0b0b0c, der auf der Ink-Nav unsichtbar ist. .px-active blendet das echte Face aus -&gt; Button weg. Betrifft jede Seite mit der Leiste (Service-Seiten identisch).</p><p class="ev-l">Vorschlag</p><p>In common.js bootPixels() Buttons mit computed background-image !== &#x27;none&#x27; vom PixelFX.button()-Wiring ausnehmen (sie behalten den CSS-Hover translateY/brightness aus v3.css:5188) — ein Filter im querySelectorAll-ForEach. Alternativ (groesser): build() beibringen, background-image via drawImage eines gradient-gefuellten Offscreen zu sampeln.</p></div></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">LD-3</span><span class="st st--ok">nachgemessen</span><span class="eff" title="Aufwand">S</span></div><h3>#proof nutzt band--tight wie das P.S.-Band: Kapitelkopf klebt an der Nav-Linie und faellt aus dem vertikalen Rhythmus der Voll-Kapitel</h3><div class="ev"><p class="ev-l">Beleg</p><p>eval: padding-block #proof 68.04px (band--tight, v3.css:253-255) vs. 105.84px bei #ai/#work/#services/#studio/#faq/#contact. index.html:620 &lt;section class=&quot;band band--tight&quot; id=&quot;proof&quot;&gt;. Screenshot 1512-08-proof.png: Label &quot;(07) — PROOF&quot; bei y=76, nur ~9px unter der gestrichelten Nav-Linie (y=67); 1920-07-proof.png: y=81, ~14px Abstand. Alle anderen Voll-Kapitel setzen ihr Label ~114px unter die Bandkante.</p><p class="ev-l">Vorschlag</p><p>band--tight bei #proof entfernen (normales .band-Padding), damit das Kapitel dieselbe Kopf-Luft wie work/services/faq bekommt. band--tight nur fuer das bewusst kompakte P.S.-Band #score behalten. Falls proof bewusst dichter sein soll: mindestens das padding-top auf Normalmass heben, padding-bottom tight lassen.</p></div></article>
+<article class="f f--p3"><div class="f-h"><span class="sev">P3</span><span class="fid">FX-8</span><span class="st st--ok">nachgemessen</span><span class="eff" title="Aufwand">S</span></div><h3>--wave-stops-quiet ist toter Code (definiert, nie referenziert)</h3><div class="ev"><p class="ev-l">Beleg</p><p>v3.css:3649 definiert --wave-stops-quiet (#f5c518 -&gt; Gruen -&gt; zurueck ueber 480px); grep ueber v3.css und alle 6 JS-Files findet null Verwendungen. Die Rainbow-Entscheidung fuer Rim, Nav-CTA und Studio-Wavetext ist owner-dokumentiert (CSS-Kommentar v3.css:3643-3648, HANDOFF.md:126 und :1233) und steht nicht zur Debatte — aber der Quiet-Fallback haengt als zweite, nie gezogene Wahrheit daneben.</p><p class="ev-l">Vorschlag</p><p>Entweder loeschen oder mit einem Einzeiler-Kommentar als bewusst geparkte Alternative markieren (&#x27;unbenutzt — Quiet-Variante falls das Spektrum je zurueckgenommen wird&#x27;), damit kein spaeterer Edit sie fuer die aktive Palette haelt.</p></div></article>
+<article class="f f--p3"><div class="f-h"><span class="sev">P3</span><span class="fid">SC-6</span><span class="st st--ok">nachgemessen</span><span class="eff" title="Aufwand">S</span></div><h3>Positiv-Befund: keine Token-Drift — alle 6 geprueften Seiten erben identisch aus v3.css</h3><div class="ev"><p class="ev-l">Beleg</p><p>Eval getComputedStyle(documentElement) auf index, services/ai-tools, services/web-apps, contact, 404, legal/imprint: --t-display &#x27;clamp(2.6rem, min(6.7vw, 13vh), 8rem)&#x27;, --t-h2 &#x27;clamp(1.9rem, 4.1vw, 3.65rem)&#x27;, --r &#x27;14px&#x27;, bg &#x27;#0b0b0c&#x27; — ueberall wortgleich; jede Seite laedt genau ein Stylesheet (v3.css bzw. ../v3.css) und dieselben 5-6 Skripte. Die H1-Differenz index 101.3px vs Unterseiten 99.2px ist dokumentierte Absicht (.hero--svc .hero-h clamp(2.4rem,7vw,6.2rem), v3.css:2981 mit Begruendungskommentar). Nav-Markup (.nav stuck) und Pacman-Punktlinie sind auf allen 6 Seiten identisch; der wahrgenommene Bruch index-&gt;Service ist entsprechend klein (Foto-Buehne vs Dither-Feld, verwandt) — die echten Bruchstellen sind Footer (SC-1) und contact/404 (SC-2/SC-3).</p><p class="ev-l">Vorschlag</p><p>Keine Aktion noetig — die Ein-Stylesheet-Architektur traegt. Bei kuenftigen Seiten weiter nur v3.css referenzieren, keine Seiten-lokalen Token-Redefinitionen einfuehren (das Inline-Style-Muster der 404, SC-3, ist die einzige Stelle, die dieses Prinzip aktuell unterlaeuft).</p></div></article>
+<article class="f f--p2 f--no"><div class="f-h"><span class="sev">P2</span><span class="fid">AP-2</span><span class="st st--no">widerlegt</span><span class="eff" title="Aufwand">S</span></div><h3>Webfont wird doppelt heruntergeladen (94 KB statt 47 KB)</h3><div class="ev"><p class="ev-l">Beleg</p><p>performance.getEntriesByType(&#x27;resource&#x27;): schibsted-normal-latin.woff2 erscheint zweimal — initiatorType &#x27;link&#x27; (Preload, index.html:42) und &#x27;fetch&#x27; (common.js:33, data-URI-Embed für die Pixel-Engine), beide mit vollem transferSize 47052. curl -I auf /fonts/schibsted-normal-latin.woff2 liefert &#x27;Cache-Control: no-store&#x27; — der zweite Fetch kann den Cache nie treffen.</p><p class="ev-l">Vorschlag</p><p>In common.js:33 fetch(..., {cache: &#x27;force-cache&#x27;}) setzen UND in der Produktion (Siteground) /fonts/ mit &#x27;Cache-Control: public, max-age=31536000, immutable&#x27; ausliefern — dann liest der zweite Zugriff aus dem HTTP-Cache (Verifikation: transferSize ≈ 0 im zweiten Resource-Entry).</p></div></article>
+</section>
+
+<section class="ch">
+  <div class="ch-h">
+    <div><p class="label">(02)</p><h2>Was fehlt</h2></div>
+    <p class="lead">Module, Sektionen und Informationsarten, die es auf der Seite nicht gibt —
+      unabhängig davon, dass Texte und Bilder bewusst Platzhalter sind.</p>
+  </div>
+  <article class="f f--p0"><div class="f-h"><span class="sev">P0</span><span class="fid">IA-1</span><span class="st st--ok">nachgemessen</span><span class="eff" title="Aufwand">M</span></div><h3>Kauf-Funnel endet auf der ALTEN contact.html — sichtbarer Systembruch am Punkt der hoechsten Kaufabsicht</h3><div class="ev"><p class="ev-l">Beleg</p><p>Screenshots ia-12-contact-page.png / ia-13-contact-page2.png: contact.html rendert das Altdesign mit gerasterter Pixel-Ueberschrift (&#x27;Tell us what you have in mind.&#x27;) und alter Pillen-Statusleiste — direkt neben dem neuen Index-Look. Dorthin verlinken: alle 4 Service-Seiten (services/ai-tools.html:683 CTA-Band &#x27;../contact.html&#x27; + Footer :705), legal/* (je 2x), 404.html (:52, :75), das Cmd+K-Menue (&#x27;Start a project&#x27; → contact.html, data.js:59, Screenshot ia-17-cmdk.png) und sitemap.xml (Eintrag https://mccain-digital.com/contact.html). Die neue index.html verlinkt contact.html dagegen 0x (grep: nur #contact-Anker + mailto).</p><p class="ev-l">Vorschlag</p><p>Beides bauen, wie der Owner es will (&#x27;wir brauchen eine kontakt seite&#x27;): (1) #contact-Anker auf index bleibt der Schnellweg (Formular + Mail). (2) contact.html im neuen System neu aufbauen — hero--stage-Kopf wie services/ai-tools.html, Formular, plus die drei Module, die es heute exklusiv traegt (siehe IA-2/IA-3): 4-Schritte-Prozess, Anti-Fit-Liste, Service-Router &#x27;Not sure which one it is?&#x27;. Alle bestehenden Links (Services, Legal, 404, Cmd+K, Sitemap) bleiben dann gueltig — kein Link muss angefasst werden, nur die Seite selbst. Optional danach: &#x27;Contact&#x27; als vierten Punkt in die Index-Footer-Spalte &#x27;Studio&#x27;.</p></div></article>
+<article class="f f--p1"><div class="f-h"><span class="sev">P1</span><span class="fid">IA-2</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">M</span></div><h3>Kein Prozess-/Ablauf-Modul auf der Startseite — der 4-Schritte-Prozess existiert nur auf der alten contact.html</h3><div class="ev"><p class="ev-l">Beleg</p><p>index.html Sektionen: stage/ai/work/score/services/studio/faq/proof/contact (Zeilen 262-717) — kein &#x27;How it works&#x27;. Der fertige Prozess liegt versteckt auf contact.html &#x27;(02) — What happens next&#x27;: 01 kostenlose Ersteinschaetzung, 02 ein Gespraech 30-45 min, 03 Fixquote in 48h, 04 Klickbares in Woche eins (Screenshots ia-13-contact-page2.png, ia-14-contact-process.png). HANDOFF.md nennt das selbst &#x27;Prozess-Abschnitt und Preisrahmen — das Loch im Kaufpfad&#x27; (Punkt 4 der Naechstes-Liste). Zeitrahmen und Preis-Signal sind dagegen abgedeckt (FAQ data.js:73-80: &#x27;low five figures&#x27;, &#x27;3-6 weeks&#x27; etc.) — was fehlt, ist der ABLAUF.</p><p class="ev-l">Vorschlag</p><p>Kompaktes Prozess-Band auf index (die vier Schritte von contact.html 1:1 uebernehmen — Text existiert schon, nichts erfinden), platziert zwischen #faq und #proof oder direkt vor #contact als Bruecke zum Formular. Auf der neuen contact.html bleibt die ausfuehrliche Fassung (IA-1). Vanilla: eine band-Sektion mit ol + Mono-Nummern im bestehenden Label-Stil.</p></div></article>
+<article class="f f--p1"><div class="f-h"><span class="sev">P1</span><span class="fid">IA-3</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Anti-Fit-Modul (&#x27;Sometimes the right answer is don&#x27;t hire us&#x27;) auf index nicht auffindbar — Cmd+K verspricht es sogar, die FAQ hat es nicht</h3><div class="ev"><p class="ev-l">Beleg</p><p>Das Modul existiert fertig auf contact.html &#x27;(03) — Being straight about it&#x27; mit Scale/Price/Presence-Liste (Screenshot ia-15-contact-rest.png). Auf index ist derselbe Inhalt NUR ueber die AI-Konsole erreichbar (KB-Eintrag data.js:125, Chip &#x27;Why should I NOT hire you?&#x27;, Screenshot ia-02-ai.png) — d.h. nur wer aktiv fragt, sieht ihn. Inkonsistenz: die Cmd+K-Beschreibung von &#x27;Straight answers&#x27; verspricht &#x27;…and why you might not want us&#x27; (data.js:58), aber die 6 FAQ-Tabs (data.js:71-97: cost/time/who/AI/after-launch/self-host) enthalten keine solche Frage (Screenshot ia-08-faq.png).</p><p class="ev-l">Vorschlag</p><p>Die Anti-Fit-Liste als 7. FAQ-Tab &#x27;When should we NOT hire you?&#x27; aufnehmen (Antwort existiert wortgleich als KB-Eintrag data.js:125 — nur in die FAQ-Liste spiegeln, wie es cost/timeline schon sind). Damit stimmt auch die Cmd+K-Beschreibung wieder. Die grosse Fassung bleibt auf der neuen contact.html.</p></div></article>
+<article class="f f--p1"><div class="f-h"><span class="sev">P1</span><span class="fid">IA-4</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">M</span></div><h3>Keine Work-Detail-Struktur — 3 von 4 Work-Karten enden auf &#x27;#contact&#x27;, und fuer die geplanten Kundenfaelle existiert keine Seitenform</h3><div class="ev"><p class="ev-l">Beleg</p><p>Screenshot ia-05-work-top.png: Carousel &#x27;Things that actually shipped&#x27;, 4 Karten. Karte 1 (whatever-recall) verlinkt extern (index.html:432), Karten 2-4 verlinken auf #contact mit &#x27;Want one like it →&#x27; / &#x27;Placeholder →&#x27; (index.html:442-496). HANDOFF Punkt 2 plant &#x27;zwei Kundenfaelle, drei freigegebene Zitate&#x27; — es gibt aber keine Zielseite, in die ein Fall (Problem → Build → Ergebnis) einziehen koennte; die Karte traegt nur 3 Meta-Zeilen (STACK/SCOPE/STATUS). Eine Award-/Flagship-Studioseite traegt Case-Detailseiten; hier fehlt das Modul strukturell, nicht inhaltlich.</p><p class="ev-l">Vorschlag</p><p>Jetzt die Schablone festlegen, nicht erst wenn der Content kommt: work/&lt;slug&gt;.html im neuen System (hero--stage-Kopf + Fakten-Spalte wie services/ai-tools.html, plus Vorher/Nachher- bzw. Ergebnis-Block ohne erfundene Zahlen). Karten behalten ihre Rolle als Index-Oberflaeche; &#x27;Open →&#x27;/&#x27;More&#x27; zeigt auf die Detailseite sobald ein Fall freigegeben ist. Sitemap/llms.txt-Eintraege pro Fall einplanen.</p></div></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">IA-5</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Engagement-Modell nach Launch hat kein Modul — &#x27;we stay&#x27; bleibt Behauptung ohne Form</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">IA-6</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">L</span></div><h3>EN-only fuer bayerische Zielgruppe ist per HANDOFF Absicht (sequenziert) — aber die IA reserviert keinen Platz fuer die DE-Version</h3></article>
+<article class="f f--p3"><div class="f-h"><span class="sev">P3</span><span class="fid">IA-7</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">L</span></div><h3>Kein Writing/Notes-Modul — fuer eine AI-Glaubwuerdigkeits-Studioseite die fehlende Flagship-Komponente (Karriere dagegen: bewusst nein)</h3></article>
+<article class="f f--p3"><div class="f-h"><span class="sev">P3</span><span class="fid">IA-8</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Zwei Footer-Architekturen: Index-Footer ohne Contact-Eintrag in den Link-Spalten, Service-Seiten mit abweichendem Schmal-Footer</h3></article>
+<article class="f f--p3"><div class="f-h"><span class="sev">P3</span><span class="fid">IA-9</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Stack-Beweis-Streifen ist rein AI-seitig — Web/Software-Staerken haben auf index keinen Beleg-Slot</h3></article>
+</section>
+
+<section class="ch">
+  <div class="ch-h">
+    <div><p class="label">(03)</p><h2>Award-Latte</h2></div>
+    <p class="lead">Bewertet nach Awwwards-Gewichtung: Design 40 %, Usability 30 %,
+      Creativity 20 %, Content 10 %. Note und Hebel sind eine Einschätzung, keine Messung.</p>
+  </div>
+  <article class="f f--p1"><div class="f-h"><span class="sev">P1</span><span class="fid">AW-2</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Der Scroll flacht nach (04) ab: es gibt keinen zweiten typografischen Hoehepunkt — obwohl der Set-Piece-Effekt dafuer (voidReveal) fertig gebaut im Repo liegt und nirgends verwendet wird</h3><div class="ev"><p class="ev-l">Beleg</p><p>pixel-engine.js:1630 definiert voidReveal (im Kommentar selbst als &quot;the AI-section signature&quot; beschrieben: Schwarzes-Loch-Disc legt echten DOM-Text als Pixelfeld frei, SEO/A11y intakt), Export pixel-engine.js:2844 — grep ueber alle Live-*.html und *.js: 0 Verwendungen. Sichtbare Folge in der Screenshot-Reihe: Hero ist der Hoehepunkt (aw-01), danach tragen nur noch Slider (aw-03), Stapelkarten (aw-05/06); (03)-Billboard (aw-04-score-dark.png), Studio (aw-07), Proof (aw-09) und das Schluss-Statement im Footer (aw-11-footer-dark.png) sind statisch gesetzte Zeilen.</p><p class="ev-l">Vorschlag</p><p>voidReveal genau EINMAL einsetzen, als zweiten Akzent in der hinteren Haelfte: entweder auf der Billboard-Zeile der (03)-Sektion oder auf dem Footer-Statement &quot;One mail is enough...&quot;. Ausloesung per IntersectionObserver nach dem Muster von bootPixels (common.js:459-473), hinter dem bestehenden reduced-Guard. Kein neuer Code noetig ausser dem Aufruf; einmal abspielen, nicht loopen — sonst konkurriert er mit dem Hero.</p></div></article>
+<article class="f f--p1"><div class="f-h"><span class="sev">P1</span><span class="fid">AW-3</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Jede interne Navigation ist ein harter Schnitt — keine Seiten-Uebergaenge, obwohl CSS-only View Transitions ohne Lighthouse-Risiko machbar waeren</h3><div class="ev"><p class="ev-l">Beleg</p><p>grep &quot;view-transition|startViewTransition&quot; ueber v3.css, v3.js, common.js, menu.js, index.html: 0 Treffer. Beim Navigieren index → services/ai-tools.html (aw-25-svc-ai-tools.png) und index → contact.html (aw-26-contact-page.png) repaintet die Seite hart; auch die Palette springt per location.href (menu.js:193).</p><p class="ev-l">Vorschlag</p><p>Cross-Document View Transitions rein deklarativ: @view-transition { navigation: auto } in v3.css plus eine kurze ::view-transition-old/new-Regel (z. B. 200ms Fade, die fixe Leiste per view-transition-name ausgenommen), eingehuellt in @media (prefers-reduced-motion: no-preference). Null JS, null Dependencies, progressives Enhancement (Browser ohne Support behalten den Schnitt), kein struktureller Einfluss auf die 4x100-Baseline — der Effekt laeuft erst NACH dem Load der Zielseite.</p></div></article>
+<article class="f f--p1"><div class="f-h"><span class="sev">P1</span><span class="fid">AW-4</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">M</span></div><h3>contact.html und 404.html brechen das Refresh-Typosystem an den zwei emotionalsten Punkten des Funnels — der Juror landet per Haupt-CTA direkt im Altdesign</h3><div class="ev"><p class="ev-l">Beleg</p><p>aw-26-contact-page.png: gerasterte Punktmatrix-Headline &quot;Tell us what you have in mind.&quot; gegen die massiven Solid-Displays von index (aw-01) und Service-Seiten (aw-25); aw-24-404.png: dieselbe Rasterschrift. Der Rest beider Seiten (Leiste, Breadcrumb, Kicker, Karten) ist bereits Neusystem — nur die Headline-Behandlung stammt aus dem Altdesign (im Auftrag als bekannt markiert). Owner-Regel &quot;Pixel-Engine nicht in Ueberschriften&quot; gilt ausdruecklich mit Ausnahme contact/404, d. h. die Angleichung ist erlaubt, nicht verboten.</p><p class="ev-l">Vorschlag</p><p>Beide Headlines auf das vorhandene .hero--svc-Token-System der Service-Seiten ziehen (services/*.html sind die fertige Vorlage, aw-25). Der 404-Charakter bleibt erhalten, wenn der Pixel-Charme dort in ein Element unterhalb der Headline wandert (z. B. die bestehende Sand-/Zerfallsflaeche), statt in die Ueberschrift selbst. Contact zuerst — es ist das Ziel jedes &quot;Start a project&quot;-Klicks.</p></div></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">AW-5</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Default-Scrollbars (dicker weisser Balken) in Command-Palette und AI-Konsole kollidieren mit den polierten Verlaufs-Rahmen</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">AW-6</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Work-Slider: Nachbarkarten werden an der Viewport-Kante mitten im Text abgeschnitten — der Peek liest sich als Unfall, nicht als Absicht</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">AW-7</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">M</span></div><h3>90-Sekunden-Problem: Brief-Tab, Palette-Ask, Favicon-Dissolve, Pac-Man-Gags und die 404 bleiben in einem Jury-Besuch unentdeckt</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">AW-8</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">L</span></div><h3>Kaufpfad-Module fehlen: kein Prozess-/Ablauf-Abschnitt, kein Preisrahmen, keine interne Case-Tiefe hinter den Work-Karten</h3></article>
+<article class="f f--p3"><div class="f-h"><span class="sev">P3</span><span class="fid">AW-1</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Juror-Note: Design 8/10 · Usability 8/10 · Creativity 7.5/10 · Content 6.5/10 — gewichtet ca. 7.7 (SOTD-Shortlist-faehig, noch kein sicherer Gewinn)</h3></article>
+<article class="f f--p3"><div class="f-h"><span class="sev">P3</span><span class="fid">AW-9</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Proof-Karten stehen als einzige Flaechen ausserhalb der Motivsprache — flaches Grau ohne Rim-, Nummern- oder Pixel-Anleihe</h3></article>
+<article class="f f--p3"><div class="f-h"><span class="sev">P3</span><span class="fid">AW-10</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Die Hero-Interaktion (Schwarzes Loch frisst echte Pixel) hat keinerlei Affordanz — wer den Cursor nicht zufaellig ueber die Buehne bewegt, verpasst den staerksten Effekt der Seite</h3></article>
+<article class="f f--p3"><div class="f-h"><span class="sev">P3</span><span class="fid">AW-11</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Pac-Mans End-of-line-Gag spuckt Pixel in den Haupt-CTA der Leiste</h3></article>
+</section>
+
+<section class="ch">
+  <div class="ch-h">
+    <div><p class="label">(04)</p><h2>Der Rest</h2></div>
+    <p class="lead">38 weitere Funde nach Linse, jeweils nach Schwere sortiert. Alle ungeprüft —
+      hier lohnt die Skeptiker-Runde am meisten.</p>
+  </div>
+  <div class="lensgrp"><p class="lens-l">LD · Layout Desktop <b>6</b></p><article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">LD-1</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Work-Karussell startet bei 01/04 mit breit angeschnittener Platzhalter-Karte links — auf 1920 dominiert abgeschnittener Text den Bandeinstieg</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">LD-2</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>FAQ-Sektionskopf bricht nur bei 1920 aus dem Band-Muster: Hinweistext rutscht unter die H2 statt oben rechts zu stehen</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">LD-4</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">M</span></div><h3>Score-Band (P.S.): rechte Haelfte ist auf beiden Breiten komplett leer — als einziges Band ohne rechtes Gegengewicht</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">LD-5</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">M</span></div><h3>Im Light-Theme verschwindet das Score-Band als Band: der Papier-auf-Ink-Kontrast des P.S.-Moments existiert nur im Dark-Theme</h3></article>
+<article class="f f--p3"><div class="f-h"><span class="sev">P3</span><span class="fid">LD-6</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Fixe &quot;Ask anything&quot;-FAB samt Label-Pille ueberdeckt beim Scrollen rechtsbuendige Hinweistexte der Sektionskoepfe</h3></article>
+<article class="f f--p3"><div class="f-h"><span class="sev">P3</span><span class="fid">LD-7</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Sieben von acht Kapiteln nutzen exakt dieselbe H2-Zweifarbigkeit (weiss + grauer Nachsatz) — die Band-Anatomie kippt von System in Monotonie</h3></article></div>
+<div class="lensgrp"><p class="lens-l">LM · Layout Mobil <b>7</b></p><article class="f f--p1"><div class="f-h"><span class="sev">P1</span><span class="fid">LM-4</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">M</span></div><h3>Command-Menu auf 390: Hover-Preview frisst die Haelfte des Panels, Nav-Liste zeigt nur ~35% ihrer Items, Preview clippt mitten in der Zeile</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">LM-5</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">M</span></div><h3>Hero-Lesefolge auf 390: die drei Fakten stehen ZWISCHEN Intro und H1 — die Headline kommt erst bei ~480px</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">LM-6</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Typo-Floors auf 390 erreicht: Sekundaertext klebt bei 12.8px, Labels bei 10.56px — inklusive Hero-Intro und Reply-SLA-Zeile</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">LM-7</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Work-Scroller auf 390 ohne sichtbaren Peek der naechsten Karte — Swipe-Affordanz haengt an Text und einem Pager eine Kartenhoehe tiefer</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">LM-8</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">M</span></div><h3>Hover-gebundene Inhalte auf Touch unerreichbar — und die Copy fordert explizit zum Hovern auf</h3></article>
+<article class="f f--p3"><div class="f-h"><span class="sev">P3</span><span class="fid">LM-9</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Foto-Buehne auf 390: das Stage-Bild liest sich als schwarze Textur — traegt nicht, frisst aber auch keinen Platz</h3></article>
+<article class="f f--p3"><div class="f-h"><span class="sev">P3</span><span class="fid">LM-10</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>1090x614 (1920@175%): Hero passt vollstaendig in EINEN Viewport — verifiziert, keine Aktion</h3></article></div>
+<div class="lensgrp"><p class="lens-l">FX · Motion & Effekte <b>5</b></p><article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">FX-3</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Reduced-Motion-Luecken: Studio-Wavetext, Status-Punkt-Pulse und Scroll-Cue animieren unter prefers-reduced-motion endlos weiter</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">FX-4</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">M</span></div><h3>Die ersten 3 Sekunden zeigen kein einziges Pixel-Moment — die Signature-Sprache der Seite ist beim Laden unsichtbar</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">FX-5</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Tote Strecke zwischen Services-Stack und Studio-Band: ~305px Leerraum, durch fx-dim zusaetzlich entleert</h3></article>
+<article class="f f--p3"><div class="f-h"><span class="sev">P3</span><span class="fid">FX-6</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Marquee friert beim Verlassen des Viewports mit vollem Skew ein und springt beim Wiedereintritt</h3></article>
+<article class="f f--p3"><div class="f-h"><span class="sev">P3</span><span class="fid">FX-7</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">M</span></div><h3>Timing-System existiert nur dem Namen nach: 25 verschiedene Literal-Durations, Duplikat-Implementierungen driften</h3></article></div>
+<div class="lensgrp"><p class="lens-l">UI · UI-Mikrointeraktion <b>9</b></p><article class="f f--p1"><div class="f-h"><span class="sev">P1</span><span class="fid">UI-2</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Verwaistes &quot;A&quot; mit haengendem Caret in der AI-Konsole bei jedem Menu-zu-Konsole-Handoff</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">UI-3</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">M</span></div><h3>&quot;Ask&quot; im Kommandomenue erzwingt Full-Page-Reload — auch wenn man schon auf index.html ist (Konversation + Scrollkontext gehen verloren)</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">UI-4</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Unstylte Default-Scrollbars (breit, hell) in Kommandomenue-Liste, AI-Konsole und Dock brechen die dunklen Panels</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">UI-5</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Docked-Assistant-Panel: Tabs und Brief-Zeilen brechen im schmalen Layout</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">UI-6</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Service-Karten signalisieren Klickbarkeit (Accent-Rahmen + Spotlight + Ziffern-Reveal), sind aber nicht klickbar</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">UI-7</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Kein Skip-Link — Keyboard-Nutzer muessen auf jeder Seite durch die komplette Navigation</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">UI-8</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">M</span></div><h3>Kontaktformular hat keinerlei Validierungs-Schicht — kein required, keine Fehlerzustaende (Modul fehlt, nicht nur Wiring)</h3></article>
+<article class="f f--p3"><div class="f-h"><span class="sev">P3</span><span class="fid">UI-9</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Kommandomenue kennt keine deutschen Suchbegriffe — &#x27;kontakt&#x27; liefert null Treffer</h3></article>
+<article class="f f--p3"><div class="f-h"><span class="sev">P3</span><span class="fid">UI-10</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Wissensbasis-Luecke: &#x27;mobile apps&#x27; faellt in den generischen Fallback, obwohl der Brief-Generator derselben Seite Mobile Apps kennt und bepreist</h3></article></div>
+<div class="lensgrp"><p class="lens-l">SC · Seiten-Konsistenz <b>5</b></p><article class="f f--p1"><div class="f-h"><span class="sev">P1</span><span class="fid">SC-1</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">M</span></div><h3>Footer-Architektur gespalten: index Mega-Footer, alle 9 anderen Seiten Schmal-Footer</h3></article>
+<article class="f f--p1"><div class="f-h"><span class="sev">P1</span><span class="fid">SC-2</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">M</span></div><h3>contact.html: drei konkrete Abstaende zum Refresh-System (Raster-Headlines, kein Stage-Dither, lose Hero-Stats)</h3></article>
+<article class="f f--p1"><div class="f-h"><span class="sev">P1</span><span class="fid">SC-3</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>404.html: gerasterte H1 plus Inline-Styles statt Systemklassen</h3></article>
+<article class="f f--p1"><div class="f-h"><span class="sev">P1</span><span class="fid">SC-4</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>contact.html: &#x27;Presence&#x27;-Label ueberlappt sichtbar seinen Beschreibungstext</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">SC-5</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>404.html: Nav ohne Work/Services/AI-Links und Footer ohne Verfuegbarkeits-Pille</h3></article></div>
+<div class="lensgrp"><p class="lens-l">AP · A11y & Performance <b>6</b></p><article class="f f--p1"><div class="f-h"><span class="sev">P1</span><span class="fid">AP-1</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">M</span></div><h3>LCP-Element (Hero-H1) wird durch Wort-Stagger um ~715 ms verzögert</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">AP-3</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Kein Skiplink — Keyboard-Nutzer müssen 7 Stops durch den Header</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">AP-4</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Kein prefers-contrast/forced-colors-Handling; Inputs verlieren dort ihren Fokus-Indikator</h3></article>
+<article class="f f--p2"><div class="f-h"><span class="sev">P2</span><span class="fid">AP-5</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>⌘K-Palette-Input #cmInput hat keinen programmatischen Namen</h3></article>
+<article class="f f--p3"><div class="f-h"><span class="sev">P3</span><span class="fid">AP-6</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Theme-Toggle kommuniziert seinen Zustand nicht an Screenreader</h3></article>
+<article class="f f--p3"><div class="f-h"><span class="sev">P3</span><span class="fid">AP-7</span><span class="st st--open">ungeprüft</span><span class="eff" title="Aufwand">S</span></div><h3>Kein metrik-getunter Fallback-Font trotz font-display:swap</h3></article></div>
+</section>
+
+<section class="ch">
+  <div class="ch-h">
+    <div><p class="label">(05)</p><h2>Reihenfolge</h2></div>
+    <p class="lead">Nach Hebelwirkung pro Aufwand, nicht nach Linse.</p>
+  </div>
+  <ol class="plan">
+    <li><b>Der Haupt-CTA muss beim Hover sichtbar bleiben</b>
+      <span><code>pixel-engine.js:928</code> liest <code>backgroundColor</code>; bei einem Gradient-Button ist das
+      <code>rgba(0,0,0,0)</code>, die helle Pille wird nie ins Offscreen gemalt. Übrig bleibt die fast schwarze
+      Beschriftung auf fast schwarzem Grund. Fix: <code>backgroundImage</code> mitlesen und den Verlauf malen —
+      oder Gradient-Buttons vom Effekt ausnehmen. Betrifft genau einen Button, den wichtigsten.</span></li>
+    <li><b>Die zwei fehlenden Timing-Tokens nachziehen</b>
+      <span><code>--d-micro</code> und <code>--d-ui</code> stehen nur in <code>preview/refresh.html:85</code> und wurden
+      bei der System-Übernahme vergessen. <code>v3.css</code> benutzt sie fünfmal — ungültiges <code>var()</code>
+      heißt Dauer 0s, also Sprung statt Übergang. Zwei Zeilen in <code>:root</code>.</span></li>
+    <li><b>Den Index-Footer unter 760 px reparieren</b>
+      <span>Gemessen bei 390 px: <code>grid-template-columns: 0px 318px</code>, die CTA-Spalte ist null breit,
+      der Text läuft über die Linkspalten. <code>.foot-top</code> steht top-level ohne Mobile-Query.</span></li>
+    <li><b>Die Kontaktseite im neuen System bauen</b>
+      <span>Der wichtigste CTA der Seite landet heute im Altdesign. Die neue Seite erbt den
+      <code>hero--stage</code>-Kopf der Service-Seiten und nimmt die drei Module auf, die dort schon fertig
+      liegen: 4-Schritte-Prozess, Anti-Fit-Liste, Service-Router. Der <code>#contact</code>-Anker auf der
+      Startseite bleibt der Schnellweg.</span></li>
+    <li><b>Prozess und Anti-Fit auf die Startseite spiegeln</b>
+      <span>Beide Texte existieren bereits — nichts zu erfinden. Der Prozess als kompaktes Band, die
+      Anti-Fit-Antwort als siebter FAQ-Tab (der Text steht wortgleich in <code>data.js:125</code>, und die
+      ⌘K-Beschreibung verspricht ihn heute schon).</span></li>
+    <li><b>Touch-Ziele und Eingabefeld-Größe</b>
+      <span>50 interaktive Flächen unter 44 px bei 390 px; vier von fünf Eingabefeldern stehen auf
+      12,8 px — iOS Safari zoomt beim Fokus unter 16 px. Beides mechanisch.</span></li>
+    <li><b>404 und contact typografisch ins System ziehen</b>
+      <span>Die letzten zwei Seiten mit gerasterten Überschriften. Danach ist <code>data-pixel</code>
+      repo-weit 0 und <code>PixelFX.headline</code> kann mit <code>voidReveal</code> zusammen raus.</span></li>
+    <li><b>Den zweiten typografischen Höhepunkt setzen</b>
+      <span><code>voidReveal</code> liegt fertig in der Engine und wird nirgends aufgerufen. Genau einmal
+      einsetzen — hintere Seitenhälfte — hebt die Creativity-Wertung fast gratis.</span></li>
+    <li><b>Seiten-Übergänge deklarativ</b>
+      <span><code>@view-transition { navigation: auto }</code> plus eine kurze Fade-Regel, hinter
+      <code>prefers-reduced-motion</code>. Null JS, null Dependencies, kein Lighthouse-Risiko.</span></li>
+    <li><b>Dann die Skeptiker-Runde auf die restlichen 57</b>
+      <span>Bevor an ungeprüften Funden gebaut wird. Ein Drittel bis die Hälfte davon dürfte fallen.</span></li>
+  </ol>
+</section>
+
+<footer class="end wrap" style="padding-inline:0">
+  <p>Der Audit war strikt read-only — am Repo wurde nichts verändert. Stand der geprüften Seite:
+  <code>df6efbd</code>. Aufwandsangaben: S = unter einer Stunde, M = ein halber Tag, L = mehr.</p>
+</footer>
+
+</div>
+</body>
+</html>
