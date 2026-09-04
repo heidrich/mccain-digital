@@ -172,8 +172,25 @@
     root.style.setProperty("--wave-stops-chrome",
       PixelFX.legibleStops(cols, [0, 0, 0], 18).map((cc, i) => cc + " " + pos[i]).join(", "));
 
+    /* SET ON THE SURFACE, NOT ON THE WORD. A custom property inherits, so a
+       band that carries the list covers every .ai-word inside it - including
+       the ones that do not exist yet. Three things on this site render after
+       this function has run: the command menu's rows, the service cards in
+       (04), and anything the console writes. The first version set the value
+       on each span it could find at boot, and every later one fell back to the
+       raw saturated stops - the logo yellow at 1.57:1 on paper.
+
+       [data-wavetext] still gets it on itself: there the band IS the host. */
+    const surfaces = new Set([...d.querySelectorAll("[data-wavetext]")]);
     hosts.forEach((el) => {
       if (el.closest(".nav, .cm, #cmenu")) return;   // the chrome uses the root list
+      surfaces.add(el.closest("[data-wavetext], .band, .hero, .stage, .foot") || d.body);
+    });
+    /* Bands that hold no AI word today but may tomorrow - the stack renders
+       into one of them - are cheap to cover and expensive to forget. */
+    d.querySelectorAll(".band, .foot").forEach((b) => surfaces.add(b));
+
+    surfaces.forEach((el) => {
       const ground = groundOf(el);
       const fixed = PixelFX.legibleStops(cols, ground, 5.2);
       el.style.setProperty("--wave-stops-text",
@@ -246,6 +263,27 @@
   /* ============================================================
      5) VELOCITY MARQUEE — scroll speed drives speed, skew, direction
      ============================================================ */
+  /* THE BRAND STRIP TICKS ON SMALL SCREENS. Nine names wrapped onto three
+     lines under 760px and read as a paragraph of grey text; owner asked for a
+     slow ticker. The animation walks the track exactly half its width, so one
+     copy of the names has to follow the first for the loop to have no seam.
+
+     Appended always and hidden by CSS above the breakpoint, rather than built
+     on a matchMedia listener: nothing then has to be torn down when someone
+     rotates a phone, and the wide layout can never catch a stray second copy.
+     The copy is aria-hidden and inert to the pointer - it is the same eight
+     names a second time, and a screen reader reading them twice is a bug. */
+  const bsTrack = d.querySelector(".brandstrip-track");
+  if (bsTrack && !bsTrack.querySelector("[data-dup]")) {
+    [...bsTrack.children].forEach((el) => {
+      const copy = el.cloneNode(true);
+      copy.setAttribute("data-dup", "");
+      copy.setAttribute("aria-hidden", "true");
+      copy.removeAttribute("style");          // the stagger index belongs to the original
+      bsTrack.appendChild(copy);
+    });
+  }
+
   const vmq = d.getElementById("vmq");
   if (vmq && !reduced) {
     vmq.innerHTML += vmq.innerHTML;          // seamless second copy

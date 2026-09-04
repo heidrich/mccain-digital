@@ -145,7 +145,18 @@
     const cols = stopList(raw).map(asRGB).filter(Boolean);
     if (!cols.length) { gradientTextSkipped++; return; }
     gradientTextChecked++;
-    const bg = bgOf(el);
+    /* THE NAV IS A FLOATING OVERLAY AND NO DOM WALK CAN FIND ITS GROUND. The
+       dark bar is .nav::before, which getComputedStyle on the element does not
+       report - and at rest it is not even painted (opacity 0 until .stuck), so
+       the bar the eye sees there is the HERO, a sibling of the nav and not an
+       ancestor of anything in it. Walking parents therefore lands on the body:
+       paper in light mode, which reported near-white type at 1.45:1 and a mid
+       grey composite of 99,99,98 on another page. Both are artefacts.
+       What the design actually guarantees is ink, in both themes and in both
+       states, so that is what this measures against. Say it here rather than
+       let the number be wrong quietly. */
+    const bg = el.closest(".nav") ? rgb(getComputedStyle(document.documentElement)
+      .getPropertyValue("--ink").trim() || "#0b0b0c") : bgOf(el);
     let worst = 99, wc = null;
     cols.forEach((c) => { const r = ratio(c, bg); if (r < worst) { worst = r; wc = c; } });
     const px = parseFloat(cs.fontSize), bold = parseInt(cs.fontWeight, 10) >= 700;

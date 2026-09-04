@@ -12,6 +12,13 @@
 (() => {
   "use strict";
 
+/* The owner's rule that the travelling gradient IS the AI signal reaches the
+   service cards too. These titles come from data.js, which this file owns and
+   which carries no markup - so the wrap is safe here without an escape step.
+   The lookahead keeps "AI-native" whole; \b alone would have split it. */
+const aiw = (t) => String(t).replace(/\bAI\b(?!-)/g, '<span class="ai-word">AI</span>');
+
+
   const d = document;
   const { reduced, fine } = window.MCDUI;
 
@@ -69,7 +76,7 @@
       <span class="scard-ghost" aria-hidden="true">${s.n}</span>
       <p class="scard-n">/${s.n}</p>
       <div>
-        <h3 class="scard-h">${s.h}</h3>
+        <h3 class="scard-h">${aiw(s.h)}</h3>
         <p class="scard-p">${s.p}</p>
         <a class="scard-link" href="${s.href}"
            aria-label="More on this — ${s.h}">More on this →</a>

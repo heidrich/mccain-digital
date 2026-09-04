@@ -1,6 +1,53 @@
-# Uebergabe — Stand 4. September 2026
+# Uebergabe — Stand 4. September 2026 (Abend)
 
 `https://mccain-digital.vercel.app/` liefert den Stand von `main`.
+
+> ⚡ **Der Tag in drei Commits.** Details mit allen Messwerten: `CHANGELOG.md`
+> (reist NICHT mit, siehe unten) — hier steht, was jemand ohne diese Datei wissen muss.
+>
+> 1. `a4ddb84` — Audit-Punkte 1-3: CTA-Hover war beim Hovern unsichtbar, `--d-micro`/`--d-ui`
+>    waren nie definiert (fuenf Uebergaenge liefen auf 0s), Index-Footer brach unter 760px.
+> 2. `7dea153` / `f75b557` — **das Wort „AI" traegt die Welle**, ueberall wo eine Ueberschrift
+>    es sagt, plus Hero-Fliesstext, Footer-Link, Nav und Befehlsmenue. In der Nav und im Menue
+>    ist **Weiss die Basis** (Owner-Entscheidung), sonst die gegen den eigenen Grund getoente Welle.
+> 3. Diese Runde — Nav entschlackt (`⌘K` raus, kein Ring am Menue-Button, mehr Luft), eigene
+>    Scrollbalken, Ziffern auf den Service-Seiten solid statt hohl-braun, Kunden-Reihe laeuft
+>    unter 760px als Ticker, „AI tools" in der Service-Liste (04) mit Verlauf.
+>
+> **Drei Fallen, die das gekostet hat — sie gelten weiter:**
+>
+> - **Eine laufende CSS-Animation ueberschreibt Inline-Styles.** Zum Testen erst
+>   `animation: none`, sonst misst man die alte Phase.
+> - **`getComputedStyle` liefert einen animierten Wert als `calc(0% + 358.054px)`**, nicht als
+>   Laenge. `parseFloat` faellt still auf 0 zurueck.
+> - **`will-change: transform` befoerdert ein Element auf eine eigene Ebene**, in die das
+>   `background-clip: text` des Elternelements nicht hineinreicht. Ein Wort kam dadurch leer
+>   heraus. Der Verlauf muss auf dem Element sitzen, das die Glyphen wirklich malt.
+>
+> **Und zwei ueber das Messen:**
+>
+> - **`--bg` ist eine Deklaration, nicht der gemalte Grund.** `groundOf()` in `common.js` sucht
+>   jetzt den ersten Hintergrund, der wirklich deckt.
+> - **Die Nav hat keinen aus dem DOM ableitbaren Grund.** Ihre dunkle Leiste ist `.nav::before`
+>   und im Ruhezustand `opacity: 0` — dann steht sie ueber dem Hero, einem **Geschwister**.
+>   Sonde und Laufzeit messen dort gegen `--ink`, weil das Design es zusichert.
+>
+> **`tools/accent_audit.sh` faellt unter Last aus — und zwar an einer Stelle:**
+> `contact.html [dark]`, mit `accent nodes 0` und „NOTHING MEASURED", **nie** mit einem
+> Kontrast-Fund. Das ist die Seite mit den 4 verbliebenen `data-pixel`-Rastern, dem teuersten
+> Boot im Repo. Verschwindet vermutlich mit Audit-Punkt 4/7. **Ein FAIL mit „NOTHING MEASURED"
+> ist kein Kontrast-Fund** — erst nachsehen, welche Zeile es ist.
+>
+> **OFFEN, Owner-Entscheidung:**
+>
+> 1. **Das Braun ist nicht ueberall weg.** Auf Papier toent `legibleStops` die Welle so weit
+>    herunter, dass ihr gelbes Ende als Senf landet — „Map where **AI** actually pays off" steht
+>    dort goldbraun. Die Ziffern sind erledigt, der Rest ist eine Systementscheidung: entweder das
+>    warme Ende der Welle auf Papier neutralisieren, oder dort eine Tinten-Basis mit Farbschimmer
+>    fahren (das Gegenstueck zur Weiss-Basis in der Nav).
+> 2. **Das Kontaktformular ist noch nicht angepasst.** Owner: „das sind die gleichen Daten wie
+>    beim Kontaktformular auf mccain-digital.com". Die alte Seite muss dafuer abgeglichen werden.
+>    Haengt an Audit-Punkt 4 (`contact.html` ins neue System), der weiter offen ist.
 
 > ⚡ **Neuestes (4.9., Mac): Audit-Punkte 1-3 sind abgearbeitet.**
 > Der CTA-Hover, die fuenf toten Uebergaenge und der Mobile-Footer. Alle drei waren
