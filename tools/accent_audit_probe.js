@@ -103,9 +103,77 @@
     }
   });
 
-  const fails = out.filter(o => !o.pass).concat(canvasFails);
+  /* GRADIENT-FILLED TEXT ANSWERS NO BETTER THAN A CANVAS DID. Anything using
+     background-clip: text reports `color: rgba(0, 0, 0, 0)`, so the accent
+     sweep above skips it entirely - it was invisible to this audit for as long
+     as the studio band has existed, and the "AI" word now puts the same fill
+     in headings across the site. The colour that is actually read is a stop in
+     --wave-stops-text, and the worst stop is what decides the page.
+
+     Parsed by the browser rather than by hand: legibleStops emits
+     `hsl(47 92% 53%)`, space-separated, and a regex written for hex or rgb()
+     turns that into a number that is not a colour. */
+  const parseEl = document.createElement("span");
+  parseEl.style.display = "none";
+  document.body.appendChild(parseEl);
+  const asRGB = (c) => {
+    parseEl.style.color = "";
+    parseEl.style.color = c;
+    const v = getComputedStyle(parseEl).color;
+    return /^rgba?\(/.test(v) ? rgb(v) : null;
+  };
+  /* commas BETWEEN stops only - hsl(...) carries its own */
+  const stopList = (str) => {
+    const o = []; let d = 0, st = 0;
+    for (let i = 0; i < str.length; i++) {
+      const c = str[i];
+      if (c === "(") d++; else if (c === ")") d--; else if (c === "," && !d) { o.push(str.slice(st, i)); st = i + 1; }
+    }
+    o.push(str.slice(st));
+    return o.map(x => x.trim().replace(/\s+-?[\d.]+(px|%)\s*$/, "")).filter(Boolean);
+  };
+  const gradFails = [];
+  let gradientTextChecked = 0, gradientTextSkipped = 0;
+  document.querySelectorAll("*").forEach((el) => {
+    const cs = getComputedStyle(el);
+    if (cs.webkitTextFillColor !== "rgba(0, 0, 0, 0)") return;
+    if (cs.backgroundImage.indexOf("gradient") < 0) return;
+    if (!el.offsetParent && cs.position !== "fixed") return;
+    const hasOwnText = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
+    if (!hasOwnText) return;                       // the split word carries it, not its wrapper
+    const raw = (cs.getPropertyValue("--wave-stops-text") || cs.getPropertyValue("--wave-stops") || "").trim();
+    const cols = stopList(raw).map(asRGB).filter(Boolean);
+    if (!cols.length) { gradientTextSkipped++; return; }
+    gradientTextChecked++;
+    const bg = bgOf(el);
+    let worst = 99, wc = null;
+    cols.forEach((c) => { const r = ratio(c, bg); if (r < worst) { worst = r; wc = c; } });
+    const px = parseFloat(cs.fontSize), bold = parseInt(cs.fontWeight, 10) >= 700;
+    const need = (px >= 24 || (bold && px >= 18.66)) ? 3 : 4.5;
+    if (worst < need) {
+      gradFails.push({
+        /* "grad " on purpose: a split word IS an <i>, and the runner exempts
+           sel == "i" as the wordmark. Without the prefix every AI word would
+           inherit an exemption written for the logo. */
+        sel: "grad " + el.tagName.toLowerCase() + (el.className ? "." + String(el.className).split(" ")[0] : ""),
+        /* WHERE, not just what. Two spans with the same class and the same
+           text are one report line unless the ancestry is in it, and the
+           first version of this cost a round of guessing. */
+        where: (() => { const a = []; for (let n = el.parentElement; n && a.length < 4; n = n.parentElement)
+          a.push(n.tagName.toLowerCase() + (n.className ? "." + String(n.className).split(" ")[0] : "")); return a.join("<"); })(),
+        ground: "rgb(" + bg.map(Math.round).join(",") + ")",
+        text: (el.textContent || "").trim().slice(0, 30),
+        fg: "rgb(" + wc.map(Math.round).join(",") + ")", px: Math.round(px),
+        large: need === 3, ratio: +worst.toFixed(2), need, pass: false
+      });
+    }
+  });
+  parseEl.remove();
+
+  const fails = out.filter(o => !o.pass).concat(canvasFails).concat(gradFails);
   return JSON.stringify({
     accentTextNodes: out.length, canvasesChecked, canvasesSkipped,
+    gradientTextChecked, gradientTextSkipped,
     failing: fails.length, fails: fails.slice(0, 12)
   }, null, 1);
 })()

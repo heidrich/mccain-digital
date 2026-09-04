@@ -120,8 +120,34 @@
 
      Per element rather than per theme: the ground that matters is the BAND's
      background, and a paper band stays paper in either theme. */
+  /* THE GROUND THAT MATTERS IS THE ONE ACTUALLY PAINTED, NOT THE ONE IN THE
+     TOKEN. --bg is a band's declaration, and the two part company: the nav
+     carries --bg: #0b0b0c as its own while sitting transparent over a paper
+     body in light mode. Reading the token there tuned the stops for ink and
+     put them on paper - the "AI" in the menu measured 1.73:1, and the accent
+     audit caught it only because it had just been taught to look at gradient
+     text at all. So: walk up for the first background that really covers, and
+     fall back to the token when nothing does.
+
+     Anything under 0.9 alpha is not a ground, it is a tint over one - keep
+     walking, or the nav's own translucent bar answers for the page behind it. */
+  function groundOf(el) {
+    for (let n = el; n && n !== d.documentElement; n = n.parentElement) {
+      const c = getComputedStyle(n).backgroundColor;
+      const m = c && c.match(/[\d.]+/g);
+      if (!m || (m.length > 3 && Number(m[3]) <= 0.9)) continue;
+      const v = m.slice(0, 3).map(Number);
+      return c.indexOf("color(") === 0 ? v.map((x) => x * 255) : v;
+    }
+    return PixelFX.tokenRGB(el, "--bg", "#f2f2ef");
+  }
+
   function paintWaveText(cs) {
-    const hosts = d.querySelectorAll("[data-wavetext]");
+    /* Two users of the same journey: the studio band, and every "AI" a
+       heading says - the owner's rule that the travelling gradient IS the AI
+       signal on this site. Each host is measured against ITS OWN ground, so a
+       word on paper and the same word on ink are both readable. */
+    const hosts = d.querySelectorAll("[data-wavetext], .ai-word");
     if (!hosts.length || !window.PixelFX || !PixelFX.legibleStops) return;
     const raw = (cs || getComputedStyle(root)).getPropertyValue("--wave-stops");
     // "#f5c518 0px, #d9c40f 96px, ..." -> colours and their positions
@@ -133,7 +159,7 @@
     });
     if (!cols.length) return;
     hosts.forEach((el) => {
-      const ground = PixelFX.tokenRGB(el, "--bg", "#f2f2ef");
+      const ground = groundOf(el);
       const fixed = PixelFX.legibleStops(cols, ground, 5.2);
       el.style.setProperty("--wave-stops-text",
         fixed.map((cc, i) => cc + " " + pos[i]).join(", "));

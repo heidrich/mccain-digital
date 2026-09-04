@@ -4689,6 +4689,58 @@ html[data-theme="light"] .t-moon {
       }
     }
 
+/* ---------- "AI" IS THE WAVE ----------
+   Owner: the travelling gradient IS the AI signal on this site, so the word
+   itself carries it wherever a heading says it. Same stops, same angle, same
+   period as the console's rim and the studio band - one effect with three
+   users, not three implementations of it.
+
+   --wave-stops-text is computed per element by common.js against the ground
+   THIS span actually sits on, so the same markup is the console's stops on an
+   ink band and a deep gold-through-olive on paper. Without that, one of the
+   two themes always gets an unreadable word.
+
+   The movement is opt-in under no-preference, the way every other motion here
+   is. Standing still the fill is still the wave, so nothing is lost. */
+/* THE FILL GOES ON WHATEVER ACTUALLY DRAWS THE GLYPHS. A heading with
+   data-words has each word replaced by .w>i, and `.wr .w>i` carries
+   `will-change: transform` on purpose - a scroll timeline can re-enter its
+   range, so it stays promoted. A promoted descendant paints in its own layer,
+   and an ancestor's background-clip: text cannot reach into it: the word came
+   out blank, its text-fill inherited transparent and the gradient clipped to
+   nothing. Measured: the hero's h1 was fine (its words carry no will-change,
+   which the block at .hs .w>i says in as many words) while every data-words
+   h2 lost the word. So the rule names both boxes - the span when the text is
+   still its own, and the split word when it is not. */
+.ai-word,
+.ai-word .w>i {
+  background-image: repeating-linear-gradient(var(--rim-angle), var(--wave-stops-text, var(--wave-stops)));
+  background-size: var(--rim-shift) 100%
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+  .ai-word,
+  .ai-word .w>i {
+    animation: wave-text var(--rim-cycle) linear infinite
+  }
+}
+
+/* Only where the fill can actually be clipped to the glyphs. Without the
+   guard, `color: transparent` in a browser that ignores background-clip is
+   not a fallback, it is an erasure - the same reason the band above carries
+   one. */
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+
+  .ai-word,
+  .ai-word .w>i {
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent
+  }
+}
+
 @keyframes wave-text {
       to {
         background-position: var(--rim-shift) 0
