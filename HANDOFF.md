@@ -2,8 +2,9 @@
 
 `https://mccain-digital.vercel.app/` liefert den Stand von `main`.
 
-> ⚡ **Der Tag in drei Commits.** Details mit allen Messwerten: `CHANGELOG.md`
-> (reist NICHT mit, siehe unten) — hier steht, was jemand ohne diese Datei wissen muss.
+> ⚡ **Der VORMITTAG in drei Commits** (auf dem Mac). Der Abend steht im Block darunter und
+> brachte acht weitere — die Arbeitsliste dazu ist `TODO.md`, und die reist mit.
+> Details mit allen Messwerten: `CHANGELOG.md` (reist NICHT mit, siehe unten).
 >
 > 1. `a4ddb84` — Audit-Punkte 1-3: CTA-Hover war beim Hovern unsichtbar, `--d-micro`/`--d-ui`
 >    waren nie definiert (fuenf Uebergaenge liefen auf 0s), Index-Footer brach unter 760px.
@@ -48,6 +49,62 @@
 > 2. **Das Kontaktformular ist noch nicht angepasst.** Owner: „das sind die gleichen Daten wie
 >    beim Kontaktformular auf mccain-digital.com". Die alte Seite muss dafuer abgeglichen werden.
 >    Haengt an Audit-Punkt 4 (`contact.html` ins neue System), der weiter offen ist.
+
+> ⚡ **NEUESTES (4.9. abends, PC): sechs Wellen, der P0-Block ist zu.**
+> **Die Arbeitsliste steht in [`TODO.md`](TODO.md)** — sie reist mit, im Gegensatz zum CHANGELOG,
+> und trägt zu jedem Punkt die Messwerte. Hier nur, was jemand ohne sie wissen muss.
+>
+> `4f78fe9` TODO angelegt · `5a132f3` contact + 404 + Formulare · `ab66ee8` Prozess-Kapitel +
+> Anti-Fit-Tab · `7ec92c3` Touch-Ziele · `f97788c` voidReveal · `80e3f00` Konsolen-„A" ·
+> `988975f` View Transitions + Menü auf 390 · `9fe2c41` Skip-Link + Reduced Motion.
+>
+> **Der Kauf-Funnel läuft im neuen System, und beide Formulare senden wirklich.** Die Mechanik war
+> nicht zu bauen — sie lag in `old/upload/contact.js`, der Fassung, die auf `mccain-digital.com`
+> steht. Eine Sendefunktion in `common.js`, zwei Mounts: Startseite 3 Fragen, Kontaktseite 6,
+> fehlende Felder gehen als „—" mit. Erfolgs- und Fehlerpfad mit abgefangenem `fetch` geprüft,
+> ohne echte Anfrage. **Die eine Ermessensentscheidung:** die alte Seite bot sieben Projekttypen
+> an, die Seite verkauft heute vier Leistungen — der Feldsatz ist identisch, die Optionen spiegeln
+> das aktuelle Angebot. Eine Zeile genügt, wenn die alten sieben zurück sollen.
+>
+> **`data-pixel` ist auf den Live-Seiten bei 0** — und das hat eine gemessene Folge, die diese
+> Datei vorhergesagt hat: `tools/accent_audit.sh` fiel auf `contact.html [dark]` immer mit
+> „NOTHING MEASURED" aus. Die vier Raster waren die Ursache. Jetzt `accent nodes 18, failing 0`.
+>
+> **Die Aufräum-Falle von Audit-Punkt 7 hat sich umgedreht:** Punkt 7 will `PixelFX.headline` und
+> `voidReveal` zusammen entsorgen. `voidReveal` wird jetzt **aufgerufen** (Studio-Leitzeile in
+> (05)) — es darf NICHT mit weg. `headline` allein ist tot, sobald niemand mehr `data-pixel`
+> schreibt.
+>
+> **Drei Fallen, die das gekostet hat — sie gelten weiter:**
+>
+> - **Eine Überschreibung, die VOR dem steht, was sie überschreibt, tut bei gleicher Spezifität
+>   nichts** — und liest sich dabei wie ein Fix. Zweimal passiert (Fußzeilen-Touchziele,
+>   Reduced-Motion-Block), beide Male erst im Browser aufgefallen. `v3.css` ist nach Thema
+>   sortiert, nicht nach Kaskade.
+> - **Eine Unterdrückung kann eine Regel treffen, die ihren Namen nicht trägt.**
+>   `.foot-bar>.logo::after { content: none }` sah nach totem Code aus — ein Grep nach
+>   `.logo::after` findet nur die Unterdrückung. Sie unterdrückt `.foot-bar a::after`. Entfernen
+>   gab dem Wortzeichen eine goldene Unterstreichung. Wiederhergestellt.
+> - **Ein emulierter iPhone meldet `pointer: fine`.** Eine `@media (pointer: coarse)`-Regel ist
+>   hier unbeweisbar; darum sind die Touch- und 16px-Regeln komma-verknüpft mit `max-width: 860px`.
+>
+> **Und die Messfalle, die dreimal an einem Abend zuschlug:** `getComputedStyle` mitten in einer
+> Animation liefert den Zwischenwert. Eine Pill las sich als „ungefärbt", ein 44-px-Chip als
+> 43,47 (ein Vorfahr stand auf dem `rvs`-Startwert `scale: .988`), ein Reveal als hängend. Vor
+> dem Messen die Animation stilllegen oder abwarten.
+>
+> **OFFEN, Owner-Entscheidung — alle drei verbliebenen P1:**
+>
+> 1. **AP-1 (LCP):** gemessen FCP ~110 ms, **LCP 824/836 ms** auf `H1.display`. Der
+>    Audit-Vorschlag „Opacity entkoppeln" kann nichts bringen — `.w` hat `overflow: clip`, das Tor
+>    ist der **Transform**. Und der Kommentar über der Regel sagt, der Kopf laufe absichtlich
+>    „inside the 800-1600ms band". Kennzahl gegen Auftritt, keine Reparatur.
+> 2. **IA-4:** keine Work-Detailform. Die Schablone (`work/<slug>.html`) gehört festgelegt.
+> 3. **SC-1:** zwei Footer-Architekturen (index Mega, die 10 anderen schmal).
+>
+> Dazu die zwei alten Owner-Punkte: **das Braun auf Papier** (`legibleStops` tönt das gelbe
+> Wellenende zu Senf) und **`AGENTS.md`** — von `recall init` erzeugt, unversioniert; ob das Repo
+> eine autogenerierte Agenten-Datei führt, ist Owner-Wahl.
 
 > ⚡ **Neuestes (4.9., Mac): Audit-Punkte 1-3 sind abgearbeitet.**
 > Der CTA-Hover, die fuenf toten Uebergaenge und der Mobile-Footer. Alle drei waren
