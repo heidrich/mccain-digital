@@ -10,7 +10,7 @@ Fund stehen in der JSON unter seiner `id`.
 ## Wie belastbar das ist
 
 Die Skeptiker-Stufe des Audits ist nie gelaufen — alle vier Prüfer sind am Session-Limit
-gescheitert. **Von den ursprünglich 58 Punkten sind 41 offen** — die Wellen vom 4.9. haben siebzehn geschlossen.
+gescheitert. **Von den ursprünglich 58 Punkten sind 38 offen** — die Wellen vom 4.9. haben zwanzig geschlossen (einer davon als Fehlalarm).
 Von den 51 ist keiner gegengeprüft.
 Erfahrungswert dieser Methode: 30–60 % Fehlalarm. Die schwersten Funde (P0, die härtesten P1) sind
 nachgemessen; ab P2 gilt: **vor dem Bauen selbst nachsehen.**
@@ -213,7 +213,7 @@ niemand mehr `data-pixel` schreibt; `voidReveal` ist es nicht.
 
 ---
 
-## P2 — 23 offen (Politur, Rest ungeprüft)
+## P2 — 20 offen (Politur, Rest ungeprüft)
 
 **Diese Liste ist nicht nachgemessen.** Je Punkt vor dem Bauen selbst nachsehen.
 
@@ -241,7 +241,31 @@ niemand mehr `data-pixel` schreibt; `voidReveal` ist es nicht.
 - **AW-7** (M) — 90-Sekunden-Problem: Brief-Tab, Palette-Ask, Favicon-Dissolve, Pac-Man und die 404
   sind die besten Momente der Seite und alle versteckt
 - **AW-8** (L) — Kaufpfad-Module: kein Preisrahmen, keine interne Referenzstrecke
-- weiter: LD-1, LD-2, LD-3, LM-6, LM-7, FX-5, UI-3, UI-5, UI-6, IA-5, IA-6, AW-6, SC-5, AP-4–AP-8
+- ~~**AP-4**~~ — erledigt, und der Fund war größer als gemeldet. Über CDP mit echtem
+  `forced-colors: active` gemessen (die agent-browser-CLI kann das nicht, `Emulation.setEmulatedMedia`
+  schon): die zwei Formularfelder und die Paletten-Suchzeile schalten `outline: none` ab und ersetzen
+  ihn durch einen inset-`box-shadow` — **und box-shadow wird in Windows-Kontrastmodus nicht gedimmt,
+  sondern fallen gelassen.** Gemessen vorher `outline-style none · box-shadow none` = **gar kein**
+  **Fokus-Indikator**; jetzt `outline-style solid, 2px` in `Highlight`. Im Normalzustand unverändert.
+  **Beim Messen aufgefallen, nicht im Audit:** dieselbe Mechanik trägt die Pillen — ihr Rahmen *ist*
+  der inset-Schatten, ihr Gewählt-Zustand *ist* die Akzentfüllung. Gemessen lasen beide Zustände
+  identisch: weiße Schrift, kein Rahmen, Hintergrund auf Canvas gezwungen — die Gruppe war weder
+  als Bedienelement noch in ihrer Auswahl erkennbar. Jetzt: ungewählt 1px `CanvasText`, gewählt
+  `Highlight`-Füllung mit `HighlightText`. **Systemfarben überleben die Zwangsfärbung** — gemessen,
+  kein `forced-color-adjust` nötig. `outline` statt `border`: ein Rahmen legte 2 px je Seite drauf und
+  stritte mit der 44-px-Touch-Regel zweihundert Zeilen weiter oben.
+  **`prefers-contrast` bleibt offen und absichtlich:** der Fund nennt es im Titel, belegt aber nur den
+  Fokus-Indikator. Ohne gemessenen Mangel dort etwas zu bauen wäre geraten.
+- ~~**AP-5**~~ — erledigt: `#cmInput` trägt `role="combobox"`, aber keinen Namen — ein Placeholder ist
+  keiner. Jetzt `aria-label="Search the site, or ask a question"`. Gegenprobe war ein Rundumschlag:
+  **jedes** Formularelement auf Start- und Kontaktseite auf einen Namen geprüft (18 Stück, inklusive
+  Honigtopf und aller 13 Pillen) — die Paletten-Zeile war die einzige ohne.
+- ~~**UI-6**~~ — **Fehlalarm, nichts zu tun.** Der Fund sagt, die Service-Karten sähen klickbar aus,
+  seien es aber nicht; gemessen wurde `cursor: auto` am `<article>`. Das stimmt und ist belanglos:
+  `.scard-link::after` steht auf `inset: 0` über der ganzen Karte. Trefferprobe an drei Punkten je
+  Karte (Mitte, oben rechts, unten links), alle vier Karten: **jeder Punkt trifft `A.scard-link`**,
+  Cursor dort `pointer`. Die ganze Karte ist das Ziel — dieselbe Mechanik, die schon LM-3 entlastet hat.
+- weiter: LD-1, LD-2, LD-3, LM-6, LM-7, FX-5, UI-3, UI-5, IA-5, IA-6, AW-6, SC-5
 
 ## P3 — 15 offen (Ideen)
 

@@ -5926,3 +5926,59 @@ html[data-theme="light"] .t-moon {
     animation: none
   }
 }
+
+
+/* ============================================================
+   FORCED COLOURS — give the fields back an indicator they can keep
+   ------------------------------------------------------------
+   Three rules turn the outline off and hand the job to an inset
+   box-shadow: the two form fields (2369) and the palette's search
+   line (3142). In Windows High Contrast the shadow is not dimmed,
+   it is dropped — measured over CDP with forced-colors emulated:
+
+     normal   outline-style none · box-shadow rgba(242,242,239,.15) inset
+     active   outline-style none · box-shadow NONE
+
+   which leaves the fields with no focus indicator at all. A visitor
+   who navigates by keyboard loses the caret's whereabouts on the
+   one screen where the site asks for something.
+
+   `Highlight` is a system colour, so it stays whatever that user's
+   theme chose; the offset keeps it clear of the 1px frame. The
+   global `:focus-visible` (216) already uses a real outline and
+   comes through untouched — only the three suppressions need this.
+
+   AT THE END OF THE FILE for the same reason as the block above:
+   these selectors are the same weight as the ones they override,
+   so they only win on source order.
+   ============================================================ */
+@media (forced-colors: active) {
+
+  .field input:focus,
+  .field textarea:focus,
+  .cm-search input:focus {
+    outline: 2px solid Highlight;
+    outline-offset: 2px
+  }
+
+  /* The pills lose more than an indicator: their frame IS the inset
+     shadow, and their chosen state IS the accent fill. Measured with
+     forced colours on, both states came back identical - white text,
+     no frame, background forced to Canvas - so the group reads as
+     loose words and the visitor cannot see what they picked.
+
+     An outline, not a border: a border would add 2px per side and
+     fight the 44px touch rule two hundred lines up. Offset inward so
+     it sits where the shadow sat. The focus rule at 2456 is more
+     specific and still wins when the control is focused. */
+  .pill {
+    outline: 1px solid CanvasText;
+    outline-offset: -1px
+  }
+
+  .pill.is-on {
+    background: Highlight;
+    color: HighlightText;
+    outline-color: Highlight
+  }
+}

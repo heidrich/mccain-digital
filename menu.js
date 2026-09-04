@@ -59,6 +59,7 @@
         <span class="cm-prompt" aria-hidden="true">&rsaquo;</span>
         <input id="cmInput" type="text" role="combobox" aria-expanded="true" aria-controls="cmList"
                aria-autocomplete="list" autocomplete="off" spellcheck="false"
+               aria-label="Search the site, or ask a question"
                placeholder="Type to jump — or just ask us something">
         <span class="cm-count" id="cmCount" aria-live="polite"></span>
       </div>
