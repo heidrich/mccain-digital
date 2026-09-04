@@ -10,7 +10,7 @@ Fund stehen in der JSON unter seiner `id`.
 ## Wie belastbar das ist
 
 Die Skeptiker-Stufe des Audits ist nie gelaufen — alle vier Prüfer sind am Session-Limit
-gescheitert. **Von den ursprünglich 58 Punkten sind 44 offen** — die Wellen vom 4.9. haben vierzehn geschlossen.
+gescheitert. **Von den ursprünglich 58 Punkten sind 42 offen** — die Wellen vom 4.9. haben sechzehn geschlossen.
 Von den 51 ist keiner gegengeprüft.
 Erfahrungswert dieser Methode: 30–60 % Fehlalarm. Die schwersten Funde (P0, die härtesten P1) sind
 nachgemessen; ab P2 gilt: **vor dem Bauen selbst nachsehen.**
@@ -199,18 +199,30 @@ niemand mehr `data-pixel` schreibt; `voidReveal` ist es nicht.
 
 ---
 
-## P2 — 25 offen (Politur, alle ungeprüft)
+## P2 — 23 offen (Politur, Rest ungeprüft)
 
 **Diese Liste ist nicht nachgemessen.** Je Punkt vor dem Bauen selbst nachsehen.
 
 - ~~**UI-8**~~ — erledigt: `required`, `aria-invalid`, Fehlerzeile je Feld, Fokus aufs erste Fehlerfeld,
   Erfolgs- und Fehlerzustand — und das Formular sendet.
-- **UI-7 / AP-3** (S) — kein Skip-Link (heute geprüft: repo-weit keiner). Doppelt gemeldet, ein Fix.
+- ~~**UI-7 / AP-3**~~ — erledigt: Skip-Link auf **allen 11 Seiten**, unsichtbar bis er Fokus hat.
+  Der Sprungpunkt (`main#top`) hat `tabindex="-1"` bekommen — **ohne das scrollt der Browser nur**
+  **und lässt den Fokus auf dem Link**, der nächste Tab läuft zurück in den Header, und der Link
+  sieht funktionierend aus, während er nichts tut. Gemessen: erster Tab trifft ihn (143×48, also
+  auch über 44 px), Enter setzt den Fokus auf `MAIN#top`, der nächste Tab landet **im Inhalt**.
 - **LM-8** (M) — hover-gebundene Inhalte auf Touch unerreichbar, obwohl die Copy zum Hovern auffordert
 - **LM-5** (M) — Hero-Lesefolge auf 390: die drei Fakten stehen **zwischen** Intro und H1
 - **LD-4 / LD-5** (M) — Score-Band: rechte Hälfte auf beiden Breiten leer; im Light-Theme
   verschwindet es als Band ganz
-- **FX-3** (S) — Reduced-Motion-Lücken: Studio-Wavetext, Status-Punkt-Pulse, Scroll-Cue laufen trotzdem
+- ~~**FX-3**~~ — erledigt: gemessen liefen bei `prefers-reduced-motion: reduce` **sieben**
+  Animationen weiter, alle unendlich (Verfügbarkeits-Punkt, Scroll-Hinweis, Wellenschrift auf der
+  Studio-Zeile und ihren vier Zahlen). Jetzt null; im Normalzustand laufen weiter 30. Nur die
+  Animation fällt weg — Farbe, Linie und Verlauf bleiben.
+  **Zwei Fallen dabei:** die Selektoren kamen aus dem Browser, nicht aus einem Grep (`animation:
+  wave-text` zeigte auf die Nav, die längst gekapselt ist — die echten Treffer waren
+  `[data-wavetext] .st-lead em` und `.st-fact b`). Und der Block steht am **Dateiende**: weiter
+  oben verliert er bei gleicher Spezifität an der Quellreihenfolge und tut nichts, was er beim
+  ersten Versuch auch tat.
 - **FX-4** (M) — die ersten 3 Sekunden zeigen kein einziges Pixel-Moment
 - **AW-7** (M) — 90-Sekunden-Problem: Brief-Tab, Palette-Ask, Favicon-Dissolve, Pac-Man und die 404
   sind die besten Momente der Seite und alle versteckt

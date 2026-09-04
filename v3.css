@@ -241,6 +241,44 @@ figure {
   border: 0
 }
 
+/* The skip link. Seven stops stand between the top of every page and its
+   first word - the wordmark, the availability pill, three nav links, the
+   menu button, the theme toggle - and a keyboard user walked all seven on
+   every page, every time.
+
+   Off-screen rather than `display: none`, because a hidden control is not
+   focusable and a skip link that cannot be reached is decoration. No
+   transition: the point is to be there the instant it is asked for.
+
+   Its target carries `tabindex="-1"`. Without it the browser scrolls and
+   leaves focus on the link, so the next Tab walks straight back into the
+   header - the link appears to work and does nothing, which is the usual
+   way this is got wrong. */
+.skip {
+  position: fixed;
+  top: .6rem;
+  left: -9999px;
+  z-index: 200;
+  padding: .8rem 1.2rem;
+  border-radius: 10px;
+  background: var(--acc);
+  color: var(--ink);
+  font-size: var(--t-small);
+  font-weight: 700
+}
+
+.skip:focus {
+  left: .6rem
+}
+
+/* The landing target should not draw a box around the whole page. Focus
+   moved there programmatically, so :focus-visible never matches and the
+   global outline rule stays out of this. */
+main:focus {
+  outline: none
+}
+
+
 .wrap {
   max-width: var(--maxw);
   margin: 0 auto;
@@ -5852,5 +5890,39 @@ html[data-theme="light"] .t-moon {
 @media (max-width: 480px) {
   .nav .btn {
     display: none
+  }
+}
+
+
+/* ============================================================
+   THE MOTION THIS SHEET STILL OWED
+   Almost every animation here is wrapped in `(prefers-reduced-motion:
+   no-preference)`. Three rules were not, and all of them loop forever:
+   the availability dot pulses, the scroll cue drops, and the wave
+   travels through the studio's claim and its four figures. Measured
+   with reduce on: seven running animations, every one infinite.
+
+   AT THE END OF THE FILE, and that is the point. The declarations this
+   overrides sit at 643, 5401 and in the studio block; written further
+   up with the same specificity this loses on source order and does
+   nothing at all — which it did, on the first attempt, while reading
+   exactly like a fix.
+
+   The selectors were taken from the browser, not from a grep: asked
+   which rules actually animate a running element, it named
+   `[data-wavetext] .st-lead em` and `.st-fact b`. A search for
+   `animation: wave-text` had pointed at the nav instead, and the nav
+   is already guarded.
+
+   Only the animation goes. The dot keeps its colour, the cue its line,
+   the wave its gradient — nothing here needs an end state to be read.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+
+  .ns-dot,
+  .cue i,
+  [data-wavetext] .st-lead em,
+  [data-wavetext] .st-fact b {
+    animation: none
   }
 }
