@@ -158,7 +158,22 @@
       if (m) { cols.push(m[1]); pos.push(m[2]); }
     });
     if (!cols.length) return;
+    /* THE CHROME GETS WHITE AS ITS BASE, AND IT GETS IT ONCE. In the nav and
+       the command menu the ground is not knowable - see the .nav .ai-word
+       block in v3.css - so nothing there is measured: the stops are lifted
+       until they clear 18:1 against black, which puts every one above 0.85
+       luminance. Hue and saturation survive, so it reads as a white word with
+       a colour moving through it.
+
+       On :root and not per element, because it depends on no element - and
+       because the command menu builds its rows when it opens, long after this
+       has run. A per-element pass would have left every menu row on the raw
+       saturated stops, which is exactly what the first version did. */
+    root.style.setProperty("--wave-stops-chrome",
+      PixelFX.legibleStops(cols, [0, 0, 0], 18).map((cc, i) => cc + " " + pos[i]).join(", "));
+
     hosts.forEach((el) => {
+      if (el.closest(".nav, .cm, #cmenu")) return;   // the chrome uses the root list
       const ground = groundOf(el);
       const fixed = PixelFX.legibleStops(cols, ground, 5.2);
       el.style.setProperty("--wave-stops-text",

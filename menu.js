@@ -97,6 +97,14 @@
     });
   }
 
+  /* The owner's rule that the wave IS the AI signal reaches the menu too.
+     Applied AFTER esc(), so this adds markup to text that is already safe -
+     never the other way round. The negative lookahead keeps "AI-native" whole;
+     \b alone would have split it. The preview heading is deliberately left
+     out: decode() rewrites it as textContent nine times a second, and any
+     markup in there would be thrown away on the first tick. */
+  const aiw = (s) => s.replace(/\bAI\b(?!-)/g, '<span class="ai-word">AI</span>');
+
   function render(q) {
     const hits = match(q.trim());
     shown = hits.slice();
@@ -113,7 +121,7 @@
       html += `<div class="cm-row" role="option" id="cmOpt${i}" data-i="${i}"
                     aria-selected="false" style="--i:${i}">
                  <span class="cm-n">${it.ask ? "?" : (it.n || "→")}</span>
-                 <span class="cm-t">${it.ask ? "Ask: “" + esc(it.t) + "”" : esc(it.t)}</span>
+                 <span class="cm-t">${it.ask ? "Ask: “" + esc(it.t) + "”" : aiw(esc(it.t))}</span>
                  <span class="cm-go" aria-hidden="true">↵</span>
                </div>`;
     });

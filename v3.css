@@ -4730,6 +4730,26 @@ html[data-theme="light"] .t-moon {
    guard, `color: transparent` in a browser that ignores background-clip is
    not a fallback, it is an erasure - the same reason the band above carries
    one. */
+/* IN THE CHROME THE GROUND IS NOT KNOWABLE. The nav has no background of its
+   own in light mode and carries near-white type over a dark hero; the command
+   menu floats over whatever happens to be behind it. Neither the runtime nor
+   the guard can name that ground - both land on a mid grey, rgb(99,99,98) -
+   and at 14.24px no saturated stop of a rainbow clears 4.5:1 against it. It
+   would need a luminance above 0.76, which is nearly white.
+
+   Owner's call, and it is the right one: white IS the base there. The word
+   goes bold and pure white, and the wave stays as a shimmer ON that white -
+   common.js lifts the stops to near-white for these hosts, so the journey
+   still reads without the word ever leaving white. The `color` here is also
+   the honest fallback where background-clip does not exist: white, not the
+   erasure that a bare `transparent` would be. */
+.nav .ai-word,
+.cm-row .ai-word {
+  font-weight: 700;
+  color: #fff;
+  background-image: repeating-linear-gradient(var(--rim-angle), var(--wave-stops-chrome, var(--wave-stops)))
+}
+
 @supports (background-clip: text) or (-webkit-background-clip: text) {
 
   .ai-word,
