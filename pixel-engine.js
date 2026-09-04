@@ -243,6 +243,206 @@
     return parts;
   }
 
+  /* ---------- THE FACE MAY BE PAINTED BY A GRADIENT, NOT A COLOUR ----------
+
+     button() renders the button face into an offscreen canvas and samples
+     that. It used to answer "is there a background?" from backgroundColor
+     alone - and the primary CTA has none. Its fill is the travelling
+     repeating-linear-gradient, the same wave the console rim carries. So the
+     pill was never painted, the only thing sampled was a #0b0b0c label (a
+     colour picked to sit ON a bright fill), and .px-active then hid the real
+     button: near-black pixels on the near-black bar. The CTA disappeared on
+     hover, and only that one, because every other pixel button either has a
+     real background-color or light type.
+
+     This reads the COMPUTED background-image, where every var() is already
+     resolved, instead of the tokens behind it - so it keeps working if the
+     stops, the angle or the element ever change, and it knows nothing about
+     this site in particular.
+
+     Scope on purpose: the linear family, which is the only kind this page
+     paints. A url(), a radial or a conic gradient returns null and the caller
+     leaves the face exactly as it was before. */
+
+  /* split on the commas BETWEEN parts - "rgb(1, 2, 3) 4px" has its own */
+  function splitTop(str) {
+    var out = [], depth = 0, start = 0;
+    for (var i = 0; i < str.length; i++) {
+      var ch = str.charAt(i);
+      if (ch === "(") depth++;
+      else if (ch === ")") depth--;
+      else if (ch === "," && depth === 0) { out.push(str.slice(start, i).trim()); start = i + 1; }
+    }
+    out.push(str.slice(start).trim());
+    return out;
+  }
+
+  /* a length against its reference, or the fallback for auto/cover/contain.
+
+     An ANIMATED background-position does not come back as a plain length: a
+     keyframe moving 0 -> 517.7px reads as "calc(0% + 358.054px)" mid-flight,
+     and parseFloat gives up on it. That is not a detail - it decides whether
+     a face sampled during the animation carries the phase on screen or is
+     silently framed at zero. */
+  function cssPx(v, ref, fallback) {
+    if (v == null) return fallback;
+    v = String(v).trim();
+    if (v.indexOf("calc(") === 0) {
+      var total = 0, term = /([+-]?\s*[\d.]+)\s*(px|%)/g, t, seen = false;
+      while ((t = term.exec(v))) {
+        var val = parseFloat(t[1].replace(/\s+/g, ""));
+        if (!isFinite(val)) continue;
+        total += t[2] === "%" ? val / 100 * ref : val;
+        seen = true;
+      }
+      return seen ? total : fallback;
+    }
+    var n = parseFloat(v);
+    if (!isFinite(n)) return fallback;
+    return /%\s*$/.test(v) ? n / 100 * ref : n;
+  }
+
+  /* CSS gradient direction -> radians. 0 is to-top and grows clockwise, so
+     the line runs along (sin, -cos) in canvas coordinates, where y is down. */
+  var SIDE_ANGLE = { top: 0, right: 90, bottom: 180, left: 270 };
+  function gradAngle(head, tw, th) {
+    var m = /^(-?[\d.]+)(deg|rad|turn|grad)$/.exec(head);
+    if (m) {
+      var v = parseFloat(m[1]);
+      if (m[2] === "rad") v = v * 180 / Math.PI;
+      else if (m[2] === "turn") v *= 360;
+      else if (m[2] === "grad") v *= 0.9;
+      return v * Math.PI / 180;
+    }
+    var side = /^to\s+([a-z]+)(?:\s+([a-z]+))?$/.exec(head);
+    if (side) {
+      if (!side[2]) return (SIDE_ANGLE[side[1]] || 0) * Math.PI / 180;
+      /* the magic corner: the line is turned so that the corner's two
+         neighbours land on the same stop, which is not the diagonal */
+      var vert = side[1], horz = side[2];
+      if (vert === "left" || vert === "right") { var sw = vert; vert = horz; horz = sw; }
+      var q = Math.atan2(tw, th);
+      if (vert === "top") return horz === "right" ? q : 2 * Math.PI - q;
+      if (vert === "bottom") return horz === "right" ? Math.PI - q : Math.PI + q;
+    }
+    return Math.PI;                       // the CSS default: to bottom
+  }
+
+  function faceGradient(octx, cs, w, h) {
+    var m = /^(repeating-)?linear-gradient\((.*)\)$/.exec(splitTop(cs.backgroundImage)[0]);
+    if (!m) return null;
+    var repeating = !!m[1], parts = splitTop(m[2]);
+
+    /* THE TILE is what the gradient is drawn into, not the element:
+       background-size gives this button a 517.7px tile of which its 137px
+       only show the front. Measuring the line across the button instead would
+       squeeze the whole spectrum into it. */
+    var size = splitTop(cs.backgroundSize)[0].split(/\s+/);
+    var tw = cssPx(size[0], w, w), th = cssPx(size.length > 1 ? size[1] : null, h, h);
+    if (!(tw > 0) || !(th > 0)) { tw = w; th = h; }
+
+    var angle = Math.PI;
+    if (/^(to\s|-?[\d.]+(deg|rad|turn|grad)$)/.test(parts[0])) angle = gradAngle(parts.shift(), tw, th);
+    if (parts.length < 2) return null;
+
+    var sa = Math.sin(angle), ca = Math.cos(angle);
+    var len = Math.abs(tw * sa) + Math.abs(th * ca);   // the CSS gradient-line length
+    if (!(len > 0)) return null;
+
+    /* colour and its position(s) - the double-position form "red 0px 40px" is
+       two stops of one colour, and dropping its tail would leave "red 0px" to
+       be parsed as a colour and throw */
+    var cols = [], pos = [];
+    for (var i = 0; i < parts.length; i++) {
+      var sp = /^(.*?)((?:\s+-?[\d.]+(?:px|%))*)$/.exec(parts[i]);
+      var col = (sp ? sp[1] : parts[i]).trim();
+      var at = (sp && sp[2] ? sp[2].trim().split(/\s+/) : []);
+      if (!at.length || !at[0]) { cols.push(col); pos.push(NaN); continue; }
+      for (var a = 0; a < at.length; a++) { cols.push(col); pos.push(cssPx(at[a], len, NaN)); }
+    }
+    /* CSS fills the gaps: the ends default to the line's ends, and a run of
+       positionless stops spreads evenly between its defined neighbours */
+    if (isNaN(pos[0])) pos[0] = 0;
+    if (isNaN(pos[pos.length - 1])) pos[pos.length - 1] = len;
+    for (var k = 1; k < pos.length - 1; k++) {
+      if (!isNaN(pos[k])) continue;
+      var next = k;
+      while (isNaN(pos[next])) next++;
+      for (var j = k; j < next; j++) pos[j] = pos[k - 1] + (pos[next] - pos[k - 1]) * (j - k + 1) / (next - k + 1);
+    }
+    for (var f = 1; f < pos.length; f++) if (pos[f] < pos[f - 1]) pos[f] = pos[f - 1];
+
+    /* where the tile's gradient line starts, in the button's own coordinates.
+       A percentage background-position is resolved against the room the tile
+       has to travel in - area minus tile - which is what CSS means by it and
+       is negative here, the tile being wider than the button. */
+    var px = cssPx(splitTop(cs.backgroundPositionX)[0], w - tw, 0);
+    var py = cssPx(splitTop(cs.backgroundPositionY)[0], h - th, 0);
+    var sx = px + tw / 2 - sa * len / 2;
+    var sy = py + th / 2 + ca * len / 2;
+
+    /* how far along that line the BUTTON reaches. Nothing outside this window
+       is ever sampled, so this is the only part that has to be right. */
+    function along(x, y) { return (x - sx) * sa - (y - sy) * ca; }
+    var ends = [along(0, 0), along(w, 0), along(0, h), along(w, h)];
+    var b0 = Math.min.apply(null, ends), b1 = Math.max.apply(null, ends);
+
+    /* A CANVAS GRADIENT CANNOT REPEAT, and past its two ends it does not stop
+       - it extends the first and the last colour for ever. So it is framed a
+       whole period WIDER than the button on both sides, and the repetitions
+       are written into that frame: whatever the button covers then always has
+       real stops around it.
+
+       Framing it on the TILE instead is the mistake this made first. It looked
+       right at background-position 0 and went flat first-stop for the other
+       70% of the cycle: the position animates a full 517.7px, which walks the
+       button onto negative offsets where no stop had been written, and a
+       canvas gradient answers those with its first colour. */
+    var period = pos[pos.length - 1] - pos[0];
+    /* a period under half a pixel is a flat colour to the eye and an unbounded
+       loop to this one */
+    if (repeating && !(period > 0.5)) repeating = false;
+
+    /* BACKGROUND-REPEAT IS NOT MODELLED: the pattern is written as one
+       continuous run. That is exactly what the browser paints in two cases -
+       the button stays inside a single tile, or one tile step along the line
+       is a whole number of periods. The second is how this page is built:
+       --rim-shift is --rim-period / sin(--rim-angle) precisely so the tile and
+       the wave stay in step (517.7px of tile = 480px of line = one period).
+       Outside those two, the honest answer is nothing rather than a gradient
+       that is quietly the wrong one - the caller then leaves the face exactly
+       as it was. */
+    var coversRow = th >= h - 0.5;
+    if (!(coversRow && b0 >= -0.5 && b1 <= len + 0.5)) {
+      var steps = repeating ? Math.abs(tw * sa) / period : 0;
+      if (!coversRow || !repeating || Math.round(steps) < 1 ||
+          Math.abs(steps - Math.round(steps)) > 0.01) return null;
+    }
+
+    var margin = repeating ? period : Math.max(len, b1 - b0);
+    var g0 = b0 - margin, g1 = b1 + margin, span = g1 - g0;
+    if (!(span > 0)) return null;
+
+    var g = octx.createLinearGradient(sx + sa * g0, sy - ca * g0, sx + sa * g1, sy - ca * g1);
+    var added = 0;
+    function add(at, col) {
+      var off = (at - g0) / span;
+      if (off < 0 || off > 1) return;
+      try { g.addColorStop(off, col); added++; } catch (e) { /* not a colour we can paint */ }
+    }
+    if (repeating) {
+      var n = Math.ceil((g0 - pos[pos.length - 1]) / period), guard = 0;
+      for (; pos[0] + n * period <= g1 && guard < 4000; n++) {
+        for (var q = 0; q < cols.length; q++, guard++) add(pos[q] + n * period, cols[q]);
+      }
+    } else {
+      for (var t = 0; t < cols.length; t++) add(pos[t], cols[t]);
+    }
+    /* no stop landed in range: hand back nothing rather than a gradient that
+       fills transparent and quietly removes the face */
+    return added ? g : null;
+  }
+
   /* ============================================================
      1) PIXEL HEADLINES — port of the proven engine, finer pixels.
         Tunable per host via data-gap / data-size.
@@ -908,6 +1108,7 @@
     var state = "idle";                   // idle | chaos | vacuum | reform
     var vac = null;                       // { x, y, t0, fired }
     var reformT0 = 0;                     // reform start, for the snap cap
+    var faceMoves = false;                // the sampled face came from a moving paint
 
     function build() {
       var r = btn.getBoundingClientRect();
@@ -927,6 +1128,7 @@
       var cs = getComputedStyle(btn);
       var bg = cs.backgroundColor;
       var hasBg = bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent";
+      var grad = faceGradient(octx, cs, W, H);
       var rad = parseFloat(cs.borderTopLeftRadius) || H / 2;
       var bw = parseFloat(cs.borderTopWidth) || 0;
 
@@ -940,12 +1142,18 @@
         octx.arcTo(x, y, x + ww, y, rd);
         octx.closePath();
       }
+      /* colour under image, the order the browser paints them in */
       if (hasBg) { rr(0, 0, W, H, rad); octx.fillStyle = bg; octx.fill(); }
+      if (grad) { rr(0, 0, W, H, rad); octx.fillStyle = grad; octx.fill(); }
       if (bw > 0) { rr(bw / 2, bw / 2, W - bw, H - bw, rad); octx.lineWidth = bw; octx.strokeStyle = cs.borderTopColor; octx.stroke(); }
       octx.fillStyle = cs.color;
       octx.font = cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily;
       octx.textBaseline = "middle"; octx.textAlign = "center";
       octx.fillText(btn.textContent.replace(/\s+/g, " ").trim(), W / 2, H / 2 + 1);
+      /* a gradient face is a MOVING face: the same paint is one phase of a 4s
+         animation, so a sample kept from page load is a different colour by
+         the time anyone hovers */
+      faceMoves = !!grad && cs.animationName !== "none";
 
       var img = octx.getImageData(0, 0, off.width, off.height);
       parts = sampleField(img, off.width, W, H, GAP, 40);
@@ -1073,7 +1281,16 @@
       // the face is pre-sampled while idle: hover styles (ghost buttons
       // jump to accent instantly) must not leak into the pixel colors,
       // and the getImageData cost must not hitch the effect start
-      if (!parts.length && !build()) return;
+      //
+      // A MOVING FACE IS THE EXCEPTION. The CTA's fill is one phase of a 4s
+      // gradient; a sample taken at page load is a different colour by the
+      // time anyone hovers, and the swarm would visibly jump on takeover and
+      // again on reform. So that one is re-sampled here, in the frame before
+      // .px-active hides the real button - measured at 0.7ms median, 1.3 at
+      // p90, against a 16.7ms frame. The leak the comment above guards
+      // against does not apply to it: its :hover changes only transform and
+      // filter, neither of which this reads.
+      if ((!parts.length || faceMoves) && !build()) return;
       for (var i = 0; i < parts.length; i++) {
         var p = parts[i];
         p.x = p.hx; p.y = p.hy; p.vx = 0; p.vy = 0;

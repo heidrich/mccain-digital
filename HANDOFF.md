@@ -1,23 +1,62 @@
-# Uebergabe — Stand 2. September 2026
+# Uebergabe — Stand 4. September 2026
 
-**Gepusht.** `main` == `origin/main`. Arbeitsbaum sauber.
-`https://mccain-digital.vercel.app/` liefert diesen Stand.
+`https://mccain-digital.vercel.app/` liefert den Stand von `main`.
 
-> ⚡ **Neuestes (2.9., Mac): Award-Audit liegt in [`audit/`](audit/).**
+> ⚡ **Neuestes (4.9., Mac): Audit-Punkte 1-3 sind abgearbeitet.**
+> Der CTA-Hover, die fuenf toten Uebergaenge und der Mobile-Footer. Alle drei waren
+> nachgemessene Funde, alle drei sind nachgemessen wieder zu. Details mit den Zahlen
+> davor und danach: `CHANGELOG.md`, Eintrag 2026-09-04.
+>
+> **Was von den drei P0 bleibt:** der **Kauf-Funnel endet weiter auf der alten
+> `contact.html`** — Audit-Punkt 4, der ausdrueckliche Owner-Auftrag, und der groesste
+> der drei. Das ist der naechste Schritt, zusammen mit den drei Modulen, die exklusiv
+> dort liegen (4-Schritte-Prozess, Anti-Fit-Liste, Service-Router).
+>
+> **Eine Sache, die jemand entscheiden muss:** `tools/accent_audit.sh` faellt unter Last
+> gelegentlich aus — 3 von 12 Laeufen, **jedes Mal** mit „NOTHING MEASURED" (eine Seite,
+> die nicht gebootet hatte), **nie** mit einem Kontrast-Fund. Gegengeprueft: alle sechs
+> Audit-Seiten booten im Light Theme sauber, danach 5 Laeufe hintereinander gruen. Ich
+> habe die Wartezeiten des Guards **nicht** angefasst — eine gelockerte Wartezeit
+> verdeckt genau das, wofuer er da ist. Wer es festnageln will, laesst ihn auf ein
+> Boot-Signal warten statt auf feste Millisekunden.
+>
+> **Nicht angefasst:** die 57 ungeprueften Funde. Unveraendert gilt: nicht daran bauen,
+> ohne sie selbst nachzumessen.
+>
+> **Zwei Fallen, die diese Runde gekostet hat — CHANGELOG.md reist nicht mit, also
+> stehen sie hier:**
+>
+> 1. **Eine laufende CSS-Animation ueberschreibt Inline-Styles.** Wer `background-position`
+>    zum Testen per `element.style` setzt, waehrend die Keyframes laufen, misst weiter die
+>    alte Phase. `animation: none` zuerst.
+> 2. **`getComputedStyle` liefert einen animierten Wert nicht als Laenge, sondern als
+>    `calc(0% + 358.054px)`.** `parseFloat` gibt darauf auf und faellt still auf 0 zurueck.
+>    Das hat einen echten Fehler in `faceGradient` unsichtbar gehalten, bis er gesucht
+>    wurde: die Phase wurde nie gelesen, also fiel nicht auf, dass die Gradient-Rahmung
+>    sie gar nicht ausgehalten haette. `pixel-engine.js:cssPx` versteht `calc()` jetzt.
+>
+> **Und eine ueber das Messen selbst:** `PixelFX.button()` baut die Flaeche nur beim
+> Idle-Callback, beim ersten Hover und entprellt beim Resize. Wer eine Style-Aenderung am
+> Button pruefen will, muss ein `resize` feuern und >220ms warten — sonst misst er das
+> alte Sample. Und `.pxbtn.px-active` setzt `background: transparent !important`: nach dem
+> Hovern liest man am Button nicht mehr, was zur Bauzeit galt.
+
+> ⚡ **Vom 2.9. (Mac): Award-Audit liegt in [`audit/`](audit/).**
 > 68 Funde aus acht Pruef-Linsen gegen die laufende Seite, read-only erhoben.
 > **Hier anfangen:** [`audit/2026-09-02-award-audit.md`](audit/2026-09-02-award-audit.md) —
 > Ursachen, Reihenfolge, was fehlt. Gerenderte Fassung:
 > `audit/2026-09-02-award-audit.html` (im Browser oeffnen). Rohdaten mit Beleg pro Fund:
 > `audit/2026-09-02-findings.json`.
 >
-> **Drei P0, alle nachgemessen:** (1) Der Haupt-CTA „Start a project" wird beim Hover
+> **Drei P0, alle nachgemessen** — (1) und (2) sind seit dem 4.9. behoben, (3) ist offen:
+> (1) Der Haupt-CTA „Start a project" wird beim Hover
 > **unsichtbar** — `pixel-engine.js:928` liest nur `backgroundColor`, der Button traegt aber
 > einen Gradient, also wird die helle Pille nie gemalt und die fast schwarze Schrift landet
 > auf fast schwarzem Grund. (2) Der Index-Footer bricht unter 760 px: `.foot-top` steht
 > top-level ohne Mobile-Query, gemessen `grid-template-columns: 0px 318px`. (3) Der
 > Kauf-Funnel endet auf der alten `contact.html`.
 >
-> **Regression aus der Uebernahme:** `--d-micro` und `--d-ui` existieren nur in
+> **Regression aus der Uebernahme (behoben am 4.9.):** `--d-micro` und `--d-ui` existierten nur in
 > `preview/refresh.html:85-86`, nie in `v3.css` — dort aber fuenfmal benutzt. Ungueltiges
 > `var()` heisst Dauer `0s`: fuenf Hover-Uebergaenge springen. Zwei Zeilen in `:root`.
 >

@@ -67,6 +67,16 @@
   --e-out: cubic-bezier(.16, 1, .3, 1);
   --e-io: cubic-bezier(.65, 0, .35, 1);
 
+  /* THE TWO SHORT DURATIONS, from animation-systems: micro 120-200ms, UI
+     state 180-260. They arrived with the refresh and were used five times in
+     this file before they were ever defined - and an invalid var() inside a
+     `transition` shorthand does not fall back, it voids the whole
+     declaration. So those five ran at 0s, which is not a fast transition but
+     none: the hover jumped. The values are the ones the draft was tuned at
+     (preview/refresh.html:85-86). */
+  --d-micro: .16s;
+  --d-ui: .22s;
+
   /* FLUID TYPE.
 
      The billboard used to be tuned so its long line spanned the container
@@ -5030,6 +5040,19 @@ html[data-theme="light"] .t-moon {
          no longer exists reads as protection and is none. */
       .nav .nav-where {
         display: none
+      }
+
+      /* THE MEGA FOOTER STACKS. .foot-top is a two-track grid -
+         minmax(0,1fr) for the say-and-mail lane, minmax(0,32rem) for the
+         link columns - and it stood top-level with no mobile rule at all.
+         At 390 the second track still claimed its 32rem, so the first
+         resolved to `0px 303px`: the CTA lane collapsed to zero width and
+         "One mail is enough..." ran straight through the links underneath.
+         Measured before: grid-template-columns 0px 303px, .foot-say 0x359.
+         One track is the whole fix; only index.html carries this footer,
+         the sub-pages use the narrow .foot-in and were never affected. */
+      .foot-top {
+        grid-template-columns: minmax(0, 1fr)
       }
 
       .foot-cols {
