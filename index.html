@@ -697,19 +697,32 @@
               Holderweg 1 · 86869 Oberostendorf · Bavaria, Germany<br>Mon–Fri · 9:00–18:00 CET</p>
           </div>
 
-          <form class="rv-s" id="contactForm" novalidate>
-            <div class="field"><label for="cName">Your name</label><input id="cName" type="text"
-                autocomplete="name"></div>
-            <div class="field"><label for="cMail">Email</label><input id="cMail" type="email"
-                autocomplete="email"></div>
-            <div class="field"><label for="cMsg">What's it about?</label><textarea id="cMsg"></textarea></div>
+          <!-- The short way in. Same sender as the contact page, three questions
+               instead of six: whoever is ready to write does not have to qualify
+               themselves first. The full form is one click away. -->
+          <form class="rv-s" id="contactForm" novalidate data-send>
+            <label class="hp" aria-hidden="true">Leave this empty
+              <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off"></label>
+            <div class="field"><label for="cName">Your name</label><input id="cName" name="name" type="text"
+                autocomplete="name" required aria-describedby="cNameErr">
+              <p class="field-err" id="cNameErr">We need a name to answer to.</p>
+            </div>
+            <div class="field"><label for="cMail">Email</label><input id="cMail" name="email" type="email"
+                autocomplete="email" required aria-describedby="cMailErr">
+              <p class="field-err" id="cMailErr">An address we can reach you at.</p>
+            </div>
+            <div class="field"><label for="cMsg">What's it about?</label><textarea id="cMsg" name="message"
+                required aria-describedby="cMsgErr"></textarea>
+              <p class="field-err" id="cMsgErr">One line is enough — but we need that one.</p>
+            </div>
             <button class="btn" type="submit">Send it
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path d="M5 12h14M13 6l6 6-6 6" />
               </svg>
             </button>
-            <p class="lead" style="font-size:var(--t-small);margin-top:1rem" id="cNote">
-              Prototype — this form is not wired up. The live site posts to Web3Forms.</p>
+            <p class="form-note">Want to tell us budget and timing too?
+              <a href="contact.html#form">The full form</a> asks three more questions.</p>
+            <p class="form-say" role="status"></p>
           </form>
         </div>
       </div>

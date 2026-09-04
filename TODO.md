@@ -1,4 +1,4 @@
-# TODO — Stand 4. September 2026
+# TODO — Stand 4. September 2026 (abends)
 
 Abgeleitet aus dem Award-Audit vom 2.9. (`audit/2026-09-02-findings.json`, 68 Funde) plus den
 offenen Owner-Entscheidungen aus `HANDOFF.md`. Gegen `4b91833` geschrieben.
@@ -10,11 +10,12 @@ Fund stehen in der JSON unter seiner `id`.
 ## Wie belastbar das ist
 
 Die Skeptiker-Stufe des Audits ist nie gelaufen — alle vier Prüfer sind am Session-Limit
-gescheitert. **Von den 58 offenen Punkten sind 4 von Hand nachgemessen, 54 sind ungeprüft.**
+gescheitert. **Von den ursprünglich 58 Punkten sind 51 offen** — die Welle vom 4.9. hat sieben geschlossen.
+Von den 51 ist keiner gegengeprüft.
 Erfahrungswert dieser Methode: 30–60 % Fehlalarm. Die schwersten Funde (P0, die härtesten P1) sind
 nachgemessen; ab P2 gilt: **vor dem Bauen selbst nachsehen.**
 
-Das `status`-Feld in der JSON ist seit dem Audit **nicht** nachgeführt. Es sagt zu vier Funden noch
+Das `status`-Feld in der JSON ist seit dem Audit **nicht** nachgeführt. Es sagt zu elf Funden noch
 „offen", die längst erledigt sind — die Wahrheit steht unten und ist im Code geprüft.
 
 ---
@@ -31,45 +32,72 @@ Das `status`-Feld in der JSON ist seit dem Audit **nicht** nachgeführt. Es sagt
 
 Merke daraus: **Netzwerk-Befunde gegen Produktion messen, nicht gegen `prodserve.py --dev`.**
 
+### Welle vom 4.9. (abends) — der P0-Block, im Browser nachgemessen
+
+| Fund | Was | Messung |
+|---|---|---|
+| IA-1 (P0) | `contact.html` im neuen System: `hero--stage guides` + `data-field`, echte Schrift statt Raster | Bühne bekommt `hs has-field go`, H1 bei Deckkraft 1 |
+| SC-2 (P1) | die drei Systemabstände derselben Seite | `data-pixel` dort 0, `hero-side` als linierte Zahlentabelle |
+| SC-3 (P1) | `404.html` auf Systemklassen | 4 Inline-Styles raus, jetzt 0; H1 als `data-words`, 4 Wörter sichtbar |
+| SC-4 (P1) | „Presence“ lief in seinen eigenen Text | Glyphen 108 px in 119-px-Spalte, 16 px Luft |
+| AW-4 (P1) | beide Seiten brachen die Typo an den emotionalsten Punkten | mit SC-2 + SC-3 zu |
+| LM-2 (P1) | iOS-Zoom beim Fokus | alle Felder **und** `#consoleInput` auf 390 px: 16 px |
+| UI-8 (P2) | Formular ohne Validierung | leer absenden markiert 3 Felder, Fokus aufs erste, Meldung |
+| Owner 2 | Formulardaten | Feldsatz der alten Seite übernommen, Optionen auf die 4 aktuellen Leistungen |
+
+Dazu: **beide Formulare senden jetzt wirklich.** Eine Mechanik in `common.js`, zwei Mounts —
+Startseite 3 Felder, Kontaktseite 6, fehlende Felder gehen als „—“ mit. Erfolgs- und Fehlerpfad
+mit abgefangenem `fetch` geprüft, ohne echte Anfrage an Web3Forms. Nebenbei: `--d-ui` war nach
+dem Fix vom Vormittag ein totes Token und hat jetzt seinen Zweck; eine doppelt verschachtelte
+`ai-word`-Span in `services/ai-tools.html` ist weg (animierte unendlich mit, ohne Glyphen zu malen).
+
+**Das Kontrast-Audit misst wieder.** `tools/accent_audit.sh` fiel laut HANDOFF auf
+`contact.html [dark]` immer mit „NOTHING MEASURED“ aus — Ursache waren die 4 `data-pixel`-Raster,
+der teuerste Boot im Repo. Jetzt: `accent nodes 18, gradient text 2, failing 0`, alle 6 Seiten,
+beide Themes, Exit 0. `data-pixel` ist auf den Live-Seiten repo-weit **0**.
+
 ---
 
-## P0 — einer offen
+## P0 — zu (4.9. abends)
 
-### 1. IA-1 · Der Kauf-Funnel endet im Altdesign
+### 1. IA-1 · Der Kauf-Funnel endete im Altdesign
 
-Jeder „Start a project"-Klick von einer Unterseite, alle Legal-Footer, die 404 und das ⌘K-Menü
-zeigen auf `contact.html` — gerasterte Pixel-Überschrift, alte Statusleiste, direkt neben dem neuen
-Look. Der Punkt der höchsten Kaufabsicht ist der einzige mit sichtbarem Systembruch.
+`contact.html` läuft im neuen System: `hero--stage guides` + `data-field`, echte Schrift statt
+Raster, die Zahlen in der linierten Tabelle, `stage-meta`-Streifen am Fuß der Bühne. Und das
+Formular sendet — mit dem Feldsatz der alten Seite.
 
-**Auftrag:** `contact.html` im neuen System neu aufbauen (`hero--stage`-Kopf wie
-`services/ai-tools.html`). Der `#contact`-Anker auf der Startseite bleibt der Schnellweg
-(Formular + Mail) — **beides**, nicht statt.
+**Owner-Entscheidung 2 war kein Blocker.** Die Daten lagen im Repo: `old/upload/contact.html` ist
+die Fassung, die auf `mccain-digital.com` steht, und `old/upload/contact.js` trägt die komplette
+Web3Forms-Mechanik. Übernommen statt nachgebaut.
 
-**Drei fertige Module liegen exklusiv dort** und sind von der Startseite aus unerreichbar. Die
-Texte existieren wortgleich — das ist Spiegeln, kein Erfinden:
+**Die eine Ermessensentscheidung, die ich getroffen habe:** die alte Seite bot **sieben**
+Projekttypen an, darunter Mobile App und Design & Brand. Die Seite verkauft heute vier Leistungen
+(`data.js` ist die Quelle). Der **Feldsatz** ist unverändert übernommen, die **Optionen** spiegeln
+das aktuelle Angebot: AI tools · Web apps · Websites · Software for companies · Not sure yet.
+Budget und Zeitrahmen stehen wortgleich wie vorher. **Eine Zeile genügt, wenn die alten sieben
+zurück sollen.**
 
-| Modul | liegt in |
+**Die drei Module liegen weiterhin nur auf `contact.html`.** Sie auf die Startseite zu spiegeln ist
+IA-2 und IA-3, nicht Teil dieser Welle:
+
+| Modul | wo |
 |---|---|
-| 4-Schritte-Prozess „(02) — What happens next" | `contact.html:207-260` |
-| Anti-Fit-Liste „(03) — Being straight about it" | `contact.html:261` |
-| Service-Router „Not sure which one it is?" | `contact.html:287` |
-
-**Blockiert von Owner-Entscheidung 2** (Formulardaten, siehe unten).
+| 4-Schritte-Prozess „(02) — What happens next" | `contact.html` |
+| Anti-Fit-Liste „(03) — Being straight about it" | `contact.html` |
+| Service-Router „Not sure which one it is?" | `contact.html` |
 
 ---
 
-## P1 — 15 offen
+## P1 — 10 offen
 
-### Hängen an P0 (dieselbe Datei, gleicher Zug)
+### Hingen an P0 — alle vier zu (4.9. abends)
 
-- **SC-2** — `contact.html`: drei konkrete Abstände zum Refresh-System (Raster-Headlines, kein Stage-Dither, …)
-- **SC-4** — `contact.html`: das „Presence"-Label überlappt sichtbar seinen Beschreibungstext
-- **AW-4** — `contact.html` + `404.html` brechen die Typo an den zwei emotionalsten Punkten
-- **SC-3** — `404.html`: gerasterte H1 plus Inline-Styles statt Systemklassen
+SC-2, SC-4, AW-4 und SC-3 sind erledigt und gemessen — siehe die Tabelle oben.
 
-Danach ist `data-pixel` auf den Live-Seiten bei **0** (heute: 4× `contact.html`, 1× `404.html`;
-der Rest steckt in `old/` und `preview/`). Erst dann können `PixelFX.headline` und `voidReveal`
-zusammen raus — **also nicht vor AW-2.**
+`data-pixel` steht damit auf den Live-Seiten bei **0** (der Rest liegt in `old/` und `preview/`).
+**Die Aufräum-Falle bleibt offen:** Audit-Punkt 7 will `PixelFX.headline` und `voidReveal`
+zusammen entsorgen, sobald das erreicht ist — aber AW-2 muss `voidReveal` erst noch einsetzen.
+**Nicht löschen vor AW-2.**
 
 ### Kaufpfad-Struktur
 
@@ -83,8 +111,9 @@ zusammen raus — **also nicht vor AW-2.**
 
 ### Mobil (alle drei nachgemessen)
 
-- **LM-2** (S) — Eingabefelder auf 12,8 px: **iOS Safari zoomt beim Fokus.** Formular und AI-Konsole.
-- **LM-3** (M) — ~50 Flächen unter 44 px bei 390 px (Konsolen-Chips 34, Karten-Links 23, Header 36/38)
+- ~~**LM-2**~~ — erledigt: alle Felder und `#consoleInput` auf 16 px, unter 860 px bzw. `pointer: coarse`.
+- **LM-3** (M) — **teilweise.** Die neuen Formular-Pills sind 44 px (gemessen: 0 von 13 darunter).
+  Offen bleiben Konsolen-Chips 34, Karten-Links 23, Header-Controls 36/38.
 - **LM-4** (M) — Command-Menü auf 390: die Hover-Vorschau frisst das halbe Panel, die Nav-Liste zeigt ~35 %
 
 ### Award-Hebel (alle billig)
@@ -106,11 +135,12 @@ zusammen raus — **also nicht vor AW-2.**
 
 ---
 
-## P2 — 26 offen (Politur, alle ungeprüft)
+## P2 — 25 offen (Politur, alle ungeprüft)
 
 **Diese Liste ist nicht nachgemessen.** Je Punkt vor dem Bauen selbst nachsehen.
 
-- **UI-8** (M) — Kontaktformular ohne jede Validierung: kein `required`, keine Fehlerzustände
+- ~~**UI-8**~~ — erledigt: `required`, `aria-invalid`, Fehlerzeile je Feld, Fokus aufs erste Fehlerfeld,
+  Erfolgs- und Fehlerzustand — und das Formular sendet.
 - **UI-7 / AP-3** (S) — kein Skip-Link (heute geprüft: repo-weit keiner). Doppelt gemeldet, ein Fix.
 - **LM-8** (M) — hover-gebundene Inhalte auf Touch unerreichbar, obwohl die Copy zum Hovern auffordert
 - **LM-5** (M) — Hero-Lesefolge auf 390: die drei Fakten stehen **zwischen** Intro und H1

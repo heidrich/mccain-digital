@@ -114,8 +114,10 @@
   <main id="top">
 
     <!-- ================= HERO ================= -->
-    <header class="hero hero--svc wrap">
-      <div class="hero-inner">
+    <header class="hero hero--svc hero--stage guides" data-field>
+      <span class="gmark gmark--tl"></span><span class="gmark gmark--tr"></span>
+      <span class="gmark gmark--bl"></span><span class="gmark gmark--br"></span>
+      <div class="hero-inner wrap">
         <nav class="crumb" aria-label="Breadcrumb">
           <a href="index.html#top">Home</a><i aria-hidden="true">/</i>
           <b aria-current="page">Start a project</b>
@@ -124,8 +126,8 @@
         <p class="hero-eyebrow label">24 h to a reply · 48 h to a fixed quote · no sales call</p>
 
         <h1 class="hero-h">
-          <span class="line"><span class="ph" data-pixel>Tell us what</span></span>
-          <span class="line"><span class="ph" data-pixel><span class="accent">you have in mind.</span></span></span>
+          <span class="line">Tell us what</span>
+          <span class="line"><span class="accent">you have in mind.</span></span>
         </h1>
 
         <div class="hero-foot">
@@ -143,11 +145,17 @@
             </div>
           </div>
           <div class="hero-side">
-            <b>24 h</b> to a real reply<br>
-            <b>48 h</b> to a fixed quote<br>
-            <b>0</b> sales calls to sit through
+            <span><b>24 h</b><i>to a real reply</i></span>
+            <span><b>48 h</b><i>to a fixed quote</i></span>
+            <span><b>0</b><i>sales calls to sit through</i></span>
           </div>
         </div>
+
+        <p class="stage-meta">
+          <span>What it is · roughly when · roughly what budget</span>
+          <span>Two people read this inbox</span>
+          <span><b>info@mccain-digital.com</b></span>
+        </p>
       </div>
     </header>
 
@@ -162,7 +170,7 @@
         <div class="contact-grid">
           <div>
             <p class="label">(01) — Start a project</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>Two people,</span>
+            <h2 class="sec-h" data-words>Two people,
               <span class="dim">one inbox.</span></h2>
             <p class="lead" style="margin:1.4rem 0">Tell us roughly what you need and roughly when. If we're
               not the right studio for it we'll say so in the first reply — and where possible point you at
@@ -179,26 +187,72 @@
             </div>
           </div>
 
-          <form id="contactForm" novalidate>
+          <!-- Six questions, the same six the old site asked. Three of them are
+               closed, so the first reply can carry a number instead of a return
+               question - that is the whole reason they exist. -->
+          <form id="contactForm" novalidate data-send>
+
+            <!-- honeypot (Web3Forms). Off-screen, never focusable, must stay empty. -->
+            <label class="hp" aria-hidden="true">Leave this empty
+              <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off"></label>
+
+            <fieldset class="fgroup">
+              <legend>What is it?</legend>
+              <div class="pills">
+              <label class="pill"><input type="checkbox" name="type" value="AI tools"><span>AI tools</span></label>
+              <label class="pill"><input type="checkbox" name="type" value="Web apps"><span>Web apps</span></label>
+              <label class="pill"><input type="checkbox" name="type" value="Websites"><span>Websites</span></label>
+              <label class="pill"><input type="checkbox" name="type" value="Software for companies"><span>Software for companies</span></label>
+              <label class="pill"><input type="checkbox" name="type" value="Not sure yet"><span>Not sure yet</span></label>
+              </div>
+            </fieldset>
+
+            <fieldset class="fgroup">
+              <legend>Rough budget</legend>
+              <div class="pills">
+              <label class="pill"><input type="radio" name="budget" value="&lt; €5k"><span>&lt; €5k</span></label>
+              <label class="pill"><input type="radio" name="budget" value="€5k–15k"><span>€5k–15k</span></label>
+              <label class="pill"><input type="radio" name="budget" value="€15k–50k"><span>€15k–50k</span></label>
+              <label class="pill"><input type="radio" name="budget" value="€50k+"><span>€50k+</span></label>
+              <label class="pill"><input type="radio" name="budget" value="Not sure"><span>Not sure</span></label>
+              </div>
+            </fieldset>
+
+            <fieldset class="fgroup">
+              <legend>When</legend>
+              <div class="pills">
+              <label class="pill"><input type="radio" name="timeframe" value="ASAP"><span>ASAP</span></label>
+              <label class="pill"><input type="radio" name="timeframe" value="1–3 months"><span>1–3 months</span></label>
+              <label class="pill"><input type="radio" name="timeframe" value="Just exploring"><span>Just exploring</span></label>
+              </div>
+            </fieldset>
+
             <div class="field">
               <label for="cName">Your name</label>
-              <input id="cName" type="text" autocomplete="name">
+              <input id="cName" name="name" type="text" autocomplete="name" required
+                aria-describedby="cNameErr">
+              <p class="field-err" id="cNameErr">We need a name to answer to.</p>
             </div>
             <div class="field">
               <label for="cMail">Email</label>
-              <input id="cMail" type="email" autocomplete="email">
+              <input id="cMail" name="email" type="email" autocomplete="email" required
+                aria-describedby="cMailErr">
+              <p class="field-err" id="cMailErr">An address we can reach you at.</p>
             </div>
             <div class="field">
               <label for="cMsg">What's it about?</label>
-              <textarea id="cMsg"></textarea>
+              <textarea id="cMsg" name="message" required aria-describedby="cMsgErr"></textarea>
+              <p class="field-err" id="cMsgErr">One line is enough — but we need that one.</p>
             </div>
+
             <button class="btn" type="submit">Send it
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path d="M5 12h14M13 6l6 6-6 6" />
               </svg>
             </button>
-            <p class="lead" style="font-size:var(--t-small);margin-top:1rem" id="cNote">
-              Prototype — this form is not wired up. The live site posts to Web3Forms.</p>
+            <p class="form-note">No newsletter, no CRM sequence, no discovery workshop.
+              One reply from one of the two people who would build it.</p>
+            <p class="form-say" role="status"></p>
           </form>
         </div>
       </div>
@@ -210,7 +264,7 @@
         <div class="sec-head rv">
           <div>
             <p class="label">(02) — What happens next</p>
-            <h2 class="sec-h"><span class="ph" data-pixel>No black box</span>
+            <h2 class="sec-h" data-words>No black box
               <span class="dim">between here and a number.</span></h2>
           </div>
           <p class="lead">Four steps, and you can stop after any of them. Nothing here costs you anything.</p>
@@ -264,7 +318,7 @@
           <div class="rv">
             <p class="lead">We're two senior people, so there are jobs we're the wrong shape for. Better you
               read it here than find out in week three:</p>
-            <div class="st-facts stagger" style="margin-top:1.4rem">
+            <div class="st-facts st-facts--wide stagger" style="margin-top:1.4rem">
               <div class="st-fact" style="--i:0"><b>Scale</b><span>You need twenty people on it by Monday —
                   we're two, and we won't pretend otherwise</span></div>
               <div class="st-fact" style="--i:1"><b>Price</b><span>You want the cheapest possible bid — we

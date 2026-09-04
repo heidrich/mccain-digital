@@ -2344,6 +2344,175 @@ html[data-theme="light"] .t-moon {
   padding-bottom: 3px
 }
 
+/* ============================================================
+   THE QUALIFYING FORM
+   Three closed questions as pills, so the first reply can carry a
+   number instead of a return question. These fields are not new -
+   the old site asked exactly them; only their home changed.
+
+   The checkbox stays the control and the pill is its label. Swapping
+   it for a synced div would cost keyboard operation and the group
+   semantics a screen reader reads out, and buy nothing.
+   ============================================================ */
+.fgroup {
+  margin: 0 0 1.25rem;
+  border: 0;
+  padding: 0;
+  min-width: 0
+}
+
+.fgroup>legend {
+  display: block;
+  font-family: var(--mono);
+  font-size: var(--t-label);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: .55rem;
+  padding: 0
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem
+}
+
+.pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: .62rem 1rem;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-size: var(--t-small);
+  color: var(--muted);
+  cursor: pointer;
+  transition: color var(--d-ui) var(--e-out), box-shadow var(--d-ui) var(--e-out), background-color var(--d-ui) var(--e-out)
+}
+
+/* Opacity, not display:none. A hidden control is not focusable, and
+   the whole group would drop out of the tab order. */
+.pill input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer
+}
+
+.pill:hover {
+  color: var(--fg);
+  box-shadow: inset 0 0 0 1px var(--acc)
+}
+
+.pill.is-on {
+  background: var(--acc);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--acc)
+}
+
+.pill:has(input:focus-visible) {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px
+}
+
+/* Fingers need 44px. A mouse does not, and the desktop rhythm keeps
+   the tighter pill. Both conditions, comma-joined: a real touch device
+   of any width, or a viewport narrow enough that a finger is the likely
+   pointer. Coarse alone cannot be measured in an emulator - it reports
+   a fine pointer at 390px - so it may not be the only trigger. */
+@media (pointer: coarse), (max-width: 860px) {
+  .pill {
+    min-height: 44px;
+    padding-inline: 1.15rem
+  }
+}
+
+/* The honeypot. Off-screen rather than display:none, because a field
+   the browser never lays out is one a bot can also skip. */
+.hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden
+}
+
+/* ---- the state a form has to be able to show ---- */
+.field input[aria-invalid="true"],
+.field textarea[aria-invalid="true"] {
+  box-shadow: inset 0 0 0 1px var(--acc)
+}
+
+.field-err {
+  display: none;
+  font-family: var(--mono);
+  font-size: var(--t-label);
+  letter-spacing: .06em;
+  color: var(--acc-text);
+  margin-top: .4rem
+}
+
+.field:has([aria-invalid="true"]) .field-err {
+  display: block
+}
+
+.form-note {
+  font-size: var(--t-small);
+  color: var(--muted);
+  margin-top: 1rem
+}
+
+.form-say {
+  display: none;
+  margin-top: 1rem;
+  padding: .9rem 1.1rem;
+  border-radius: 10px;
+  font-size: var(--t-small);
+  color: var(--fg);
+  box-shadow: inset 0 0 0 1px var(--ok)
+}
+
+.form-say.is-bad {
+  box-shadow: inset 0 0 0 1px var(--acc)
+}
+
+.form-say.go {
+  display: block
+}
+
+/* iOS Safari zooms the viewport when a focused field sits under 16px
+   and then leaves it displaced - on the two conversion surfaces of the
+   site. The page deliberately allows zoom, so the field itself is the
+   only lever. Coarse pointers only: the desktop scale is untouched.
+   The selector is broad on purpose - the palette and the dock build
+   their inputs in JS, and a list of classes would miss them. The width
+   arm is not redundant: an emulated iPhone reports `pointer: fine`, so
+   coarse alone is a rule no test on this machine can prove.
+
+   `.field input` and `.field textarea` are named although the bare
+   element selectors are already in the list: the base rule at .field is
+   (0,1,1) and a bare `textarea` is (0,0,1), so without them the message
+   box keeps its 12.8px and the two fields above it do not. The bare arms
+   stay for the fields the palette and the dock build in JS. */
+@media (pointer: coarse), (max-width: 860px) {
+
+  .field input,
+  .field textarea,
+  input[type="text"],
+  input[type="email"],
+  input[type="search"],
+  input:not([type]),
+  textarea,
+  select {
+    font-size: max(16px, var(--t-small))
+  }
+}
+
 .foot {
   border-top: 1px solid var(--line-2);
   padding-block: 1.6rem;
@@ -3563,6 +3732,25 @@ html[data-theme="light"] .t-moon {
 .ctaband .lead {
   margin: 0 auto 2rem;
   max-width: 62ch
+}
+
+/* The 404 is the one page with no content of its own to lay out: a
+   single centred column. These three carry what used to be four inline
+   style attributes on that page - the headline size, the extra air
+   above it, and the centred button row. `.label` never needed one:
+   it is not a flex container, so the justify-content sitting on it
+   did nothing, and .ctaband already centres the line. */
+.ctaband--lift {
+  padding-top: 6vh
+}
+
+.ctaband-h {
+  font-size: clamp(2.4rem, 7vw, 6.2rem)
+}
+
+.hero-ctas--center {
+  justify-content: center;
+  margin-top: 2rem
 }
 
 /* ============================================================

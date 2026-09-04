@@ -487,17 +487,113 @@
      The home page and contact.html carry the same form, so the
      honest-failure note lives here rather than in both.
      ============================================================ */
-  const cForm = d.getElementById("contactForm");
-  if (cForm) {
-    cForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const note = d.getElementById("cNote");
-      if (!note) return;
-      note.innerHTML =
-        "This is the <b>design prototype</b> — nothing was sent. On the live site this posts to Web3Forms. " +
-        'Mail us directly at <a href="mailto:info@mccain-digital.com" style="text-decoration:underline">info@mccain-digital.com</a>.';
+  /* THE CONTACT FORM — one mechanism, two mounts.
+     The home page asks three questions, the contact page asks six. That
+     is not two forms: the sender collects whatever fields are actually
+     present, so the short form keeps working and the long one needs no
+     second implementation. Any form that opts in with `data-send` gets
+     it.
+
+     The Web3Forms access key is public by design — it names the inbox,
+     it does not authorise anything. */
+  const W3F_URL = "https://api.web3forms.com/submit";
+  const W3F_KEY = "d3e1fa0a-cbe1-45cd-b823-c63eff37c66a";
+  const OUR_MAIL = "info@mccain-digital.com";
+
+  d.querySelectorAll("form[data-send]").forEach((form) => {
+    const say = form.querySelector(".form-say");
+    const btn = form.querySelector('button[type="submit"]');
+
+    const speak = (text, bad) => {
+      if (!say) return;
+      say.textContent = text;
+      say.classList.toggle("is-bad", !!bad);
+      say.classList.add("go");
+    };
+
+    /* The pill is the label; the checkbox underneath stays the control
+       and keeps the focus ring. Radios have to clear their siblings,
+       because only one of them fires a change event. */
+    form.querySelectorAll(".pill").forEach((pill) => {
+      const input = pill.querySelector("input");
+      if (!input) return;
+      const sync = () => {
+        if (input.type === "radio") {
+          form.querySelectorAll('input[name="' + input.name + '"]').forEach((g) => {
+            const p = g.closest(".pill");
+            if (p) p.classList.toggle("is-on", g.checked);
+          });
+        } else {
+          pill.classList.toggle("is-on", input.checked);
+        }
+      };
+      input.addEventListener("change", sync);
+      sync();
     });
-  }
+
+    // A field stops being wrong the moment someone works on it.
+    form.querySelectorAll("input,textarea").forEach((el) => {
+      el.addEventListener("input", () => el.removeAttribute("aria-invalid"));
+    });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (say) say.classList.remove("go");
+
+      /* `novalidate` suppresses the browser's own bubbles, not its
+         validity state — the check below is the same one, shown in
+         this page's own type instead of the platform's. */
+      const wrong = [...form.querySelectorAll("input,textarea")].filter((el) => !el.checkValidity());
+      if (wrong.length) {
+        wrong.forEach((el) => el.setAttribute("aria-invalid", "true"));
+        wrong[0].focus();
+        speak(wrong.length === 1
+          ? "One field still needs you — it is marked above."
+          : wrong.length + " fields still need you — they are marked above.", true);
+        return;
+      }
+
+      const val = (n) => {
+        const el = form.elements[n];
+        return el && el.value ? el.value.trim() : "";
+      };
+      const picked = (n) => [...form.querySelectorAll('input[name="' + n + '"]:checked')]
+        .map((i) => i.value).join(", ");
+      const hp = form.querySelector('[name="botcheck"]');
+
+      if (btn) btn.disabled = true;
+
+      fetch(W3F_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          access_key: W3F_KEY,
+          subject: "New project inquiry via mccain-digital.com",
+          name: val("name"),
+          email: val("email"),
+          project_type: picked("type") || "—",
+          budget: picked("budget") || "—",
+          timeframe: picked("timeframe") || "—",
+          message: val("message"),
+          botcheck: hp && hp.checked ? "1" : ""
+        })
+      })
+        .then((r) => r.json())
+        .then((res) => {
+          if (!res.success) throw new Error("web3forms declined");
+          form.reset();
+          form.querySelectorAll(".pill.is-on").forEach((p) => p.classList.remove("is-on"));
+          speak("That is with us. One of the two people who would build it replies within 24 hours — from a real address, not a ticket system.");
+          if (say) say.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
+        })
+        .catch(() => {
+          speak("That did not go through. Mail us at " + OUR_MAIL + " — it reaches the same two people.", true);
+        })
+        .then(() => {
+          if (btn) btn.disabled = false;
+        });
+    });
+  });
 
   /* ============================================================
      9) PIXEL ENGINE — headlines, buttons, pictures
