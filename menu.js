@@ -154,6 +154,13 @@
     streamCancel();
     clearInterval(decodeTimer);
 
+    // Below 640 the pane is display:none. Streaming an answer into a hidden
+    // node once per keystroke is work the phone pays for and nobody sees.
+    // Asked of the computed style, so the CSS stays the only place the
+    // breakpoint is written down — and offsetParent is not usable here,
+    // it is null for anything inside a fixed-position ancestor.
+    if (getComputedStyle(prev).display === "none") return;
+
     if (it.ask) {
       prev.innerHTML =
         `<p class="cm-p-eyebrow">Answer</p>

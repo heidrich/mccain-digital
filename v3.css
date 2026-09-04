@@ -2617,6 +2617,41 @@ html[data-theme="light"] .t-moon {
   visibility: hidden
 }
 
+/* ============================================================
+   VIEW TRANSITIONS — the cut between pages
+   Every internal navigation on this site is a hard cut: the header
+   rebuilds, the dither field reboots, the wordmark blinks. A
+   cross-document view transition costs one at-rule and no JavaScript,
+   and the browser does the rest — it snapshots the outgoing page and
+   cross-fades it into the incoming one.
+
+   Deliberately only the root. Named transitions on the nav or the
+   wordmark would ask the browser to MORPH elements between documents,
+   and every one of those is a chance for a mismatched box to slide
+   across the screen. A short fade is the whole ask.
+
+   `navigation: none` under reduced motion, not `animation: none` on
+   the pseudo-elements: turning the animation off leaves the browser
+   still running a transition, just with nothing driving it. Refusing
+   the transition is the honest way to say no.
+   ============================================================ */
+@view-transition {
+  navigation: auto
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: .26s;
+  animation-timing-function: var(--e-out)
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none
+  }
+}
+
+
 
 .foot-in {
   display: flex;
@@ -3296,6 +3331,28 @@ html[data-theme="light"] .t-moon {
 
   .cm-foot-k {
     display: none
+  }
+}
+
+/* On a phone the panel is a LIST, not a split view. Measured at 390: the
+   list showed 293px of 875 - a third of the entries - while the preview
+   took 313px and clipped its own text mid-word, and the hint bar spent 42
+   more explaining arrow keys to a finger. The preview follows the HOVERED
+   item, and there is no hover here: a tap navigates.
+
+   640 and not the 800 above on purpose. A narrow desktop window has a
+   mouse, so it keeps the preview; this is the phone case only. */
+@media (max-width: 640px) {
+
+  .cm-prev,
+  .cm-foot {
+    display: none
+  }
+
+  /* the rule above draws a line under the list to separate it from the
+     preview. With no preview there is nothing to separate. */
+  .cm-list {
+    border-bottom: 0
   }
 }
 

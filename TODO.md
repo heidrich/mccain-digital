@@ -10,7 +10,7 @@ Fund stehen in der JSON unter seiner `id`.
 ## Wie belastbar das ist
 
 Die Skeptiker-Stufe des Audits ist nie gelaufen — alle vier Prüfer sind am Session-Limit
-gescheitert. **Von den ursprünglich 58 Punkten sind 47 offen** — die Wellen vom 4.9. haben elf geschlossen.
+gescheitert. **Von den ursprünglich 58 Punkten sind 44 offen** — die Wellen vom 4.9. haben vierzehn geschlossen.
 Von den 51 ist keiner gegengeprüft.
 Erfahrungswert dieser Methode: 30–60 % Fehlalarm. Die schwersten Funde (P0, die härtesten P1) sind
 nachgemessen; ab P2 gilt: **vor dem Bauen selbst nachsehen.**
@@ -114,7 +114,7 @@ IA-2 und IA-3, nicht Teil dieser Welle:
 
 ---
 
-## P1 — 6 offen
+## P1 — 3 offen
 
 ### Hingen an P0 — alle vier zu (4.9. abends)
 
@@ -150,7 +150,10 @@ niemand mehr `data-pixel` schreibt; `voidReveal` ist es nicht.
   Hover-Unterstreichung (`left:0;right:0`) über die ganze Spalte statt unter dem Wort. Die Reihen
   sind 44 px hoch und 26 px von der Nachbarspalte entfernt, bestehen AA (24×24) also deutlich;
   die Breite verfehlt AAA. Bewusst so gelassen.
-- **LM-4** (M) — Command-Menü auf 390: die Hover-Vorschau frisst das halbe Panel, die Nav-Liste zeigt ~35 %
+- ~~**LM-4**~~ — erledigt: unter 640 px sind Vorschau und Tastatur-Hinweisleiste ausgeblendet.
+  Die Liste geht damit von **293 px auf 649 px** (33 % → 74 % ihrer Höhe), 12 statt 5,5 von 16
+  Einträgen sichtbar. 640 und nicht die bestehenden 800: ein schmales Desktop-Fenster hat eine
+  Maus und behält die Vorschau. `menu.js` streamt zusätzlich nicht mehr in die versteckte Fläche.
 
 ### Award-Hebel (alle billig)
 
@@ -166,14 +169,33 @@ niemand mehr `data-pixel` schreibt; `voidReveal` ist es nicht.
   Gemessen: `vr-armed` → `vr-playing` → `vr-done`, Text kommt zurück, Box unverändert (kein
   Layout-Sprung). Bei `prefers-reduced-motion` wird gar nichts aufgebaut — kein Canvas, keine
   Klasse, Text schlicht da.
-- **AW-3** (S) — jede interne Navigation ist ein harter Schnitt. `@view-transition { navigation: auto }`
-  plus kurze Fade-Regel hinter `prefers-reduced-motion`. Null JS, null Dependencies.
+- ~~**AW-3**~~ — erledigt: `@view-transition { navigation: auto }` plus eine 0,26-s-Blende auf
+  `::view-transition-old/new(root)`. Nur die Wurzel: benannte Übergänge auf Nav oder Wortzeichen
+  würden den Browser bitten, Elemente **zwischen Dokumenten** zu morphen, und jedes davon ist eine
+  Gelegenheit für eine verrutschte Box. Bei reduzierter Bewegung `navigation: none` statt
+  `animation: none` — die Animation abschalten lässt den Browser weiter eine Transition fahren,
+  nur ohne Antrieb. Belegt per `pageswap`: normal ein echtes `ViewTransition`-Objekt, unter
+  reduzierter Bewegung `false`.
 - **SC-1** (M) — zwei Footer-Architekturen: `index` Mega-Footer, die 9 anderen Seiten schmal
 
 ### Rest
 
-- **UI-2** (S) — verwaistes „A" mit hängendem Caret bei jedem Menü→Konsole-Handoff
-- **AP-1** (M) — LCP-Element (Hero-H1) durch den Wort-Stagger um ~715 ms verzögert
+- ~~**UI-2**~~ — erledigt: `?ask=` wird jetzt **vor** `setMode` gelesen, und mit einer Frage in
+  der Hand wird gar keine Begrüßung gestreamt. Vorher brach `answer()` sie nach dem ersten
+  Zeichen ab und liess ein einzelnes „A" über jeder übergebenen Konversation stehen. Zweiter
+  Fix in `data.js`: `stream()`s Abbruch gibt jetzt die `caret`-Klasse zurück — sonst blinkt ein
+  Cursor bis zum Sessionende auf einer Zeile, die nie fertig wird.
+- **AP-1** (M) — **Owner-Entscheidung, kein Fehler.** Gemessen (zwei saubere Läufe): FCP ~110 ms,
+  **LCP 824 / 836 ms** auf `H1.display`, 8 Wörter, das letzte mit `--wi=7` also 336 ms Versatz plus
+  720 ms Transform.
+  **Zwei Korrekturen am Audit-Befund:** (1) Der Vorschlag „Opacity vom Wort-Versatz entkoppeln"
+  kann nichts bringen — `.w` hat `overflow: clip`, ein Wort auf `translateY(115%)` ist unsichtbar
+  unabhängig von seiner Deckkraft. Das Tor ist der **Transform**. (2) Der Kommentar über der Regel
+  in `v3.css` sagt, der Kopf laufe **absichtlich** „inside the 800-1600ms band, with inner beats".
+  Der gemessene LCP ist der Anfang genau dieses Bandes.
+  **Also eine Abwägung, keine Reparatur:** Kennzahl gegen Auftritt. Hebel wären die Transform-Dauer
+  (0,72 s) und der Versatz (48 ms/Wort). Nicht still nachgezogen — sag, ob dir der PageSpeed-Wert
+  den kürzeren Auftritt wert ist, dann messe ich beide Varianten gegeneinander.
 
 ---
 
