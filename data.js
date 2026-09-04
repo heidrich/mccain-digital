@@ -56,6 +56,7 @@
     { g: "Pages", t: "The studio", to: "index.html#studio", d: "Two founders, twenty years, no hand-offs.", k: "about studio team who founders christian kathi people" },
     { g: "Pages", t: "Proof", to: "index.html#proof", d: "Twenty years of brands, and the client quotes we are still collecting.", k: "proof reviews testimonials clients brands references trust" },
     { g: "Pages", t: "Straight answers", to: "index.html#faq", d: "Cost, timelines, who builds it — and why you might not want us.", k: "faq questions answers cost price timeline" },
+    { g: "Pages", t: "What happens next", to: "index.html#process", d: "The four steps from a first mail to something clickable — and you can stop after any of them.", k: "process steps next what happens quote timeline how it works ablauf" },
     { g: "Pages", t: "Start a project", to: "contact.html", d: "A real reply within 24 hours, a fixed quote within 48.", k: "contact start hire quote email mail reach brief" },
 
     /* German law requires these four to be reachable from every page. Putting
@@ -92,6 +93,14 @@
     {
       q: "Can we host it ourselves?",
       a: "Yes — and for anything touching your data, we'd recommend it.\n\n<b>Self-hosted, your keys, your iron.</b> No lock-in, no per-seat tax, no vendor who owns your content. You get the repository and the documentation."
+    },
+    /* The palette entry for this section promises "why you might not want
+       us" and lands on #faq. Until this tab existed, that promise pointed at
+       six answers that never said it. The wording is the anti-fit list from
+       contact.html, mirrored rather than rewritten - two places, one claim. */
+    {
+      q: "Is there a reason NOT to hire you?",
+      a: "Three, and better you read them here than find out in week three.\n\nWe're two senior people, so there are jobs we're the wrong shape for. <b>Scale</b> — you need twenty people on it by Monday: we're two, and we won't pretend otherwise. <b>Price</b> — you want the cheapest possible bid: we won't be it, and we'd rather say so now. <b>Presence</b> — you need someone on site every day: we're in Bavaria and we work remote.\n\nWhat you get instead: the people who quote are the people who build, and we're still the ones who pick up the phone in year three."
     }
   ];
 

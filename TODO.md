@@ -10,7 +10,7 @@ Fund stehen in der JSON unter seiner `id`.
 ## Wie belastbar das ist
 
 Die Skeptiker-Stufe des Audits ist nie gelaufen — alle vier Prüfer sind am Session-Limit
-gescheitert. **Von den ursprünglich 58 Punkten sind 51 offen** — die Welle vom 4.9. hat sieben geschlossen.
+gescheitert. **Von den ursprünglich 58 Punkten sind 49 offen** — die zwei Wellen vom 4.9. haben neun geschlossen.
 Von den 51 ist keiner gegengeprüft.
 Erfahrungswert dieser Methode: 30–60 % Fehlalarm. Die schwersten Funde (P0, die härtesten P1) sind
 nachgemessen; ab P2 gilt: **vor dem Bauen selbst nachsehen.**
@@ -56,6 +56,17 @@ dem Fix vom Vormittag ein totes Token und hat jetzt seinen Zweck; eine doppelt v
 der teuerste Boot im Repo. Jetzt: `accent nodes 18, gradient text 2, failing 0`, alle 6 Seiten,
 beide Themes, Exit 0. `data-pixel` ist auf den Live-Seiten repo-weit **0**.
 
+### Zweite Welle vom 4.9. — die zwei Kaufpfad-Module gespiegelt
+
+| Fund | Was | Messung |
+|---|---|---|
+| IA-2 (P1) | 4-Schritte-Prozess als Kapitel **(08)** auf der Startseite | 4 Schritte, alle erreichen Deckkraft 1 beim Scrollen; Leiste meldet „(08) What happens next“ |
+| IA-3 (P1) | Anti-Fit als **siebter FAQ-Tab** | 7 Tabs, Antwort streamt vollständig durch (563 Zeichen), nennt Scale/Price/Presence |
+
+Beide Texte sind aus `contact.html` **gespiegelt, nicht umgeschrieben** — zwei Orte, eine Zusage.
+Die Kapitel-Umnummerierung kostete drei Stellen: das Label, den Kommentar und `CHAPTERS`; der
+IntersectionObserver läuft über dieselbe Liste und findet den neuen Abschnitt von allein.
+
 ---
 
 ## P0 — zu (4.9. abends)
@@ -88,7 +99,7 @@ IA-2 und IA-3, nicht Teil dieser Welle:
 
 ---
 
-## P1 — 10 offen
+## P1 — 8 offen
 
 ### Hingen an P0 — alle vier zu (4.9. abends)
 
@@ -101,10 +112,12 @@ zusammen entsorgen, sobald das erreicht ist — aber AW-2 muss `voidReveal` erst
 
 ### Kaufpfad-Struktur
 
-- **IA-2** (M) — kein Prozess-/Ablauf-Modul auf der Startseite
-- **IA-3** (S) — Anti-Fit auf `index` nicht auffindbar. Der ⌘K-Eintrag verspricht den Inhalt
-  bereits (`data.js:58`: „why you might not want us"), landet aber auf `index.html#faq` — und dort
-  steht die Liste nicht. Vorschlag des Audits: als siebter FAQ-Tab.
+- ~~**IA-2**~~ — erledigt: der 4-Schritte-Prozess ist ein eigenes Kapitel **(08) What happens next**
+  auf der Startseite, zwischen Proof und Formular. Wortgleich gespiegelt, nicht neu geschrieben.
+  Kontakt ist dadurch **(09)**; die Kapitelleiste (`CHAPTERS` in `index.html`) zieht mit.
+- ~~**IA-3**~~ — erledigt: die Anti-Fit-Liste ist der **siebte FAQ-Tab** („Is there a reason NOT to
+  hire you?“). Damit trifft das ⌘K-Versprechen aus `data.js` („why you might not want us“) endlich
+  auf einen Inhalt, der es einlöst — es zeigt auf `index.html#faq`, und dort stand die Liste nicht.
 - **IA-4** (M) — keine Work-Detailform. 3 von 4 Work-Karten enden auf `#contact`; für die zwei
   geplanten Kundenfälle gibt es keine Seitenform. Die Schablone (`work/<slug>.html` im System der
   Service-Seiten) gehört jetzt festgelegt, nicht erst wenn der Content freigegeben ist.
