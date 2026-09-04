@@ -223,7 +223,10 @@
       }
     };
     tick();
-    return () => { killed = true; clearTimeout(timer); };
+    // A killed stream still owns the caret. Without this the abandoned line
+    // keeps a blinking cursor for the rest of the session, on text that will
+    // never finish - which is exactly what it looks like: a bug.
+    return () => { killed = true; clearTimeout(timer); el.classList.remove("caret"); };
   }
 
   /* the single lookup both the console and the menu use */

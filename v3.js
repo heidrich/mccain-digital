@@ -211,7 +211,10 @@ const aiw = (t) => String(t).replace(/\bAI\b(?!-)/g, '<span class="ai-word">AI</
     cancel = stream(out, mode === "brief" ? brief(q) : lookup(q), toBottom);
   }
 
-  function setMode(next) {
+  /* `silent` skips the greeting. The caller passes it when it already has a
+     question to answer: streaming a hello and cancelling it one character
+     later used to leave that character standing as its own message. */
+  function setMode(next, silent) {
     mode = next;
     tabAsk.setAttribute("aria-selected", String(next === "ask"));
     tabBrief.setAttribute("aria-selected", String(next === "brief"));
@@ -220,6 +223,7 @@ const aiw = (t) => String(t).replace(/\bAI\b(?!-)/g, '<span class="ai-word">AI</
       : "Ask us anything…";
     body.innerHTML = "";
     renderChips();
+    if (silent) return;
     const out = push();
     cancel = stream(out, next === "brief"
       ? "Tell me what you want built — one line is enough — and I'll lay out how we'd run it, what it takes and roughly what it costs.\n\nTry one of the examples below."
@@ -242,11 +246,13 @@ const aiw = (t) => String(t).replace(/\bAI\b(?!-)/g, '<span class="ai-word">AI</
     answer(q);
   });
 
-  setMode("ask");
-
   // A question asked in the command menu arrives here as ?ask=… — the console
   // picks it up and answers it, so the handover doesn't lose the thought.
+  // Read BEFORE setMode: with a question in hand there is no greeting to
+  // write, and the one that used to be written was cancelled after its first
+  // letter — leaving a lone "A" above every handed-over conversation.
   const asked = new URLSearchParams(location.search).get("ask");
+  setMode("ask", !!asked);
   if (asked) {
     answer(asked);
     // drop the parameter again: a reload should not re-ask, and the URL is
