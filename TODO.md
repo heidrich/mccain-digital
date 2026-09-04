@@ -10,7 +10,7 @@ Fund stehen in der JSON unter seiner `id`.
 ## Wie belastbar das ist
 
 Die Skeptiker-Stufe des Audits ist nie gelaufen — alle vier Prüfer sind am Session-Limit
-gescheitert. **Von den ursprünglich 58 Punkten sind 42 offen** — die Wellen vom 4.9. haben sechzehn geschlossen.
+gescheitert. **Von den ursprünglich 58 Punkten sind 41 offen** — die Wellen vom 4.9. haben siebzehn geschlossen.
 Von den 51 ist keiner gegengeprüft.
 Erfahrungswert dieser Methode: 30–60 % Fehlalarm. Die schwersten Funde (P0, die härtesten P1) sind
 nachgemessen; ab P2 gilt: **vor dem Bauen selbst nachsehen.**
@@ -195,7 +195,21 @@ niemand mehr `data-pixel` schreibt; `voidReveal` ist es nicht.
   Der gemessene LCP ist der Anfang genau dieses Bandes.
   **Also eine Abwägung, keine Reparatur:** Kennzahl gegen Auftritt. Hebel wären die Transform-Dauer
   (0,72 s) und der Versatz (48 ms/Wort). Nicht still nachgezogen — sag, ob dir der PageSpeed-Wert
-  den kürzeren Auftritt wert ist, dann messe ich beide Varianten gegeneinander.
+  den kürzeren Auftritt wert ist.
+
+  **Gemessen (je 3 saubere Läufe, Median):**
+
+  | Variante | Transform | Versatz/Wort | LCP | Sequenz endet |
+  |---|---|---|---|---|
+  | **A — Ist** | 0,72 s | 48 ms | **844 ms** | 1056 ms |
+  | **B** | 0,50 s | 28 ms | **640 ms** (−24 %) | 696 ms |
+  | **C** | 0,38 s | 20 ms | **556 ms** (−34 %) | 520 ms |
+
+  **Beide verlassen das dokumentierte Band** („inside the 800-1600ms band"): B endet bei 696 ms,
+  C bei 520 ms. B behält mit 196 ms Gesamtversatz eine deutlich lesbare Staffelung; C liegt mit
+  140 ms an der Schwelle, ab der ein Stagger nicht mehr als Choreografie liest, sondern als eine
+  einzige Bewegung. **Meine Empfehlung: B** — der größere Teil des Gewinns, und der Auftritt
+  bleibt einer. Nicht eingebaut; sag ein Wort, dann ist es zwei Zeilen.
 
 ---
 
@@ -229,13 +243,16 @@ niemand mehr `data-pixel` schreibt; `voidReveal` ist es nicht.
 - **AW-8** (L) — Kaufpfad-Module: kein Preisrahmen, keine interne Referenzstrecke
 - weiter: LD-1, LD-2, LD-3, LM-6, LM-7, FX-5, UI-3, UI-5, UI-6, IA-5, IA-6, AW-6, SC-5, AP-4–AP-8
 
-## P3 — 16 offen (Ideen)
+## P3 — 15 offen (Ideen)
 
 - **FX-8** (S) — `--wave-stops-quiet` ist toter Code, steht heute noch in `v3.css`
 - **FX-7** (M) — Timing-System nur dem Namen nach: 25 Literal-Durations
 - **FX-6** (S) — Marquee friert beim Verlassen des Viewports mit vollem Skew ein
 - **UI-9** (S) — ⌘K kennt keine deutschen Suchbegriffe („kontakt" → 0 Treffer)
-- **AP-6** (S) — Theme-Toggle kommuniziert seinen Zustand nicht an Screenreader
+- ~~**AP-6**~~ — erledigt: die Beschriftung des Theme-Knopfs nennt jetzt das Ziel
+  („Switch to light mode" / „Switch to dark mode") statt in beiden Richtungen dasselbe zu sagen.
+  Die neutrale Beschriftung bleibt im Markup — sie ist, was ein Besucher ohne JS bekommt, und
+  sie stimmt in beiden Zuständen. Gemessen: Beschriftung folgt dem Theme in beide Richtungen.
 - weiter: LD-6, LD-7, LM-9, UI-10, IA-7, IA-8, IA-9, AW-9, AW-10, AW-11, AP-7
 - **keine Aufgaben:** AW-1 (Juror-Note), SC-6 (Positiv-Befund: keine Token-Drift), LM-10 (verifiziert, keine Aktion)
 

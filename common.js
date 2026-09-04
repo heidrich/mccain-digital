@@ -212,9 +212,26 @@
 
   if (themeBtn) {
     let themeRedraw = null;
+
+    /* The button says what it does, not where it is. Two sun-and-moon icons
+       carry the state to anyone who can see them and to nobody else; the
+       label read "Switch between light and dark" in both directions, so a
+       screen reader announced the same eleven words whichever theme was on.
+       It now names the destination, which is the one thing that changes.
+
+       The markup keeps the neutral label: it is what a visitor without
+       JavaScript gets, and it is true in both states. */
+    const labelTheme = () => {
+      themeBtn.setAttribute("aria-label", root.dataset.theme === "dark"
+        ? "Switch to light mode"
+        : "Switch to dark mode");
+    };
+    labelTheme();
+
     themeBtn.addEventListener("click", () => {
       const next = root.dataset.theme === "dark" ? "light" : "dark";
       root.dataset.theme = next;
+      labelTheme();
       try { localStorage.setItem("mcd-v3-theme", next); } catch { /* ignore */ }
 
       // The pixel fields hold the OLD colours and have to be re-sampled — but
