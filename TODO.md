@@ -10,7 +10,7 @@ Fund stehen in der JSON unter seiner `id`.
 ## Wie belastbar das ist
 
 Die Skeptiker-Stufe des Audits ist nie gelaufen — alle vier Prüfer sind am Session-Limit
-gescheitert. **Von den ursprünglich 58 Punkten sind 49 offen** — die zwei Wellen vom 4.9. haben neun geschlossen.
+gescheitert. **Von den ursprünglich 58 Punkten sind 48 offen** — die drei Wellen vom 4.9. haben zehn geschlossen.
 Von den 51 ist keiner gegengeprüft.
 Erfahrungswert dieser Methode: 30–60 % Fehlalarm. Die schwersten Funde (P0, die härtesten P1) sind
 nachgemessen; ab P2 gilt: **vor dem Bauen selbst nachsehen.**
@@ -67,6 +67,21 @@ Beide Texte sind aus `contact.html` **gespiegelt, nicht umgeschrieben** — zwei
 Die Kapitel-Umnummerierung kostete drei Stellen: das Label, den Kommentar und `CHAPTERS`; der
 IntersectionObserver läuft über dieselbe Liste und findet den neuen Abschnitt von allein.
 
+### Dritte Welle vom 4.9. — Touch-Ziele (LM-3)
+
+Zwei Mechaniken, weil zwei Probleme. Wortzeichen, Theme-Knopf, Menü-Knopf und die zwei
+Mail-Links stehen **allein** — ihre Trefferfläche wächst über `::before` auf 44 px, die Optik
+bleibt. Das ist dieselbe Mechanik, mit der `.scard-link::after` aus einem 115×23-Link eine ganze
+Karte macht, nicht eine neue. Die Konsolen-Chips und die Fußzeilen-Spalten stehen **in Gruppen** —
+dort wäre eine unsichtbare Vergrößerung falsch, weil sie dem Nachbarn Tipps wegnimmt; die
+wachsen echt. Gemessen: jede Fläche trifft sich selbst, jeder Nachbar behält seinen eigenen Tipp.
+
+**`::before` und nicht `::after`, und das ist keine Vorliebe:** `.foot-bar a::after` malt die
+goldene Unterstreichung jedes Fußzeilen-Links, und `.foot-bar>.logo::after { content: none }`
+hält sie vom Wortzeichen fern. Ich hatte diese Zeile als toten Code entfernt — die Suche nach
+`.logo::after` findet nur die Unterdrückung und nichts, was sie unterdrückt. Sie unterdrückt eine
+Regel, die „logo" gar nicht im Selektor hat. Wiederhergestellt.
+
 ---
 
 ## P0 — zu (4.9. abends)
@@ -99,7 +114,7 @@ IA-2 und IA-3, nicht Teil dieser Welle:
 
 ---
 
-## P1 — 8 offen
+## P1 — 7 offen
 
 ### Hingen an P0 — alle vier zu (4.9. abends)
 
@@ -125,8 +140,15 @@ zusammen entsorgen, sobald das erreicht ist — aber AW-2 muss `voidReveal` erst
 ### Mobil (alle drei nachgemessen)
 
 - ~~**LM-2**~~ — erledigt: alle Felder und `#consoleInput` auf 16 px, unter 860 px bzw. `pointer: coarse`.
-- **LM-3** (M) — **teilweise.** Die neuen Formular-Pills sind 44 px (gemessen: 0 von 13 darunter).
-  Offen bleiben Konsolen-Chips 34, Karten-Links 23, Header-Controls 36/38.
+- ~~**LM-3**~~ — erledigt: von **62 Flächen unter 44 px auf 8**, und die 8 sind 44 px **hoch**
+  (Fußzeilen-Spaltenlinks, 31–101 px breit). Die Audit-Zahl „~50" war zum größten Teil Fehlalarm:
+  28 davon sind Karten-Links mit `tabindex="-1"`, deren `::after` die ganze 335×567-Karte
+  abdeckt, 13 sind Fließtext-Links (von WCAG 2.5.8 ausdrücklich ausgenommen) und 10 sind
+  fokussierbare Nicht-Bedienelemente. Echt waren zehn.
+  **Der benannte Rest:** volle 44×44 bräuchte den Anker auf Spaltenbreite — dann liefe die
+  Hover-Unterstreichung (`left:0;right:0`) über die ganze Spalte statt unter dem Wort. Die Reihen
+  sind 44 px hoch und 26 px von der Nachbarspalte entfernt, bestehen AA (24×24) also deutlich;
+  die Breite verfehlt AAA. Bewusst so gelassen.
 - **LM-4** (M) — Command-Menü auf 390: die Hover-Vorschau frisst das halbe Panel, die Nav-Liste zeigt ~35 %
 
 ### Award-Hebel (alle billig)

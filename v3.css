@@ -2513,6 +2513,64 @@ html[data-theme="light"] .t-moon {
   }
 }
 
+/* ============================================================
+   TOUCH TARGETS
+   WCAG 2.5.8 wants 44px for anything you tap. Two different fixes,
+   because two different problems:
+
+   The wordmark, the theme button, the menu button and the two mail
+   links are typographic or icon-sized and have to STAY that size -
+   growing the wordmark would change a bar that was deliberately given
+   air. They stand alone, with nothing tappable within 22px, so the hit
+   area can grow past the box without stealing a neighbour's taps. That
+   is the trick `.scard-link::after` already plays to turn a 115x23 link
+   into a whole 335x567 card; this is the same mechanic, not a new one.
+
+   The console chips sit in a GROUP. An invisible overlay there would
+   overlap the chip next to it and hand taps to the wrong one, so those
+   grow for real.
+
+   Deliberately NOT touched: links inside sentences (the criterion
+   exempts them), and `.case-peek`, which is a hover-only duplicate of
+   the card link pointing at the same href - invisible on touch, and
+   losing nothing, because the whole card already goes there.
+
+   ::before, not ::after, and that is not a preference. `.foot-bar
+   a::after` draws the gold underline on every footer link, and
+   `.foot-bar>.logo::after { content: none }` exists to keep it off the
+   wordmark. An ::after here either loses to the first or is killed by
+   the second - and searching the sheet for `.logo::after` finds only
+   the suppression, which makes it look like dead code. It is not.
+   ============================================================ */
+@media (pointer: coarse), (max-width: 860px) {
+
+  .logo,
+  .theme-t,
+  .menu-t,
+  .contact-mail,
+  .foot-mail {
+    position: relative
+  }
+
+  .logo::before,
+  .theme-t::before,
+  .menu-t::before,
+  .contact-mail::before,
+  .foot-mail::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px)
+  }
+
+  .chip {
+    min-height: 44px
+  }
+}
+
 .foot {
   border-top: 1px solid var(--line-2);
   padding-block: 1.6rem;
@@ -5323,6 +5381,31 @@ html[data-theme="light"] .t-moon {
       margin-bottom: .35rem
     }
 
+/* TOUCH TARGETS, second half - see the block next to the 16px field rule.
+   These three live down here and not up there for one reason: `.foot-col`
+   and `.foot-col a::after` are declared in this section with the SAME
+   specificity, so up there they lost on source order alone and silently did
+   nothing. The rows were 22px tall 9px apart - under even the 24px AA floor,
+   and too close for an invisible overlay, which would have reached 13px into
+   the neighbouring link. So they grow for real and sit flush.
+
+   The underline has to come along: it is anchored 3px under the TEXT, and
+   with 11px of padding a `bottom: -3px` would hang 14px below it. */
+@media (pointer: coarse), (max-width: 860px) {
+
+  .foot-col {
+    gap: 0
+  }
+
+  .foot-col a {
+    padding-block: 11px
+  }
+
+  .foot-col a::after {
+    bottom: 8px
+  }
+}
+
 .foot-col a,
     .foot-col span:not(.nav-status) {
       font-size: var(--t-small);
@@ -5386,6 +5469,9 @@ html[data-theme="light"] .t-moon {
       color: var(--acc-text)
     }
 
+/* The wordmark is not one of the footer's links: `.foot-bar a::after` draws
+   the gold underline, and the logo must not get it. Removing this line looks
+   safe - nothing else in the sheet says `.logo::after` - and it is not. */
 .foot-bar>.logo::after {
       content: none
     }
