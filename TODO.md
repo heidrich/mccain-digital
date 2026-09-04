@@ -10,7 +10,7 @@ Fund stehen in der JSON unter seiner `id`.
 ## Wie belastbar das ist
 
 Die Skeptiker-Stufe des Audits ist nie gelaufen — alle vier Prüfer sind am Session-Limit
-gescheitert. **Von den ursprünglich 58 Punkten sind 48 offen** — die drei Wellen vom 4.9. haben zehn geschlossen.
+gescheitert. **Von den ursprünglich 58 Punkten sind 47 offen** — die Wellen vom 4.9. haben elf geschlossen.
 Von den 51 ist keiner gegengeprüft.
 Erfahrungswert dieser Methode: 30–60 % Fehlalarm. Die schwersten Funde (P0, die härtesten P1) sind
 nachgemessen; ab P2 gilt: **vor dem Bauen selbst nachsehen.**
@@ -114,16 +114,17 @@ IA-2 und IA-3, nicht Teil dieser Welle:
 
 ---
 
-## P1 — 7 offen
+## P1 — 6 offen
 
 ### Hingen an P0 — alle vier zu (4.9. abends)
 
 SC-2, SC-4, AW-4 und SC-3 sind erledigt und gemessen — siehe die Tabelle oben.
 
 `data-pixel` steht damit auf den Live-Seiten bei **0** (der Rest liegt in `old/` und `preview/`).
-**Die Aufräum-Falle bleibt offen:** Audit-Punkt 7 will `PixelFX.headline` und `voidReveal`
-zusammen entsorgen, sobald das erreicht ist — aber AW-2 muss `voidReveal` erst noch einsetzen.
-**Nicht löschen vor AW-2.**
+**Die Aufräum-Falle von Audit-Punkt 7 ist entschärft, aber andersherum als gedacht:** Punkt 7 will
+`PixelFX.headline` und `voidReveal` zusammen entsorgen, sobald `data-pixel` bei 0 ist. Seit AW-2
+wird `voidReveal` **aufgerufen** — es darf also NICHT mit weg. `headline` allein ist tot, sobald
+niemand mehr `data-pixel` schreibt; `voidReveal` ist es nicht.
 
 ### Kaufpfad-Struktur
 
@@ -153,12 +154,18 @@ zusammen entsorgen, sobald das erreicht ist — aber AW-2 muss `voidReveal` erst
 
 ### Award-Hebel (alle billig)
 
-- **AW-2** (S) — **zweiter typografischer Höhepunkt fehlt.** `voidReveal` liegt fertig in
-  `pixel-engine.js:1847` (Export `:3061`), im Kommentar selbst „the AI-section signature" — und wird
-  **nirgends aufgerufen** (heute geprüft: 0 Verwendungen außerhalb der Engine). Genau **einmal**
-  einsetzen, hinten: Billboard-Zeile der (03)-Sektion oder das Footer-Statement. Auslösung per
-  IntersectionObserver nach dem Muster von `bootPixels` in `common.js`, hinter dem reduced-Guard.
-  Nicht loopen — sonst konkurriert er mit dem Hero.
+- ~~**AW-2**~~ — erledigt: `voidReveal` läuft **einmal**, auf der Studio-Leitzeile in (05).
+  **Nicht dort, wo das Audit es vorschlug.** Seine beiden Kandidaten — die (03)-Billboard-Zeile und
+  der Fußzeilen-Satz — liegen auf `--bg`, und das ist im hellen Theme **Papier**; ein schwarzer
+  Kern auf Papier ist ein Fleck, kein Loch. (05) ist `band--ink`, gemessen `rgb(11,11,12)` in
+  **beiden** Themes. Dafür wurde die Scheibe gezeichnet.
+  **Der CSS-Vertrag fehlte:** `.vr-txt` und `.vr-canvas` standen nirgends in `v3.css` — nur im
+  Mockup. Ohne sie säße das Canvas im Fluss statt über der Zeile und der echte Text bliebe
+  sichtbar: der Effekt scheitert nicht laut, er zeichnet doppelt. Aus `old/mockup/index.html`
+  übernommen, nicht neu erfunden.
+  Gemessen: `vr-armed` → `vr-playing` → `vr-done`, Text kommt zurück, Box unverändert (kein
+  Layout-Sprung). Bei `prefers-reduced-motion` wird gar nichts aufgebaut — kein Canvas, keine
+  Klasse, Text schlicht da.
 - **AW-3** (S) — jede interne Navigation ist ein harter Schnitt. `@view-transition { navigation: auto }`
   plus kurze Fade-Regel hinter `prefers-reduced-motion`. Null JS, null Dependencies.
 - **SC-1** (M) — zwei Footer-Architekturen: `index` Mega-Footer, die 9 anderen Seiten schmal

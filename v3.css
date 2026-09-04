@@ -2577,6 +2577,47 @@ html[data-theme="light"] .t-moon {
   background: var(--bg)
 }
 
+/* ============================================================
+   VOID REVEAL — the contract the effect needs to exist
+   The engine has shipped `PixelFX.voidReveal` since the refresh and
+   nothing ever called it, so these four rules were never carried over
+   from the mockup. Without them the sampled canvas sits in the flow
+   instead of over the text and the real line never goes transparent:
+   the effect does not fail loudly, it just draws twice.
+
+   Hidden with `visibility`, NOT with a colour: the rasterizer forces
+   `visibility: visible` on the clone it samples, so the pixel field
+   still picks up the real colours. `.vr-done` hands the live text back
+   — and the engine sets it itself when motion is reduced, when there is
+   nothing to sample, and when the build fails, so every failure path
+   ends with a readable line.
+
+   `.vr-armed` is added by JS after the instance exists. That is the
+   guard for visitors without JavaScript, and for an engine that throws
+   while re-parenting: no class, no hidden text.
+   ============================================================ */
+.vr-host {
+  position: relative
+}
+
+.vr-host .vr-txt {
+  position: relative;
+  z-index: 1
+}
+
+.vr-host .vr-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 2
+}
+
+.vr-host.vr-armed:not(.vr-done) .vr-txt {
+  visibility: hidden
+}
+
+
 .foot-in {
   display: flex;
   align-items: center;

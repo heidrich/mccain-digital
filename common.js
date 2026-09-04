@@ -700,6 +700,46 @@
         });
       });
     }
+
+    /* THE ONE SET PIECE. voidReveal has been finished, commented as "the
+       AI-section signature" and exported since the refresh — and called from
+       nowhere. The scroll flattens after (04) because nothing behind the hero
+       is a typographic event; this is that event, used once.
+
+       It runs on the studio claim in (05) and not where the audit suggested.
+       Both of its candidates — the (03) billboard and the footer statement —
+       sit on `--bg`, which is PAPER in light mode, and a black core on paper
+       is a smudge rather than a hole punched through the page. (05) is
+       `band--ink`: dark in both themes, which is what the disc was drawn for.
+
+       Constructed first, armed second: `.vr-armed` is what hides the real
+       line, so if the engine ever throws while re-parenting, the claim stays
+       readable instead of vanishing. Skipped entirely under reduced motion —
+       arming there would hide the text until an observer fires. */
+    const vrHost = d.querySelector(".vr-host");
+    if (vrHost && PixelFX.voidReveal && !reduced) {
+      const vr = PixelFX.voidReveal(vrHost);
+      vrHost.classList.add("vr-armed");
+
+      const vrIO = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          vr.play();
+          vrIO.disconnect();
+        });
+      }, { threshold: 0.6 });
+      vrIO.observe(vrHost);
+
+      // Only BEFORE it has played: redraw re-arms, and re-arming a finished
+      // line would hide text the visitor is already reading.
+      let vrt = null;
+      addEventListener("resize", () => {
+        clearTimeout(vrt);
+        vrt = setTimeout(() => {
+          if (!vrHost.classList.contains("vr-done")) vr.redraw();
+        }, 200);
+      }, { passive: true });
+    }
   }
 
 
