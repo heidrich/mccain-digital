@@ -1,6 +1,70 @@
-# Uebergabe — Stand 4. September 2026 (Abend)
+# Uebergabe — Stand 5. September 2026 (Vormittag)
 
 `https://mccain-digital.vercel.app/` liefert den Stand von `main`.
+
+> ⚡ **NEUESTES (5.9., PC): der Design-Befund liegt vor, und die erste Welle daraus ist gebaut.**
+>
+> **Lies zuerst [`DESIGN-BEFUND.md`](DESIGN-BEFUND.md).** Der Owner hat vier Klagen genannt —
+> zu bildarm, zu viel Textstapel, zu wenig Luft, die vier Service-Seiten sehen gleich aus („die
+> Infos aber nicht raushauen") — plus „die Mainpage nochmal unter die Lupe" und „wir brauchen eine
+> DE-Loka". Sieben Analyse-Linsen haben die Seite dagegen vermessen: **56 Befunde**, roh in
+> `audit/2026-09-05-design-befunde.md`, Dichtekarte je Band in `audit/2026-09-05-dichtekarten.md`.
+>
+> **Die Gegenlese ist NICHT gelaufen** — alle 35 Skeptiker-Agenten sind am Sitzungslimit gestorben.
+> Zwoelf tragende Punkte habe ich selbst nachgemessen, nur die stehen als Tatsache da (Tabelle im
+> Befund). Alles andere traegt den Vertrauensgrad seiner Linse. **Zwei Linsen fehlen ganz** (Bilder,
+> Mobil) — es gibt keinen eigenen Mobil-Befund, LM-5 bis LM-9 und UI-5 sind weiterhin ungeprueft.
+>
+> **`c2ca0dd` — die erste Welle: vier Raeume hinter vier Tueren, und ein Feld, das man sieht.**
+>
+> - **Das Dither-Feld hinter fuenf Heros hatte zwei Farben.** `dsmooth(0.52, 1.02)` sperrte oberhalb
+>   dessen, was das Rauschen erreicht (`cloud + wave` laeuft -0,10 bis 0,64, Mittel 0,342). Gemessen:
+>   84,7 % `rgb(11,11,12)` und 15,1 % `rgb(20,20,21)` — **neun Werte von 255 auseinander**, sechs
+>   Palettenstufen gebaut, zwei benutzt. Jetzt 0,30/0,78 (aus einem Histogramm der echten Geometrie,
+>   nicht nach Augenmass): 43,0 / 27,9 / 14,4 / 8,9 / 4,7 / 1,1. **Der Kontrast wandert nicht mit** —
+>   der Deckel in `ditherRamp` sitzt auf der PALETTE, nicht auf der Verteilung. Schwelle ist jetzt
+>   eine Option (`data-dither-lo/hi`).
+> - **Ein Signal je Service-Seite**, nach der Zwei-Gewichte-Regel von Gelb und Gruen, weil kein
+>   einzelner Wert auf beiden Gruenden AA schafft: ai-tools `#3fc9c2` (Ink 9,69 / Papier `#0b6660`
+>   6,07) · web-apps `#5b2eff` (Ink `#8b6bff` 5,29 / Papier 5,71) · websites `#7a8c00` (Ink `#a4bd00`
+>   9,24 / Papier `#5c6b00` 5,26) · software `#ff3d8a` (Ink 5,89 / Papier `#c2004d` 5,51). Es traegt
+>   Augenbrauen-Strich, Kapitelnummern, Gruppenziffern, Capability-Chips, die Hover-Linie der
+>   Use-Case-Karten, die Proof-Zahlen — **und das Hero-Feld** (`data-dither-token="--svc"`).
+>   **Das H1-Akzentwort bleibt Logo-Gelb**, absichtlich: die Marke behaelt den ersten Viewport.
+> - **Die Farbe beginnt auf der Startseite.** Jede `.scard` setzt ihre eigenen Tokens, die Tuer hat
+>   die Farbe des Raums dahinter.
+>
+> **`783c8b1` — AP-4/AP-5:** Fokus-Indikator in Zwangsfarben (box-shadow wird dort nicht gedimmt,
+> sondern fallen gelassen — die Felder hatten GAR keinen), Name fuer `#cmInput`. UI-6 war ein
+> Fehlalarm. **`8a17735`** — der Theme-Knopf nennt sein Ziel.
+>
+> **DREI FALLEN, die das gekostet hat:**
+>
+> - **Ein Waechter, der nur eine Farbfamilie kennt, meldet null Fehler ueber eine Farbfamilie.**
+>   `isAccent()` beschrieb Gelb/Gold ueber die Kanaele; Gruen, Violett, Pink und sogar `--sig-text`,
+>   das die Seite schon ausliefert, fielen durch. Die Canvas-Haelfte prueft `.ph canvas` — davon gibt
+>   es repo-weit **null**. Gruen auf nichts, zweimal. Jetzt Vereinigung aus Familie UND Token-Naehe
+>   (Union, nicht Ersatz: Token allein mass neun Knoten WENIGER auf index), plus eine Pruefung des
+>   Dither-Felds gegen den duennsten Text des Bandes.
+> - **Eine Kontrast-Insel muss JEDES Signal neu erklaeren, nicht zwei von dreien.** Genau daran fiel
+>   die erste Fassung der Kapitelnummern: 1,90:1 auf Papierbaendern im dunklen Theme, 3,33:1 auf
+>   Ink-Baendern im hellen. Das geschaerfte Gate hat es gefangen, bevor es live ging.
+> - **Eine Regel kann jahrelang auf nichts zeigen.** `.label b` war gestylt, die Kapitel-Labels
+>   hatten gar kein `<b>`. 29 Nummern nachgezogen. Ebenso: `.scard-ghost` war gezeichnet, platziert
+>   und dann auf `opacity: 0` gesetzt bis zum Hover — auf Touch existierte es nie, und sein
+>   Ruhezustand stand mit 55 von 153 px ausserhalb einer Karte mit `overflow: hidden`.
+>
+> **OFFEN — Owner-Entscheidungen** (vollstaendig im Befund, §Owner-Entscheidungen): Gelb auf Papier
+> (es gibt mathematisch **kein** lesbares Gelb auf Papier, das nicht braun ist — Hue 47 braucht
+> Helligkeit ≤26 % fuer 4,5:1; Ausweg ist Gelb als Flaeche statt Schrift), Farbe je Service-Seite
+> bestaetigen, Preisspannen oeffentlich, Konsole auf die AI-Seite, Proof als Kapitel aufgeben,
+> Hero-Koordinaten (zeigen auf Muenchen, die Firma sitzt 70 km weiter in Oberostendorf), Zahlen aus
+> Pixeln, und die acht DE-Fragen.
+>
+> **NAECHSTE WELLE:** die Bildplaetze in den bildlosen Baendern (7 von 11 auf index, 10 von 11 auf
+> den Service-Seiten). Die Engine ist auf `.shot > .shot-img > img` schon verdrahtet — es braucht
+> keine JS-Zeile, nur Markup. Danach: Luft (`--t-copy`, 58ch), dann der Kapitelumbau der Startseite.
+
 
 > ⚡ **Der VORMITTAG in drei Commits** (auf dem Mac). Der Abend steht im Block darunter und
 > brachte acht weitere — die Arbeitsliste dazu ist `TODO.md`, und die reist mit.
