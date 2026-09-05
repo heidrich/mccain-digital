@@ -6,6 +6,7 @@
 # sees an empty panel. FAQPage puts the same words in the markup where every
 # crawler and every AI agent can read them without running anything.
 import io
+import subprocess
 import json
 import os
 import re
@@ -19,28 +20,56 @@ MARK_B = "  <!-- /STRUCTURED DATA -->"
 
 
 def read_data_js():
-    """Pull SERVICES and FAQ out of data.js without a JS engine."""
-    s = io.open(os.path.join(ROOT, "data.js"), encoding="utf-8").read()
+    """Read SERVICES and FAQ out of data.js by RUNNING it.
 
-    services = []
-    block = s[s.index("const SERVICES = ["):s.index("/* ---------- everything the menu")]
-    for m in re.finditer(r'n:\s*"(\d+)",\s*h:\s*"([^"]+)",\s*slug:\s*"([^"]+)",\s*href:\s*"([^"]+)",\s*\n?\s*p:\s*"([^"]+)"', block):
-        services.append({"n": m.group(1), "h": m.group(2), "href": m.group(4), "p": m.group(5)})
+    This used to match them with a regex, and the regex was quietly wrong: it
+    required every answer to be a double-quoted literal, so the seventh FAQ
+    entry never reached the graph and the page shipped six questions where the
+    console answered seven. Nobody noticed, because a generator that finds six
+    of seven prints a cheerful "6 FAQ entries" and exits 0.
 
-    faq = []
-    fblock = s[s.index("const FAQ = ["):s.index("/* ---------- knowledge base")]
-    for m in re.finditer(r'q:\s*"((?:[^"\\]|\\.)*)",\s*\n?\s*a:\s*"((?:[^"\\]|\\.)*)"', fblock):
-        q = m.group(1).replace('\\"', '"')
-        a = m.group(2).replace('\\"', '"').replace("\\n", "\n")
-        a = re.sub(r"<[^>]+>", "", a)                    # plain text for the schema
-        a = a.replace("&amp;", "&").replace("&ldquo;", '"').replace("&rdquo;", '"')
-        faq.append({"q": q, "a": " ".join(a.split())})
+    data.js is an IIFE that assigns to `window`, which is exactly what
+    api/ask.js already relies on - so a window stub and one node call give the
+    real objects instead of an approximation of them. Any answer built from
+    another value (the timing line is composed from RANGES now) comes through
+    correct, and so does anything added later that a pattern would have missed.
+    """
+    script = (
+        "global.window = {};"
+        "require(process.argv[1]);"
+        "const M = global.window.MCD || {};"
+        "process.stdout.write(JSON.stringify({"
+        "  services: (M.SERVICES || []).map(s => ({ n: s.n, h: s.h, href: s.href, p: s.p })),"
+        "  faq: (M.FAQ || []).map(f => ({ q: f.q, a: f.a }))"
+        "}));"
+    )
+    out = subprocess.run(
+        ["node", "-e", script, os.path.join(ROOT, "data.js")],
+        capture_output=True, text=True, encoding="utf-8",
+    )
+    if out.returncode != 0:
+        raise SystemExit("node could not read data.js:\n" + (out.stderr or "").strip())
+    data = json.loads(out.stdout)
+
+    strip = lambda t: " ".join(
+        re.sub(r"<[^>]+>", "", t)
+        .replace("&amp;", "&").replace("&ldquo;", '"').replace("&rdquo;", '"')
+        .split()
+    )
+    services = [dict(s, p=strip(s["p"])) for s in data["services"]]
+    faq = [{"q": f["q"], "a": strip(f["a"])} for f in data["faq"]]
     return services, faq
 
 
 SERVICES, FAQ = read_data_js()
-if len(SERVICES) != 4 or len(FAQ) < 5:
-    raise SystemExit("data.js parse failed: %d services, %d faq" % (len(SERVICES), len(FAQ)))
+# The FAQ count is asserted against data.js itself, not against a floor. A
+# floor of 5 is what let a missing seventh entry pass for as long as it did.
+FAQ_IN_SOURCE = io.open(os.path.join(ROOT, "data.js"), encoding="utf-8").read()
+FAQ_IN_SOURCE = FAQ_IN_SOURCE[FAQ_IN_SOURCE.index("const FAQ = ["):FAQ_IN_SOURCE.index("/* ---------- knowledge base")]
+EXPECTED = len(re.findall(r"^\s*q: ", FAQ_IN_SOURCE, re.M))
+if len(SERVICES) != 4 or len(FAQ) != EXPECTED:
+    raise SystemExit("data.js read failed: %d services (want 4), %d faq (want %d)"
+                     % (len(SERVICES), len(FAQ), EXPECTED))
 
 ORG = {
     "@type": "ProfessionalService",

@@ -63,6 +63,14 @@ function systemPrompt() {
   const services = (MCD.SERVICES || [])
     .map((s) => "- " + s.h + ": " + String(s.p).replace(/<[^>]+>/g, ""))
     .join("\n");
+  /* The same list the console's brief generator and the FAQ read. Without it
+     the model was told "never invent a price" while the page beside it quoted
+     bands the model had never seen - so the only safe answer it could give
+     about money was no answer. */
+  const ranges = (MCD.RANGES || [])
+    .map((r) => "- " + r.kind + ": " + r.weeks + ", " +
+      (r.budget ? "budget band " + r.budget : "no published band - a fixed quote within 48 hours"))
+    .join("\n");
 
   return [
     "You answer questions on the website of McCain Digital, a two-person software studio in Bavaria.",
@@ -73,6 +81,10 @@ function systemPrompt() {
     "",
     "WHAT THE STUDIO DOES",
     services,
+    "",
+    "TYPICAL DURATION AND BUDGET BAND (these are the only numbers you may quote)",
+    ranges,
+    "A native mobile app is NOT one of the four things the studio builds. If someone asks for one, say so and offer a web app instead.",
     "",
     "WHAT IS KNOWN",
     kb,

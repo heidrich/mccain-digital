@@ -201,6 +201,14 @@
               "@type": "Answer",
               "text": "Yes — and for anything touching your data, we'd recommend it. Self-hosted, your keys, your iron. No lock-in, no per-seat tax, no vendor who owns your content. You get the repository and the documentation."
             }
+          },
+          {
+            "@type": "Question",
+            "name": "Is there a reason NOT to hire you?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Three, and better you read them here than find out in week three. We're two senior people, so there are jobs we're the wrong shape for. Scale — you need twenty people on it by Monday: we're two, and we won't pretend otherwise. Price — you want the cheapest possible bid: we won't be it, and we'd rather say so now. Presence — you need someone on site every day: we're in Bavaria and we work remote. What you get instead: the people who quote are the people who build, and we're still the ones who pick up the phone in year three."
+            }
           }
         ]
       }
@@ -335,9 +343,14 @@
             <p class="lead">Most agency sites <b>say</b> they do AI. This one <b>is</b> one. Ask it what we
               cost, whether we're right for you, or what we'd actually build — or hand it your project and
               watch it write the brief.</p>
-            <p class="ai-note">Runs on a serverless function with a rate limit — the key never touches your
-              browser. Right now this prototype answers from a local knowledge base; flip
-              <code>AI_MODE</code> to <code>live</code> in <code>v3.js</code> once the endpoint is deployed.</p>
+            <!-- This used to end with "flip AI_MODE to live in v3.js once the
+                 endpoint is deployed" - an instruction to ourselves, printed
+                 for visitors, and out of date besides: AI_MODE has been "auto"
+                 and the endpoint has been live since bc8edf9. What a visitor
+                 actually wants to know here is where their words go. -->
+            <p class="ai-note">Answers come from a rate-limited serverless function — the key never touches
+              your browser, and nothing you type is stored. If the model is unavailable, the page answers
+              from its own knowledge base instead of failing.</p>
           </div>
 
           <!-- The console sits in a travelling rim: an animated gradient border

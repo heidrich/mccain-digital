@@ -68,6 +68,66 @@
     { g: "Legal", t: "Withdrawal", to: "legal/withdrawal.html", d: "Right of withdrawal and the model withdrawal form.", k: "withdrawal widerruf cancel return consumer refund" }
   ];
 
+  /* ---------- WHAT A THING TAKES, IN ONE PLACE ----------
+     These numbers were living in v3.js, inside the brief generator, where
+     nothing else could read them - and they had already drifted away from the
+     FAQ two screens up: the FAQ says a web app MVP is 6-12 weeks, and the
+     generator had no "web app" at all, so `a web app for our clinic` matched
+     /app/ and came back as a MOBILE app at 8-14 weeks and EUR 30-70k. Two
+     other examples from the site's own chip row missed too: `a booking site`
+     matched /ki/ inside "booking", and `a trainer directory` matched /ai/
+     inside "trainer" - both were quoted as AI projects.
+
+     So: one list, word-bounded, read by the generator, by the FAQ answer
+     below, and by /api/ask (which loads this file rather than copying it).
+     Order matters - the first match wins, so the specific kinds come before
+     the general ones.
+
+     MOBILE APPS ARE GONE ON PURPOSE. The offer is four things, and native
+     apps are not one of them ("Vier statt sechs: AI Tools, Web Apps,
+     Websites, Software fuer Firmen. Mobile Apps und Design & Brand raus").
+     Quoting a price for something we do not sell is worse than saying no, and
+     saying no is what the rest of this site does well - so a mobile brief now
+     gets the honest answer and the nearest real one.
+
+     `budget: null` on the web app is not an oversight. Every other band here
+     was written by the owner; that one never was, and inventing a number for
+     someone else's invoice is not my call. Until it is set, the brief says
+     what the site says everywhere else: a fixed quote within 48 hours. */
+  const RANGES = [
+    { kind: "Online shop", weeks: "6\u201310 weeks", budget: "\u20ac15\u201335k",
+      k: /\b(shop|store|e-?commerce|commerce|bakery|checkout|sell(ing)?)\b/ },
+    { kind: "AI tool on your data", weeks: "4\u201310 weeks", budget: "\u20ac20\u201360k",
+      k: /\b(ai|ki|llm|rag|agent|agents|assistant|chatbot|copilot|invoices?|documents?|pdfs?|extraction)\b/ },
+    { kind: "Internal software", weeks: "8\u201314 weeks", budget: "\u20ac25\u201370k",
+      k: /\b(dashboard|internal|staff|employees|erp|crm|back\s?office|admin|intranet)\b/ },
+    { kind: "Web app", weeks: "6\u201312 weeks", budget: null,
+      k: /\b(web\s?app|webapp|saas|platform|portal|app)\b/ },
+    { kind: "Website", weeks: "3\u20136 weeks", budget: "\u20ac8\u201325k",
+      k: /\b(website|web\s?site|site|landing|homepage|microsite|blog)\b/ }
+  ];
+
+  /* Not one of the four things. Matched BEFORE the list above, because a
+     native app is a no and not a cheaper yes. */
+  const NOT_US = /\b(mobile\s?app|native\s?app|ios|android|app\s?store|play\s?store|swift|kotlin|flutter|react\s?native)\b/;
+
+  const DEFAULT_KIND = RANGES[RANGES.length - 1];          // a website, if nothing else matches
+
+  function kindOf(q) {
+    const s = String(q || "").toLowerCase();
+    if (NOT_US.test(s)) return null;
+    for (let i = 0; i < RANGES.length; i++) if (RANGES[i].k.test(s)) return RANGES[i];
+    return DEFAULT_KIND;
+  }
+
+  /* The FAQ's timing answer is BUILT from the same list, so the two can never
+     say different things again. Only the kinds a visitor asks about by name. */
+  const timingLine = ["Website", "Web app", "AI tool on your data"].map(function (n) {
+    const r = RANGES.filter(function (x) { return x.kind === n; })[0];
+    return (n === "Website" ? "A marketing site" : n === "Web app" ? "A web app MVP" : "An AI tool on your data")
+      + ": <b>" + r.weeks + "</b>";
+  }).join(".\n") + ", depending on how tidy the data is.";
+
   /* ---------- FAQ: question + streamed answer ---------- */
   const FAQ = [
     {
@@ -76,7 +136,7 @@
     },
     {
       q: "How long does it take?",
-      a: "A marketing site: <b>3–6 weeks</b>.\nA web app MVP: <b>6–12 weeks</b>.\nAn AI tool on your data: <b>4–10 weeks</b>, depending on how tidy the data is.\n\nYou see something clickable in the first week — not a status meeting."
+      a: timingLine + "\n\nYou see something clickable in the first week — not a status meeting."
     },
     {
       q: "Who actually builds it?",
@@ -112,7 +172,10 @@
     },
     {
       k: ["time", "long", "timeline", "deadline", "fast", "dauer", "wie lange"],
-      a: "Site: <b>3–6 weeks</b>. Web app MVP: <b>6–12 weeks</b>. AI tool: <b>4–10 weeks</b>.\n\nYou get something clickable in week one."
+      a: RANGES.filter(function (r) { return /Website|Web app|AI tool/.test(r.kind); })
+        .map(function (r) { return (r.kind === "Website" ? "Site" : r.kind === "Web app" ? "Web app MVP" : "AI tool")
+          + ": <b>" + r.weeks + "</b>"; }).join(". ")
+        + ".\n\nYou get something clickable in week one."
     },
     {
       k: ["who", "team", "people", "founder", "wer", "christian", "kathi"],
@@ -240,5 +303,5 @@
     return best ? best.a : FALLBACK;
   }
 
-  window.MCD = { SERVICES, NAV, FAQ, KB, FALLBACK, TIPS, lookup, stream };
+  window.MCD = { SERVICES, NAV, FAQ, KB, FALLBACK, TIPS, RANGES, kindOf, lookup, stream };
 })();

@@ -153,23 +153,37 @@ const aiw = (t) => String(t).replace(/\bAI\b(?!-)/g, '<span class="ai-word">AI</
   const lookup = window.MCD.lookup;
   const FALLBACK = window.MCD.FALLBACK;
 
-  /* the brief generator — deterministic, honest about being an estimate */
-  function brief(q) {
-    const s = q.toLowerCase();
-    const kind =
-      /shop|store|commerce|bakery|sell/.test(s) ? { t: "Online shop", w: "6–10 weeks", b: "€15–35k" } :
-        /invoice|extract|document|pdf|rag|ai|ki|assistant|agent/.test(s) ? { t: "AI tool on your data", w: "4–10 weeks", b: "€20–60k" } :
-          /dashboard|internal|staff|erp|crm|tool|portal/.test(s) ? { t: "Internal software", w: "8–14 weeks", b: "€25–70k" } :
-            /app|ios|android|mobile/.test(s) ? { t: "Mobile app", w: "8–14 weeks", b: "€30–70k" } :
-              { t: "Website", w: "3–6 weeks", b: "€8–25k" };
+  /* The brief generator — deterministic, honest about being an estimate.
 
-    return `<b>${kind.t}</b> — here's how we'd run it.\n` +
+     The kinds, the weeks and the bands live in data.js now (RANGES), because
+     they were drifting from the FAQ two screens up while sitting in a closure
+     nothing else could read: the FAQ said a web app MVP is 6-12 weeks and this
+     had no "web app" at all, so `a web app for our clinic` matched /app/ and
+     came back as a MOBILE app at 8-14 weeks and EUR 30-70k.
+
+     `kindOf` returns null for the work we do not take, and that answer is
+     worth more than a price. */
+  function brief(q) {
+    const kind = window.MCD.kindOf(q);
+
+    if (!kind) {
+      return "<b>A native mobile app</b> — that is one of the few things we don't build.\n" +
+        `<div class="brief-row"><span class="k">Why</span><span>The offer is four things: AI tools, web apps, websites and software for companies. An App Store build is a different craft, and we would rather say so than learn it on your budget.</span></div>` +
+        `<div class="brief-row"><span class="k">What we would do</span><span>If it can live in a browser, a <b>web app</b> reaches every phone without a store review — same two people, 6–12 weeks. Ask me about that one.</span></div>` +
+        `\nStill want the app? Say so at <b>info@mccain-digital.com</b> — we will point you at someone who does it properly.`;
+    }
+
+    const money = kind.budget
+      ? `<b>${kind.budget}</b> — an honest band, not a quote. The real number comes within 48 hours.`
+      : "No band written for this one yet — you get the real number, <b>fixed, within 48 hours</b>.";
+
+    return `<b>${kind.kind}</b> — here's how we'd run it.\n` +
       `<div class="brief-row"><span class="k">Phase 1</span><span>Scope &amp; a clickable prototype — you see it, not a document. <b>Week 1</b></span></div>` +
       `<div class="brief-row"><span class="k">Phase 2</span><span>Design + build in weekly slices you can click through.</span></div>` +
       `<div class="brief-row"><span class="k">Phase 3</span><span>Hardening — tests, a11y, Lighthouse, security pass.</span></div>` +
       `<div class="brief-row"><span class="k">Phase 4</span><span>Launch + handover: the repo, the docs and the keys are yours.</span></div>` +
-      `<div class="brief-row"><span class="k">Timeframe</span><span><b>${kind.w}</b></span></div>` +
-      `<div class="brief-row"><span class="k">Budget band</span><span><b>${kind.b}</b> — an honest band, not a quote. The real number comes within 48 hours.</span></div>` +
+      `<div class="brief-row"><span class="k">Timeframe</span><span><b>${kind.weeks}</b></span></div>` +
+      `<div class="brief-row"><span class="k">Budget band</span><span>${money}</span></div>` +
       `\nWant this properly? <b>info@mccain-digital.com</b>`;
   }
 
