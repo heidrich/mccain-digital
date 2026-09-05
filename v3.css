@@ -56,6 +56,57 @@
   --sig-text: #a4bd00;
   --sig-ink: #5c6b00;
 
+  /* THE SERVICE SIGNAL. Four rooms behind four doors, and until now the only
+     thing that told them apart was the H1 - measured, the four pages are 97-98%
+     the same skeleton and 137 lines of them are byte-identical, while barely
+     four sentences in eighty are shared. The work was in the words and the
+     layout was throwing it away.
+
+     Same two-weights-of-one-colour rule as the yellow and the green, because
+     no single value clears AA on both grounds: --svc is the surface (fills,
+     rules, numerals), --svc-text is whatever that hue needs to be READ on the
+     current theme. Measured against #0b0b0c / #131316 and #f2f2ef / #fbfbf9:
+
+       ai-tools   #3fc9c2  ink 9.69   paper #0b6660 6.07
+       web-apps   #5b2eff  ink #8b6bff 5.29   paper 5.71
+       websites   #7a8c00  ink #a4bd00 9.24   paper #5c6b00 5.26
+       software   #ff3d8a  ink 5.89   paper #c2004d 5.51
+
+     The default IS the accent, so every page without data-svc renders exactly
+     as before. The H1's accent word deliberately keeps --acc-text on all four:
+     the brand yellow stays in the first viewport, the service colour carries
+     everything below it. */
+  --svc: var(--acc);
+  --svc-lift: var(--acc);
+  --svc-deep: var(--acc-ink);
+}
+
+html[data-svc="ai-tools"] {
+  --svc: #3fc9c2;
+  --svc-lift: #3fc9c2;
+  --svc-deep: #0b6660;
+}
+
+html[data-svc="web-apps"] {
+  --svc: #5b2eff;
+  --svc-lift: #8b6bff;
+  --svc-deep: #5b2eff;
+}
+
+html[data-svc="websites"] {
+  --svc: #7a8c00;
+  --svc-lift: #a4bd00;
+  --svc-deep: #5c6b00;
+}
+
+html[data-svc="software"] {
+  --svc: #ff3d8a;
+  --svc-lift: #ff3d8a;
+  --svc-deep: #c2004d;
+}
+
+:root {
+
   --sans: "Schibsted Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
 
@@ -111,6 +162,7 @@
 
 html[data-theme="dark"] {
   --acc-text: var(--acc);
+  --svc-text: var(--svc-lift);
   --sig-fg: var(--sig-text);
   --bg: var(--ink);
   --bg-2: var(--ink-2);
@@ -125,6 +177,7 @@ html[data-theme="dark"] {
 
 html[data-theme="light"] {
   --acc-text: var(--acc-ink);
+  --svc-text: var(--svc-deep);
   --sig-fg: var(--sig-ink);
   --bg: var(--paper);
   --bg-2: var(--paper-2);
@@ -139,6 +192,13 @@ html[data-theme="light"] {
 /* contrast islands — fixed regardless of theme */
 .band--ink {
   --acc-text: var(--acc);
+  /* An island re-declares every signal, not two of them. The service colour
+     was mapped on <html> by theme, and the theme is exactly what an island
+     overrules: on a paper band inside the dark theme the lifted weight
+     measured 1.90:1 on the chapter numbers, and the deep weight 3.33:1 on an
+     ink band in the light theme. The gate caught both - which is the whole
+     reason it was taught to see colours other than yellow first. */
+  --svc-text: var(--svc-lift);
   --sig-fg: var(--sig-text);
   --bg: var(--ink);
   --bg-2: var(--ink-2);
@@ -151,6 +211,7 @@ html[data-theme="light"] {
 
 .band--paper {
   --acc-text: var(--acc-ink);
+  --svc-text: var(--svc-deep);
   --sig-fg: var(--sig-ink);
   --bg: var(--paper);
   --bg-2: var(--paper-2);
@@ -321,7 +382,7 @@ section {
 }
 
 .label b {
-  color: var(--acc-text);
+  color: var(--svc-text);
   font-weight: 400
 }
 
@@ -936,7 +997,7 @@ html[data-theme="light"] .t-moon {
   content: "";
   width: clamp(24px, 5vw, 64px);
   height: 2px;
-  background: var(--acc)
+  background: var(--svc)
 }
 
 /* sized so the long line spans the container instead of huddling on the
@@ -1878,7 +1939,7 @@ html[data-theme="light"] .t-moon {
 .scard:hover,
 .scard:focus-within {
   transform: translateY(-4px);
-  box-shadow: inset 0 0 0 1px var(--acc), var(--shadow)
+  box-shadow: inset 0 0 0 1px var(--svc), var(--shadow)
 }
 
 .scard::before {
@@ -1886,7 +1947,7 @@ html[data-theme="light"] .t-moon {
   position: absolute;
   inset: auto 0 0 0;
   height: 2px;
-  background: var(--acc);
+  background: var(--svc);
   transform: scaleX(0);
   transform-origin: 0 50%;
   transition: transform .6s var(--e-out);
@@ -1937,10 +1998,28 @@ html[data-theme="light"] .t-moon {
   pointer-events: none
 }
 
+/* AT REST, NOT ONLY ON HOVER. The numeral was drawn, positioned and then set
+   to opacity 0 until a pointer arrived - so on touch it never existed, and in
+   every screenshot of this band the card is a rectangle of text. It is the
+   only large graphic element the services band has; hiding it until hover is
+   hiding the band's one picture. Faint at rest, full on hover, and in the
+   colour of the service either way. */
+.scard-ghost {
+  opacity: .3;
+  /* The resting transform was written for something nobody would see: 16%
+     further right on top of the -2.2rem offset, which measured 55px of a
+     153px glyph outside a card with `overflow: hidden` - a third of it gone.
+     A bleed is a decision; a glyph cut at 36% reads as a mistake. At rest it
+     sits at its own offset (29px over, 19%), and the hover pulls it IN rather
+     than out. */
+  transform: translate(0, -50%) scale(.96);
+  -webkit-text-stroke-color: color-mix(in srgb, var(--svc-text) 34%, transparent)
+}
+
 .scard:hover .scard-ghost {
   opacity: 1;
-  transform: translate(0, -50%) scale(1);
-  -webkit-text-stroke-color: color-mix(in srgb, var(--acc-text) 45%, transparent)
+  transform: translate(-4%, -50%) scale(1);
+  -webkit-text-stroke-color: color-mix(in srgb, var(--svc-text) 55%, transparent)
 }
 
 /* one column below 900px — there is no spare space for a background numeral */
@@ -1964,10 +2043,28 @@ html[data-theme="light"] .t-moon {
   }
 }
 
+/* THE DOOR CARRIES THE COLOUR OF THE ROOM. Four cards that differ only in
+   their number and their words send the visitor to four pages that differ only
+   in their H1 - the same complaint at both ends of the same click. The card
+   sets the service tokens itself, so the number and the ghost numeral are the
+   colour the page behind the link will be. The values live in one place, at
+   the top of this file; this only repeats which card is which.
+
+   Everything else on the card stays as it was: the heading, the copy, the
+   link and the "what you get" list keep the accent, because the family has to
+   still read as one family. */
+.scard[data-svc="ai-tools"] { --svc: #3fc9c2; --svc-lift: #3fc9c2; --svc-deep: #0b6660 }
+.scard[data-svc="web-apps"] { --svc: #5b2eff; --svc-lift: #8b6bff; --svc-deep: #5b2eff }
+.scard[data-svc="websites"] { --svc: #7a8c00; --svc-lift: #a4bd00; --svc-deep: #5c6b00 }
+.scard[data-svc="software"] { --svc: #ff3d8a; --svc-lift: #ff3d8a; --svc-deep: #c2004d }
+
+html[data-theme="dark"] .scard[data-svc] { --svc-text: var(--svc-lift) }
+html[data-theme="light"] .scard[data-svc] { --svc-text: var(--svc-deep) }
+
 .scard-n {
   font-family: var(--mono);
   font-size: var(--t-small);
-  color: var(--acc-text)
+  color: var(--svc-text)
 }
 
 .scard-h {
@@ -2131,7 +2228,7 @@ html[data-theme="light"] .t-moon {
   font-family: var(--mono);
   font-size: clamp(1.1rem, 1.8vw, 1.5rem);
   font-weight: 700;
-  color: var(--acc-text);
+  color: var(--svc-text);
   letter-spacing: -.02em
 }
 
@@ -3566,7 +3663,7 @@ html[data-theme="light"] .t-moon {
   height: 2.1rem;
   flex: none;
   border-radius: 50%;
-  background: var(--acc);
+  background: var(--svc);
   color: #0d0c0a;
   font-family: var(--mono);
   font-size: var(--t-small);
@@ -3597,7 +3694,7 @@ html[data-theme="light"] .t-moon {
   position: absolute;
   inset: 0 auto 0 0;
   width: 2px;
-  background: var(--acc);
+  background: var(--svc);
   scale: 1 0;
   transform-origin: 50% 0;
   transition: scale .5s var(--e-out)
@@ -3707,8 +3804,8 @@ html[data-theme="light"] .t-moon {
   height: 2.6rem;
   margin-bottom: 1rem;
   border-radius: 9px;
-  background: color-mix(in srgb, var(--acc) 14%, transparent);
-  color: var(--acc-text)
+  background: color-mix(in srgb, var(--svc) 14%, transparent);
+  color: var(--svc-text)
 }
 
 .cap-i svg {

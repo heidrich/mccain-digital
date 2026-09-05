@@ -34,10 +34,59 @@
     }
     return out;
   };
-  const isAccent = (c) => {
-    const [r, g, b] = c;
-    return r > 90 && g > 70 && b < 90 && r >= g && g > b;   // yellow/gold family
+  /* Colours arrive in every notation CSS allows - hex, rgb(), and the
+     `hsl(47 92% 53%)` that legibleStops emits. Let the browser parse them. */
+  const parseEl = document.createElement("span");
+  parseEl.style.display = "none";
+  document.body.appendChild(parseEl);
+  const asRGB = (c) => {
+    parseEl.style.color = "";
+    parseEl.style.color = c;
+    const v = getComputedStyle(parseEl).color;
+    return /^rgba?\(/.test(v) ? rgb(v) : null;
   };
+
+  /* WHICH COLOURS COUNT AS "SIGNAL" — read from the tokens, not guessed from
+     the channels. The predicate this replaces described the yellow/gold family
+     by hand (`r > 90 && g > 70 && b < 90 && r >= g && g > b`), and every other
+     signal the site ships fell straight through it: the green figures in (05)
+     run on --sig-text (164,189,0 — fails r >= g), and any per-service colour
+     would too. A gate that only sees one family reports "0 failing" about the
+     one family it can see.
+
+     So: resolve the signal tokens on the root, and count a colour as a signal
+     if it is within a small Manhattan distance of one of them. Same idea as
+     markWaveParticles in the engine, same tolerance — 24 covers antialiasing
+     and the compositor without swallowing a neighbouring hue. */
+  const SIGNAL_TOKENS = [
+    "--acc", "--acc-ink", "--acc-text",
+    "--sig", "--sig-ink", "--sig-text",
+    "--svc", "--svc-ink", "--svc-text"
+  ];
+  const signals = [];
+  {
+    const cs = getComputedStyle(document.documentElement);
+    SIGNAL_TOKENS.forEach((t) => {
+      const v = (cs.getPropertyValue(t) || "").trim();
+      if (!v) return;
+      const c = asRGB(v);
+      if (c) signals.push({ token: t, c });
+    });
+  }
+  const nearToken = (c) => signals.some((s) =>
+    Math.abs(s.c[0] - c[0]) + Math.abs(s.c[1] - c[1]) + Math.abs(s.c[2] - c[2]) < 24);
+  /* UNION, not replacement. Token proximity alone measured NINE nodes fewer on
+     the home page than the old family test did: a blend of the accent - a
+     hover state, a color-mix, a composite over a translucent card - is accent
+     colour that no longer sits within 24 of any declared token. The family
+     test keeps those; the token test adds every signal that is not yellow.
+     Dropping either one loses coverage, and a gate that measures less than it
+     did is a regression wearing the clothes of a fix. */
+  const yellowFamily = (c) => {
+    const [r, g, b] = c;
+    return r > 90 && g > 70 && b < 90 && r >= g && g > b;
+  };
+  const isAccent = (c) => yellowFamily(c) || nearToken(c);
   const out = [];
   document.querySelectorAll("body *").forEach((el) => {
     if (!el.offsetParent && getComputedStyle(el).position !== "fixed") return;
@@ -113,15 +162,6 @@
      Parsed by the browser rather than by hand: legibleStops emits
      `hsl(47 92% 53%)`, space-separated, and a regex written for hex or rgb()
      turns that into a number that is not a colour. */
-  const parseEl = document.createElement("span");
-  parseEl.style.display = "none";
-  document.body.appendChild(parseEl);
-  const asRGB = (c) => {
-    parseEl.style.color = "";
-    parseEl.style.color = c;
-    const v = getComputedStyle(parseEl).color;
-    return /^rgba?\(/.test(v) ? rgb(v) : null;
-  };
   /* commas BETWEEN stops only - hsl(...) carries its own */
   const stopList = (str) => {
     const o = []; let d = 0, st = 0;
@@ -179,12 +219,82 @@
       });
     }
   });
+  /* THE FIELD BEHIND THE TEXT IS ALSO A COLOUR NOBODY DECLARED. The canvas
+     sweep above looks at `.ph canvas` - pixel headlines - and `data-pixel` has
+     been 0 repo-wide since the engine left the type, so that half of this
+     audit has been reporting "0 checked" on every page for weeks. Green on
+     nothing.
+
+     What IS painted behind text is the dither field of every hero. Its ramp
+     caps itself against --muted (ditherRamp in pixel-engine.js), but a cap the
+     effect applies to itself is not a check - and now that the ramp can climb
+     toward a per-service token, its top is no longer the neutral --fg the cap
+     was written for. So: measure the brightest cell the field actually paints
+     against the dimmest text the band actually shows.
+
+     Photo mosaics are exempt on purpose. A photograph owes no text contrast;
+     it is the picture, not the ground under a paragraph. */
+  const fieldFails = [];
+  let fieldsChecked = 0, fieldsSkipped = 0;
+  document.querySelectorAll("canvas.dither-l").forEach((cv) => {
+    const host = cv.parentElement;
+    if (!host) { fieldsSkipped++; return; }
+    let d;
+    try {
+      d = cv.getContext("2d", { willReadFrequently: true })
+        .getImageData(0, 0, cv.width, cv.height).data;
+    } catch (e) { fieldsSkipped++; return; }
+    let bright = null, bl = -1;
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i + 3] < 250) continue;
+      const c = [d[i], d[i + 1], d[i + 2]], l = lum(c);
+      if (l > bl) { bl = l; bright = c; }
+    }
+    if (!bright) { fieldsSkipped++; return; }
+    /* The dimmest text ON THIS BAND, at the size it is set - a 12px label has
+       to clear 4.5 where a 58px headline only needs 3. Both are asked. */
+    let worst = 99, wt = null, wsel = "", wneed = 4.5;
+    host.querySelectorAll("*").forEach((el) => {
+      if (!el.offsetParent) return;
+      if (![...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim())) return;
+      const cs = getComputedStyle(el);
+      if (cs.webkitTextFillColor === "rgba(0, 0, 0, 0)") return;   // gradient text has its own pass
+      /* The field is only this text's ground if nothing opaque sits between
+         them. The primary CTA is ink type on a yellow button face - measuring
+         it against the cell behind the button reported 1.68:1 and meant
+         nothing. Walk to the host; any solid surface on the way disqualifies. */
+      let ownGround = false;
+      for (let n = el; n && n !== host; n = n.parentElement) {
+        const c = getComputedStyle(n).backgroundColor;
+        if (c && !/rgba\(0, 0, 0, 0\)|transparent/.test(c) && alphaOf(c) >= 0.5) { ownGround = true; break; }
+      }
+      if (ownGround) return;
+      const fg = rgb(cs.color);
+      const px = parseFloat(cs.fontSize), bold = parseInt(cs.fontWeight, 10) >= 700;
+      const need = (px >= 24 || (bold && px >= 18.66)) ? 3 : 4.5;
+      const r = ratio(fg, bright);
+      if (r - need < worst - wneed) { worst = r; wt = fg; wneed = need; wsel = el.tagName.toLowerCase() + (el.className ? "." + String(el.className).split(" ")[0] : ""); }
+    });
+    if (wt === null) { fieldsSkipped++; return; }
+    fieldsChecked++;
+    if (worst < wneed) {
+      fieldFails.push({
+        sel: "field " + wsel,
+        where: host.tagName.toLowerCase() + (host.className ? "." + String(host.className).split(" ")[0] : ""),
+        ground: "rgb(" + bright.map(Math.round).join(",") + ")",
+        text: "brightest field cell vs dimmest text on the band",
+        fg: "rgb(" + wt.map(Math.round).join(",") + ")", px: 0,
+        large: wneed === 3, ratio: +worst.toFixed(2), need: wneed, pass: false
+      });
+    }
+  });
+
   parseEl.remove();
 
-  const fails = out.filter(o => !o.pass).concat(canvasFails).concat(gradFails);
+  const fails = out.filter(o => !o.pass).concat(canvasFails).concat(gradFails).concat(fieldFails);
   return JSON.stringify({
     accentTextNodes: out.length, canvasesChecked, canvasesSkipped,
-    gradientTextChecked, gradientTextSkipped,
+    gradientTextChecked, gradientTextSkipped, fieldsChecked, fieldsSkipped,
     failing: fails.length, fails: fails.slice(0, 12)
   }, null, 1);
 })()

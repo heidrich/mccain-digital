@@ -61,14 +61,14 @@ for p in $PAGES; do
 import sys, json
 d = json.loads(json.loads(sys.stdin.read()))
 real = [f for f in d['fails'] if f['sel'] != 'i']
-print('$p [$th] accent nodes %d, pixel canvases %d (%d not settled), gradient text %d, failing %d, excluding the wordmark %d'
-      % (d['accentTextNodes'], d['canvasesChecked'], d['canvasesSkipped'], d.get('gradientTextChecked', 0), d['failing'], len(real)))
+print('$p [$th] accent nodes %d, pixel canvases %d (%d not settled), gradient text %d, fields %d, failing %d, excluding the wordmark %d'
+      % (d['accentTextNodes'], d['canvasesChecked'], d['canvasesSkipped'], d.get('gradientTextChecked', 0), d.get('fieldsChecked', 0), d['failing'], len(real)))
 for f in real:
     print('   ', f['sel'], f['fg'], f['ratio'], '<', f['need'], '|', f['text'])
 # Nothing found is not a pass, it is an absent measurement. Every page on this
 # site has accent text AND at least one pixel headline; a run that sees neither
 # is looking at an error page, a page that never booted, or a probe that threw.
-if d['accentTextNodes'] == 0 and d['canvasesChecked'] == 0 and d.get('gradientTextChecked', 0) == 0:
+if d['accentTextNodes'] == 0 and d['canvasesChecked'] == 0 and d.get('gradientTextChecked', 0) == 0 and d.get('fieldsChecked', 0) == 0:
     print('    NOTHING MEASURED on this page - the probe saw no accent text and no mosaic')
     print('REAL 1')
 else:

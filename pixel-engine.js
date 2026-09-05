@@ -2897,9 +2897,9 @@
      right by eye the small print measured 3.58:1 where it needs 4.5. So the
      top of the ramp is walked down until the dimmest text on the band clears
      the bar - the effect is not allowed to decide that for itself. */
-  function ditherRamp(host, steps, top) {
+  function ditherRamp(host, steps, top, hiToken) {
     var lo = tokenRGB(host, "--ink", "#0d0c0a");
-    var hi = tokenRGB(host, "--fg", "#f3f1e9");
+    var hi = tokenRGB(host, hiToken || "--fg", "#f3f1e9");
     var txt = relLum(tokenRGB(host, "--muted", "#8a8578"));
     var mix = function (t) {
       return [lo[0] + (hi[0] - lo[0]) * t, lo[1] + (hi[1] - lo[1]) * t, lo[2] + (hi[2] - lo[2]) * t];
@@ -2928,7 +2928,21 @@
     var CELL = +(host.dataset.ditherCell || opts.cell || 7);
     var TOP = opts.top === undefined ? 0.22 : opts.top;
     var FPS = opts.fps || 12;
-    var pal = opts.palette || ditherRamp(host, 6, TOP);
+    /* THE THRESHOLD IS THE WHOLE EFFECT. `cloud + wave` runs -0.10 to 0.64
+       with a mean of 0.342, so a gate opening at 0.52 lets a fifth of the
+       cells register at all - measured on the live field, 84.7% of it was one
+       colour and 15.1% the next one up, nine values of 255 apart. Six palette
+       steps were built and two were used.
+
+       0.30/0.78 was chosen off a histogram of the real geometry (1440x873,
+       cell 9), not by eye: 58.8 / 23.3 / 13.3 / 4.2 / 0.4 - five steps in
+       play and real cloud mass. Contrast does not move with it, because the
+       cap in ditherRamp is on the PALETTE: the brightest step is walked down
+       until the band's dimmest text clears 4.6:1, whatever share of cells
+       reaches it. */
+    var DLO = +(host.dataset.ditherLo || opts.lo || 0.30);
+    var DHI = +(host.dataset.ditherHi || opts.hi || 0.78);
+    var pal = opts.palette || ditherRamp(host, 6, TOP, host.dataset.ditherToken || opts.token);
 
     var cv = document.createElement("canvas");
     cv.className = "dither-l";
@@ -2967,7 +2981,7 @@
         ny = (y / rows - 0.5) * 2;
         wave = Math.sin(nx * 1.1 + ny * 1.2) * 0.16 + Math.sin(nx * -0.6 + ny * 3.2) * 0.12;
         cloud = dfbm(nx * 0.55, ny * 0.55);
-        out[at + y] = dsmooth(0.52, 1.02, cloud + wave);
+        out[at + y] = dsmooth(DLO, DHI, cloud + wave);
       }
     }
 

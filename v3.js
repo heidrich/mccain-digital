@@ -72,7 +72,7 @@ const aiw = (t) => String(t).replace(/\bAI\b(?!-)/g, '<span class="ai-word">AI</
      ============================================================ */
   const stackList = d.getElementById("stackList");
   stackList.innerHTML = SERVICES.map((s, i) => `
-    <article class="scard" style="top:calc(var(--nav) + 2.2rem + ${i * 12}px);z-index:${i + 1}">
+    <article class="scard" data-svc="${s.slug}" style="top:calc(var(--nav) + 2.2rem + ${i * 12}px);z-index:${i + 1}">
       <span class="scard-ghost" aria-hidden="true">${s.n}</span>
       <p class="scard-n">/${s.n}</p>
       <div>
