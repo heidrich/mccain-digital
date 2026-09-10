@@ -15,7 +15,23 @@
 gegeben hat — LUFT-4 bis LUFT-7 sind damit gegenstandslos, soweit sie die
 Startseite betreffen.
 
-**`main` steht 18 vor `origin/main`, nicht gepusht.**
+### Dazwischengekommen und erledigt (10.9. spaet)
+
+- **Anzeigengrad, dritte Runde.** „Alles riesig" war die dritte Meldung derselben
+  Sache; die zwei frueheren Antworten waren je ein Token, nicht die Schicht.
+  index bei 1440 vorher 96 / 58 / 43 px bei 20 Ueberschriften, jetzt 74 / 44 / 33.
+  Fliesstext unangetastet (16,4), alle clamp-Untergrenzen unberuehrt (Handy
+  bitgleich). Werkzeuge: `tools/type_scale.mjs`, `tools/type_rescale.py`,
+  `tools/shots.mjs`.
+- **Kontaktseite von der Startseite erreichbar.** Die Fusszeilenspalte „Studio"
+  hatte als einzige Fusszeile im Projekt kein `Contact`.
+
+**Offen daraus:** `.legal` laeuft auf **86 Zeichen pro Zeile**. Vorbefund, kein
+Rueckschritt — die Grenze ist `74ch`, und `ch` skaliert mit der Schrift, also
+sind die Zeichen pro Zeile groessenunabhaengig; die Zeilen sind jetzt nur
+physisch kuerzer. Wenn das runter soll, ist `74ch → 64ch` der Handgriff (XS).
+
+**`main` steht 21 vor `origin/main`, nicht gepusht.**
 
 ---
 

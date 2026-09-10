@@ -4,8 +4,45 @@
 
 ## ▶ ZUERST LESEN — Stand am Ende des 10.9.
 
-**`main` steht 20 Commits vor `origin/main` und ist NICHT gepusht.** Arbeitsbaum
+**`main` steht 21 Commits vor `origin/main` und ist NICHT gepusht.** Arbeitsbaum
 sauber. Die Entscheidung zu pushen liegt beim Owner.
+
+### Zuletzt gebaut: der Anzeigengrad, dritte Runde
+
+Owner: „ist die font size ueberall viel zu gross, das sieht alles so riesig aus."
+**Es war die dritte Meldung derselben Sache** — der Kommentar ueber `--t-display`
+haelt die zwei frueheren fest. Beide Male wurde EIN Token bewegt und die Schicht
+dazwischen blieb stehen. Gemessen (index, 1440×900): eine h1 mit 96 px, **acht**
+h2 mit 58 und **zwoelf** h3 mit 43 — zwanzig Ueberschriften, keine unter 43 px,
+ueber Fliesstext mit 16,4. **Der Fliesstext war nie das Problem und ist unangetastet.**
+
+Jetzt bei 1440 / 1920×1080: h1 **74 / 88** (war 96,5 / 128), h2 **44 / 46**,
+`.case-h` 33 / 35, `--t-h3` 24, `--t-body` 16,96 (war 18,88). Reihe bei 1440:
+74 / 44 / 33 / 24 / 16,4 / 12. **Alle clamp-Untergrenzen unberuehrt** — 390 misst
+h1 41,6 / h2 30,4 / Text 16, bitgleich zu vorher.
+
+Der Umbau liegt als `tools/type_rescale.py` im Repo (15 gezaehlte Ersetzungen,
+bricht vor dem Schreiben ab, wenn ein Muster nicht genau einmal trifft — hat es
+getan). Nachmessen jederzeit mit `node tools/type_scale.mjs 1440 1920x1080 390`;
+Bilder zum Draufschauen mit `node tools/shots.mjs <ordner> 1440 index.html`.
+
+**Nicht skaliert, mit Grund:** `.display--fill` (Groesse ist Containerbreite ÷
+Zeilenbreite bei 1em, eine gemessene Fuell-Zusage) und `.scard-ghost`
+(angeschnittene Deko-Ziffer). Wer hier nachjustiert, laesst beide in Ruhe.
+
+### Und: die Kontaktseite ist jetzt von der Startseite aus erreichbar
+
+`contact.html` fehlte nie und ist auch nicht mehr das Altdesign (Audit AW-4 vom
+2.9. ist ueberholt). Sie war nur von **index** aus praktisch unerreichbar: jede
+andere Seite endet ihre Fusszeile mit `Work · Services · AI · Contact`, die
+index-Spalte „Studio" ist genau diese Zeile — und hatte kein Contact. Einziger
+Weg war ein Satz im Formular-Hinweis. `check_links` war dabei die ganze Zeit
+gruen: neun andere Seiten zeigen ja hin. **Ein Link-Pruefer beantwortet „zeigt
+irgendwer hierhin", nicht „kommt man von der Startseite hin."**
+
+Der Nav-Knopf „Start a project" zeigt auf index weiterhin bewusst auf den Anker
+`#contact` — das Kurzformular steht auf der Seite, die lange Fassung ist einen
+Klick weiter. Falls das vereinheitlicht werden soll, ist es ein Owner-Entscheid.
 
 **Die Werkzeuge laufen nicht mehr auf `agent-browser`** — der haengt auf diesem
 PC an `set viewport`, an zwei getrennten Tagen, auch nach voller Bereinigung.
