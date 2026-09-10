@@ -1444,10 +1444,19 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
   flex-wrap: wrap
 }
 
+/* GROUPED, NOT STRETCHED. `space-between` pushed five marks to the two edges
+   of a 1382px band, so "The core five" read as five unrelated items rather
+   than as a set — owner, 10.9.: "sind mir zu lang gezogen". The label keeps
+   its own distance from the group; the marks then sit at the row's normal
+   column-gap, which is what makes them read as one list. */
 @media (min-width: 1000px) {
   .stack {
     flex-wrap: nowrap;
-    justify-content: space-between
+    justify-content: flex-start
+  }
+
+  .stack-l {
+    margin-right: clamp(1.5rem, 4vw, 3rem)
   }
 }
 
@@ -1479,9 +1488,8 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
 /* The real vendor marks. Tinted through a CSS mask so one file serves both
    themes and the hover state — and so 5 KB of path data stays out of the
    HTML. Hand-drawn approximations were what made these look wrong. */
-.tool i {
-  width: 19px;
-  height: 19px;
+.tool i,
+.tag i {
   flex: none;
   background: currentColor;
   -webkit-mask: var(--m) center/contain no-repeat;
@@ -1489,17 +1497,76 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
   transition: background .3s
 }
 
+.tool i {
+  width: 19px;
+  height: 19px
+}
+
+.tag i {
+  width: 15px;
+  height: 15px
+}
+
 .tool:hover i,
 .tool:focus-visible i {
   background: var(--acc)
+}
+
+/* One rule per file in img/logos/, and nothing that is not a file there.
+   Every one of these came from simple-icons (CC0); hand-drawn
+   approximations were what made the marks look wrong in the first place.
+   Paths are relative to this stylesheet, which lives at the repository
+   root, so they resolve the same from /services/ and /legal/. */
+.tl-astro {
+  --m: url("img/logos/astro.svg")
 }
 
 .tl-claude {
   --m: url("img/logos/claude.svg")
 }
 
-.tl-openai {
-  --m: url("img/logos/openai.svg")
+.tl-cloudflare {
+  --m: url("img/logos/cloudflare.svg")
+}
+
+.tl-css {
+  --m: url("img/logos/css.svg")
+}
+
+.tl-docker {
+  --m: url("img/logos/docker.svg")
+}
+
+.tl-fastapi {
+  --m: url("img/logos/fastapi.svg")
+}
+
+.tl-graphql {
+  --m: url("img/logos/graphql.svg")
+}
+
+.tl-html {
+  --m: url("img/logos/html.svg")
+}
+
+.tl-javascript {
+  --m: url("img/logos/javascript.svg")
+}
+
+.tl-langchain {
+  --m: url("img/logos/langchain.svg")
+}
+
+.tl-lighthouse {
+  --m: url("img/logos/lighthouse.svg")
+}
+
+.tl-llama {
+  --m: url("img/logos/llama.svg")
+}
+
+.tl-mistral {
+  --m: url("img/logos/mistral.svg")
 }
 
 .tl-mcp {
@@ -1510,8 +1577,88 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
   --m: url("img/logos/n8n.svg")
 }
 
+.tl-nextjs {
+  --m: url("img/logos/nextjs.svg")
+}
+
+.tl-nodejs {
+  --m: url("img/logos/nodejs.svg")
+}
+
+.tl-ollama {
+  --m: url("img/logos/ollama.svg")
+}
+
+.tl-openai {
+  --m: url("img/logos/openai.svg")
+}
+
+.tl-openapi {
+  --m: url("img/logos/openapi.svg")
+}
+
+.tl-playwright {
+  --m: url("img/logos/playwright.svg")
+}
+
 .tl-pg {
   --m: url("img/logos/postgresql.svg")
+}
+
+.tl-prisma {
+  --m: url("img/logos/prisma.svg")
+}
+
+.tl-python {
+  --m: url("img/logos/python.svg")
+}
+
+.tl-qdrant {
+  --m: url("img/logos/qdrant.svg")
+}
+
+.tl-qwen {
+  --m: url("img/logos/qwen.svg")
+}
+
+.tl-react {
+  --m: url("img/logos/react.svg")
+}
+
+.tl-redis {
+  --m: url("img/logos/redis.svg")
+}
+
+.tl-sanity {
+  --m: url("img/logos/sanity.svg")
+}
+
+.tl-stripe {
+  --m: url("img/logos/stripe.svg")
+}
+
+.tl-supabase {
+  --m: url("img/logos/supabase.svg")
+}
+
+.tl-tailwind {
+  --m: url("img/logos/tailwind.svg")
+}
+
+.tl-trpc {
+  --m: url("img/logos/trpc.svg")
+}
+
+.tl-typescript {
+  --m: url("img/logos/typescript.svg")
+}
+
+.tl-vercel {
+  --m: url("img/logos/vercel.svg")
+}
+
+.tl-vitest {
+  --m: url("img/logos/vitest.svg")
 }
 
 /* ============================================================
@@ -3624,9 +3771,13 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
   gap: clamp(1.1rem, 2.2vw, 2rem)
 }
 
-/* The card lifts and grows an accent rule down its left edge. Same
-   gesture as .scard at a third of the weight — there are eight of
-   these on the page, and eight pointer spotlights would be noise. */
+/* ONE BORDER, NOT TWO. The card used to answer a hover with a 2px signal
+   rule down its left edge AND a ring in 40% logo yellow around the whole
+   thing — two borders in two different colours on one gesture, which is what
+   "links einen dicken und einen gelben drum rum" was (owner, 10.9.). The rule
+   is gone; the ring is the border, and on hover it takes the page's own
+   signal colour. Same single-ring gesture as .scard on the home page, which
+   is the card this one is a lighter echo of. */
 .uc {
   position: relative;
   overflow: hidden;
@@ -3637,24 +3788,10 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
   transition: box-shadow .4s, transform .5s var(--e-out)
 }
 
-.uc::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 2px;
-  background: var(--svc);
-  scale: 1 0;
-  transform-origin: 50% 0;
-  transition: scale .5s var(--e-out)
-}
-
-.uc:hover {
+.uc:hover,
+.uc:focus-within {
   transform: translateY(-3px);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 40%, var(--line))
-}
-
-.uc:hover::before {
-  scale: 1 1
+  box-shadow: inset 0 0 0 1px var(--svc)
 }
 
 /* block + fit-content, not inline-block: an inline-block still sits in a line
@@ -3743,9 +3880,13 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
   transition: box-shadow .4s, transform .5s var(--e-out)
 }
 
-.cap:hover {
+/* The signal, not the logo yellow — same ring, same rule, same colour as the
+   use-case cards two bands up. A 40% yellow mix on a paper band was the other
+   half of "und border!". */
+.cap:hover,
+.cap:focus-within {
   transform: translateY(-3px);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 40%, var(--line))
+  box-shadow: inset 0 0 0 1px var(--svc)
 }
 
 .cap-i {
@@ -3783,6 +3924,13 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
   max-width: 58ch
 }
 
+/* NOT --acc-text. On a paper band that resolves to --acc-ink (#806400), and
+   four of these sit on every service page's (03) — sixteen mustard spec lines
+   that the owner called out twice ("hässliche braune senf sachen", 10.9.).
+   The line is already distinguished by being mono, uppercase and tracked; it
+   does not need a colour on top, and there is no yellow that is both readable
+   and not brown on paper. The tile keeps its colour where it belongs: the
+   icon plate and the hover ring. */
 .cap-meta {
   display: block;
   margin-top: .9rem;
@@ -3790,7 +3938,7 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
   font-size: var(--t-label);
   letter-spacing: .08em;
   text-transform: uppercase;
-  color: var(--acc-text)
+  color: var(--fg)
 }
 
 /* ---------- the long tail of the stack ----------
@@ -3804,8 +3952,23 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
   margin-top: 1.4rem
 }
 
+/* THE PILLS CARRY THEIR REAL MARK. Owner, 10.9.: "bei den pillen darunter
+   fehlen mir die icons, das sieht billig aus." Same mechanism as the five
+   marks above them - a CSS mask over currentColor, so one file serves the
+   hover state and keeps the path data out of the HTML - and the same rule
+   about never drawing one ourselves.
+
+   Not every pill gets one, and that is the honest part: about a fifth of them
+   are not products. "Role-based access", "WebP / AVIF", "SSO / OAuth" and
+   "llms.txt" have no logo and never will, and LlamaIndex simply has no public
+   mark in simple-icons. Those keep the pill and lose the slot; the pill is
+   built to read as a term either way rather than as a product missing its
+   picture. Hover ring in the signal, like the cards - not the logo yellow. */
 .tag {
-  padding: .38rem .8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .38rem .85rem;
   border-radius: 100px;
   box-shadow: inset 0 0 0 1px var(--line);
   font-family: var(--mono);
@@ -3816,7 +3979,7 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
 
 .tag:hover {
   color: var(--fg);
-  box-shadow: inset 0 0 0 1px var(--acc)
+  box-shadow: inset 0 0 0 1px var(--svc)
 }
 
 /* ---------- process ---------- */
