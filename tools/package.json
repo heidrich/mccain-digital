@@ -1,0 +1,9 @@
+{
+  "name": "mccain-digital-tools",
+  "private": true,
+  "type": "module",
+  "description": "Measuring tools only. Separate from the root package.json on purpose: that one exists so Vercel installs the Anthropic SDK for api/, and the browser driver has no business in a production install. tools/ is in .vercelignore, so nothing here is ever deployed. Install once per machine: npm --prefix tools install",
+  "dependencies": {
+    "playwright-core": "^1.56.0"
+  }
+}
