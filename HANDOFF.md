@@ -3,7 +3,9 @@
 `https://mccain-digital.vercel.app/` liefert den Stand von `main`.
 
 > ⚡ **NEUESTES (10.9., PC): die Bildwelle ist zu, die Luft ist drin — und die
-> zwei Browser-Tore laufen wieder.** Vier Commits, **nicht gepusht**.
+> zwei Browser-Tore laufen wieder.** Vier Commits — `a003742` `a8ec5a8` `353a174`
+> `fe17ac9` — plus das eine vom 5.9., das schon vorlag: `main` steht **5 vor `origin/main`
+> und ist NICHT gepusht**.
 >
 > **`a8ec5a8` — ein Tor, das man nicht laufen lassen kann, ist kein Tor.**
 > `agent-browser set viewport` haengt auf diesem PC: keine Ausgabe, kein Exit,
@@ -60,7 +62,7 @@
 > −250 px" — das galt fuer den *strukturellen* Teil mit (Baender verschmelzen,
 > Proof auf die Zitat-Slots schrumpfen). Der Teil ist LUFT-4 bis LUFT-8 und offen.
 >
-> **`4dd0f7b` — LUFT-8, und was daran nicht stimmte.** Das Bodenpolster der
+> **`fe17ac9` — LUFT-8, und was daran nicht stimmte.** Das Bodenpolster der
 > letzten sticky-Karte ist der Abstand zu einer Karte, die es nicht gibt. Gemessen
 > Inhalt zu Inhalt, services → studio: **252 px** (33 unausgefuellter Rest des
 > Kartenpolsters + 17,6 dieses Polster + 2 × 100,8 die zwei Baender), jetzt 235.
