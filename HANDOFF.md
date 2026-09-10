@@ -2,6 +2,29 @@
 
 `https://mccain-digital.vercel.app/` liefert den Stand von `main`.
 
+> ⚡ **NACHTRAG (10.9., `1ceb658`): die wandernde Verlaufsfarbe hat kein Gelb
+> mehr.** `--wave-stops` ist die einzige Quelle fuer jeden bewegten Verlauf der
+> Seite (Konsolenrand, Nav-Statuspille, Nav-CTA, die (05)-Aussage, jedes „AI" in
+> einer Ueberschrift) — eine Zeile, alle Stellen.
+> **Drei Stops zu loeschen ging nicht:** die alte Liste war eine volle
+> Farbtonrunde, die auf dem Logo-Gelb schloss, damit die Wiederholung keine Naht
+> hat. Nimmt man das Gelb aus einer Runde, sind die losen Enden Koralle und
+> Gelbgruen — und der kuerzeste Weg dazwischen laeuft ueber Oliv und Sandbraun,
+> also genau die Brauntoene, die verboten sind. **Jede Liste, die die Luecke
+> schliesst, erfindet die Farbe neu, die raus sollte.**
+> Deshalb ist es keine Runde mehr, sondern eine **Reise hin und zurueck**: Gruen
+> an beiden Enden, die kalte Haelfte dazwischen, Koralle als einzige warme Wende
+> in der Mitte. Symmetrisch, also nahtlos **durch Bauart** statt durch die Wahl
+> der Schlussfarbe. Gleiche 480px-Periode, gleicher 40px-Takt — `--rim-shift`,
+> `--rim-cycle` und die Geometrie in `paintRimPalette` unangetastet.
+> Gemessen: Farbtoene 149 · 177 · 207 · 234 · 269 · 304 · 11 und zurueck, nichts
+> im Gelbband (38–72°), auch nicht in den zehn abgeleiteten Bandlisten. **Der
+> dunkelste Stop ist unveraendert** (`#a86ee8`, 5,68:1 gegen das Fast-Schwarz des
+> Nav-CTA) — raus kamen die HELLSTEN Stops.
+> **Weiterhin gelb, richtig so:** Wortmarke, Konsolen-Tab, Sende-Knopf,
+> Pacman-Linie — das ist `--acc`, nicht die Welle. **Ebenfalls weg:**
+> `--wave-stops-quiet`, nie referenziert (Audit FX-8).
+
 > ⚡ **NACHTRAG (10.9., `2fb4791`): das schwarze Loch auf der (05)-Aussage ist
 > raus.** Owner: „das sieht echt nicht gut aus." `PixelFX.voidReveal` lief auf
 > der Studio-Aussage — weg aus allen drei Stellen: `.vr-host` im Markup, der
