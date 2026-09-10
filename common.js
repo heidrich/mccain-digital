@@ -44,20 +44,15 @@
   }
 
   /* ============================================================
-     2) THEME
-     ============================================================ */
+     2) THE PIXEL HOSTS
+     ============================================================
+     This section used to be the theme: a stored preference read back before
+     the stylesheet resolved, a toggle, and a redraw pass because the pixel
+     fields hold the OLD colours across a switch. There is one theme now
+     (owner, 10.9.), so all of that is gone and nothing can change a colour
+     under a rasterized headline any more. The list itself stays — the engine
+     registers into it and the console's rim palette is built off it. */
   let pixelHosts = [];
-  const themeBtn = d.getElementById("themeT");
-
-  /* Every page also applies this inline in <head>, before the stylesheet
-     resolves - that is what stops the dark flash AND stops a pixel headline
-     from rasterizing the outgoing theme's colour mid-transition. This stays as
-     the fallback for any page that ever ships without the snippet; assigning
-     the value it already has costs nothing and starts no transition. */
-  try {
-    const saved = localStorage.getItem("mcd-v3-theme");
-    if (saved === "light" || saved === "dark") root.dataset.theme = saved;
-  } catch { /* private mode — keep the default */ }
 
   /* ---------- the travelling rim's palette ----------
 
@@ -208,41 +203,6 @@
       es.forEach((e) => e.target.classList.toggle("is-still", !e.isIntersecting));
     }, { rootMargin: "120px" });
     d.querySelectorAll(".rim-hold").forEach((el) => rimIO.observe(el));
-  }
-
-  if (themeBtn) {
-    let themeRedraw = null;
-
-    /* The button says what it does, not where it is. Two sun-and-moon icons
-       carry the state to anyone who can see them and to nobody else; the
-       label read "Switch between light and dark" in both directions, so a
-       screen reader announced the same eleven words whichever theme was on.
-       It now names the destination, which is the one thing that changes.
-
-       The markup keeps the neutral label: it is what a visitor without
-       JavaScript gets, and it is true in both states. */
-    const labelTheme = () => {
-      themeBtn.setAttribute("aria-label", root.dataset.theme === "dark"
-        ? "Switch to light mode"
-        : "Switch to dark mode");
-    };
-    labelTheme();
-
-    themeBtn.addEventListener("click", () => {
-      const next = root.dataset.theme === "dark" ? "light" : "dark";
-      root.dataset.theme = next;
-      labelTheme();
-      try { localStorage.setItem("mcd-v3-theme", next); } catch { /* ignore */ }
-
-      // The pixel fields hold the OLD colours and have to be re-sampled — but
-      // NOT before the .5s colour transition has landed, or the rasterizer
-      // captures a half-faded value and the headline stays invisible on paper.
-      clearTimeout(themeRedraw);
-      themeRedraw = setTimeout(() => {
-        pixelHosts.forEach((h) => { if (h && h.redraw) h.redraw(); });
-        paintRimPalette();      // the rim answers to the accent AND to the ground
-      }, 600);
-    });
   }
 
   /* ============================================================

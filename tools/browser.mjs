@@ -108,11 +108,13 @@ export async function settle(page, { deep = true } = {}) {
   await page.waitForTimeout(700);
 }
 
-/* The theme is persisted in localStorage, so it has to be written BEFORE the
- * page boots — clicking the toggle inside a loop leaks the previous page's
- * theme into the next run and silently mislabels every result. Writing it
- * needs an origin, hence the first load. */
-export async function openThemed(context, url, theme) {
+/* This used to take a theme and write it to localStorage before the page
+ * booted, because a stored preference read back at boot would otherwise leak
+ * the previous page's theme into the next run. There is one theme now (owner,
+ * 10.9.) and nothing to set — but the site still has a tonal plan inside it,
+ * so what a probe measures still depends on which BAND an element sits on,
+ * not on a global switch. */
+export async function open(context, url) {
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
@@ -120,10 +122,6 @@ export async function openThemed(context, url, theme) {
     if (m.type() === "error" || m.type() === "warning") errors.push(m.type() + ": " + m.text());
   });
   await page.goto(url, { waitUntil: "domcontentloaded" });
-  if (theme) {
-    await page.evaluate((t) => localStorage.setItem("mcd-v3-theme", t), theme);
-    await page.goto(url, { waitUntil: "domcontentloaded" });
-  }
   page.mcdErrors = errors;
   return page;
 }

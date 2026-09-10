@@ -8,7 +8,7 @@
  * There are no sessions any more — every run gets its own context — so it is
  * accepted and ignored rather than turned into an error in old muscle memory.
  */
-import { BASE, launch, openThemed, probeSource, requireServer, settle } from "./browser.mjs";
+import { BASE, launch, open, probeSource, requireServer, settle } from "./browser.mjs";
 
 const W = Number(process.argv[2] || 1280);
 const H = Number(process.argv[3] || 820);
@@ -33,7 +33,7 @@ const { browser, context } = await launch(W, H);
 let bad = 0;
 for (const p of PAGES) {
   console.log(`===== ${p} @ ${W}x${H} =====`);
-  const page = await openThemed(context, `${BASE}/${p}`, null);
+  const page = await open(context, `${BASE}/${p}`);
   await settle(page, { deep: false });
 
   const errs = page.mcdErrors;

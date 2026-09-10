@@ -4,9 +4,14 @@
      1. real typography (Schibsted Grotesk, not system-ui)
      2. scroll-DRIVEN motion (native CSS scroll timelines, no lib)
      3. the pixel engine as the signature, on every transition
-   Theme: [data-theme="dark"|"light"] on <html>. Neutral bands
-   follow the theme; .band--ink / .band--paper are deliberate
-   contrast islands and keep their colour in both themes.
+   ONE THEME. The site is dark; there is no light mode and no
+   toggle (owner, 10.9.: "wir hauen den light modus raus.
+   komplett"). What survives is the TONAL PLAN inside that one
+   theme: .band--ink and .band--paper are bands on their own
+   ground, and paper bands are still light surfaces - so the
+   paper weights of every signal (--acc-ink, --svc-deep,
+   --sig-ink) are still load-bearing. Removing the theme did not
+   remove the paper.
    ============================================================ */
 
 @font-face {
@@ -167,7 +172,13 @@ html[data-svc="software"] {
   --t-label: clamp(.66rem, .14vw + .62rem, .76rem);
 }
 
-html[data-theme="dark"] {
+/* THE PAGE GROUND. This used to be html[data-theme="dark"], with a light
+   twin below it. There is no twin any more, so it sits on :root - and it must
+   stay a SEPARATE declaration from the palette above rather than being merged
+   into it, because .band--ink and .band--paper override exactly this set on
+   the section element. They win by proximity, not by specificity: these are
+   inherited custom properties set on <html>, and a band sets them on itself. */
+:root {
   --acc-text: var(--acc);
   --svc-text: var(--svc-lift);
   --sig-fg: var(--sig-text);
@@ -180,20 +191,6 @@ html[data-theme="dark"] {
   --line-2: rgba(242, 242, 239, .07);
   --card: #131316;
   --shadow: 0 30px 80px -30px rgba(0, 0, 0, .8);
-}
-
-html[data-theme="light"] {
-  --acc-text: var(--acc-ink);
-  --svc-text: var(--svc-deep);
-  --sig-fg: var(--sig-ink);
-  --bg: var(--paper);
-  --bg-2: var(--paper-2);
-  --fg: var(--paper-fg);
-  --muted: #5f5f5c;
-  --line: rgba(16, 16, 17, .16);
-  --line-2: rgba(16, 16, 17, .07);
-  --card: #fbfbf9;
-  --shadow: 0 30px 70px -34px rgba(20, 18, 12, .34);
 }
 
 /* contrast islands — fixed regardless of theme */
@@ -764,40 +761,6 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
   transform-origin: 0 50%
 }
 
-.theme-t {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  box-shadow: inset 0 0 0 1px var(--line);
-  transition: background .3s
-}
-
-.theme-t:hover {
-  background: var(--line-2)
-}
-
-.theme-t svg {
-  width: 17px;
-  height: 17px
-}
-
-html[data-theme="dark"] .t-sun {
-  display: block
-}
-
-html[data-theme="dark"] .t-moon {
-  display: none
-}
-
-html[data-theme="light"] .t-sun {
-  display: none
-}
-
-html[data-theme="light"] .t-moon {
-  display: block
-}
 
 @media (max-width: 900px) {
   .nav-status {
@@ -2078,8 +2041,10 @@ html[data-theme="light"] .t-moon {
 .scard[data-svc="websites"] { --svc: #7a8c00; --svc-lift: #a4bd00; --svc-deep: #5c6b00 }
 .scard[data-svc="software"] { --svc: #ff3d8a; --svc-lift: #ff3d8a; --svc-deep: #c2004d }
 
-html[data-theme="dark"] .scard[data-svc] { --svc-text: var(--svc-lift) }
-html[data-theme="light"] .scard[data-svc] { --svc-text: var(--svc-deep) }
+/* The door card sits on the neutral ground, which is now always ink - so the
+   lifted weight, always. The deep weight has not gone anywhere: a .scard
+   inside a .band--paper still gets it from the band. */
+.scard[data-svc] { --svc-text: var(--svc-lift) }
 
 .scard-n {
   font-family: var(--mono);
