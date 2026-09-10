@@ -4,7 +4,7 @@
 
 ## ▶ ZUERST LESEN — Stand am Ende des 10.9.
 
-**`main` steht 18 Commits vor `origin/main` und ist NICHT gepusht.** Arbeitsbaum
+**`main` steht 20 Commits vor `origin/main` und ist NICHT gepusht.** Arbeitsbaum
 sauber. Die Entscheidung zu pushen liegt beim Owner.
 
 **Die Werkzeuge laufen nicht mehr auf `agent-browser`** — der haengt auf diesem
