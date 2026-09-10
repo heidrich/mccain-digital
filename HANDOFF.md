@@ -2,6 +2,47 @@
 
 `https://mccain-digital.vercel.app/` liefert den Stand von `main`.
 
+> ⚡ **NACHTRAG 2 (10.9. abends): sieben Owner-Punkte, alle gebaut und
+> nachgemessen** — `e34aa26` `63ff3cc` `9193483` `f54c46f`.
+>
+> 1. **Der Hero der Service-Seiten flackerte nicht, er war GERUEST.** Kalt
+>    gemessen: FCP ~1130ms, `common.js` bei ~1100ms (drittes defer-Skript,
+>    wartet auf 140KB Engine), Sequenz haelt alles auf 0 und ist erst bei
+>    ~2400ms fertig. Bis dahin sieht man nur `.guides`, die vier `gmark` und
+>    die `.hero-side`-Striche — das sind die „Linien". Die Choreografie prueft
+>    jetzt FCP **und** `performance.now() > 600`; beides heisst „ueberfaellig",
+>    und ueberfaelliger Inhalt wird gezeigt, nicht choreografiert. Warm
+>    (Paint 72–80ms) bleibt das Schauspiel.
+> 2. **Ein Rahmen.** `.uc` hatte 2px Signalstrich links UND einen Ring in 40 %
+>    Logo-Gelb. Strich weg, Ring traegt die Signalfarbe. `.cap` genauso, beide
+>    zusaetzlich auf `:focus-within`.
+> 3. **Kein Senf in (03).** `.cap-meta` lief auf `--acc-text` → auf Papier
+>    `#806400`, 16 Knoten. Jetzt `--fg`; **nachgemessen: null `#806400` auf der
+>    ganzen Seite.** Was die Sonde auf `websites` noch meldet, ist deren eigene
+>    olivgruene Signalfarbe — andere, weiter offene Frage.
+> 4. **„The core five" nicht mehr gestreckt** (`space-between` → gruppiert).
+> 5. **45 von 55 Pillen tragen jetzt ihre echte Marke** — 31 neue SVGs aus
+>    simple-icons (CC0) in `img/logos/`, eine generierte Regel je Datei. Die
+>    zehn ohne sind Faehigkeiten und Formate („Role-based access", „WebP /
+>    AVIF", „llms.txt" …) plus LlamaIndex, das keine oeffentliche Marke hat.
+> 6. **Pacman beisst nicht mehr in den CTA.** Mit dem Biss fielen der
+>    `.nav .btn`-Lookup und die `ctaBox`-Messung, die nur ihn fuetterten.
+> 7. **Das Kommando-Menue war in Fliesstextgroesse gesetzt.** Es setzte
+>    NIRGENDS eine `font-size`, erbte also `--t-body` (18,88px): Panel
+>    **1040×828** auf 900px Viewport, Zeilen 52px, 175px Chrome. Jetzt eigenes
+>    Token **`--t-ui`** (15,2px) auf dem Panel, ein Balken statt zwei, Zeilen
+>    34px, Panel **880×620**, Vorschau-Ueberschrift 19px statt 32.
+>    **Zwei Fallen dabei:** der 18px-Verlauf am Listenende braucht 26px
+>    Bodenpolster (Verlauf MUSS kleiner sein als das Polster, sonst dimmt er
+>    die zuletzt erreichte Zeile), und die 16px-Touch-Regel gegen den
+>    iOS-Fokus-Zoom steht 500 Zeilen weiter oben bei **gleicher Spezifitaet** —
+>    gemessen stand `#cmInput` auf 390 bei **13,76px**, jedes andere Feld bei
+>    16. Hinter der zu schlagenden Regel wiederholt.
+>
+> **Tore nach jedem Schritt gruen:** `sweep` 11 Seiten auf 1280×820 **und**
+> 390×844, `accent_audit` 6 Seiten, `check_links`. `main` steht **18 vor
+> `origin/main`**, nicht gepusht.
+
 > ⚡ **NACHTRAG (10.9., `1ceb658`): die wandernde Verlaufsfarbe hat kein Gelb
 > mehr.** `--wave-stops` ist die einzige Quelle fuer jeden bewegten Verlauf der
 > Seite (Konsolenrand, Nav-Statuspille, Nav-CTA, die (05)-Aussage, jedes „AI" in
