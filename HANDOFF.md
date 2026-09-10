@@ -2,6 +2,43 @@
 
 `https://mccain-digital.vercel.app/` liefert den Stand von `main`.
 
+> 🔴 **VIER OWNER-ENTSCHEIDUNGEN vom 10.9., alle umgesetzt (`3383e78`) — und EINE
+> davon hat nicht getan, was sie sollte.**
+>
+> 1. **„Struktur bleibt."** Die Startseite behaelt ihre neun Kapitel. Der
+>    Kapitelumbau (9→7, −19 % Hoehe) ist **abgesagt**, nicht verschoben. Damit
+>    bleibt die Seite auf der Laenge, die Welle 2 ihr gegeben hat. Stattdessen
+>    gewuenscht: **die Service-Seiten weiter** — je Raum ein Signatur-Modul, gegen
+>    „die vier sehen alle gleich aus" (97–98 % Skelett-Aehnlichkeit gemessen).
+>    **Das ist die naechste Welle.** Der Befund nennt die vier Module:
+>    AI-tools = die Konsole als eigenes Band · web-apps = Zeitleiste Tag 1 → Tag 7
+>    → Woche 6–12 · websites = „This page, audited" (Score-Tabelle +
+>    Gewichtsbalken statt Stockfoto) · software = Vorher/Nachher der Systeme, die
+>    nicht miteinander reden.
+> 2. **Light-Modus komplett raus.** Erledigt: `html[data-theme="light"]` weg, der
+>    dunkle Block liegt auf `:root`, Umschalter + Icons + `data-theme` + der
+>    `<head>`-Schnipsel raus aus allen elf Seiten, Theme-Code aus `common.js`, und
+>    die Tore laufen jede Seite nur noch einmal.
+>    **ABER: das Braun ist NICHT weg.** Es war als Antwort auf die
+>    Gelb-auf-Papier-Frage gemeint, und es beantwortet sie nicht. Nach dem Ausbau
+>    gemessen: **16 Knoten `#806400`** (`--acc-ink`) auf `span.cap-meta`, vier je
+>    Service-Seite, **alle auf `.band--paper`**. Papierbaender sind der Tonplan
+>    INNERHALB des einen Themes — der Ausbau hat den Umschalter entfernt, nicht das
+>    Papier. **Offen bleibt genau die alte Frage:** Gelb als Marker hinter
+>    Ink-Schrift, oder auf Papier gar keine farbige Schrift. (Nicht mitgezaehlt:
+>    `#a4bd00` / `#5c6b00` auf der websites-Seite — das ist ihre olivgruene
+>    Signalfarbe, eine andere Frage.)
+> 3. **„Placeholder"-Wort raus, Bilder bleiben.** Fuenf Bildunterschriften und
+>    fuenf Alt-Texte. Die Alt-Texte beschreiben jetzt das Bild, ohne zu behaupten,
+>    es sei unseres; die software-Unterschrift wurde umformuliert, damit der Satz
+>    sein Argument selbst traegt statt auf ein Stockfoto als Beleg zu zeigen.
+>    **Weiterhin „Placeholder", mit Absicht:** die zwei leeren Work-Cases — dort ist
+>    das Wort richtig, es ist keine Unterschriften-Marotte.
+> 4. **Keine Koordinaten, „Bavaria".** Der Hero druckte die Muenchner Innenstadt,
+>    waehrend Impressum, JSON-LD und `llms.txt` 86869 Oberostendorf sagen. Hero und
+>    Marquee sagen jetzt beide Bavaria — englische Schreibung, weil die Augenbraue
+>    eine Zeile darueber schon „Bavaria" sagte und `addressRegion` im JSON-LD auch.
+
 > ⚡ **NEUESTES (10.9., PC): die Bildwelle ist zu, die Luft ist drin — und die
 > zwei Browser-Tore laufen wieder.** Vier Commits — `a003742` `a8ec5a8` `353a174`
 > `fe17ac9` — plus das eine vom 5.9., das schon vorlag: `main` steht **5 vor `origin/main`
