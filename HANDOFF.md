@@ -2,6 +2,75 @@
 
 `https://mccain-digital.vercel.app/` liefert den Stand von `main`.
 
+## ▶ ZUERST LESEN — Stand am Ende des 10.9.
+
+**`main` steht 18 Commits vor `origin/main` und ist NICHT gepusht.** Arbeitsbaum
+sauber. Die Entscheidung zu pushen liegt beim Owner.
+
+**Die Werkzeuge laufen nicht mehr auf `agent-browser`** — der haengt auf diesem
+PC an `set viewport`, an zwei getrennten Tagen, auch nach voller Bereinigung.
+Beide Browser-Tore liegen jetzt auf `playwright-core`; die Sonden
+(`probe.js`, `accent_audit_probe.js`) sind unveraendert und bleiben der einzige
+Ort der Messlogik. **Einmal je Maschine:** `npm --prefix tools install`.
+
+```
+python prodserve.py 8898 --dev      # ANSEHEN  — gzip, no-store
+python prodserve.py 8897            # MESSEN   — Produktions-Header, echter Cache
+bash tools/sweep.sh 1280 820        # 11 Seiten: Fehler, Ueberlauf, A11y-Basics
+bash tools/sweep.sh 390 844         #   ... und auf dem Telefon
+bash tools/accent_audit.sh          # jeder Akzent-Textknoten gegen seinen echten Grund
+python tools/check_links.py         # Links, Anker, doppelte IDs
+```
+
+**Was heute gebaut wurde** steht in den drei ⚡-Bloecken darunter: Bildwelle,
+Welle 2 „Luft", die Tore auf Playwright, vier Owner-Entscheide (Light-Modus raus,
+Bavaria, „Placeholder"-Wort raus, Kapitelumbau abgesagt), Gelb aus der wandernden
+Verlaufsfarbe, das schwarze Loch aus (05), und sieben Punkte auf den
+Service-Seiten inklusive Kommando-Menue.
+
+### Gelb auf Papier — ERLEDIGT, entgegen meiner eigenen Notiz
+
+Ich hatte das mehrfach als offene Owner-Entscheidung gefuehrt. **Nachgemessen am
+Ende des Tages ueber alle 11 Seiten, jedes Blatt-Element auf jedem Papierband:
+es gibt keine gelbe SCHRIFT auf Papier mehr.** Null `#806400`. Die 16
+`.cap-meta`-Zeilen waren die letzten.
+
+Gelb auf Papier existiert noch **9×, ausschliesslich als Flaeche mit
+fast-schwarzer Schrift darauf (11,99:1)** — die fuenf Score-Chips in (03) P.S.
+auf der Startseite (`.score b`) und der Abschluss-CTA je Service-Seite. Das ist
+exakt die Regel, die der Befund empfohlen hat („Gelb ist auf Papier Flaeche, nie
+Schrift"). **Da muss nichts passieren.**
+
+**Zwei Reste, beide klein, beide Owner-Entscheid:**
+
+1. `.band--paper` bildet weiterhin `--acc-text: var(--acc-ink)` ab. Heute malt
+   damit nichts mehr Text — aber das naechste `color: var(--acc-text)` auf einem
+   Papierband holt das Senfgelb lautlos zurueck. **Eine Zeile** (`--acc-text:
+   var(--fg)` in dem Block) macht aus dem Zustand eine Regel und aendert optisch
+   heute exakt nichts.
+2. `services/websites.html` druckt `(03)` zweimal in `#5c6b00` (Farbton 68,
+   dunkles Oliv, 5,26:1). Das ist **nicht** das Logo-Gelb, sondern die eigene
+   Signalfarbe dieser Seite — der einzige der vier Signale, der auf Papier
+   Richtung Senf kippt. Die vier Signalfarben sind im Befund weiterhin
+   unbestaetigt.
+
+### Naechste Welle (Owner-Wahl vom 10.9.)
+
+„Struktur bleibt" — der Kapitelumbau der Startseite ist **abgesagt**, nicht
+verschoben. Stattdessen: **die vier Service-Signatur-Module** gegen „die vier
+sehen alle gleich aus" (97–98 % Skelett-Aehnlichkeit gemessen). Der Befund nennt
+sie: ai-tools = die Konsole als eigenes Band · web-apps = Zeitleiste Tag 1 → Tag
+7 → Woche 6–12 · websites = „This page, audited" (Score-Tabelle +
+Gewichtsbalken statt Stockfoto) · software = Vorher/Nachher der Systeme, die
+nicht miteinander reden. **Empfohlener Start: websites** — ersetzt ein Stockfoto
+durch echte Daten, braucht aber vorher einen frischen Lighthouse-Lauf, weil sich
+die Seitenhoehen geaendert haben.
+
+**Kleinkram, offen:** LlamaIndex ist die einzige Pille ohne Marke (keine in
+simple-icons) — wenn der Owner eine Datei liefert, ist es ein Handgriff.
+
+---
+
 > ⚡ **NACHTRAG 2 (10.9. abends): sieben Owner-Punkte, alle gebaut und
 > nachgemessen** — `e34aa26` `63ff3cc` `9193483` `f54c46f`.
 >

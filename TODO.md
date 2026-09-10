@@ -1,3 +1,24 @@
+# TODO — Stand 10. September 2026 (abends)
+
+## Was als Naechstes ansteht
+
+| # | Was | Groesse | Haengt an |
+|---|---|---|---|
+| 1 | **Die vier Service-Signatur-Module** — Owner-Wahl vom 10.9. gegen „die vier sehen alle gleich aus". ai-tools = Konsole als eigenes Band · web-apps = Zeitleiste Tag 1 → Tag 7 → Woche 6–12 · websites = „This page, audited" (Score-Tabelle + Gewichtsbalken statt Stockfoto) · software = Vorher/Nachher der Systeme, die nicht miteinander reden | L | **websites zuerst** — braucht davor einen frischen Lighthouse-Lauf, die Seitenhoehen haben sich geaendert |
+| 2 | `--acc-text: var(--fg)` im `.band--paper`-Block | XS | Owner-OK. Aendert optisch heute **nichts**, macht aus dem Ist-Zustand eine Regel (siehe HANDOFF, §Gelb auf Papier) |
+| 3 | Die vier Signalfarben bestaetigen — Oliv (`websites`) ist der einzige, der auf Papier Richtung Senf kippt | XS–M | Owner-Entscheid, steht seit dem Befund offen |
+| 4 | LlamaIndex-Marke — einzige Pille ohne Icon, keine in simple-icons | XS | Owner liefert die Datei |
+| 5 | Restliche Owner-Entscheidungen aus `DESIGN-BEFUND.md` §Owner-Entscheidungen: Preisspannen oeffentlich, Konsole auf die AI-Seite, Proof als Kapitel, Zahlen aus Pixeln, die acht DE-Fragen | M–L | Owner |
+
+**Abgesagt, nicht verschoben:** der Kapitelumbau der Startseite (9→7). Owner
+10.9.: „Struktur bleibt." Damit bleibt die Seite auf der Laenge, die Welle 2 ihr
+gegeben hat — LUFT-4 bis LUFT-7 sind damit gegenstandslos, soweit sie die
+Startseite betreffen.
+
+**`main` steht 18 vor `origin/main`, nicht gepusht.**
+
+---
+
 # TODO — Stand 10. September 2026
 
 ## Welle vom 10.9. (PC) — Bilder, Luft, und die zwei Tore zurueck
