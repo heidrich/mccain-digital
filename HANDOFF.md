@@ -2,6 +2,20 @@
 
 `https://mccain-digital.vercel.app/` liefert den Stand von `main`.
 
+> ⚡ **NACHTRAG (10.9., `2fb4791`): das schwarze Loch auf der (05)-Aussage ist
+> raus.** Owner: „das sieht echt nicht gut aus." `PixelFX.voidReveal` lief auf
+> der Studio-Aussage — weg aus allen drei Stellen: `.vr-host` im Markup, der
+> Bau-und-Beobachte-Block in `common.js` (der einzige Aufrufer) und die vier
+> `.vr-*`-Regeln in `v3.css`. **An der Aufrufstelle entfernt, nicht aus der
+> Engine:** `voidReveal` wird weiter gebaut und exportiert, es kommt mit einer
+> Klasse und einem Block zurueck. **Nicht angefasst, weil andere Effekte:** das
+> Zeiger-Loch auf den Bildern (`PixelFX.image`) und die wandernde Wellenfarbe auf
+> derselben Aussage (`data-wavetext` am Band).
+> **Eine Falle:** der Block endete mit der `}`, die das umschliessende `if`
+> schloss — bis zur naechsten Abschnitts-Ueberschrift zu schneiden nimmt sie mit.
+> `node --check common.js` nach jedem Block-Ausbau, die Seite haette sonst nur
+> einen Konsolenfehler gezeigt.
+
 > 🔴 **VIER OWNER-ENTSCHEIDUNGEN vom 10.9., alle umgesetzt (`3383e78`) — und EINE
 > davon hat nicht getan, was sie sollte.**
 >
