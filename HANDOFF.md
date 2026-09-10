@@ -5,7 +5,7 @@
 > ⚡ **NEUESTES (10.9., PC): die Bildwelle ist zu, die Luft ist drin — und die
 > zwei Browser-Tore laufen wieder.** Vier Commits — `a003742` `a8ec5a8` `353a174`
 > `fe17ac9` — plus das eine vom 5.9., das schon vorlag: `main` steht **5 vor `origin/main`
-> und ist NICHT gepusht**.
+> und ist NICHT gepusht** (die weiteren sind Doku und die tools-Lockdatei).
 >
 > **`a8ec5a8` — ein Tor, das man nicht laufen lassen kann, ist kein Tor.**
 > `agent-browser set viewport` haengt auf diesem PC: keine Ausgabe, kein Exit,
