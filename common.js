@@ -678,47 +678,16 @@
       });
     }
 
-    /* THE ONE SET PIECE. voidReveal has been finished, commented as "the
-       AI-section signature" and exported since the refresh — and called from
-       nowhere. The scroll flattens after (04) because nothing behind the hero
-       is a typographic event; this is that event, used once.
-
-       It runs on the studio claim in (05) and not where the audit suggested.
-       Both of its candidates — the (03) billboard and the footer statement —
-       sit on `--bg`, which is PAPER in light mode, and a black core on paper
-       is a smudge rather than a hole punched through the page. (05) is
-       `band--ink`: dark in both themes, which is what the disc was drawn for.
-
-       Constructed first, armed second: `.vr-armed` is what hides the real
-       line, so if the engine ever throws while re-parenting, the claim stays
-       readable instead of vanishing. Skipped entirely under reduced motion —
-       arming there would hide the text until an observer fires. */
-    const vrHost = d.querySelector(".vr-host");
-    if (vrHost && PixelFX.voidReveal && !reduced) {
-      const vr = PixelFX.voidReveal(vrHost);
-      vrHost.classList.add("vr-armed");
-
-      const vrIO = new IntersectionObserver((entries) => {
-        entries.forEach((e) => {
-          if (!e.isIntersecting) return;
-          vr.play();
-          vrIO.disconnect();
-        });
-      }, { threshold: 0.6 });
-      vrIO.observe(vrHost);
-
-      // Only BEFORE it has played: redraw re-arms, and re-arming a finished
-      // line would hide text the visitor is already reading.
-      let vrt = null;
-      addEventListener("resize", () => {
-        clearTimeout(vrt);
-        vrt = setTimeout(() => {
-          if (!vrHost.classList.contains("vr-done")) vr.redraw();
-        }, 200);
-      }, { passive: true });
-    }
+    /* THE BLACK HOLE IS OUT. `PixelFX.voidReveal` used to run here, on the
+       studio claim in (05) — a disc that punched a hole through the line and
+       let it re-form. Owner, 10.9.: "das sieht echt nicht gut aus." Removed at
+       the call site, not from the engine: `voidReveal` is still built and
+       still exported from pixel-engine.js, so putting it back is one element
+       with `.vr-host` and the block that used to stand here (git log this
+       file). Nothing else in the repo calls it, so it is unreferenced again —
+       which is the state a comment here once complained about; that is now a
+       decision rather than an oversight. */
   }
-
 
   /* ============================================================
      8) THE REFRESH — word reveals and the header field
