@@ -2,8 +2,8 @@
    McCain Digital — Pac-Man scroll progress.
    Lifted verbatim from the live homepage (upload-v2/index.html)
    into its own module for v3. Needs: <canvas id="pacbar">, an
-   optional .scroll-progress fallback bar, and .nav-links .nav-cta
-   as the thing he teases. Reduced motion: does not run at all.
+   optional .scroll-progress fallback bar. Reduced motion: does not
+   run at all.
    ============================================================ */
 (function () {
   "use strict";
@@ -27,7 +27,6 @@
         // as the progress bar it is. Measured live so it follows the nav.
         var navEl = d.querySelector(".nav");
         var W = 0, H = 190, LY = 68, R = 6.5, PADX = 48;
-        var cta = d.querySelector(".nav .btn");   // v3: the CTA he teases
         var COLORS = ["#a8a294", "#f5c518", "#9FD98A", "#d9a800"];
         var colorIdx = 0;                    // the line currently being eaten
         var dir = 1;                         // 1 eats rightward, -1 leftward
@@ -44,11 +43,10 @@
            transform on every frame the layout is always dirty. Reading them
            per frame meant a forced reflow 60 times a second: 722 ms of
            main-thread time on throttled mobile for 15 ms of actual script. */
-        var maxScroll = 0, ctaBox = null;
+        var maxScroll = 0;
         function measure() {
           if (navEl) LY = Math.round(navEl.getBoundingClientRect().height);
           // the nav is position:fixed, so its viewport box is constant
-          ctaBox = cta ? cta.getBoundingClientRect() : null;
           maxScroll = d.documentElement.scrollHeight - w.innerHeight;
           var vw = d.documentElement.clientWidth;
           if (vw === W) return;
@@ -145,31 +143,13 @@
             blocks(0, px - r - 3, eaten);
             blocks(px + r + 3, W, rebuilt);
           }
-          // Fat pac reaches up and gnaws a scallop out of the CTA's BOTTOM
-          // edge — ONE clean pixel-stepped semicircle (the jittered fringe
-          // version read as frizz, not as a bite). Driven by how fat he is,
-          // not by raw overlap: he now rides below the header, so "does the
-          // circle touch the button" would be true the whole time.
-          if (ctaBox) {
-            var br = ctaBox;                  // cached in measure(), see above
-            var bite = (r - R) * 2.2;         // 0 when thin, ~11px at his fattest
-            if (bite > 2 && br.bottom > 0 && br.bottom < LY + 6 &&
-              px > br.left - bite && px < br.right + bite) {
-              // the notch has to be painted in the CURRENT page background —
-              // the hard-coded ink left a dark blob on the button in light mode
-              ctx.fillStyle = getComputedStyle(d.documentElement)
-                .getPropertyValue("--bg").trim() || "#0f0e0c";
-              var bx0 = Math.max(br.left, Math.floor((px - bite) / 3) * 3);
-              var bx1 = Math.min(br.right, px + bite);
-              for (var bx = bx0; bx < bx1; bx += 3) {
-                var dxc = bx + 1.5 - px;
-                var h2 = bite * bite - dxc * dxc;
-                if (h2 <= 0) continue;
-                var depth = Math.ceil(Math.sqrt(h2) / 3) * 3;
-                ctx.fillRect(bx, br.bottom - depth, 3, depth + 1);
-              }
-            }
-          }
+          // NO BITE OUT OF THE CTA. Fat pac used to gnaw a pixel-stepped
+          // scallop out of the button's bottom edge, painted in the page
+          // background so it read as a notch. Owner, 10.9.: "bitte entferne
+          // den pixel border um packman, das sieht schlecht aus" - on the
+          // button's own gradient the notch reads as a dark ragged rim around
+          // him rather than as a bite out of the button. He keeps the line,
+          // the fattening, the idle antics and the spat pixels.
           for (var i = parts.length - 1; i >= 0; i--) {
             var q = parts[i];
             q.x += q.vx; q.y += q.vy;
