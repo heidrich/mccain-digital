@@ -3868,6 +3868,60 @@ html[data-theme="light"] .scard[data-svc] { --svc-text: var(--svc-deep) }
 }
 
 /* ---------- process ---------- */
+/* THE PROCESS BAND HAD A RIGHT HALF AND NOTHING IN IT. Four steps of
+   `4.5rem | 1fr` with the copy capped at 68ch left roughly 800px of a 1382px
+   wrap empty over the full height of the band, on six pages - measured, the
+   right side carried 0.19-0.22 of its own area. The band is also one of seven
+   on the home page with no image at all, and the pixel engine is wired
+   exclusively to images: where there is no picture there can be no moment.
+
+   So the empty half becomes the picture, and one problem answers the other.
+   NOT sticky, deliberately: the wrap carries `.fx-out`, and a transform on an
+   ancestor re-parents a sticky box - the same trap the services and FAQ bands
+   are already documented for. */
+.process-grid {
+  display: grid;
+  gap: clamp(1.6rem, 3vw, 3rem)
+}
+
+/* A WIDE PICTURE IN THE MIDDLE OF THE TALLEST BAND. The use-case band of a
+   service page measured 1200-1556px - the tallest on the page - and carried no
+   image at all; ten of the eleven bands on those pages do not. A strip between
+   the first and second group halves the text run and, because IMG_TARGETS
+   wires the engine to `.shot > .shot-img > img`, it is also the only engine
+   moment those pages have between the hero and the proof band.
+
+   3/1 rather than the 16/10 of a card: at 1382px that is 460px, which reads as
+   a break rather than as another block. On a phone the same crop would be a
+   sliver, so it goes back to 16/10 there. */
+.uc-break {
+  margin: clamp(2.2rem, 4.5vw, 4rem) 0
+}
+
+.uc-break .shot-img {
+  aspect-ratio: 16/10
+}
+
+@media (min-width: 760px) {
+  .uc-break .shot-img {
+    aspect-ratio: 3/1
+  }
+}
+
+@media (min-width: 1000px) {
+  .process-grid {
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, .88fr);
+    gap: clamp(2rem, 4vw, 4.5rem);
+    align-items: start
+  }
+
+  /* the first step's rule is the top of the column - line the picture up with
+     it rather than with the heading above it */
+  .process-grid>.shot {
+    margin-top: clamp(1.8rem, 4vw, 3rem)
+  }
+}
+
 .steps {
   margin-top: clamp(1.8rem, 4vw, 3rem)
 }
