@@ -157,6 +157,13 @@ html[data-svc="software"] {
   --t-h3: clamp(1.35rem, 2.1vw, 2rem);
   --t-body: clamp(1rem, .48vw + .88rem, 1.18rem);
   --t-small: clamp(.8rem, .2vw + .74rem, .89rem);
+  /* THE BODY TOKEN WAS USED TWICE AND --t-small FORTY-TWO TIMES. Every card,
+     every step, every note read 14.24px (12.8 on 390) over 62-78 characters a
+     line, which is what "zu wenig Space" actually is: the bands stand 145-234px
+     apart, the tightness is INSIDE them. --t-copy is the running-text size for
+     card and note copy - 16.4px at 1440, 16.8 at 1920, 15.2 at 390. --t-small
+     keeps what it was made for: labels, pills, meta and captions. */
+  --t-copy: clamp(.95rem, .25vw + .8rem, 1.05rem);
   --t-label: clamp(.66rem, .14vw + .62rem, .76rem);
 }
 
@@ -378,7 +385,7 @@ section {
 .label+.sec-h,
 .label+h2,
 .label+.st-lead {
-  margin-top: clamp(1rem, 1.7vw, 1.8rem)
+  margin-top: clamp(1.2rem, 2.2vw, 2.2rem)
 }
 
 .label b {
@@ -392,7 +399,7 @@ section {
   justify-content: space-between;
   gap: 2rem;
   flex-wrap: wrap;
-  margin-bottom: clamp(1.8rem, 3.2vw, 3.2rem)
+  margin-bottom: clamp(2.2rem, 4vw, 4rem)
 }
 
 /* The pixel raster used to supply the presence; where a headline is real
@@ -1244,7 +1251,7 @@ html[data-theme="light"] .t-moon {
 
 .ai-note {
   margin-top: 1.6rem;
-  font-size: var(--t-small);
+  font-size: var(--t-copy);
   color: var(--muted);
   max-width: 40ch
 }
@@ -2077,7 +2084,8 @@ html[data-theme="light"] .scard[data-svc] { --svc-text: var(--svc-deep) }
 
 .scard-p {
   color: var(--muted);
-  font-size: var(--t-small)
+  font-size: var(--t-copy);
+  max-width: 58ch
 }
 
 .scard-get {
@@ -2094,7 +2102,7 @@ html[data-theme="light"] .scard[data-svc] { --svc-text: var(--svc-deep) }
 .scard-get span {
   display: flex;
   gap: .6rem;
-  font-size: var(--t-small);
+  font-size: var(--t-copy);
   color: var(--muted);
   transition: color .4s var(--e-io)
 }
@@ -2234,6 +2242,7 @@ html[data-theme="light"] .scard[data-svc] { --svc-text: var(--svc-deep) }
 
 .st-fact span {
   color: var(--muted);
+  font-size: var(--t-copy);
   align-self: center
 }
 
@@ -2597,8 +2606,9 @@ html[data-theme="light"] .scard[data-svc] { --svc-text: var(--svc-deep) }
 }
 
 .form-note {
-  font-size: var(--t-small);
+  font-size: var(--t-copy);
   color: var(--muted);
+  max-width: 58ch;
   margin-top: 1rem
 }
 
@@ -2979,9 +2989,9 @@ html[data-theme="light"] .scard[data-svc] { --svc-text: var(--svc-deep) }
 /* Legally load-bearing (UWG §5): these are brands from twenty years of prior
    employment, NOT clients of this studio. The hedge has to stay visible. */
 .brand-note {
-  font-size: var(--t-small);
+  font-size: var(--t-copy);
   color: var(--muted);
-  max-width: 62ch;
+  max-width: 58ch;
   margin-bottom: clamp(2rem, 4vw, 3.4rem)
 }
 
@@ -3673,7 +3683,7 @@ html[data-theme="light"] .scard[data-svc] { --svc-text: var(--svc-deep) }
 .uc-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
-  gap: clamp(.9rem, 2vw, 1.4rem)
+  gap: clamp(1.1rem, 2.2vw, 2rem)
 }
 
 /* The card lifts and grows an accent rule down its left edge. Same
@@ -3682,7 +3692,7 @@ html[data-theme="light"] .scard[data-svc] { --svc-text: var(--svc-deep) }
 .uc {
   position: relative;
   overflow: hidden;
-  padding: clamp(1.2rem, 2.4vw, 1.8rem);
+  padding: clamp(1.5rem, 2.8vw, 2.4rem);
   border-radius: var(--r);
   background: var(--card);
   box-shadow: inset 0 0 0 1px var(--line);
@@ -3737,15 +3747,18 @@ html[data-theme="light"] .scard[data-svc] { --svc-text: var(--svc-deep) }
 
 .uc p {
   color: var(--muted);
-  font-size: var(--t-small);
-  line-height: 1.55
+  font-size: var(--t-copy);
+  line-height: 1.55;
+  max-width: 58ch
 }
 
 /* the payoff line — the only thing on the card in full contrast */
 .uc-out {
   margin-top: .8rem;
   padding-top: .8rem;
-  border-top: 1px solid var(--line)
+  border-top: 1px solid var(--line);
+  font-size: var(--t-copy);
+  max-width: 58ch
 }
 
 .uc-out b {
@@ -3756,8 +3769,8 @@ html[data-theme="light"] .scard[data-svc] { --svc-text: var(--svc-deep) }
 .uc-note {
   margin-top: clamp(1.6rem, 3vw, 2.4rem);
   color: var(--muted);
-  font-size: var(--t-small);
-  max-width: 78ch
+  font-size: var(--t-copy);
+  max-width: 58ch
 }
 
 .uc-note a {
@@ -3771,7 +3784,7 @@ html[data-theme="light"] .scard[data-svc] { --svc-text: var(--svc-deep) }
 .caps {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-  gap: clamp(.9rem, 2vw, 1.4rem);
+  gap: clamp(1.1rem, 2.2vw, 2rem);
   margin-top: clamp(1.8rem, 4vw, 3rem)
 }
 
@@ -3785,7 +3798,7 @@ html[data-theme="light"] .scard[data-svc] { --svc-text: var(--svc-deep) }
 
 .cap {
   position: relative;
-  padding: clamp(1.3rem, 2.6vw, 2rem);
+  padding: clamp(1.5rem, 2.8vw, 2.4rem);
   border-radius: var(--r);
   background: var(--card);
   box-shadow: inset 0 0 0 1px var(--line);
@@ -3827,8 +3840,9 @@ html[data-theme="light"] .scard[data-svc] { --svc-text: var(--svc-deep) }
 
 .cap p {
   color: var(--muted);
-  font-size: var(--t-small);
-  line-height: 1.6
+  font-size: var(--t-copy);
+  line-height: 1.6;
+  max-width: 58ch
 }
 
 .cap-meta {
@@ -3967,9 +3981,9 @@ html[data-theme="light"] .scard[data-svc] { --svc-text: var(--svc-deep) }
 
 .step p {
   color: var(--muted);
-  font-size: var(--t-small);
+  font-size: var(--t-copy);
   line-height: 1.6;
-  max-width: 68ch
+  max-width: 58ch
 }
 
 .step em {
@@ -4001,9 +4015,17 @@ html[data-theme="light"] .scard[data-svc] { --svc-text: var(--svc-deep) }
 }
 
 .shot figcaption {
+  /* THE PLATE IS FULL WIDTH, THE SENTENCE IS NOT. Under the 3/1 strip on a
+     service page this caption ran 152 characters a line - twice a readable
+     measure. A max-width would shrink the grey plate with it and leave a half
+     bar under a full-width picture, so the cap goes on the padding instead:
+     the percentage resolves against the plate, the ch against this element's
+     own font, and where the plate is narrower than the measure max() falls
+     back to the normal inset. No wrapper element, holds at every width. */
   padding: .9rem 1.1rem;
+  padding-right: max(1.1rem, 100% - 58ch - 1.1rem);
   background: var(--card);
-  font-size: var(--t-small);
+  font-size: var(--t-copy);
   color: var(--muted)
 }
 
@@ -4016,7 +4038,7 @@ html[data-theme="light"] .scard[data-svc] { --svc-text: var(--svc-deep) }
 .rel {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
-  gap: clamp(.7rem, 1.6vw, 1.1rem);
+  gap: clamp(1.1rem, 2.2vw, 2rem);
   margin-top: 1.6rem
 }
 
@@ -4056,7 +4078,7 @@ html[data-theme="light"] .scard[data-svc] { --svc-text: var(--svc-deep) }
 
 .rel-d {
   color: var(--muted);
-  font-size: var(--t-small);
+  font-size: var(--t-copy);
   line-height: 1.5
 }
 
@@ -5231,7 +5253,7 @@ html[data-theme="light"] .scard[data-svc] { --svc-text: var(--svc-deep) }
          paragraph settles onto two. */
       max-width: 44ch;
       color: var(--muted);
-      font-size: var(--t-small);
+      font-size: var(--t-copy);
       line-height: 1.7;
       margin: 1.2rem 0 0
     }
