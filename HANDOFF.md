@@ -1,6 +1,86 @@
-# Uebergabe — Stand 5. September 2026 (Vormittag)
+# Uebergabe — Stand 10. September 2026
 
 `https://mccain-digital.vercel.app/` liefert den Stand von `main`.
+
+> ⚡ **NEUESTES (10.9., PC): die Bildwelle ist zu, die Luft ist drin — und die
+> zwei Browser-Tore laufen wieder.** Vier Commits, **nicht gepusht**.
+>
+> **`a8ec5a8` — ein Tor, das man nicht laufen lassen kann, ist kein Tor.**
+> `agent-browser set viewport` haengt auf diesem PC: keine Ausgabe, kein Exit,
+> kein Fehler. Es hat das jetzt an **zwei verschiedenen Tagen** getan und die
+> komplette Bereinigung ueberlebt — 10 verwaiste Chrome-Prozesse nach
+> `CommandLine` gefiltert und beendet, 7 abgestandene Daemon-Dateien geloescht,
+> frischer Session-Name. Damit waren `sweep` und `accent_audit` unbenutzbar, und
+> jede Welle danach haette auf einem Argument statt auf einer Messung
+> ausgeliefert. Die Orchestrierung liegt jetzt auf `playwright-core`, **die
+> Sonden nicht**: `probe.js` und `accent_audit_probe.js` sind weiterhin der
+> einzige Ort, an dem die Messlogik steht, werden weiterhin von der Platte
+> gelesen und woertlich ausgewertet — gleiche Zahlen, anderer Treiber.
+> `tools/browser.mjs` sucht das Chromium selbst (hoechster `ms-playwright`-Build,
+> je Plattform, `MCD_CHROME` sticht). Die `.sh`-Dateien bleiben als duenne
+> Huellen, weil jede Notiz in HANDOFF und TODO sie so nennt, und installieren
+> `tools/` beim ersten Lauf. **Einmal je Maschine:** `npm --prefix tools install`.
+> Neu: `sweep` **faellt jetzt durch** — Querueberlauf, fehlendes `alt`, ein Knopf
+> ohne Namen oder eine h1-Zahl ungleich 1 wurden vorher gedruckt und bestanden.
+>
+> **`a003742` — die Bildwelle, und der Grund, warum sie hier endet.** index (08)
+> Prozess bekommt das Bild in die leere rechte Haelfte (`.process-grid`, an der
+> Linie des ersten Schritts ausgerichtet, **bewusst nicht sticky**: der Wrap
+> traegt `.fx-out`, und ein `transform` am Vorfahren nimmt einer sticky-Box den
+> Bezug). Die vier Service-Seiten bekommen einen 3/1-Streifen zwischen
+> Use-Case-Gruppe A und B — das hoechste Band der Seite und ihr einziger
+> Engine-Moment zwischen Hero und Proof; auf 390 wieder 16/10.
+> **Der Fotovorrat ist damit aufgebraucht** — alle sechs Fotos in `img/` sind
+> platziert. Jeder weitere Bildplatz heisst entweder ein Foto zweimal zeigen oder
+> die Grafiken aus „Text, der Bild werden will" bauen (Prozess-Zeitleiste,
+> Score-Quittung, Gewichtsbalken, Stack als Markenreihe). **Jede Bildunterschrift
+> sagt „Placeholder", jeder Alt-Text auch** — es sind Stockfotos, und die Seite
+> behauptet nichts anderes. Gleiche Regel wie bei den drei leeren Zitat-Slots.
+>
+> **`353a174` — Welle 2, die Luft (LUFT-1 + LUFT-2).** Die Enge sass innen:
+> `--t-body` wurde in der ganzen Datei **zweimal** benutzt, `--t-small`
+> **42-mal** — jede Karte, jeder Schritt, jede Notiz las 14,24 px (12,8 auf 390)
+> ueber 62–78 Zeichen. Neues `--t-copy: clamp(.95rem, .25vw + .8rem, 1.05rem)`
+> (1440: 16,4 · 1920: 16,8 · 390: 15,2) auf den 14 Fliesstext-Selektoren,
+> `max-width: 58ch` auf Karten- und Notiztext, Innenluft eine Stufe hoch.
+> Gemessen auf vier Seiten: **alle 14 Selektoren 14,24 → 16,40 px**, laengstes
+> Mass **78 → 58 Zeichen**, typisch 67 → 57.
+>
+> **Die Bildunterschrift brauchte eine eigene Antwort.** Unter dem neuen
+> 3/1-Streifen lief sie **152 Zeichen** pro Zeile, und ein `max-width` haette die
+> graue Platte mitgeschrumpft — ein halber Balken unter einem vollbreiten Bild.
+> Der Deckel sitzt deshalb auf dem Polster: `padding-right: max(1.1rem, 100% -
+> 58ch - 1.1rem)`. Das Prozent bezieht sich auf die Platte, das `ch` auf die
+> eigene Schrift der Unterschrift, und wo die Platte schmaler ist als das Mass
+> faellt `max()` auf das normale Polster zurueck. Gemessen: Platte 1325 px,
+> Textspalte 582 px = 58ch, laengste gemalte Zeile 54ch. **Kein Wrapper-Element.**
+>
+> **Die Seite ist dadurch LAENGER geworden, nicht kuerzer:** index +272 px,
+> contact +168, ai-tools +521, websites +398. Der Befund schaetzte „±0 bis
+> −250 px" — das galt fuer den *strukturellen* Teil mit (Baender verschmelzen,
+> Proof auf die Zitat-Slots schrumpfen). Der Teil ist LUFT-4 bis LUFT-8 und offen.
+>
+> **`4dd0f7b` — LUFT-8, und was daran nicht stimmte.** Das Bodenpolster der
+> letzten sticky-Karte ist der Abstand zu einer Karte, die es nicht gibt. Gemessen
+> Inhalt zu Inhalt, services → studio: **252 px** (33 unausgefuellter Rest des
+> Kartenpolsters + 17,6 dieses Polster + 2 × 100,8 die zwei Baender), jetzt 235.
+> **Der Befund nannte 282 px und „wird Normalabstand" — beide Zahlen liessen sich
+> nicht reproduzieren.** Das Loch ist echt, es ist kleiner, und eine Deklaration
+> schliesst es nicht.
+>
+> **ALLE TORE GRUEN** nach jeder Welle: `accent_audit` 6 Seiten × 2 Themes, 0
+> echte Fehler; `sweep` 11 Seiten auf 1280×820 **und** 390×844, keine
+> Seitenfehler, kein Querueberlauf; `check_links` sauber. Im Browser angesehen:
+> Prozessband und Use-Case-Band auf 1440 und 390, hell und dunkel.
+>
+> **NAECHSTE WELLE — und die Entscheidung davor.** Was ohne den Owner geht, ist
+> jetzt duenn: LUFT-4 bis LUFT-7 sind Strukturaenderungen (Baender verschmelzen,
+> Score als Ringe, Marken-Rail zu Studio, Proof auf die Zitat-Slots) und haengen
+> auf der Startseite am Kapitelumbau, der laut Befund die Owner-Entscheidungen
+> braucht. **Die acht offenen Punkte stehen unveraendert im Befund
+> (§Owner-Entscheidungen)** — Gelb auf Papier, Farbe je Service-Seite, Preisspannen
+> oeffentlich, Konsole auf die AI-Seite, Proof als Kapitel, Hero-Koordinaten,
+> Zahlen aus Pixeln, die acht DE-Fragen.
 
 > ⚡ **NEUESTES (5.9., PC): der Design-Befund liegt vor, und die erste Welle daraus ist gebaut.**
 >

@@ -1942,6 +1942,19 @@ html[data-theme="light"] .t-moon {
   transition: box-shadow .45s, transform .6s var(--e-out)
 }
 
+/* THE LAST CARD'S BOTTOM MARGIN IS THE GAP TO A CARD THAT ISN'T THERE. The
+   margin is what sets one sticky card off from the next; after the fourth
+   there is no next, so it lands on top of the band's own 100.8px padding and
+   makes services -> studio the widest seam on the page. Measured content to
+   content: 252px, of which 33 is the unfilled remainder of the card's own
+   padding, 17.6 this margin, and 2 x 100.8 the two bands. Without it: 234.
+   (The design report put this seam at 282 and the fix at "normal spacing" —
+   neither number reproduced; the hole is real, it is just smaller, and one
+   declaration does not close it on its own.) */
+.stack-list .scard:last-child {
+  margin-bottom: 0
+}
+
 /* the card you're pointing at lifts out of the stack and lights its edge */
 .scard:hover,
 .scard:focus-within {

@@ -1,3 +1,31 @@
+# TODO — Stand 10. September 2026
+
+## Welle vom 10.9. (PC) — Bilder, Luft, und die zwei Tore zurueck
+
+| Fund | Was | Messung |
+|---|---|---|
+| Tore | `agent-browser set viewport` haengt auf diesem PC — an zwei Tagen, ueberlebt die volle Bereinigung. `sweep` und `accent_audit` laufen jetzt auf `playwright-core`, die Sonden unveraendert | `accent_audit` 6×2 Themes 0 echte Fehler · `sweep` 11 Seiten auf 1280 **und** 390 sauber |
+| Bilder | Prozessband index + 3/1-Streifen auf den vier Service-Seiten. **Fotovorrat aufgebraucht**, alle 6 platziert | index 7→6 bildlose Baender, Service-Seiten 10→9 |
+| LUFT-1 | `--t-copy` auf 14 Selektoren, Innenluft eine Stufe | alle 14: **14,24 → 16,40 px** |
+| LUFT-2 | `max-width: 58ch`; Bildunterschrift ueber das Polster gedeckelt statt ueber die Breite | laengstes Mass **78 → 58 Zeichen**, typisch 67 → 57; Platte bleibt 1325 px breit, Textspalte 582 = 58ch |
+| LUFT-8 | Bodenpolster der letzten sticky-Karte weg | services→studio **252 → 235 px** |
+
+**Zwei Zahlen des Befunds liessen sich nicht reproduzieren** — beim naechsten Mal vor dem Bauen
+nachmessen, nicht die Tabelle uebernehmen:
+
+- LUFT-8: der Befund nannte den Sitz services→studio mit **282 px** und den Fix mit „wird
+  Normalabstand". Gemessen waren es **252**, und die eine Deklaration bringt 235 — die anderen
+  Naehte liegen bei 152–189. Das Loch ist echt und kleiner, und es schliesst sich erst mit dem
+  strukturellen Teil.
+- Die Hoehen-Schaetzung „±0 bis −250 px" gilt nur mit dem strukturellen Teil. Nur LUFT-1/2/8
+  gebaut heisst: index **+272 px**, contact +168, ai-tools +521, websites +398.
+
+**Damit ist die Arbeit ohne Owner-Entscheid duenn geworden.** LUFT-4 bis LUFT-7 sind
+Strukturaenderungen und haengen auf der Startseite am Kapitelumbau (Welle 5), der laut Befund die
+Entscheidungen aus §Owner-Entscheidungen braucht. Die acht Punkte stehen unveraendert.
+
+---
+
 # TODO — Stand 4. September 2026 (abends)
 
 Abgeleitet aus dem Award-Audit vom 2.9. (`audit/2026-09-02-findings.json`, 68 Funde) plus den
