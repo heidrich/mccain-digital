@@ -47,14 +47,12 @@
   wrap.innerHTML = `
     <div class="cm-scrim" data-cm-close></div>
     <div class="cm-panel" role="dialog" aria-modal="true" aria-label="Menu and search">
-      <div class="cm-head">
-        <span class="cm-brand">mccain <i>digital</i></span>
-        <button class="cm-x" type="button" data-cm-close aria-label="Close menu">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M6 6l12 12M18 6L6 18"/>
-          </svg>
-        </button>
-      </div>
+      <!-- ONE BAR, NOT TWO. The wordmark used to sit in a 64px band of its
+           own above a 67px search band - 131px of chrome before the first
+           result, on a panel that was already too tall. The panel keeps the
+           accent hairline along its top edge, which is the element that was
+           built to say "this is ours"; the wordmark itself is forty pixels
+           above this, in the nav that opened it. -->
       <div class="cm-search">
         <span class="cm-prompt" aria-hidden="true">&rsaquo;</span>
         <input id="cmInput" type="text" role="combobox" aria-expanded="true" aria-controls="cmList"
@@ -62,6 +60,11 @@
                aria-label="Search the site, or ask a question"
                placeholder="Type to jump — or just ask us something">
         <span class="cm-count" id="cmCount" aria-live="polite"></span>
+        <button class="cm-x" type="button" data-cm-close aria-label="Close menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18"/>
+          </svg>
+        </button>
       </div>
       <div class="cm-body">
         <div class="cm-list" id="cmList" role="listbox" aria-label="Destinations"></div>

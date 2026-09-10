@@ -169,6 +169,13 @@ html[data-svc="software"] {
      card and note copy - 16.4px at 1440, 16.8 at 1920, 15.2 at 390. --t-small
      keeps what it was made for: labels, pills, meta and captions. */
   --t-copy: clamp(.95rem, .25vw + .8rem, 1.05rem);
+  /* UI SIZE. Not a third body size - a size for chrome that is read at a
+     glance and scanned, not read line by line: the command palette's rows,
+     its input and its preview. The palette used to inherit --t-body, so its
+     rows were set at 18.88px and stood 52px tall, and the whole panel came to
+     1040x828 on a 900px viewport. That is a page, not a menu. 15.2px at 1440,
+     13.8 on a phone. */
+  --t-ui: clamp(.86rem, .16vw + .82rem, .95rem);
   --t-label: clamp(.66rem, .14vw + .62rem, .76rem);
 }
 
@@ -3210,7 +3217,12 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
   z-index: 1000;
   display: grid;
   place-items: start center;
-  padding: clamp(.75rem, 4vh, 4rem) clamp(.75rem, 3vw, 2rem)
+  /* Down from 4vh. The panel used to be 828px tall and needed the whole
+     screen; at 620 it was left pinned 36px under the top edge, which reads as
+     "stuck to the ceiling" rather than placed. A tenth of the viewport puts it
+     in the upper third with room underneath, and 10 + 76 (the panel's own cap)
+     + 6 stays inside 100vh on a short screen. */
+  padding: clamp(1rem, 10vh, 6rem) clamp(.75rem, 3vw, 2rem) clamp(1rem, 6vh, 3rem)
 }
 
 .cm[hidden] {
@@ -3230,10 +3242,15 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
   opacity: 1
 }
 
+/* A PALETTE IS A TOOL, NOT A PAGE. Measured before: 1040x828 on a 900px
+   viewport - 92% of the screen - with 175px of chrome above the first result.
+   Now: one bar of chrome, a panel that stops at 620px, and everything inside
+   set in --t-ui instead of inheriting the 18.88px body size. */
 .cm-panel {
   position: relative;
-  width: min(100%, 1040px);
-  max-height: calc(100dvh - clamp(1.5rem, 8vh, 8rem));
+  width: min(100%, 880px);
+  max-height: min(76dvh, 620px);
+  font-size: var(--t-ui);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -3262,29 +3279,10 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
   background: linear-gradient(90deg, var(--acc), transparent 65%)
 }
 
-.cm-head {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: .9rem 1rem .9rem 1.2rem;
-  border-bottom: 1px solid var(--line-2)
-}
-
-.cm-brand {
-  font-weight: 800;
-  font-size: 1rem;
-  letter-spacing: -.03em
-}
-
-.cm-brand i {
-  font-style: normal;
-  color: var(--acc-text)
-}
-
 .cm-x {
-  margin-left: auto;
-  width: 34px;
-  height: 34px;
+  flex: none;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -3306,28 +3304,43 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
 .cm-search {
   display: flex;
   align-items: center;
-  gap: .7rem;
-  padding: .5rem 1.2rem;
+  gap: .65rem;
+  padding: .45rem .55rem .45rem 1rem;
   border-bottom: 1px solid var(--line-2)
 }
 
 .cm-prompt {
   color: var(--acc-text);
   font-family: var(--mono);
-  font-size: 1.3rem;
+  font-size: 1.05rem;
   line-height: 1
 }
 
 .cm-search input {
   flex: 1;
   min-width: 0;
-  padding: .9rem 0;
+  padding: .55rem 0;
   border: 0;
   background: none;
   color: var(--fg);
   font-family: var(--mono);
-  font-size: clamp(.95rem, 1.5vw, 1.15rem);
+  font-size: var(--t-ui);
   letter-spacing: -.01em
+}
+
+/* 16px ON TOUCH, OR IOS ZOOMS THE PAGE ON FOCUS. The rule that does this for
+   every other field on the site is `input[type="text"] { font-size: max(16px,
+   ...) }`, and it sits five hundred lines above this one. Same specificity as
+   `.cm-search input`, so source order decides and the palette's own rule wins
+   — measured at 390px before this block existed: every other field 16px, this
+   one 13.76. Restated here, after the rule it has to beat. Same trap as the
+   footer columns and the reduced-motion stop: in a stylesheet sorted by topic
+   rather than by cascade, an override has to stand next to or behind what it
+   overrides. */
+@media (pointer: coarse), (max-width: 860px) {
+  .cm-search input {
+    font-size: max(16px, var(--t-ui))
+  }
 }
 
 .cm-search input:focus {
@@ -3350,19 +3363,28 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
 
 .cm-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, .9fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, .78fr);
   min-height: 0;
   flex: 1
 }
 
+/* THE CUT AT THE BOTTOM READS AS DAMAGE, NOT AS SCROLL. The list ended flush
+   against the footer and sliced whatever row happened to be there through the
+   middle of its letters. An 18px fade says "there is more" instead; the 26px
+   of bottom padding is what keeps that honest, because once the list IS
+   scrolled to the end the fade sits over the padding and the last row is
+   fully opaque. Fade smaller than the padding, always - the other way round
+   dims a row the visitor has already reached. */
 .cm-list {
   overflow-y: auto;
-  padding: .7rem;
-  border-right: 1px solid var(--line-2)
+  padding: .45rem .45rem 1.6rem;
+  border-right: 1px solid var(--line-2);
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent)
 }
 
 .cm-group {
-  margin: .9rem .6rem .35rem;
+  margin: .75rem .55rem .25rem;
   font-family: var(--mono);
   font-size: var(--t-label);
   letter-spacing: .16em;
@@ -3374,15 +3396,20 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
   margin-top: .2rem
 }
 
+/* 34px, not 52. The row inherited the body size and carried .7rem of padding
+   on top of it, so sixteen destinations needed 830px of screen. A palette row
+   is scanned, not read: --t-ui, a tighter box, and the numeral column narrowed
+   to what a two-digit label actually needs. */
 .cm-row {
   display: grid;
-  grid-template-columns: 2.2rem minmax(0, 1fr) 1.4rem;
+  grid-template-columns: 1.75rem minmax(0, 1fr) 1.1rem;
   align-items: center;
-  gap: .6rem;
-  padding: .7rem .6rem;
-  border-radius: 10px;
+  gap: .55rem;
+  padding: .42rem .55rem;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
+  line-height: 1.35;
   letter-spacing: -.015em;
   color: var(--muted);
   transition: background .18s, color .18s
@@ -3436,7 +3463,7 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
 
 .cm-prev {
   overflow-y: auto;
-  padding: 1.3rem 1.4rem;
+  padding: 1rem 1.1rem;
   background: var(--bg-2)
 }
 
@@ -3446,15 +3473,18 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
   letter-spacing: .16em;
   text-transform: uppercase;
   color: var(--acc-text);
-  margin-bottom: .7rem
+  margin-bottom: .5rem
 }
 
+/* 19px, not 32. This is the title of the row you are pointing at, not a
+   page headline - at clamp(1.4rem, 2.4vw, 2rem) it was bigger than every h3
+   on the site and set the scale for a pane that is mostly empty. */
 .cm-p-h {
-  font-size: clamp(1.4rem, 2.4vw, 2rem);
+  font-size: 1.2rem;
   font-weight: 800;
-  letter-spacing: -.035em;
-  line-height: 1.05;
-  margin-bottom: .8rem;
+  letter-spacing: -.03em;
+  line-height: 1.15;
+  margin-bottom: .6rem;
   /* the decode scramble changes width constantly — reserve the line so the
      pane cannot jitter while it resolves */
   min-height: 1.1em
@@ -3517,9 +3547,9 @@ body:has(.stage, .hero--stage) .nav:not(.stuck) .nav-where {
 
 .cm-foot {
   display: flex;
-  gap: 1.2rem;
+  gap: 1.1rem;
   flex-wrap: wrap;
-  padding: .7rem 1.2rem;
+  padding: .5rem 1rem;
   border-top: 1px solid var(--line-2);
   font-size: var(--t-label);
   font-family: var(--mono);
