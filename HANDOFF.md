@@ -4,8 +4,19 @@
 
 ## ▶ ZUERST LESEN — Stand am Ende des 10.9.
 
-**`main` steht 21 Commits vor `origin/main` und ist NICHT gepusht.** Arbeitsbaum
-sauber. Die Entscheidung zu pushen liegt beim Owner.
+**GEPUSHT am 10.9. spaet — `main` und `origin/main` stehen gleich auf `4800a79`.**
+Arbeitsbaum sauber. Damit sind die 22 Commits des Tages live.
+
+**Gegen die veroeffentlichte Seite nachgemessen, nicht nur lokal:**
+`https://mccain-digital.vercel.app` liefert `--t-h2: clamp(1.9rem, 3.06vw, 2.9rem)`
+und `--t-display: clamp(2.6rem, min(5.14vw, 10vh), 5.5rem)`; index misst dort
+1440 → h1 74,0 / h2 44,1 / h3 33,0 und 1920×1080 → h1 88 / h2 46,4 — deckungsgleich
+mit lokal. `sweep` und `accent_audit` mit `MCD_BASE=https://mccain-digital.vercel.app`
+ebenfalls sauber. Beide Tore koennen so gegen live laufen, das ist der schnellste
+Weg, einen Deploy zu pruefen.
+
+**Squirrelscan lief NICHT** — `squirrel` ist auf diesem PC nicht auf dem PATH. Die
+globale Regel „Squirrelscan nach Deploy" ist damit fuer diesen Deploy offen.
 
 ### Zuletzt gebaut: der Anzeigengrad, dritte Runde
 
@@ -57,6 +68,12 @@ bash tools/sweep.sh 1280 820        # 11 Seiten: Fehler, Ueberlauf, A11y-Basics
 bash tools/sweep.sh 390 844         #   ... und auf dem Telefon
 bash tools/accent_audit.sh          # jeder Akzent-Textknoten gegen seinen echten Grund
 python tools/check_links.py         # Links, Anker, doppelte IDs
+
+node tools/type_scale.mjs 1440 1920x1080 390    # der GEMALTE Schriftgrad je Seite
+node tools/shots.mjs <ordner> 1440 index.html   # Bilder zum Draufschauen
+
+# Beide Browser-Tore laufen auch gegen live — der schnellste Deploy-Test:
+MCD_BASE=https://mccain-digital.vercel.app node tools/sweep.mjs
 ```
 
 **Was heute gebaut wurde** steht in den drei ⚡-Bloecken darunter: Bildwelle,

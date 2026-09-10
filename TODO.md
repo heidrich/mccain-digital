@@ -31,7 +31,10 @@ Rueckschritt — die Grenze ist `74ch`, und `ch` skaliert mit der Schrift, also
 sind die Zeichen pro Zeile groessenunabhaengig; die Zeilen sind jetzt nur
 physisch kuerzer. Wenn das runter soll, ist `74ch → 64ch` der Handgriff (XS).
 
-**`main` steht 21 vor `origin/main`, nicht gepusht.**
+**GEPUSHT** am 10.9. spaet auf `4800a79` — `main` und `origin/main` stehen gleich,
+Arbeitsbaum sauber. Live gegengemessen (siehe HANDOFF, ZUERST-LESEN-Block).
+**Offen aus der globalen Regel:** Squirrelscan nach Deploy — `squirrel` ist auf
+diesem PC nicht auf dem PATH, der Lauf fehlt also fuer diesen Deploy.
 
 ---
 
