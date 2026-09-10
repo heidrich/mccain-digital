@@ -740,20 +740,59 @@
        is behind us before the first frame. The hidden state is added
        here rather than in the stylesheet, so a visitor whose JavaScript
        never arrives gets the finished headline instead of an empty
-       header. */
+       header.
+
+       AN INTRO CAN ONLY BE AN INTRO. This file is the third deferred script
+       on the page and waits on a 140KB engine, so on a cold load it first
+       runs about a second in — long after the browser has painted the
+       finished hero. Adding `.hs` there did exactly what it says: it hid the
+       breadcrumb, the eyebrow, the lead, the buttons and the facts the
+       visitor was already reading, and faded them back in over another
+       680ms. Measured on services/websites.html: crumb 1.00 -> 0.09 and
+       eyebrow 1.00 -> 0.00 at the moment the class landed. That is not a
+       reveal, it is a flicker, and it is what "die alten hero daten" was.
+
+       So the sequence is now conditional on the two facts that decide
+       whether it CAN still be one:
+
+         painted  - the first contentful paint is already on the visitor's
+                    screen, so hiding anything now is a flicker, not an intro.
+         late     - this script itself is running past the start of the band
+                    the sequence was tuned for (800-1600ms). Measured on a
+                    cold load of a service page: first paint at ~1130ms and
+                    this file executing at ~1100ms, because it is the third
+                    deferred script and waits on a 140KB engine. Running the
+                    full choreography from there finishes the hero at about
+                    2400ms - and until then the visitor looks at the SCAFFOLD:
+                    the two guide rails, the four corner marks and the three
+                    rules of .hero-side, with the eyebrow, the lead, the
+                    buttons and the facts all still held at opacity 0. That is
+                    what "im hero werden immer noch so linien geladen" is.
+
+       Either one means the content is overdue, and overdue content is shown,
+       not choreographed. Warm loads keep the set piece: measured there, first
+       paint lands at ~105ms and this runs before it.
+
+       The words still get split either way — the scroll reveals and the pixel
+       engine both walk that markup. */
     const stage = d.querySelector(".hero--stage");
     if (stage) {
+      const painted = performance.getEntriesByType("paint")
+        .some((e) => e.name === "first-contentful-paint");
+      const late = performance.now() > 600;
       const h1 = stage.querySelector(".hero-h");
       if (h1) {
         h1.classList.remove("wr");
         splitWords(h1);
-        h1.classList.add("hs");
       }
-      stage.classList.add("hs");
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        if (h1) h1.classList.add("go");
-        stage.classList.add("go");
-      }));
+      if (!painted && !late) {
+        if (h1) h1.classList.add("hs");
+        stage.classList.add("hs");
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          if (h1) h1.classList.add("go");
+          stage.classList.add("go");
+        }));
+      }
     }
   }
 
