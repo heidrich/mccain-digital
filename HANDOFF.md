@@ -31,6 +31,72 @@ Die Umstellung selbst ist eine Owner-Entscheidung und steht aus.
 
 ---
 
+## ▶ WO ES WEITERGEHT — Polishing (Owner-Ansage 11.9., nach dem Compact)
+
+Der Bau steht. Was aussteht, sind **Inhalts-Entscheidungen und Feinschliff**,
+nicht Technik. Reihenfolge nach Dringlichkeit:
+
+### 1. Die „4×100 Lighthouse"-Aussage ist falsch — DRINGEND
+
+Sie steht als Projektkarten-Aussage über die **eigene** Seite auf der Startseite.
+Gemessen (Lighthouse Desktop, lokale Produktionsheader): **Startseite 68**,
+gebunden an 1.493 ms Skriptauswertung für ~2.140 React-Elemente. Die Zahl stammt
+vom v3-Build.
+
+Das ist eine unzutreffende Tatsachenbehauptung auf einer Werbeseite, unabhängig
+vom Livegang. Zu tun: Stelle in `content.json` bzw. im Komponenten-Skript
+suchen, dem Owner zwei bis drei ehrliche Formulierungen vorschlagen (die
+**Unterseiten** liegen tatsächlich bei 100/100/100 — das ist eine wahre und
+starke Aussage), die gewählte einbauen über `tools/patch_export.py`.
+
+### 2. Die Logo-Reihe im Hero
+
+Deutsche Bank, Apple, Microsoft, Blizzard, Deutsches Museum, Ravensburger,
+Travian, AOK — direkt über einer Sektion, die „Was Kunden sagen – **sobald sie
+es dürfen**" heißt. Die `readme.md` des Design-Systems sagt selbst, Beispiele
+seien „illustrativ, nie Kundenreferenzen". Sind das keine freigegebenen Kunden,
+ist das in DE ein Abmahn-Risiko. **Owner-Entscheidung, kein Code.**
+
+### 3. „Tech-Notizen" zeigt auf `#`
+
+Toter Platzhalter in der Fußzeile. Entweder den Eintrag entfernen (eine Zeile in
+`patch_export.py`) oder die Seite bauen. Owner wählt.
+
+### 4. Kam die Prüfnachricht an?
+
+Im Postfach `info@mccain-digital.com` sollte „[AUTOMATISCHE PRUEFUNG]
+Kontaktformular mccain-digital.com" liegen. Die API meldete `success: true`.
+**Kommt sie nicht an, stimmt etwas an der Web3Forms-Zustellung** — dann ist das
+der nächste Bug, nicht Polishing.
+
+### 5. Noch nicht gebaut
+
+Eine **About-Seite** und **Projektseiten — die erste für whatever-recall**, dessen
+Inhalt und URL hierher geholt werden sollen. Beides mit `tools/pagekit.py` +
+`tools/build_pages.py`, genau wie die Leistungsseiten. Für recall muss der Owner
+sagen, welcher Inhalt von `whatever-recall.com` herüberkommt.
+
+### 6. Bewusst liegen gelassen (Fremd-Markup, Risiko)
+
+- Der Startseite fehlt ein `<main>`-Landmark → A11y 99 statt 100. `role="main"`
+  auf `#dc-root` wäre **falsch**, dort stehen Kopf- und Fußzeile mit drin.
+- Der Brand Guide liegt bei A11y 91: Bilder ohne `width`/`height`, Kontraste,
+  Links im Fließtext ohne nicht-farbliche Unterscheidung.
+
+Wenn das gemacht wird, gehört es in `tools/patch_export.py`, sonst verschluckt
+es der nächste Export.
+
+### Zustände, die eine neue Sitzung braucht
+
+- `python prodserve.py 8898 --dev` — **muss laufen**, der Build rendert darüber
+- `python prodserve.py 8897` — nur zum **Messen** (Lighthouse), Produktionsheader
+- Arbeitsbaum sauber, `main` = `origin/main`
+- Pflicht vor jedem Push: `node tools/verify_site.mjs`
+- Und: `node tools/domain_check.mjs` — fällt durch, bis die Domain umgehängt ist.
+  Das ist gewollt und kein Defekt.
+
+---
+
 ## ▶ ZUERST LESEN — Stand nach der Nacht zum 11.9.
 
 **Der Relaunch steht am Repo-Root**, gebaut aus dem Claude-Design-Export in
