@@ -14,7 +14,16 @@ import { chromium } from "playwright-core";
 import { findChrome } from "./browser.mjs";
 
 const BASE = (process.argv[2] || "http://127.0.0.1:8898").replace(/\/$/, "");
-const PAGES = process.argv[3] ? [process.argv[3]] : ["/index.html", "/brand-guide.html"];
+
+/* Paths are accepted with or without a leading slash, and that is not tidiness:
+ * Git Bash on Windows rewrites a bare "/kontakt.html" argument into
+ * "C:/Program Files/Git/kontakt.html" before node ever sees it, and the tool
+ * then navigates to a nonsense URL. Either write it without the slash, or set
+ * MSYS_NO_PATHCONV=1. */
+const arg = process.argv[3];
+const PAGES = arg
+  ? [arg.startsWith("/") ? arg : "/" + arg]
+  : ["/index.html", "/brand-guide.html"];
 
 const executablePath = findChrome();
 const browser = await chromium.launch({ executablePath, headless: true });
