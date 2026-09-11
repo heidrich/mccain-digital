@@ -265,8 +265,11 @@ def main():
     preloads = "\n".join(
         f'<link rel="preload" href="../fonts/{f}" as="font" type="font/woff2" crossorigin>'
         for f in sorted(os.listdir(fonts))
-        if f.endswith(".woff2") and "-latin-" in f and "latin-ext" not in f
+        if f.endswith("-normal-latin.woff2")
     )
+    if preloads.count("<link") != 2:
+        raise SystemExit("expected 2 upright latin faces in fonts/ - "
+                         "run tools/vendor_assets.py")
 
     os.makedirs(DST, exist_ok=True)
     for src, title, kind, desc, ld in PAGES:

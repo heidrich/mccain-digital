@@ -219,9 +219,17 @@ if (html.includes("{{")) throw new Error("prerender: unresolved {{ }} in the sna
 
 /* ------------------------------------------------------------- seo head */
 
+/* Preload only the two faces the page paints in immediately: upright latin.
+ * latin-ext and the italic are unicode-range / style gated and download only if
+ * something actually needs them - preloading those would spend 40 KB of the
+ * critical path on bytes most visits never use. */
 const fontFiles = fs
   .readdirSync(path.join(SITE, "fonts"))
-  .filter((f) => f.endsWith(".woff2") && f.includes("-latin-") && !f.includes("latin-ext"));
+  .filter((f) => f.endsWith("-normal-latin.woff2"));
+if (fontFiles.length !== 2) {
+  throw new Error(`prerender: expected 2 upright latin faces, found ${fontFiles.length} ` +
+    `- run tools/vendor_assets.py`);
+}
 
 const graph = [
   {

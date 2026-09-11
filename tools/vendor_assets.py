@@ -94,15 +94,30 @@ def main():
             sys.exit(f"ABORT: no gstatic url in a {subset} block")
         url = m.group(1)
         if url not in seen:
-            name = url.rsplit("/", 1)[-1].split("?")[0]
-            fam = "instrument-sans" if "Instrument" in block or "instrument" in block.lower() else "font"
+            # Name the file after what it IS - family, style, subset - and never
+            # after Google's filename. Those differ between the roman and the
+            # italic face only by the CASE of one letter (pxitypc9vs against
+            # pxiTypc9vs), so on Windows the second download silently overwrote
+            # the first and the roman face was served as italic; on Linux the
+            # other name then 404ed. It survived local testing precisely because
+            # NTFS is case-insensitive and Vercel's filesystem is not.
             fam = re.search(r"font-family:\s*'([^']+)'", block)
             fam = fam.group(1).lower().replace(" ", "-") if fam else "font"
-            local = f"fonts/{fam}-{subset}-{name[:10]}.woff2"
+            sty = re.search(r"font-style:\s*(\w+)", block)
+            sty = sty.group(1).lower() if sty else "normal"
+            local = f"fonts/{fam}-{sty}-{subset}.woff2"
+            if local in seen.values():
+                sys.exit(f"ABORT: two different urls both want {local}")
             write(local, get(url, binary=True))
             seen[url] = local
         out.append(f"/* {subset} */\n" + block.replace(url, "../" + seen[url]).strip())
         kept += 1
+
+    # The bug above was invisible because nothing counted. One file per distinct
+    # url, or something collided again.
+    on_disk = {os.path.basename(p) for p in seen.values()}
+    if len(on_disk) != len(seen):
+        sys.exit(f"ABORT: {len(seen)} urls collapsed onto {len(on_disk)} filenames")
 
     if not kept:
         sys.exit("ABORT: no font faces survived the subset filter")
