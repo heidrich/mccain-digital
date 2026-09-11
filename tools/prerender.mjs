@@ -1,25 +1,41 @@
-/* Build the production index.html from the design component.
+/* Build the production index.html (and brand-guide.html) from the design
+ * component.
  *
- *   node tools/prerender.mjs            (dev server must be on :8898)
+ *   python prodserve.py 8898 --dev      # must be running
+ *   node tools/prerender.mjs
  *
  * WHY THIS EXISTS
- * The page shipped by Claude Design is a client-rendered component: 838
- * template placeholders, and every word of copy lives in content.json. Measured
- * on the export, a crawler that does not run JavaScript reads 145 words of
- * decoration - no headline, no title, no prose. Rendered, the same page carries
- * 1,893. Google executes JS and would eventually see the second number; social
- * previews, Bing's non-rendering pass and every AI crawler see the first.
+ * The page Claude Design exports is a client-rendered component: 838 template
+ * placeholders, every word of copy in content.json. Measured on the export, a
+ * crawler that does not run JavaScript reads 145 words of decoration - no
+ * headline, no title, no prose. Rendered, the same page carries 1,886.
  *
- * So this renders the page once, in a real browser, and writes the settled DOM
- * out as static HTML. support.js still ships and still takes over on load, so
- * the modals, the DE/EN switch, the console and the pixel stream keep working -
- * the snapshot is what everything else reads, and what paints first.
+ * HOW IT WORKS - and why it is not just "save the rendered DOM"
+ * That was the first attempt and it shipped a page that looked perfect and was
+ * completely dead: no mega menu, no modals, no pixel stream. support.js mounts
+ * like this:
  *
- * It also removes the two third-party origins the export depends on. React
- * comes from vendor/ via support.js's own window.__resources hook (no patching
- * of support.js needed, and the SRI hashes still match because the bytes are
- * the same), and the fonts come from fonts/. See tools/vendor_assets.py for the
- * legal reason that is not optional here.
+ *     const dc = doc.querySelector("x-dc");
+ *     if (!dc) return null;              // <- a settled snapshot dies here
+ *     dc.replaceWith(hostEl);            // x-dc becomes <div id="dc-root">
+ *
+ * A snapshot of the settled DOM is taken AFTER that replacement, so <x-dc> is
+ * gone from it and on the next load support.js finds nothing to render. React
+ * loads, PixelFX loads, no error is printed, and every button is inert.
+ *
+ * So the built page carries BOTH:
+ *   <div id="dc-prerender">  the settled markup - what a crawler reads and what
+ *                            paints first
+ *   <x-dc>                   the original template, untouched, hidden - what
+ *                            support.js mounts on
+ * and a small watcher removes the prerendered copy the moment React has put
+ * something in its own #dc-root. If React never arrives, the readable copy
+ * simply stays.
+ *
+ * It also removes the two third-party origins the export depends on: React via
+ * support.js's own window.__resources hook (no patching, and the SRI hashes
+ * still match because the bytes are identical), fonts from fonts/. See
+ * tools/vendor_assets.py for the legal reason that is not optional here.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -28,9 +44,12 @@ import { launch, open, settle } from "./browser.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SITE = path.dirname(HERE);
-const SRC = "http://127.0.0.1:8898/mccain-design-system/reference/index.html";
-const BRAND_SRC =
-  "http://127.0.0.1:8898/mccain-design-system/reference/McCain%20Digital%20Brand%20Guide.dc.html";
+const BASE = "http://127.0.0.1:8898";
+const EXPORT_DIR = path.join(SITE, "mccain-design-system", "reference");
+const SRC_URL = `${BASE}/mccain-design-system/reference/index.html`;
+const SRC_FILE = path.join(EXPORT_DIR, "index.html");
+const BRAND_URL = `${BASE}/mccain-design-system/reference/McCain%20Digital%20Brand%20Guide.dc.html`;
+const BRAND_FILE = path.join(EXPORT_DIR, "McCain Digital Brand Guide.dc.html");
 const ORIGIN = "https://mccain-digital.com";
 
 const TITLE = "McCain Digital — KI-Tools, Web-Apps und Websites aus Bayern";
@@ -38,20 +57,16 @@ const DESC =
   "Digital-Produktstudio in Bayern: KI-Werkzeuge auf Ihren eigenen Daten, " +
   "Web-Apps, Websites und Unternehmenssoftware. Antwort in 24 Stunden, " +
   "Festpreis in 48.";
-const OG_ALT =
-  "mccain digital — das Pixelstrom-Zeichen auf dunklem Grund";
+const OG_ALT = "mccain digital — das Pixelstrom-Zeichen auf dunklem Grund";
 
-/* The hero headline ROTATES through heroWords.de, so whichever variant happens
- * to be on screen when the snapshot is taken becomes the indexed h1 - a
- * different one on every build. Wait for the first line instead. If the copy
- * ever changes this throws rather than quietly indexing a different promise,
- * which is the right failure: which sentence Google shows is a decision, not a
- * race. Source: heroWords.de[0] in the design component. */
+/* The hero headline ROTATES through heroWords.de, so whichever variant is on
+ * screen at snapshot time becomes the indexed h1 - a different promise on every
+ * build. Wait for the first line. If the copy changes this throws rather than
+ * quietly indexing something else: which sentence Google shows is a decision. */
 const HERO_H1 = "KI-Tools, die auf Ihren Daten laufen.";
 
-/* Everything the built page loads at runtime, copied from the export so the
- * site root is self-contained and nothing reaches into mccain-design-system/
- * (which is .vercelignore'd and must not be part of a deploy). */
+/* Copied so the site root is self-contained and a deploy never has to reach
+ * into mccain-design-system/, which is .vercelignore'd. */
 const ASSETS = {
   "mccain-design-system/reference/support.js": "support.js",
   "mccain-design-system/reference/content.json": "content.json",
@@ -61,9 +76,6 @@ const ASSETS = {
   "mccain-design-system/brand": "brand",
 };
 
-/* The two CDN urls support.js asks for, mapped onto the copies in vendor/.
- * cdnScriptFor() consults window.__resources before falling back to the CDN,
- * so this is the supported override rather than a patch of a vendored file. */
 const RESOURCE_MAP = {
   "https://unpkg.com/react@18.3.1/umd/react.production.min.js":
     "vendor/react-18.3.1.production.min.js",
@@ -74,15 +86,75 @@ const RESOURCE_MAP = {
 const esc = (s) =>
   String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-/* ---------------------------------------------------------------- render */
+/* Every rewrite the export needs to become a page of this site. Applied to the
+ * template, the prerendered markup and the head alike - the same strings occur
+ * in all three, and a rewrite that covers only one of them is the bug that
+ * re-introduces a CDN through the back door. */
+function localise(s) {
+  return s
+    .replace(/\.\.\/brand\//g, "brand/")
+    .replace(/(["'])\.\/support\.js\1/g, "$1support.js$1")
+    .replace(/\s*<link[^>]+fonts\.(?:googleapis|gstatic)\.com[^>]*>/g, "")
+    .replace(/\s*<script[^>]+unpkg\.com[^>]*><\/script>/g, "")
+    .replace(new RegExp(`(href=")${ORIGIN}/`, "g"), "$1/")
+    .replace(
+      /href="McCain%20Digital%20Brand%20Guide\.dc\.html"|href="McCain Digital Brand Guide\.dc\.html"/g,
+      'href="/brand-guide.html"'
+    );
+}
+
+/* Looks for a third-party origin being LOADED - src=, href=, or a CSS import -
+ * not merely mentioned. The bare-substring version of this check failed the
+ * build on window.__resources, whose keys are the unpkg URLs precisely so that
+ * they are never fetched. A guard that cannot tell a lookup key from a network
+ * request costs more than it catches. */
+const THIRD_PARTY = /(?:src|href)\s*=\s*["']https?:\/\/(?:unpkg\.com|fonts\.googleapis\.com|fonts\.gstatic\.com)|@import[^;]*(?:fonts\.googleapis|unpkg)/i;
+
+function assertClean(s, what) {
+  const m = THIRD_PARTY.exec(s);
+  if (m) {
+    const at = Math.max(0, m.index - 60);
+    throw new Error(
+      `prerender: a third-party origin is still being loaded in ${what}:\n    ` +
+        s.slice(at, m.index + 120).replace(/\s+/g, " ")
+    );
+  }
+}
+
+const fontFiles = fs
+  .readdirSync(path.join(SITE, "fonts"))
+  .filter((f) => f.endsWith("-normal-latin.woff2"));
+if (fontFiles.length !== 2) {
+  throw new Error(
+    `prerender: expected 2 upright latin faces, found ${fontFiles.length} - run tools/vendor_assets.py`
+  );
+}
+const preloads = fontFiles
+  .map((f) => `<link rel="preload" href="fonts/${f}" as="font" type="font/woff2" crossorigin>`)
+  .join("\n");
+
+/* The raw template must never be seen. support.js hides it itself, but only
+ * once it runs - before that the browser would paint a screenful of {{ }}. */
+const HIDE_TEMPLATE = "<style>x-dc{display:none!important}</style>";
+
+/* Hands the page over from the prerendered copy to the live render. Deliberately
+ * one-way and fail-safe: if React never mounts, the readable copy stays. */
+const SWAP = `<script>(function(){var p=document.getElementById("dc-prerender");if(!p)return;
+function ready(){var r=document.getElementById("dc-root");return !!(r&&r.firstElementChild);}
+function go(){if(!ready())return false;p.remove();return true;}
+if(go())return;var mo=new MutationObserver(function(){if(go())mo.disconnect();});
+mo.observe(document.documentElement,{childList:true,subtree:true});
+setTimeout(function(){mo.disconnect();},20000);})();</script>`;
+
+/* ------------------------------------------------------------------ render */
 
 const { browser, context } = await launch(1440, 900);
-const page = await open(context, SRC);
+const page = await open(context, SRC_URL);
 await page.addStyleTag({ content: "html{scroll-behavior:auto!important}" });
 await settle(page);
 
-/* Sections reveal on scroll. Anything never scrolled past is snapshotted in
- * its pre-reveal state, so walk the whole page before taking the picture. */
+/* Sections reveal on scroll; anything never scrolled past is snapshotted in its
+ * pre-reveal state. */
 await page.evaluate(async () => {
   const step = window.innerHeight;
   for (let y = 0; y < document.body.scrollHeight; y += step) {
@@ -93,11 +165,8 @@ await page.evaluate(async () => {
 });
 await page.waitForTimeout(1400);
 
-/* Land on the canonical hero line before taking the picture. The grab happens
- * in the same evaluate as the check, and the result is verified afterwards,
- * because the rotation keeps running between two separate round-trips. */
-let html = null;
-for (let attempt = 1; attempt <= 6 && html === null; attempt++) {
+let snap = null;
+for (let attempt = 1; attempt <= 6 && snap === null; attempt++) {
   await page
     .waitForFunction(
       (want) => (document.querySelector("h1")?.innerText || "").trim() === want,
@@ -105,131 +174,70 @@ for (let attempt = 1; attempt <= 6 && html === null; attempt++) {
       { timeout: 20000 }
     )
     .catch(() => {});
-  const got = await page.evaluate((want) => {
+  snap = await page.evaluate((want) => {
     const h1 = (document.querySelector("h1")?.innerText || "").trim();
-    return h1 === want ? document.documentElement.outerHTML : null;
+    if (h1 !== want) return null;
+    const root = document.getElementById("dc-root");
+    if (!root) return { missingRoot: true };
+    return {
+      head: document.head.innerHTML,
+      body: root.innerHTML,
+      words: (document.body.innerText || "").trim().split(/\s+/).length,
+    };
   }, HERO_H1);
-  if (got) html = got;
-  else console.log(`  hero rotated away between check and grab, retry ${attempt}`);
+  if (snap === null) console.log(`  hero rotated away between check and grab, retry ${attempt}`);
 }
-if (html === null) {
+if (!snap) {
   throw new Error(
-    `prerender: never caught the hero on "${HERO_H1}". ` +
-      `Has heroWords.de[0] changed? Update HERO_H1 deliberately.`
+    `prerender: never caught the hero on "${HERO_H1}". Has heroWords.de[0] changed?`
   );
 }
+if (snap.missingRoot) {
+  throw new Error("prerender: no #dc-root after render - support.js changed its mount");
+}
 
-/* Pull the facts for the structured data OUT OF THE RENDERED PAGE rather than
- * retyping them here. Schema.org markup that disagrees with the visible text is
- * a manual action waiting to happen, and a second copy of the copy would drift
- * the first time content.json changes. */
+/* Structured data comes OUT OF THE RENDERED PAGE, never retyped: schema that
+ * disagrees with the visible text is a manual action waiting to happen. */
 const facts = await page.evaluate(() => {
   const faq = [];
-  const faqSection = document.querySelector("#faq");
-  if (faqSection) {
-    for (const btn of faqSection.querySelectorAll("button[aria-expanded]")) {
+  const sec = document.querySelector("#faq");
+  if (sec) {
+    for (const btn of sec.querySelectorAll("button[aria-expanded]")) {
       const q = (btn.innerText || "").trim();
-      /* the answer is the sibling panel the button controls */
-      let panel = btn.nextElementSibling;
-      const a = panel ? (panel.innerText || "").trim() : "";
+      const a = btn.nextElementSibling ? (btn.nextElementSibling.innerText || "").trim() : "";
       if (q && a && a.length > 40) faq.push({ q, a });
     }
   }
-  const services = [...document.querySelectorAll("#services h3")]
-    .map((h) => (h.innerText || "").trim())
-    .filter(Boolean);
   return {
     faq,
-    services,
-    h1: (document.querySelector("h1")?.innerText || "").trim(),
-    words: (document.body.innerText || "").trim().split(/\s+/).length,
+    services: [...document.querySelectorAll("#services h3")]
+      .map((h) => (h.innerText || "").trim())
+      .filter(Boolean),
   };
 });
 
-/* ------------------------------------------------------- the og:image ---- */
-/* Rendered from the brand SVG rather than kept as a second hand-made file:
- * social platforms will not accept SVG, and a PNG checked in by hand goes
- * stale the moment the mark changes. */
+/* og:image, rendered from the brand SVG - social platforms refuse SVG, and a
+ * PNG committed by hand goes stale the moment the mark changes. */
 const ogPage = await context.newPage();
 await ogPage.setViewportSize({ width: 1200, height: 630 });
-await ogPage.goto("http://127.0.0.1:8898/mccain-design-system/brand/mccain-og-dark.svg", {
+await ogPage.goto(`${BASE}/mccain-design-system/brand/mccain-og-dark.svg`, {
   waitUntil: "networkidle",
 });
 await ogPage.screenshot({ path: path.join(SITE, "og-image.png") });
 await ogPage.close();
-await browser.close();
 
-/* --------------------------------------------------------------- rewrite */
+/* ---------------------------------------------------- the original template */
 
-const before = html.length;
-const swap = (re, to, label, min = 1) => {
-  const n = (html.match(re) || []).length;
-  if (n < min) throw new Error(`prerender: expected >=${min} ${label}, found ${n}`);
-  html = html.replace(re, to);
-  return n;
-};
+const srcHtml = fs.readFileSync(SRC_FILE, "utf8");
+const openTag = /<x-dc(?:\s[^>]*)?>/.exec(srcHtml);
+const closeAt = srcHtml.lastIndexOf("</x-dc>");
+if (!openTag || closeAt < 0) throw new Error("prerender: no <x-dc> block in the export");
+const template = srcHtml.slice(openTag.index + openTag[0].length, closeAt);
 
-/* the page sits one folder below the brand assets in the export; at the site
- * root it sits beside them */
-const nBrand = swap(/\.\.\/brand\//g, "brand/", "../brand/ paths");
-/* support.js is referenced ./support.js from the export */
-html = html.replace(/(["'])\.\/support\.js\1/g, "$1support.js$1");
+const scriptTag = /<script[^>]*data-dc-script[^>]*>[\s\S]*?<\/script>/.exec(srcHtml);
+if (!scriptTag) throw new Error("prerender: no <script data-dc-script> in the export");
 
-/* drop the two google-fonts origins entirely - preconnect included, or the
- * browser still opens a connection to a host we no longer use */
-const nFont = swap(
-  /\s*<link[^>]+fonts\.(?:googleapis|gstatic)\.com[^>]*>/g,
-  "",
-  "google-font links"
-);
-
-/* the CDN react tags support.js injected during the render: the live page
- * re-injects them from window.__resources, so the snapshot must not ship a
- * second, remote copy */
-const nReact = swap(
-  /\s*<script[^>]+unpkg\.com[^>]*><\/script>/g,
-  "",
-  "unpkg script tags",
-  0
-);
-
-/* The component links to itself with absolute production URLs. On localhost and
- * on a Vercel preview those jump straight to the live domain, so the thing you
- * are trying to test is the one page you can never reach. Root-relative keeps
- * the same target in production and makes previews testable. */
-const nAbs = swap(
-  new RegExp(`(href=")${ORIGIN}/`, "g"),
-  "$1/",
-  "absolute self-links"
-);
-
-/* "Marke & Downloads" points at the .dc.html filename it has inside the export
- * folder. At the site root that file does not exist under that name - it is
- * built below as brand-guide.html. */
-const nBg = swap(
-  /href="McCain%20Digital%20Brand%20Guide\.dc\.html"|href="McCain Digital Brand Guide\.dc\.html"/g,
-  'href="/brand-guide.html"',
-  "brand-guide links"
-);
-
-if (/unpkg\.com|fonts\.googleapis\.com|fonts\.gstatic\.com/.test(html)) {
-  throw new Error("prerender: a third-party origin survived the rewrite");
-}
-if (html.includes("{{")) throw new Error("prerender: unresolved {{ }} in the snapshot");
-
-/* ------------------------------------------------------------- seo head */
-
-/* Preload only the two faces the page paints in immediately: upright latin.
- * latin-ext and the italic are unicode-range / style gated and download only if
- * something actually needs them - preloading those would spend 40 KB of the
- * critical path on bytes most visits never use. */
-const fontFiles = fs
-  .readdirSync(path.join(SITE, "fonts"))
-  .filter((f) => f.endsWith("-normal-latin.woff2"));
-if (fontFiles.length !== 2) {
-  throw new Error(`prerender: expected 2 upright latin faces, found ${fontFiles.length} ` +
-    `- run tools/vendor_assets.py`);
-}
+/* ------------------------------------------------------------------ compose */
 
 const graph = [
   {
@@ -291,7 +299,8 @@ if (facts.faq.length) {
   });
 }
 
-const head = `
+const seoHead = `<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(TITLE)}</title>
 <meta name="description" content="${esc(DESC)}">
 <link rel="canonical" href="${ORIGIN}/">
@@ -314,65 +323,69 @@ const head = `
 <meta name="twitter:image" content="${ORIGIN}/og-image.png">
 <link rel="icon" href="brand/mccain-favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="brand/apple-touch-icon-180.png">
-${fontFiles
-  .map((f) => `<link rel="preload" href="fonts/${f}" as="font" type="font/woff2" crossorigin>`)
-  .join("\n")}
+${preloads}
 <link rel="stylesheet" href="fonts/fonts.css">
-<script>window.__resources=${JSON.stringify(RESOURCE_MAP)};</script>
 <script type="application/ld+json">${JSON.stringify(
   { "@context": "https://schema.org", "@graph": graph },
   null,
   1
 )}</script>
-`.trim();
+<script>window.__resources=${JSON.stringify(RESOURCE_MAP)};</script>
+${HIDE_TEMPLATE}`;
 
-/* <html> carries no lang in the export; a German page that does not say so is
- * read aloud by a screen reader in the user's default language. */
-html = html.replace(/^<html(?![^>]*\blang=)/i, '<html lang="de"');
-if (!/^<html[^>]*\blang="de"/i.test(html)) throw new Error("prerender: could not set lang");
+/* ONLY the <style> blocks out of the head the runtime produced, so the
+ * prerendered markup is styled at first paint before support.js has processed
+ * <helmet>.
+ *
+ * Taking the whole head instead shipped support.js and pixel-engine.js TWICE -
+ * once from the snapshot, once from our own tag - and two support.js instances
+ * race each other: the second runtime reached the component code before React
+ * had finished loading and the page died on "Cannot read properties of null
+ * (reading 'useState')", leaving #dc-root empty and every button inert. An
+ * allow-list of one tag type is the only version of this that cannot regress. */
+function stylesOf(head) {
+  return (localise(head).match(/<style[^>]*>[\s\S]*?<\/style>/gi) || []).join("\n");
+}
+const runtimeHead = stylesOf(snap.head);
 
-/* window.__resources must exist BEFORE support.js runs, so the block goes at
- * the top of <head>, not appended to it. */
-if (!/<head[^>]*>/i.test(html)) throw new Error("prerender: no <head>");
-html = html.replace(/<head([^>]*)>/i, `<head$1>\n${head}\n`);
+const prerendered = localise(snap.body);
+const templateLocal = localise(template);
+assertClean(seoHead + runtimeHead + prerendered + templateLocal, "index.html");
+if (prerendered.includes("{{")) throw new Error("prerender: unresolved {{ }} in the snapshot");
 
-const banner = `<!DOCTYPE html>
+const html = `<!DOCTYPE html>
 <!-- GENERATED - do not edit by hand.
 
      Source:  mccain-design-system/reference/index.html  (Claude Design export)
-     Build:   node tools/prerender.mjs        (needs: python prodserve.py 8898 --dev)
+     Build:   node tools/prerender.mjs   (needs: python prodserve.py 8898 --dev)
 
-     This is a settled snapshot of the client-rendered design component, so that
-     a crawler, a social preview and a first paint all get the real page instead
-     of 145 words of decoration. Editing this file loses the change on the next
-     build - edit the source component, then re-run the script. -->
+     #dc-prerender is the settled markup: what a crawler reads and what paints
+     first. <x-dc> below it is the untouched template support.js mounts on - it
+     MUST stay, or the page loads looking perfect and every button is dead.
+     The watcher at the end removes the prerendered copy once React has filled
+     its own #dc-root, and leaves it alone if React never arrives. -->
+<html lang="de">
+<head>
+${seoHead}
+${runtimeHead}
+<script src="support.js"></script>
+</head>
+<body>
+<div id="dc-prerender">${prerendered}</div>
+<x-dc>${templateLocal}</x-dc>
+${localise(scriptTag[0])}
+${SWAP}
+</body>
+</html>
 `;
-html = banner + html.replace(/^<!DOCTYPE html>\s*/i, "");
 
-const out = path.join(SITE, "index.html");
-fs.writeFileSync(out, html, "utf8");
+fs.writeFileSync(path.join(SITE, "index.html"), html, "utf8");
 
-/* ------------------------------------------------------------- assets */
+/* ------------------------------------------------------------ brand guide */
+/* The footer links to it ("Marke & Downloads"), so it has to exist at the root.
+ * Same two-copy treatment, plain head: a reference page, not a landing page. */
 
-let copied = 0;
-for (const [from, to] of Object.entries(ASSETS)) {
-  const src = path.join(SITE, from);
-  const dst = path.join(SITE, to);
-  if (!fs.existsSync(src)) throw new Error(`prerender: asset source missing: ${from}`);
-  fs.rmSync(dst, { recursive: true, force: true });
-  fs.cpSync(src, dst, { recursive: true });
-  copied += fs.statSync(dst).isDirectory()
-    ? fs.readdirSync(dst, { recursive: true }).length
-    : 1;
-}
-
-/* ------------------------------------------------- the brand guide page */
-/* The footer links to it ("Marke & Downloads"), so it has to exist at the site
- * root. Same treatment as the start page - settled snapshot, local react, local
- * fonts - but a plain head: it is a reference page, not a landing page. */
-
-const bg = await launch(1440, 900);
-const bgPage = await open(bg.context, BRAND_SRC);
+const bgPage = await open(context, BRAND_URL);
 await bgPage.addStyleTag({ content: "html{scroll-behavior:auto!important}" });
 await settle(bgPage);
 await bgPage.evaluate(async () => {
@@ -384,41 +397,40 @@ await bgPage.evaluate(async () => {
   window.scrollTo(0, 0);
 });
 await bgPage.waitForTimeout(1200);
-let bgHtml = await bgPage.evaluate(() => document.documentElement.outerHTML);
-await bg.browser.close();
+const bgSnap = await bgPage.evaluate(() => {
+  const root = document.getElementById("dc-root");
+  return root ? { head: document.head.innerHTML, body: root.innerHTML } : null;
+});
+await browser.close();
+if (!bgSnap) throw new Error("prerender: no #dc-root in the brand guide");
 
-bgHtml = bgHtml
-  .replace(/\.\.\/brand\//g, "brand/")
-  .replace(/(["'])\.\/support\.js\1/g, "$1support.js$1")
-  .replace(/\s*<link[^>]+fonts\.(?:googleapis|gstatic)\.com[^>]*>/g, "")
-  .replace(/\s*<script[^>]+unpkg\.com[^>]*><\/script>/g, "");
-if (/unpkg\.com|fonts\.(googleapis|gstatic)\.com/.test(bgHtml)) {
-  throw new Error("prerender: third-party origin survived in the brand guide");
-}
+const bgSrc = fs.readFileSync(BRAND_FILE, "utf8");
+const bgOpen = /<x-dc(?:\s[^>]*)?>/.exec(bgSrc);
+const bgClose = bgSrc.lastIndexOf("</x-dc>");
+const bgScript = /<script[^>]*data-dc-script[^>]*>[\s\S]*?<\/script>/.exec(bgSrc);
+if (!bgOpen || bgClose < 0 || !bgScript) throw new Error("prerender: brand guide has no <x-dc>");
 
-/* Inside the export the brand guide sits beside its sibling design components
- * and links to them by filename. Only one of the three is a page of this site.
- *   v2    -> is the start page, so point there
- *   Deck  -> a slide deck; not published, so keep the words and drop the link
- *   Marke -> was never in the export at all (see readme.md "Quellen"), so the
- *            link has never resolved anywhere - same treatment
- * Turning a dead <a> into a <span> keeps the sentence and loses only the false
- * promise that there is something to click. */
-const deadLink = (file) =>
-  new RegExp(`<a\\b[^>]*href="${file.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"[^>]*>(.*?)<\\/a>`, "gs");
+/* Inside the export it links to its sibling components by filename. Only one of
+ * the three is a page of this site: v2 is the start page. The Deck is not
+ * published and "Marke" was never in the export at all - both keep their words
+ * and lose the link that never resolved. */
+const deadLink = (f) =>
+  new RegExp(`<a\\b[^>]*href="${f.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"[^>]*>(.*?)<\\/a>`, "gs");
+const bgFix = (s) => {
+  let out = localise(s).replace(/(<a\b[^>]*)href="McCain Digital v2\.dc\.html"/g, '$1href="/"');
+  for (const f of ["McCain Digital Deck.dc.html", "McCain Digital Marke.dc.html"]) {
+    out = out.replace(deadLink(f), "<span>$1</span>");
+  }
+  return out;
+};
 
-const nV2 = (bgHtml.match(deadLink("McCain Digital v2.dc.html")) || []).length;
-bgHtml = bgHtml.replace(
-  /(<a\b[^>]*)href="McCain Digital v2\.dc\.html"/g,
-  '$1href="/"'
-);
-let nDead = 0;
-for (const f of ["McCain Digital Deck.dc.html", "McCain Digital Marke.dc.html"]) {
-  const re = deadLink(f);
-  nDead += (bgHtml.match(re) || []).length;
-  bgHtml = bgHtml.replace(re, "<span>$1</span>");
-}
-if (/href="McCain Digital/.test(bgHtml)) {
+const bgBody = bgFix(bgSnap.body);
+const bgTemplate = bgFix(bgSrc.slice(bgOpen.index + bgOpen[0].length, bgClose));
+/* Styles only, same reason as the start page: taking the whole head ships a
+ * second support.js and the two runtimes race each other. */
+const bgHead = stylesOf(bgSnap.head);
+assertClean(bgHead + bgBody + bgTemplate, "brand-guide.html");
+if (/href="McCain Digital/.test(bgHead + bgBody + bgTemplate)) {
   throw new Error("prerender: a .dc.html link survived in the brand guide");
 }
 
@@ -426,7 +438,13 @@ const BG_TITLE = "Marke & Downloads — McCain Digital";
 const BG_DESC =
   "Das Zeichen, die Fassungen, Farbe, Typografie und jede Markendatei von " +
   "McCain Digital zum Herunterladen.";
-const bgHead = `
+const bgHtml = `<!DOCTYPE html>
+<!-- GENERATED by tools/prerender.mjs from
+     mccain-design-system/reference/McCain Digital Brand Guide.dc.html -->
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(BG_TITLE)}</title>
 <meta name="description" content="${esc(BG_DESC)}">
 <link rel="canonical" href="${ORIGIN}/brand-guide.html">
@@ -441,28 +459,41 @@ const bgHead = `
 <meta property="og:image" content="${ORIGIN}/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="brand/mccain-favicon.svg" type="image/svg+xml">
-${fontFiles
-  .map((f) => `<link rel="preload" href="fonts/${f}" as="font" type="font/woff2" crossorigin>`)
-  .join("\n")}
+${preloads}
 <link rel="stylesheet" href="fonts/fonts.css">
 <script>window.__resources=${JSON.stringify(RESOURCE_MAP)};</script>
-`.trim();
-
-bgHtml = bgHtml.replace(/^<html(?![^>]*\blang=)/i, '<html lang="de"');
-bgHtml = bgHtml.replace(/<head([^>]*)>/i, `<head$1>\n${bgHead}\n`);
-bgHtml =
-  `<!DOCTYPE html>\n<!-- GENERATED by tools/prerender.mjs from\n` +
-  `     mccain-design-system/reference/McCain Digital Brand Guide.dc.html -->\n` +
-  bgHtml.replace(/^<!DOCTYPE html>\s*/i, "");
+${HIDE_TEMPLATE}
+${bgHead}
+<script src="support.js"></script>
+</head>
+<body>
+<div id="dc-prerender">${bgBody}</div>
+<x-dc>${bgTemplate}</x-dc>
+${bgFix(bgScript[0])}
+${SWAP}
+</body>
+</html>
+`;
 fs.writeFileSync(path.join(SITE, "brand-guide.html"), bgHtml, "utf8");
 
-console.log(`prerendered ${SRC}`);
-console.log(`  h1              ${facts.h1}`);
-console.log(`  visible words   ${facts.words}`);
-console.log(`  services        ${facts.services.length}`);
-console.log(`  faq entries     ${facts.faq.length}  -> FAQPage schema`);
-console.log(`  rewrites        ${nBrand} brand paths, ${nFont} font links, ${nReact} unpkg tags removed`);
-console.log(`  preloads        ${fontFiles.length} latin woff2`);
-console.log(`  ${before.toLocaleString()} -> ${html.length.toLocaleString()} bytes  ->  index.html`);
-console.log(`  og-image.png    1200x630, rendered from the brand SVG`);
-console.log(`  assets          ${copied} files copied to the site root (${Object.keys(ASSETS).length} sources)`);
+/* ------------------------------------------------------------------ assets */
+
+let copied = 0;
+for (const [from, to] of Object.entries(ASSETS)) {
+  const src = path.join(SITE, from);
+  const dst = path.join(SITE, to);
+  if (!fs.existsSync(src)) throw new Error(`prerender: asset source missing: ${from}`);
+  fs.rmSync(dst, { recursive: true, force: true });
+  fs.cpSync(src, dst, { recursive: true });
+  copied += fs.statSync(dst).isDirectory() ? fs.readdirSync(dst, { recursive: true }).length : 1;
+}
+
+console.log("built from " + SRC_URL);
+console.log(`  hero h1         ${HERO_H1}`);
+console.log(`  visible words   ${snap.words}`);
+console.log(`  services        ${facts.services.length}   faq ${facts.faq.length} -> FAQPage`);
+console.log(`  index.html      ${html.length.toLocaleString()} bytes ` +
+  `(prerender ${prerendered.length.toLocaleString()} + template ${templateLocal.length.toLocaleString()})`);
+console.log(`  brand-guide     ${bgHtml.length.toLocaleString()} bytes`);
+console.log(`  preloads        ${fontFiles.length} upright latin woff2`);
+console.log(`  assets          ${copied} files copied to the site root`);
