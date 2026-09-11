@@ -1,22 +1,96 @@
-# Uebergabe — Stand 10. September 2026
+# Uebergabe — Stand 11. September 2026
 
 `https://mccain-digital.vercel.app/` liefert den Stand von `main`.
 
-## ▶ ZUERST LESEN — Stand am Ende des 10.9.
+## ▶ ZUERST LESEN — Stand am Ende des 11.9.
 
-**GEPUSHT am 10.9. spaet — `main` und `origin/main` stehen gleich auf `4800a79`.**
-Arbeitsbaum sauber. Damit sind die 22 Commits des Tages live.
+**Der Relaunch steht am Repo-Root.** Die v3-Seite liegt unter `old 2/`
+(`git mv`, 93 Renames, Historie folgt), der Root ist jetzt die neue Seite,
+gebaut aus dem Claude-Design-Export in `mccain-design-system/`.
 
-**Gegen die veroeffentlichte Seite nachgemessen, nicht nur lokal:**
-`https://mccain-digital.vercel.app` liefert `--t-h2: clamp(1.9rem, 3.06vw, 2.9rem)`
-und `--t-display: clamp(2.6rem, min(5.14vw, 10vh), 5.5rem)`; index misst dort
-1440 → h1 74,0 / h2 44,1 / h3 33,0 und 1920×1080 → h1 88 / h2 46,4 — deckungsgleich
-mit lokal. `sweep` und `accent_audit` mit `MCD_BASE=https://mccain-digital.vercel.app`
-ebenfalls sauber. Beide Tore koennen so gegen live laufen, das ist der schnellste
-Weg, einen Deploy zu pruefen.
+### Was ausgeliefert wird
 
-**Squirrelscan lief NICHT** — `squirrel` ist auf diesem PC nicht auf dem PATH. Die
-globale Regel „Squirrelscan nach Deploy" ist damit fuer diesen Deploy offen.
+`index.html` · `brand-guide.html` · `404.html` · `legal/{imprint,privacy,terms,withdrawal}.html`
+· `robots.txt` · `sitemap.xml` · `llms.txt` · `og-image.png`
+· Laufzeit: `support.js`, `content.json`, `pixel-engine.js`, `brand/`, `img/`, `team/`,
+`fonts/`, `vendor/`
+
+`mccain-design-system/`, `old/`, `old 2/`, `tools/`, `_parked/`, `audit/` und die
+internen Notizen stehen in `.vercelignore`.
+
+### Die zwei Befunde, die die Arbeit getrieben haben
+
+**1. Die Seite war client-gerendert — das war das eigentliche SEO-Problem.**
+838 Platzhalter, jedes Wort in `content.json`. Gemessen: ein Crawler ohne
+JavaScript las **145 Wörter** Dekoration. `tools/prerender.mjs` rendert die
+Seite jetzt im echten Browser und schreibt den gesetzten DOM nach `index.html`:
+**1.886 Wörter**, eine `<h1>`, 23 Überschriften. `support.js` fährt weiter mit
+und übernimmt beim Laden, Modals/DE-EN/Konsole funktionieren unverändert.
+
+**2. React kam von `unpkg.com`, die Schriften von Google.** Für eine deutsche
+Seite mit Datenschutzerklärung ist das die Übertragung, über die das LG München I
+2022 entschieden hat. `tools/vendor_assets.py` holt beides ins Repo. React läuft
+über den vorgesehenen `window.__resources`-Haken von `support.js` — kein Patch
+an einer Fremddatei, und die SRI-Hashes stimmen weiter, weil die Bytes gleich
+sind. **Gemessen: die gebaute Seite kontaktiert 32 URLs, alle bei uns. Der
+Export daneben rief unpkg.com, fonts.gstatic.com und fonts.googleapis.com.**
+
+### Der Build — drei Befehle, Reihenfolge zählt
+
+```
+python prodserve.py 8898 --dev          # muss laufen, prerender liest darüber
+python tools/vendor_assets.py           # einmalig / bei Versionswechsel
+node tools/prerender.mjs                # index.html + brand-guide.html + og-image + Assets
+python tools/build_legal.py             # die vier Rechtsseiten
+python tools/build_sitemap.py           # zuletzt, prüft gegen die Platte
+```
+
+`index.html` und `brand-guide.html` sind **generiert**. Wer sie von Hand ändert,
+verliert es beim nächsten Build — die Quelle ist
+`mccain-design-system/reference/`.
+
+### Offen — Owner-Entscheidungen
+
+1. **Die Logo-Reihe im Hero** (Deutsche Bank, Apple, Microsoft, Blizzard,
+   Deutsches Museum, Ravensburger, Travian, AOK) liest sich als Kundenliste,
+   während die Sektion darunter „Was Kunden sagen – **sobald sie es dürfen**"
+   heißt und die `readme.md` des Design-Systems sagt, Beispiele seien
+   „illustrativ, nie Kundenreferenzen". Sind das keine freigegebenen Kunden,
+   ist das in DE ein Abmahn-Risiko.
+2. **Die Rechtstexte sind Englisch**, die Seite ist Deutsch-zuerst. Die Seiten
+   tragen deshalb `lang="en"`. Der geprüfte Wortlaut darf nicht maschinell
+   übersetzt werden — das ist eine Anwaltsfrage.
+3. **„4×100 Lighthouse"** steht als Projektkarten-Aussage über die eigene Seite
+   auf der Startseite. Die Zahl stammt vom v3-Build. Nach dem Deploy **echte**
+   Lighthouse-/Squirrelscan-Messung, sonst wirbt die Seite mit einer Zahl, die
+   für sie nicht mehr belegt ist.
+4. **„Tech-Notizen"** in der Fusszeile zeigt auf `#` — toter Platzhalter aus dem
+   Entwurf.
+
+### Geplant, noch nicht gebaut (Owner, 11.9.)
+
+Vier Leistungsseiten, eine About-, eine Kontaktseite, alle Rechtsseiten (stehen),
+und **Projektseiten — die erste für whatever-recall**, dessen Inhalt und URL auf
+diese Domain geholt und umgeleitet werden sollen. recall ist stark geschrumpft,
+damit ist eine Projektseite hier der richtige Ort statt einer eigenen Domain.
+`tools/build_sitemap.py` trägt die Liste; sie verweigert den Bau, wenn eine
+gelistete Datei fehlt **oder** eine vorhandene `.html` nicht gelistet ist.
+
+### Die Werkzeuge zeigen noch auf das alte Layout
+
+`tools/browser.mjs` `requireServer()` prüft `BASE + "/index.html"` — das geht
+wieder, weil der Root wieder eine `index.html` hat. Aber `sweep.mjs`,
+`accent_audit.mjs` und `type_scale.mjs` messen **v3-Klassen und v3-Tokens**, die
+es in der neuen Seite nicht gibt. Sie laufen, sagen aber nichts über diese Seite.
+Vor dem nächsten Einsatz umbauen oder stilllegen — ein Tor, das immer grün ist,
+liest irgendwann niemand mehr.
+
+### Gemessen, damit es nicht wieder erraten wird
+
+Ein triviales Ein-`<h1>`-Dokument misst in diesem Aufbau bereits **968 ms FCP**.
+Absolute Zahlen aus headless Chromium sind wertlos; nur der Abstand zum Boden
+zählt: v3-Seite (gemessene 4×100) +148 ms, neue Seite +396 ms, der Export
++1680 ms. CLS 0 (Export: 0,0069), LCP 1364 ms gegen 1816 ms der alten Seite.
 
 ### Zuletzt gebaut: der Anzeigengrad, dritte Runde
 

@@ -1,0 +1,14 @@
+# Vendored third-party builds are copied byte-for-byte from their CDN and must
+# stay that way. Without this, Git rewrites them to CRLF on a Windows checkout:
+# harmless for the JavaScript itself, but it makes the files differ from what
+# support.js expects and produces a whole-file diff every time the repository
+# moves between this PC and the Mac.
+vendor/** -text
+
+# Fonts and images are binary. Saying so stops Git from trying to diff or
+# line-ending-normalise them.
+*.woff2 binary
+*.webp binary
+*.png  binary
+*.jpg  binary
+*.mp4  binary

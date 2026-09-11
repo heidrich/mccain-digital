@@ -7,6 +7,12 @@
 # second, older copy of the same company under /old/.
 old/
 
+# The v3 site that was live until the 2026 relaunch, moved here on 11.9.2026
+# with `git mv` so the history follows. Same reason as old/: it must not be
+# reachable, or the relaunch would compete with its own predecessor in the
+# search index — two copies of the same company, one of them stale.
+old 2/
+
 # Build and audit tooling, the local measuring server, and the internal notes.
 tools/
 prodserve.py
@@ -22,6 +28,17 @@ CHANGELOG.md
 # aussuchen" was. A page nobody can open is not a page that was offered.
 # preview/ carries noindex and a robots Disallow; take it out at go-live.
 _parked/
+
+# The Claude Design export the site is BUILT FROM. 4.2 MB of source, and it
+# contains a second copy of every headline on the start page - shipping it would
+# put the studio in competition with itself in the index. robots.txt disallows
+# it as a second line of defence; this is the first.
+mccain-design-system/
+
+# Internal notes. README stays: it is the repository's front door on GitHub.
+TODO.md
+DESIGN-BEFUND.md
+AGENTS.md
 
 # Der Audit-Befund. Getrackt, damit er zwischen den Maschinen reist - aber
 # nichts davon gehoert auf die ausgelieferte Seite.

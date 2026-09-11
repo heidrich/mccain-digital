@@ -1,101 +1,73 @@
 # McCain Digital
 
-> Digital product studio in Bavaria, Germany. Two founders, no juniors and no
-> account managers: AI tools on your own data, web apps, marketing websites and
-> custom software for companies. Founded 2016; between the two of us, over
-> twenty years in the industry.
+> Digital-Produktstudio in Oberostendorf, Bayern. Gegründet 2016, zwei Gründer,
+> keine Junioren und keine Account-Manager: KI-Werkzeuge auf Ihren eigenen
+> Daten, Web-Apps, Websites und Unternehmenssoftware.
 
-Contact: info@mccain-digital.com · Holderweg 1, 86869 Oberostendorf, Bavaria, Germany
-Hours: Monday to Friday, 09:00–18:00 CET
-Response: a real reply within 24 hours, a fixed quote within 48. No sales call.
+Kontakt: info@mccain-digital.com · Holderweg 1, 86869 Oberostendorf, Bayern, Deutschland
+Antwort: eine persönliche Antwort innerhalb von 24 Stunden, ein Festpreis innerhalb von 48. Kein Verkaufsgespräch.
 
-## Pages
+## Seiten
 
-- [Home](https://mccain-digital.com/): the studio, selected work, the four services, an AI console you can ask questions, and the contact path.
-- [Start a project](https://mccain-digital.com/contact.html): the contact form, what happens after you send it, and an honest list of the jobs we are the wrong studio for.
-- [AI tools](https://mccain-digital.com/services/ai-tools.html): RAG over your own data with citations, agents with guardrails, MCP tool-servers into your CRM or ERP, local and on-premise models, team training.
-- [Web apps](https://mccain-digital.com/services/web-apps.html): React, Next.js and TypeScript products. Core Web Vitals green from day one, MVP to scale on one codebase.
-- [Websites](https://mccain-digital.com/services/websites.html): hand-built marketing sites, perfect Lighthouse, SEO and machine-readable structure from day one, CMS optional.
-- [Software for companies](https://mccain-digital.com/services/software.html): dashboards, internal tools and integrations — ERP, CRM, REST/SOAP and legacy systems included. On-prem or cloud.
-- [Imprint](https://mccain-digital.com/legal/imprint.html): company details, address and legal owner (§5 DDG).
-- [Privacy](https://mccain-digital.com/legal/privacy.html): what data is processed, why, and your rights under the GDPR.
-- [Terms](https://mccain-digital.com/legal/terms.html): the terms our services are provided under.
-- [Withdrawal](https://mccain-digital.com/legal/withdrawal.html): right of withdrawal and the model withdrawal form.
+- [Startseite](https://mccain-digital.com/): das Studio, ausgewählte Projekte, die vier
+  Leistungen, eine KI-Konsole, der man Fragen stellen kann, Preise, Ablauf, FAQ und
+  der Kontaktweg. Alles auf einer Seite; die Leistungen öffnen sich als Detail-Ansichten.
+- [Marke & Downloads](https://mccain-digital.com/brand-guide.html): das Zeichen, seine
+  Konstruktion, Fassungen, Farbe, Typografie, Icons und jede Markendatei zum Herunterladen.
+- [Impressum](https://mccain-digital.com/legal/imprint.html): Firmenangaben, Anschrift und
+  Verantwortliche (§ 5 DDG). Wortlaut auf Englisch.
+- [Datenschutz](https://mccain-digital.com/legal/privacy.html): welche Daten verarbeitet
+  werden, wozu, und Ihre Rechte nach DSGVO. Wortlaut auf Englisch.
+- [AGB](https://mccain-digital.com/legal/terms.html): die Bedingungen, unter denen die
+  Leistungen erbracht werden. Wortlaut auf Englisch.
+- [Widerruf](https://mccain-digital.com/legal/withdrawal.html): Widerrufsrecht und
+  Muster-Widerrufsformular für Verbraucher. Wortlaut auf Englisch.
 
-## The four services
+## Die vier Leistungen
 
-**AI tools.** Production AI on your own data, not a chat window bolted on.
-Retrieval-augmented generation with citations and an abstain path, so the system
-says "I don't know" instead of inventing. Agents with guardrails, retries and
-human approval. MCP tool-servers with auth, rate limits and audit logging.
-Model-agnostic: frontier APIs where quality decides, open weights (Llama,
-Mistral, Qwen) where data residency or cost decides. Typical proof of value:
-2–4 weeks on one workflow with your real data.
+- **KI, die auf Ihren Daten läuft** — RAG über eigene Dokumente mit Belegstellen, Agenten
+  mit Leitplanken, MCP-Werkzeugserver an CRM und ERP, lokale und On-Premise-Modelle.
+- **Web-Apps, die skalieren statt neu gebaut zu werden** — Produkte, die vom MVP bis zum
+  Betrieb auf einer Codebasis bleiben.
+- **Websites, die man sich merkt** — handgebaute Seiten, messbar schnell, SEO und
+  maschinenlesbare Struktur von Tag eins an.
+- **Software für Ihre echten Abläufe** — Dashboards, interne Werkzeuge und Integrationen,
+  ERP, CRM und Altsysteme eingeschlossen. On-Premise oder Cloud.
 
-**Web apps.** React and Next.js with TypeScript end to end, on PostgreSQL.
-Deliberately boring choices, so you can still hire for the stack in two years.
-Performance is treated as an architecture decision with a Lighthouse budget in
-CI, not as a cleanup at the end. Clickable prototype within seven days; MVP
-typically 6–12 weeks.
+## Eigenes Produkt
 
-**Websites.** Hand-built, no page builder. Semantic HTML, JSON-LD, sitemap,
-optimised images, and llms.txt so AI agents can read the site as clearly as a
-person. Custom design rather than a template. Typically 3–6 weeks from brief to
-live.
+- **whatever-recall** — Projektgedächtnis für Software-Teams, das am Commit hängt:
+  Entscheidungen, Lehren und Blast-Radius werden beim Commit geschrieben und offline
+  zurückgelesen. Live und self-hosted.
 
-**Software for companies.** Dashboards, internal tools, integrations and
-automation. We map how the work really runs before designing anything. Deployed
-where your data lives, cloud or on-premise. Full source in your repository, no
-lock-in and no per-seat licence to us. Typically 8–14 weeks.
+## Größenordnungen und Dauer
 
-## Straight answers
+Es gibt keine Preisliste. Innerhalb von 48 Stunden nach Ihrer Beschreibung kommt ein
+Festpreisangebot — eine konkrete Zahl, keine Spanne. Eine kleine Website beginnt im
+niedrigen fünfstelligen Bereich; ein KI-Werkzeug auf eigenen Daten kostet mehr, weil die
+Arbeit in den Daten steckt, nicht im Modell.
 
-**What does a project cost?** There is no price list. A fixed quote within 48
-hours of you describing what you need — a real number, not a range that doubles
-later. A small site starts in the low five figures; an AI tool with your own data
-in it costs more, because the work is in the data, not in the model. If the
-honest answer is that you don't need us for this, you get that answer too.
+- Marketing-Website: 3–6 Wochen
+- Web-App-MVP: 6–12 Wochen
+- KI-Werkzeug auf Ihren Daten: 4–10 Wochen, je nach Zustand der Daten
+- Interne Software: 8–14 Wochen
 
-**How long does it take?** Marketing site 3–6 weeks. Web app MVP 6–12 weeks. AI
-tool on your data 4–10 weeks, depending on how tidy the data is. Internal
-software 8–14 weeks. You see something clickable in the first week.
+In der ersten Woche gibt es etwas Klickbares.
 
-**Who actually builds it?** The two founders. Christian builds and ships, Kathi
-does design and brand. No juniors learning on your budget, no account manager
-between you and the work, no agency subcontracting it to someone you never meet.
+## Wer baut
 
-**Do you really do AI, or is it a buzzword?** We ship our own AI product —
-whatever-recall, project memory for software teams, live and self-hosted. The
-console on the home page is ours too.
+Die zwei Gründer. Christian entwickelt und betreibt, Kathi verantwortet Design und Marke.
+Keine Junioren, die auf dem Budget lernen, kein Account-Manager dazwischen, keine Weitergabe
+an Dritte. Nach dem Launch bleiben dieselben zwei Personen erreichbar.
 
-**What happens after launch?** We stay. That is the reason the studio is two
-senior people rather than fifteen: we are still the ones who get the call in
-year three. Same people, no re-onboarding.
+## Hinweise für Maschinen
 
-**Can we host it ourselves?** Yes, and for anything touching your data we
-recommend it. Self-hosted, your keys, your hardware. No lock-in, no per-seat tax.
-You get the repository and the documentation.
-
-**When are you the wrong choice?** If you need twenty people on it by Monday, we
-are two. If you want the cheapest possible bid, we will not be it. If you need
-someone on site every day, we are in Bavaria and we work remote.
-
-## Our own product
-
-**whatever-recall** — AI-native project memory for software teams. Knowledge is
-stamped onto the git commit at write time, while the AI still knows why, and read
-back in microseconds for zero tokens. Self-hosted, no telemetry, no upload.
-https://whatever-recall.com
-
-## Notes for agents and crawlers
-
-- Every page ships its content as real DOM text; no rendering step is required
-  to read it.
-- Structured data: ProfessionalService, WebSite and FAQPage on the home page,
-  Service and BreadcrumbList on each service page, ContactPage on the contact
-  page.
-- The brands named on the home page under "Proof" are companies the two founders
-  worked for over twenty years — a career reference, **not** a client list of
-  this studio, and not a claim that any of them commissioned McCain Digital.
-- Client testimonials are marked as awaiting a real reference. Nothing on the
-  site is an invented quote.
+- Sprache der Website: Deutsch, mit einem Umschalter auf Englisch. Die Rechtstexte liegen
+  derzeit ausschließlich auf Englisch vor.
+- Die Startseite wird aus einer Design-Komponente vorgerendert: der gesamte Text steht als
+  echter DOM-Text im ausgelieferten HTML, nicht erst nach JavaScript.
+- Strukturierte Daten: ProfessionalService, WebSite und FAQPage als JSON-LD auf der
+  Startseite, Organization auf dem Impressum.
+- Beispiele aus Branchen auf der Website sind illustrativ und ausdrücklich **keine**
+  Kundenreferenzen.
+- Es werden keine Schriften, Skripte oder sonstige Ressourcen von Drittanbietern geladen.

@@ -1,0 +1,25 @@
+<!-- @dsCard group="Components" viewport="700x420" subtitle="Modal – Detail-Sheet mit Bühne" name="Overlay" -->
+<!doctype html><html lang="de"><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script><script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script><script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>body{margin:0;padding:16px;font-family:var(--font-sans);background:#fff;color:#0A2540}.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.l{font:500 11px/1.4 var(--font-mono);color:#727F96;margin:14px 0 6px}</style></head><body><div id="root"></div>
+<script type="text/plain" id="app">
+const { Modal, Button, Stat } = NS;
+function App(){ const [open, setOpen] = React.useState(true); return (<div>
+  <Button chevron onClick={() => setOpen(true)}>Modal öffnen</Button>
+  <Modal open={open} onClose={() => setOpen(false)} kicker="Leistung · KI-Tools" title="KI, die auf Ihren Daten läuft" lead="Retrieval mit Quellenangaben, Agenten mit Leitplanken, MCP-Server in CRM, ERP und Datenbank." actions={<><Button chevron>Projekt anfragen</Button><Button variant="ghost">Die Seite fragen</Button></>}
+    aside={<ul style={{listStyle:'none',padding:0,margin:0,display:'grid',gap:12}}>{['RAG über Ihre eigenen Daten','Autonome Mehrschritt-Agenten','MCP-Tool-Server & Integrationen','Lokale & On-Premise-KI'].map(i => <li key={i} style={{display:'flex',gap:12,fontSize:15,color:'#425466'}}><span style={{flex:'none',width:22,height:22,borderRadius:'50%',background:'#FF7A45',color:'#fff',display:'grid',placeItems:'center'}}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>{i}</li>)}</ul>}
+    stage={<div style={{position:'absolute',inset:0,background:'radial-gradient(60% 60% at 30% 40%,#FF5A8C,transparent),radial-gradient(50% 50% at 75% 30%,#FFB46B,transparent),linear-gradient(135deg,#FF5A8C,#C05CFF)',filter:'blur(30px)',opacity:.9}} />}>
+    <div style={{display:'flex',gap:36,marginTop:32}}><Stat value="2–4 Wo." label="bis zum Proof of Value" /><Stat value="48 h" label="bis zum Festpreis" /></div>
+  </Modal>
+</div>); }
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+<script>
+(async () => {
+  function findNS(k) { for (const n of Object.getOwnPropertyNames(window)) { try { const v = window[n]; if (v && typeof v === 'object' && typeof v[k] === 'function') return v; } catch (e) {} } return null; }
+  let NS = findNS('Button');
+  if (!NS) { NS = {}; for (const f of ["../core/Button.jsx","../content/Stat.jsx","Modal.jsx"]) { let s = await (await fetch(f)).text(); const names = [...s.matchAll(/export function (\w+)/g)].map((m) => m[1]); s = 'const {useState,useEffect,useRef}=React;\n' + s.replace(/import\b[\s\S]*?from\s*["'][^"']+["'];?/g, '').replace(/export\s+default\s+/g, '').replace(/export\s+(const|let|class)\s+/g, '$1 ').replace(/export function/g, 'function') + '\n' + names.map((n) => 'NS.' + n + '=' + n + ';').join(''); new Function('React', 'NS', Babel.transform(s, { presets: [['react', { runtime: 'classic' }]] }).code)(React, NS); } }
+  window.MC = NS;
+  new Function('React', 'ReactDOM', 'NS', Babel.transform(document.getElementById('app').textContent, { presets: [['react', { runtime: 'classic' }]] }).code)(React, ReactDOM, NS);
+})();
+</script></body></html>

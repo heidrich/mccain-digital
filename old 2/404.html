@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<!-- Served from any depth, so every asset path here is root-absolute — a
+     relative path would break for /services/typo.html. data-root stays "."
+     for the same reason: menu.js builds "/index.html"-style links from it. -->
+<html lang="en" data-root="">
+
+<head>
+  <meta charset="utf-8">
+  <!-- The saved theme, applied BEFORE the stylesheet resolves.
+
+       Not only to stop the dark flash on a light-theme load. The pixel
+       headlines rasterize the real DOM text, and they read its colour through
+       getComputedStyle - so while the theme transition is still running, the
+       colour they read is the OLD one. The headline above the fold builds
+       first, catches the dark-theme white, and then sits on a paper background
+       at 1.03:1, which is invisible. Applying the theme here means there is no
+       transition on load and nothing to catch mid-flight. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Not found — McCain Digital</title>
+  <meta name="robots" content="noindex, follow">
+  <meta name="description" content="That page does not exist. Everything the site does have is one keystroke away.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#0d0c0a">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/v3.css">
+</head>
+
+<body>
+  <a class="skip" href="#top">Skip to content</a>
+
+  <nav class="nav" id="nav" aria-label="Main navigation">
+    <a class="logo" href="/index.html#top">mccain <i>digital</i><span class="sr-only"> — home</span></a>
+
+    <span class="nav-status">
+      <i class="ns-dot" aria-hidden="true"></i>
+      available for new projects
+    </span>
+
+    <div class="nav-right">
+      <button class="menu-t" type="button" data-menu-open aria-haspopup="dialog" aria-controls="cmenu">
+        <i aria-hidden="true"></i>Menu
+      </button>
+      <a class="btn" href="/contact.html">Start a project</a>
+    </div>
+  </nav>
+
+  <main id="top" tabindex="-1">
+    <section class="band">
+      <div class="wrap ctaband ctaband--lift">
+        <p class="label">Error 404</p>
+        <h1 class="hero-h ctaband-h" data-words>This page doesn't exist.</h1>
+        <p class="lead">Either it moved, or the link was wrong. Nothing is broken on your side.</p>
+        <!-- data-menu-key: menu.js swaps this for ⌘K or Ctrl K depending on the
+             platform, same as the trigger in the nav -->
+        <p class="lead">Everything the site does have is one keystroke away — press
+          <kbd class="k404" data-menu-key>⌘K</kbd> or <kbd class="k404">/</kbd> and start typing. You can
+          also just ask a question there and get an answer.</p>
+        <div class="hero-ctas hero-ctas--center">
+          <a class="btn" href="/index.html#top">Back to the start
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </a>
+          <a class="btn btn--ghost" href="/contact.html" data-magnet>Tell us what you were looking for</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="band band--tight">
+      <div class="wrap">
+        <div class="rel">
+          <a class="rel-c" href="/services/ai-tools.html">
+            <span class="rel-n">AI tools <i aria-hidden="true">→</i></span>
+            <span class="rel-d">RAG on your own data, agents with guardrails, MCP into your systems.</span>
+          </a>
+          <a class="rel-c" href="/services/web-apps.html">
+            <span class="rel-n">Web apps <i aria-hidden="true">→</i></span>
+            <span class="rel-d">React and Next.js products, green vitals from day one.</span>
+          </a>
+          <a class="rel-c" href="/services/websites.html">
+            <span class="rel-n">Websites <i aria-hidden="true">→</i></span>
+            <span class="rel-d">Marketing sites with a perfect Lighthouse.</span>
+          </a>
+          <a class="rel-c" href="/services/software.html">
+            <span class="rel-n">Software for companies <i aria-hidden="true">→</i></span>
+            <span class="rel-d">Dashboards, internal tools and integrations.</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-in">
+      <a class="logo" href="/index.html#top">mccain <i>digital</i></a>
+      <span>© 2026 · Bavaria, Germany</span>
+      <div class="foot-links">
+        <a href="/index.html#work">Work</a>
+        <a href="/index.html#services">Services</a>
+        <a href="/index.html#ai"><span class="ai-word">AI</span></a>
+        <a href="/contact.html">Contact</a>
+      </div>
+      <div class="foot-legal">
+        <a href="/legal/imprint.html">Imprint</a>
+        <a href="/legal/privacy.html">Privacy</a>
+        <a href="/legal/terms.html">Terms</a>
+        <a href="/legal/withdrawal.html">Withdrawal</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ORDER IS LOAD-BEARING — see index.html. No pacman.js: the scroll bar is
+       pointless on a page this short. -->
+  <script src="/data.js" defer></script>
+  <script src="/pixel-engine.js" defer></script>
+  <script src="/common.js" defer></script>
+  <script src="/menu.js" defer></script>
+</body>
+
+</html>
