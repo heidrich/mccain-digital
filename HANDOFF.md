@@ -1,72 +1,191 @@
-# Uebergabe — Stand 11. September 2026
+# Uebergabe — Stand 11. September 2026, Nachtlauf
 
 `https://mccain-digital.vercel.app/` liefert den Stand von `main`.
 
-## ▶ ZUERST LESEN — Stand am Ende des 11.9.
+## ▶ ZUERST LESEN — Stand nach der Nacht zum 11.9.
 
 **Der Relaunch steht am Repo-Root**, gebaut aus dem Claude-Design-Export in
-`mccain-design-system/`.
+`mccain-design-system/`. **Die ganze Seite steht auf `noindex`**, solange sie
+unfertig ist — ein Schalter: `site.config.json`.
 
-**Die Ordner wurden am 11.9. abends aufgeraeumt** (`git mv`, Historie folgt):
+### ⚠ Das Wichtigste zuerst: das Kontaktformular hat NICHTS gesendet
+
+Der Handler aus dem Export lautete:
+
+```js
+formSubmit = (e) => { e.preventDefault();
+  const fd = new FormData(e.currentTarget);
+  if (fd.get('company')) return;
+  this.setState({ formSent: true }); };
+```
+
+Er hat die Danke-Meldung gezeigt — „Danke – Ihre Nachricht ist da. Sie hören
+innerhalb von 24 Stunden von Christian oder Kathi." — und **null Requests**
+abgesetzt. Gegen die Live-Seite gemessen: 0 Nicht-GET-Requests, Danke sichtbar,
+Formular aus dem DOM entfernt. **Jede Anfrage wurde still verworfen, während dem
+Absender gesagt wurde, sie sei angekommen.** Niemand auf beiden Seiten hätte das
+je bemerkt.
+
+Behoben: Das Formular postet wieder an **Web3Forms** — keine neue Entscheidung,
+sondern die dokumentierte. Die alte Seite nutzte denselben öffentlichen
+Schlüssel, und die **geprüfte Datenschutzerklärung nennt Web3Forms ausdrücklich**
+als Verarbeiter. Umgesetzt als progressive Verbesserung: echtes `action` und
+`method` (funktioniert ohne JavaScript), `fetch()` für die Antwort in der Seite,
+nativer Submit als Rückfall — und die Danke-Meldung **nur bei Erfolg**.
+
+Der Kanal ist Ende-zu-Ende geprüft (`success: true`). **Eine klar
+gekennzeichnete Prüfnachricht liegt im Postfach** und erklärt sich selbst.
+
+`tools/verify_site.mjs` prüft ab jetzt, dass jedes Formular ein brauchbares
+`action` hat.
+
+### Die 100 SVG-Fehler in der Konsole — behoben
+
+Beim Laden druckte die Startseite **70** SVG-Fehler, der Brand Guide **37**,
+während das Tor „0 page errors" meldete. `pageerror` trägt nur ungefangene
+Ausnahmen; `console.error` und die Parser-Meldungen des Browsers erreichen es
+nie. **Ein Tor, das einen Kanal beobachtet, sagt nichts über den anderen.**
+
+Ursache war die Zustellform des Templates. Als lebendiger `<x-dc>`-Teilbaum
+parst, layoutet und malt der Browser eine **zweite vollständige Kopie der Seite**,
+die niemand sieht — voller `{{ }}`-Platzhalter, also ein Fehler je SVG-Attribut,
+ein Fetch je `src="{{ … }}"` und `pixel-engine.js` **zweimal** geladen.
+
+Jetzt: inertes `<template id="dc-template">` + leeres `<x-dc>` als Montagepunkt,
+dazu ein dreizeiliger Shim. Vorher geprüft, dass ein `<template>` **exakt**
+denselben String liefert wie ein `<x-dc>` — 143.641 Zeichen auf beiden Wegen.
+
+| | vorher | jetzt |
+| --- | --- | --- |
+| Konsolenfehler Start / Brand | 70 / 37 | **0 / 0** |
+| `pixel-engine.js` | 2× | 1× |
+| Favicon | 3× | 1× |
+| Elemente im Layout beim Parsen | ~4.200 | ~2.200 |
+
+### Was gemessen wurde — Lighthouse, Desktop, lokale Produktionsheader
+
+| Seite | Perf | A11y | Best | SEO | FCP | LCP | TBT |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Startseite | **68** | 99 | 100 | 69 | 349 ms | 1398 ms | 663 ms |
+| Kontakt | **100** | **100** | 100 | 69 | 200 ms | 300 ms | 0 ms |
+| Leistungsseite | **100** | **100** | 100 | 69 | 200 ms | 300 ms | 0 ms |
+| Rechtsseite | **100** | **100** | 100 | 69 | 200 ms | 300 ms | 0 ms |
+| Brand Guide | **100** | 91 | 100 | 69 | 400 ms | 700 ms | 0 ms |
+
+**SEO 69 ist unser eigenes `noindex`** (`is-crawlable`), sonst nichts.
+
+**Die „4×100 Lighthouse"-Aussage auf der Startseite stimmt für diesen Build
+nicht.** Die Seite liegt bei **68**, gebunden an **1.493 ms Skriptauswertung**,
+mit der React ~2.140 Elemente rendert, plus 364 ms Layout. Das ist der Entwurf
+der Komponente, nicht ihre Auslieferung: `support.js` zu deferren und React
+vorzuladen bewegte den Wert **gar nicht** (68/69/69 über je drei Läufe), und der
+React-Preload verschlechterte FCP messbar von 349 ms auf 485 ms — deshalb ist er
+nicht drin. Die Aussage muss entweder von der Seite oder die Seite muss anders
+gebaut werden. **Owner-Entscheidung.**
+
+Lighthouse kann von diesem Rechner aus **die Live-URL nicht** messen (jeder Lauf
+endet in `FAILED_DOCUMENT_REQUEST` / `net::ERR_ABORTED`, während curl und
+Playwright dieselbe URL problemlos holen). Gemessen wird deshalb gegen
+`python prodserve.py 8897` — gleiche Kompression, gleiche Cache-Header,
+reproduzierbar. Live liefert Brotli (66 KB) statt gzip (102 KB), ist also eher
+besser als die Zahlen oben.
+
+### Neu gebaut: fünf Seiten, die es schon einmal gab
+
+`/contact.html` und `/services/{ai-tools,web-apps,websites,software}.html` waren
+auf der Vorgängerseite live — sie stehen in deren Sitemap — und **lieferten seit
+dem Relaunch alle 404**. Sie sind zurück, unter denselben Adressen:
+
+- `/kontakt.html` — deutsch-zuerst; `/contact.html` ist eine **308-Weiterleitung**
+  darauf, keine zweite Kopie
+- `/services/ai-tools.html` · `web-apps` · `websites` · `software`
+
+**Woher die Worte kommen:** nichts ist abgetippt. Die vier Leistungen sind die
+vier Schlüssel in `content.json` (`ai`, `apps`, `web`, `software`) — Kennzahlen,
+Anwendungsfälle, Fähigkeiten, Ablauf, FAQ, Stack, alles schon auf Deutsch. Das
+ist derselbe Inhalt, den die Startseite in ihren Modals zeigt. Überschrift,
+Kopfzeile und Einleitung kommen über `tools/extract_design.mjs` aus der
+**gerenderten** Startseite, damit eine Unterseite nicht von deren Wortlaut
+abdriften kann.
+
+**„Halte dich an das Design"** ist ebenfalls nicht nach Augenmaß: Typo-Skala,
+Farben, Kartenradius und Schatten in `tools/pagekit.py` sind mit
+`getComputedStyle` von der gerenderten Startseite abgelesen (h1 600/−0.04em,
+h2 700/−0.03em, h3 600/−0.025em, Fließtext #425466 auf #fff, Karte 16px +
+`0 0 0 1px #E3E8EE`).
+
+Die Seiten sind **statisches HTML ohne Hydration** — beide Fehler, die eine tote
+Startseite ausgeliefert haben, waren Hydrationsfehler, und PageSpeed steht in
+diesem Projekt vor allem anderen. Ergebnis: 100/100/100.
+
+### Aufgeräumt: eine Archiv- und eine Interna-Ablage
 
 | vorher | jetzt |
 | --- | --- |
-| `old/` | `archive/site-apache/` — die Apache-Seite, **Quelle des geprueften Rechtstextes** |
-| `old 2/` | `archive/site-v3/` — die Seite, die der Relaunch abgeloest hat |
+| `old/` | `archive/site-apache/` — **Quelle des geprüften Rechtstextes** und der alten Kontaktseite |
+| `old 2/` | `archive/site-v3/` — die Seite, die der Relaunch abgelöst hat |
 | `audit/`, `_parked/`, `TODO.md`, `DESIGN-BEFUND.md`, `assets-src/` | `internal/` |
+| `sweep`, `accent_audit`, `type_scale` + 11 weitere | `archive/site-v3-tools/` (mit README) |
 
-`tools/build_legal.py`, `tools/build_sitemap.py`, `tools/check_links.py`,
-`.vercelignore`, `.gitignore` und `README.md` sind nachgezogen. Dass nichts davon
-erreichbar ist, ist keine Zusage, sondern ein Test: `tools/verify_site.mjs` fragt
-den Live-Host nach diesen Pfaden und faellt durch, wenn einer **nicht** 404 ist.
+Dass nichts davon erreichbar ist, ist **keine Zusage, sondern ein Test**:
+`tools/verify_site.mjs` fragt den Live-Host nach zehn Pfaden und fällt durch,
+wenn einer **nicht** 404 liefert. `README.md` war komplett veraltet (beschrieb
+v3: ein Stylesheet, Schibsted Grotesk, „zero build") und ist neu geschrieben.
 
-### Was ausgeliefert wird
-
-`index.html` · `brand-guide.html` · `404.html` · `legal/{imprint,privacy,terms,withdrawal}.html`
-· `robots.txt` · `sitemap.xml` · `llms.txt` · `og-image.png`
-· Laufzeit: `support.js`, `content.json`, `pixel-engine.js`, `brand/`, `img/`, `team/`,
-`fonts/`, `vendor/`
-
-`mccain-design-system/`, `archive/`, `internal/`, `tools/` und die Notizen stehen
-in `.vercelignore`.
-
-**Die ganze Seite steht auf `noindex`**, solange der Relaunch unfertig ist.
-Ein Schalter: `site.config.json`. Jeder Generator liest ihn, `vercel.json`
-liefert zusaetzlich `X-Robots-Tag`, und das Tor faellt durch, wenn die beiden
-auseinanderlaufen.
-
-### Die zwei Befunde, die die Arbeit getrieben haben
-
-**1. Die Seite war client-gerendert — das war das eigentliche SEO-Problem.**
-838 Platzhalter, jedes Wort in `content.json`. Gemessen: ein Crawler ohne
-JavaScript las **145 Wörter** Dekoration. `tools/prerender.mjs` rendert die
-Seite jetzt im echten Browser und schreibt den gesetzten DOM nach `index.html`:
-**1.886 Wörter**, eine `<h1>`, 23 Überschriften. `support.js` fährt weiter mit
-und übernimmt beim Laden, Modals/DE-EN/Konsole funktionieren unverändert.
-
-**2. React kam von `unpkg.com`, die Schriften von Google.** Für eine deutsche
-Seite mit Datenschutzerklärung ist das die Übertragung, über die das LG München I
-2022 entschieden hat. `tools/vendor_assets.py` holt beides ins Repo. React läuft
-über den vorgesehenen `window.__resources`-Haken von `support.js` — kein Patch
-an einer Fremddatei, und die SRI-Hashes stimmen weiter, weil die Bytes gleich
-sind. **Gemessen: die gebaute Seite kontaktiert 32 URLs, alle bei uns. Der
-Export daneben rief unpkg.com, fonts.gstatic.com und fonts.googleapis.com.**
-
-### Der Build — drei Befehle, Reihenfolge zählt
+### Der Build — Reihenfolge zählt
 
 ```
-python prodserve.py 8898 --dev          # muss laufen, prerender liest darüber
-python tools/vendor_assets.py           # einmalig / bei Versionswechsel
-node tools/prerender.mjs                # index.html + brand-guide.html + og-image + Assets
-python tools/build_legal.py             # die vier Rechtsseiten
-python tools/build_sitemap.py           # zuletzt, prüft gegen die Platte
+python prodserve.py 8898 --dev              # muss laufen
+python tools/patch_export.py                # nach JEDEM neuen Claude-Design-Export
+python tools/vendor_assets.py               # React + Schriften ins Repo
+node  tools/prerender.mjs                   # index + brand-guide + og-image + minify
+node  tools/extract_design.mjs > internal/design-reference.json
+python tools/build_pages.py                 # Kontakt + die vier Leistungsseiten
+python tools/build_legal.py                 # die vier Rechtsseiten
+python tools/build_sitemap.py               # zuletzt, prüft gegen die Platte
+node  tools/verify_site.mjs                 # PFLICHT vor jedem Push
 ```
 
-`index.html` und `brand-guide.html` sind **generiert**. Wer sie von Hand ändert,
-verliert es beim nächsten Build — die Quelle ist
-`mccain-design-system/reference/`.
+`index.html`, `brand-guide.html`, `kontakt.html`, `services/*`, `legal/*` sind
+**generiert**. Handänderungen gehen beim nächsten Build verloren.
 
-### ⚠ Zwei Fallen im Build — beide haben eine tote Seite ausgeliefert
+**`tools/patch_export.py` ist neu und wichtig:** es sammelt jede bewusste
+Änderung am Claude-Design-Export an einer Stelle (Kontaktformular, Fußzeilen-
+Links) und ist wiederholbar. Ein frischer Export überschreibt den Ordner —
+danach dieses Skript laufen lassen, sonst ist das Formular wieder tot.
+
+### Die Tore
+
+| | |
+| --- | --- |
+| `verify_site.mjs` | **klickt.** Hydration, Menü, Modal, Pixel-Engine, Konsole, `noindex`, Formular-`action`, Erreichbarkeit jeder Seite von der Startseite, und was 404 bleiben muss. Nimmt eine URL für live. |
+| `console_audit.mjs` | jede Konsolenmeldung, nach Form gruppiert |
+| `requests_audit.mjs` | jeder Request, gezählt — eine Dublette ist der Befund |
+| `responsive_audit.mjs` | Überlauf bei 390/768/1024/1440 und **welches Element** ihn verursacht |
+| `lighthouse_audit.py` | die Tabelle oben, plus jeder Prüfpunkt unter 100 |
+| `form_probe.mjs` | füllt ein Formular aus, sendet ab, meldet was den Browser verlässt |
+| `weigh.mjs` | woraus die ausgelieferten Bytes bestehen |
+| `check_links.py` | Links, Anker, doppelte IDs auf den ausgelieferten Seiten |
+
+### Optimiert, ohne die Seite zu zerstören
+
+Interne (kommentierte) und externe (minifizierte) Fassung, bei jedem Build neu
+abgeleitet, damit sie nicht auseinanderlaufen:
+
+```
+support.js        67,5 KB -> 36,4 KB roh   (16,3 -> 12,3 KB brotli)
+pixel-engine.js  137,3 KB -> 42,1 KB roh   (37,2 -> 14,4 KB brotli)
+```
+
+**26,8 KB weniger über die Leitung, 126 KB weniger zu parsen.** Nur Bezeichner
+werden umbenannt, keine Eigenschaftsnamen — `support.js` greift namentlich auf
+Objekte zu. Das Tor klickt, ein kaputter Minifier wäre aufgefallen.
+
+Zur Ausgangsfrage „viele Kommentare auf der Live-Seite?": **in der HTML sind es
+0,9 KB von 661 KB — nichts.** In `pixel-engine.js` waren es 55 KB von 137 KB —
+*das* war der reale Fund.
+
+### ⚠ Vier Fallen im Build — jede hat schon etwas Kaputtes ausgeliefert
 
 **1. Niemals den gesetzten DOM als `index.html` speichern.** `support.js`
 montiert so:
@@ -81,9 +200,11 @@ Ein Snapshot entsteht NACH diesem Austausch, enthält also kein `<x-dc>` mehr.
 Beim nächsten Laden rendert nichts. React lädt, PixelFX lädt, **null
 Konsolenfehler**, jeder Knopf tot. Deshalb liefert die Seite **beide** Kopien:
 `#dc-prerender` (gesetztes Markup — was Crawler lesen und was zuerst malt) und
-darunter das unberührte, versteckte `<x-dc>`. Ein MutationObserver entfernt die
-Vorschau, sobald `#dc-root` Kinder hat — und lässt sie stehen, falls React nie
-kommt.
+darunter das leere `<x-dc>` als Montagepunkt, mit dem Template im inerten
+`<template id="dc-template">`. Ein MutationObserver entfernt die Vorschau,
+sobald `#dc-root` **mehr als 40 Elemente** hat — nicht schon beim ersten Kind:
+„React hat eine leere Hülle montiert" und „React hat die Seite gerendert" sind
+zwei Zustände, und nur einer darf die lesbare Kopie wegnehmen.
 
 **2. Aus dem Snapshot-`<head>` nur die `<style>`-Blöcke übernehmen.** Den ganzen
 Head mitzunehmen liefert `support.js` und `pixel-engine.js` **doppelt**. Zwei
@@ -91,21 +212,36 @@ Laufzeiten im Wettlauf, die zweite erreicht den Komponenten-Code bevor React
 fertig ist: `Cannot read properties of null (reading 'useState')`, wieder
 leeres `#dc-root`, wieder keine sichtbare Fehlermeldung.
 
-**Die Lehre, die am meisten gekostet hat:** eine Ladezeit-Prüfung beweist nicht,
-dass eine Seite funktioniert. 200er, Bilder, Meta-Tags und Wortzahl waren alle
-grün, während die Seite vollständig tot war — gefunden hat es der Owner, nicht
-ich. **Vor jedem Push klicken**, mit den Sonden im Scratchpad-Muster:
+**3. Das Template niemals als lebendiges Markup ausliefern.** Als
+`<x-dc>`-Teilbaum baut der Browser einen kompletten zweiten DOM, der nie zu
+sehen ist — und weil darin `{{ }}`-Platzhalter stehen, meldet er einen Fehler je
+SVG-Attribut (70 auf der Startseite), holt jedes `src="{{ … }}"` als URL und
+führt das `<script src="pixel-engine.js">` aus dem `<helmet>` ein zweites Mal
+aus. Inertes `<template>` löst alle vier Punkte auf einmal.
 
-- `#dc-prerender` weg, `#dc-root` hat Kinder, `pageerrors: 0`
-- Mega-Menü reagiert (DOM ändert sich bei hover/click)
-- eine Leistungs-Kachel öffnet einen `[role=dialog]`
-
-**3. Gross-/Kleinschreibung in erzeugten Dateinamen.** Google Fonts benennt den
+**4. Gross-/Kleinschreibung in erzeugten Dateinamen.** Google Fonts benennt den
 römischen und den kursiven Schnitt fast gleich (`pxitypc9vs` gegen
 `pxiTypc9vs`). Auf NTFS überschrieb der zweite Download den ersten still — vier
 Dateien statt sechs, eine mit dem falschen Schnitt — und der verschwundene Name
 lief auf Vercel in 404. `vendor_assets.py` benennt jetzt nach Familie-Stil-Subset
 und bricht ab, wenn zwei URLs auf denselben Dateinamen fallen.
+
+**Die zwei Lehren, die am meisten gekostet haben:**
+
+- **Eine Ladezeit-Prüfung beweist nicht, dass eine Seite funktioniert.** 200er,
+  Bilder, Meta-Tags und Wortzahl waren alle grün, während die Seite vollständig
+  tot war. Gefunden hat es der Owner. **Vor jedem Push klicken.**
+- **Ein Tor, das einen Kanal beobachtet, sagt nichts über den anderen.**
+  `pageerror` war leer, während 70 Meldungen auf `console` standen. Dasselbe
+  Muster zweimal: eine grüne Messung ist erst dann eine Auskunft, wenn sie die
+  Frage stellt, um die es geht.
+
+**Und ein Wächter kann sich selbst blenden:** zwei Prüfungen suchten nach dem
+Literal `<template id="dc-template">` und trafen den **Doku-Kommentar** oben in
+der erzeugten Datei, der genau dieses Tag zitiert. Der Treffer lief bis zum
+echten `</template>` und schnitt damit das vorgerenderte Markup aus der eigenen
+Prüfung heraus. Kommentare kommen jetzt zuerst raus. **Was in der Dokumentation
+ein Muster benennt, liegt mit im Suchraum.**
 
 ### Offen — Owner-Entscheidungen
 
@@ -116,39 +252,55 @@ und bricht ab, wenn zwei URLs auf denselben Dateinamen fallen.
    „illustrativ, nie Kundenreferenzen". Sind das keine freigegebenen Kunden,
    ist das in DE ein Abmahn-Risiko.
 2. **Die Rechtstexte sind Englisch**, die Seite ist Deutsch-zuerst. Die Seiten
-   tragen deshalb `lang="en"`. Der geprüfte Wortlaut darf nicht maschinell
-   übersetzt werden — das ist eine Anwaltsfrage.
-3. **„4×100 Lighthouse"** steht als Projektkarten-Aussage über die eigene Seite
-   auf der Startseite. Die Zahl stammt vom v3-Build. Nach dem Deploy **echte**
-   Lighthouse-/Squirrelscan-Messung, sonst wirbt die Seite mit einer Zahl, die
-   für sie nicht mehr belegt ist.
+   tragen deshalb `lang="en"`, und die deutsche Schale darin ist seit dem
+   Nachtlauf korrekt als `lang="de"` ausgezeichnet. Der geprüfte Wortlaut darf
+   nicht maschinell übersetzt werden — das bleibt eine Anwaltsfrage.
+   **Dazu neu:** die Datenschutzerklärung nennt **SiteGround** als Hoster. Die
+   Seite läuft seit dem Umzug auf **Vercel**. Das ist ein Fehler im geprüften
+   Text, den ich nicht ändern darf — bitte beim Anwalt mitnehmen.
+3. **„4×100 Lighthouse"** steht als Aussage über die eigene Seite auf der
+   Startseite. **Jetzt gemessen: die Startseite liegt bei 68**, gebunden an
+   1.493 ms Skriptauswertung für ~2.140 React-Elemente. Die Zahl stammt vom
+   v3-Build und ist für diesen nicht belegt. Entweder die Aussage geht von der
+   Seite, oder die Startseite wird anders gebaut. Die vier statischen
+   Unterseiten liegen bei 100.
 4. **„Tech-Notizen"** in der Fusszeile zeigt auf `#` — toter Platzhalter aus dem
    Entwurf.
+5. **Das Bestätigungs-Postfach prüfen.** Im Postfach liegt eine Nachricht
+   „[AUTOMATISCHE PRUEFUNG] Kontaktformular mccain-digital.com". Kommt sie an,
+   ist der Kanal beweisbar in Ordnung. Kommt sie **nicht** an, obwohl die API
+   `success: true` gemeldet hat, stimmt etwas an der Web3Forms-Zustellung — dann
+   bitte Bescheid geben.
 
-### Geplant, noch nicht gebaut (Owner, 11.9.)
+### Geplant, noch nicht gebaut
 
-Vier Leistungsseiten, eine About-, eine Kontaktseite, alle Rechtsseiten (stehen),
-und **Projektseiten — die erste für whatever-recall**, dessen Inhalt und URL auf
-diese Domain geholt und umgeleitet werden sollen. recall ist stark geschrumpft,
-damit ist eine Projektseite hier der richtige Ort statt einer eigenen Domain.
+Eine **About-Seite** und **Projektseiten — die erste für whatever-recall**,
+dessen Inhalt und URL auf diese Domain geholt und umgeleitet werden sollen.
+recall ist stark geschrumpft, damit ist eine Projektseite hier der richtige Ort
+statt einer eigenen Domain.
+
 `tools/build_sitemap.py` trägt die Liste; sie verweigert den Bau, wenn eine
 gelistete Datei fehlt **oder** eine vorhandene `.html` nicht gelistet ist.
 
-### Die Werkzeuge zeigen noch auf das alte Layout
+### Zwei Befunde, die ich bewusst NICHT angefasst habe
 
-`tools/browser.mjs` `requireServer()` prüft `BASE + "/index.html"` — das geht
-wieder, weil der Root wieder eine `index.html` hat. Aber `sweep.mjs`,
-`accent_audit.mjs` und `type_scale.mjs` messen **v3-Klassen und v3-Tokens**, die
-es in der neuen Seite nicht gibt. Sie laufen, sagen aber nichts über diese Seite.
-Vor dem nächsten Einsatz umbauen oder stilllegen — ein Tor, das immer grün ist,
-liest irgendwann niemand mehr.
+Beide sitzen in der Claude-Design-Komponente, nicht in der Auslieferung:
 
-### Gemessen, damit es nicht wieder erraten wird
+- **Der Startseite fehlt ein `<main>`-Landmark** (Lighthouse A11y 99 statt 100).
+  Richtig wäre, im Template die Sektionen zwischen Kopf- und Fusszeile in
+  `<main>` zu fassen. `role="main"` auf `#dc-root` wäre **falsch** — dort stehen
+  Kopf- und Fusszeile mit drin.
+- **Der Brand Guide liegt bei A11y 91**: Bilder ohne `width`/`height`,
+  Kontraste, und Links im Fließtext ohne nicht-farbliche Unterscheidung.
 
-Ein triviales Ein-`<h1>`-Dokument misst in diesem Aufbau bereits **968 ms FCP**.
-Absolute Zahlen aus headless Chromium sind wertlos; nur der Abstand zum Boden
-zählt: v3-Seite (gemessene 4×100) +148 ms, neue Seite +396 ms, der Export
-+1680 ms. CLS 0 (Export: 0,0069), LCP 1364 ms gegen 1816 ms der alten Seite.
+Beides sind Eingriffe in Fremd-Markup mit echtem Risiko, für eine Nacht ohne
+Rückfrage zu viel. Wenn sie gemacht werden, gehören sie in
+`tools/patch_export.py`, damit ein frischer Export sie nicht verschluckt.
+
+### Historie unterhalb dieser Zeile
+
+Alles ab hier ist **älter** und beschreibt teils die v3-Seite. Der aktuelle
+Stand steht vollständig oben.
 
 ### Zuletzt gebaut: der Anzeigengrad, dritte Runde
 
