@@ -49,6 +49,47 @@ python tools/build_sitemap.py           # zuletzt, prüft gegen die Platte
 verliert es beim nächsten Build — die Quelle ist
 `mccain-design-system/reference/`.
 
+### ⚠ Zwei Fallen im Build — beide haben eine tote Seite ausgeliefert
+
+**1. Niemals den gesetzten DOM als `index.html` speichern.** `support.js`
+montiert so:
+
+```js
+const dc = doc.querySelector("x-dc");
+if (!dc) return null;          // <- ein Snapshot stirbt hier
+dc.replaceWith(hostEl);        // x-dc wird <div id="dc-root">
+```
+
+Ein Snapshot entsteht NACH diesem Austausch, enthält also kein `<x-dc>` mehr.
+Beim nächsten Laden rendert nichts. React lädt, PixelFX lädt, **null
+Konsolenfehler**, jeder Knopf tot. Deshalb liefert die Seite **beide** Kopien:
+`#dc-prerender` (gesetztes Markup — was Crawler lesen und was zuerst malt) und
+darunter das unberührte, versteckte `<x-dc>`. Ein MutationObserver entfernt die
+Vorschau, sobald `#dc-root` Kinder hat — und lässt sie stehen, falls React nie
+kommt.
+
+**2. Aus dem Snapshot-`<head>` nur die `<style>`-Blöcke übernehmen.** Den ganzen
+Head mitzunehmen liefert `support.js` und `pixel-engine.js` **doppelt**. Zwei
+Laufzeiten im Wettlauf, die zweite erreicht den Komponenten-Code bevor React
+fertig ist: `Cannot read properties of null (reading 'useState')`, wieder
+leeres `#dc-root`, wieder keine sichtbare Fehlermeldung.
+
+**Die Lehre, die am meisten gekostet hat:** eine Ladezeit-Prüfung beweist nicht,
+dass eine Seite funktioniert. 200er, Bilder, Meta-Tags und Wortzahl waren alle
+grün, während die Seite vollständig tot war — gefunden hat es der Owner, nicht
+ich. **Vor jedem Push klicken**, mit den Sonden im Scratchpad-Muster:
+
+- `#dc-prerender` weg, `#dc-root` hat Kinder, `pageerrors: 0`
+- Mega-Menü reagiert (DOM ändert sich bei hover/click)
+- eine Leistungs-Kachel öffnet einen `[role=dialog]`
+
+**3. Gross-/Kleinschreibung in erzeugten Dateinamen.** Google Fonts benennt den
+römischen und den kursiven Schnitt fast gleich (`pxitypc9vs` gegen
+`pxiTypc9vs`). Auf NTFS überschrieb der zweite Download den ersten still — vier
+Dateien statt sechs, eine mit dem falschen Schnitt — und der verschwundene Name
+lief auf Vercel in 404. `vendor_assets.py` benennt jetzt nach Familie-Stil-Subset
+und bricht ab, wenn zwei URLs auf denselben Dateinamen fallen.
+
 ### Offen — Owner-Entscheidungen
 
 1. **Die Logo-Reihe im Hero** (Deutsche Bank, Apple, Microsoft, Blizzard,
