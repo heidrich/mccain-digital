@@ -40,6 +40,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import * as esbuild from "esbuild";
 import { launch, open, settle } from "./browser.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -64,6 +65,22 @@ const OG_ALT = "mccain digital — das Pixelstrom-Zeichen auf dunklem Grund";
  * build. Wait for the first line. If the copy changes this throws rather than
  * quietly indexing something else: which sentence Google shows is a decision. */
 const HERO_H1 = "KI-Tools, die auf Ihren Daten laufen.";
+
+/* An internal and an external edition of the same file.
+ *
+ * pixel-engine.js is 137 KB of which 55 KB is comments - it is written to be
+ * read, and that is worth keeping. But every visitor downloads and tokenises
+ * all of it, and Lighthouse names it: "unminified JavaScript, est. savings
+ * 33 KiB". So the commented source stays the source of record in
+ * mccain-design-system/reference/, and what ships at the site root is the
+ * minified edition built from it.
+ *
+ * support.js is third-party runtime, minified through the same step rather than
+ * edited. Nothing here rewrites its logic; if minification ever broke it the
+ * gate would catch it, because the gate clicks.
+ *
+ * Both are re-derived on every build, so the two editions cannot drift. */
+const MINIFY = new Set(["pixel-engine.js", "support.js"]);
 
 /* Copied so the site root is self-contained and a deploy never has to reach
  * into mccain-design-system/, which is .vercelignore'd. */
@@ -375,6 +392,17 @@ const seoHead = `<meta charset="utf-8">
 <link rel="apple-touch-icon" href="brand/apple-touch-icon-180.png">
 ${preloads}
 <link rel="stylesheet" href="fonts/fonts.css">
+<!-- support.js is deferred: it was blocking the parser in front of ~680 KB of
+     document, and on an already-prerendered page there is nothing to gain from
+     running the runtime before the readable copy exists.
+
+     React is deliberately NOT preloaded here. It looks like it should help -
+     support.js only requests it after it runs - but measured over three runs
+     each, preloading moved median FCP from 349 ms to 485 ms: the two files
+     compete with the document for the same connection, and the document is what
+     paints. The score itself did not move either way (68/69/69), because this
+     page is bound by main-thread work, not by load order: 1,493 ms of script
+     evaluation rendering ~2,140 elements. -->
 <script type="application/ld+json">${JSON.stringify(
   { "@context": "https://schema.org", "@graph": graph },
   null,
@@ -445,7 +473,7 @@ const html = `<!DOCTYPE html>
 <head>
 ${seoHead}
 ${runtimeHead}
-<script src="support.js"></script>
+<script src="support.js" defer></script>
 </head>
 <body>
 <div id="dc-prerender">${prerendered}</div>
@@ -541,10 +569,21 @@ const bgHtml = `<!DOCTYPE html>
 <link rel="icon" href="brand/mccain-favicon.svg" type="image/svg+xml">
 ${preloads}
 <link rel="stylesheet" href="fonts/fonts.css">
+<!-- support.js is deferred: it was blocking the parser in front of ~680 KB of
+     document, and on an already-prerendered page there is nothing to gain from
+     running the runtime before the readable copy exists.
+
+     React is deliberately NOT preloaded here. It looks like it should help -
+     support.js only requests it after it runs - but measured over three runs
+     each, preloading moved median FCP from 349 ms to 485 ms: the two files
+     compete with the document for the same connection, and the document is what
+     paints. The score itself did not move either way (68/69/69), because this
+     page is bound by main-thread work, not by load order: 1,493 ms of script
+     evaluation rendering ~2,140 elements. -->
 <script>window.__resources=${JSON.stringify(RESOURCE_MAP)};</script>
 ${HIDE_TEMPLATE}
 ${bgHead}
-<script src="support.js"></script>
+<script src="support.js" defer></script>
 </head>
 <body>
 <div id="dc-prerender">${bgBody}</div>
@@ -562,12 +601,28 @@ fs.writeFileSync(path.join(SITE, "brand-guide.html"), bgHtml, "utf8");
 /* ------------------------------------------------------------------ assets */
 
 let copied = 0;
+const minified = [];
 for (const [from, to] of Object.entries(ASSETS)) {
   const src = path.join(SITE, from);
   const dst = path.join(SITE, to);
   if (!fs.existsSync(src)) throw new Error(`prerender: asset source missing: ${from}`);
   fs.rmSync(dst, { recursive: true, force: true });
   fs.cpSync(src, dst, { recursive: true });
+  if (MINIFY.has(to)) {
+    const before = fs.readFileSync(dst, "utf8");
+    const out = await esbuild.transform(before, {
+      loader: "js",
+      minify: true,
+      /* Identifiers only. Property names are left alone: support.js reaches
+       * into objects by name (DCLogic, StreamableLogic, __dcRootName) and
+       * pixel-engine reads data-* driven config, so renaming properties would
+       * be a silent behaviour change dressed up as a size win. */
+      legalComments: "none",
+      target: "es2018",
+    });
+    fs.writeFileSync(dst, out.code, "utf8");
+    minified.push([to, before.length, out.code.length]);
+  }
   copied += fs.statSync(dst).isDirectory() ? fs.readdirSync(dst, { recursive: true }).length : 1;
 }
 
@@ -580,3 +635,10 @@ console.log(`  index.html      ${html.length.toLocaleString()} bytes ` +
 console.log(`  brand-guide     ${bgHtml.length.toLocaleString()} bytes`);
 console.log(`  preloads        ${fontFiles.length} upright latin woff2`);
 console.log(`  assets          ${copied} files copied to the site root`);
+for (const [name, before, after] of minified) {
+  const pct = (100 - (after / before) * 100).toFixed(0);
+  console.log(
+    `  minified        ${name.padEnd(18)} ${(before / 1024).toFixed(1)} KB -> ` +
+      `${(after / 1024).toFixed(1)} KB  (-${pct}%)`
+  );
+}

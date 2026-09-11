@@ -22,6 +22,17 @@
 <link rel="preload" href="fonts/instrument-sans-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/jetbrains-mono-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="fonts/fonts.css">
+<!-- support.js is deferred: it was blocking the parser in front of ~680 KB of
+     document, and on an already-prerendered page there is nothing to gain from
+     running the runtime before the readable copy exists.
+
+     React is deliberately NOT preloaded here. It looks like it should help -
+     support.js only requests it after it runs - but measured over three runs
+     each, preloading moved median FCP from 349 ms to 485 ms: the two files
+     compete with the document for the same connection, and the document is what
+     paints. The score itself did not move either way (68/69/69), because this
+     page is bound by main-thread work, not by load order: 1,493 ms of script
+     evaluation rendering ~2,140 elements. -->
 <script>window.__resources={"https://unpkg.com/react@18.3.1/umd/react.production.min.js":"vendor/react-18.3.1.production.min.js","https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js":"vendor/react-dom-18.3.1.production.min.js"};</script>
 <style>x-dc{display:none!important}</style>
 <style>
@@ -93,7 +104,7 @@ pre{margin:0}
 @media (prefers-reduced-motion:reduce){[data-motion] *{animation:none!important}}
 </style>
 <style type="text/css">html{scroll-behavior:auto!important}</style>
-<script src="support.js"></script>
+<script src="support.js" defer></script>
 </head>
 <body>
 <div id="dc-prerender"><div class="sc-host" data-sc-name="McCain Digital Brand Guide"><div data-dc-tpl="5" data-screen-label="Navigation" style="position: sticky; top: 0px; z-index: 20; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(14px) saturate(1.4); border-bottom: 1px solid rgba(10, 37, 64, 0.08);">

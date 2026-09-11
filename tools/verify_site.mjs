@@ -290,6 +290,31 @@ if (WANT_NOINDEX && BASE.startsWith("http") && !BASE.includes("127.0.0.1")) {
   if (!headerSeen) fail("no X-Robots-Tag: noindex header - check vercel.json");
 }
 
+/* Reachability, the other direction: is every page actually linked FROM the
+ * start page, in the DOM React renders - not in the prerendered copy that gets
+ * thrown away. A page can be in the sitemap, answer 200 and still be an orphan
+ * that no reader ever arrives at. The four service pages and the contact page
+ * were exactly that until the footer stopped opening modals and started linking. */
+{
+  const url = BASE + "/index.html";
+  const { page } = await load(url);
+  const hrefs = await page.evaluate(() => {
+    const root = document.getElementById("dc-root") || document.body;
+    return [...root.querySelectorAll("a[href]")].map((a) => a.getAttribute("href"));
+  });
+  const norm = (h) => h.replace(/^\.?\//, "").replace(/^https?:\/\/[^/]+\//, "");
+  const linked = new Set(hrefs.map(norm));
+  const want = FLAT_PAGES.filter((f) => f.indexable !== false).map((f) => f.path.slice(1));
+  want.push("brand-guide.html");
+  console.log("\n  linked from the start page (after hydration)");
+  for (const p of want) {
+    const good = linked.has(p);
+    console.log(`    ${ok(good)} ${p}`);
+    if (!good) fail(`${p} is not linked from the start page - it is an orphan`);
+  }
+  await page.close();
+}
+
 /* What must NOT be reachable. .vercelignore is a text file with no test of its
  * own: a mistyped line there silently publishes the two retired sites, the build
  * tooling and the internal notes, and nothing on the site would look different.

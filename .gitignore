@@ -29,3 +29,8 @@ __pycache__/
 
 # Screenshots are a look, not a record - regenerate with tools/shots.mjs
 internal/shots/
+
+# Lighthouse reports: half a megabyte each, regenerable in a minute with
+# `python tools/lighthouse_audit.py`. The numbers that matter are written
+# down in HANDOFF.md instead.
+internal/lighthouse/
