@@ -101,6 +101,8 @@ selectable, crawlable DOM underneath. Touch devices and
 ```text
 index.html              GENERATED   the start page
 brand-guide.html        GENERATED   the brand and download page
+kontakt.html            GENERATED   the contact page (/contact.html 301s here)
+services/               GENERATED   ai-tools, web-apps, websites, software
 legal/                  GENERATED   imprint, privacy, terms, withdrawal
 404.html
 site.config.json        the noindex switch, read by every generator
@@ -142,6 +144,8 @@ component through it.
 python prodserve.py 8898 --dev      # must be running
 python tools/vendor_assets.py       # React + the typefaces into the repo
 node  tools/prerender.mjs           # index.html, brand-guide.html, og-image.png
+node  tools/extract_design.mjs > internal/design-reference.json
+python tools/build_pages.py         # contact + the four service pages
 python tools/build_legal.py         # the four legal pages
 python tools/build_sitemap.py       # last: it checks itself against the disk
 node  tools/verify_site.mjs         # REQUIRED before every push
@@ -155,6 +159,8 @@ node  tools/verify_site.mjs         # REQUIRED before every push
 | `console_audit.mjs` | every console message, grouped by shape |
 | `requests_audit.mjs` | every request, counted — a duplicate is the finding |
 | `weigh.mjs` | what the shipped bytes actually consist of |
+| `responsive_audit.mjs` | horizontal overflow at 390 / 768 / 1024 / 1440, and the element that causes it |
+| `form_probe.mjs` | fills a contact form, submits it, and reports what left the browser |
 | `check_links.py` | internal links, anchors and duplicate ids on deployed pages |
 
 `verify_site.mjs` exists because a load check does not prove a page works. The

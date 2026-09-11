@@ -10,15 +10,22 @@ SITE = "https://mccain-digital.com"
 
 # path -> (priority, changefreq). Order is the order in the file.
 PAGES = [
-    # STATE, not intent: today the relaunch ships index.html plus the brand
-    # guide and the four legal pages. The four service pages, an about page and
-    # a contact page ARE planned (owner, 11.9.), and so are project pages -
-    # the first one for whatever-recall, whose content and URL are to be moved
-    # onto this domain and redirected. None of them are built yet.
-    # Add each one here as it lands: the checks above refuse to write a sitemap
-    # that lists a file which is not on disk, and refuse to leave an .html on
-    # disk out of the sitemap. So this list cannot silently drift either way.
+    # STATE, not intent. Add each page here as it lands: the checks below refuse
+    # to write a sitemap that lists a file which is not on disk, and refuse to
+    # leave an .html on disk out of the sitemap, so this list cannot drift in
+    # either direction.
+    #
+    # /contact.html is deliberately absent: it is a 301 to /kontakt.html in
+    # vercel.json, and a redirect does not belong in a sitemap.
+    #
+    # STILL PLANNED (owner, 11.9.): an about page, and project pages - the first
+    # for whatever-recall, whose content and URL are to move onto this domain.
     ("index.html", "1.0", "monthly"),
+    ("kontakt.html", "0.9", "yearly"),
+    ("services/ai-tools.html", "0.8", "monthly"),
+    ("services/web-apps.html", "0.8", "monthly"),
+    ("services/websites.html", "0.8", "monthly"),
+    ("services/software.html", "0.8", "monthly"),
     ("brand-guide.html", "0.5", "yearly"),
     ("legal/imprint.html", "0.3", "yearly"),
     ("legal/privacy.html", "0.3", "yearly"),

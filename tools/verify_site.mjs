@@ -46,6 +46,11 @@ const LIVE_PAGES = [
  * thing, the same mistake as demanding nav interaction from the brand guide. */
 const FLAT_PAGES = [
   { path: "/404.html", indexable: false },
+  { path: "/kontakt.html", form: true },
+  { path: "/services/ai-tools.html" },
+  { path: "/services/web-apps.html" },
+  { path: "/services/websites.html" },
+  { path: "/services/software.html" },
   { path: "/legal/imprint.html" },
   { path: "/legal/privacy.html" },
   { path: "/legal/terms.html" },
@@ -230,7 +235,7 @@ for (const { path: p, interactive, pixels } of LIVE_PAGES) {
   await page.close();
 }
 
-for (const { path: p, indexable = true } of FLAT_PAGES) {
+for (const { path: p, indexable = true, form = false } of FLAT_PAGES) {
   const url = BASE + p;
   const { page, errs, noise, hosts, bad, headers } = await load(url);
   const info = await page.evaluate(() => ({
@@ -240,6 +245,15 @@ for (const { path: p, indexable = true } of FLAT_PAGES) {
     words: (document.body.innerText || "").trim().split(/\s+/).length,
     canonical: document.querySelector('link[rel="canonical"]')?.getAttribute("href") || "",
     desc: document.querySelector('meta[name="description"]')?.getAttribute("content") || "",
+    /* A form has to have somewhere to send to. The start page's contact form
+     * showed "Danke - Ihre Nachricht ist da." and posted nothing at all: every
+     * enquiry silently discarded while the sender was told it had arrived.
+     * Nothing about the page looked wrong, so this is now asked out loud. */
+    forms: [...document.querySelectorAll("form")].map((f) => ({
+      action: f.getAttribute("action") || "",
+      method: (f.getAttribute("method") || "get").toLowerCase(),
+      fields: [...f.elements].filter((el) => el.name).map((el) => el.name),
+    })),
   }));
   const robots = await robotsOf(page);
   checkRobots(p, robots, headers);
@@ -251,6 +265,15 @@ for (const { path: p, indexable = true } of FLAT_PAGES) {
   if (!info.title) fail(`${p}: no title`);
   if (indexable && !info.desc) fail(`${p}: no meta description`);
   if (indexable && !info.canonical) fail(`${p}: no canonical`);
+  if (form) {
+    const posting = info.forms.filter((f) => f.method === "post" && /^https?:|^\//.test(f.action));
+    console.log(
+      `    ${ok(posting.length > 0)} ${posting.length} form(s) that actually post` +
+        (posting.length ? `  -> ${posting[0].action}` : "")
+    );
+    if (!posting.length)
+      fail(`${p}: the form has no usable action - a form that cannot send must not say it did`);
+  }
   if (info.h1 !== 1) fail(`${p}: ${info.h1} h1 elements`);
   if (info.overflow) fail(`${p}: scrolls horizontally`);
   for (const h of ext) fail(`${p}: contacts ${h}`);

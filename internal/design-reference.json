@@ -1,0 +1,278 @@
+{
+ "design": {
+  "vars": {
+   "--acc": "#635BFF",
+   "--acc-text": "#4d47c7",
+   "--acc-soft": "rgba(99,91,255,.10)",
+   "--acc-ring": "rgba(99,91,255,.28)"
+  },
+  "body": {
+   "font-family": "\"Instrument Sans\", system-ui, -apple-system, sans-serif",
+   "font-size": "16px",
+   "font-weight": "400",
+   "line-height": "normal",
+   "letter-spacing": "normal",
+   "color": "rgb(10, 37, 64)",
+   "background-color": "rgb(255, 255, 255)"
+  },
+  "h1": {
+   "font-family": "\"Instrument Sans\", system-ui, sans-serif",
+   "font-size": "70.56px",
+   "font-weight": "600",
+   "line-height": "73.3824px",
+   "letter-spacing": "-2.8224px",
+   "color": "rgb(10, 37, 64)"
+  },
+  "h2": {
+   "font-family": "\"Instrument Sans\", system-ui, sans-serif",
+   "font-size": "48px",
+   "font-weight": "700",
+   "line-height": "52.8px",
+   "letter-spacing": "-1.44px",
+   "color": "rgb(10, 37, 64)"
+  },
+  "h3": {
+   "font-family": "\"Instrument Sans\", system-ui, sans-serif",
+   "font-size": "24.48px",
+   "font-weight": "600",
+   "line-height": "28.152px",
+   "letter-spacing": "-0.612px",
+   "color": "rgb(10, 37, 64)"
+  },
+  "paragraph": {
+   "font-family": "\"Instrument Sans\", system-ui, sans-serif",
+   "font-size": "18px",
+   "font-weight": "400",
+   "line-height": "28.8px",
+   "letter-spacing": "normal",
+   "color": "rgb(66, 84, 102)"
+  },
+  "eyebrow": {
+   "font-family": "\"JetBrains Mono\", monospace",
+   "font-size": "11px",
+   "font-weight": "500",
+   "line-height": "normal",
+   "letter-spacing": "normal",
+   "color": "rgb(10, 37, 64)",
+   "sample": "sitemap.xml · 42 urls"
+  },
+  "card": {
+   "background-color": "rgb(255, 255, 255)",
+   "border-radius": "16px",
+   "box-shadow": "rgb(227, 232, 238) 0px 0px 0px 1px, rgba(10, 37, 64, 0.04) 0px 1px 2px 0px",
+   "padding": "0px",
+   "border": "0px none rgb(10, 37, 64)"
+  },
+  "sectionPadding": {
+   "padding": "115.2px 0px 57.6px",
+   "maxWidth": "none"
+  },
+  "container": 1440,
+  "footerBackground": "rgba(0, 0, 0, 0)"
+ },
+ "labels": {
+  "useCases": {
+   "heading": "Was wir bauen würden",
+   "kicker": "Konkrete Projekte, gruppiert nach Aufgabe."
+  },
+  "caps": {
+   "heading": "Wie tief wir gehen",
+   "kicker": "Der Motor unter den Anwendungsfällen."
+  },
+  "steps": {
+   "heading": "So läuft es",
+   "kicker": "Vier Schritte, jeder mit Ausstieg."
+  },
+  "stack": {
+   "heading": "Womit wir das bauen",
+   "kicker": ""
+  },
+  "faqs": {
+   "heading": "Fragen",
+   "kicker": "Was Sie wirklich fragen."
+  },
+  "cta": {
+   "heading": "Bereit für ein Gespräch?",
+   "kicker": ""
+  }
+ },
+ "services": [
+  {
+   "eyebrow": "Leistung · KI-Tools",
+   "title": "KI, die auf Ihren Daten läuft",
+   "lead": "KI, die im Betrieb funktioniert – nicht als nachträglich angeschraubtes Chatfenster. Systeme, die Quellen nennen, „Ich weiß es nicht“ sagen können und in Ihre bestehenden Werkzeuge greifen.",
+   "kind": "KI-Tools"
+  },
+  {
+   "eyebrow": "Leistung · Web-Apps",
+   "title": "Web-Apps, die skalieren statt neu gebaut zu werden",
+   "lead": "Bewusst unaufgeregte Technologieentscheidungen, damit Sie in zwei Jahren noch dafür einstellen können. Performance ist eine Architekturentscheidung mit Budget in der CI, kein Aufräumen am Ende.",
+   "kind": "Web-Apps"
+  },
+  {
+   "eyebrow": "Leistung · Websites",
+   "title": "Websites, die man sich merkt",
+   "lead": "Kein Page-Builder, kein Template. Semantisches HTML, JSON-LD, Sitemap und optimierte Bilder – damit Ihre Seite von Menschen wie von Maschinen gleich klar gelesen wird.",
+   "kind": "Websites"
+  },
+  {
+   "eyebrow": "Leistung · Software für Unternehmen",
+   "title": "Software für Ihre echten Abläufe",
+   "lead": "Bevor wir etwas entwerfen, nehmen wir auf, wie die Arbeit tatsächlich läuft. Danach entsteht Software, die dort betrieben wird, wo Ihre Daten liegen – und die Ihnen gehört.",
+   "kind": "Software für Unternehmen"
+  }
+ ],
+ "modals": [
+  {
+   "tile": "KI, die auf Ihren Daten läuft",
+   "heading": "KI, die auf Ihren Daten läuft",
+   "h3s": [
+    "KI, die auf Ihren Daten läuft"
+   ],
+   "h4s": [
+    "Konkrete Projekte, gruppiert nach Aufgabe.",
+    "Der Motor unter den Anwendungsfällen.",
+    "Vier Schritte, jeder mit Ausstieg.",
+    "Was Sie wirklich fragen."
+   ],
+   "paragraphs": [
+    "KI, die im Betrieb funktioniert – nicht als nachträglich angeschraubtes Chatfenster. Systeme, die Quellen nennen, „Ich weiß es nicht“ sagen können und in Ihre bestehenden Werkzeuge greifen.",
+    "Die Branchen sind Beispiele, um die Form zu zeigen – keine Kundenreferenzen. Ihre Situation ist anders: Erzählen Sie sie uns.",
+    "Retrieval mit Quellenangaben aus Dokumenten, Code, Tickets oder Datenbank. Vektorsuche (pgvector, Qdrant), Re-Ranking und ein Konfidenzpfad, der „Ich weiß es nicht“ sagen kann.",
+    "Workflows, die planen, Ihre echten APIs über Tools aufrufen und die eigene Arbeit prüfen – mit Leitplanken, Retries und menschlicher Freigabe, wo es zählt.",
+    "Model-Context-Protocol-Server und Function Calling in CRM, ERP, interne APIs und Datenbanken – mit Auth, Rate-Limits und Audit-Log.",
+    "Triage, Dateneingabe, Zusammenfassen, Routing, Entwürfe – in Pipelines (n8n, eigene Loops, geplante Jobs), die im Hintergrund laufen und jede Woche Stunden zurückgeben.",
+    "Offene Modelle (Llama, Mistral, Qwen) auf Ihrer eigenen Hardware installiert und konfiguriert. Ihre Daten verlassen das Gebäude nicht.",
+    "Markenkonforme Visuals auf Abruf – als wiederholbare Pipeline, nicht als Einzelstück.",
+    "Praxis-Workshops für Führung und Belegschaft – an den Werkzeugen und Abläufen, die bei Ihnen zählen, nicht an Theorie.",
+    "Ein Arbeitstermin zu Ihren Abläufen: Wir finden den Hebel – und die Stellen, an denen KI nicht hilft. Sie bekommen einen Bauplan, kein Buzzword-Deck.",
+    "Ein Workflow, Ihre echten Daten, lauffähig. Sie beurteilen Trefferqualität, Genauigkeit, Tempo und Kosten, bevor Sie sich festlegen.",
+    "Leitplanken, Evals, Monitoring, Auth und eine Oberfläche, die Ihr Team nutzt. Gehärtet gegen Halluzination, Kosten, Latenz und Drift.",
+    "Dokumentiert, Ihr Eigentum, kein Lock-in. Self-hosted oder Cloud – Ihre Entscheidung. Plus 30 Tage Support nach dem Launch.",
+    "Ja. Offene Modelle auf Ihrer Infrastruktur, wenn Datenresidenz zählt – oder API-Modelle mit strikter No-Retention-Konfiguration. whatever-recall, unser eigenes Produkt, ist vollständig self-hosted: Das ist der Standard, für den wir bauen.",
+    "Jede Antwort wird per Retrieval in Ihren Daten verankert und zitiert die Quelle. Dazu Schema-Validierung und ein Konfidenzpfad: Das System sagt „Ich weiß es nicht“, statt zu erfinden – und Agenten prüfen ihre Arbeit, bevor sie sie abgeben.",
+    "Ein fokussierter Proof of Value dauert typischerweise 2–4 Wochen, ein Produktivsystem 4–10. Nach dem ersten Gespräch gibt es innerhalb von 48 Stunden einen Festpreis – kein offener Stundenzähler.",
+    "Ein Chatfenster ist kein Produkt. Der Wert entsteht, wenn Modelle in Ihre Systeme greifen – Daten, Werkzeuge, Auth, Workflow – zuverlässig, mit Leitplanken und Monitoring. Diese Integration ist die Arbeit.",
+    "Das, das für Ihre Aufgabe gewinnt: Frontier-APIs, wo Qualität entscheidet, offene Gewichte, wo Datenresidenz oder Kosten entscheiden. Die Architektur hält das Modell austauschbar – ein besseres im nächsten Jahr ist eine Konfigurationsänderung, kein Rewrite."
+   ],
+   "listItems": [
+    "RAG über Ihre Daten – pgvector oder Qdrant, mit Zitaten und Enthaltungspfad",
+    "Agenten und Automatisierung – Leitplanken, Protokolle, menschliche Freigabe",
+    "MCP-Tool-Server mit Auth, Rate-Limits und Audit-Log",
+    "Modellunabhängig: Frontier-APIs oder offene Gewichte (Llama, Mistral, Qwen)"
+   ],
+   "text": "Leistung · KI-Tools\nKI, die auf Ihren Daten läuft\n\nKI, die im Betrieb funktioniert – nicht als nachträglich angeschraubtes Chatfenster. Systeme, die Quellen nennen, „Ich weiß es nicht“ sagen können und in Ihre bestehenden Werkzeuge greifen.\n\nProjekt anfragen\nDie Seite fragen\n2–4 Wo.\nbis zum lauffähigen Proof of Value\n48 h\nbis zum Festpreis\n100 %\nself-hostbar – Ihre Schlüssel, Ihre Daten\nRAG über Ihre Daten – pgvector oder Qdrant, mit Zitaten und Enthaltungspfad\nAgenten und Automatisierung – Leitplanken, Protokolle, menschliche Freigabe\nMCP-Tool-Server mit Auth, Rate-Limits und Audit-Log\nModellunabhängig: Frontier-APIs oder offene Gewichte (Llama, Mistral, Qwen)\nassistent.ihre-firma.de\nWie lange ist die Gewährleistung bei der Serie B?\n24 Monate ab Lieferung – verlängerbar auf 36 Monate.\n\nhandbuch-v4.pdf · S. 12\nAntwort aus Ihrer Wissensbasis – mit Quelle\nWas wir bauen würden\nKonkrete Projekte, gruppiert nach Aufgabe.\n\nDie Branchen sind Beispiele, um die Form zu zeigen – keine Kundenreferenzen. Ihre Situation ist anders: Erzählen Sie sie uns.\n\nSUPPORT-TEAMS\nEin Support-Bot, der aus Ihren eigenen Dokumenten antwortet\n→ 80 % der Tickets beantworten sich selbst – rund um die Uhr.\nE-COMMERCE / HANDEL\nAuto-Triage für das überlaufende Postfach\n→ Das Postfach sortiert sich selbst – Antworten in Minuten statt Stunden.\nRECHT / LEGAL\nVertrags- und Aktensuche mit Quellenangabe\n→ Recherche in Sekunden – jede Antwort nachvollziehbar.\nOPERATIONS / HR\nEin Wissensassistent über Wiki und Laufwerke\n→ Mitarbeitende finden Antworten selbst, statt das Team zu fragen.\nVERSICHERUNG / FINANZEN\nDokumentenextraktion direkt in Ihr System\n→ Manuelle Dateneingabe verschwindet – der Audit-Trail bleibt sauber.\nAGENTUREN / BERATUNGEN\nIhre Werkzeuge, angebunden an Claude oder ChatGPT\n→ Firmenwissen in Klartext abfragen – sicher, mit Auth und Audit-Log.\nVERTRIEB\nFollow-ups, die sich selbst schreiben\n→ Kein warmer Lead wird kalt, weil eine E-Mail fehlt.\nWie tief wir gehen\nDer Motor unter den Anwendungsfällen.\nRAG über Ihre eigenen Daten\n\nRetrieval mit Quellenangaben aus Dokumenten, Code, Tickets oder Datenbank. Vektorsuche (pgvector, Qdrant), Re-Ranking und ein Konfidenzpfad, der „Ich weiß es nicht“ sagen kann.\n\nAutonome Mehrschritt-Agenten\n\nWorkflows, die planen, Ihre echten APIs über Tools aufrufen und die eigene Arbeit prüfen – mit Leitplanken, Retries und menschlicher Freigabe, wo es zählt.\n\nMCP-Tool-Server & Integrationen\n\nModel-Context-Protocol-Server und Function Calling in CRM, ERP, interne APIs und Datenbanken – mit Auth, Rate-Limits und Audit-Log.\n\nAutomatisierung, die sich rechnet\n\nTriage, Dateneingabe, Zusammenfassen, Routing, Entwürfe – in Pipelines (n8n, eigene Loops, geplante Jobs), die im Hintergrund laufen und jede Woche Stunden zurückgeben.\n\nLokale & On-Premise-KI\n\nOffene Modelle (Llama, Mistral, Qwen) auf Ihrer eigenen Hardware installiert und konfiguriert. Ihre Daten verlassen das Gebäude nicht.\n\nKI-Bild- & Content-Generierung\n\nMarkenkonforme Visuals auf Abruf – als wiederholbare Pipeline, nicht als Einzelstück.\n\nKI-Schulung für Teams\n\nPraxis-Workshops für Führung und Belegschaft – an den Werkzeugen und Abläufen, die bei Ihnen zählen, nicht an Theorie.\n\nSo läuft es\nVier Schritte, jeder mit Ausstieg.\n01\nWo KI sich wirklich auszahlt\n\nEin Arbeitstermin zu Ihren Abläufen: Wir finden den Hebel – und die Stellen, an denen KI nicht hilft. Sie bekommen einen Bauplan, kein Buzzword-Deck.\n\n02\nProof of Value – 2–4 Wochen\n\nEin Workflow, Ihre echten Daten, lauffähig. Sie beurteilen Trefferqualität, Genauigkeit, Tempo und Kosten, bevor Sie sich festlegen.\n\n03\nProduktionsreif machen\n\nLeitplanken, Evals, Monitoring, Auth und eine Oberfläche, die Ihr Team nutzt. Gehärtet gegen Halluzination, Kosten, Latenz und Drift.\n\n04\nLiefern & übergeben\n\nDokumentiert, Ihr Eigentum, kein Lock-in. Self-hosted oder Cloud – Ihre Entscheidung. Plus 30 Tage Support nach dem Launch.\n\nWomit wir das bauen\nClaude\nGPT\nMCP\nn8n\npgvector\nLlama\nMistral\nQwen\nOllama\nQdrant\nLangChain\nLlamaIndex\nPython\nTypeScript\nFastAPI\nNext.js\nPostgres\nFragen\nWas Sie wirklich fragen.\nKann die KI self-hosted laufen, ohne Daten an Dritte zu senden?\n\nJa. Offene Modelle auf Ihrer Infrastruktur, wenn Datenresidenz zählt – oder API-Modelle mit strikter No-Retention-Konfiguration. whatever-recall, unser eigenes Produkt, ist vollständig self-hosted: Das ist der Standard, für den wir bauen.\n\nWie verhindern Sie Halluzinationen?\n\nJede Antwort wird per Retrieval in Ihren Daten verankert und zitiert die Quelle. Dazu Schema-Validierung und ein Konfidenzpfad: Das System sagt „Ich weiß es nicht“, statt zu erfinden – und Agenten prüfen ihre Arbeit, bevor sie sie abgeben.\n\nWas kostet ein KI-Projekt, und wie lange dauert es?\n\nEin fokussierter Proof of Value dauert typischerweise 2–4 Wochen, ein Produktivsystem 4–10. Nach dem ersten Gespräch gibt es innerhalb von 48 Stunden einen Festpreis – kein offener Stundenzähler.\n\nWir nutzen schon ChatGPT – warum ein Studio?\n\nEin Chatfenster ist kein Produkt. Der Wert entsteht, wenn Modelle in Ihre Systeme greifen – Daten, Werkzeuge, Auth, Workflow – zuverlässig, mit Leitplanken und Monitoring. Diese Integration ist die Arbeit.\n\nWelches Modell setzen Sie ein?\n\nDas, das für Ihre Aufgabe gewinnt: Frontier-APIs, wo Qualität entscheidet, offene Gewichte, wo Datenresidenz oder Kosten entscheiden. Die Architektur hält das Modell austauschbar – ein besseres im nächsten Jahr ist eine Konfigurationsänderung, kein Rewrite.\n\nBereit für ein Gespräch?\nAntwort in 24 Stunden, Festpreis in 48 – von einer der zwei Personen, die es bauen würden.\nProjekt anfragen"
+  },
+  {
+   "tile": "Web-Apps, die skalieren statt neu gebaut zu werden",
+   "heading": "Web-Apps, die skalieren statt neu gebaut zu werden",
+   "h3s": [
+    "Web-Apps, die skalieren statt neu gebaut zu werden"
+   ],
+   "h4s": [
+    "Konkrete Projekte, gruppiert nach Aufgabe.",
+    "Der Motor unter den Anwendungsfällen.",
+    "Vier Schritte, jeder mit Ausstieg.",
+    "Was Sie wirklich fragen."
+   ],
+   "paragraphs": [
+    "Bewusst unaufgeregte Technologieentscheidungen, damit Sie in zwei Jahren noch dafür einstellen können. Performance ist eine Architekturentscheidung mit Budget in der CI, kein Aufräumen am Ende.",
+    "Die Branchen sind Beispiele, um die Form zu zeigen – keine Kundenreferenzen. Ihre Situation ist anders: Erzählen Sie sie uns.",
+    "React und Next.js mit TypeScript von Ende zu Ende, Server Components, App Router, typisierte Datenschicht mit Prisma oder Drizzle auf PostgreSQL. Langweilig mit Absicht: großer Talentpool, lange Unterstützung.",
+    "Performance ist eine Architekturentscheidung: kleine Bundles, indizierte Abfragen statt N+1, Caching – und ein Lighthouse-Budget in der CI, das eine Regression den Build kostet.",
+    "Saubere Datenschicht, typisierte APIs (tRPC oder REST), echte Auth und Rollen – so gebaut, dass MVP und skalierte App dieselbe Codebasis sind.",
+    "Live-Updates über Websockets, Stripe für Zahlungen und Abos, OAuth, Magic Links, SSO – Webhooks, Retries und Idempotenz inklusive, damit Integrationen nicht um 2 Uhr nachts klingeln.",
+    "Ein Arbeitstermin zum Produkt: Kernflüsse, Datenmodell, was MVP ist und was später kommt. Sie bekommen einen Bauplan und einen Festpreis in 48 Stunden.",
+    "Innerhalb einer Woche ein echtes, klickbares Frontend auf dem eigentlichen Stack: die Kernscreens, um Gefühl und Richtung zu beurteilen.",
+    "Datenschicht, APIs, Auth, Integrationen – offen gebaut, jede Woche eine funktionierende Demo. Getestet (Vitest, Playwright) und Vitals-budgetiert in der CI.",
+    "Gestartet, dokumentiert, Ihr Eigentum, kein Lock-in – mit grünen Vitals. Self-hosted oder Cloud. Plus 30 Tage Support.",
+    "React und Next.js mit TypeScript auf PostgreSQL. Bewusst langweilig: In zwei Jahren finden Sie jemanden, der den Stack kennt und den Code ohne Archäologie liest.",
+    "Kleine Bundles durch Server Components und Streaming, indizierte Abfragen und Caching statt N+1-Schleifen. Dann ein Lighthouse-Budget in der CI – die Regression scheitert im Build, nicht beim Launch.",
+    "Ja – und wir fangen nicht mit „Neu schreiben“ an. Erst lesen, Tests um die wichtigen Teile, dokumentieren, dann das reparieren, was wehtut. Ein Rewrite ist eine Entscheidung mit Belegen, nicht am ersten Tag.",
+    "Ein MVP typischerweise 6–12 Wochen, etwas Klickbares in Woche eins. Nach dem ersten Gespräch ein Festpreis in 48 Stunden. Wenn Sie ehrlicherweise keine eigene App brauchen, sagen wir auch das.",
+    "Ihnen. Vollständiger Quellcode in Ihrem Repository, dokumentiert, kein Lock-in, keine Lizenz pro Nutzer. Die Übergabe ist so geschrieben, dass Ihr Team ohne uns weitermachen kann."
+   ],
+   "listItems": [
+    "Echtzeit, Authentifizierung und Zahlungen integriert",
+    "Lighthouse-Budget in der CI – grüne Vitals als Abnahmekriterium",
+    "Eine Codebasis, die Ihr nächstes Team weiterentwickeln kann",
+    "Klickbarer Prototyp innerhalb von sieben Tagen"
+   ],
+   "text": "Leistung · Web-Apps\nWeb-Apps, die skalieren statt neu gebaut zu werden\n\nBewusst unaufgeregte Technologieentscheidungen, damit Sie in zwei Jahren noch dafür einstellen können. Performance ist eine Architekturentscheidung mit Budget in der CI, kein Aufräumen am Ende.\n\nProjekt anfragen\nDie Seite fragen\n7 Tage\nbis zum klickbaren Prototyp\n48 h\nbis zum Festpreis\nWöchentlich\nDemos – nie ein Big Reveal am Ende\nEchtzeit, Authentifizierung und Zahlungen integriert\nLighthouse-Budget in der CI – grüne Vitals als Abnahmekriterium\nEine Codebasis, die Ihr nächstes Team weiterentwickeln kann\nKlickbarer Prototyp innerhalb von sieben Tagen\napp.ihr-produkt.de\nMonatlicher Umsatz\n48.210 €\n+18 %\nAktive Nutzer\n12.480\n+9 %\nAntwortzeit p95\n84 ms\nLCP 0,9 s\nWas wir bauen würden\nKonkrete Projekte, gruppiert nach Aufgabe.\n\nDie Branchen sind Beispiele, um die Form zu zeigen – keine Kundenreferenzen. Ihre Situation ist anders: Erzählen Sie sie uns.\n\nSAAS / START-UP\nEin Abo-Produkt mit Abrechnung, die funktioniert\n→ Sie können am ersten Tag Geld nehmen, nicht in Phase zwei.\nMARKTPLATZ / PLATTFORM\nZweiseitige Plattform mit Echtzeit-Status\n→ Bleibt bei 10× so vielen Zeilen schnell – die Indizes waren zuerst da.\nGRÜNDERINNEN & GRÜNDER\nEin MVP, das den Kontakt mit Nutzern überlebt\n→ Kein Wegwerf-Build, keine zweite erste Version.\nSCALE-UP\nDie Rettung einer Codebasis, die niemand anfassen will\n→ Es wird wieder geliefert – ohne Neustart auf der leeren Seite.\nOPS / GROWTH\nEin Performance-Durchgang, der in den Zahlen sichtbar wird\n→ Grüne Vitals, gehalten – erzwungen von der Pipeline, nicht vom guten Willen.\nWie tief wir gehen\nDer Motor unter den Anwendungsfällen.\nEin moderner, typisierter Stack\n\nReact und Next.js mit TypeScript von Ende zu Ende, Server Components, App Router, typisierte Datenschicht mit Prisma oder Drizzle auf PostgreSQL. Langweilig mit Absicht: großer Talentpool, lange Unterstützung.\n\nCore Web Vitals, grün ab Tag eins\n\nPerformance ist eine Architekturentscheidung: kleine Bundles, indizierte Abfragen statt N+1, Caching – und ein Lighthouse-Budget in der CI, das eine Regression den Build kostet.\n\nArchitektur, die skaliert\n\nSaubere Datenschicht, typisierte APIs (tRPC oder REST), echte Auth und Rollen – so gebaut, dass MVP und skalierte App dieselbe Codebasis sind.\n\nEchtzeit & Integrationen\n\nLive-Updates über Websockets, Stripe für Zahlungen und Abos, OAuth, Magic Links, SSO – Webhooks, Retries und Idempotenz inklusive, damit Integrationen nicht um 2 Uhr nachts klingeln.\n\nSo läuft es\nVier Schritte, jeder mit Ausstieg.\n01\nDas Eigentliche scopen\n\nEin Arbeitstermin zum Produkt: Kernflüsse, Datenmodell, was MVP ist und was später kommt. Sie bekommen einen Bauplan und einen Festpreis in 48 Stunden.\n\n02\nKlickbarer Prototyp – 7 Tage\n\nInnerhalb einer Woche ein echtes, klickbares Frontend auf dem eigentlichen Stack: die Kernscreens, um Gefühl und Richtung zu beurteilen.\n\n03\nBauen, mit wöchentlichen Demos\n\nDatenschicht, APIs, Auth, Integrationen – offen gebaut, jede Woche eine funktionierende Demo. Getestet (Vitest, Playwright) und Vitals-budgetiert in der CI.\n\n04\nLighthouse-grün liefern & übergeben\n\nGestartet, dokumentiert, Ihr Eigentum, kein Lock-in – mit grünen Vitals. Self-hosted oder Cloud. Plus 30 Tage Support.\n\nWomit wir das bauen\nReact\nNext.js\nTypeScript\nNode.js\nPostgreSQL\nPrisma\ntRPC\nTailwind\nVercel\nSupabase\nRedis\nStripe\nPlaywright\nVitest\nDocker\nFragen\nWas Sie wirklich fragen.\nAuf welchem Stack bauen Sie – und warum genau dem?\n\nReact und Next.js mit TypeScript auf PostgreSQL. Bewusst langweilig: In zwei Jahren finden Sie jemanden, der den Stack kennt und den Code ohne Archäologie liest.\n\nWie bleibt es schnell, wenn es wächst?\n\nKleine Bundles durch Server Components und Streaming, indizierte Abfragen und Caching statt N+1-Schleifen. Dann ein Lighthouse-Budget in der CI – die Regression scheitert im Build, nicht beim Launch.\n\nÜbernehmen Sie eine bestehende oder Legacy-App?\n\nJa – und wir fangen nicht mit „Neu schreiben“ an. Erst lesen, Tests um die wichtigen Teile, dokumentieren, dann das reparieren, was wehtut. Ein Rewrite ist eine Entscheidung mit Belegen, nicht am ersten Tag.\n\nWas kostet eine Web-App, und wie lange dauert sie?\n\nEin MVP typischerweise 6–12 Wochen, etwas Klickbares in Woche eins. Nach dem ersten Gespräch ein Festpreis in 48 Stunden. Wenn Sie ehrlicherweise keine eigene App brauchen, sagen wir auch das.\n\nWem gehört der Code?\n\nIhnen. Vollständiger Quellcode in Ihrem Repository, dokumentiert, kein Lock-in, keine Lizenz pro Nutzer. Die Übergabe ist so geschrieben, dass Ihr Team ohne uns weitermachen kann.\n\nBereit für ein Gespräch?\nAntwort in 24 Stunden, Festpreis in 48 – von einer der zwei Personen, die es bauen würden.\nProjekt anfragen"
+  },
+  {
+   "tile": "Websites, die man sich merkt",
+   "heading": "Websites, die man sich merkt",
+   "h3s": [
+    "Websites, die man sich merkt"
+   ],
+   "h4s": [
+    "Konkrete Projekte, gruppiert nach Aufgabe.",
+    "Der Motor unter den Anwendungsfällen.",
+    "Vier Schritte, jeder mit Ausstieg.",
+    "Was Sie wirklich fragen."
+   ],
+   "paragraphs": [
+    "Kein Page-Builder, kein Template. Semantisches HTML, JSON-LD, Sitemap und optimierte Bilder – damit Ihre Seite von Menschen wie von Maschinen gleich klar gelesen wird.",
+    "Die Branchen sind Beispiele, um die Form zu zeigen – keine Kundenreferenzen. Ihre Situation ist anders: Erzählen Sie sie uns.",
+    "Ladezeit unter einer Sekunde, kein Layout-Shift, nichts Render-Blockierendes. Schlankes HTML, kritisches CSS inline, Bilder in modernen Formaten und exakt bemessen.",
+    "Semantisches HTML, JSON-LD, echte Sitemap, saubere Meta- und Open-Graph-Daten – plus llms.txt, damit KI-Suche und agentische Browser Sie ebenfalls lesen.",
+    "Individuell, nie Template. Typografie, Rhythmus und Bewegung wirken hochwertig und bewusst – auf dem Handy wie auf dem 32-Zoll-Monitor.",
+    "Headless-CMS mit sauberem Admin und automatischen Rebuilds – oder rein statisch mit der gelegentlichen Änderung per E-Mail. Ihre Entscheidung, Ihr Eigentum.",
+    "Ein Arbeitstermin: Mit wem sprechen Sie, was sollen die Leute tun? Wir planen die Seiten, die ihren Platz verdienen – und streichen die anderen.",
+    "Ein eigenes Design für Ihre Marke – Schrift, Farbe, Rhythmus, Bewegung. Echte Screens statt Vorlage, iteriert, bis der erste Eindruck stimmt.",
+    "Handgeschrieben für Tempo und Suche: semantisches HTML, JSON-LD, optimierte Bilder, CMS bei Bedarf. Lighthouse wird während des Baus gemessen, nicht am Ende.",
+    "Live auf Vercel oder Cloudflare, dokumentiert, Ihr Eigentum. Sie pflegen es selbst oder schicken uns die gelegentliche Änderung. Plus 30 Tage Support.",
+    "Indem wir während des Baus messen, nicht am Ende. Schlankes HTML, kritisches CSS inline, exakt bemessene Bilder. Der Beweis ist unsere eigene Seite: 100 auf allen vier Achsen – mit laufender Canvas-Engine.",
+    "Wenn Sie eins wollen, ja – Headless-CMS mit sauberem Admin und automatischen Rebuilds. Rein statisch mit Änderungen per E-Mail ist günstiger und schneller. Wir sagen Ihnen, was Ihre Seite wirklich braucht.",
+    "Inklusive. Semantische Struktur, JSON-LD, Sitemap, saubere Meta-Daten und crawlbarer DOM-Text gehören zum Bau, nicht zum Upsell. Dazu llms.txt, damit KI-Suche Sie so klar liest wie Google.",
+    "Typischerweise 3–6 Wochen vom Briefing bis live, echte Screens in Woche eins. Festpreis in 48 Stunden – eine echte Zahl. Eine kleine Seite beginnt im niedrigen fünfstelligen Bereich.",
+    "Weil das, was WordPress bequem macht, es auch langsam macht: Themes, Plugins, Datenbankabfragen für Inhalte, die sich nie ändern. Für eine Marketing-Seite ist handgeschrieben und statisch schneller, sicherer und günstiger im Betrieb."
+   ],
+   "listItems": [
+    "Lighthouse 100/100/100/100 als Zielwert – gemessen, nicht behauptet",
+    "Semantisches HTML, JSON-LD, Sitemap, llms.txt",
+    "Eigenes Design statt Template",
+    "CMS oder rein statisch – Ihre Entscheidung"
+   ],
+   "text": "Leistung · Websites\nWebsites, die man sich merkt\n\nKein Page-Builder, kein Template. Semantisches HTML, JSON-LD, Sitemap und optimierte Bilder – damit Ihre Seite von Menschen wie von Maschinen gleich klar gelesen wird.\n\nProjekt anfragen\nDie Seite fragen\n3–6 Wo.\nvom Briefing bis live\n4×100\nLighthouse – gemessen, nicht behauptet\n0\nPage-Builder, Themes, Plugins\nLighthouse 100/100/100/100 als Zielwert – gemessen, nicht behauptet\nSemantisches HTML, JSON-LD, Sitemap, llms.txt\nEigenes Design statt Template\nCMS oder rein statisch – Ihre Entscheidung\nwww.ihre-firma.de\n100\nPerformance\n100\nAccessibility\n100\nBest Practices\n100\nSEO\nCLS 0\nTBT 0 ms\nLCP < 1 s\nJSON-LD\nllms.txt\nSitemap\nAgentic 3/3\nWas wir bauen würden\nKonkrete Projekte, gruppiert nach Aufgabe.\n\nDie Branchen sind Beispiele, um die Form zu zeigen – keine Kundenreferenzen. Ihre Situation ist anders: Erzählen Sie sie uns.\n\nB2B / INDUSTRIE\nEine Unternehmensseite, die senior wirkt\n→ Sie wirken nicht länger kleiner, als Sie sind.\nBERATUNG / DIENSTLEISTUNG\nEine Seite, die vor dem Anruf antwortet\n→ Weniger, bessere Gespräche – die, die Ihre Zeit wert sind.\nPRODUKT / LAUNCH\nEine Landingpage, die konvertiert statt Preise zu gewinnen\n→ Ladezeit unter einer Sekunde – und eine Zahl, auf die Sie zeigen können.\nJEDE SEITE\nEin Relaunch, der den Score repariert, nicht die Farbe\n→ Perfektes Lighthouse – die Zahl, nicht das Gefühl.\nMARKETING-TEAMS\nEin CMS, das Ihr Team wirklich benutzt\n→ Sie ändern es selbst – ohne Ticket.\nWie tief wir gehen\nDer Motor unter den Anwendungsfällen.\nLighthouse 100, Core Web Vitals grün\n\nLadezeit unter einer Sekunde, kein Layout-Shift, nichts Render-Blockierendes. Schlankes HTML, kritisches CSS inline, Bilder in modernen Formaten und exakt bemessen.\n\nSEO ab Tag eins\n\nSemantisches HTML, JSON-LD, echte Sitemap, saubere Meta- und Open-Graph-Daten – plus llms.txt, damit KI-Suche und agentische Browser Sie ebenfalls lesen.\n\nDesign, das in einer Sekunde Vertrauen schafft\n\nIndividuell, nie Template. Typografie, Rhythmus und Bewegung wirken hochwertig und bewusst – auf dem Handy wie auf dem 32-Zoll-Monitor.\n\nEin CMS, das Sie selbst bedienen\n\nHeadless-CMS mit sauberem Admin und automatischen Rebuilds – oder rein statisch mit der gelegentlichen Änderung per E-Mail. Ihre Entscheidung, Ihr Eigentum.\n\nSo läuft es\nVier Schritte, jeder mit Ausstieg.\n01\nBotschaft & Struktur\n\nEin Arbeitstermin: Mit wem sprechen Sie, was sollen die Leute tun? Wir planen die Seiten, die ihren Platz verdienen – und streichen die anderen.\n\n02\nDie erste Sekunde gestalten\n\nEin eigenes Design für Ihre Marke – Schrift, Farbe, Rhythmus, Bewegung. Echte Screens statt Vorlage, iteriert, bis der erste Eindruck stimmt.\n\n03\nSchlank bauen, 100 erreichen\n\nHandgeschrieben für Tempo und Suche: semantisches HTML, JSON-LD, optimierte Bilder, CMS bei Bedarf. Lighthouse wird während des Baus gemessen, nicht am Ende.\n\n04\nLive & übergeben\n\nLive auf Vercel oder Cloudflare, dokumentiert, Ihr Eigentum. Sie pflegen es selbst oder schicken uns die gelegentliche Änderung. Plus 30 Tage Support.\n\nWomit wir das bauen\nHTML\nCSS\nJavaScript\nAstro\nNext.js\nTailwind\nSanity\nHeadless CMS\nVercel\nCloudflare\nJSON-LD\nllms.txt\nLighthouse\nWebP / AVIF\nFragen\nWas Sie wirklich fragen.\nWie garantieren Sie Tempo und den perfekten Lighthouse-Score?\n\nIndem wir während des Baus messen, nicht am Ende. Schlankes HTML, kritisches CSS inline, exakt bemessene Bilder. Der Beweis ist unsere eigene Seite: 100 auf allen vier Achsen – mit laufender Canvas-Engine.\n\nBekommen wir ein CMS, um die Seite selbst zu pflegen?\n\nWenn Sie eins wollen, ja – Headless-CMS mit sauberem Admin und automatischen Rebuilds. Rein statisch mit Änderungen per E-Mail ist günstiger und schneller. Wir sagen Ihnen, was Ihre Seite wirklich braucht.\n\nIst SEO inklusive – oder eine eigene Rechnung?\n\nInklusive. Semantische Struktur, JSON-LD, Sitemap, saubere Meta-Daten und crawlbarer DOM-Text gehören zum Bau, nicht zum Upsell. Dazu llms.txt, damit KI-Suche Sie so klar liest wie Google.\n\nWas kostet eine Website, und wie lange dauert sie?\n\nTypischerweise 3–6 Wochen vom Briefing bis live, echte Screens in Woche eins. Festpreis in 48 Stunden – eine echte Zahl. Eine kleine Seite beginnt im niedrigen fünfstelligen Bereich.\n\nWarum kein WordPress?\n\nWeil das, was WordPress bequem macht, es auch langsam macht: Themes, Plugins, Datenbankabfragen für Inhalte, die sich nie ändern. Für eine Marketing-Seite ist handgeschrieben und statisch schneller, sicherer und günstiger im Betrieb.\n\nBereit für ein Gespräch?\nAntwort in 24 Stunden, Festpreis in 48 – von einer der zwei Personen, die es bauen würden.\nProjekt anfragen"
+  },
+  {
+   "tile": "Software für Ihre echten Abläufe",
+   "heading": "Software für Ihre echten Abläufe",
+   "h3s": [
+    "Software für Ihre echten Abläufe"
+   ],
+   "h4s": [
+    "Konkrete Projekte, gruppiert nach Aufgabe.",
+    "Der Motor unter den Anwendungsfällen.",
+    "Vier Schritte, jeder mit Ausstieg.",
+    "Was Sie wirklich fragen."
+   ],
+   "paragraphs": [
+    "Bevor wir etwas entwerfen, nehmen wir auf, wie die Arbeit tatsächlich läuft. Danach entsteht Software, die dort betrieben wird, wo Ihre Daten liegen – und die Ihnen gehört.",
+    "Die Branchen sind Beispiele, um die Form zu zeigen – keine Kundenreferenzen. Ihre Situation ist anders: Erzählen Sie sie uns.",
+    "Admin-Panels, Ops-Dashboards und Back-Office-Werkzeuge – schnell, rollenbasiert, für den echten Ablauf gebaut. Echtzeitzahlen aus Ihrer eigenen Datenbank.",
+    "ERP, CRM, REST und SOAP, OpenAPI-Spezifikationen und die Altsysteme, die niemand anfassen will. Wo es keine saubere API gibt, bauen wir einen Adapter gegen Datenbank oder Export.",
+    "Copy-Paste zwischen Systemen, nächtliche Abstimmung, der handgebaute Bericht – übergeben an geplante Jobs und Pipelines. Wo es passt, nimmt KI die Fleißarbeit ab.",
+    "Dokumentiert, getestet, Ihr Eigentum – Quellcode in Ihrem Repository, kein Lock-in, keine Lizenz pro Nutzer. Eine Übergabe, die Ihr eigenes Team aufnehmen kann.",
+    "Wir sitzen bei den Menschen, die die Arbeit machen, und erfassen, wie sie wirklich läuft – Systeme, Übergaben, manuelle Schritte. Ein Bauplan aus der Realität, nicht aus dem Organigramm.",
+    "Ein klickbarer Prototyp des Kernflusses, bevor wir den vollen Bau beginnen – Kurskorrektur an etwas Sichtbarem, nicht an einer 40-seitigen Spezifikation.",
+    "Gebaut gegen Ihre echten Daten und Integrationen, jede Woche funktionierende Software. Kein Big-Bang am Ende – Sie steuern durchgehend mit.",
+    "Deployt, wo Ihre Daten liegen – Cloud oder On-Premise – mit dokumentierter Architektur, Quellcode in Ihrem Repository und sauberer Übergabe. Plus 30 Tage Support.",
+    "Ja – das ist der Großteil der Arbeit. ERP, CRM, REST und SOAP, OpenAPI und die Altsysteme, die niemand anfassen will. Ohne saubere API bauen wir einen Adapter gegen Datenbank oder Export.",
+    "Was Ihre Daten verlangen. On-Premise, wenn Residenz oder Richtlinien es fordern, Cloud, wenn nicht. Eine Entscheidung, die wir mit Ihnen treffen – die Architektur ändert sich nicht.",
+    "Ihnen. Vollständiger Quellcode in Ihrem Repository, dokumentiert, kein Lock-in, keine Lizenz pro Nutzer. Software, die Sie nicht verlassen können, gehört Ihnen nicht.",
+    "Interne Software typischerweise 8–14 Wochen, ein klickbarer Prototyp des Kernflusses deutlich früher. Festpreis in 48 Stunden. Wenn ein Standardprodukt Ihnen besser dient, sagen wir das.",
+    "Genau deshalb dokumentieren und testen wir beim Bauen und wählen einen unaufgeregten Stack: Ihre eigene IT kann ihn besetzen. In der Praxis sind wir seit 2016 da – aber davon sollten Sie nie abhängen, und das tun Sie nicht."
+   ],
+   "listItems": [
+    "Prozessaufnahme vor dem ersten Entwurf",
+    "Dokumentiert, getestet, übergeben",
+    "Vollständiger Quellcode in Ihrem Repository – kein Lock-in, keine Lizenz pro Nutzer",
+    "Deployment dort, wo Ihre Daten liegen"
+   ],
+   "text": "Leistung · Software für Unternehmen\nSoftware für Ihre echten Abläufe\n\nBevor wir etwas entwerfen, nehmen wir auf, wie die Arbeit tatsächlich läuft. Danach entsteht Software, die dort betrieben wird, wo Ihre Daten liegen – und die Ihnen gehört.\n\nProjekt anfragen\nDie Seite fragen\n8–14 Wo.\ntypisch, vom Briefing bis live\n48 h\nbis zum Festpreis\n0\nLizenzen pro Nutzer – der Code gehört Ihnen\nProzessaufnahme vor dem ersten Entwurf\nDokumentiert, getestet, übergeben\nVollständiger Quellcode in Ihrem Repository – kein Lock-in, keine Lizenz pro Nutzer\nDeployment dort, wo Ihre Daten liegen\nops.ihre-firma.de\nOffene Aufträge\nLive\nKUNDE\nSYSTEM\nBETRAG\nNordlicht GmbH\nSAP\n7.513,00 €\nBaumann & Söhne\nHubSpot\n1.352,00 €\nAlpina Logistik\nLegacy · SOAP\n22.112,18 €\nWerk 3\nCSV → App\n3.290,00 €\nHafenkontor\nREST\n27.840,00 €\nKessler Technik\nExcel → App\n2.021,00 €\nWas wir bauen würden\nKonkrete Projekte, gruppiert nach Aufgabe.\n\nDie Branchen sind Beispiele, um die Form zu zeigen – keine Kundenreferenzen. Ihre Situation ist anders: Erzählen Sie sie uns.\n\nOPERATIONS\nEin Ops-Dashboard mit den Zahlen von heute\n→ Kein CSV mehr, das montags herumgeschickt wird.\nBACK-OFFICE\nDas interne Tool, das die Tabelle ersetzt\n→ Eine Version der Wahrheit – und ein Audit-Trail.\nAUSSENDIENST / SERVICE\nEin Werkzeug, das fern vom Schreibtisch funktioniert\n→ Papierkram vor Ort erledigt, nicht abends nachgetippt.\nERP / CRM\nEine Integration zwischen zwei Inseln\n→ Ihre Werkzeuge teilen Daten, statt jedes für sich zu leben.\nFINANZEN / VERWALTUNG\nDer manuelle Prozess, übergeben an einen Zeitplan\n→ Jede Woche Stunden zurück – und es vergisst nie.\nWie tief wir gehen\nDer Motor unter den Anwendungsfällen.\nDashboards & interne Tools\n\nAdmin-Panels, Ops-Dashboards und Back-Office-Werkzeuge – schnell, rollenbasiert, für den echten Ablauf gebaut. Echtzeitzahlen aus Ihrer eigenen Datenbank.\n\nIntegrationen, die Ihren Stack sprechen\n\nERP, CRM, REST und SOAP, OpenAPI-Spezifikationen und die Altsysteme, die niemand anfassen will. Wo es keine saubere API gibt, bauen wir einen Adapter gegen Datenbank oder Export.\n\nDen manuellen Prozess automatisieren\n\nCopy-Paste zwischen Systemen, nächtliche Abstimmung, der handgebaute Bericht – übergeben an geplante Jobs und Pipelines. Wo es passt, nimmt KI die Fleißarbeit ab.\n\nGebaut, um zu bleiben\n\nDokumentiert, getestet, Ihr Eigentum – Quellcode in Ihrem Repository, kein Lock-in, keine Lizenz pro Nutzer. Eine Übergabe, die Ihr eigenes Team aufnehmen kann.\n\nSo läuft es\nVier Schritte, jeder mit Ausstieg.\n01\nDen echten Prozess entdecken\n\nWir sitzen bei den Menschen, die die Arbeit machen, und erfassen, wie sie wirklich läuft – Systeme, Übergaben, manuelle Schritte. Ein Bauplan aus der Realität, nicht aus dem Organigramm.\n\n02\nPrototyp\n\nEin klickbarer Prototyp des Kernflusses, bevor wir den vollen Bau beginnen – Kurskorrektur an etwas Sichtbarem, nicht an einer 40-seitigen Spezifikation.\n\n03\nBauen, mit wöchentlichen Demos\n\nGebaut gegen Ihre echten Daten und Integrationen, jede Woche funktionierende Software. Kein Big-Bang am Ende – Sie steuern durchgehend mit.\n\n04\nLiefern & übergeben\n\nDeployt, wo Ihre Daten liegen – Cloud oder On-Premise – mit dokumentierter Architektur, Quellcode in Ihrem Repository und sauberer Übergabe. Plus 30 Tage Support.\n\nWomit wir das bauen\nTypeScript\nNode.js\nPython\nReact\nNext.js\nPostgreSQL\nREST\nGraphQL\nOpenAPI\nDocker\nAzure / AWS\nSSO / OAuth\nRBAC\nAudit-Logging\nFragen\nWas Sie wirklich fragen.\nIntegrieren Sie unser ERP, CRM und unsere Altsysteme?\n\nJa – das ist der Großteil der Arbeit. ERP, CRM, REST und SOAP, OpenAPI und die Altsysteme, die niemand anfassen will. Ohne saubere API bauen wir einen Adapter gegen Datenbank oder Export.\n\nOn-Premise oder Cloud – was müssen wir wählen?\n\nWas Ihre Daten verlangen. On-Premise, wenn Residenz oder Richtlinien es fordern, Cloud, wenn nicht. Eine Entscheidung, die wir mit Ihnen treffen – die Architektur ändert sich nicht.\n\nWem gehört der Code – Ihnen oder uns?\n\nIhnen. Vollständiger Quellcode in Ihrem Repository, dokumentiert, kein Lock-in, keine Lizenz pro Nutzer. Software, die Sie nicht verlassen können, gehört Ihnen nicht.\n\nWas kostet es, und wie lange dauert es?\n\nInterne Software typischerweise 8–14 Wochen, ein klickbarer Prototyp des Kernflusses deutlich früher. Festpreis in 48 Stunden. Wenn ein Standardprodukt Ihnen besser dient, sagen wir das.\n\nWas passiert, wenn Sie nicht mehr verfügbar sind?\n\nGenau deshalb dokumentieren und testen wir beim Bauen und wählen einen unaufgeregten Stack: Ihre eigene IT kann ihn besetzen. In der Praxis sind wir seit 2016 da – aber davon sollten Sie nie abhängen, und das tun Sie nicht.\n\nBereit für ein Gespräch?\nAntwort in 24 Stunden, Festpreis in 48 – von einer der zwei Personen, die es bauen würden.\nProjekt anfragen"
+  }
+ ]
+}

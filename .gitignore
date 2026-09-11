@@ -22,3 +22,10 @@ AGENTS.md
 # Parked binaries: the pristine Claude Design export and screen recordings.
 # Kept on disk for reference, too large and too regenerable for history.
 internal/parked/*.zip
+
+# Python bytecode from the build tools
+__pycache__/
+*.pyc
+
+# Screenshots are a look, not a record - regenerate with tools/shots.mjs
+internal/shots/
