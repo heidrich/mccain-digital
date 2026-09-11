@@ -5,7 +5,17 @@
 The marketing site for **McCain Digital**, a digital product studio in Bavaria,
 Germany (AI tools, web apps, websites and custom software).
 
-🔗 **Live:** [mccain-digital.com](https://mccain-digital.com)
+🔗 **Deployment:** [mccain-digital.vercel.app](https://mccain-digital.vercel.app)
+
+> **`mccain-digital.com` does not serve this repository.** Measured 11.9.2026:
+> the domain still points at SiteGround's nginx and serves the English v2 site
+> from June, indexable, with the contact and service pages 404. The Vercel
+> project carries only its own `*.vercel.app` domains. `node
+> tools/domain_check.mjs` compares the two and fails while they differ.
+>
+> Switching the domain is an owner decision and is **not** just a DNS change:
+> this build is `noindex`, and pointing an indexed domain at a noindex site asks
+> Google to remove it. Turn `noindex` off first, rebuild, verify, then move DNS.
 
 > **The site is `noindex` right now.** The 2026 relaunch is not finished —
 > subpages are still being built and two owner decisions are open (see
@@ -161,6 +171,7 @@ node  tools/verify_site.mjs         # REQUIRED before every push
 | `weigh.mjs` | what the shipped bytes actually consist of |
 | `responsive_audit.mjs` | horizontal overflow at 390 / 768 / 1024 / 1440, and the element that causes it |
 | `form_probe.mjs` | fills a contact form, submits it, and reports what left the browser |
+| `domain_check.mjs` | whether the canonical domain actually serves this build — it does not |
 | `check_links.py` | internal links, anchors and duplicate ids on deployed pages |
 
 `verify_site.mjs` exists because a load check does not prove a page works. The

@@ -1,6 +1,35 @@
-# Uebergabe — Stand 11. September 2026, Nachtlauf
+# Uebergabe — Stand 11. September 2026
 
-`https://mccain-digital.vercel.app/` liefert den Stand von `main`.
+## ⛔ ZUERST: `mccain-digital.com` liefert NICHT diesen Stand
+
+Die Domain zeigt **nicht** auf Vercel und hat es nie getan. Gemessen am 11.9.:
+
+| | `mccain-digital.com` | `mccain-digital.vercel.app` |
+| --- | --- | --- |
+| Server | **nginx** (SiteGround, Google-Cloud-IPs) | Vercel |
+| Inhalt | die **englische v2** vom 21. Juni 2026 | der Relaunch |
+| `lang` | `en` | `de` |
+| robots | **`index, follow`** — ist indexiert | `noindex, follow` |
+| Kontakt + 4 Leistungsseiten | **404** | 200 |
+
+Das Vercel-Projekt `mccain-digital` (`prj_UPXVc2IOpokV6yA4zzxqpPPAQGZX`) traegt
+**nur** seine drei automatischen `*.vercel.app`-Domains. `mccain-digital.com`
+ist dort gar nicht eingetragen.
+
+**Folge fuer jede Messung in diesem Dokument:** wo „live" steht, ist
+`mccain-digital.vercel.app` gemeint — die Auslieferung, nicht die Adresse, die
+jemand eintippt. `node tools/domain_check.mjs` stellt die Frage direkt und
+faellt durch, solange beide auseinanderlaufen.
+
+**Und die Falle beim Umschalten:** dieser Build ist `noindex`. Eine **indexierte**
+Domain auf eine noindex-Seite zu zeigen, heisst Google zu bitten, sie aus dem
+Index zu nehmen. Reihenfolge deshalb: erst `site.config.json` auf
+`"noindex": false` **und** den `X-Robots-Tag` aus `vercel.json` nehmen, neu
+bauen, `node tools/verify_site.mjs` — **dann** die Domain umhaengen.
+
+Die Umstellung selbst ist eine Owner-Entscheidung und steht aus.
+
+---
 
 ## ▶ ZUERST LESEN — Stand nach der Nacht zum 11.9.
 
