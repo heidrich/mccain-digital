@@ -26,7 +26,12 @@ for (const file of ["index.html", "brand-guide.html"]) {
   const html = fs.readFileSync(p, "utf8");
 
   const pre = slice(html, /<div id="dc-prerender">[\s\S]*?\n<x-dc/);
-  const tpl = slice(html, /<x-dc[^>]*>[\s\S]*?<\/x-dc>/);
+  /* The template moved into an inert <template> on 11.9.2026. Matching the old
+   * <x-dc>...</x-dc> shape after that reported 406 KB for an empty element and
+   * 0 KB for a page that carries 42 KB of template - a measuring tool quietly
+   * measuring the wrong thing is worse than one that fails. */
+  const tpl = slice(html, /<template id="dc-template">[\s\S]*?<\/template>/);
+  if (!tpl) throw new Error(`weigh: no <template id="dc-template"> in ${file} - has the build changed?`);
   const scr = slice(html, /<script[^>]*data-dc-script[^>]*>[\s\S]*?<\/script>/);
   const sty = (html.match(/<style[^>]*>[\s\S]*?<\/style>/gi) || []).join("");
   const comments = html.match(/<!--[\s\S]*?-->/g) || [];
@@ -41,7 +46,7 @@ for (const file of ["index.html", "brand-guide.html"]) {
   console.log(`\n${file}   ${kb(html.length)} raw   ${kb(br(html))} brotli`);
   const rows = [
     ["prerendered markup", pre],
-    ["x-dc template", tpl],
+    ["inert template", tpl],
     ["component script", scr],
     ["<style> blocks", sty],
   ];

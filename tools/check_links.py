@@ -1,5 +1,13 @@
-# Static check of the v3 proposal: every internal href/src resolves to a real
-# file, every #anchor exists on its target page, every id is unique.
+# Every internal href/src on a DEPLOYED page resolves to a real file, every
+# #anchor exists on its target page, every id is unique.
+#
+#     python tools/check_links.py
+#
+# mccain-design-system/ is skipped on purpose. It is the Claude Design export
+# the site is built FROM, it is in .vercelignore, and it is full of href="{{ x }}"
+# template placeholders and links to sibling components that were never
+# published. Reporting those made this tool print a dozen findings on every run
+# that nobody could act on - and a checker that is always red stops being read.
 import io
 import os
 import re
@@ -10,7 +18,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 pages = []
 for base, dirs, files in os.walk(ROOT):
     dirs[:] = [d for d in dirs if d not in
-               ("old", "_parked", "fonts", "img", "team", "node_modules", ".git")]
+               ("archive", "internal", "mccain-design-system", "fonts", "img", "team",
+                "node_modules", ".git")]
     for f in files:
         if f.endswith(".html"):
             pages.append(os.path.join(base, f))
@@ -18,8 +27,51 @@ for base, dirs, files in os.walk(ROOT):
 ids = {}
 problems = []
 
+# The component template ships as inert <template id="dc-template"> content: the
+# browser never resolves anything inside it, support.js interpolates the {{ }}
+# expressions before React renders them, and nothing in there is a request. A
+# text scan cannot tell that apart from a real href, so it is cut out before the
+# scan rather than explained away in eight findings per run.
+#
+# Comments are stripped FIRST, and that order is the whole point: the banner at
+# the top of the generated page explains the structure and contains the literal
+# string <template id="dc-template">, so a regex looking for that tag matched
+# the COMMENT, ran on to the one real </template> and deleted the prerendered
+# markup along with it. The check then reported four anchors as missing that
+# were sitting in the part it had just thrown away. A pattern named in
+# documentation is inside the search space too.
+COMMENT = re.compile(r"<!--.*?-->", re.S)
+TEMPLATE_BLOCK = re.compile(
+    r'<template id="dc-template">.*?</template>', re.S)
+# A <script> body is code, not markup. The component script carries strings like
+# icons: 'Alle Icons als SVG-Sprite mit <symbol id="...">.' - prose about markup,
+# which a text scan reads as markup. The opening tag stays, because src= on it is
+# a real reference.
+SCRIPT_BODY = re.compile(r"(<script[^>]*>).*?</script>", re.S)
+# Escaped markup is markup being SHOWN, not applied. The brand guide documents
+# the icon sprite as &lt;symbol id="..."&gt; three times in its prose, which this
+# checker reported as a duplicate id - a false finding, and false findings are
+# how a real one later goes unnoticed.
+SHOWN_MARKUP = re.compile(r"&lt;[^&]{0,400}?&gt;")
+
+
+def servable(path):
+    """Only the markup a browser actually resolves.
+
+    Everything removed here is present in the file and inert: comments, the
+    template support.js interpolates later, script bodies, and markup quoted as
+    documentation. What is left is what a link can actually point at.
+    """
+    s = io.open(path, encoding="utf-8").read()
+    s = COMMENT.sub("", s)
+    s = TEMPLATE_BLOCK.sub("", s)
+    s = SCRIPT_BODY.sub(r"", s)
+    s = SHOWN_MARKUP.sub("", s)
+    return s
+
+
 for p in pages:
-    s = io.open(p, encoding="utf-8").read()
+    s = servable(p)
     found = re.findall('id="([^"]+)"', s)
     dupes = set(x for x in found if found.count(x) > 1)
     if dupes:
@@ -30,7 +82,7 @@ for p in pages:
 RUNTIME_IDS = {"cmenu", "cmInput", "cmList", "cmPrev", "cmCount", "chipTip"}
 
 for p in pages:
-    s = io.open(p, encoding="utf-8").read()
+    s = servable(p)
     rel = os.path.relpath(p, ROOT)
     refs = re.findall('(?:href|src)="([^"]+)"', s)
     for r in refs:

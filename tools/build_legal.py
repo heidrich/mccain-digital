@@ -1,6 +1,6 @@
 # Generates the four legal pages in the 2026 relaunch design.
 #
-# THE BODY OF EACH PAGE IS VERBATIM from the live site (old/upload/legal/*).
+# THE BODY OF EACH PAGE IS VERBATIM from the live site (archive/site-apache/upload/legal/*).
 # That wording is legally reviewed and must not be re-typed, paraphrased or
 # translated here. This script only ever builds the shell around it and rewrites
 # hrefs. If the wording has to change, it changes at the source and this runs
@@ -22,7 +22,7 @@ import re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SITE = os.path.dirname(HERE)
-SRC = os.path.join(SITE, "old", "upload", "legal")
+SRC = os.path.join(SITE, "archive", "site-apache", "upload", "legal")
 DST = os.path.join(SITE, "legal")
 ORIGIN = "https://mccain-digital.com"
 
@@ -162,7 +162,7 @@ footer.site .legal-links a[aria-current]{color:#fff;font-weight:600}
 SHELL = """<!DOCTYPE html>
 <!-- GENERATED - do not edit by hand.
 
-     Body text is VERBATIM from old/upload/legal/{src}; that wording is legally
+     Body text is VERBATIM from archive/site-apache/upload/legal/{src}; that wording is legally
      reviewed. Regenerate with `python tools/build_legal.py` rather than editing
      the prose here. The shell (header, footer, styles) is ours.
 

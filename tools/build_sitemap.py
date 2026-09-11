@@ -37,7 +37,7 @@ for base, dirs, files in os.walk(ROOT):
     # built FROM - both are in .vercelignore, and both are full of .html that
     # would otherwise trip the "on disk but not in the sitemap" check below.
     dirs[:] = [d for d in dirs if d not in
-               ("old", "old 2", "_parked", "preview", "fonts", "img", "team",
+               ("archive", "internal", "preview", "fonts", "img", "team",
                 "tools", "vendor", "node_modules", ".git", "audit",
                 "mccain-design-system", "assets-src", "v3-proposal",
                 # brand/ holds mccain-signatur.html - an email signature

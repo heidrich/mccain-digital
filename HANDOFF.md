@@ -4,9 +4,21 @@
 
 ## ▶ ZUERST LESEN — Stand am Ende des 11.9.
 
-**Der Relaunch steht am Repo-Root.** Die v3-Seite liegt unter `old 2/`
-(`git mv`, 93 Renames, Historie folgt), der Root ist jetzt die neue Seite,
-gebaut aus dem Claude-Design-Export in `mccain-design-system/`.
+**Der Relaunch steht am Repo-Root**, gebaut aus dem Claude-Design-Export in
+`mccain-design-system/`.
+
+**Die Ordner wurden am 11.9. abends aufgeraeumt** (`git mv`, Historie folgt):
+
+| vorher | jetzt |
+| --- | --- |
+| `old/` | `archive/site-apache/` — die Apache-Seite, **Quelle des geprueften Rechtstextes** |
+| `old 2/` | `archive/site-v3/` — die Seite, die der Relaunch abgeloest hat |
+| `audit/`, `_parked/`, `TODO.md`, `DESIGN-BEFUND.md`, `assets-src/` | `internal/` |
+
+`tools/build_legal.py`, `tools/build_sitemap.py`, `tools/check_links.py`,
+`.vercelignore`, `.gitignore` und `README.md` sind nachgezogen. Dass nichts davon
+erreichbar ist, ist keine Zusage, sondern ein Test: `tools/verify_site.mjs` fragt
+den Live-Host nach diesen Pfaden und faellt durch, wenn einer **nicht** 404 ist.
 
 ### Was ausgeliefert wird
 
@@ -15,8 +27,13 @@ gebaut aus dem Claude-Design-Export in `mccain-design-system/`.
 · Laufzeit: `support.js`, `content.json`, `pixel-engine.js`, `brand/`, `img/`, `team/`,
 `fonts/`, `vendor/`
 
-`mccain-design-system/`, `old/`, `old 2/`, `tools/`, `_parked/`, `audit/` und die
-internen Notizen stehen in `.vercelignore`.
+`mccain-design-system/`, `archive/`, `internal/`, `tools/` und die Notizen stehen
+in `.vercelignore`.
+
+**Die ganze Seite steht auf `noindex`**, solange der Relaunch unfertig ist.
+Ein Schalter: `site.config.json`. Jeder Generator liest ihn, `vercel.json`
+liefert zusaetzlich `X-Robots-Tag`, und das Tor faellt durch, wenn die beiden
+auseinanderlaufen.
 
 ### Die zwei Befunde, die die Arbeit getrieben haben
 

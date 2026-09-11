@@ -408,7 +408,15 @@ if (prerendered.includes("{{")) throw new Error("prerender: unresolved {{ }} in 
  * and a fetch per src - the thing this build exists to prevent - so it is
  * checked on the finished document rather than trusted. */
 function assertMoustachesAreInert(doc, what) {
-  const outside = doc.replace(/<template id="dc-template">[\s\S]*?<\/template>/, "");
+  /* Comments come out FIRST. The banner at the top of the generated file
+   * explains the structure and therefore contains the literal string
+   * `<template id="dc-template">`, so a regex looking for that tag matched the
+   * COMMENT, ran to the one real </template>, and cut the prerendered markup out
+   * of its own check - a guard that could no longer see the thing it exists to
+   * catch. Documentation that names a pattern is inside the search space too. */
+  const outside = doc
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/<template id="dc-template">[\s\S]*?<\/template>/, "");
   const n = (outside.match(/\{\{/g) || []).length;
   if (n) {
     const at = outside.indexOf("{{");

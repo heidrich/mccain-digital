@@ -2,145 +2,190 @@
 
 > We build digital products.
 
-The marketing site for our new small company **McCain Digital**, a digital product studio in Bavaria, Germany (AI tools, web apps, mobile apps, websites and custom software).
-
-It is hand-written **vanilla HTML / CSS / JS** — no framework, no build step, no dependencies — and scores **100 / 100 / 100 / 100** on Google PageSpeed (Performance, Accessibility, Best Practices, SEO), with Total Blocking Time 0 ms and Cumulative Layout Shift 0 — *while* running a custom canvas **pixel-physics engine** over every headline, button and tile.
+The marketing site for **McCain Digital**, a digital product studio in Bavaria,
+Germany (AI tools, web apps, websites and custom software).
 
 🔗 **Live:** [mccain-digital.com](https://mccain-digital.com)
 
----
-
-## What makes it interesting
-
-- **Eleven pages, zero build.** The repository root *is* the site: [`index.html`](index.html) is the home page, [`pixel-engine.js`](pixel-engine.js) the shared effect engine, [`v3.css`](v3.css) the single stylesheet. `git push` deploys it, and everything except [`api/ask.js`](api/ask.js) runs on any static host as-authored.
-- **No dependencies, no third-party requests.** Type is one self-hosted, preloaded `woff2` (Schibsted Grotesk) in [`fonts/`](fonts/) — no font CDN; the only network requests are the page, its scripts and a handful of images.
-- **The text is always real DOM.** Every word is selectable, crawlable HTML — the pixel effects are `aria-hidden` `<canvas>` overlays drawn *on top*. Structured data via JSON-LD (`ProfessionalService`, `WebSite`, `FAQPage` on the home page, `Service` + `BreadcrumbList` per service page).
-- **Graceful by default.** Touch devices and `prefers-reduced-motion` get the native, effect-free site. The canvas is presentation only; it can fail and the page still works.
-- **Frame-frugal.** Every animation loop runs *only* while something is actually moving and on-screen, then parks itself — an idle page burns zero frames. That is how the effects coexist with a 0 ms Total Blocking Time.
+> **The site is `noindex` right now.** The 2026 relaunch is not finished —
+> subpages are still being built and two owner decisions are open (see
+> `HANDOFF.md`). The switch is `site.config.json`; flipping it is the go-live
+> gesture, and `tools/verify_site.mjs` fails if the generators, the meta tags and
+> the `X-Robots-Tag` header disagree about it.
 
 ---
 
-## Tech stack
+## What this repository is
 
-| Concern | Choice |
+**The repository root *is* the deployed site.** `git push` is the deploy. But
+unlike the version this replaced, the root is now **generated**: the start page
+and the brand guide are built out of a Claude Design component export that lives
+in [`mccain-design-system/`](mccain-design-system/) and is never itself served.
+
+`index.html` and `brand-guide.html` are build output. **Editing them by hand is
+lost work** — change the export and run the build.
+
+### Why there is a build at all
+
+The export is a client-rendered React component: every word of copy is a
+`{{ }}` placeholder resolved at runtime from `content.json`. Measured on the
+untouched export, a crawler that does not run JavaScript reads **145 words** of
+decoration — no headline, no title, no prose. Rendered, the same page carries
+**1,896**. Meta tags alone would have been cosmetic.
+
+So the build renders the component in a real browser and ships **both copies**:
+
+| in the page | what it is for |
 |---|---|
-| Markup / styling / logic | Hand-written **HTML5, CSS3, vanilla JS** (ES5-style, IIFE, no modules) |
-| Build step | **None** — files are served as-authored |
-| Dependencies | **None** |
-| Effects | Custom `<canvas>` 2D **pixel-physics engine** (`window.PixelFX`) |
-| Type | **Schibsted Grotesk**, self-hosted in `fonts/` |
-| SEO | Per-page meta, Open Graph, JSON-LD structured data, `sitemap.xml`, `robots.txt`, `llms.txt` |
-| Hosting | **Vercel**, deployed from the repository root on `git push`; headers via `vercel.json` |
+| `<div id="dc-prerender">` | the settled markup — what a crawler reads and what paints first |
+| `<x-dc></x-dc>` | the empty mount point `support.js` replaces with `#dc-root` |
+| `<template id="dc-template">` | the component template, **inert**, handed to `support.js` by a shim |
+
+A `MutationObserver` removes the prerendered copy once React has actually
+rendered — and leaves it in place if React never arrives, so a visitor without
+JavaScript keeps a readable page.
+
+Two mistakes in that design each shipped a page that looked perfect and was
+completely dead. Both are written up at the top of
+[`tools/prerender.mjs`](tools/prerender.mjs) and in `HANDOFF.md`. Read that file
+before changing the build.
 
 ---
 
-## The pixel engine — how the particles are calculated
+## Measured, not claimed
 
-[`pixel-engine.js`](pixel-engine.js) is one physics core feeding five effects. The pipeline is the same everywhere:
+Numbers from the deployed site, 11 September 2026:
 
-**1. Rasterize → sample into particles.** The engine takes a real DOM node (a headline, a button face, a tile), clones it with its computed styles inlined, and renders it into an `<svg><foreignObject>` which is drawn to an offscreen canvas. It then reads the raw pixels back with `getImageData` and walks them on a fixed grid (`gap` px). Every sampled pixel above an alpha threshold becomes a **particle** carrying its colour `[r,g,b]`, its alpha, and its **home position** `(hx, hy)`. Everything is `devicePixelRatio`-aware (capped at 3) so it stays crisp on retina without over-drawing.
+|     |     |
+| --- | --- |
+| Third-party hosts | **0** — React and both typefaces are vendored |
+| Console errors / warnings | **0** on every page |
+| Requests, start page | ~30, all same-origin |
+| `index.html` | 661 KB raw, **66 KB brotli** |
+| Words of real text for a crawler | 1,896 |
+| Structured data | `ProfessionalService`, `WebSite`, `FAQPage` (7 questions) |
 
-**2. Simulate.** Each frame, particles integrate simple velocity-based physics toward (or away from) their home position. The shared building blocks:
+A Lighthouse / PageSpeed score for **this** build has not been taken yet. The
+four-times-100 figure that appears on the page itself is a number from the
+previous site and is one of the open items in `HANDOFF.md`.
 
-- **The cursor is a "black hole".** For every particle within radius `R` of the pointer, a radial push is applied that grows as you get closer to the centre:
+### Why React and the fonts are in the repository
 
-  ```
-  if (dist² < R²) {
-    force = (1 − dist / R) · FORCE     // 0 at the rim, strongest at the centre
-    vx   += (dx / dist) · force
-    vy   += (dy / dist) · force
-  }
-  ```
+Not a preference — **GDPR**. Loading a font or a script from a CDN sends the
+visitor's IP address to that CDN's operator. LG München I, 3 O 17493/20
+(20 January 2022) awarded damages for exactly that with Google Fonts, and the
+reasoning applies to unpkg.com in the same way. So:
 
-- **A spring pulls every particle home**, and velocity is damped each frame, so the field always wants to re-form the text:
+- React 18.3.1 UMD lives in [`vendor/`](vendor/) and is injected through
+  `support.js`'s own `window.__resources` hook — no patching of third-party code,
+  and the SRI hashes still match because the bytes are identical.
+- Instrument Sans and JetBrains Mono live in [`fonts/`](fonts/), subset to
+  `latin` and `latin-ext`, named after what they are rather than after Google's
+  URL hash. (Two of them once differed only in capitalisation and silently
+  overwrote each other on NTFS — see `tools/vendor_assets.py`.)
 
-  ```
-  vx += (homeX − x) · SPRING           // pull back toward home
-  vy += (homeY − y) · SPRING
-  vx *= DAMP;  vy *= DAMP               // friction
-  x  += vx;    y  += vy
-  ```
+---
 
-  For the headlines that is `R = 46`, `FORCE = 2.4`, `SPRING = 0.10`, `DAMP = 0.86`.
+## The pixel engine
 
-- **Assembly** (the intro, and re-forming) interpolates each particle from a random start to its home over ~1 s with a cubic ease-out `e = 1 − (1 − t)³` and a small per-particle delay, so the text *snaps together* rather than sliding uniformly.
-
-- **Scroll shear.** A single lerped scroll-velocity value is broadcast on a small "velocity bus"; headlines use it to shear their rows like a CRT tear while you scroll, then spring back.
-
-The five consumers built on that core:
-
-1. **Pixel headlines** — text assembles from scattered pixels, then *stays* pixels. The cursor punches the black hole through it; with no pointer, an autonomous "pass" drifts the hole through the text every ~30 s (random side, random lane), and a real pointer always takes over.
-2. **Disintegrating buttons** — hover tears the whole button face into pixels that scatter around the cursor; click triggers a **vacuum** (an accelerating pull into the click point), a short mustard flash, and *then* fires the real action (navigate / submit / event). Keyboard, touch and reduced-motion use the plain button.
-3. **Tile morph** — a card's front face dissolves into pixels blasted away from the cursor entry point and reassembles as its back face out of the debris.
-4. **Scroll-velocity bus** — one decaying scroll-velocity value, lerped, that consumers subscribe to; the loop runs only while it decays.
-5. **Falling sand** — clicking content shatters it into grains governed by a **cellular automaton** (fall straight down, else slide diagonally, else pile up). The cursor stirs the pile; after 5 s idle the grains vacuum back to their sampled home. The 404 page turns this into a little "sweep up the pixels" game.
+[`pixel-engine.js`](pixel-engine.js) exposes `window.PixelFX`: one 2-D canvas
+physics core feeding the effects over headlines, buttons and tiles. It is
+presentation only and `aria-hidden` — every word on the page is real,
+selectable, crawlable DOM underneath. Touch devices and
+`prefers-reduced-motion` get the effect-free page.
 
 ---
 
 ## Project structure
 
-The repository root **is** the site — what is here is what gets served.
+```text
+index.html              GENERATED   the start page
+brand-guide.html        GENERATED   the brand and download page
+legal/                  GENERATED   imprint, privacy, terms, withdrawal
+404.html
+site.config.json        the noindex switch, read by every generator
+support.js              the Claude Design runtime (third party, unmodified)
+pixel-engine.js         the canvas pixel-physics engine
+content.json            every word of copy, de + en
+vendor/                 React 18.3.1 UMD
+fonts/ img/ team/ brand/ assets
+robots.txt · sitemap.xml · llms.txt · og-image.png
+vercel.json             edge cache, security headers, X-Robots-Tag
+.vercelignore           what must NOT be published — archive/, internal/, tools/
 
+mccain-design-system/   the Claude Design export the site is BUILT FROM
+tools/                  generators and gates
+api/ask.js              the only server-side function
+
+archive/site-apache/    the site that was live on Apache until the Vercel move.
+                        SOURCE OF RECORD for the reviewed legal wording and for
+                        the old contact page.
+archive/site-v3/        the site the 2026 relaunch replaced.
+internal/               audit findings, design notes, parked experiments,
+                        screen recordings and source material.
+HANDOFF.md              the working notes — start here, it opens with a
+                        READ-THIS-FIRST block
 ```
-index.html              home
-contact.html
-services/               ai-tools · web-apps · websites · software
-legal/                  imprint · privacy · terms · withdrawal
-404.html                falling-sand "collect" game
 
-data.js                 the single content source (services, FAQ, knowledge base)
-pixel-engine.js         the shared canvas pixel-physics engine
-common.js               shared page runtime (theme, nav, marquee, FAQ, tooltips)
-pacman.js · menu.js     scroll-progress Pac-Man · the ⌘K command menu
-v3.js                   what only the home page has
-v3.css                  every style
+Nothing under `archive/`, `internal/`, `tools/` or `mccain-design-system/` is
+deployed. That is not a promise, it is a test: `tools/verify_site.mjs` asks the
+live host for those paths and fails unless they are 404.
 
-fonts/ · img/ · team/   assets
-robots.txt · sitemap.xml · llms.txt · og-image.png · favicon.svg
-vercel.json             edge cache + security headers
-.vercelignore           what must NOT be published (old/, tools/, notes)
+---
 
-tools/                  generators and guards, not deployed
-old/                    the retired site, kept for reference — see below
-HANDOFF.md              the working notes
+## Build and check
+
+Order matters. The dev server has to be running, because the build renders the
+component through it.
+
+```bash
+python prodserve.py 8898 --dev      # must be running
+python tools/vendor_assets.py       # React + the typefaces into the repo
+node  tools/prerender.mjs           # index.html, brand-guide.html, og-image.png
+python tools/build_legal.py         # the four legal pages
+python tools/build_sitemap.py       # last: it checks itself against the disk
+node  tools/verify_site.mjs         # REQUIRED before every push
 ```
 
-**Script order is load-bearing:** `data.js` → `pixel-engine.js` → `common.js` →
-`pacman.js` → `menu.js` → page script. `pixel-engine.js` must come before
-`common.js`, because the marquee subscribes to `PixelFX.onVelocity`
-synchronously.
+### The gates
 
-### `old/`
+|     |     |
+| --- | --- |
+| `verify_site.mjs` | **clicks.** Hydration, the mega menu, a modal, the pixel engine, the console, `noindex`, and what must stay 404. Takes a URL to run against production. |
+| `console_audit.mjs` | every console message, grouped by shape |
+| `requests_audit.mjs` | every request, counted — a duplicate is the finding |
+| `weigh.mjs` | what the shipped bytes actually consist of |
+| `check_links.py` | internal links, anchors and duplicate ids on deployed pages |
 
-The site that was live on classic Apache webspace until the move to Vercel,
-plus the design studies that led here (`upload/`, `upload-v2/`, `mockup/`,
-`_v2-preview/`). It is kept because it is the source of record for the legal
-wording — `tools/build_legal.py` lifts that text verbatim out of
-`old/upload/legal/` and only ever rewrites hrefs. It is listed in
-`.vercelignore`, so it is never published: a second, older copy of the same
-company reachable under `/old/` would be a genuine SEO problem.
+`verify_site.mjs` exists because a load check does not prove a page works. The
+relaunch went live with 200s, loaded images, correct meta tags and 1,886 words of
+text — and every button dead. Nothing that was measured had asked whether
+anything *does* something.
+
+---
 
 ## Run locally
 
-No build, no install. Use the small server in the repository rather than
+No install. Use the server in the repository rather than
 `python -m http.server`, which sends no compression or cache headers and
-measures roughly 4x worse in Lighthouse for the same files:
+measures roughly 4× worse for the same files:
 
 ```bash
 python prodserve.py 8898 --dev   # to look at:  Cache-Control: no-store
-python prodserve.py 8897         # to measure:  production headers + gzip
+python prodserve.py 8898         # to measure:  brotli + production headers
 ```
+
+---
 
 ## Deploy
 
-`git push` — Vercel builds from the repository root. There is nothing to
-compile. `vercel.json` carries the cache and security headers; `.vercelignore`
-decides what stays unpublished.
-
----
+Vercel, from the repository root, on push to `main`. Headers come from
+`vercel.json`. There is no build step on Vercel — the generated files are
+committed, so what is in the repository is exactly what is served.
 
 ---
 
 ## License
 
-© McCain Digital. All rights reserved. Published for reference and portfolio purposes; not licensed for reuse or redistribution.
+© McCain Digital. All rights reserved. The brand assets under `brand/` and the
+copy are not licensed for reuse.

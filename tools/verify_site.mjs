@@ -267,6 +267,42 @@ if (WANT_NOINDEX && BASE.startsWith("http") && !BASE.includes("127.0.0.1")) {
   if (!headerSeen) fail("no X-Robots-Tag: noindex header - check vercel.json");
 }
 
+/* What must NOT be reachable. .vercelignore is a text file with no test of its
+ * own: a mistyped line there silently publishes the two retired sites, the build
+ * tooling and the internal notes, and nothing on the site would look different.
+ * The folders were renamed on 11.9.2026, which is exactly when a list like this
+ * goes stale, so it asks the deployed host rather than trusting the file.
+ *
+ * The old names are in here too: if archive/ were reachable under its previous
+ * path, some cache or rewrite is still serving it. */
+const MUST_404 = [
+  "/archive/site-apache/upload/index.html",
+  "/archive/site-v3/index.html",
+  "/old/upload/index.html",
+  "/old 2/index.html",
+  "/internal/TODO.md",
+  "/internal/audit/2026-09-02-award-audit.html",
+  "/tools/prerender.mjs",
+  "/prodserve.py",
+  "/HANDOFF.md",
+  "/mccain-design-system/reference/index.html",
+];
+if (BASE.startsWith("http") && !BASE.includes("127.0.0.1")) {
+  console.log("\n  must not be reachable");
+  for (const p of MUST_404) {
+    let status = 0;
+    try {
+      const res = await fetch(BASE + p, { method: "GET", redirect: "manual" });
+      status = res.status;
+    } catch {
+      status = -1;
+    }
+    const good = status === 404 || status === 401 || status === 403;
+    console.log(`    ${ok(good)} ${String(status).padStart(3)}  ${p}`);
+    if (!good) fail(`${p} is reachable (${status}) - it must be in .vercelignore`);
+  }
+}
+
 await browser.close();
 console.log();
 if (failures) {

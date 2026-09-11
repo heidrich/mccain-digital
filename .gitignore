@@ -9,7 +9,7 @@
 
 # internal — kept on disk for development, never part of the public site
 labs/
-assets-src/
+internal/assets-src/
 docs/
 CHANGELOG.md
 
@@ -21,4 +21,4 @@ AGENTS.md
 
 # Parked binaries: the pristine Claude Design export and screen recordings.
 # Kept on disk for reference, too large and too regenerable for history.
-_parked/*.zip
+internal/parked/*.zip
