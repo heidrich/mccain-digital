@@ -17,6 +17,7 @@
 # flagged rather than silently "fixed" by machine-translating legal text.
 import io
 import os
+import json
 import re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -24,6 +25,13 @@ SITE = os.path.dirname(HERE)
 SRC = os.path.join(SITE, "old", "upload", "legal")
 DST = os.path.join(SITE, "legal")
 ORIGIN = "https://mccain-digital.com"
+
+# One switch for the whole site - see site.config.json. Kept in a file rather
+# than in each generator because three tools emit this tag and a fourth serves
+# it as a header; tools/verify_site.mjs fails if any of them disagree.
+with io.open(os.path.join(SITE, "site.config.json"), encoding="utf-8") as _f:
+    CONFIG = json.load(_f)
+ROBOTS = "noindex, follow" if CONFIG["noindex"] else "index, follow, max-snippet:-1"
 
 # The imprint is the page search engines read for the company identity, so it
 # carries the Organization graph. The other three need none.
@@ -168,7 +176,7 @@ SHELL = """<!DOCTYPE html>
 <title>{title} — McCain Digital</title>
 <meta name="description" content="{desc}">
 <link rel="canonical" href="{origin}/legal/{src}">
-<meta name="robots" content="index, follow, max-snippet:-1">
+<meta name="robots" content="{ROBOTS}">
 <meta name="theme-color" content="#635BFF">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="McCain Digital">
@@ -283,7 +291,7 @@ def main():
         html = SHELL.format(
             src=src, title=title, kind=kind, desc=desc, body=body, ld=ld,
             css=CSS, preloads=preloads, origin=ORIGIN, year=2026,
-            footlinks=footlinks,
+            footlinks=footlinks, ROBOTS=ROBOTS,
         )
         out = os.path.join(DST, src)
         io.open(out, "w", encoding="utf-8", newline="\n").write(html)

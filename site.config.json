@@ -1,0 +1,19 @@
+{
+  "_comment": [
+    "One switch, read by every generator and asserted by tools/verify_site.mjs.",
+    "",
+    "noindex: true keeps the whole site out of the search index while the",
+    "relaunch is unfinished - subpages missing, the hero client-logo row not",
+    "cleared with the clients, the legal wording still English on a German-first",
+    "site. It is emitted as <meta name=robots> by every generator AND as an",
+    "X-Robots-Tag header in vercel.json, because a header also covers files no",
+    "generator touches.",
+    "",
+    "Flipping it to false is the go-live gesture: set it here, set the header in",
+    "vercel.json to match, rebuild, and run node tools/verify_site.mjs - the gate",
+    "fails if the two disagree, which is the only reason this lives in a file",
+    "instead of in each tool."
+  ],
+  "noindex": true,
+  "origin": "https://mccain-digital.com"
+}

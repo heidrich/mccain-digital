@@ -8,7 +8,7 @@
 <title>Marke &amp; Downloads — McCain Digital</title>
 <meta name="description" content="Das Zeichen, die Fassungen, Farbe, Typografie und jede Markendatei von McCain Digital zum Herunterladen.">
 <link rel="canonical" href="https://mccain-digital.com/brand-guide.html">
-<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="robots" content="noindex, follow">
 <meta name="theme-color" content="#635BFF">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="McCain Digital">
@@ -493,9 +493,9 @@ pre{margin:0}
     <div data-dc-tpl="335" style="display: flex; align-items: center; gap: 12px;"><img data-dc-tpl="336" src="brand/mccain-mark-free-color.svg" alt="" width="28" height="28" style="display: block;"><span data-dc-tpl="337" style="font-weight: 600; font-size: 15px; letter-spacing: -0.03em; color: rgb(255, 255, 255);">mccain digital</span><span data-dc-tpl="338" style="color: rgb(141, 162, 224);">· Marke v1 · September 2026</span></div>
     <div data-dc-tpl="339" style="display: flex; align-items: center; gap: 18px;"><a data-dc-tpl="340" href="/" class="scp4" style="color: rgb(197, 208, 245);">Startseite</a><span>Präsentation</span><a data-dc-tpl="342" href="#s13" class="scp4" style="color: rgb(197, 208, 245);">Dateien</a></div>
   </div></footer></div></div>
-<x-dc>
+<x-dc></x-dc>
+<template id="dc-template">
 <helmet>
-<link rel="icon" type="image/svg+xml" href="brand/mccain-favicon.svg">
 <style>
 body{margin:0;background:#fff;color:#0A2540;font-family:'Instrument Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 *,*::before,*::after{box-sizing:border-box}
@@ -726,7 +726,8 @@ pre{margin:0}
     <div style="display:flex; align-items:center; gap:18px"><a href="/" style="color:#C5D0F5" style-hover="color:#fff">Startseite</a><span>Präsentation</span><a href="#s13" style="color:#C5D0F5" style-hover="color:#fff">Dateien</a></div>
   </div>
 </footer>
-</x-dc>
+</template>
+<script>(function(){var t=document.getElementById("dc-template"),x=document.querySelector("x-dc");if(!t||!x)return;Object.defineProperty(x,"innerHTML",{configurable:true,get:function(){return t.innerHTML}});})();</script>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   static EASE = 'cubic-bezier(.2,.8,.2,1)';
@@ -838,7 +839,8 @@ class Component extends DCLogic {
 }
 </script>
 <script>(function(){var p=document.getElementById("dc-prerender");if(!p)return;
-function ready(){var r=document.getElementById("dc-root");return !!(r&&r.firstElementChild);}
+function ready(){var r=document.getElementById("dc-root");
+return !!(r&&r.firstElementChild&&r.getElementsByTagName("*").length>40);}
 function go(){if(!ready())return false;p.remove();return true;}
 if(go())return;var mo=new MutationObserver(function(){if(go())mo.disconnect();});
 mo.observe(document.documentElement,{childList:true,subtree:true});

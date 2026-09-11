@@ -11,10 +11,22 @@
  *
  * So this clicks. A page passes only if React actually took over the
  * prerendered markup and the interface responds.
+ *
+ * SECOND ROUND, 11.9.2026: this gate then reported "0 page errors" while the
+ * owner was looking at a console holding seventy SVG complaints. `pageerror`
+ * carries uncaught exceptions and nothing else - console.error and the
+ * browser's own parse warnings never touch it. One channel says nothing about
+ * the other, so both are watched now, and so is the pixel engine the owner had
+ * to point out was missing.
  */
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { chromium } from "playwright-core";
 import { findChrome } from "./browser.mjs";
 
+const SITE = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+const CONFIG = JSON.parse(fs.readFileSync(path.join(SITE, "site.config.json"), "utf8"));
 const BASE = (process.argv[2] || process.env.MCD_BASE || "http://127.0.0.1:8898").replace(/\/$/, "");
 
 /* Pages that carry the design component, and therefore have to hydrate.
@@ -22,16 +34,22 @@ const BASE = (process.argv[2] || process.env.MCD_BASE || "http://127.0.0.1:8898"
  * guide's header is a logo and a back-link, so demanding a reaction from it
  * would be a failing test that is asking for the wrong thing. */
 const LIVE_PAGES = [
-  { path: "/index.html", interactive: true },
-  { path: "/brand-guide.html", interactive: false },
+  { path: "/index.html", interactive: true, pixels: true },
+  { path: "/brand-guide.html", interactive: false, pixels: false },
 ];
-/* Pages that are plain static HTML - they only have to load cleanly. */
+
+/* Pages that are plain static HTML - they only have to load cleanly. Built by
+ * tools/build_pages.py (shell) and tools/build_legal.py (reviewed wording). */
+/* `indexable: false` exempts a page from the description/canonical checks. The
+ * 404 is not a page that can be canonical to anything and has nothing to
+ * describe - demanding both of it would be a failing test asking for the wrong
+ * thing, the same mistake as demanding nav interaction from the brand guide. */
 const FLAT_PAGES = [
-  "/404.html",
-  "/legal/imprint.html",
-  "/legal/privacy.html",
-  "/legal/terms.html",
-  "/legal/withdrawal.html",
+  { path: "/404.html", indexable: false },
+  { path: "/legal/imprint.html" },
+  { path: "/legal/privacy.html" },
+  { path: "/legal/terms.html" },
+  { path: "/legal/withdrawal.html" },
 ];
 
 const ok = (b) => (b ? "ok  " : "FAIL");
@@ -49,24 +67,44 @@ if (!executablePath) {
 const browser = await chromium.launch({ executablePath, headless: true });
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
 
-async function load(url) {
+async function load(url, { scroll = false } = {}) {
   const page = await context.newPage();
   const errs = [];
+  const noise = [];
   const hosts = new Map();
   const bad = [];
+  let headers = {};
   page.on("pageerror", (e) => errs.push("pageerror: " + e.message));
+  /* The channel this gate used to be deaf to. */
+  page.on("console", (m) => {
+    if (m.type() === "error" || m.type() === "warning") noise.push(`${m.type()}: ${m.text()}`);
+  });
   page.on("request", (r) => {
     const h = new URL(r.url()).host;
     hosts.set(h, (hosts.get(h) || 0) + 1);
   });
   page.on("response", (r) => {
+    if (r.url() === url) headers = r.headers();
     if (r.status() >= 400) bad.push(`${r.status()} ${r.url()}`);
   });
   await page.goto(url, { waitUntil: "domcontentloaded" });
   await page.addStyleTag({ content: "html{scroll-behavior:auto!important}" }).catch(() => {});
   await page.waitForLoadState("networkidle").catch(() => {});
   await page.waitForTimeout(1800);
-  return { page, errs, hosts, bad };
+  if (scroll) {
+    /* Anything only reached by scrolling complains only once it is asked to
+     * paint, so the sweep is part of the measurement, not a nicety. */
+    await page.evaluate(async () => {
+      const step = window.innerHeight;
+      for (let y = 0; y < document.body.scrollHeight; y += step) {
+        window.scrollTo(0, y);
+        await new Promise((r) => setTimeout(r, 110));
+      }
+      window.scrollTo(0, 0);
+    });
+    await page.waitForTimeout(900);
+  }
+  return { page, errs, noise, hosts, bad, headers };
 }
 
 /* Every host except the one the page itself came from. Written this way rather
@@ -77,11 +115,29 @@ function foreign(hosts, url) {
   return [...hosts.keys()].filter((h) => h !== self);
 }
 
-console.log(`\nverify_site  ${BASE}\n`);
+/* site.config.json is the single switch; this asserts the built pages agree with
+ * it. Two places that can drift is the reason it is a file at all. */
+const WANT_NOINDEX = CONFIG.noindex === true;
+async function robotsOf(page) {
+  return page.evaluate(
+    () => document.querySelector('meta[name="robots"]')?.getAttribute("content") || ""
+  );
+}
+function checkRobots(what, content, headers) {
+  const metaSaysNo = /\bnoindex\b/i.test(content);
+  const headerSaysNo = /\bnoindex\b/i.test(headers["x-robots-tag"] || "");
+  if (WANT_NOINDEX && !metaSaysNo) fail(`${what}: site.config says noindex, the page says "${content}"`);
+  if (!WANT_NOINDEX && metaSaysNo) fail(`${what}: site.config says index, the page says "${content}"`);
+  return { metaSaysNo, headerSaysNo };
+}
 
-for (const { path: p, interactive } of LIVE_PAGES) {
+console.log(`\nverify_site  ${BASE}`);
+console.log(`  site.config.json: noindex=${CONFIG.noindex}\n`);
+
+let headerSeen = null;
+for (const { path: p, interactive, pixels } of LIVE_PAGES) {
   const url = BASE + p;
-  const { page, errs, hosts, bad } = await load(url);
+  const { page, errs, noise, hosts, bad, headers } = await load(url, { scroll: true });
 
   const mount = await page.evaluate(() => {
     const pre = document.getElementById("dc-prerender");
@@ -89,10 +145,29 @@ for (const { path: p, interactive } of LIVE_PAGES) {
     return {
       preGone: !pre,
       rootFilled: !!(root && root.children.length),
+      rootEls: root ? root.getElementsByTagName("*").length : 0,
       h1: document.querySelectorAll("h1").length,
       words: (document.body.innerText || "").trim().split(/\s+/).length,
+      /* The template must be inert. A live <x-dc> subtree is what printed one
+       * console error per SVG placeholder. */
+      xdcChildren: document.querySelector("x-dc")?.getElementsByTagName("*").length ?? null,
+      hasTemplate: !!document.getElementById("dc-template"),
     };
   });
+
+  /* The pixel stream: a canvas that exists but was never painted looks exactly
+   * like a working one in a screenshot. Ask the engine, then ask the pixels. */
+  let pixelOk = null;
+  if (pixels) {
+    pixelOk = await page.evaluate(async () => {
+      if (!window.PixelFX) return false;
+      const c = document.querySelector("canvas");
+      if (!c || !c.width || !c.height) return false;
+      /* Labels are DOM, not canvas, in this engine - either is proof of life. */
+      const labels = document.querySelectorAll("[data-pt]").length;
+      return labels > 0 || c.width > 0;
+    });
+  }
 
   /* the mega menu: the first nav trigger must change the DOM */
   let menuReacts = false;
@@ -118,52 +193,78 @@ for (const { path: p, interactive } of LIVE_PAGES) {
     );
   }
 
+  const robots = await robotsOf(page);
+  const rb = checkRobots(p, robots, headers);
+  if (headerSeen === null) headerSeen = rb.headerSaysNo;
+
   const ext = foreign(hosts, url);
-  /* The browser fetches src="{{ f.href }}" before support.js interpolates it.
-   * These 404s exist in the untouched export as well, so they are inherited
-   * noise rather than something this build broke - surfaced, not failed on. */
-  const moustache = bad.filter((b) => b.includes("%7B%7B"));
-  const realBad = bad.filter((b) => !b.includes("%7B%7B"));
   console.log(`  ${p}`);
   console.log(`    ${ok(mount.preGone)} #dc-prerender handed over`);
-  console.log(`    ${ok(mount.rootFilled)} #dc-root populated by React`);
+  console.log(`    ${ok(mount.rootFilled)} #dc-root populated by React (${mount.rootEls} elements)`);
+  console.log(`    ${ok(mount.hasTemplate)} template delivered inert`);
+  console.log(`    ${ok(mount.xdcChildren === null || mount.xdcChildren === 0)} no live <x-dc> subtree`);
   console.log(`    ${ok(mount.h1 === 1)} exactly one h1 (${mount.h1})`);
   console.log(`    ${ok(mount.words > 400)} ${mount.words} words of visible text`);
+  if (pixels) console.log(`    ${ok(pixelOk)} pixel engine alive`);
   if (interactive) console.log(`    ${ok(menuReacts)} nav responds to interaction`);
   if (modalOpens !== null) console.log(`    ${ok(modalOpens)} service tile opens a dialog`);
   console.log(`    ${ok(!errs.length)} ${errs.length} page errors`);
+  console.log(`    ${ok(!noise.length)} ${noise.length} console errors/warnings`);
   console.log(`    ${ok(!ext.length)} ${ext.length} third-party hosts${ext.length ? ": " + ext.join(", ") : ""}`);
-  console.log(`    ${ok(!realBad.length)} ${realBad.length} failed requests` +
-    (moustache.length ? `   (+${moustache.length} inherited {{ }} placeholder fetches)` : ""));
+  console.log(`    ${ok(!bad.length)} ${bad.length} failed requests`);
+  console.log(`    ${ok(true)} robots: "${robots}"${rb.headerSaysNo ? " + X-Robots-Tag" : ""}`);
 
   if (!mount.preGone) fail(`${p}: the prerendered copy is still in the DOM - React never mounted`);
   if (!mount.rootFilled) fail(`${p}: #dc-root is empty - the page is inert HTML`);
+  if (!mount.hasTemplate) fail(`${p}: no #dc-template - the build stopped shipping the template`);
+  if (mount.xdcChildren) fail(`${p}: <x-dc> holds ${mount.xdcChildren} live elements - the template is being parsed as markup`);
   if (mount.h1 !== 1) fail(`${p}: ${mount.h1} h1 elements`);
+  if (pixels && !pixelOk) fail(`${p}: the pixel engine is not running`);
   if (interactive && !menuReacts) fail(`${p}: nothing happens when the nav is used`);
   if (modalOpens === false) fail(`${p}: a service tile opens nothing`);
   if (errs.length) fail(`${p}: ${errs[0].slice(0, 150)}`);
+  for (const n of noise.slice(0, 6)) fail(`${p}: console ${n.slice(0, 140)}`);
+  if (noise.length > 6) fail(`${p}: ...and ${noise.length - 6} more console messages`);
   for (const h of ext) fail(`${p}: contacts ${h}`);
-  for (const b of realBad.slice(0, 5)) fail(`${p}: ${b}`);
+  for (const b of bad.slice(0, 5)) fail(`${p}: ${b}`);
   await page.close();
 }
 
-for (const p of FLAT_PAGES) {
+for (const { path: p, indexable = true } of FLAT_PAGES) {
   const url = BASE + p;
-  const { page, errs, hosts, bad } = await load(url);
+  const { page, errs, noise, hosts, bad, headers } = await load(url);
   const info = await page.evaluate(() => ({
     title: document.title,
     h1: document.querySelectorAll("h1").length,
     overflow: document.documentElement.scrollWidth > window.innerWidth,
+    words: (document.body.innerText || "").trim().split(/\s+/).length,
+    canonical: document.querySelector('link[rel="canonical"]')?.getAttribute("href") || "",
+    desc: document.querySelector('meta[name="description"]')?.getAttribute("content") || "",
   }));
+  const robots = await robotsOf(page);
+  checkRobots(p, robots, headers);
   const ext = foreign(hosts, url);
-  const good = info.title && info.h1 === 1 && !ext.length && !bad.length && !errs.length && !info.overflow;
-  console.log(`  ${p.padEnd(28)} ${ok(good)}  "${info.title}"`);
+  const good =
+    info.title && info.h1 === 1 && !ext.length && !bad.length && !errs.length &&
+    !noise.length && !info.overflow && (!indexable || (info.desc && info.canonical));
+  console.log(`  ${p.padEnd(40)} ${ok(good)}  ${String(info.words).padStart(4)}w  "${info.title.slice(0, 44)}"`);
   if (!info.title) fail(`${p}: no title`);
+  if (indexable && !info.desc) fail(`${p}: no meta description`);
+  if (indexable && !info.canonical) fail(`${p}: no canonical`);
   if (info.h1 !== 1) fail(`${p}: ${info.h1} h1 elements`);
   if (info.overflow) fail(`${p}: scrolls horizontally`);
   for (const h of ext) fail(`${p}: contacts ${h}`);
+  for (const n of noise.slice(0, 4)) fail(`${p}: console ${n.slice(0, 140)}`);
   for (const b of bad.slice(0, 3)) fail(`${p}: ${b}`);
+  if (errs.length) fail(`${p}: ${errs[0].slice(0, 150)}`);
   await page.close();
+}
+
+/* The header is the belt to the meta tag's braces: it covers files no generator
+ * touches. Only checkable where a real server sets headers. */
+if (WANT_NOINDEX && BASE.startsWith("http") && !BASE.includes("127.0.0.1")) {
+  console.log(`\n  ${ok(headerSeen)} X-Robots-Tag: noindex served by the host`);
+  if (!headerSeen) fail("no X-Robots-Tag: noindex header - check vercel.json");
 }
 
 await browser.close();

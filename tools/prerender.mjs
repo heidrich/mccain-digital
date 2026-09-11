@@ -83,6 +83,13 @@ const RESOURCE_MAP = {
     "vendor/react-dom-18.3.1.production.min.js",
 };
 
+/* One switch for the whole site - see site.config.json for why it is a file and
+ * not a constant in here. */
+const CONFIG = JSON.parse(fs.readFileSync(path.join(SITE, "site.config.json"), "utf8"));
+const ROBOTS = CONFIG.noindex
+  ? "noindex, follow"
+  : "index, follow, max-image-preview:large, max-snippet:-1";
+
 const esc = (s) =>
   String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
@@ -96,6 +103,10 @@ function localise(s) {
     .replace(/(["'])\.\/support\.js\1/g, "$1support.js$1")
     .replace(/\s*<link[^>]+fonts\.(?:googleapis|gstatic)\.com[^>]*>/g, "")
     .replace(/\s*<script[^>]+unpkg\.com[^>]*><\/script>/g, "")
+    /* The component's <helmet> declares the icons too, and support.js injects
+     * them on top of the ones in the head this build writes - measured as three
+     * requests for the same favicon. The head is the place that owns them. */
+    .replace(/\s*<link[^>]+rel="(?:icon|apple-touch-icon)"[^>]*>/g, "")
     .replace(new RegExp(`(href=")${ORIGIN}/`, "g"), "$1/")
     .replace(
       /href="McCain%20Digital%20Brand%20Guide\.dc\.html"|href="McCain Digital Brand Guide\.dc\.html"/g,
@@ -134,13 +145,52 @@ const preloads = fontFiles
   .join("\n");
 
 /* The raw template must never be seen. support.js hides it itself, but only
- * once it runs - before that the browser would paint a screenful of {{ }}. */
+ * once it runs. With the template delivered as inert <template> content there is
+ * nothing left to flash, but an empty <x-dc> with a display rule costs 40 bytes
+ * and keeps the page correct if anything ever puts markup back inside it. */
 const HIDE_TEMPLATE = "<style>x-dc{display:none!important}</style>";
 
+/* THE TEMPLATE IS DELIVERED AS INERT <template> CONTENT, NOT AS A LIVE SUBTREE.
+ *
+ * Shipping it as a real <x-dc> subtree - what the export does, and what this
+ * build did until 11.9.2026 - has the browser parse, lay out and paint a second
+ * complete copy of the page that nobody ever sees. Measured on the live site,
+ * that copy cost:
+ *
+ *   - 70 console errors on the start page, one per SVG attribute holding a
+ *     moustache: `<rect x="{{ c.x }}">` is not a length, so Blink complains
+ *     about every one. This is what the owner was looking at, and it never
+ *     reached `pageerror`, which is why the gate reported a clean page.
+ *   - every src="{{ ... }}" fetched as a literal URL (/%7B%7B%20s.href%20%7D%7D)
+ *   - pixel-engine.js loaded TWICE: once by the parser reaching the <script>
+ *     inside the template's <helmet>, once by support.js processing that helmet
+ *   - ~2,100 elements of layout and paint work, discarded milliseconds later
+ *
+ * <template> content is parsed into an inert fragment: no layout, no paint, no
+ * requests, no SVG attribute parsing. And its innerHTML serialises to exactly
+ * the same string the <x-dc> version produced - measured, 143,641 characters
+ * both ways - so support.js receives byte-for-byte what it received before.
+ *
+ * support.js reads the template as `dc.innerHTML` (parse.ts, parseDcDocument),
+ * so the <x-dc> that stays in the document is empty and forwards that one
+ * property to the template element. */
+const TEMPLATE_SHIM =
+  `<script>(function(){var t=document.getElementById("dc-template"),` +
+  `x=document.querySelector("x-dc");if(!t||!x)return;` +
+  `Object.defineProperty(x,"innerHTML",{configurable:true,get:function(){return t.innerHTML}});})();</script>`;
+
 /* Hands the page over from the prerendered copy to the live render. Deliberately
- * one-way and fail-safe: if React never mounts, the readable copy stays. */
+ * one-way and fail-safe: if React never mounts, the readable copy stays.
+ *
+ * The floor of 40 elements is the point of it. "#dc-root has a first child" is
+ * also true when React mounts an empty shell - which is exactly what happened
+ * when two runtimes raced each other - and removing the readable copy on that
+ * signal turns a degraded page into a blank one. The real page renders ~2,140
+ * elements, so 40 separates "rendered" from "mounted but produced nothing"
+ * without being anywhere near the real value. */
 const SWAP = `<script>(function(){var p=document.getElementById("dc-prerender");if(!p)return;
-function ready(){var r=document.getElementById("dc-root");return !!(r&&r.firstElementChild);}
+function ready(){var r=document.getElementById("dc-root");
+return !!(r&&r.firstElementChild&&r.getElementsByTagName("*").length>40);}
 function go(){if(!ready())return false;p.remove();return true;}
 if(go())return;var mo=new MutationObserver(function(){if(go())mo.disconnect();});
 mo.observe(document.documentElement,{childList:true,subtree:true});
@@ -304,7 +354,7 @@ const seoHead = `<meta charset="utf-8">
 <title>${esc(TITLE)}</title>
 <meta name="description" content="${esc(DESC)}">
 <link rel="canonical" href="${ORIGIN}/">
-<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="robots" content="${ROBOTS}">
 <meta name="theme-color" content="#635BFF">
 <meta name="author" content="McCain Digital">
 <meta property="og:type" content="website">
@@ -353,6 +403,22 @@ const templateLocal = localise(template);
 assertClean(seoHead + runtimeHead + prerendered + templateLocal, "index.html");
 if (prerendered.includes("{{")) throw new Error("prerender: unresolved {{ }} in the snapshot");
 
+/* Every moustache must be inside the inert <template> and nowhere else. A
+ * placeholder that escapes into live markup is a console error per SVG attribute
+ * and a fetch per src - the thing this build exists to prevent - so it is
+ * checked on the finished document rather than trusted. */
+function assertMoustachesAreInert(doc, what) {
+  const outside = doc.replace(/<template id="dc-template">[\s\S]*?<\/template>/, "");
+  const n = (outside.match(/\{\{/g) || []).length;
+  if (n) {
+    const at = outside.indexOf("{{");
+    throw new Error(
+      `prerender: ${n} template placeholder(s) outside the inert template in ${what}:\n    ` +
+        outside.slice(Math.max(0, at - 100), at + 100).replace(/\s+/g, " ")
+    );
+  }
+}
+
 const html = `<!DOCTYPE html>
 <!-- GENERATED - do not edit by hand.
 
@@ -360,8 +426,11 @@ const html = `<!DOCTYPE html>
      Build:   node tools/prerender.mjs   (needs: python prodserve.py 8898 --dev)
 
      #dc-prerender is the settled markup: what a crawler reads and what paints
-     first. <x-dc> below it is the untouched template support.js mounts on - it
-     MUST stay, or the page loads looking perfect and every button is dead.
+     first. The empty <x-dc> below it is the mount point support.js replaces - it
+     MUST stay, or the page loads looking perfect and every button is dead. The
+     template itself lives in the inert <template id="dc-template"> and reaches
+     support.js through the shim next to it; delivering it as live markup printed
+     one console error per SVG placeholder and built a whole second DOM.
      The watcher at the end removes the prerendered copy once React has filled
      its own #dc-root, and leaves it alone if React never arrives. -->
 <html lang="de">
@@ -372,13 +441,16 @@ ${runtimeHead}
 </head>
 <body>
 <div id="dc-prerender">${prerendered}</div>
-<x-dc>${templateLocal}</x-dc>
+<x-dc></x-dc>
+<template id="dc-template">${templateLocal}</template>
+${TEMPLATE_SHIM}
 ${localise(scriptTag[0])}
 ${SWAP}
 </body>
 </html>
 `;
 
+assertMoustachesAreInert(html, "index.html");
 fs.writeFileSync(path.join(SITE, "index.html"), html, "utf8");
 
 /* ------------------------------------------------------------ brand guide */
@@ -448,7 +520,7 @@ const bgHtml = `<!DOCTYPE html>
 <title>${esc(BG_TITLE)}</title>
 <meta name="description" content="${esc(BG_DESC)}">
 <link rel="canonical" href="${ORIGIN}/brand-guide.html">
-<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="robots" content="${ROBOTS}">
 <meta name="theme-color" content="#635BFF">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="McCain Digital">
@@ -468,12 +540,15 @@ ${bgHead}
 </head>
 <body>
 <div id="dc-prerender">${bgBody}</div>
-<x-dc>${bgTemplate}</x-dc>
+<x-dc></x-dc>
+<template id="dc-template">${bgTemplate}</template>
+${TEMPLATE_SHIM}
 ${bgFix(bgScript[0])}
 ${SWAP}
 </body>
 </html>
 `;
+assertMoustachesAreInert(bgHtml, "brand-guide.html");
 fs.writeFileSync(path.join(SITE, "brand-guide.html"), bgHtml, "utf8");
 
 /* ------------------------------------------------------------------ assets */
