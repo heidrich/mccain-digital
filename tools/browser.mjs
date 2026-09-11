@@ -1,12 +1,16 @@
-/* The driver both browser gates run on.
+/* The driver every browser tool in here runs on.
  *
  * They used to drive `agent-browser`. On this PC that CLI hangs on `set
  * viewport` — no output, no exit — and it has now done so on two separate
  * days, surviving a full cleanup (10 orphaned Chrome processes killed, 7 stale
  * daemon pid files removed, fresh session name). A gate that cannot be run is
- * not a gate, so the orchestration moved to playwright-core and the probes did
- * not: `probe.js` and `accent_audit_probe.js` are still the only place the
- * measuring logic lives, still loaded from disk, still evaluated verbatim.
+ * not a gate, so the orchestration moved to playwright-core.
+ *
+ * `probeSource()` below loads a measuring probe from disk and is currently
+ * unused: the four tools that needed it measured v3 classes and moved to
+ * archive/site-v3-tools/ on 11.9.2026. It is kept because the pattern — keep
+ * the measuring logic in a file, evaluate it verbatim — is the right one, and
+ * the next probe should use it rather than inlining a page function.
  *
  * playwright-core, not playwright: no browser download. The browsers are
  * already on both machines under the ms-playwright cache, and this file finds
