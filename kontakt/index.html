@@ -238,6 +238,7 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
 @keyframes ai-grad{0%{background-position:0% 50%}100%{background-position:200% 50%}}
 </style>
 <link rel="preload" as="image" href="/brand/mark-34-c.svg" fetchpriority="high">
+<style>@media (max-width:879px){[data-pt-layer]{display:none!important}}</style>
 <script src="/support.js" defer></script>
 <script src="/motion-budget.js" defer></script>
 </head>
@@ -2059,6 +2060,7 @@ class Component extends DCLogic {
   }
   movePointsGlobal(tm, canvas) {
     const root = this.rootEl; if (!root) return;
+    if (window.innerWidth < 880) return;
     if (!canvas._pool || (tm - (canvas._ptT || 0)) > 2) {
       const layer = root.querySelector('[data-pt-layer]'); if (!layer) return;
       const sy0 = window.scrollY || 0, avoid = [];

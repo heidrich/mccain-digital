@@ -948,6 +948,54 @@ function calmConsent(template, name) {
   return { template: template.split(CONSENT_ANIM_FROM).join(CONSENT_ANIM_TO), calmed: n };
 }
 
+/* THE DRIFTING STREAM LABELS ARE A DESKTOP THING.
+ *
+ * Owner 13.9.2026: "auf mobile würde ich die mitlaufenden notes nicht anzeigen,
+ * das sieht man eh nicht und kann sie nicht usen." Right on both counts, and it
+ * is the device class where it matters most.
+ *
+ * What they cost while nobody can use them: nine labels, each written twice per
+ * frame (transform and opacity) - measured at 5.458 style writes in ten seconds.
+ * On this machine that is 63 ms of a 5,7 s profile, about 1 %. But the owner put
+ * the right frame around that number: five per cent of a fast desktop is thirty
+ * to fifty per cent of an old laptop or a mid-range phone, and that is the
+ * hardware Lighthouse runs on.
+ *
+ * Two halves, because one alone is not enough:
+ *
+ *   CSS   hides the layer below the 880 px breakpoint the component itself uses
+ *         for `isDesktop`. It applies at the FIRST paint, before any script -
+ *         so a phone never lays the labels out or paints them at all.
+ *   JS    leaves movePointsGlobal immediately at the same width, so no frame
+ *         work happens even though the elements are still in React's tree.
+ *
+ * Not removed from the DOM: React owns that subtree, and fighting it over ~30
+ * nodes would cost more than it saves. display:none takes them out of layout
+ * and paint, which is the expensive part.
+ */
+const PT_MOBILE_CSS =
+  "<style>@media (max-width:879px){[data-pt-layer]{display:none!important}}</style>";
+
+const PT_BAIL_FROM =
+  "  movePointsGlobal(tm, canvas) {\n" +
+  "    const root = this.rootEl; if (!root) return;\n";
+
+const PT_BAIL_TO =
+  "  movePointsGlobal(tm, canvas) {\n" +
+  "    const root = this.rootEl; if (!root) return;\n" +
+  "    if (window.innerWidth < 880) return;\n";
+
+function ptDesktopOnly(script, name) {
+  const n = script.split(PT_BAIL_FROM).length - 1;
+  if (n !== 1) {
+    throw new Error(
+      `prerender: expected exactly one movePointsGlobal in ${name}, found ${n}. ` +
+        `The export changed the stream labels - re-read it and update PT_BAIL_FROM.`
+    );
+  }
+  return { script: script.split(PT_BAIL_FROM).join(PT_BAIL_TO) };
+}
+
 /* NO PAGE HAD A <main>.
  *
  * The content sections sit as siblings between <header> and <footer>, so a
@@ -1407,10 +1455,11 @@ for (const page of PAGES) {
   const still = stillMark(notes.script, page.src);
   const marks = markToFile(still.script, page.src);
   const icons = fixIconGallery(marks.script);
+  const ptDesk = ptDesktopOnly(icons.script, page.src);
   const helmet = stripHelmetSeo(localise(template), page.src);
   const calm = calmConsent(helmet.template, page.src);
   const tplTiles = fixTileRoles(calm.template);
-  const anchors = fixAnchors({ template: tplTiles.html, script: icons.script });
+  const anchors = fixAnchors({ template: tplTiles.html, script: ptDesk.script });
   const tiles = tplTiles.fixed;
   const templateLocal = wrapMain(anchors.template, page.src, "template");
   const script = anchors.script;
@@ -1436,6 +1485,7 @@ for (const page of PAGES) {
     ? head + `
 <link rel="preload" as="image" href="${firstMark[0]}" fetchpriority="high">`
     : head;
+  const headOut = headWithMark + "\n" + PT_MOBILE_CSS;
   assertClean(head + prerendered + templateLocal + script, page.out);
   assertNoExportLinks(head + prerendered + templateLocal + script, page.out);
 
@@ -1456,7 +1506,7 @@ for (const page of PAGES) {
      If React never arrives, the markup simply stays and the page is readable. -->
 <html lang="de">
 <head>
-${headWithMark}
+${headOut}
 <script src="/support.js" defer></script>
 <script src="/motion-budget.js" defer></script>
 </head>
