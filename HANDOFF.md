@@ -10,10 +10,16 @@
   existiert und unter welcher URL; `sitemap.xml` und das Seitenverzeichnis in
   `llms.txt` werden daraus geschrieben.
 - **`noindex` bleibt an** (Owner 12.9.: Texte ueberarbeiten + md-recall fertig).
-- **12.9. abends:** Logo statisch (Hauptthread halbiert), `<main>` auf jeder
-  Seite, Bilder 211 → 65 KB, sieben Titel gekürzt, CSP + Permissions-Policy.
-  **Und: `prodserve.py` hat jede Messung dieses Projekts unkomprimiert
-  genommen — „mobil 41" war nie wahr, siehe Arbeitsplan.**
+- **12.9. abends erledigt:** Logo statisch (Hauptthread halbiert), `<main>` auf
+  jeder Seite, Bilder 211 → 65 KB, sieben Titel gekürzt, CSP +
+  Permissions-Policy, „Tech-Notizen" raus. **Live 84 mobil.**
+- **⚠ Zwei Messungen dieses Projekts waren falsch:** `prodserve.py` lieferte
+  Verzeichnis-Routen unkomprimiert („mobil 41" war nie wahr), und mein
+  „nur HTML+CSS"-Lauf enthielt noch Vorlage und Skriptblock. Beides behoben.
+- **▶ NÄCHSTER DURCHGANG steht ganz oben:** die Seite ist keine gebaute
+  React-Anwendung, sondern ein Export, den ein Interpreter abspielt — Inhalt
+  dreimal ausgeliefert, **57 % des Dokuments sind wiederholte Inline-Styles**.
+  Owner-Ziel **95+**.
 
 ---
 
@@ -33,6 +39,177 @@ ableiten, nichts dazuerfinden.
 
 **Offen dazu:** `404.html` habe ich von Grund auf geschrieben. Die Werte kommen
 aus dem System, die **Gestaltung ist meine** und vom Owner nicht abgenommen.
+
+---
+
+## ▶ DER NÄCHSTE DURCHGANG — „was, warum, wie" (Owner 12.9. nachts)
+
+> „wir bauen mit react, ABER eine react CORE function geht nicht. also haben
+> wir nicht correct gebaut" · „4x 100 oder 95 bei speed mobile möglich sind mit
+> dicken react sein, ist kein problem, das haben wir schon oft gebaut" ·
+> „92 ist einfach zu wenig in 2026, da muss 95+ locker drin sein"
+
+Der Owner hat recht, und das ist der wichtigere Befund als alles andere von
+heute. Wenn `hydrateRoot` — eine Kernfunktion des Frameworks — an dieser Seite
+scheitert, ist nicht die Funktion schuld.
+
+### WAS falsch ist
+
+**Diese Seite ist keine gebaute React-Anwendung. Sie ist ein Design-Export, den
+ein Interpreter im Browser abspielt.** Gemessen an `index.html`:
+
+| Teil | roh | gzip | was es ist |
+| --- | ---: | ---: | --- |
+| `#dc-prerender` | 563.511 B | 47.003 B | der gesetzte DOM als Abzug |
+| `<template id="dc-template">` | 147.219 B | 23.670 B | **dieselbe Seite nochmal**, unkompiliert |
+| `<script type="text/x-dc">` | 172.113 B | 56.768 B | der Code, der dieselbe Seite ein drittes Mal erzeugt |
+| Kopf (Stile + Schriften inline) | 19.008 B | 4.955 B | |
+| **`index.html` gesamt** | **905.070 B** | **133.588 B** | für **eine** Seite |
+
+Dazu zur Laufzeit `content.json` (62 KB / 18 KB gz), `support.js` (37 KB),
+`pixel-engine.js` (43 KB), React (143 KB / 48 KB gz).
+
+**Der Inhalt wird dreimal ausgeliefert** und der Browser arbeitet die Kette
+jedes Mal komplett ab: 563 KB gesetztes Markup parsen und malen → `support.js`
+liest die 147-KB-Vorlage und übersetzt sie mit `new Function` → der
+172-KB-Komponentencode läuft → React baut **2.812 Knoten mit 10.920
+Inline-Style-Deklarationen** neu auf, um dasselbe Bild zu zeigen.
+
+Deshalb geht Hydration nicht: der Abzug ist kein *Server-Rendering*, sondern
+ein **DOM-Abzug nach Sekunden Leben**. React hat nie eine Fassung gesehen, die
+zu seinem ersten Rendering passt.
+
+### Und der Grundfehler darunter: das HTML selbst
+
+Owner: *„ohne react und js ist das plain html. das MUSS 100 sein, das geht gar
+nicht anders. also MUSS was fundamental falsch gebaut sein."* Richtig — und
+meine erste Zahl dazu war schief. Der Lauf, den ich „nur HTML+CSS" genannt
+habe, enthielt noch die 147-KB-Vorlage, den 172-KB-Skriptblock und vier
+Inline-Skripte.
+
+**Echtes plain HTML gemessen** — Kopf + vorgerenderte Kopie, null `<script>`:
+
+| | |
+| --- | ---: |
+| Score | **95** |
+| FCP / LCP | 972 / 1.880 ms |
+| TBT | **212 ms** |
+| Hauptthread | **2.930 ms** |
+| davon Script Evaluation | **9 ms** |
+
+**212 ms Blockierzeit und 2,9 s Hauptthread ohne eine Zeile JavaScript.** Das
+ist kein Skript-Problem, das ist das Dokument. Zerlegt:
+
+| | |
+| --- | ---: |
+| Dokument | 581.178 B |
+| **davon `style="…"`-Attribute** | **329.119 B = 56,6 %** |
+| Attribute | 2.207 |
+| Deklarationen | 12.707 |
+| **verschiedene Style-Strings** | **699** |
+| exakte Wiederholungen | 1.508 |
+
+Der schlimmste Einzelfall: `transform-box: fill-box; transform-origin: center
+center; animation: …` steht **730-mal** in derselben Datei — **79 KB
+identischer Text pro Seite**, nur für die Zellen des Markenzeichens.
+
+**Wo die fehlenden fünf Punkte liegen** — aus demselben Lauf: Speed Index
+**3.386 ms** bei FCP 972 und LCP 1.880. Die Seite ist also früh da und wird
+trotzdem erst spät fertig: die Einblend-Animationen laufen auch in der reinen
+HTML-Fassung weiter, weil sie als Inline-`animation` an den Elementen hängen.
+Dazu 212 ms Blockierzeit aus Style und Layout von 2.812 Knoten. Beides führt
+auf dieselbe Wurzel: **zu viele Knoten, jeder mit seinem eigenen Stil.**
+Owner-Maßstab: *„plain html muss 100 haben. ansonsten ist alles kaputt und
+falsch."*
+
+**699 Klassen würden 2.207 Inline-Attribute ersetzen.** Der Browser löst dann
+699 Regeln auf statt 2.207 Attribute, das Stylesheet wird über alle 21 Seiten
+**einmal** geladen statt in jede HTML-Datei kopiert, und das Dokument
+halbiert sich. Das ist eine rein mechanische Umformung — gleiche
+Deklarationen, gleiches Aussehen, kein Gestaltungsspielraum und damit auch
+kein Risiko dabei.
+
+### WARUM es so gebaut wurde
+
+Nicht aus Unwissen, sondern aus einer Kette einzeln richtiger Entscheidungen
+mit einem falschen Gesamtergebnis:
+
+1. Claude Design liefert die Seite als **Vorlage + Komponentenskript**, die nur
+   sein eigener Browser-Player `support.js` ausführen kann (`new Function`).
+2. Damit Crawler etwas sehen, brauchte es vorgerendertes Markup → naheliegender
+   Weg: **Chrome fahren, warten, `innerHTML` abziehen**.
+3. Das ist für Crawler richtig und war die Rettung des Projekts. Für Hydration
+   ist es **strukturell unbrauchbar** — und das ist erst aufgefallen, als
+   Hydration das Ziel wurde.
+
+Kurz: der Build wurde gebaut, um **einen Export lauffähig zu machen**. Er wurde
+nie gebaut, um **eine React-Anwendung zu sein**. Das ist die Lücke.
+
+### WIE es richtig geht — der Plan
+
+Zur Bauzeit übersetzen statt zur Laufzeit abspielen. Reihenfolge:
+
+**1. Den Komponentenbaum zur Bauzeit rendern (`renderToString`).**
+Statt den gesetzten DOM abzuziehen: denselben React-Baum, den `support.js`
+montiert, durch `react-dom/server` schicken. Das Ergebnis **ist per Definition
+Reacts erstes Rendering** — damit passt `hydrateRoot` ohne Abgleich.
+*Erster Schritt und Machbarkeitsprobe:* `support.js` legt nichts auf `window`
+außer `__dcContentKeyed`, der Wurzel-Element ist also von außen nicht
+greifbar. Es braucht einen kleinen, gezählten Patch, der `StandaloneRoot`
+herausreicht — dann `ReactDOMServer.renderToString()` im Build-Browser.
+*Prüfen bevor gebaut wird:* stimmen die ersten 200 Knoten von
+`renderToString` mit dem überein, was React beim Mounten erzeugt?
+
+**2. `hydrateRoot` statt `createRoot`.** Der Patch ist schon einmal geschrieben
+und gemessen worden (siehe unten) — er war nicht falsch, ihm fehlte nur eine
+passende Vorlage. Erwartung nach Schritt 1: **+20 Punkte**.
+
+**3. Die Vorlage nicht mehr ausliefern.** Ist der Komponentencode zur Bauzeit
+kompiliert, brauchen Browser weder die 147-KB-Vorlage noch den Übersetzer.
+Spart 24 KB gz je Seite, **und `'unsafe-eval'` fällt aus der CSP** — die einzige
+Schwachstelle der jetzigen Policy.
+
+**4. Die Inline-Styles in echtes CSS heben — der Schritt für die 100.**
+2.207 Attribute, 699 verschiedene. Zwei Stufen:
+
+*4a, sofort und klein:* die **730 identischen Zellen-Styles des
+Markenzeichens** bekommen eine Klasse. Ein gezählter Patch in `mark()`, eine
+CSS-Regel, **79 KB weniger pro Seite** — 14 % des Dokuments, ohne dass sich
+irgendetwas ändert. Das ist genau die Sorte Eingriff, die dieser Build schon
+zwanzigmal macht.
+
+*4b, der ganze Weg:* die übrigen 698 Style-Strings als generierte Klassen, ein
+Stylesheet für alle 21 Seiten. Braucht Schritt 1–3 vorher, weil die Vorlage und
+der Komponentencode dieselben Styles nochmal erzeugen — solange React sie zur
+Laufzeit als `style`-Objekte setzt, kommen sie nach dem Mounten zurück.
+
+**Werkzeug ist da:** `esbuild` liegt schon in `tools/node_modules` und wird für
+die Minifizierung benutzt. Was fehlt, ist `react-dom/server` (nur zur Bauzeit,
+wird nicht ausgeliefert).
+
+**Zielmarke: 95+ mobil, und die Zahlen sagen, dass mehr geht.** Plain HTML
+steht heute bei 95 — mit einem Dokument, das zu 57 % aus wiederholten
+Style-Attributen besteht. Schritt 4 hebt diese Decke, Schritt 1–3 holen die 21
+Punkte zurück, die das Neubauen kostet.
+
+### Ebenfalls freigegeben: das Markenzeichen auf Canvas
+
+> „ja das mit dem logo können wir so bauen."
+
+146 unendliche CSS-Animationen in einem 34-px-`<svg>` wurden auf `static`
+gestellt, weil sie 3,5 s Hauptthread kosteten. Auf ein `<canvas>` gezeichnet
+sieht es identisch aus und kostet einen Zeichenaufruf pro Bild. Damit lebt das
+Logo wieder — **die Animationen sind dem Owner wichtig, die Seite ist ein
+Flaggschiff und muss zeigen, was das Studio kann.**
+
+### Was NICHT nochmal probiert wird
+
+- **`hydrateRoot` gegen den gesetzten Abzug.** Zwei Anläufe, beide gemessen,
+  beide gescheitert: 1.193 von ~3.000 Knotenpositionen weichen ab. Erst
+  Schritt 1, dann Hydration.
+- **`fonts.css` inline ziehen.** Erledigt, gemessen, ohne Wirkung.
+- **Das Namens-Laufband.** Gemessen: 106 ms von 3.659. Es ist das
+  LCP-*Element*, nicht die *Ursache*. Bleibt, und **die Referenzen sind echt.**
 
 ---
 
