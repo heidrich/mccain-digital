@@ -45,6 +45,7 @@
  * hashes still match because the bytes are identical) and both typefaces from
  * fonts/. See tools/vendor_assets.py for the legal reason that is not optional.
  */
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -203,6 +204,55 @@ const RESOURCE_MAP = {
     "/vendor/react-dom-18.3.1.production.min.js",
 };
 
+/* IMAGES THE PAGES SHOW SMALLER, OR AT A DIFFERENT SHAPE, THAN THEY ARE.
+ *
+ * Measured 12.9.2026 by comparing every <img>'s naturalWidth and naturalHeight
+ * against the box it actually renders in, at 390 / 768 / 1440 px. Three files
+ * carry real bytes and all three are wasteful, none of it on purpose:
+ *
+ *   brand/mccain-recall-logo-128.png  9.8 KB PNG in a 20-24 px box, all 21 pages
+ *   team/portrait-*-840.webp          840x1050, 67.6 KB each, in a 96x120 box
+ *   img/studio-wide-1200.webp         1200x800 in a box whose ratio is 2.625,
+ *                                     so `object-fit: cover` throws away 43 %
+ *                                     of the rows AFTER downloading them
+ *
+ * Each target is derived at 2-2.5x its CSS box, because a phone screen asks for
+ * two to three device pixels per CSS pixel, and cropped to the box's own aspect
+ * ratio. The ratio is constant across all three widths - it comes from the
+ * layout, not the viewport - so cropping here shows exactly what the browser
+ * was going to show anyway, minus the bytes.
+ *
+ * Quality: 0.82 for the photographs, where WebP at that setting is not
+ * distinguishable from 0.92 at a fraction of the size, and 0.90 for the badge,
+ * which is flat colour and a hard edge and does show it.
+ *
+ * The badge is derived at 128 rather than at 2x its smallest box, because it is
+ * not one box: 20-24 px on twenty pages and 58 px on /md-recall/. Measured, the
+ * whole ladder costs almost nothing - 48 px is 1.587 B and 128 px is 2.925 B -
+ * so the version that is sharp everywhere is 1,3 KB dearer than the version
+ * that is soft on one page, against 9.822 B for the PNG it replaces. Sizing it
+ * for the smallest box and letting the biggest one blur would be a saving
+ * nobody asked for.
+ *
+ * The originals stay in the export untouched. These are build products, like
+ * the minified support.js, re-derived on every build so the two editions
+ * cannot drift, and localise() points the pages at them - derived from this
+ * table, so a new entry cannot be half-wired.
+ *
+ * Owner 12.9.2026: "die bilder sind alles placeholder, mach die alle kleiner" /
+ * "optimiere die bilder und schneide die richtig zu". The real photographs come
+ * after the text pass; this is about the placeholders not costing 200 KB.
+ *
+ * The brand SVGs on /marke/ are deliberately NOT in here: they are vector, and
+ * they are also the download the page offers. Re-rasterising a download to save
+ * preview bytes would ship a worse file than the one being advertised. */
+const DERIVED = [
+  { src: "brand/mccain-recall-logo-128.png", out: "brand/mccain-recall-logo-128.webp", w: 128, h: 128, q: 0.9 },
+  { src: "team/portrait-christian-840.webp", out: "team/portrait-christian-240.webp", w: 240, h: 300, q: 0.82 },
+  { src: "team/portrait-kathi-840.webp", out: "team/portrait-kathi-240.webp", w: 240, h: 300, q: 0.82 },
+  { src: "img/studio-wide-1200.webp", out: "img/studio-wide-1200x457.webp", w: 1200, h: 457, q: 0.82 },
+];
+
 /* One switch for the whole site - see site.config.json for why it is a file and
  * not a constant in here. */
 const CONFIG = JSON.parse(fs.readFileSync(path.join(SITE, "site.config.json"), "utf8"));
@@ -261,7 +311,7 @@ function unwrapDeadLinks(s) {
  * in all three, and a rewrite that covers only one of them is the bug that
  * re-introduces a CDN through the back door. */
 function localise(s) {
-  return (
+  let out = (
     unwrapDeadLinks(rewriteLinks(s))
       /* ROOT-ABSOLUTE, not relative. This is new in v4 and it is the reason the
        * subpages work at all: /leistungen/ki-automatisierung/ is two folders
@@ -296,10 +346,12 @@ function localise(s) {
        * them. */
       .replace(/\s*<link[^>]+rel="(?:icon|apple-touch-icon)"[^>]*>/g, "")
       .replace(new RegExp(`(href=")${rx(ORIGIN)}/`, "g"), "$1/")
-      /* Point the 20-24 px badge at the 48 px WebP the build derives. See
-       * deriveRecallBadge(): 9.8 KB of PNG for a 24 px box, on all 21 pages. */
-      .replace(/\/brand\/mccain-recall-logo-128\.png/g, "/brand/mccain-recall-logo-48.webp")
   );
+  /* Point every reference at the cropped, right-sized edition the build
+   * derives - read straight off DERIVED, so adding a picture to that table is
+   * the whole change and a half-wired one is impossible. */
+  for (const job of DERIVED) out = out.replace(new RegExp(rx("/" + job.src), "g"), "/" + job.out);
+  return out;
 }
 
 /* THE HEAD OWNS THE META TAGS - THE HELMET MUST NOT SHIP A SECOND SET.
@@ -652,6 +704,100 @@ function wireForms(script, name) {
   return { script: script.split(FORM_PATCH_FROM).join(FORM_PATCH_TO), forms: n };
 }
 
+/* THE BRAND MARK RAN 146 CSS ANIMATIONS, FOREVER, ON EVERY PAGE.
+ *
+ * mark(size, v, mode) builds the McCain square out of 146 <rect> cells and
+ * gives every single cell its own animation. In 'loop' - what the header logo
+ * switches to 1.6 s after mount - that is 146 infinite animations inside a
+ * 34 px square, and the browser recalculates style for all of them, every
+ * frame, for as long as the page is open. It is the most expensive thing on
+ * this site by a wide margin.
+ *
+ * Measured 12.9.2026, two identical mobile Lighthouse runs on the start page,
+ * the only difference being a stylesheet that switched those animations off:
+ *
+ *     animated   score 63   TBT 1026 ms   main thread 8497 ms
+ *     static     score 68   TBT  778 ms   main thread 4971 ms
+ *
+ * 3.5 seconds of main-thread work for one logo. For comparison, the data
+ * stream everybody suspected - 112 absolutely positioned chips - measured
+ * 63 -> 64 and is left alone.
+ *
+ * The component documents a third mode itself ("mode: static | in | loop") and
+ * its own chat variant already asks for it, so this is the export's switch and
+ * not an invention. Static is the animation at rest: same geometry, same
+ * colours, same fill-opacity, only `animation: none`.
+ *
+ * Owner 12.9.2026: "hau das logo raus, wenn wir das nicht gefixt bekommen. und
+ * ersetze es durch ein statisches". */
+const MARK_FROM = "mark(size, v, mode) {\n    const t = this.tileFree(size, v, mode);";
+const MARK_TO = "mark(size, v, mode) {\n    const t = this.tileFree(size, v, 'static');";
+
+/* With the mode ignored, the timer that flips the header logo from 'in' to
+ * 'loop' wakes the whole application 1.6 s in to re-render identical markup. */
+const NAVLOOP_FROM =
+  "this.navLoopT = setTimeout(() => { if (this.mounted) this.setState({ navLoop: true }); }, 1600);";
+
+function stillMark(script, name) {
+  const marks = script.split(MARK_FROM).length - 1;
+  if (marks !== 1) {
+    throw new Error(
+      `prerender: expected exactly one mark() in ${name}, found ${marks}. The export changed ` +
+        `shape - re-read it and update MARK_FROM, or every page ships 146 animations per logo.`
+    );
+  }
+  const timers = script.split(NAVLOOP_FROM).length - 1;
+  if (timers !== 1) {
+    throw new Error(
+      `prerender: expected exactly one navLoop timer in ${name}, found ${timers}. ` +
+        `Re-read componentDidMount and update NAVLOOP_FROM.`
+    );
+  }
+  return { script: script.split(MARK_FROM).join(MARK_TO).split(NAVLOOP_FROM).join("") };
+}
+
+/* NO PAGE HAD A <main>.
+ *
+ * The content sections sit as siblings between <header> and <footer>, so a
+ * screen reader offers no "skip to main content" landmark and the skip link at
+ * the top jumps to a plain <section>. Putting role="main" on one section would
+ * be worse than nothing - it would claim the first section IS the content.
+ *
+ * The wrap is derived from the document, not guessed: everything between the
+ * site header and the footer. Measured across all 21 published artboards - one
+ * <footer> each, always last, no existing <main>. Anything else throws rather
+ * than shipping a landmark in the wrong place. The chat dialog and the
+ * ask-the-page widget sit after the footer and stay outside, which is where a
+ * dialog belongs, and the skip link sits before the header.
+ *
+ * Header to footer, rather than first-section to footer, because /marke/ is
+ * built differently: its content is one <div id="inhalt"> that opens with a
+ * <header> of its own. Starting at the first <section> put <main> INSIDE that
+ * wrapper and left the page's title block outside it - where a <header> with
+ * no sectioning ancestor counts as a second `banner` landmark. Taking the
+ * whole span puts it inside <main>, where it is an ordinary heading group, and
+ * the page has one banner again.
+ *
+ * Applied to BOTH copies. The prerendered markup is what a crawler reads; the
+ * template is what React renders over it a moment later. A landmark in only
+ * one of them is a landmark that disappears. */
+function wrapMain(html, what, which) {
+  if (/<main[\s>]/i.test(html)) throw new Error(`prerender: ${what} (${which}) already has a <main>`);
+
+  const headerEnd = html.indexOf("</header>");
+  if (headerEnd < 0) throw new Error(`prerender: no </header> in ${what} (${which})`);
+  const openAt = headerEnd + "</header>".length;
+
+  const footers = html.split("<footer").length - 1;
+  if (footers !== 1) throw new Error(`prerender: expected one <footer> in ${what} (${which}), found ${footers}`);
+  const closeAt = html.indexOf("<footer");
+  if (closeAt < openAt) throw new Error(`prerender: the <footer> precedes the content in ${what} (${which})`);
+  if (!/<section[\s>]/i.test(html.slice(openAt, closeAt)))
+    throw new Error(`prerender: no <section> between header and footer in ${what} (${which})`);
+
+  return html.slice(0, openAt) + "<main>" + html.slice(openAt, closeAt) + "</main>" + html.slice(closeAt);
+}
+
 /* ONLY the <style> blocks out of the head the runtime produced, so the
  * prerendered markup is styled at first paint before support.js has processed
  * <helmet>.
@@ -677,6 +823,44 @@ function stylesOf(head) {
  * decides it, and every occurrence of the source's own canonical string is
  * rewritten with it - which fixes og:url, twitter and the @id fields in the
  * JSON-LD in the same pass, rather than leaving three of them disagreeing. */
+/* SEVEN TITLES WERE LONG ENOUGH TO BE CUT OFF IN THE RESULT.
+ *
+ * Measured 12.9.2026 with entities decoded, which matters: "ERP &amp; CRM"
+ * reads as 12 characters in the file and 8 on the screen, and counting the file
+ * puts two titles on the wrong side of the line. Over the ~60-character mark,
+ * Google truncates - and it truncates the END, which on this site is the brand.
+ *
+ * So the brand suffix is what goes, and only where the title would otherwise be
+ * cut: the page's own wording, which is the part that has to earn the click, is
+ * never touched. Dropping it everywhere for consistency would be a copy
+ * decision; dropping the part that was going to be thrown away anyway is not.
+ * The seven affected land at 44-51 characters.
+ *
+ * Not fixed here, because it needs words rather than a rule: /news/ is
+ * "News · McCain Digital", 21 characters, which is too thin to say anything. */
+const TITLE_MAX = 60;
+const TITLE_BRAND = " · McCain Digital";
+
+function shortenTitle(title) {
+  /* Rendered length, not source length - see above. Only the entities the
+   * export actually produces; an unknown one should stand out, not be guessed. */
+  const rendered = (s) =>
+    s.replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#0?39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+
+  const len = rendered(title).length;
+  if (len <= TITLE_MAX || !title.endsWith(TITLE_BRAND)) return { title, trimmed: false, len };
+
+  const short = title.slice(0, -TITLE_BRAND.length);
+  const shortLen = rendered(short).length;
+  if (shortLen > TITLE_MAX) {
+    throw new Error(
+      `prerender: "${short}" is ${shortLen} characters even without the brand. ` +
+        `That one needs rewriting, not trimming.`
+    );
+  }
+  return { title: short, trimmed: true, len: shortLen };
+}
+
 function metaOf(src, page) {
   const helmet = /<helmet>([\s\S]*?)<\/helmet>/.exec(src);
   if (!helmet) throw new Error(`prerender: no <helmet> in ${page.src}`);
@@ -700,8 +884,11 @@ function metaOf(src, page) {
   const fix = (s) => (declared && declared !== want ? s.split(declared).join(want) : s);
 
   const over = page.meta || {};
+  const trimmed = shortenTitle(over.title || title);
   return {
-    title: over.title || title,
+    title: trimmed.title,
+    titleTrimmed: trimmed.trimmed,
+    titleLen: trimmed.len,
     desc: over.desc || desc,
     ogImage: over.ogImage || (ogImage ? fix(ogImage) : `${ORIGIN}/og-image.png`),
     themeColor,
@@ -810,6 +997,21 @@ async function snapshot(page) {
       p.setAttribute("d", p.getAttribute("d").split(",").join(" "));
     }
   });
+
+  /* Same shape again for the brand mark (see MARK_FROM): the script that ships
+   * renders it static, but this snapshot is taken from the UNPATCHED export,
+   * so without this the prerendered copy would animate 146 rects until React
+   * replaces it - the expensive part happens exactly during load.
+   *
+   * The cells animate `opacity` and `transform` only, and both rest at the
+   * base value the static mode leaves them at, so clearing the declaration
+   * reproduces static exactly rather than approximating it. viewBox
+   * "0 0 64 64" is the mark and nothing else: the export uses it in one place. */
+  return await page.evaluate(() => {
+    const cells = document.querySelectorAll('svg[viewBox="0 0 64 64"] rect');
+    for (const c of cells) c.style.animation = "none";
+    return cells.length;
+  });
 }
 
 async function grab(page, pinned, name) {
@@ -867,7 +1069,7 @@ for (const page of PAGES) {
   if (!fs.existsSync(srcFile)) throw new Error(`prerender: ${page.src} is not in the export`);
 
   const tab = await open(context, `${EXPORT_URL}/${encodeURIComponent(page.src)}`);
-  await snapshot(tab);
+  const stilledCells = await snapshot(tab);
   const snap = await grab(tab, page.h1, page.src);
   await tab.close();
 
@@ -884,7 +1086,8 @@ for (const page of PAGES) {
   if (meta.canonicalWasWrong) fixedCanonicals++;
 
   const wired = wireForms(localise(scriptTag[0]), page.src);
-  const icons = fixIconGallery(wired.script);
+  const still = stillMark(wired.script, page.src);
+  const icons = fixIconGallery(still.script);
   const helmet = stripHelmetSeo(localise(template), page.src);
   const preTiles = fixTileRoles(localise(snap.body));
   const tplTiles = fixTileRoles(helmet.template);
@@ -894,8 +1097,8 @@ for (const page of PAGES) {
     script: icons.script,
   });
   const tiles = preTiles.fixed + tplTiles.fixed;
-  const prerendered = anchors.prerendered;
-  const templateLocal = anchors.template;
+  const prerendered = wrapMain(anchors.prerendered, page.src, "prerendered");
+  const templateLocal = wrapMain(anchors.template, page.src, "template");
   const script = anchors.script;
   const head = headOf(meta, page, stylesOf(snap.head));
 
@@ -941,8 +1144,17 @@ ${SWAP}
   fs.mkdirSync(path.dirname(outFile), { recursive: true });
   fs.writeFileSync(outFile, html, "utf8");
 
+  /* Only <script> with NO attributes: the component script is type="text/x-dc"
+   * and the JSON-LD is application/ld+json, and the browser executes neither,
+   * so neither needs a hash. Anything the build starts writing later lands
+   * here on its own. */
+  const inlineHashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(
+    (m) => `'sha256-${crypto.createHash("sha256").update(m[1], "utf8").digest("base64")}'`
+  );
+
   built.push({
     ...page,
+    inlineHashes,
     title: meta.title,
     words: snap.words,
     els: snap.els,
@@ -953,51 +1165,58 @@ ${SWAP}
   console.log(
     `  ${page.route.padEnd(44)} ${String(snap.words).padStart(5)} words  ${String(snap.els).padStart(5)} els  ${String(Math.round(html.length / 1024)).padStart(4)} KB` +
       `  ${wired.forms} form${wired.forms === 1 ? " " : "s"} wired` +
+      `  ${stilledCells} mark cells stilled` +
       `  ${helmet.stripped} helmet meta dropped` +
       (tiles ? `  ${tiles} tile roles fixed` : "") +
       (anchors.fixed ? `  ${anchors.fixed} anchors → /` : "") +
       (icons.icons ? "  [icon gallery fixed]" : "") +
+      (meta.titleTrimmed ? `  [title → ${meta.titleLen} chars]` : "") +
       (meta.canonicalWasWrong ? "  [canonical corrected]" : "") +
       (meta.overridden ? `  [${meta.overridden} meta overridden]` : "")
   );
 }
 
 /* --------------------------------------------------------- the recall badge */
-/* brand/mccain-recall-logo-128.png is 9.8 KB of PNG shown in a 20-24 px box, on
- * ALL 21 pages. PageSpeed put the saving at 9.5 KB: "larger than needed for the
- * displayed dimensions (20x20)" plus "could be a modern image format".
- *
- * So the build derives a 48 px WebP from it - 48, not 24, because a 2x display
- * asks for twice the CSS pixels - and points the pages at that. The 128 px
- * original stays in the export untouched; this is a build product, like the
- * minified support.js. Same picture, same rounded corners from the CSS, a
- * fraction of the bytes. */
-const RECALL_SRC = "brand/mccain-recall-logo-128.png";
-const RECALL_OUT = "brand/mccain-recall-logo-48.webp";
+async function deriveImages() {
+  const done = [];
+  for (const job of DERIVED) {
+    const page = await context.newPage();
+    await page.goto(`${EXPORT_URL}/${job.src}`, { waitUntil: "networkidle" });
+    const shot = await page.evaluate(async ({ w, h, q }) => {
+      const img = document.querySelector("img");
+      await img.decode();
 
-async function deriveRecallBadge() {
-  const page = await context.newPage();
-  await page.goto(`${EXPORT_URL}/${RECALL_SRC}`, { waitUntil: "networkidle" });
-  const dataUrl = await page.evaluate(async () => {
-    const img = document.querySelector("img");
-    await img.decode();
-    const c = document.createElement("canvas");
-    c.width = 48;
-    c.height = 48;
-    const g = c.getContext("2d");
-    g.imageSmoothingQuality = "high";
-    g.drawImage(img, 0, 0, 48, 48);
-    return c.toDataURL("image/webp", 0.92);
-  });
-  await page.close();
-  if (!dataUrl.startsWith("data:image/webp")) {
-    throw new Error("prerender: the browser did not produce a WebP for the recall badge");
+      /* Reproduce `object-fit: cover; object-position: 50% 50%` here rather
+       * than leaving it to the browser at runtime: take the centred slice of
+       * the source that has the output's aspect ratio, then scale it. For a
+       * source already at the right ratio this is a no-op, so one code path
+       * covers both the crops and the plain resizes. */
+      let sw = img.naturalWidth;
+      let sh = img.naturalHeight;
+      if (sw / sh > w / h) sw = Math.round(sh * (w / h));
+      else sh = Math.round(sw / (w / h));
+      const sx = Math.round((img.naturalWidth - sw) / 2);
+      const sy = Math.round((img.naturalHeight - sh) / 2);
+
+      const c = document.createElement("canvas");
+      c.width = w;
+      c.height = h;
+      const g = c.getContext("2d");
+      g.imageSmoothingQuality = "high";
+      g.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+      return { url: c.toDataURL("image/webp", q), nat: img.naturalWidth + "x" + img.naturalHeight, cropped: sw !== img.naturalWidth || sh !== img.naturalHeight };
+    }, job);
+    await page.close();
+    if (!shot.url.startsWith("data:image/webp")) {
+      throw new Error(`prerender: the browser did not produce a WebP for ${job.src}`);
+    }
+    const bytes = Buffer.from(shot.url.split(",")[1], "base64");
+    const out = path.join(SITE, job.out);
+    fs.mkdirSync(path.dirname(out), { recursive: true });
+    fs.writeFileSync(out, bytes);
+    done.push({ ...job, bytes: bytes.length, was: fs.statSync(path.join(EXPORT_DIR, job.src)).size, nat: shot.nat, cropped: shot.cropped });
   }
-  const bytes = Buffer.from(dataUrl.split(",")[1], "base64");
-  const out = path.join(SITE, RECALL_OUT);
-  fs.mkdirSync(path.dirname(out), { recursive: true });
-  fs.writeFileSync(out, bytes);
-  return bytes.length;
+  return done;
 }
 
 /* ----------------------------------------------------------------- og image */
@@ -1010,9 +1229,16 @@ const ogJobs = [
    * export does not contain - so it is rendered from the light social plate. */
   ["brand/mccain-og-light.svg", "brand/mccain-og-marke.png"],
 ];
-const badgeBytes = await deriveRecallBadge();
+const derived = await deriveImages();
+console.log("");
+for (const d of derived) {
+  console.log(
+    `  ${d.out.padEnd(38)} ${String(d.bytes).padStart(7)} B  ${String(d.w) + "x" + d.h}` +
+      `   (from ${d.nat}, ${d.was} B${d.cropped ? ", cropped" : ""})`
+  );
+}
 console.log(
-  `\n  ${RECALL_OUT}  ${badgeBytes} B  (from ${fs.statSync(path.join(EXPORT_DIR, RECALL_SRC)).size} B PNG)`
+  `  ${derived.reduce((a, d) => a + d.was, 0)} B of placeholder became ${derived.reduce((a, d) => a + d.bytes, 0)} B`
 );
 
 for (const [svg, out] of ogJobs) {
@@ -1088,6 +1314,71 @@ function copy(from, to) {
 }
 
 for (const [from, to] of Object.entries(ASSETS)) copy(from, to);
+
+/* ---------------------------------------------------------------------- CSP */
+/* THE HASHES ARE READ OFF WHAT WAS ACTUALLY WRITTEN, NOT OFF A LIST.
+ *
+ * A Content-Security-Policy that is maintained next to the code it describes
+ * goes stale the first time somebody adds a script, and the failure is silent
+ * in the worst direction: the page loads, looks perfect, and one behaviour is
+ * gone. So the policy is derived from the built files - every inline <script>
+ * with no attributes, hashed - and the union is written into vercel.json.
+ * Adding a fifth inline script updates the policy in the same build.
+ *
+ * Two things the export forces, both checked rather than assumed:
+ *
+ *   'unsafe-eval' - support.js compiles the component through
+ *     `new Function("DCLogic", "StreamableLogic", "React", src)`. There is no
+ *     version of this policy without it while the runtime works that way.
+ *     Note what it does NOT cost: an injected <script> still needs a hash, an
+ *     injected src= still needs to be same-origin, javascript: URLs are still
+ *     refused. The component script itself is type="text/x-dc", so the browser
+ *     never executes it and it needs no hash.
+ *
+ *   img-src data: - image-slot.js and pixel-engine.js both produce images
+ *     through toDataURL. Measured, not guessed: grepped for it before writing
+ *     the line, because "no data: URIs in the markup" is not the same question.
+ *
+ * style-src keeps 'unsafe-inline' because the export styles everything with
+ * inline style attributes; hashing is not available for those, and taking it
+ * away would render the site as unstyled text.
+ *
+ * frame-ancestors is here as well as X-Frame-Options, which is the one header
+ * this policy can genuinely replace. */
+const cspHashes = [...new Set(built.flatMap((p) => p.inlineHashes))].sort();
+const CSP = [
+  "default-src 'self'",
+  "base-uri 'none'",
+  "object-src 'none'",
+  "frame-ancestors 'self'",
+  "form-action 'self'",
+  "img-src 'self' data:",
+  "font-src 'self'",
+  "style-src 'self' 'unsafe-inline'",
+  `script-src 'self' 'unsafe-eval' ${cspHashes.join(" ")}`,
+  "connect-src 'self' https://api.web3forms.com",
+  "upgrade-insecure-requests",
+].join("; ");
+
+const vercelPath = path.join(SITE, "vercel.json");
+const vercelJson = JSON.parse(fs.readFileSync(vercelPath, "utf8"));
+const cspHeader = vercelJson.headers
+  .flatMap((h) => h.headers)
+  .find((h) => h.key === "Content-Security-Policy");
+if (!cspHeader) {
+  throw new Error(
+    "prerender: vercel.json has no Content-Security-Policy header to fill in. " +
+      "Add one with any placeholder value - the build owns the value, not the entry."
+  );
+}
+const cspChanged = cspHeader.value !== CSP;
+if (cspChanged) {
+  cspHeader.value = CSP;
+  fs.writeFileSync(vercelPath, JSON.stringify(vercelJson, null, 2) + "\n", "utf8");
+}
+console.log(
+  `\n  CSP: ${cspHashes.length} inline script hash(es)${cspChanged ? " - vercel.json updated" : " - vercel.json already current"}`
+);
 
 /* ------------------------------------------------------------------ sitemap */
 /* Written from PAGES, never maintained beside it: a sitemap that disagrees with

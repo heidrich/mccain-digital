@@ -235,6 +235,47 @@ for (const { path: p, interactive, pixels, modals } of LIVE_PAGES) {
   }));
   const dupeList = Object.entries(dupes).filter(([, n]) => n > 1);
 
+  /* THE LANDMARKS, AFTER HYDRATION.
+   *
+   * No page had a <main> before 12.9.2026 - the sections sat as siblings
+   * between <header> and <footer>, so "skip to main content" had nothing to
+   * skip to. tools/prerender.mjs wraps both copies now (see wrapMain), and this
+   * is the half that matters: the prerendered copy is thrown away a moment
+   * after load, so a <main> that only exists there is a <main> that vanishes.
+   *
+   * The banner count is asked too, because the fix has a way of going subtly
+   * wrong rather than loudly: on /marke/ the content wrapper opens with a
+   * <header> of its own, and a <main> that starts after it leaves that header
+   * outside as a SECOND banner landmark. One is correct; two is a page with two
+   * mastheads as far as a screen reader is concerned. */
+  const marks = await page.evaluate(() => {
+    const m = document.querySelector("main");
+    const banner = [...document.querySelectorAll("header")].filter(
+      (h) => !h.closest("main, article, aside, nav, section")
+    ).length;
+    /* THE BRAND MARK MUST NOT BE ANIMATING.
+     *
+     * It is built from 146 <rect> cells and in 'loop' mode every one of them
+     * gets its own infinite CSS animation - 3.5 seconds of main-thread work per
+     * page load, measured. tools/prerender.mjs forces the component's own
+     * 'static' mode; asked here because the patch is against the export, and
+     * the next export can move the line it patches. viewBox 0 0 64 64 is the
+     * mark and nothing else. */
+    let logoAnim = 0;
+    for (const svg of document.querySelectorAll('svg[viewBox="0 0 64 64"]')) {
+      logoAnim += svg.getAnimations({ subtree: true }).filter((a) => a.playState === "running").length;
+    }
+
+    return {
+      mains: document.querySelectorAll("main").length,
+      hasFooterInside: !!m && !!m.querySelector("footer"),
+      hasSkipTarget: !!m && !!document.getElementById("inhalt") && m.contains(document.getElementById("inhalt")),
+      banner,
+      logoAnim,
+      logos: document.querySelectorAll('svg[viewBox="0 0 64 64"]').length,
+    };
+  });
+
   const robots = await robotsOf(page);
   const rb = checkRobots(p, robots, headers);
   if (headerSeen === null) headerSeen = rb.headerSaysNo;
@@ -255,13 +296,28 @@ for (const { path: p, interactive, pixels, modals } of LIVE_PAGES) {
   console.log(`    ${ok(!ext.length)} ${ext.length} third-party hosts${ext.length ? ": " + ext.join(", ") : ""}`);
   console.log(`    ${ok(!bad.length)} ${bad.length} failed requests`);
   console.log(`    ${ok(!dupeList.length)} one title/canonical/description/og:url after hydration${dupeList.length ? ": " + dupeList.map(([k, n]) => `${n}× ${k}`).join(", ") : ""}`);
+  console.log(`    ${ok(marks.mains === 1 && !marks.hasFooterInside && marks.hasSkipTarget && marks.banner === 1)} one <main> around the content, one banner (${marks.mains} main, ${marks.banner} banner)`);
+  console.log(`    ${ok(marks.logoAnim === 0)} brand mark static (${marks.logos} marks, ${marks.logoAnim} running animations)`);
   console.log(`    ${ok(true)} robots: "${robots}"${rb.headerSaysNo ? " + X-Robots-Tag" : ""}`);
+  /* A CSP violation is a console error, and console errors already fail this
+   * gate - so the policy being WRONG is caught above. This asks the other
+   * question: whether it is there at all. Both prodserve.py and Vercel read it
+   * out of vercel.json, so the answer is the same locally and in production. */
+  const csp = headers["content-security-policy"] || "";
+  const cspHashes = (csp.match(/'sha256-/g) || []).length;
+  console.log(`    ${ok(!!csp)} CSP present (${cspHashes} script hash(es))`);
 
   if (!mount.preGone) fail(`${p}: the prerendered copy is still in the DOM - React never mounted`);
   if (!mount.rootFilled) fail(`${p}: #dc-root is empty - the page is inert HTML`);
   if (!mount.hasTemplate) fail(`${p}: no #dc-template - the build stopped shipping the template`);
   if (mount.xdcChildren) fail(`${p}: <x-dc> holds ${mount.xdcChildren} live elements - the template is being parsed as markup`);
   if (mount.h1 !== 1) fail(`${p}: ${mount.h1} h1 elements`);
+  if (!csp) fail(`${p}: no Content-Security-Policy header`);
+  if (marks.mains !== 1) fail(`${p}: ${marks.mains} <main> after hydration - the landmark did not survive React`);
+  if (marks.hasFooterInside) fail(`${p}: the <footer> is inside <main>`);
+  if (!marks.hasSkipTarget) fail(`${p}: the skip link's target is not inside <main>`);
+  if (marks.banner !== 1) fail(`${p}: ${marks.banner} banner landmarks - a <header> outside <main> that is not the masthead`);
+  if (marks.logoAnim) fail(`${p}: the brand mark is running ${marks.logoAnim} animations - the static patch missed (see MARK_FROM in prerender.mjs)`);
   for (const [k, n] of dupeList)
     fail(`${p}: ${n} <${k}> after hydration - the helmet is shipping a second set of meta tags`);
   if (pixels && !pixelOk) fail(`${p}: the pixel engine is not running`);

@@ -10,7 +10,10 @@
   existiert und unter welcher URL; `sitemap.xml` und das Seitenverzeichnis in
   `llms.txt` werden daraus geschrieben.
 - **`noindex` bleibt an** (Owner 12.9.: Texte ueberarbeiten + md-recall fertig).
-- Arbeitsstand: **alles committet und gepusht**, `main` = `9be9dcd`.
+- **12.9. abends:** Logo statisch (Hauptthread halbiert), `<main>` auf jeder
+  Seite, Bilder 211 → 65 KB, sieben Titel gekürzt, CSP + Permissions-Policy.
+  **Und: `prodserve.py` hat jede Messung dieses Projekts unkomprimiert
+  genommen — „mobil 41" war nie wahr, siehe Arbeitsplan.**
 
 ---
 
@@ -33,118 +36,186 @@ aus dem System, die **Gestaltung ist meine** und vom Owner nicht abgenommen.
 
 ---
 
-## ▶ DER ARBEITSPLAN — „dann gehen wir alles an“ (Owner 12.9.)
+## ▶ DER ARBEITSPLAN — Stand nach dem Durchgang vom 12.9. abends
 
-Reihenfolge nach Wirkung. Der vollstaendige Befund als Artifact:
-<https://claude.ai/code/artifact/0e1c630e-37a6-4883-acd3-ec2c57b2ef24>
+Owner hat am 12.9. **A, B, C2, D, E, F und die 404** freigegeben („das setzen
+wir erstmal um, das sind alles technisch notwendige sachen"). **C1 — die drei
+Kontrastfehler — bewusst nicht**, das sind Farbentscheidungen.
 
-### A — Performance, der eine grosse Punkt
+Der Befund von vorher als Artifact:
+<https://claude.ai/code/artifact/0e1c630e-37a6-4883-acd3-ec2c57b2ef24> —
+**seine absoluten Zahlen sind hinfällig**, siehe gleich.
 
-**Mobil 41** auf der Startseite (LCP 7,9 s, FCP 5,2 s, TBT 940 ms). Desktop
-55–65. Google bewertet mobil — das ist die Zahl, die zaehlt.
+### ⚠ ZUERST: „mobil 41" war eine Fehlmessung
 
-Ursache **gemessen**: nicht Bandbreite, sondern Rechenzeit. Mobil arbeitet der
-Hauptthread 7,7 s, davon Other 3.366 ms, **Style & Layout 1.810 ms**, Script
-Evaluation 1.737 ms, Rendering 629 ms. Grund: **46–67 % des DOM sind
-Dekoration** (alles innerhalb `aria-hidden="true"`), mit **454–1.067
-gleichzeitig laufenden CSS-Animationen** je Seite.
+`prodserve.py` komprimierte nur Pfade, die auf `.html` enden. Jede Route dieser
+Seite endet auf `/` → **jede Seitenmessung dieses Projekts lief gegen eine
+unkomprimierte Seite**, Startseite 907 KB statt 134 KB. Behoben.
 
-| Seite | Elemente | Deko | Anteil | animiert |
-| --- | ---: | ---: | ---: | ---: |
-| Startseite | 2.947 | 1.369 | 46 % | 510 |
-| KI & Automatisierung | 3.003 | 1.636 | 54 % | 758 |
-| Preise | 2.213 | 1.204 | 54 % | 602 |
-| Rechtliches | 1.429 | 914 | **64 %** | 456 |
-| News | 1.385 | 922 | **67 %** | 454 |
-| Marke | 3.697 | 2.039 | 55 % | 1.067 |
+Dieselbe Datei über `/` und über `/index.html`: Score 45 gegen 63, FCP 5.171 ms
+gegen 1.272 ms. Die *Vergleiche* untereinander stimmten immer, die Hausnummer
+nie. **Vercel komprimiert — die Live-Seite war nie so langsam, wie wir sie
+gemessen haben.** Wenn eine Zahl aus diesem Projekt älter ist als der 12.9.
+abends, ist sie zu pessimistisch.
 
-**A1. Datenstrom als Canvas statt DOM.** Er besteht aus hunderten Spans mit je
-eigener Animation. Auf ein `<canvas>` gezeichnet kostet er einen Bruchteil und
-sieht identisch aus. Groesster Effekt. **Arbeit im Export**, nicht im Build.
+Gegenprobe vor jeder künftigen Messreihe, dreißig Sekunden:
 
-**A2. Animationen ausserhalb des Bildes anhalten.** `content-visibility` oder
-ein IntersectionObserver (teils schon vorhanden). Spart direkt an den 2,4 s
-Style & Layout + Rendering.
+    curl -sI -H "Accept-Encoding: gzip" http://127.0.0.1:8898/ | grep -i content-encoding
 
-**A3. Spaeter hydrieren — NUR wenn A1+A2 nicht reichen.** Die vorgerenderte
-Kopie *ist* die lesbare Seite; React braucht es erst fuer Menue, Modale,
-Konsole, Formular. **⚠ Das ist der Weg mit dem Risiko, das dieses Projekt schon
-zweimal getroffen hat** (Seite sieht perfekt aus, jeder Knopf tot). Nur mit
-sichtbarem Bereitschaftssignal.
+### ✔ A — Performance: erledigt, und der Verdächtige war der falsche
 
-**A4. Erzwungener Umbruch, 259–386 ms in React.** Die Komponente liest waehrend
-des Renderns Geometrie (`offsetWidth`) fuer `Component.MENU_W` und die
-Pixel-Effekte. Messen und Schreiben trennen, oder Breiten aus CSS. **Export.**
+Der Plan nannte den Datenstrom. Vier identische Läufe, die sich nur durch ein
+eingeschobenes Stylesheet unterschieden:
 
-**Nicht nochmal versuchen:** `fonts.css` inline ziehen ist **erledigt und hat
-nichts gebracht** — PageSpeed schaetzte 450 ms, gemessen 41 vorher / 41 nachher,
-LCP unveraendert. Der `render-blocking`-Audit ist gruen, der Score steht still,
-weil der LCP an der Element-Renderverzoegerung haengt und nicht am Netz.
+| Variante | Score | TBT | Hauptthread |
+| --- | ---: | ---: | ---: |
+| unverändert | 63 | 1.026 ms | 8.497 ms |
+| Datenstrom aus | 64 | 1.010 ms | 8.485 ms |
+| **Logo-Animation aus** | **68** | **778 ms** | **4.971 ms** |
 
-### B — Bilder (Export)
+Der Datenstrom kostet nichts. Die Rechenzeit lag im **Zeichen im Kopf**: ein
+34 × 34 px `<svg>` aus 146 `<rect>`, jedes mit eigener unendlicher Animation —
+146 der 170 unendlichen Animationen der Startseite in einem Quadrat.
 
-- **Portraits**: Quelle `840x1050`, angezeigt `96x120`, je 67,6 KB → rund
-  **115 KB umsonst**. Gebraucht: ~240 px.
-- **Studiofoto**: Quelle 1200 px, angezeigt auf 1344 px — wird **hochskaliert**
-  und ist auf 2x-Displays weich. Gebraucht: ~2400 px.
-- Das recall-Abzeichen ist **erledigt**: der Build leitet ein 48-px-WebP ab,
-  9.822 → 1.586 B, auf allen 21 Seiten.
+**A1 — erledigt.** `mark()` läuft im Modus `static`, den die Komponente selbst
+dokumentiert (`mode: static | in | loop`). Dazu fällt der 1,6-s-Timer weg, der
+auf `loop` schaltete und dafür die ganze Anwendung neu rendert. Beide Patches
+zählen ihre Treffer und brechen ab, wenn der nächste Export sie verschiebt.
+Owner: *„hau das logo raus, wenn wir das nicht gefixt bekommen. und ersetze es
+durch ein statisches"*.
 
-### C — Barrierefreiheit
+**A2 — hinfällig.** Nach A1 laufen auf der Startseite noch **24** Animationen
+statt 270. Außerhalb des Bildes anzuhalten würde jetzt nichts mehr einbringen.
 
-- **Kontrast**, drei echte Fehler (gefordert 4,5:1):
-  `/kontakt/` `#8da2e0` auf weiss = **2,5:1** (Fliesstext im Konfigurator-Link);
-  `/marke/` `#c5d0f5` auf weiss = **1,53:1** — das ist `--mc-dark-text-2`, eine
-  Farbe fuer *dunklen* Grund, die auf weiss steht; Farbmuster-Labels weiss auf
-  `#ff5a8c` = 2,96:1 und auf `#c05cff` = 3,37:1. Bei den Labels steht die
-  Markenfarbe fest → dunkle Schrift oder groesser/fetter, **nicht** andere Farbe.
-  **Farbentscheidungen: Owner, siehe Regel oben.**
-- **Kein `<main>` auf keiner Seite.** Die Inhaltsabschnitte liegen als
-  Geschwister zwischen `<header>` und `<footer>`. Ein `role="main"` auf nur eine
-  Section waere falsch — gehoert im **Export** um die Inhaltsabschnitte gelegt.
-  Bewusst *nicht* im Build geraten: ein falsches `<main>` ist schlechter als keines.
-- Erledigt: `role="button"` auf `<article>` (8 Kacheln) → `<div>`.
-  Barrierefreiheit mobil jetzt **100**.
+**A4 — offen, aber neu zu messen.** Die 259–386 ms erzwungener Umbruch stammen
+aus der unkomprimierten Messreihe.
 
-### D — Texte (Owner-Durchgang)
+**A3 — weiterhin der Notnagel**, nicht angefasst. Was jetzt noch im Hauptthread
+steht: Script Evaluation 1.528 ms · Other 1.373 ms · Style & Layout 1.342 ms ·
+Rendering 571 ms. Der nächste echte Hebel wäre spätes Hydrieren — **mit genau
+dem Risiko, das dieses Projekt zweimal getroffen hat.**
 
-- **Sechs Titel > 60 Zeichen**, werden abgeschnitten: Vergleich WordPress (68),
-  MCP (68), Uebersicht (67), ERP (67), Next.js (61), Styleguide (61), Preise (61).
-  Das `· McCain Digital` kostet 17 Zeichen und ist auf Unterseiten verzichtbar.
-  Andersrum: `/news/` mit 21 Zeichen ist zu duenn.
-- **„4x100" steht weiter im Hintergrundtext** der Startseite. Fuer diesen Build
-  nie gemessen. Wahr waere: die v3-*Unterseiten* lagen bei 100/100/100.
-- **Descriptions von `/news/`, `/news/md-recall/`, `/marke/`** habe ich aus dem
-  jeweiligen Hero-Text ersetzt (in `PAGES`, als `meta`-Ueberschreibung markiert).
-  Korrekt, aber Werbetext — bitte selbst formulieren.
-- **Die ersten 48–180 Woerter jeder Seite sind Dekoration** (der Datenstrom).
-  Screenreader ueberspringen das korrekt, **Crawler nicht**. Insgesamt sind 94 %
-  der Wortzahl echter Inhalt — unguenstig ist nur die Position.
+**Ergebnis mobil, gleiche Bedingungen, komprimiert:**
 
-### E — Inhalt und Recht (Owner-Entscheidung, kein Code)
+| | vorher | nachher |
+| --- | ---: | ---: |
+| Score Startseite | 63 | **69** |
+| Hauptthread | 8.497 ms | **4.999 ms** |
+| TBT | 1.026 ms | **811 ms** |
+| LCP | 4.050 ms | **3.669 ms** |
 
+Sechs Seiten: Start 69 · KI 70 · Rechtliches 70 · News 73 · Preise 65 ·
+Marke 65. A11y 100 überall außer `/marke/` (93 = C1). Best Practices 100.
+CLS 0. Gesamtgewicht Startseite 393 KiB.
+
+### ✔ B — Bilder: 211 KB Platzhalter sind 65 KB
+
+Portraits 840 × 1050 → 240 × 300 (67,6 → 12,6 KB je Stück). Studiofoto
+1200 × 800 → **1200 × 457 zugeschnitten**: die Box hat Verhältnis 2.625, der
+Browser warf 43 % der Zeilen weg, *nachdem* er sie geladen hatte. Abzeichen
+9,8 KB PNG → 2,9 KB WebP bei 128 px (nicht 48: auf `/md-recall/` steht dasselbe
+Bild in einer 58-px-Box).
+
+Tabelle `DERIVED` im Build; `localise()` liest die Verweise daraus, damit ein
+neues Bild nicht halb verdrahtet werden kann. Marken-SVGs auf `/marke/` bleiben
+absichtlich außen vor — Vektor **und** die angebotene Download-Datei.
+
+**Zwei Befunde für den Owner:** die beiden Portraits sind **byte-identisch**
+(dieselbe Datei zweimal, `md5 25edd2c1…`), und das Studiofoto ist mit 1200 px
+für eine 1344-px-Box zu klein — das braucht ein größeres Original, keinen
+Build-Schritt.
+
+### ✔ C2 — jede Seite hat ein `<main>`
+
+Vorher keine einzige. Der Rahmen liegt um **beide** Kopien — die vorgerenderte
+und die Vorlage, aus der React rendert; nur in der ersten wäre er nach einer
+Zehntelsekunde wieder weg.
+
+`/marke/` ist anders gebaut: ihr Inhalt liegt in einem Wrapper, der mit einem
+eigenen `<header>` beginnt. Ein `<main>` ab der ersten Sektion hätte diesen Kopf
+draußen gelassen — als **zweite `banner`-Landmarke**. Der Rahmen geht deshalb
+vom Seitenkopf bis zum Fuß. Das Tor zählt beides.
+
+### ◑ D — Titel erledigt, Aussagen offen
+
+**Erledigt:** sieben Titel waren über 60 Zeichen und wurden abgeschnitten.
+Gemessen mit aufgelösten Entities (`&amp;` sind 5 Zeichen in der Datei und 1 auf
+dem Schirm — das verschiebt zwei Titel über die Grenze). Der Markenzusatz fällt
+weg, und nur dort: 44–51 Zeichen, längster der Seite 60. Der Text selbst
+unberührt.
+
+**Offen, Owner:**
+
+- **`/news/` heißt „News · McCain Digital", 21 Zeichen.** Zu dünn, braucht Worte.
+- **Die Lighthouse-Aussagen über die eigene Seite.** Das ist größer als
+  gedacht: **auf allen 21 Seiten**, nicht nur im Hintergrundtext. Als sichtbare
+  Kennzahl `{ v: '4×100', l: 'Lighthouse' }`, als Fließtext „Lighthouse-Wertung
+  der eigenen Website", „Lighthouse 100 mit laufender Canvas-Engine", und als
+  Merkmalsliste „Cumulative Layout Shift 0, **Total Blocking Time 0 ms**".
+  Gemessen sind es heute 65–73 mobil und TBT 639–1.085 ms. **CLS 0 stimmt.**
+  Nicht angefasst: das ist Text, teils Werbeaussage über die eigene Leistung,
+  und in DE abmahnfähig. Die Zusagen über *Kundenprojekte*
+  („Lighthouse-Budget in der CI") sind davon unberührt und bleiben richtig.
+- Die drei Descriptions in `PAGES` sind weiterhin von mir formuliert.
+
+### ◑ E — was noch ins Leere zeigt (Owner)
+
+Gemessen, nicht geschätzt — pro Seite:
+
+- **„Tech-Notizen" → `#`**, im Kopfmenü *und* in der Fußzeile, auf **allen 21
+  Seiten**. Trägt ehrlich ein „Bald"-Schild. Seite bauen oder Eintrag weg.
+- **`/news/` zeigt drei Artikel, zwei davon zeigen auf `#`** („Warum der…",
+  „Zwei Personen…"). Nur `md-recall` existiert.
+- **`/md-recall/`: „Repository öffnen" → `#`.** Eine URL zu raten ist genau das,
+  was ich nicht tue.
 - **Die Logo-Reihe im Hero** (Deutsche Bank, Apple, Microsoft, Blizzard,
-  Deutsches Museum, Ravensburger, Travian, AOK) steht weiter ueber einer Sektion
-  „sobald sie es duerfen". Keine freigegebenen Kunden → Abmahnrisiko in DE.
-  Nebenbefund: eines dieser Logos ist mobil das **LCP-Element**.
-- **`/md-recall/` hat 10 leere Bildslots** mit Platzhaltertext. Die Screenshots
-  muessen **in den Export** — auf der ausgelieferten Seite kann man dort nichts
-  ablegen — oder die Slots werden durch normale `<img>` ersetzt.
-- **„Tech-Notizen"** in der Fusszeile zeigt auf `#`. Immerhin ehrlich: der
-  Eintrag ist `soon: true` und faengt den Klick ab. Seite bauen oder Eintrag weg.
+  Deutsches Museum, Ravensburger, Travian, AOK) über einer Sektion „sobald sie
+  es dürfen". Keine freigegebenen Kunden → Abmahnrisiko.
+- **`/md-recall/` hat 10 leere Bildslots.** Die Screenshots müssen in den
+  Export; auf der ausgelieferten Seite kann man dort nichts ablegen.
 
-### F — Technik, kleinere Gewinne
+### ✔ F — CSP, Permissions-Policy, Caching
 
-- **Keine CSP, keine Permissions-Policy.** Vorhanden: HSTS (2 J., preload),
-  nosniff, X-Frame-Options, Referrer-Policy. Die Seite waere ein guter Kandidat
-  — sie laedt **nur** von der eigenen Domain, einziger fremder Empfaenger ist
-  `api.web3forms.com`. Haken: der Build schreibt Inline-Skripte (Shim,
-  Uebergabe, Formular-Laufzeit), die brauchen Hashes oder eine Nonce. **Eine
-  falsch gesetzte CSP macht die Seite still tot** — nicht nebenbei machen.
-- `.js`/`.css` laufen mit `max-age=0, must-revalidate`. Mit Hash im Dateinamen
-  ginge `immutable`. Kleiner Gewinn, kleine Arbeit.
-- Nebenbefund: HTML kommt mit `Access-Control-Allow-Origin: *` (Vercel-Standard),
-  hier ungenutzt.
+**Content-Security-Policy**, ihr Wert vom Build geschrieben: jedes
+Inline-`<script>` **der gebauten Datei** wird gehasht, keine gepflegte Liste.
+Ein fünftes Skript aktualisiert die Policy im selben Lauf.
+
+- `'unsafe-eval'` ist unvermeidbar: `support.js` übersetzt die Komponente über
+  `new Function(...)`. Es kostet nicht viel — ein eingeschleustes `<script>`
+  braucht weiter einen Hash, `src=` weiter die eigene Domain. Der
+  Komponenten-Code ist `type="text/x-dc"`, wird nie ausgeführt, braucht keinen.
+- `img-src data:` ist nötig: `image-slot.js` und `pixel-engine.js` erzeugen
+  Bilder über `toDataURL`. Nachgesehen, nicht geraten.
+
+Dazu `Permissions-Policy` (Kamera, Mikrofon, Standort, Zahlung, USB, Kohorten —
+aus) und `immutable` für `/vendor/`, wo die Version im Dateinamen steht.
+
+**`prodserve.py` schickt die Sicherheits-Header jetzt aus `vercel.json` mit** —
+eine CSP ist der eine Header, bei dem „sehen wir beim Deployen" keine Prüfung
+ist. Das Tor fängt jeden Verstoß, weil ein CSP-Verstoß eine Konsolenmeldung ist.
+
+**Nicht gemacht, mit Grund: Dateinamen mit Inhalts-Hash** für `support.js`,
+`pixel-engine.js`, `image-slot.js`. Gewinn wären drei `304`-Antworten pro
+Wiederbesuch, und die HTML-Datei ist ohnehin `must-revalidate`, kostet also eine
+Rundreise auf derselben warmen Verbindung — **kein Gewinn auf dem kritischen
+Pfad.** Dafür träfe die Umbenennung an sechs Stellen genau die Datei, deren
+Fehlen diese Seite zweimal tot ausgeliefert hat. Eigener Durchgang, nicht
+angehängt.
+
+### ◑ 404 — Farben korrigiert, Gestaltung weiter nicht abgenommen
+
+`404.html` benutzte `rgba(10,37,64,.1)` und `rgba(10,37,64,.28)` — beide
+**abgeleitet**, beide nicht im System, dasselbe Muster wie die erfundenen
+Rottöne. Jetzt `--mc-line` und `--mc-indigo-ring`. `<main>` hatte sie schon.
+**Die Komposition ist meine und der Owner hat sie nie gesehen.**
+
+### Was das Tor jetzt zusätzlich prüft
+
+`node tools/verify_site.mjs` fragt auf jeder der 21 Seiten am laufenden
+Browser: genau ein `<main>`, Fußzeile nicht darin, Sprungziel darin, genau eine
+`banner`-Landmarke, **null** laufende Animationen im Zeichen, CSP-Header
+vorhanden. Die Patches im Build zählen ihre Treffer und brechen ab, statt still
+danebenzugreifen.
 
 ---
 
@@ -152,6 +223,15 @@ weil der LCP an der Element-Renderverzoegerung haengt und nicht am Netz.
 
 Dev-Server muss laufen: `python prodserve.py 8898 --dev` (bauen) bzw.
 `python prodserve.py 8898` (messen, Produktionsheader).
+
+**Vor jeder Messreihe einmal pruefen, dass der Server komprimiert** — bis zum
+12.9. abends tat er es fuer Verzeichnis-Routen nicht, und das hat jede Zahl
+dieses Projekts verschoben:
+
+    curl -sI -H "Accept-Encoding: gzip" http://127.0.0.1:8898/ | grep -i content-encoding
+
+Er schickt seit dem 12.9. auch die Sicherheits-Header aus `vercel.json` mit,
+damit die CSP lokal pruefbar ist statt erst in Produktion.
 
 | | |
 | --- | --- |

@@ -21,13 +21,19 @@
 <link rel="preload" href="/fonts/instrument-sans-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/fonts/fonts.css">
 <style>
-:root{--acc:#635BFF;--acc-text:#4D47C7;--ink:#0A2540;--slate:#425466;--line:rgba(10,37,64,.1)}
+/* Every value here is a token out of mccain-design-system/tokens/colors.css,
+   copied rather than referenced because this page loads no stylesheet of the
+   site's own - that is the point of it. Names kept short, values not touched:
+   --mc-indigo, --mc-indigo-text, --mc-indigo-soft, --mc-indigo-ring,
+   --mc-navy, --mc-slate, --mc-line. */
+:root{--acc:#635BFF;--acc-text:#4D47C7;--ink:#0A2540;--slate:#425466;
+  --line:#E3E8EE;--ring:rgba(99,91,255,.28);--wash:rgba(99,91,255,.10)}
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;background:#fff;color-scheme:light}
 body{margin:0;min-height:100vh;display:flex;flex-direction:column;
   font-family:'Instrument Sans',system-ui,-apple-system,sans-serif;color:var(--ink);
   -webkit-font-smoothing:antialiased;background:
-    radial-gradient(1200px 600px at 50% -10%,rgba(99,91,255,.10),transparent 70%),#fff}
+    radial-gradient(1200px 600px at 50% -10%,var(--wash),transparent 70%),#fff}
 main{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 24px}
 .card{width:100%;max-width:640px;text-align:center}
 .code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;font-weight:500;
@@ -40,7 +46,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-ra
 a.primary{background:var(--acc);color:#fff}
 a.primary:hover{background:var(--ink);transform:translateY(-1px)}
 a.ghost{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
-a.ghost:hover{box-shadow:inset 0 0 0 1px rgba(10,37,64,.28);transform:translateY(-1px)}
+a.ghost:hover{box-shadow:inset 0 0 0 1px var(--ring);transform:translateY(-1px)}
 nav.more{margin-top:34px;padding-top:22px;border-top:1px solid var(--line);
   display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:center}
 nav.more a{font-size:14px;color:var(--slate);text-decoration:none}
