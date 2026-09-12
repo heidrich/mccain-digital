@@ -1,5 +1,65 @@
 # Uebergabe — Stand 13. September 2026
 
+## ▶ STAND 13.9. NACHTS — vier Runden gebaut, alles live
+
+`main` = `25aef20`. Alle Tore grün, `hydrateRoot` auf allen 21 Seiten,
+0 Konsolenfehler. **PageSpeed mobil 84 -> 91** (TBT 320 -> 80 ms, CLS 0).
+
+| Runde | Was | Wirkung |
+| --- | --- | ---: |
+| 1 | Bauzeit-Rendering (`ssrRender`) + `hydrateRoot` (`patchRuntime`) | mobil 84 -> 91 |
+| 2 | Bewegungsbudget: pausiert Animationen ausserhalb des Bildes | 25 laufende -> 5 |
+| 3 | Markenzeichen als externe SVG-Datei (`markToFile`) | DOM 3.168 -> 2.438 |
+| 4 | Preload/fetchpriority fuer die Header-Marke, Cookie-Rahmen ruhig, Notizen mobil aus | Hauptthread -> 3.910 ms |
+
+`index.html`: **905.070 -> 676.109 B** roh, **133.588 -> 119.004 B** gzip.
+Style-Attribute 2.207 -> 1.464. `Layout`-Aufrufe (Owner-Trace) 358 -> 65.
+
+### Die eine offene Zahl
+
+Googles **Desktop**-Lauf meldet TBT 13.060 ms und "Other" 30.533 ms bei FCP 0,4 s
+und LCP 0,8 s. **Nicht reproduzierbar**: lokal misst Desktop 96, und in der
+eigenen Aufzeichnung des Owners ist derselbe Rechner auf derselben Live-Seite
+**68 % im Leerlauf** (gesamtes Seiten-Skript unter 300 ms, `movePointsGlobal`
+1,1 %, Pixel-Engine 2,7 %).
+
+Die plausibelste Lesart kam vom Owner: **5 % CPU auf einer schnellen Maschine
+sind 30-50 % auf einem alten Notebook** - und genau dort misst Google. Also
+Hardware-Abstand, kein verstecktes Leck. **Gebraucht wird Googles eigener
+Bericht als JSON** (DevTools -> Lighthouse -> Desktop -> Bericht speichern), sonst
+bleibt es Raten.
+
+### Als naechstes, nach Messung sortiert
+
+1. **Nicht-composited Animationen** (Lighthouse: 17 Elemente). `rail` animiert
+   `top` (Layout!), `word-in` `clip-path`, `streamBorder`/`ai-grad`
+   `background-position`, `stp`/`stpdot` `color`/`background-color`. Jede davon
+   ist pro Frame Hauptthread-Arbeit - auf langsamer Hardware das Vielfache.
+   `top -> translateY` ist nicht 1:1 (100 % bezieht sich auf verschiedene Boxen),
+   also je Fall pruefen.
+2. **`measureHero`** baut bei jedem Resize ein Probe-Element, kopiert berechnete
+   Stile darauf, haengt es an `<body>` und misst. Erzwungenes Layout.
+3. **`movePointsGlobal`s Kollisionsscan** liest alle zwei Sekunden
+   `getBoundingClientRect()` von jedem `h1..p, li, button, a, img, svg, form`.
+4. **`/marke/`**: 19 Marken, 913 von 3.161 Knoten. Nach gzip nur 13.938 B -
+   Knoteneffekt ja, Byteeffekt nein. Vier davon sind Bewegungs-Demos und
+   muessen animiert bleiben.
+5. **Phase 2** (Einbahnstrasse): Vorlage + Laufzeit-Uebersetzer nicht mehr
+   ausliefern, `'unsafe-eval'` faellt. Kostet gemessen nur ~20 ms Skriptzeit -
+   es ist eine **Korrektheits**maszahme, keine Geschwindigkeitsmaszahme.
+
+### Gemessen und als Verdaechtige ausgeschieden
+
+- Vorlagen-Umweg parse/serialisieren/parse: **15,3 ms**.
+- Pixelstrom: **eine** laufende Schleife, Desktop wie mobil, ~2 % Hauptthread.
+  Beide Sichtbarkeitstore funktionieren. Bleibt (Owner).
+- Die 1.000 DOM-Aenderungen/s: real, aber 63 ms in 5,7 s.
+- Die Marken-Bytes auf `/marke/`: 460 KB roh, 13.938 B gzip.
+- "Die URL wird 6x aufgerufen": nein, **1** Dokument-Anfrage. Die Spalte in
+  Lighthouses Tabelle der langen Aufgaben ist das *zugeordnete Skript*.
+
+---
+
 ## ▶ ZUERST: wo wir stehen, in fuenf Zeilen
 
 - **Die Seite wird seit 13.9. zur Bauzeit gerendert und hydriert.** `ssrRender()`
