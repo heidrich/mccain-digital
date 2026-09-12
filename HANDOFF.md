@@ -90,10 +90,28 @@ statt 270. Außerhalb des Bildes anzuhalten würde jetzt nichts mehr einbringen.
 **A4 — offen, aber neu zu messen.** Die 259–386 ms erzwungener Umbruch stammen
 aus der unkomprimierten Messreihe.
 
-**A3 — weiterhin der Notnagel**, nicht angefasst. Was jetzt noch im Hauptthread
-steht: Script Evaluation 1.528 ms · Other 1.373 ms · Style & Layout 1.342 ms ·
-Rendering 571 ms. Der nächste echte Hebel wäre spätes Hydrieren — **mit genau
-dem Risiko, das dieses Projekt zweimal getroffen hat.**
+**A5 — `hydrateRoot`: gebaut, gemessen, zurückgenommen. NICHT WIEDER AUFMACHEN.**
+Zerlegung mobil: nur HTML+CSS **92** · React geladen und geparst, bootet nie
+**91** · nur React **72** · wie ausgeliefert **70**. Also: die Bibliothek kostet
+**einen Punkt**, die 21 Punkte sind das *Neubauen*. `support.js` montiert mit
+`createRoot` in ein leeres div, obwohl die fertige Seite schon dasteht.
+Umgebaut auf `hydrateRoot` → React #418/#425/#423, Rückfall auf volles
+Client-Rendering, 32 Konsolenfehler, kein Gewinn. Grund gemessen: zwischen
+Reacts erstem Rendering und dem gesetzten DOM liegen **1.193 von ~3.000
+Knotenpositionen** (rotierende Überschrift, Zähler 0→77, 205 imperativ
+erzeugte Knoten). Zweiter Anlauf mit Snapshot beim ersten Commit: auch 32
+Fehler. Vollständig zurückgenommen.
+
+**A3 — spätes Hydrieren, der einzige verbliebene Hebel.** Gemessene Obergrenze
+**92**. Was jetzt noch im Hauptthread steht: Script Evaluation 1.528 ms ·
+Other 1.373 ms · Style & Layout 1.342 ms · Rendering 571 ms. **Mit genau dem
+Risiko, das dieses Projekt zweimal getroffen hat** — braucht ein sichtbares
+Bereitschaftssignal, nicht nebenbei.
+
+**Owner 12.9. zur Richtung:** die Animationen sind wichtig, die Seite ist ein
+Flaggschiff und muss zeigen, was das Studio kann; später soll ein Kundenbereich
+mit Projekt-Tracking andocken. React bleibt also — die Messung oben sagt
+ohnehin, dass es nicht das Problem ist.
 
 **Ergebnis mobil, gleiche Bedingungen, komprimiert:**
 
@@ -169,9 +187,11 @@ Gemessen, nicht geschätzt — pro Seite:
   „Zwei Personen…"). Nur `md-recall` existiert.
 - **`/md-recall/`: „Repository öffnen" → `#`.** Eine URL zu raten ist genau das,
   was ich nicht tue.
-- **Die Logo-Reihe im Hero** (Deutsche Bank, Apple, Microsoft, Blizzard,
-  Deutsches Museum, Ravensburger, Travian, AOK) über einer Sektion „sobald sie
-  es dürfen". Keine freigegebenen Kunden → Abmahnrisiko.
+- ~~Das Namens-Laufband im Hero~~ — **erledigt, bleibt wie es ist.** Owner
+  12.9.: die Referenzen sind echt und zwanzig Jahre alt. **Nicht wieder
+  aufmachen.** Technisch ist es auch kein Posten: gemessen mit und ohne, LCP
+  3.659 vs. 3.553 ms — 106 ms von 3.659, neun Wörter in reinem CSS.
+  Es ist das LCP-*Element*, nicht die LCP-*Ursache*.
 - **`/md-recall/` hat 10 leere Bildslots.** Die Screenshots müssen in den
   Export; auf der ausgelieferten Seite kann man dort nichts ablegen.
 
