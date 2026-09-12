@@ -296,6 +296,9 @@ function localise(s) {
        * them. */
       .replace(/\s*<link[^>]+rel="(?:icon|apple-touch-icon)"[^>]*>/g, "")
       .replace(new RegExp(`(href=")${rx(ORIGIN)}/`, "g"), "$1/")
+      /* Point the 20-24 px badge at the 48 px WebP the build derives. See
+       * deriveRecallBadge(): 9.8 KB of PNG for a 24 px box, on all 21 pages. */
+      .replace(/\/brand\/mccain-recall-logo-128\.png/g, "/brand/mccain-recall-logo-48.webp")
   );
 }
 
@@ -345,6 +348,57 @@ function stripHelmetSeo(template, name) {
   let stripped = 0;
   for (const re of HELMET_DROP) h = h.replace(re, () => (stripped++, ""));
   return { template: before + h + after, stripped };
+}
+
+/* role="button" IS NOT ALLOWED ON <article>.
+ *
+ * The eight service tiles on the start page are
+ * <article role="button" tabindex="0" aria-label="KI-Tools">, and axe flags it:
+ * "ARIA role should be appropriate for the element". <article> is a document
+ * section with an implicit `article` role; overriding it with `button` gives
+ * assistive technology a control that also claims to be a landmark-ish region,
+ * and the rich content inside it is not a button label.
+ *
+ * The tiles contain no interactive children (checked: 0 links or buttons
+ * inside), so a plain <div> carries role="button" correctly and nothing else
+ * changes: no CSS rule targets the tag - the styling hangs off .scpb and inline
+ * styles - and tabindex, aria-label and the click handler are untouched.
+ *
+ * The close tag has to be matched rather than replaced globally, because the
+ * page has other <article> elements that must stay articles. */
+function fixTileRoles(s) {
+  const open = /<article(?=[^>]*\brole="button")[^>]*>/g;
+  let out = "";
+  let last = 0;
+  let fixed = 0;
+  let m;
+  while ((m = open.exec(s))) {
+    /* walk forward to this element's own </article>, counting nesting */
+    let depth = 1;
+    let i = m.index + m[0].length;
+    const scan = /<article\b[^>]*>|<\/article>/g;
+    scan.lastIndex = i;
+    let t;
+    let closeAt = -1;
+    while ((t = scan.exec(s))) {
+      depth += t[0][1] === "/" ? -1 : 1;
+      if (depth === 0) {
+        closeAt = t.index;
+        break;
+      }
+    }
+    if (closeAt < 0) continue;
+    out +=
+      s.slice(last, m.index) +
+      m[0].replace(/^<article/, "<div") +
+      s.slice(m.index + m[0].length, closeAt) +
+      "<div-close>";
+    last = closeAt + "</article>".length;
+    fixed++;
+    open.lastIndex = last;
+  }
+  out += s.slice(last);
+  return { html: out.split("<div-close>").join("</div>"), fixed };
 }
 
 /* CROSS-PAGE ANCHORS.
@@ -428,6 +482,35 @@ if (fontFiles.length !== 2) {
 const preloads = fontFiles
   .map((f) => `<link rel="preload" href="/fonts/${f}" as="font" type="font/woff2" crossorigin>`)
   .join("\n");
+
+/* fonts.css is INLINED, not linked.
+ *
+ * It is 1.3 KB, and as a <link> it was a render-blocking request on the
+ * critical path: PageSpeed measured it at 380 ms of critical-path latency and
+ * put the estimated saving at 450 ms. Worse than its own cost, the LCP element
+ * is the wordmark in the nav - text that cannot paint until the @font-face
+ * rules have arrived - so a whole extra round trip sat in front of the first
+ * thing the visitor sees.
+ *
+ * Inlining removes the request entirely. Nothing about the typefaces changes:
+ * the same two families, the same self-hosted .woff2 files, the same
+ * font-display: swap. Only the delivery path of the 1.3 KB of @font-face rules
+ * moves - from a second request into the document that already has to arrive.
+ *
+ * The url()s are rewritten from ../fonts/ to /fonts/ because they no longer
+ * resolve relative to fonts/fonts.css but to the page. */
+const fontCss = fs
+  .readFileSync(path.join(SITE, "fonts", "fonts.css"), "utf8")
+  .replace(/url\(\.\.\/fonts\//g, "url(/fonts/")
+  .replace(/\/\*[\s\S]*?\*\//g, "")
+  .replace(/\n{2,}/g, "\n")
+  .trim();
+if (!/@font-face/.test(fontCss)) {
+  throw new Error("prerender: fonts/fonts.css carries no @font-face - run tools/vendor_assets.py");
+}
+if (/\.\.\//.test(fontCss)) {
+  throw new Error("prerender: a relative url() survived in the inlined fonts.css");
+}
 
 /* The raw template must never be seen. support.js hides it itself, but only
  * once it runs. With the template delivered as inert <template> content there is
@@ -539,9 +622,9 @@ if(btn){btn.disabled=false;}onSent();})
 var box=form.querySelector('.mcd-form-error');
 if(!box){box=document.createElement('p');box.className='mcd-form-error';
 box.setAttribute('role','alert');
-box.style.cssText='margin:12px 0 0;padding:12px 14px;border-radius:10px;border:1px solid #FECACA;background:#FEF2F2;color:#991B1B;font-size:14px;line-height:1.5';
+box.style.cssText='margin:12px 0 0;padding:12px 14px;border-radius:10px;border:1px solid #E3E8EE;border-left:3px solid #E5484D;background:#F6F9FC;color:#0A2540;font-size:14px;line-height:1.5';
 form.appendChild(box);}
-box.innerHTML='Das Formular konnte nicht gesendet werden. Bitte schreiben Sie uns direkt an <a href="mailto:info@mccain-digital.com" style="color:inherit;text-decoration:underline">info@mccain-digital.com</a>.';});};})();</script>`;
+box.innerHTML='Das Formular konnte nicht gesendet werden. Bitte schreiben Sie uns direkt an <a href="mailto:info@mccain-digital.com" style="color:#4D47C7;text-decoration:underline">info@mccain-digital.com</a>.';});};})();</script>`;
 
 /* The brand guide's icon gallery hands an ARRAY of sub-paths to a single
  * <path d>, so the runtime stringifies it with commas and Blink rejects it:
@@ -654,7 +737,7 @@ function headOf(meta, page, runtimeHead) {
 <link rel="icon" href="/brand/mccain-favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/brand/apple-touch-icon-180.png">
 ${preloads}
-<link rel="stylesheet" href="/fonts/fonts.css">
+<style>${fontCss}</style>
 <!-- support.js is deferred: it was blocking the parser in front of several
      hundred KB of document, and on an already-prerendered page there is nothing
      to gain from running the runtime before the readable copy exists.
@@ -803,11 +886,14 @@ for (const page of PAGES) {
   const wired = wireForms(localise(scriptTag[0]), page.src);
   const icons = fixIconGallery(wired.script);
   const helmet = stripHelmetSeo(localise(template), page.src);
+  const preTiles = fixTileRoles(localise(snap.body));
+  const tplTiles = fixTileRoles(helmet.template);
   const anchors = fixAnchors({
-    prerendered: localise(snap.body),
-    template: helmet.template,
+    prerendered: preTiles.html,
+    template: tplTiles.html,
     script: icons.script,
   });
+  const tiles = preTiles.fixed + tplTiles.fixed;
   const prerendered = anchors.prerendered;
   const templateLocal = anchors.template;
   const script = anchors.script;
@@ -868,11 +954,50 @@ ${SWAP}
     `  ${page.route.padEnd(44)} ${String(snap.words).padStart(5)} words  ${String(snap.els).padStart(5)} els  ${String(Math.round(html.length / 1024)).padStart(4)} KB` +
       `  ${wired.forms} form${wired.forms === 1 ? " " : "s"} wired` +
       `  ${helmet.stripped} helmet meta dropped` +
+      (tiles ? `  ${tiles} tile roles fixed` : "") +
       (anchors.fixed ? `  ${anchors.fixed} anchors → /` : "") +
       (icons.icons ? "  [icon gallery fixed]" : "") +
       (meta.canonicalWasWrong ? "  [canonical corrected]" : "") +
       (meta.overridden ? `  [${meta.overridden} meta overridden]` : "")
   );
+}
+
+/* --------------------------------------------------------- the recall badge */
+/* brand/mccain-recall-logo-128.png is 9.8 KB of PNG shown in a 20-24 px box, on
+ * ALL 21 pages. PageSpeed put the saving at 9.5 KB: "larger than needed for the
+ * displayed dimensions (20x20)" plus "could be a modern image format".
+ *
+ * So the build derives a 48 px WebP from it - 48, not 24, because a 2x display
+ * asks for twice the CSS pixels - and points the pages at that. The 128 px
+ * original stays in the export untouched; this is a build product, like the
+ * minified support.js. Same picture, same rounded corners from the CSS, a
+ * fraction of the bytes. */
+const RECALL_SRC = "brand/mccain-recall-logo-128.png";
+const RECALL_OUT = "brand/mccain-recall-logo-48.webp";
+
+async function deriveRecallBadge() {
+  const page = await context.newPage();
+  await page.goto(`${EXPORT_URL}/${RECALL_SRC}`, { waitUntil: "networkidle" });
+  const dataUrl = await page.evaluate(async () => {
+    const img = document.querySelector("img");
+    await img.decode();
+    const c = document.createElement("canvas");
+    c.width = 48;
+    c.height = 48;
+    const g = c.getContext("2d");
+    g.imageSmoothingQuality = "high";
+    g.drawImage(img, 0, 0, 48, 48);
+    return c.toDataURL("image/webp", 0.92);
+  });
+  await page.close();
+  if (!dataUrl.startsWith("data:image/webp")) {
+    throw new Error("prerender: the browser did not produce a WebP for the recall badge");
+  }
+  const bytes = Buffer.from(dataUrl.split(",")[1], "base64");
+  const out = path.join(SITE, RECALL_OUT);
+  fs.mkdirSync(path.dirname(out), { recursive: true });
+  fs.writeFileSync(out, bytes);
+  return bytes.length;
 }
 
 /* ----------------------------------------------------------------- og image */
@@ -885,6 +1010,11 @@ const ogJobs = [
    * export does not contain - so it is rendered from the light social plate. */
   ["brand/mccain-og-light.svg", "brand/mccain-og-marke.png"],
 ];
+const badgeBytes = await deriveRecallBadge();
+console.log(
+  `\n  ${RECALL_OUT}  ${badgeBytes} B  (from ${fs.statSync(path.join(EXPORT_DIR, RECALL_SRC)).size} B PNG)`
+);
+
 for (const [svg, out] of ogJobs) {
   const ogPage = await context.newPage();
   await ogPage.setViewportSize({ width: 1200, height: 630 });
