@@ -217,6 +217,24 @@ for (const { path: p, interactive, pixels, modals } of LIVE_PAGES) {
     );
   }
 
+  /* ONE OF EACH, AFTER HYDRATION.
+   *
+   * support.js injects the component's <helmet> into document.head on top of
+   * the head the build wrote, so anything the helmet still carries ships twice.
+   * Measured 12.9.2026 before tools/prerender.mjs stripped it: two <title>, two
+   * descriptions, two og:url, two JSON-LD graphs and TWO <link rel=canonical> -
+   * the second one relative, and on /marke/ pointing at /rechtliches/. Two
+   * canonicals on one page is the case where Google may ignore both, and the
+   * head alone looked perfectly correct the whole time. Only the hydrated page
+   * shows it, so it is asked here rather than in the builder. */
+  const dupes = await page.evaluate(() => ({
+    title: document.querySelectorAll("title").length,
+    canonical: document.querySelectorAll('link[rel="canonical"]').length,
+    description: document.querySelectorAll('meta[name="description"]').length,
+    ogUrl: document.querySelectorAll('meta[property="og:url"]').length,
+  }));
+  const dupeList = Object.entries(dupes).filter(([, n]) => n > 1);
+
   const robots = await robotsOf(page);
   const rb = checkRobots(p, robots, headers);
   if (headerSeen === null) headerSeen = rb.headerSaysNo;
@@ -236,6 +254,7 @@ for (const { path: p, interactive, pixels, modals } of LIVE_PAGES) {
   console.log(`    ${ok(!noise.length)} ${noise.length} console errors/warnings`);
   console.log(`    ${ok(!ext.length)} ${ext.length} third-party hosts${ext.length ? ": " + ext.join(", ") : ""}`);
   console.log(`    ${ok(!bad.length)} ${bad.length} failed requests`);
+  console.log(`    ${ok(!dupeList.length)} one title/canonical/description/og:url after hydration${dupeList.length ? ": " + dupeList.map(([k, n]) => `${n}× ${k}`).join(", ") : ""}`);
   console.log(`    ${ok(true)} robots: "${robots}"${rb.headerSaysNo ? " + X-Robots-Tag" : ""}`);
 
   if (!mount.preGone) fail(`${p}: the prerendered copy is still in the DOM - React never mounted`);
@@ -243,6 +262,8 @@ for (const { path: p, interactive, pixels, modals } of LIVE_PAGES) {
   if (!mount.hasTemplate) fail(`${p}: no #dc-template - the build stopped shipping the template`);
   if (mount.xdcChildren) fail(`${p}: <x-dc> holds ${mount.xdcChildren} live elements - the template is being parsed as markup`);
   if (mount.h1 !== 1) fail(`${p}: ${mount.h1} h1 elements`);
+  for (const [k, n] of dupeList)
+    fail(`${p}: ${n} <${k}> after hydration - the helmet is shipping a second set of meta tags`);
   if (pixels && !pixelOk) fail(`${p}: the pixel engine is not running`);
   if (interactive && !menuReacts) fail(`${p}: nothing happens when the nav is used`);
   if (modalOpens === false) fail(`${p}: a service tile opens nothing`);

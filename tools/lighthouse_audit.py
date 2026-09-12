@@ -26,12 +26,17 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SITE = os.path.dirname(HERE)
 OUT = os.path.join(SITE, "internal", "lighthouse")
 
+# Six of the 21, chosen to bracket the range rather than to be exhaustive: the
+# heaviest page, the heaviest subpage, the largest file, a form page, an
+# overview and the lightest page. A full run of all 21 takes ~20 minutes and
+# has never said anything the bracket did not.
 PAGES = [
-    ("/", "start page"),
-    ("/kontakt.html", "contact"),
-    ("/services/ai-tools.html", "service page"),
-    ("/legal/imprint.html", "legal page"),
-    ("/brand-guide.html", "brand guide"),
+    ("/", "start page (heaviest)"),
+    ("/leistungen/", "overview"),
+    ("/leistungen/ki-automatisierung/", "service page (heaviest sub)"),
+    ("/kontakt/", "contact (form)"),
+    ("/rechtliches/", "legal (lightest)"),
+    ("/marke/", "brand guide (largest file)"),
 ]
 
 CATEGORIES = "performance,accessibility,best-practices,seo"

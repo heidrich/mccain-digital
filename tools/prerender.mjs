@@ -299,6 +299,54 @@ function localise(s) {
   );
 }
 
+/* THE HEAD OWNS THE META TAGS - THE HELMET MUST NOT SHIP A SECOND SET.
+ *
+ * support.js processes the component's <helmet> at runtime and injects what it
+ * finds into document.head, on top of the head this build wrote. Measured on
+ * the hydrated page before this existed: TWO <title> elements, two
+ * descriptions, two og:url, two JSON-LD graphs - and two <link rel="canonical">.
+ *
+ * The second canonical is the export's own, which localise() had turned
+ * relative, so Lighthouse read `canonical: is not an absolute URL (/)` while
+ * the head said the right thing. Worse on the three pages whose helmet was
+ * copy-pasted from the legal page: /marke/ served
+ *     <link rel="canonical" href="https://mccain-digital.com/marke/">   (head)
+ *     <link rel="canonical" href="/rechtliches/">                       (runtime)
+ * Correcting the head was not enough, because the wrong one was being put back
+ * after hydration. Two rel=canonical on one page is also the case where Google
+ * may ignore both.
+ *
+ * Same reasoning that already removes the icon links: whatever the head owns,
+ * the helmet must not repeat. The style block, the pixel-engine script and the
+ * content.json preload stay - those are the helmet doing its actual job.
+ *
+ * hreflang goes for a second reason: the export declares
+ * <link rel="alternate" hreflang="en" href="/en/">, and /en/ does not exist.
+ * A relative hreflang is invalid anyway (Lighthouse: "Relative href value"),
+ * but the real problem is that it points at a page that was never built. */
+const HELMET_DROP = [
+  /\s*<title>[\s\S]*?<\/title>/gi,
+  /\s*<meta[^>]+name="description"[^>]*>/gi,
+  /\s*<meta[^>]+name="robots"[^>]*>/gi,
+  /\s*<link[^>]+rel="canonical"[^>]*>/gi,
+  /\s*<link[^>]+rel="alternate"[^>]*>/gi,
+  /\s*<meta[^>]+property="og:[^"]*"[^>]*>/gi,
+  /\s*<meta[^>]+name="twitter:[^"]*"[^>]*>/gi,
+  /\s*<script type="application\/ld\+json">[\s\S]*?<\/script>/gi,
+];
+
+function stripHelmetSeo(template, name) {
+  const open = template.indexOf("<helmet>");
+  const close = template.indexOf("</helmet>");
+  if (open < 0 || close < 0) throw new Error(`prerender: no <helmet> in the template of ${name}`);
+  const before = template.slice(0, open + "<helmet>".length);
+  const after = template.slice(close);
+  let h = template.slice(open + "<helmet>".length, close);
+  let stripped = 0;
+  for (const re of HELMET_DROP) h = h.replace(re, () => (stripped++, ""));
+  return { template: before + h + after, stripped };
+}
+
 /* CROSS-PAGE ANCHORS.
  *
  * The nav and the footer are the same markup on all 21 pages, and four of their
@@ -754,9 +802,10 @@ for (const page of PAGES) {
 
   const wired = wireForms(localise(scriptTag[0]), page.src);
   const icons = fixIconGallery(wired.script);
+  const helmet = stripHelmetSeo(localise(template), page.src);
   const anchors = fixAnchors({
     prerendered: localise(snap.body),
-    template: localise(template),
+    template: helmet.template,
     script: icons.script,
   });
   const prerendered = anchors.prerendered;
@@ -818,6 +867,7 @@ ${SWAP}
   console.log(
     `  ${page.route.padEnd(44)} ${String(snap.words).padStart(5)} words  ${String(snap.els).padStart(5)} els  ${String(Math.round(html.length / 1024)).padStart(4)} KB` +
       `  ${wired.forms} form${wired.forms === 1 ? " " : "s"} wired` +
+      `  ${helmet.stripped} helmet meta dropped` +
       (anchors.fixed ? `  ${anchors.fixed} anchors → /` : "") +
       (icons.icons ? "  [icon gallery fixed]" : "") +
       (meta.canonicalWasWrong ? "  [canonical corrected]" : "") +
