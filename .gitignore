@@ -41,3 +41,8 @@ internal/lighthouse/
 # it (grep for "uploads/" across mccain-design-system/ finds nothing).
 # Kept on disk, out of the history; recoverable from the parked export zip.
 mccain-design-system/uploads/
+
+# The build renders each page with react-dom/server in a staging document under
+# _dcbuild/ and removes the directory when it is done. It exists only while
+# tools/prerender.mjs is running; a crash can leave it behind.
+_dcbuild/

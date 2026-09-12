@@ -91,6 +91,36 @@ if (!executablePath) {
 const browser = await chromium.launch({ executablePath, headless: true });
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
 
+/* DID THE PAGE HYDRATE, OR DID IT BUILD ITSELF A SECOND TIME?
+ *
+ * Since 13.9.2026 the build writes React's own first render into #dc-root and
+ * patchRuntime() teaches support.js to hydrate it. Nothing about that is
+ * visible from the outside: a page that falls back to createRoot looks
+ * identical, scores 20 points worse, and prints nothing. So the gate watches
+ * which mount function actually ran.
+ *
+ * Wrapped on READ, not on write: the React UMD assigns an EMPTY object to
+ * window.ReactDOM and its factory fills it afterwards, so a setter sees nothing
+ * to wrap and reports "no mount at all". */
+await context.addInitScript(() => {
+  window.__mcdMount = [];
+  let real;
+  Object.defineProperty(window, "ReactDOM", {
+    configurable: true,
+    get() {
+      if (real && !real.__mcdWrapped) {
+        real.__mcdWrapped = true;
+        const hr = real.hydrateRoot;
+        const cr = real.createRoot;
+        if (hr) real.hydrateRoot = function (...a) { window.__mcdMount.push("hydrateRoot"); return hr.apply(this, a); };
+        if (cr) real.createRoot = function (...a) { window.__mcdMount.push("createRoot"); return cr.apply(this, a); };
+      }
+      return real;
+    },
+    set(v) { real = v; },
+  });
+});
+
 async function load(url, { scroll = false } = {}) {
   const page = await context.newPage();
   const errs = [];
@@ -164,10 +194,15 @@ for (const { path: p, interactive, pixels, modals } of LIVE_PAGES) {
   const { page, errs, noise, hosts, bad, headers } = await load(url, { scroll: true });
 
   const mount = await page.evaluate(() => {
-    const pre = document.getElementById("dc-prerender");
     const root = document.getElementById("dc-root");
     return {
-      preGone: !pre,
+      /* One copy of the page, not two. The owner watched the second one arrive
+       * on 13.9.2026 - a cached document from before the rebuild met the new
+       * runtime, which found no filled #dc-root, created its own and left the
+       * old markup lying underneath, offset by the hero. */
+      hosts: document.querySelectorAll(".sc-host").length,
+      mountPath: window.__mcdMount || [],
+      stalePrerender: !!document.getElementById("dc-prerender"),
       rootFilled: !!(root && root.children.length),
       rootEls: root ? root.getElementsByTagName("*").length : 0,
       h1: document.querySelectorAll("h1").length,
@@ -282,7 +317,10 @@ for (const { path: p, interactive, pixels, modals } of LIVE_PAGES) {
 
   const ext = foreign(hosts, url);
   console.log(`  ${p}`);
-  console.log(`    ${ok(mount.preGone)} #dc-prerender handed over`);
+  console.log(
+    `    ${ok(mount.mountPath.includes("hydrateRoot") && mount.hosts === 1)} React hydrated the delivered markup ` +
+      `(${mount.mountPath.join("+") || "no mount seen"}, ${mount.hosts} copy)`
+  );
   console.log(`    ${ok(mount.rootFilled)} #dc-root populated by React (${mount.rootEls} elements)`);
   console.log(`    ${ok(mount.hasTemplate)} template delivered inert`);
   console.log(`    ${ok(mount.xdcChildren === null || mount.xdcChildren === 0)} no live <x-dc> subtree`);
@@ -307,7 +345,17 @@ for (const { path: p, interactive, pixels, modals } of LIVE_PAGES) {
   const cspHashes = (csp.match(/'sha256-/g) || []).length;
   console.log(`    ${ok(!!csp)} CSP present (${cspHashes} script hash(es))`);
 
-  if (!mount.preGone) fail(`${p}: the prerendered copy is still in the DOM - React never mounted`);
+  if (mount.stalePrerender) fail(`${p}: #dc-prerender is in the document - this page was built before 13.9.2026, rebuild it`);
+  if (mount.hosts !== 1) {
+    fail(`${p}: ${mount.hosts} copies of the page in the DOM, expected 1 - the runtime rendered a second one instead of adopting`);
+  }
+  if (!mount.mountPath.length) fail(`${p}: React never mounted - no createRoot and no hydrateRoot ran`);
+  else if (!mount.mountPath.includes("hydrateRoot")) {
+    fail(
+      `${p}: React ran ${mount.mountPath.join("+")} instead of hydrateRoot - it rebuilt the whole page. ` +
+        `Either #dc-root arrived empty (ssrRender) or support.js lost the patch (patchRuntime).`
+    );
+  }
   if (!mount.rootFilled) fail(`${p}: #dc-root is empty - the page is inert HTML`);
   if (!mount.hasTemplate) fail(`${p}: no #dc-template - the build stopped shipping the template`);
   if (mount.xdcChildren) fail(`${p}: <x-dc> holds ${mount.xdcChildren} live elements - the template is being parsed as markup`);

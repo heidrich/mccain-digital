@@ -19,26 +19,33 @@
  * no headline, no title, no prose. Rendered, the start page carries ~2,600.
  * Meta tags alone would have been cosmetic.
  *
- * HOW IT WORKS - and why it is not just "save the rendered DOM"
- * That was the first attempt, back in the v3 round, and it shipped a page that
- * looked perfect and was completely dead: no mega menu, no modals, no pixel
- * stream. support.js mounts like this:
+ * HOW IT WORKS - and why it is no longer "save the rendered DOM"
+ * WHAT CHANGED ON 13.9.2026: the markup is RENDERED by react-dom/server at build
+ * time instead of scraped out of a settled browser, and the runtime hydrates it
+ * instead of building the whole page a second time.
  *
- *     const dc = doc.querySelector("x-dc");
- *     if (!dc) return null;              // <- a settled snapshot dies here
- *     dc.replaceWith(hostEl);            // x-dc becomes <div id="dc-root">
+ * The scrape worked and shipped for months, but it produced the page AFTER
+ * seconds of life - counters at their end value, sections revealed, nodes that
+ * componentDidMount created imperatively. React's first render is the page at
+ * zero, so the two could never be reconciled: hydrateRoot against that snapshot
+ * was measured twice and failed both times, 1,193 of ~3,000 node positions
+ * apart. Without hydration React rebuilt all ~2,900 nodes on every load, and
+ * measured on mobile that rebuild is 21 of the 30 points the page was missing -
+ * downloading React itself costs one.
  *
- * A snapshot of the settled DOM is taken AFTER that replacement, so <x-dc> is
- * gone from it and on the next load support.js finds nothing to render. React
- * loads, PixelFX loads, no error is printed, and every button is inert.
+ * So ssrRender() writes the patched template and the patched script into a
+ * staging document, lets support.js compile them exactly as a browser would,
+ * and renders the component it produced. The result IS React's first render.
  *
- * So every built page carries BOTH:
- *   <div id="dc-prerender">  the settled markup - what a crawler reads and what
- *                            paints first
- *   <x-dc>                   the empty mount point support.js replaces
+ * Every built page therefore carries ONE copy, not two:
+ *   <div id="dc-root">          React's first render - what a crawler reads,
+ *                               what paints first, and what React adopts
+ *   <x-dc>                      empty; how support.js finds the template
  *   <template id="dc-template">  the component template, INERT
- * and a watcher removes the prerendered copy the moment React has put something
- * in its own #dc-root. If React never arrives, the readable copy simply stays.
+ * patchRuntime() teaches support.js to notice the filled #dc-root, drop the
+ * <x-dc> and call hydrateRoot. If React never arrives, the markup simply stays
+ * and the page is still readable - the old watcher that removed a second copy
+ * is gone with the second copy.
  *
  * It also removes the three third-party origins the export depends on: React
  * through support.js's own window.__resources hook (no patching, and the SRI
@@ -178,9 +185,12 @@ const NOT_PUBLISHED = [
  * of record in mccain-design-system/, and what ships at the site root is the
  * minified edition built from it.
  *
- * support.js is third-party runtime, minified through the same step rather than
- * edited. Nothing here rewrites its logic; if minification ever broke it the
- * gate would catch it, because the gate clicks.
+ * support.js is third-party runtime, minified through the same step. It carries
+ * exactly ONE logic change, patchRuntime() below: the mount adopts the markup
+ * this build rendered instead of throwing it away and building it again. That
+ * patch asserts its own count, so a re-exported runtime cannot absorb it
+ * silently. If minification ever broke either, the gate would catch it, because
+ * the gate clicks.
  *
  * Both are re-derived on every build, so the two editions cannot drift. */
 const MINIFY = new Set(["pixel-engine.js", "support.js", "image-slot.js"]);
@@ -471,10 +481,13 @@ function fixTileRoles(s) {
  * columns, so patching only the markup fixes the page that is rendered and
  * leaves the page React renders broken. */
 function fixAnchors(parts) {
+  /* The template is the only place ids can come from now, and it is the right
+   * one: it is what React renders, so an id that exists there exists on the
+   * page. The delivered markup used to be collected here too, back when it was
+   * scraped separately - it is rendered from this very template today, so it
+   * cannot contribute an id the template does not have. */
   const ids = new Set();
-  for (const s of [parts.prerendered, parts.template]) {
-    for (const m of s.matchAll(/\sid="([A-Za-z][\w-]*)"/g)) ids.add(m[1]);
-  }
+  for (const m of parts.template.matchAll(/\sid="([A-Za-z][\w-]*)"/g)) ids.add(m[1]);
   let fixed = 0;
   const fix = (s) =>
     s
@@ -484,12 +497,7 @@ function fixAnchors(parts) {
       .replace(/href: '#([A-Za-z][\w-]*)'/g, (full, id) =>
         ids.has(id) ? full : (fixed++, `href: '/#${id}'`)
       );
-  return {
-    prerendered: fix(parts.prerendered),
-    template: fix(parts.template),
-    script: fix(parts.script),
-    fixed,
-  };
+  return { template: fix(parts.template), script: fix(parts.script), fixed };
 }
 
 /* Looks for a third-party origin being LOADED - src=, href=, or a CSS import -
@@ -602,22 +610,6 @@ const TEMPLATE_SHIM =
   `x=document.querySelector("x-dc");if(!t||!x)return;` +
   `Object.defineProperty(x,"innerHTML",{configurable:true,get:function(){return t.innerHTML}});})();</script>`;
 
-/* Hands the page over from the prerendered copy to the live render. Deliberately
- * one-way and fail-safe: if React never mounts, the readable copy stays.
- *
- * The floor of 40 elements is the point of it. "#dc-root has a first child" is
- * also true when React mounts an empty shell - which is exactly what happened
- * when two runtimes raced each other - and removing the readable copy on that
- * signal turns a degraded page into a blank one. The real pages render between
- * ~700 and ~2,100 elements, so 40 separates "rendered" from "mounted but
- * produced nothing" without being anywhere near the real value. */
-const SWAP = `<script>(function(){var p=document.getElementById("dc-prerender");if(!p)return;
-function ready(){var r=document.getElementById("dc-root");
-return !!(r&&r.firstElementChild&&r.getElementsByTagName("*").length>40);}
-function go(){if(!ready())return false;p.remove();return true;}
-if(go())return;var mo=new MutationObserver(function(){if(go())mo.disconnect();});
-mo.observe(document.documentElement,{childList:true,subtree:true});
-setTimeout(function(){mo.disconnect();},20000);})();</script>`;
 
 /* ------------------------------------------------------- the contact forms */
 /* THE EXPORT'S FORMS SAY "SENT" AND SEND NOTHING.
@@ -751,17 +743,14 @@ const NAVLOOP_FROM =
  *
  * Removed from the resource list and the footer column the export builds them
  * from, so the row disappears with its icon, its text and its badge - not just
- * its href. The prerendered copy is dealt with in snapshot(), because it is
- * captured before any of this runs. */
+ * its href. There is no second copy to clean up any more: the delivered markup
+ * is rendered FROM this patched script, so it never carries the rows either. */
 const NOTES_MENU_FROM =
   "{ icon: this.icon('book', 18), title: t.menus.resNotes, text: t.menus.resNotesText, " +
   "soon: true, href: '#', target: '_self', onClick: (e) => e.preventDefault() },";
 const NOTES_FOOT_FROM =
   "{ label: t.footer.notes, href: '#', target: '_self', onClick: (e) => e.preventDefault() },";
 
-/* What the removed rows say, in both languages - the snapshot is matched on the
- * visible text because that is all a settled DOM still carries. */
-const NOTES_LABELS = ["Tech-Notizen", "Tech notes"];
 
 function dropTechNotes(script, name) {
   for (const [what, lit] of [["menu", NOTES_MENU_FROM], ["footer", NOTES_FOOT_FROM]]) {
@@ -792,6 +781,75 @@ function stillMark(script, name) {
     );
   }
   return { script: script.split(MARK_FROM).join(MARK_TO).split(NAVLOOP_FROM).join("") };
+}
+
+/* THE RUNTIME MOUNTS INTO AN EMPTY DIV. IT HAS TO ADOPT WHAT THE BUILD RENDERED.
+ *
+ * Every other patch in this file rewrites the COMPONENT SCRIPT. This is the one
+ * patch on the runtime itself, and it is the point of the whole build-time
+ * render: support.js creates a fresh <div id="dc-root">, replaces <x-dc> with it
+ * and calls createRoot().render() - so React builds all ~2,900 nodes a second
+ * time although the finished markup is already in the document and painted.
+ *
+ * Measured 12.9.2026, mobile, the same page in four states: as shipped 70,
+ * React downloaded and parsed but never booted 91, plain HTML 95. Downloading
+ * the library costs ONE point. Rebuilding the page costs 21.
+ *
+ * With the markup written by react-dom/server at build time (ssrRender below),
+ * React's first render and the delivered DOM are the same tree by construction,
+ * so the mount can hydrate instead of rebuild. Two edits:
+ *
+ *   1. if the document already carries a filled #dc-root, adopt it instead of
+ *      creating one, and drop the (empty) <x-dc> rather than replacing it
+ *   2. hydrateRoot for that case, createRoot for every other
+ *
+ * BOTH BRANCHES SURVIVE. An artboard opened straight out of mccain-design-system/
+ * has no #dc-root and takes exactly the old path - which is what keeps the raw
+ * export openable, and what ssrRender itself runs on.
+ *
+ * Why patching third-party code is acceptable here where the header says it is
+ * not: both replacements are asserted to occur exactly once. A re-exported
+ * runtime that moved either line fails the build loudly instead of quietly going
+ * back to rendering everything twice.
+ *
+ * Do NOT try this against a settled DOM snapshot. That was measured twice on
+ * 12.9.2026: 1,193 of ~3,000 node positions differ, React 418/425/423 on every
+ * page, 32 console errors, no gain. The snapshot is the page after seconds of
+ * life; React's first render is the page at zero. They are different documents. */
+const HYDRATE_FROM = `    const dc = doc.querySelector("x-dc");
+    const hostEl = doc.createElement("div");
+    hostEl.id = "dc-root";
+    dc.replaceWith(hostEl);`;
+
+const HYDRATE_TO = `    const dc = doc.querySelector("x-dc");
+    const prerendered = doc.getElementById("dc-root");
+    const hydrate = !!(prerendered && prerendered.firstElementChild);
+    const hostEl = hydrate ? prerendered : doc.createElement("div");
+    hostEl.id = "dc-root";
+    if (hydrate) dc.remove();
+    else dc.replaceWith(hostEl);`;
+
+const MOUNT_FROM = `    const ReactDOM = getReactDOM();
+    if (ReactDOM.createRoot)
+      ReactDOM.createRoot(hostEl).render(h(StandaloneRoot));
+    else ReactDOM.render(h(StandaloneRoot), hostEl);`;
+
+const MOUNT_TO = `    const ReactDOM = getReactDOM();
+    if (hydrate && ReactDOM.hydrateRoot)
+      ReactDOM.hydrateRoot(hostEl, h(StandaloneRoot));
+    else if (ReactDOM.createRoot)
+      ReactDOM.createRoot(hostEl).render(h(StandaloneRoot));
+    else ReactDOM.render(h(StandaloneRoot), hostEl);`;
+
+function patchRuntime(code) {
+  for (const [from, what] of [
+    [HYDRATE_FROM, "the mount point"],
+    [MOUNT_FROM, "the mount call"],
+  ]) {
+    const n = code.split(from).length - 1;
+    if (n !== 1) throw new Error(`prerender: support.js - expected ${what} exactly once, found ${n}`);
+  }
+  return code.split(HYDRATE_FROM).join(HYDRATE_TO).split(MOUNT_FROM).join(MOUNT_TO);
 }
 
 /* NO PAGE HAD A <main>.
@@ -1004,75 +1062,121 @@ function assertMoustachesAreInert(doc, what) {
 
 /* ------------------------------------------------------------------- render */
 
+/* THE ASSETS ARE WRITTEN BEFORE THE BROWSER STARTS, AND THAT ORDER IS LOAD-BEARING.
+ *
+ * ssrRender() below renders each page in a staging document that pulls
+ * /support.js off the site root - so the runtime it renders against has to be
+ * THIS build's, patched by patchRuntime(). Copied afterwards, as it was until
+ * the build-time render existed, every page would be rendered against the
+ * PREVIOUS build's runtime and the mismatch would only show as a hydration
+ * error, on a page that still looks fine. */
+for (const [from, to] of Object.entries(ASSETS)) copy(from, to);
+
 const { browser, context } = await launch(1440, 900);
 
-async function snapshot(page) {
-  await page.addStyleTag({ content: "html{scroll-behavior:auto!important}" });
-  await settle(page);
-  /* Sections reveal on scroll; anything never scrolled past is snapshotted in
-   * its pre-reveal state. */
-  await page.evaluate(async () => {
-    const step = window.innerHeight;
-    for (let y = 0; y < document.body.scrollHeight; y += step) {
-      window.scrollTo(0, y);
-      await new Promise((r) => setTimeout(r, 220));
-    }
-    window.scrollTo(0, 0);
-  });
-  await page.waitForTimeout(1300);
-
-  /* The snapshot is taken from the UNPATCHED export, so the icon-gallery bug
-   * above is still in the markup being captured even though the script that
-   * ships is fixed. Left alone, the built page renders correctly and still
-   * prints nine console errors, because the browser parses the prerendered
-   * copy too - the same "a gate that watches one channel" shape as before.
-   *
-   * Commas and spaces are interchangeable separators in SVG path data, so
-   * swapping them is a no-op for every valid path and repairs exactly the ones
-   * that arrived as a joined array. */
-  await page.evaluate(() => {
-    for (const p of document.querySelectorAll('path[d*=","]')) {
-      p.setAttribute("d", p.getAttribute("d").split(",").join(" "));
-    }
-  });
-
-  /* Same shape again for the brand mark (see MARK_FROM): the script that ships
-   * renders it static, but this snapshot is taken from the UNPATCHED export,
-   * so without this the prerendered copy would animate 146 rects until React
-   * replaces it - the expensive part happens exactly during load.
-   *
-   * The cells animate `opacity` and `transform` only, and both rest at the
-   * base value the static mode leaves them at, so clearing the declaration
-   * reproduces static exactly rather than approximating it. viewBox
-   * "0 0 64 64" is the mark and nothing else: the export uses it in one place. */
-  const swept = await page.evaluate((labels) => {
-    const cells = document.querySelectorAll('svg[viewBox="0 0 64 64"] rect');
-    for (const c of cells) c.style.animation = "none";
-
-    /* The same rows dropTechNotes() takes out of the script, in case the
-     * settled markup carries them too - matched on visible text, because that
-     * is all a rendered DOM still has. Whole row, not just the href: the menu
-     * entry is an <a> holding an icon, a title and a "Bald" badge. */
-    let notes = 0;
-    for (const a of document.querySelectorAll('a[href="#"], a[href=""]')) {
-      const t = (a.textContent || "").trim();
-      if (labels.some((l) => t === l || t.startsWith(l + " "))) {
-        a.remove();
-        notes++;
-      }
-    }
-    return { cells: cells.length, notes };
-  }, NOTES_LABELS);
-
-  /* Measured: today this finds ZERO, and that is correct - the resource list
-   * and the footer column are built by the component at runtime, so those two
-   * rows exist only in React's render and never in the settled copy. The sweep
-   * stays as the other half of the fix rather than as dead code: if a future
-   * export prerenders them, they go here too and the build says how many. An
-   * assertion on a specific count would be asserting which half of the export
-   * happens to render them, which is not a thing worth pinning. */
-  return swept;
+/* ------------------------------------------------- the build-time render */
+/* THE MARKUP IS RENDERED BY REACT, NOT SCRAPED OUT OF A BROWSER.
+ *
+ * What this replaces: the build used to let the page run for a few seconds,
+ * scroll it end to end and take document.innerHTML. That produced markup a
+ * crawler could read - the whole reason a build exists - but it is the page
+ * AFTER seconds of life: counters at their end value, sections revealed, the
+ * consent panel open, nodes that componentDidMount created imperatively.
+ * React's first render is the page at zero. They are different documents, which
+ * is why hydration against that snapshot failed twice (see patchRuntime).
+ *
+ * What happens instead: the patched script and the patched template are written
+ * into a staging document, support.js compiles them exactly as a browser would,
+ * and react-dom/server renders the component it produced. The result IS React's
+ * first render, so hydrateRoot has nothing to reconcile.
+ *
+ * IT RENDERS THE PATCHED SOURCES, NOT THE RAW EXPORT - that is the other half.
+ * Rendering the raw artboard would bake in every bug this build fixes and then
+ * hand React a tree that disagrees with the script it ships beside it. Measured
+ * on the brand guide: 19 hydration errors, all of them the icon gallery that
+ * fixIconGallery() repairs. Twenty of the other twenty pages passed at zero.
+ *
+ * The staging document deliberately carries no #dc-root, so support.js takes
+ * its ordinary createRoot path here and getDC() hands out the same component the
+ * shipped page will mount.
+ *
+ * react-dom/server is a build-time dependency and is never deployed: it is
+ * copied into _dcbuild/ for the duration of the run and the directory is removed
+ * at the end. It is served rather than injected because the CSP this build
+ * writes has no 'unsafe-inline' - addScriptTag({path}) would be blocked, and the
+ * failure would read as "renderToString is not a function". */
+const SSR_DIR = path.join(SITE, "_dcbuild");
+const SSR_UMD = path.join(HERE, "vendor-build", "react-dom-server-legacy-18.3.1.js");
+if (!fs.existsSync(SSR_UMD)) {
+  throw new Error(`prerender: ${path.relative(SITE, SSR_UMD)} is missing - see tools/vendor-build/README.md`);
 }
+fs.rmSync(SSR_DIR, { recursive: true, force: true });
+fs.mkdirSync(SSR_DIR, { recursive: true });
+fs.copyFileSync(SSR_UMD, path.join(SSR_DIR, "rds.js"));
+
+async function ssrRender({ head, template, script }, name) {
+  const stage = `<!DOCTYPE html>
+<html lang="de">
+<head>
+${head}
+<script src="/support.js" defer></script>
+</head>
+<body>
+<x-dc></x-dc>
+<template id="dc-template">${template}</template>
+${TEMPLATE_SHIM}
+${script}
+</body>
+</html>
+`;
+  fs.writeFileSync(path.join(SSR_DIR, "stage.html"), stage, "utf8");
+
+  const tab = await open(context, `${BASE}/_dcbuild/stage.html`);
+  try {
+    await tab
+      .waitForFunction(() => typeof window.getDC === "function" && !!window.React, null, { timeout: 30000 })
+      .catch(() => {
+        throw new Error(`prerender: support.js never booted the staging document for ${name}`);
+      });
+    /* After React exists, not with the page: the UMD binds window.React at the
+     * moment it runs, and support.js loads React itself, asynchronously. */
+    await tab.addScriptTag({ url: "/_dcbuild/rds.js" });
+
+    const out = await tab.evaluate(() => {
+      const rootName = window.__dcRootName();
+      const Root = window.getDC(rootName);
+      if (typeof Root !== "function") return { error: `getDC("${rootName}") returned ${typeof Root}` };
+      /* The same defaults StandaloneRoot feeds the component on the client:
+       * data-props is where support.js reads propsMeta from. propOverrides only
+       * exist inside the design tool, never in a built page. */
+      let props = {};
+      try {
+        const el = document.querySelector('script[type="text/x-dc"][data-props]');
+        const meta = el ? JSON.parse(el.getAttribute("data-props")) : {};
+        for (const k in meta) if (meta[k] && meta[k].default !== undefined) props[k] = meta[k].default;
+      } catch (e) {
+        return { error: "data-props is not readable: " + e.message };
+      }
+      try {
+        return { html: window.ReactDOMServer.renderToString(window.React.createElement(Root, props)), props: Object.keys(props) };
+      } catch (e) {
+        return { error: "renderToString threw: " + (e && e.message) };
+      }
+    });
+
+    if (out.error) throw new Error(`prerender: ${name} - ${out.error}`);
+    if (!out.html || out.html.length < 5000) {
+      throw new Error(`prerender: ${name} rendered ${out.html ? out.html.length : 0} bytes - that is not a page`);
+    }
+    if (out.html.includes("{{")) throw new Error(`prerender: unresolved {{ }} in the render of ${name}`);
+    const errs = tab.mcdErrors.filter((e) => e.startsWith("pageerror:"));
+    if (errs.length) throw new Error(`prerender: ${name} threw while rendering - ${errs[0].slice(0, 200)}`);
+    return out.html;
+  } finally {
+    await tab.close();
+  }
+}
+
 
 async function grab(page, pinned, name) {
   if (!pinned) {
@@ -1081,7 +1185,6 @@ async function grab(page, pinned, name) {
       if (!root) return { missingRoot: true };
       return {
         head: document.head.innerHTML,
-        body: root.innerHTML,
         h1: (document.querySelector("h1")?.innerText || "").trim(),
         words: (document.body.innerText || "").trim().split(/\s+/).length,
         els: root.getElementsByTagName("*").length,
@@ -1108,7 +1211,6 @@ async function grab(page, pinned, name) {
       if (!root) return { missingRoot: true };
       return {
         head: document.head.innerHTML,
-        body: root.innerHTML,
         h1,
         words: (document.body.innerText || "").trim().split(/\s+/).length,
         els: root.getElementsByTagName("*").length,
@@ -1128,8 +1230,13 @@ for (const page of PAGES) {
   const srcFile = path.join(EXPORT_DIR, page.src);
   if (!fs.existsSync(srcFile)) throw new Error(`prerender: ${page.src} is not in the export`);
 
+  /* The export is still opened once, but only for the two things the SOURCE
+   * does not carry: the <style> blocks support.js injects from the component's
+   * <helmet>, and the proof that the page renders an <h1> at all. The markup
+   * itself no longer comes from here - ssrRender() renders it from the patched
+   * sources further down. */
   const tab = await open(context, `${EXPORT_URL}/${encodeURIComponent(page.src)}`);
-  const stilled = await snapshot(tab);
+  await settle(tab);
   const snap = await grab(tab, page.h1, page.src);
   await tab.close();
 
@@ -1150,20 +1257,18 @@ for (const page of PAGES) {
   const still = stillMark(notes.script, page.src);
   const icons = fixIconGallery(still.script);
   const helmet = stripHelmetSeo(localise(template), page.src);
-  const preTiles = fixTileRoles(localise(snap.body));
   const tplTiles = fixTileRoles(helmet.template);
-  const anchors = fixAnchors({
-    prerendered: preTiles.html,
-    template: tplTiles.html,
-    script: icons.script,
-  });
-  const tiles = preTiles.fixed + tplTiles.fixed;
-  const prerendered = wrapMain(anchors.prerendered, page.src, "prerendered");
+  const anchors = fixAnchors({ template: tplTiles.html, script: icons.script });
+  const tiles = tplTiles.fixed;
   const templateLocal = wrapMain(anchors.template, page.src, "template");
   const script = anchors.script;
   const head = headOf(meta, page, stylesOf(snap.head));
 
-  if (prerendered.includes("{{")) throw new Error(`prerender: unresolved {{ }} in the snapshot of ${page.src}`);
+  /* Everything above patched the sources; this renders them. The order matters:
+   * <main> is wrapped around the TEMPLATE, so React renders it too and the two
+   * trees agree. Wrapping the rendered markup instead would insert an element
+   * React does not know about, and hydration would reject the whole page. */
+  const prerendered = await ssrRender({ head, template: templateLocal, script }, page.src);
   assertClean(head + prerendered + templateLocal + script, page.out);
   assertNoExportLinks(head + prerendered + templateLocal + script, page.out);
 
@@ -1174,27 +1279,26 @@ for (const page of PAGES) {
      Route:   ${page.route}
      Build:   node tools/prerender.mjs   (needs: python prodserve.py 8898 --dev)
 
-     #dc-prerender is the settled markup: what a crawler reads and what paints
-     first. The empty <x-dc> below it is the mount point support.js replaces - it
-     MUST stay, or the page loads looking perfect and every button is dead. The
-     template itself lives in the inert template element below and reaches
-     support.js through the shim next to it; delivering it as live markup printed
-     one console error per SVG placeholder and built a whole second DOM.
-     The watcher at the end removes the prerendered copy once React has filled
-     its own #dc-root, and leaves it alone if React never arrives. -->
+     #dc-root holds React's own first render, written by react-dom/server at
+     build time. It is what a crawler reads, what paints first, AND what React
+     adopts - one copy, not two. The empty <x-dc> beside it MUST stay: it is how
+     support.js finds the template, through the shim below. The patched runtime
+     sees the filled #dc-root, drops the <x-dc> and calls hydrateRoot instead of
+     rebuilding all of this a second time.
+
+     If React never arrives, the markup simply stays and the page is readable. -->
 <html lang="de">
 <head>
 ${head}
 <script src="/support.js" defer></script>
 </head>
 <body>
-<div id="dc-prerender">${prerendered}</div>
+<div id="dc-root">${prerendered}</div>
 <x-dc></x-dc>
 <template id="dc-template">${templateLocal}</template>
 ${TEMPLATE_SHIM}
 ${FORM_RUNTIME}
 ${script}
-${SWAP}
 </body>
 </html>
 `;
@@ -1226,8 +1330,7 @@ ${SWAP}
   console.log(
     `  ${page.route.padEnd(44)} ${String(snap.words).padStart(5)} words  ${String(snap.els).padStart(5)} els  ${String(Math.round(html.length / 1024)).padStart(4)} KB` +
       `  ${wired.forms} form${wired.forms === 1 ? " " : "s"} wired` +
-      `  ${stilled.cells} mark cells stilled` +
-      (stilled.notes ? `  ${stilled.notes} dead "Tech-Notizen" swept from the snapshot` : "") +
+      `  ${Math.round(prerendered.length / 1024)} KB rendered` +
       `  ${helmet.stripped} helmet meta dropped` +
       (tiles ? `  ${tiles} tile roles fixed` : "") +
       (anchors.fixed ? `  ${anchors.fixed} anchors → /` : "") +
@@ -1314,6 +1417,7 @@ for (const [svg, out] of ogJobs) {
 }
 
 await browser.close();
+fs.rmSync(SSR_DIR, { recursive: true, force: true });
 
 /* ------------------------------------------------------------------- assets */
 
@@ -1363,6 +1467,7 @@ function copy(from, to) {
   if (MINIFY.has(name)) {
     let code = fs.readFileSync(src, "utf8");
     if (name === "image-slot.js") code = deCanvas(code);
+    if (name === "support.js") code = patchRuntime(code);
     const out = esbuild.transformSync(code, {
       loader: "js",
       minify: true,
@@ -1375,7 +1480,6 @@ function copy(from, to) {
   fs.copyFileSync(src, dst);
 }
 
-for (const [from, to] of Object.entries(ASSETS)) copy(from, to);
 
 /* ---------------------------------------------------------------------- CSP */
 /* THE HASHES ARE READ OFF WHAT WAS ACTUALLY WRITTEN, NOT OFF A LIST.
