@@ -1,49 +1,175 @@
-# Uebergabe — Stand 12. September 2026
+# Uebergabe — Stand 12. September 2026, abends
 
-## ▶ ZUERST: die ganze Seite ist neu — v4, 21 Seiten aus dem Claude-Design-Export
+## ▶ ZUERST: wo wir stehen, in fuenf Zeilen
 
-Der Owner hat am 12.9. ein neues ZIP geliefert („v3" im Dateinamen, im Repo die
-**v4-Generation**): 26 Artboards, davon **21 echte Seiten**, untereinander
-verlinkt, jede mit eigenem `<helmet>`, Canonical und JSON-LD.
-
-**Was daraus geworden ist**
-
-- Die alte Seite liegt vollstaendig unter **`archive/old3/`** (mit `git mv`, die
-  Historie folgt). Am Wurzelverzeichnis ist **nichts** davon uebrig.
-- Der Export liegt unter **`mccain-design-system/`** und wird nie ausgeliefert.
-- Das ZIP selbst liegt in `internal/parked/` (gitignored).
-- Die Generatoren `build_pages.py`, `build_legal.py`, `pagekit.py`, `chrome.py`
-  und `extract_design.mjs` sind **weg** → `archive/site-v3-tools/`. Sie haben die
-  Unterseiten gebaut, die der Export jetzt selbst mitbringt.
-- `tools/prerender.mjs` ist der **ganze Build**: eine Schleife ueber eine
-  Routen-Tabelle. Diese Tabelle (`PAGES`) ist die einzige Wahrheit darueber, was
-  existiert und unter welcher URL — `sitemap.xml` und das Seitenverzeichnis in
+- **v4 ist gebaut, geprueft und live** auf `mccain-digital.vercel.app`: 21 Seiten
+  aus dem Claude-Design-Export, alle Tore gruen **gegen Produktion**.
+- Die alte Seite liegt vollstaendig in `archive/old3/`. Der Wurzelordner ist sauber.
+- `tools/prerender.mjs` ist der **ganze Build** — eine Schleife ueber die
+  Routen-Tabelle `PAGES`. Diese Tabelle ist die einzige Wahrheit darueber, was
+  existiert und unter welcher URL; `sitemap.xml` und das Seitenverzeichnis in
   `llms.txt` werden daraus geschrieben.
+- **`noindex` bleibt an** (Owner 12.9.: Texte ueberarbeiten + md-recall fertig).
+- Arbeitsstand: **alles committet und gepusht**, `main` = `9be9dcd`.
 
-**Der Build ist keine Kosmetik.** Der Export ist ein Design-Ergebnis, keine
-Website. Sechs Dinge waren kaputt und sind im Build repariert, jedes an seiner
-Stelle im Code begruendet:
+---
+
+## ⚠ OWNER-REGEL, neu am 12.9. — NICHT UEBERGEHEN
+
+> „bitte nicht einfach farben ändern! oder fonts! das muss vorher abgesprochen werden“
+
+Ausgeloest durch mich: ich hatte fuer den Fehlerhinweis im Formular `#991B1B`,
+`#FEF2F2`, `#FECACA` **erfunden**, obwohl `mccain-design-system/tokens/colors.css`
+mit `--mc-danger:#E5484D` alles Noetige hatte. Ist korrigiert (nur noch
+Systemwerte).
+
+**Regel ab jetzt:** vor jeder Farb- oder Schriftentscheidung fragen. Wenn ein
+Wert gebraucht wird, zuerst in `tokens/colors.css` nachsehen — dort stehen auch
+`--mc-success`, `--mc-success-text`, `--mc-danger`, `--mc-check`. Nichts
+ableiten, nichts dazuerfinden.
+
+**Offen dazu:** `404.html` habe ich von Grund auf geschrieben. Die Werte kommen
+aus dem System, die **Gestaltung ist meine** und vom Owner nicht abgenommen.
+
+---
+
+## ▶ DER ARBEITSPLAN — „dann gehen wir alles an“ (Owner 12.9.)
+
+Reihenfolge nach Wirkung. Der vollstaendige Befund als Artifact:
+<https://claude.ai/code/artifact/0e1c630e-37a6-4883-acd3-ec2c57b2ef24>
+
+### A — Performance, der eine grosse Punkt
+
+**Mobil 41** auf der Startseite (LCP 7,9 s, FCP 5,2 s, TBT 940 ms). Desktop
+55–65. Google bewertet mobil — das ist die Zahl, die zaehlt.
+
+Ursache **gemessen**: nicht Bandbreite, sondern Rechenzeit. Mobil arbeitet der
+Hauptthread 7,7 s, davon Other 3.366 ms, **Style & Layout 1.810 ms**, Script
+Evaluation 1.737 ms, Rendering 629 ms. Grund: **46–67 % des DOM sind
+Dekoration** (alles innerhalb `aria-hidden="true"`), mit **454–1.067
+gleichzeitig laufenden CSS-Animationen** je Seite.
+
+| Seite | Elemente | Deko | Anteil | animiert |
+| --- | ---: | ---: | ---: | ---: |
+| Startseite | 2.947 | 1.369 | 46 % | 510 |
+| KI & Automatisierung | 3.003 | 1.636 | 54 % | 758 |
+| Preise | 2.213 | 1.204 | 54 % | 602 |
+| Rechtliches | 1.429 | 914 | **64 %** | 456 |
+| News | 1.385 | 922 | **67 %** | 454 |
+| Marke | 3.697 | 2.039 | 55 % | 1.067 |
+
+**A1. Datenstrom als Canvas statt DOM.** Er besteht aus hunderten Spans mit je
+eigener Animation. Auf ein `<canvas>` gezeichnet kostet er einen Bruchteil und
+sieht identisch aus. Groesster Effekt. **Arbeit im Export**, nicht im Build.
+
+**A2. Animationen ausserhalb des Bildes anhalten.** `content-visibility` oder
+ein IntersectionObserver (teils schon vorhanden). Spart direkt an den 2,4 s
+Style & Layout + Rendering.
+
+**A3. Spaeter hydrieren — NUR wenn A1+A2 nicht reichen.** Die vorgerenderte
+Kopie *ist* die lesbare Seite; React braucht es erst fuer Menue, Modale,
+Konsole, Formular. **⚠ Das ist der Weg mit dem Risiko, das dieses Projekt schon
+zweimal getroffen hat** (Seite sieht perfekt aus, jeder Knopf tot). Nur mit
+sichtbarem Bereitschaftssignal.
+
+**A4. Erzwungener Umbruch, 259–386 ms in React.** Die Komponente liest waehrend
+des Renderns Geometrie (`offsetWidth`) fuer `Component.MENU_W` und die
+Pixel-Effekte. Messen und Schreiben trennen, oder Breiten aus CSS. **Export.**
+
+**Nicht nochmal versuchen:** `fonts.css` inline ziehen ist **erledigt und hat
+nichts gebracht** — PageSpeed schaetzte 450 ms, gemessen 41 vorher / 41 nachher,
+LCP unveraendert. Der `render-blocking`-Audit ist gruen, der Score steht still,
+weil der LCP an der Element-Renderverzoegerung haengt und nicht am Netz.
+
+### B — Bilder (Export)
+
+- **Portraits**: Quelle `840x1050`, angezeigt `96x120`, je 67,6 KB → rund
+  **115 KB umsonst**. Gebraucht: ~240 px.
+- **Studiofoto**: Quelle 1200 px, angezeigt auf 1344 px — wird **hochskaliert**
+  und ist auf 2x-Displays weich. Gebraucht: ~2400 px.
+- Das recall-Abzeichen ist **erledigt**: der Build leitet ein 48-px-WebP ab,
+  9.822 → 1.586 B, auf allen 21 Seiten.
+
+### C — Barrierefreiheit
+
+- **Kontrast**, drei echte Fehler (gefordert 4,5:1):
+  `/kontakt/` `#8da2e0` auf weiss = **2,5:1** (Fliesstext im Konfigurator-Link);
+  `/marke/` `#c5d0f5` auf weiss = **1,53:1** — das ist `--mc-dark-text-2`, eine
+  Farbe fuer *dunklen* Grund, die auf weiss steht; Farbmuster-Labels weiss auf
+  `#ff5a8c` = 2,96:1 und auf `#c05cff` = 3,37:1. Bei den Labels steht die
+  Markenfarbe fest → dunkle Schrift oder groesser/fetter, **nicht** andere Farbe.
+  **Farbentscheidungen: Owner, siehe Regel oben.**
+- **Kein `<main>` auf keiner Seite.** Die Inhaltsabschnitte liegen als
+  Geschwister zwischen `<header>` und `<footer>`. Ein `role="main"` auf nur eine
+  Section waere falsch — gehoert im **Export** um die Inhaltsabschnitte gelegt.
+  Bewusst *nicht* im Build geraten: ein falsches `<main>` ist schlechter als keines.
+- Erledigt: `role="button"` auf `<article>` (8 Kacheln) → `<div>`.
+  Barrierefreiheit mobil jetzt **100**.
+
+### D — Texte (Owner-Durchgang)
+
+- **Sechs Titel > 60 Zeichen**, werden abgeschnitten: Vergleich WordPress (68),
+  MCP (68), Uebersicht (67), ERP (67), Next.js (61), Styleguide (61), Preise (61).
+  Das `· McCain Digital` kostet 17 Zeichen und ist auf Unterseiten verzichtbar.
+  Andersrum: `/news/` mit 21 Zeichen ist zu duenn.
+- **„4x100" steht weiter im Hintergrundtext** der Startseite. Fuer diesen Build
+  nie gemessen. Wahr waere: die v3-*Unterseiten* lagen bei 100/100/100.
+- **Descriptions von `/news/`, `/news/md-recall/`, `/marke/`** habe ich aus dem
+  jeweiligen Hero-Text ersetzt (in `PAGES`, als `meta`-Ueberschreibung markiert).
+  Korrekt, aber Werbetext — bitte selbst formulieren.
+- **Die ersten 48–180 Woerter jeder Seite sind Dekoration** (der Datenstrom).
+  Screenreader ueberspringen das korrekt, **Crawler nicht**. Insgesamt sind 94 %
+  der Wortzahl echter Inhalt — unguenstig ist nur die Position.
+
+### E — Inhalt und Recht (Owner-Entscheidung, kein Code)
+
+- **Die Logo-Reihe im Hero** (Deutsche Bank, Apple, Microsoft, Blizzard,
+  Deutsches Museum, Ravensburger, Travian, AOK) steht weiter ueber einer Sektion
+  „sobald sie es duerfen". Keine freigegebenen Kunden → Abmahnrisiko in DE.
+  Nebenbefund: eines dieser Logos ist mobil das **LCP-Element**.
+- **`/md-recall/` hat 10 leere Bildslots** mit Platzhaltertext. Die Screenshots
+  muessen **in den Export** — auf der ausgelieferten Seite kann man dort nichts
+  ablegen — oder die Slots werden durch normale `<img>` ersetzt.
+- **„Tech-Notizen"** in der Fusszeile zeigt auf `#`. Immerhin ehrlich: der
+  Eintrag ist `soon: true` und faengt den Klick ab. Seite bauen oder Eintrag weg.
+
+### F — Technik, kleinere Gewinne
+
+- **Keine CSP, keine Permissions-Policy.** Vorhanden: HSTS (2 J., preload),
+  nosniff, X-Frame-Options, Referrer-Policy. Die Seite waere ein guter Kandidat
+  — sie laedt **nur** von der eigenen Domain, einziger fremder Empfaenger ist
+  `api.web3forms.com`. Haken: der Build schreibt Inline-Skripte (Shim,
+  Uebergabe, Formular-Laufzeit), die brauchen Hashes oder eine Nonce. **Eine
+  falsch gesetzte CSP macht die Seite still tot** — nicht nebenbei machen.
+- `.js`/`.css` laufen mit `max-age=0, must-revalidate`. Mit Hash im Dateinamen
+  ginge `immutable`. Kleiner Gewinn, kleine Arbeit.
+- Nebenbefund: HTML kommt mit `Access-Control-Allow-Origin: *` (Vercel-Standard),
+  hier ungenutzt.
+
+---
+
+## ▶ WERKZEUGE — womit das gemessen wurde
+
+Dev-Server muss laufen: `python prodserve.py 8898 --dev` (bauen) bzw.
+`python prodserve.py 8898` (messen, Produktionsheader).
 
 | | |
 | --- | --- |
-| **22 Formulare, die luegen** | `this.setState({ formSent: true })` ohne einen einzigen Request — auf **allen 21 Seiten**. Zum zweiten Mal derselbe Fehler aus einem Export. Jetzt an Web3Forms verdrahtet, und der Patch **zaehlt sich selbst pro Seite**, damit ein umgebauter Handler den Build bricht statt still wieder zu luegen. |
-| **3 Seiten mit dem Kopf der Rechtsseite** | `/news/`, `/news/md-recall/` und `/marke/` trugen den `<helmet>` von „Recht" woertlich: gleiches Canonical, gleiche Description, gleiches og:image, bei `/marke/` sogar der gleiche `<title>`. |
-| **60 tote Navigationslinks** | `#work`, `#process`, `#faq`, `#stack` gibt es nur auf der Startseite. Auf den anderen 20 Seiten passierte beim Klick **nichts**. |
-| **Relative Asset-Pfade** | Seiten zwei Ordner tief haben `brand/…` zu `/leistungen/ki-automatisierung/brand/…` aufgeloest. Auch die zwei fiesen Formen: `url(&quot;team/…&quot;)` und die `href`-Felder in `brand/files.json`, aus denen die Markenseite ihre 45 Downloads baut. |
-| **9 Icons im Brand Guide** | Ein Array in einem einzelnen `<path d>`. |
-| **CDN-Ladungen** | React und beide Schriften kamen von unpkg und Google. Wie bisher vendored — das ist der DSGVO-Punkt, keine Vorliebe. |
+| `node tools/prerender.mjs` | der ganze Build: 21 Seiten, sitemap, llms.txt, og-Bilder |
+| `node tools/verify_site.mjs [url]` | **Pflicht vor jedem Push.** Klickt alle 21 Seiten |
+| `node tools/seo_audit.mjs [url]` | **neu 12.9.** Meta, Ueberschriften, alt, Verlinkung, Waisen, sitemap — plus jede Seite einmal *ohne JavaScript* |
+| `node tools/form_probe.mjs [url]` | Formular; `MCD_HEADED=1` fuer den Ende-zu-Ende-Beweis |
+| `python tools/lighthouse_audit.py [url]` | sechs Seiten, Desktop |
+| `node tools/responsive_audit.mjs` | Ueberlauf bei 390/768/1024/1440 |
+| `node tools/weigh.mjs` · `python tools/check_links.py` | Bytes · Links, Anker, doppelte IDs |
 
-**Gemessen nach dem Import (lokal, Produktionsheader):** 21 Seiten, 33.498
-Woerter gerendert, **0** Drittanbieter-Hosts, **0** Konsolenfehler, **0**
-fehlgeschlagene Requests, kein horizontaler Ueberlauf bei 390/768/1024/1440,
-keine kaputten Links, keine fehlenden Anker, keine doppelten IDs.
-`node tools/verify_site.mjs` → **all checks passed**.
+Mobil messen (das ist die Zahl, die zaehlt) — eine Zeile:
 
-**Die Zustellung des Kontaktformulars ist bewiesen:** ein echter Browser
-bekommt HTTP 200, eine Testnachricht liegt in `info@mccain-digital.com`
-(12.9.). Ein **headless** Browser wird von Cloudflare mit 403 abgewiesen — und
-genau dann zeigt die Seite ihren ehrlichen Fehler statt „gesendet".
-`MCD_HEADED=1 node tools/form_probe.mjs` fuer den Ende-zu-Ende-Beweis.
+    npx lighthouse "http://127.0.0.1:8898/" --form-factor=mobile --screenEmulation.mobile --throttling-method=simulate --only-categories=performance,accessibility --chrome-flags="--headless=new"
+
+**`MCD_HEADED=1`** schaltet `tools/browser.mjs` auf einen sichtbaren Browser —
+noetig, weil Cloudflare vor Web3Forms jeden headless-Browser und auch
+`node fetch` mit Browser-UA mit 403 abweist.
 
 ---
 
@@ -75,49 +201,11 @@ beiden Punkte unten erledigt sind.
 
 ---
 
-## ▶ WAS JETZT AUSSTEHT
+## ▶ (ueberholt) Die Liste vom Vormittag des 12.9.
 
-### 1. Alle Texte ueberarbeiten (Owner-Ansage)
-
-Die Texte kommen aus dem Design-Export. Beim Import sind drei Stellen
-aufgefallen, die **inhaltlich** und nicht nur stilistisch falsch sind:
-
-- **`/news/`, `/news/md-recall/`, `/marke/` haben geliehene Descriptions.** Ich
-  habe sie aus dem jeweiligen Hero-Text der Seite ersetzt (in `PAGES` in
-  `tools/prerender.mjs`, als `meta`-Ueberschreibung markiert). Das ist korrekt,
-  aber es ist Werbetext — beim Textdurchgang bitte selbst formulieren.
-- **„4×100" steht immer noch im Hintergrundtext** (`mccain-digital.com · 4×100`
-  im Datenstrom der Hero-Sektion). Gemessen wurde das nie fuer diesen Build.
-  Die **Unterseiten** lagen im v3-Build tatsaechlich bei 100/100/100 — das ist
-  eine wahre und starke Aussage; die Startseite lag bei 68.
-- **Die Logo-Reihe im Hero** (Deutsche Bank, Apple, Microsoft, Blizzard,
-  Deutsches Museum, Ravensburger, Travian, AOK) steht weiterhin ueber einer
-  Sektion, die „sobald sie es duerfen" heisst. Sind das keine freigegebenen
-  Kunden, ist das in DE ein Abmahnrisiko. **Owner-Entscheidung, kein Code.**
-
-### 2. md-recall fertigmachen (Owner-Ansage)
-
-`/md-recall/` hat **10 leere Bildslots** (`<image-slot>` mit Platzhaltertext:
-„Editor · Die Begruendung steht, wo der Code steht", „CLI · md-recall why", …).
-Da gehoeren Screenshots hinein. Der Slot-Mechanismus ist eine
-Claude-Design-Canvas-Komponente — auf einer ausgelieferten Seite kann man dort
-nichts ablegen. Die Bilder muessen also **im Export** gesetzt werden, oder die
-Slots werden durch normale `<img>` ersetzt.
-
-### 3. Kleinere offene Punkte
-
-- **„Tech-Notizen" in der Fusszeile** zeigt weiterhin auf `#`. Immerhin
-  ehrlich: der Eintrag ist `soon: true` und faengt den Klick ab. Entweder Seite
-  bauen oder Eintrag entfernen — Owner waehlt.
-- **Die KI-Konsole antwortet lokal.** Sie ruft `window.claude.complete` auf,
-  das es nur im Design-Canvas gibt, und faellt sauber auf eine eingebaute
-  Antwort zurueck. Das alte `api/ask.js` ist mit nach `archive/old3/`
-  gewandert: es verlangte `../data.js`, die es am Wurzelverzeichnis seit dem
-  Umzug nicht mehr gab — der Endpunkt war also ohnehin tot. Wer die Konsole
-  echt haben will, verdrahtet `window.claude.complete` auf eine neue Funktion.
-- **`brand/mccain-og-marke.png`** war im Export nicht enthalten und wird jetzt
-  aus `mccain-og-light.svg` gerendert. Wenn die Markenseite ein eigenes
-  Social-Bild bekommen soll, gehoert es in den Export.
+Die Punkte von hier sind in **DER ARBEITSPLAN** oben aufgegangen — dort stehen
+sie mit den Zahlen aus dem Audit vom Abend. Diese Liste wurde entfernt, damit es
+nicht zwei widersprechende To-dos gibt.
 
 ---
 
