@@ -46,3 +46,4 @@ mccain-design-system/uploads/
 # _dcbuild/ and removes the directory when it is done. It exists only while
 # tools/prerender.mjs is running; a crash can leave it behind.
 _dcbuild/
+

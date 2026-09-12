@@ -1072,6 +1072,21 @@ function assertMoustachesAreInert(doc, what) {
  * error, on a page that still looks fine. */
 for (const [from, to] of Object.entries(ASSETS)) copy(from, to);
 
+/* OUR OWN RUNTIME, NOT THE EXPORT'S - see tools/motion-budget.js for what it
+ * does and the numbers that justify it. Minified through the same step as the
+ * export's runtimes so the commented source stays the source of record. */
+{
+  const src = path.join(HERE, "motion-budget.js");
+  if (!fs.existsSync(src)) throw new Error("prerender: tools/motion-budget.js is missing");
+  const out = esbuild.transformSync(fs.readFileSync(src, "utf8"), {
+    loader: "js",
+    minify: true,
+    legalComments: "none",
+    target: "es2019",
+  });
+  fs.writeFileSync(path.join(SITE, "motion-budget.js"), out.code, "utf8");
+}
+
 const { browser, context } = await launch(1440, 900);
 
 /* ------------------------------------------------- the build-time render */
@@ -1291,6 +1306,7 @@ for (const page of PAGES) {
 <head>
 ${head}
 <script src="/support.js" defer></script>
+<script src="/motion-budget.js" defer></script>
 </head>
 <body>
 <div id="dc-root">${prerendered}</div>

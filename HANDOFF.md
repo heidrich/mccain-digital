@@ -1,25 +1,143 @@
-# Uebergabe — Stand 12. September 2026, abends
+# Uebergabe — Stand 13. September 2026
 
 ## ▶ ZUERST: wo wir stehen, in fuenf Zeilen
 
+- **Die Seite wird seit 13.9. zur Bauzeit gerendert und hydriert.** `ssrRender()`
+  laesst `react-dom/server` das Markup schreiben, `patchRuntime()` bringt
+  `support.js` dazu, es zu **uebernehmen** statt daneben alles neu zu bauen.
+  `hydrateRoot` laeuft auf allen 21 Seiten, 0 Konsolenfehler, alle Tore gruen.
+  Owner beim Ansehen: *„die seite ist brutal schnell."*
 - **v4 ist gebaut, geprueft und live** auf `mccain-digital.vercel.app`: 21 Seiten
-  aus dem Claude-Design-Export, alle Tore gruen **gegen Produktion**.
-- Die alte Seite liegt vollstaendig in `archive/old3/`. Der Wurzelordner ist sauber.
+  aus dem Claude-Design-Export.
 - `tools/prerender.mjs` ist der **ganze Build** — eine Schleife ueber die
   Routen-Tabelle `PAGES`. Diese Tabelle ist die einzige Wahrheit darueber, was
   existiert und unter welcher URL; `sitemap.xml` und das Seitenverzeichnis in
   `llms.txt` werden daraus geschrieben.
 - **`noindex` bleibt an** (Owner 12.9.: Texte ueberarbeiten + md-recall fertig).
-- **12.9. abends erledigt:** Logo statisch (Hauptthread halbiert), `<main>` auf
-  jeder Seite, Bilder 211 → 65 KB, sieben Titel gekürzt, CSP +
-  Permissions-Policy, „Tech-Notizen" raus. **Live 84 mobil.**
-- **⚠ Zwei Messungen dieses Projekts waren falsch:** `prodserve.py` lieferte
-  Verzeichnis-Routen unkomprimiert („mobil 41" war nie wahr), und mein
-  „nur HTML+CSS"-Lauf enthielt noch Vorlage und Skriptblock. Beides behoben.
-- **▶ NÄCHSTER DURCHGANG steht ganz oben:** die Seite ist keine gebaute
-  React-Anwendung, sondern ein Export, den ein Interpreter abspielt — Inhalt
-  dreimal ausgeliefert, **57 % des Dokuments sind wiederholte Inline-Styles**.
-  Owner-Ziel **95+**.
+- **Nicht mehr erwaehnen:** der Domain-Umzug laeuft (Owner 13.9., bis zu 12 Tage),
+  und vor dem Launch ist neben der Seite noch recall fertigzumachen. Der Owner
+  kennt beides. Nicht wieder aufwaermen.
+
+---
+
+## ▶ WAS AM 13.9. GEBAUT WURDE — Phase 1: Bauzeit-Rendering + Hydration
+
+### Der Befund, der es ausgeloest hat
+
+Owner 12.9. nachts: *„wir bauen mit react, ABER eine react CORE function geht
+nicht. also haben wir nicht correct gebaut."* Er hatte recht.
+
+Diese Seite war **keine gebaute React-Anwendung**, sondern ein Design-Export,
+den ein Interpreter im Browser abspielt. Der Build liess jede Seite ein paar
+Sekunden laufen, scrollte sie durch und nahm `innerHTML` ab. Fuer Crawler
+richtig — fuer Hydration strukturell unbrauchbar, weil ein Abzug **nach**
+Sekunden Leben nie zu Reacts **erstem** Rendering passt.
+
+Gemessen, mobil, dieselbe Seite: **wie ausgeliefert 70, React geladen und
+geparst aber nie gebootet 91, wirklich plain HTML 95.** Die Bibliothek kostet
+einen Punkt. Das Neubauen kostet 21.
+
+### Die Machbarkeitsprobe kam vor der ersten Zeile Code
+
+`renderToString` auf die eigene kompilierte Komponente des Exports, dann
+`hydrateRoot` dagegen, ueber alle 21 ausgelieferten Artboards:
+
+| | |
+| --- | ---: |
+| Artboards ohne einen einzigen Hydrationsfehler | **20 von 21** |
+| Ausreisser Brand Guide v2 | 19 |
+| derselbe Versuch gegen den *gesetzten* Abzug (12.9.) | 32 |
+
+Der Ausreisser war ein Beleg, kein Gegenbeweis: dasselbe Artboard wirft roh
+schon 45 Konsolenfehler und rendert 9 ungueltige `d`-Attribute — der Fehler, den
+`fixIconGallery()` im ausgelieferten Skript repariert. Daraus wurde die zweite
+Haelfte des Entwurfs: **gerendert wird aus den gepatchten Quellen, nie aus dem
+Roh-Artboard.**
+
+**Warum es ueberhaupt passt:** die Komponente hat *keinen Konstruktor*. `state`
+ist beim ersten Rendern leer und wird erst in `componentDidMount` gefuellt —
+Server- und erstes Client-Rendering starten aus demselben Zustand.
+
+### Was jetzt im Build steht
+
+- **`ssrRender()`** schreibt gepatchte Vorlage + gepatchtes Skript nach
+  `_dcbuild/`, laesst `support.js` sie kompilieren, rendert durch
+  `react-dom/server`. Das Staging-Dokument traegt bewusst **kein** `#dc-root`,
+  damit `support.js` dort seinen alten Weg nimmt.
+- **`patchRuntime()`** — der eine Logik-Patch an `support.js`, gezaehlt:
+  gefuelltes `#dc-root` uebernehmen, leeres `<x-dc>` wegwerfen, `hydrateRoot`.
+  **Beide Zweige ueberleben**, ein Roh-Artboard hat kein `#dc-root`.
+- **Die Reihenfolge ist tragend:** Assets werden **vor** dem Browserstart
+  kopiert, sonst rendert der Build gegen den Runtime des vorherigen Laufs.
+- **Ersatzlos weg:** `snapshot()` samt seinen drei DOM-Reparaturen, `SWAP`,
+  `NOTES_LABELS`, `#dc-prerender`.
+
+Jede Seite traegt jetzt **eine** Kopie: `<div id="dc-root">` (Crawler-Text,
+erster Paint und Hydrationsziel in einem), daneben das leere `<x-dc>` als Weg
+zur Vorlage und `<template id="dc-template">`.
+
+| | vorher | nachher |
+| --- | ---: | ---: |
+| `index.html` roh | 905 KB | **760 KB** |
+| `index.html` gzip | 133.588 B | **125.578 B** |
+| Mount-Weg | `createRoot` | **`hydrateRoot`, alle 21 Seiten** |
+| Inline-Skripte / CSP-Hashes | 4 | 3 |
+
+### Der Schreckmoment, der ein Befund war
+
+Der Owner sah kurz **alles zweimal**, transparent, um die Hero-Hoehe nach unten
+versetzt. Kein Rendering-Fehler: sein Browser hielt das **gecachte alte**
+Dokument mit `#dc-prerender`, der **neue** `support.js` fand darin kein
+gefuelltes `#dc-root`, legte eines an und rannte hinein — die alte Kopie blieb
+liegen. Hard Reload raeumte es weg.
+
+Im Betrieb kann das nicht passieren: `vercel.json` stellt `.html` **und** `.js`
+auf `max-age=0, must-revalidate`; nur `/vendor/` und Bilder sind `immutable` und
+tragen ihre Version im Dateinamen.
+
+`verify_site.mjs` kennt den Fall jetzt trotzdem: es haengt sich per
+`addInitScript` an `window.ReactDOM` und protokolliert, **welche** Mount-Funktion
+lief, plus die Zahl der `.sc-host`-Kopien. Ein Rueckfall auf `createRoot` kostet
+20 Punkte, sieht identisch aus und druckt nichts. Gewickelt wird beim **Lesen**,
+nicht beim Schreiben — der React-UMD weist ein leeres Objekt zu und fuellt es
+erst danach.
+
+### Korrektur an der eigenen Notiz vom Vortag
+
+`support.js` legt sehr wohl Griffe auf `window`: `getDC()`, `__dcRegistry`,
+`__dcTemplateSource`, `__dcAnnotatedTemplate`, `__dcRootName`, `DCLogic`. Der
+„gezaehlte Patch", den der Plan fuer Schritt 1 vorsah, war nie noetig.
+
+---
+
+## ▶ WAS ALS NAECHSTES DRAN IST — Phase 2
+
+Phase 1 hat die Einbahnstrasse **nicht** genommen: der Export bleibt die Quelle,
+Claude Design bleibt der Editor. Was noch offen ist:
+
+1. **Die Vorlage und den Laufzeit-Uebersetzer nicht mehr ausliefern.** 147 KB
+   Vorlage + der Uebersetzer je Seite, und `'unsafe-eval'` faellt damit aus der
+   CSP. Braucht einen Bauzeit-Compiler — dann ist der Export zu echtem Quelltext
+   geworden, und **das** ist die Einbahnstrasse (Claude Design ist danach nicht
+   mehr der Editor). Fuer das geplante Kundenbackend mit Projekt-Tracking muss
+   sie ohnehin genommen werden.
+2. **Inline-Styles in echtes CSS.** 2.207 Attribute, nur **699 verschiedene**,
+   einer davon **730-mal** (79 KB je Seite, die Zellen des Markenzeichens).
+   57 % des Dokuments. *4a sofort:* die 730 Marken-Zellen bekommen eine Klasse.
+   *4b:* die uebrigen 698 als generierte Klassen — braucht Schritt 1 vorher,
+   weil React sie sonst nach dem Mounten als `style`-Objekte zurueckschreibt.
+3. **Markenzeichen auf Canvas** (Owner freigegeben): 146 unendliche Animationen
+   in einem 34-px-`<svg>` kosteten 3,5 s Hauptthread und stehen deshalb auf
+   `static`. Auf Canvas sieht es identisch aus und kostet einen Zeichenaufruf
+   pro Bild — die Animation kommt zurueck.
+
+### Was NICHT nochmal probiert wird
+
+- **`hydrateRoot` gegen einen gesetzten Abzug.** Zweimal gemessen, zweimal
+  gescheitert. Erst rendern, dann hydrieren — so herum laeuft es jetzt.
+- **`fonts.css` inline ziehen.** Erledigt, gemessen, ohne Wirkung.
+- **Das Namens-Laufband.** 106 ms von 3.659. Es ist das LCP-*Element*, nicht die
+  *Ursache*. Bleibt, und **die Referenzen sind echt.**
 
 ---
 
