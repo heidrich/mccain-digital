@@ -33,29 +33,48 @@ const BASE = (process.argv[2] || process.env.MCD_BASE || "http://127.0.0.1:8898"
  * `interactive` marks the ones with a nav that must respond - the brand
  * guide's header is a logo and a back-link, so demanding a reaction from it
  * would be a failing test that is asking for the wrong thing. */
+/* All 21 of them since the v4 import: the whole site is the design export now,
+ * so there is no such thing here as a page that only has to load. Each one
+ * hydrates, carries the shared nav and runs the pixel engine.
+ *
+ * Keep this list in step with PAGES in tools/prerender.mjs. It is deliberately
+ * a second, hand-written list rather than an import: this gate asking the same
+ * table the builder used would only ever confirm the builder agrees with
+ * itself. A route that exists in one and not the other is a finding. */
 const LIVE_PAGES = [
-  { path: "/index.html", interactive: true, pixels: true },
-  { path: "/brand-guide.html", interactive: false, pixels: false },
+  { path: "/", interactive: true, pixels: true, modals: true },
+  { path: "/leistungen/", interactive: true, pixels: true },
+  { path: "/leistungen/ki-automatisierung/", interactive: true, pixels: true },
+  { path: "/leistungen/web-apps/", interactive: true, pixels: true },
+  { path: "/leistungen/websites/", interactive: true, pixels: true },
+  { path: "/leistungen/individualsoftware/", interactive: true, pixels: true },
+  { path: "/leistungen/nextjs-entwicklung/", interactive: true, pixels: true },
+  { path: "/leistungen/mcp-server-entwickeln/", interactive: true, pixels: true },
+  { path: "/leistungen/rag-beratung/", interactive: true, pixels: true },
+  { path: "/leistungen/erp-integration/", interactive: true, pixels: true },
+  { path: "/vergleich/wordpress-oder-handgeschrieben/", interactive: true, pixels: true },
+  { path: "/vergleich/chatgpt-oder-eigenes-rag/", interactive: true, pixels: true },
+  { path: "/md-recall/", interactive: true, pixels: true },
+  { path: "/preise/", interactive: true, pixels: true },
+  { path: "/studio/", interactive: true, pixels: true },
+  { path: "/kontakt/", interactive: true, pixels: true },
+  { path: "/rechtliches/", interactive: true, pixels: true },
+  { path: "/styleguide/", interactive: true, pixels: true },
+  { path: "/news/", interactive: true, pixels: true },
+  { path: "/news/md-recall/", interactive: true, pixels: true },
+  { path: "/marke/", interactive: true, pixels: true },
 ];
 
-/* Pages that are plain static HTML - they only have to load cleanly. Built by
- * tools/build_pages.py (shell) and tools/build_legal.py (reviewed wording). */
-/* `indexable: false` exempts a page from the description/canonical checks. The
- * 404 is not a page that can be canonical to anything and has nothing to
- * describe - demanding both of it would be a failing test asking for the wrong
- * thing, the same mistake as demanding nav interaction from the brand guide. */
-const FLAT_PAGES = [
-  { path: "/404.html", indexable: false },
-  { path: "/kontakt.html", form: true },
-  { path: "/services/ai-tools.html" },
-  { path: "/services/web-apps.html" },
-  { path: "/services/websites.html" },
-  { path: "/services/software.html" },
-  { path: "/legal/imprint.html" },
-  { path: "/legal/privacy.html" },
-  { path: "/legal/terms.html" },
-  { path: "/legal/withdrawal.html" },
-];
+/* The 404 is the only hand-written page left, and the only one that must work
+ * when the runtime does not. `indexable: false` exempts it from the
+ * description/canonical checks: it is not a page that can be canonical to
+ * anything, and demanding that of it would be a failing test asking for the
+ * wrong thing. */
+const FLAT_PAGES = [{ path: "/404.html", indexable: false }];
+
+/* Which routes must carry a contact form that is actually wired. The export
+ * puts one on every page; these are the two a visitor is sent to. */
+const FORM_PAGES = ["/", "/kontakt/"];
 
 const ok = (b) => (b ? "ok  " : "FAIL");
 let failures = 0;
@@ -140,7 +159,7 @@ console.log(`\nverify_site  ${BASE}`);
 console.log(`  site.config.json: noindex=${CONFIG.noindex}\n`);
 
 let headerSeen = null;
-for (const { path: p, interactive, pixels } of LIVE_PAGES) {
+for (const { path: p, interactive, pixels, modals } of LIVE_PAGES) {
   const url = BASE + p;
   const { page, errs, noise, hosts, bad, headers } = await load(url, { scroll: true });
 
@@ -189,8 +208,8 @@ for (const { path: p, interactive, pixels } of LIVE_PAGES) {
 
   /* a tile must open a dialog - only meaningful on the start page */
   let modalOpens = null;
-  const tile = page.locator("#services button, #services [role='button']").first();
-  if (await tile.count()) {
+  const tile = modals ? page.locator("#services button, #services [role='button']").first() : null;
+  if (tile && (await tile.count())) {
     await tile.click({ timeout: 4000 }).catch(() => {});
     await page.waitForTimeout(1200);
     modalOpens = await page.evaluate(
@@ -233,6 +252,47 @@ for (const { path: p, interactive, pixels } of LIVE_PAGES) {
   for (const h of ext) fail(`${p}: contacts ${h}`);
   for (const b of bad.slice(0, 5)) fail(`${p}: ${b}`);
   await page.close();
+}
+
+/* THE FORMS ACTUALLY SEND.
+ *
+ * The old version of this check asked for action= and method=post, which the
+ * design export's forms do not have and never will: they are React handlers.
+ * So it asks the two things that are true of a wired page and false of the
+ * export as it arrives:
+ *
+ *   - the delivery runtime is present (window.__mcdSend)
+ *   - the handler that sets formSent without sending is GONE
+ *
+ * The second half is the one that matters. The export ships
+ * `if (fd.get('company')) return; this.setState({ formSent: true });` on all 21
+ * pages - a form that tells every visitor their message arrived and discards
+ * it. If a future export renames something and tools/prerender.mjs stops
+ * matching, the build already fails; this is the belt to that brace, measured
+ * on the served page rather than on the builder's intentions.
+ *
+ * Whether a message really leaves the browser is tools/form_probe.mjs - it has
+ * to click, and it needs a headed browser to get past the bot check. */
+{
+  console.log("\n  contact forms wired to a real endpoint");
+  const LIE = "this.setState({ formSent: true })";
+  for (const p of FORM_PAGES) {
+    let html = "";
+    try {
+      html = await (await fetch(BASE + p)).text();
+    } catch (e) {
+      fail(`${p}: could not be fetched for the form check (${e.message})`);
+      continue;
+    }
+    const wired = html.includes("window.__mcdSend");
+    /* Only outside the inert template: the template is markup, not code. */
+    const code = html.replace(/<template id="dc-template">[\s\S]*?<\/template>/, "");
+    const lies = code.includes(LIE) && !code.includes("__mcdSend");
+    console.log(`    ${ok(wired)} ${p} carries the delivery runtime`);
+    console.log(`    ${ok(!lies)} ${p} has no unwired "formSent" handler left`);
+    if (!wired) fail(`${p}: no window.__mcdSend - the form cannot send anything`);
+    if (lies) fail(`${p}: a submit handler still fakes success without sending`);
+  }
 }
 
 for (const { path: p, indexable = true, form = false } of FLAT_PAGES) {
@@ -296,22 +356,27 @@ if (WANT_NOINDEX && BASE.startsWith("http") && !BASE.includes("127.0.0.1")) {
  * that no reader ever arrives at. The four service pages and the contact page
  * were exactly that until the footer stopped opening modals and started linking. */
 {
-  const url = BASE + "/index.html";
+  const url = BASE + "/";
   const { page } = await load(url);
   const hrefs = await page.evaluate(() => {
     const root = document.getElementById("dc-root") || document.body;
     return [...root.querySelectorAll("a[href]")].map((a) => a.getAttribute("href"));
   });
-  const norm = (h) => h.replace(/^\.?\//, "").replace(/^https?:\/\/[^/]+\//, "");
+  const norm = (h) =>
+    h.replace(/^https?:\/\/[^/]+/, "").replace(/[#?].*$/, "").replace(/\/?$/, "/");
   const linked = new Set(hrefs.map(norm));
-  const want = FLAT_PAGES.filter((f) => f.indexable !== false).map((f) => f.path.slice(1));
-  want.push("brand-guide.html");
+  /* Every route except the start page itself has to be arrivable from it -
+   * directly or through the mega menu, which is in the DOM either way. */
+  const want = LIVE_PAGES.map((x) => x.path).filter((x) => x !== "/");
   console.log("\n  linked from the start page (after hydration)");
+  let orphans = 0;
   for (const p of want) {
     const good = linked.has(p);
+    if (!good) orphans++;
     console.log(`    ${ok(good)} ${p}`);
     if (!good) fail(`${p} is not linked from the start page - it is an orphan`);
   }
+  if (!orphans) console.log(`    all ${want.length} routes reachable from /`);
   await page.close();
 }
 
@@ -324,16 +389,23 @@ if (WANT_NOINDEX && BASE.startsWith("http") && !BASE.includes("127.0.0.1")) {
  * The old names are in here too: if archive/ were reachable under its previous
  * path, some cache or rewrite is still serving it. */
 const MUST_404 = [
+  "/archive/old3/index.html",
+  "/archive/old3/kontakt.html",
+  "/archive/old3/services/ai-tools.html",
   "/archive/site-apache/upload/index.html",
   "/archive/site-v3/index.html",
   "/old/upload/index.html",
   "/old 2/index.html",
   "/internal/TODO.md",
-  "/internal/audit/2026-09-02-award-audit.html",
   "/tools/prerender.mjs",
   "/prodserve.py",
   "/HANDOFF.md",
-  "/mccain-design-system/reference/index.html",
+  "/README.md",
+  /* The v4 export. Its artboards carry a second copy of every headline on the
+   * site, so a leak would put the studio in competition with itself. */
+  "/mccain-design-system/McCain Digital v2.dc.html",
+  "/mccain-design-system/content.json",
+  "/mccain-design-system/readme.md",
 ];
 if (BASE.startsWith("http") && !BASE.includes("127.0.0.1")) {
   console.log("\n  must not be reachable");

@@ -1,23 +1,23 @@
 # The repository root IS the site, so everything here would otherwise be
 # published. Keep the deployment to what a visitor should be able to reach.
 #
-# This list got shorter on 11.9.2026: everything that is kept but never served
-# now lives under exactly two folders, so a new internal file is excluded by
-# where it is put rather than by remembering to add a line here.
-# tools/verify_site.mjs asserts that both are 404 on the deployed site.
+# Everything that is kept but never served lives under exactly two folders, so
+# a new internal file is excluded by where it is put rather than by remembering
+# to add a line here. tools/verify_site.mjs asserts that both are 404 on the
+# deployed site.
 
-# archive/site-apache  - the site that was live on the Apache webspace until the
-#                        move to Vercel. It is the SOURCE OF RECORD for the
-#                        reviewed legal wording (tools/build_legal.py reads it)
-#                        and for the old contact page, so it stays in the
-#                        repository - but it must not be reachable, or a search
-#                        engine finds a second, older copy of the same company.
-# archive/site-v3      - the site that was live until the 2026 relaunch, moved
-#                        here with `git mv` so the history follows. Same reason.
+# archive/old3        - the site the v4 design import replaced (September 2026),
+#                       moved with `git mv` so the history follows.
+# archive/site-apache - the site that was live on the Apache webspace until the
+#                       move to Vercel. SOURCE OF RECORD for the reviewed legal
+#                       wording and for the old contact page.
+# archive/site-v3     - the site that was live until the 2026 relaunch.
+#                       None of them may be reachable, or a search engine finds
+#                       a second, older copy of the same company.
 archive/
 
-# Internal: the audit findings, the design notes, the parked experiments, the
-# screen recordings and source material. Kept, never served.
+# Internal: the audit findings, the design notes, the parked exports, the screen
+# recordings and source material. Kept, never served.
 internal/
 
 # Build and audit tooling, the local measuring server, and the session notes.
@@ -25,12 +25,13 @@ tools/
 prodserve.py
 HANDOFF.md
 CHANGELOG.md
+README.md
 AGENTS.md
 
-# The Claude Design export the site is BUILT FROM. 4.2 MB of source, and it
-# contains a second copy of every headline on the start page - shipping it would
-# put the studio in competition with itself in the index. robots.txt disallows
-# it as a second line of defence; this is the first.
+# The Claude Design export the whole site is BUILT FROM: 26 artboards, ~40 MB,
+# and it contains a second copy of every headline on every page - shipping it
+# would put the studio in competition with itself in the index. robots.txt
+# disallows it as a second line of defence; this is the first.
 mccain-design-system/
 
 # Source material and screen recordings - large and never requested by a page.

@@ -1,0 +1,23 @@
+# McCain Digital
+> Digital Product Studio in Bayern, seit 2016. Zwei Gründer: Christian (Entwicklung, Architektur, Betrieb), Kathi (Design, Marke, Inhalt). Keine Junioren, kein Vertrieb.
+
+## Leistungen
+- KI & Automatisierung (https://mccain-digital.com/leistungen/ki-automatisierung/): RAG auf eigenen Daten, Agenten mit Werkzeugen, MCP-Server, Automatisierung. Self-hostbar. Proof of Value in 2–4 Wochen.
+- Web-Apps & Plattformen (https://mccain-digital.com/leistungen/web-apps/): React, Next.js, TypeScript, PostgreSQL. Klickbarer Prototyp in 7 Tagen, MVP in 6–12 Wochen.
+- Websites (https://mccain-digital.com/leistungen/websites/): handgeschrieben, Lighthouse 100, kein Page-Builder, 3–6 Wochen.
+- Individualsoftware (https://mccain-digital.com/leistungen/individualsoftware/): Dashboards, interne Tools, Integrationen in ERP, CRM und Altsysteme. 8–14 Wochen.
+
+## Produkt
+- md-recall (https://mccain-digital.com/md-recall/): Projektgedächtnis, das am Git-Commit hängt. HTML-Dashboard, MCP-Server, self-hosted, keine Telemetrie. Einrichtung über einen Claude-Befehl. Kostenlos für Teams bis fünf Personen.
+
+## Konditionen
+- Antwort in 24 Stunden, Festpreis in 48 Stunden nach dem Erstgespräch.
+- Festpreis statt Stundenzähler; Schätzrisiko liegt beim Studio.
+- Jedes Projekt wird als Git-Repository übergeben, mit Dokumentation und Patch Notes. Quellcode gehört dem Kunden, kein Lock-in, keine Lizenz pro Nutzer.
+- 30 Tage Support nach dem Launch inklusive; Betrieb optional 190–890 € im Monat.
+- Größenordnungen: Website ab etwa 12.000 €, KI-Assistent 22.000–35.000 €, SaaS-MVP 38.000–60.000 €, internes Tool 45.000–75.000 €.
+
+## Kontakt
+- E-Mail: info@mccain-digital.com
+- Kontaktseite: https://mccain-digital.com/kontakt/
+- Preise und Rechner: https://mccain-digital.com/preise/

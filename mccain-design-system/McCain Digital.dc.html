@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#FF3D8A;--pink-text:#C7306C;--pink-soft:rgba(255,61,138,.10);--pink-ring:rgba(255,61,138,.28)}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;background:#fff;color-scheme:light}
+body{margin:0;background:transparent;color:#0B1633;font-family:'Instrument Sans',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+*,*::before,*::after{box-sizing:border-box}
+a{color:var(--pink-text);text-decoration:none}a:hover{color:#0B1633}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;text-align:inherit}
+input,textarea{font:inherit;color:inherit}
+input::placeholder,textarea::placeholder{color:#8C95B0}
+::selection{background:rgba(255,61,138,.22)}
+h1,h2,h3,p,ul{margin:0}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}html{scroll-behavior:auto}}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" id="top" style="min-height:100vh; background:#fff; color:#0B1633; font-family:'Instrument Sans',system-ui,sans-serif; overflow-x:clip; position:relative">
+
+<header data-screen-label="Navigation" onMouseLeave="{{ navLeave }}" style="position:fixed; top:0; left:0; right:0; z-index:80; background: {{ navBg }}; box-shadow: {{ navShadow }}; backdrop-filter: {{ navBlur }}; -webkit-backdrop-filter: {{ navBlur }}; transition: background-color .3s, box-shadow .3s">
+  <div data-nav-inner style="position:relative; max-width:1440px; margin:0 auto; padding:0 clamp(20px,4vw,48px); height:64px; display:flex; align-items:center; gap:16px">
+    <button onClick="{{ goTop }}" aria-label="McCain Digital" style="display:flex; align-items:center; gap:9px; color: {{ navFg }}; flex:none; transition: color .3s">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="7" fill="{{ markBg }}" style="transition: fill .3s"></rect><path d="M7 19v-7.5a3 3 0 0 1 6 0V19M13 19v-7.5a3 3 0 0 1 6 0V19" stroke="{{ markFg }}" stroke-width="2.2" fill="none" stroke-linecap="round" style="transition: stroke .3s"></path><circle cx="22" cy="8" r="2.6" fill="var(--pink)"></circle></svg>
+      <span style="font-weight:700; letter-spacing:-.03em; font-size:18px; line-height:1">mccain digital</span>
+    </button>
+    <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+      <nav aria-label="Hauptnavigation" style="display:flex; align-items:center; gap:2px; margin-left:10px">
+        <sc-for list="{{ navItems }}" as="m" hint-placeholder-count="6">
+          <button data-nav-item="{{ m.id }}" onMouseEnter="{{ m.open }}" onClick="{{ m.toggle }}" style="display:flex; align-items:center; gap:2px; padding:6px 8px; border-radius:999px; font-size:14px; font-weight:500; white-space:nowrap; color: {{ m.color }}; background: {{ m.bg }}; opacity: {{ m.opacity }}; transition: color .2s, background .2s, opacity .2s">{{ m.label }}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="opacity:.55; transform: {{ m.chev }}; transition: transform .3s"><path d="m6 9 6 6 6-6"></path></svg></button>
+        </sc-for>
+      </nav>
+    </sc-if>
+    <div style="margin-left:auto; display:flex; align-items:center; gap:10px">
+      <sc-if value="{{ showLangInNav }}" hint-placeholder-val="{{ true }}">
+      <div role="group" aria-label="Sprache" style="display:flex; border:1px solid {{ toggleBorder }}; border-radius:999px; padding:2px; font-size:12px; font-weight:600; letter-spacing:.02em; transition: border-color .3s">
+        <button onClick="{{ setDe }}" style="padding:4px 9px; border-radius:999px; background: {{ deBg }}; color: {{ deFg }}; transition: background .25s, color .25s">DE</button>
+        <button onClick="{{ setEn }}" style="padding:4px 9px; border-radius:999px; background: {{ enBg }}; color: {{ enFg }}; transition: background .25s, color .25s">EN</button>
+      </div>
+      </sc-if>
+      <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ goContact }}" style="display:inline-flex; align-items:center; gap:4px; height:38px; padding:0 8px 0 16px; border-radius:999px; background: {{ ctaBg }}; color: {{ ctaFg }}; font-size:14px; font-weight:600; transition: background .25s, color .25s, transform .2s" style-hover="transform: translateY(-1px)">{{ t.nav.contact }}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+      </sc-if>
+      <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ toggleMobile }}" aria-label="{{ t.nav.menu }}" style="width:42px; height:42px; border-radius:50%; display:grid; place-items:center; color: {{ navFg }}; border:1px solid {{ toggleBorder }}">
+          <sc-if value="{{ mobileOpen }}" hint-placeholder-val="{{ false }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if>
+          <sc-if value="{{ mobileClosed }}" hint-placeholder-val="{{ true }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path></svg></sc-if>
+        </button>
+      </sc-if>
+    </div>
+
+    <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+      <div aria-hidden="true" style="position:absolute; top:52px; left: {{ caretLeft }}px; width:14px; height:14px; background:#fff; transform: rotate(45deg); border-radius:3px; opacity: {{ panelOp }}; transition: left .35s cubic-bezier(.2,.8,.2,1), opacity .2s; pointer-events:none; z-index:2"></div>
+      <div onMouseEnter="{{ panelEnter }}" style="position:absolute; top:58px; left: {{ panelLeft }}px; width: {{ panelW }}px; height: {{ panelH }}px; background:#fff; border-radius:12px; box-shadow: 0 30px 90px -20px rgba(11,22,51,.30), 0 2px 10px rgba(11,22,51,.08), 0 0 0 1px rgba(11,22,51,.05); opacity: {{ panelOp }}; transform: {{ panelTf }}; pointer-events: {{ panelPe }}; transition: {{ panelTransition }}; overflow:hidden; transform-origin: 50% 0; z-index:1">
+
+        <div data-menu-content="services" style="position:absolute; top:0; left:0; width:640px; opacity: {{ mv.services.op }}; transform: {{ mv.services.tf }}; pointer-events: {{ mv.services.pe }}; transition: opacity .25s, transform .35s cubic-bezier(.2,.8,.2,1)">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:2px; padding:14px">
+            <sc-for list="{{ services }}" as="s" hint-placeholder-count="4">
+              <button onClick="{{ s.openModal }}" style="display:flex; gap:14px; align-items:flex-start; padding:12px; border-radius:8px; transition: background .2s" style-hover="background:#F6F8FC">
+                <span style="flex:none; width:34px; height:34px; border-radius:8px; background:var(--pink-soft); color:var(--pink-text); display:grid; place-items:center">{{ s.iconSm }}</span>
+                <span style="display:block; min-width:0"><span style="display:block; font-size:15px; font-weight:600; color:#0B1633">{{ s.title }}</span><span style="display:block; font-size:13px; line-height:1.45; color:#6B7590; margin-top:3px">{{ s.menu }}</span></span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:13px 22px; background:#F6F8FC; border-top:1px solid rgba(11,22,51,.06); font-size:13px">
+            <span style="color:#6B7590">{{ t.menus.servicesFoot }}</span>
+            <span style="display:flex; gap:18px"><button onClick="{{ goAi }}" style="font-weight:600; color:var(--pink-text)">{{ t.menus.askSite }} ›</button><button onClick="{{ goProcess }}" style="font-weight:600; color:#0B1633">{{ t.menus.seeProcess }} ›</button></span>
+          </div>
+        </div>
+
+        <div data-menu-content="work" style="position:absolute; top:0; left:0; width:540px; opacity: {{ mv.work.op }}; transform: {{ mv.work.tf }}; pointer-events: {{ mv.work.pe }}; transition: opacity .25s, transform .35s cubic-bezier(.2,.8,.2,1)">
+          <div style="display:grid; gap:2px; padding:14px">
+            <sc-for list="{{ cases }}" as="c" hint-placeholder-count="2">
+              <button onClick="{{ c.openModal }}" style="display:flex; gap:14px; align-items:flex-start; padding:12px; border-radius:8px; transition: background .2s" style-hover="background:#F6F8FC">
+                <span style="flex:none; width:34px; height:34px; border-radius:8px; background: {{ c.tileBg }}; display:grid; place-items:center; color:#fff">{{ c.iconSm }}</span>
+                <span style="display:block; min-width:0"><span style="display:flex; align-items:center; gap:8px; font-size:15px; font-weight:600; color:#0B1633">{{ c.title }}<span style="font-size:11px; font-weight:600; color:#1F8A5B; background:rgba(79,207,140,.16); padding:2px 8px; border-radius:999px">{{ c.status }}</span></span><span style="display:block; font-size:13px; line-height:1.45; color:#6B7590; margin-top:3px">{{ c.menu }}</span></span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:13px 22px; background:#F6F8FC; border-top:1px solid rgba(11,22,51,.06); font-size:13px">
+            <span style="color:#6B7590">{{ t.menus.workFoot }}</span>
+            <button onClick="{{ goWork }}" style="font-weight:600; color:#0B1633">{{ t.common.viewAll }} ›</button>
+          </div>
+        </div>
+
+        <div data-menu-content="studio" style="position:absolute; top:0; left:0; width:560px; opacity: {{ mv.studio.op }}; transform: {{ mv.studio.tf }}; pointer-events: {{ mv.studio.pe }}; transition: opacity .25s, transform .35s cubic-bezier(.2,.8,.2,1)">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:16px">
+            <button onClick="{{ goStudio }}" style="display:block; padding:16px; border-radius:10px; background:#F6F8FC; text-align:left; transition: background .2s" style-hover="background:#EEF2F9">
+              <span style="display:block; font-size:13px; font-weight:600; color:var(--pink-text)">{{ t.menus.studioTitle }}</span>
+              <span style="display:block; font-size:26px; font-weight:700; letter-spacing:-.03em; color:#0B1633; margin-top:8px">2016 →</span>
+              <span style="display:block; font-size:13px; line-height:1.5; color:#4A5578; margin-top:8px">{{ t.menus.studioText }}</span>
+            </button>
+            <div style="display:grid; gap:2px; align-content:start">
+              <span style="display:block; font-size:12px; font-weight:600; color:#6B7590; padding:6px 12px 4px">{{ t.menus.teamTitle }}</span>
+              <sc-for list="{{ team }}" as="p" hint-placeholder-count="2">
+                <button onClick="{{ goStudio }}" style="display:flex; gap:12px; align-items:center; padding:9px 12px; border-radius:8px; transition: background .2s" style-hover="background:#F6F8FC">
+                  <span style="flex:none; width:34px; height:34px; border-radius:8px; background: {{ p.grad }}; color:#fff; font-weight:700; font-size:14px; display:grid; place-items:center">{{ p.initial }}</span>
+                  <span style="display:block; min-width:0"><span style="display:block; font-size:14px; font-weight:600; color:#0B1633">{{ p.name }}</span><span style="display:block; font-size:12px; color:#6B7590; margin-top:2px">{{ p.role }}</span></span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:13px 22px; background:#F6F8FC; border-top:1px solid rgba(11,22,51,.06); font-size:13px">
+            <span style="color:#6B7590">{{ t.menus.studioFootNote }}</span>
+            <button onClick="{{ goFaq }}" style="font-weight:600; color:#0B1633">{{ t.menus.studioFoot }} ›</button>
+          </div>
+        </div>
+
+        <div data-menu-content="process" style="position:absolute; top:0; left:0; width:540px; opacity: {{ mv.process.op }}; transform: {{ mv.process.tf }}; pointer-events: {{ mv.process.pe }}; transition: opacity .25s, transform .35s cubic-bezier(.2,.8,.2,1)">
+          <div style="display:grid; gap:2px; padding:14px">
+            <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+              <button onClick="{{ goProcess }}" style="display:flex; gap:16px; align-items:flex-start; padding:11px 12px; border-radius:8px; transition: background .2s" style-hover="background:#F6F8FC">
+                <span style="flex:none; font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; color:var(--pink-text); margin-top:3px">{{ s.n }}</span>
+                <span style="display:block; min-width:0"><span style="display:flex; gap:10px; align-items:baseline; flex-wrap:wrap"><span style="font-size:15px; font-weight:600; color:#0B1633">{{ s.title }}</span><span style="font-size:12px; color:#6B7590">{{ s.time }}</span></span><span style="display:block; font-size:13px; line-height:1.45; color:#6B7590; margin-top:3px">{{ s.menu }}</span></span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:13px 22px; background:#F6F8FC; border-top:1px solid rgba(11,22,51,.06); font-size:13px">
+            <span style="color:#6B7590">{{ t.menus.processFoot }}</span>
+            <button onClick="{{ goContact }}" style="font-weight:600; color:var(--pink-text)">{{ t.menus.pricingCta }} ›</button>
+          </div>
+        </div>
+
+        <div data-menu-content="resources" style="position:absolute; top:0; left:0; width:440px; opacity: {{ mv.resources.op }}; transform: {{ mv.resources.tf }}; pointer-events: {{ mv.resources.pe }}; transition: opacity .25s, transform .35s cubic-bezier(.2,.8,.2,1)">
+          <div style="display:grid; gap:2px; padding:14px">
+            <sc-for list="{{ resItems }}" as="r" hint-placeholder-count="3">
+              <a href="{{ r.href }}" target="{{ r.target }}" rel="noopener" onClick="{{ r.onClick }}" style="display:flex; gap:14px; align-items:flex-start; padding:12px; border-radius:8px; transition: background .2s; color:#0B1633" style-hover="background:#F6F8FC">
+                <span style="flex:none; width:34px; height:34px; border-radius:8px; background:#F0F3FA; color:#4A5578; display:grid; place-items:center">{{ r.icon }}</span>
+                <span style="display:block; min-width:0"><span style="display:flex; align-items:center; gap:8px; font-size:15px; font-weight:600; color:#0B1633">{{ r.title }}<sc-if value="{{ r.soon }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px; font-weight:600; color:#6B7590; border:1px solid rgba(11,22,51,.14); padding:1px 7px; border-radius:999px">{{ t.menus.soon }}</span></sc-if></span><span style="display:block; font-size:13px; line-height:1.45; color:#6B7590; margin-top:3px">{{ r.text }}</span></span>
+              </a>
+            </sc-for>
+          </div>
+        </div>
+
+        <div data-menu-content="pricing" style="position:absolute; top:0; left:0; width:480px; opacity: {{ mv.pricing.op }}; transform: {{ mv.pricing.tf }}; pointer-events: {{ mv.pricing.pe }}; transition: opacity .25s, transform .35s cubic-bezier(.2,.8,.2,1)">
+          <div style="padding:20px 22px 6px">
+            <div style="font-size:13px; font-weight:600; color:var(--pink-text)">{{ t.nav.pricing }}</div>
+            <div style="font-size:20px; font-weight:700; letter-spacing:-.025em; color:#0B1633; margin-top:6px">{{ t.menus.pricingTitle }}</div>
+            <p style="font-size:13px; line-height:1.5; color:#6B7590; margin-top:6px">{{ t.menus.pricingText }}</p>
+            <div style="margin-top:14px">
+              <sc-for list="{{ priceSteps }}" as="s" hint-placeholder-count="3">
+                <div style="display:flex; gap:14px; align-items:center; padding:10px 0; border-top:1px solid rgba(11,22,51,.08)">
+                  <span style="flex:none; width:26px; height:26px; border-radius:50%; background:var(--pink-soft); color:var(--pink-text); font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; display:grid; place-items:center">{{ s.n }}</span>
+                  <span style="font-size:14px; font-weight:600; color:#0B1633; flex:1">{{ s.title }}</span>
+                  <span style="font-size:12px; color:#6B7590; white-space:nowrap">{{ s.time }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:13px 22px; background:#F6F8FC; border-top:1px solid rgba(11,22,51,.06); font-size:13px; margin-top:8px">
+            <span style="color:#6B7590">{{ t.menus.pricingFoot }}</span>
+            <button onClick="{{ goContact }}" style="display:inline-flex; align-items:center; gap:4px; height:32px; padding:0 8px 0 14px; border-radius:999px; background:#0B1633; color:#fff; font-size:13px; font-weight:600" style-hover="background:#1B2A5E">{{ t.menus.pricingCta }}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+          </div>
+        </div>
+
+      </div>
+    </sc-if>
+  </div>
+</header>
+
+<sc-if value="{{ isHeroA }}" hint-placeholder-val="{{ true }}">
+<section data-screen-label="Hero A" style="position:relative; padding: 150px 0 72px; min-height: 92vh; display:flex; align-items:center; overflow:hidden">
+  <div aria-hidden="true" style="position:absolute; inset:0; clip-path: polygon(0 0, 100% 0, 100% 78%, 0 100%); background: linear-gradient(135deg, #7B86F0 0%, #A86EE8 45%, #4AA6EF 100%)">
+    <canvas ref="{{ gradRef }}" style="position:absolute; inset:0; width:100%; height:100%; display:block"></canvas>
+    <div style="position:absolute; left:0; right:0; top:0; height:180px; background: linear-gradient(180deg, rgba(11,22,51,.28), rgba(11,22,51,0))"></div>
+  </div>
+  <div style="position:relative; width:100%; max-width:1440px; margin:0 auto; padding:0 clamp(20px,4vw,48px); display:grid; grid-template-columns: {{ heroCols }}; gap: clamp(40px,5vw,96px); align-items:center">
+    <div style="max-width:640px; opacity:0; animation: fadeUp .9s cubic-bezier(.2,.8,.2,1) forwards .1s">
+      <div style="font-size:15px; font-weight:600; color:#0B1633; opacity:.8">{{ t.hero.eyebrow }}</div>
+      <h1 style="font-size: clamp(40px, 5.2vw, 76px); line-height:1.02; letter-spacing:-.035em; font-weight:700; margin-top:16px; color:#0B1633; text-wrap:balance">{{ t.hero.title }}</h1>
+      <p style="font-size: clamp(17px, 1.3vw, 19px); line-height:1.6; color:#1B2549; max-width:52ch; margin-top:24px; text-wrap:pretty">{{ t.hero.lead }}</p>
+      <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:32px">
+        <button onClick="{{ goContact }}" style="display:inline-flex; align-items:center; gap:4px; height:44px; padding:0 12px 0 20px; border-radius:999px; background:#0B1633; color:#fff; font-size:15px; font-weight:600; transition: background .2s, transform .2s, box-shadow .2s" style-hover="background:#1B2A5E; transform: translateY(-1px); box-shadow: 0 10px 28px -8px rgba(11,22,51,.45)">{{ t.hero.cta1 }}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+        <button onClick="{{ goAi }}" style="display:inline-flex; align-items:center; gap:4px; height:44px; padding:0 12px 0 20px; border-radius:999px; background:#fff; color:#0B1633; font-size:15px; font-weight:600; transition: background .2s, transform .2s" style-hover="background:#F6F8FC; transform: translateY(-1px)">{{ t.hero.cta2 }}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:8px 14px; margin-top:28px; font-size:14px; font-weight:500; color:#1B2549">
+        <span>{{ t.hero.trust1 }}</span><span style="opacity:.5">·</span><span>{{ t.hero.trust2 }}</span><span style="opacity:.5">·</span><span>{{ t.hero.trust3 }}</span>
+      </div>
+    </div>
+    <div data-mock-stage style="position:relative; width:100%; max-width:600px; margin:0 auto; padding:0 0 76px; opacity:0; animation: fadeUp 1s cubic-bezier(.2,.8,.2,1) forwards .3s">
+      <div style="background:#fff; border-radius:10px; box-shadow: 0 40px 80px -24px rgba(11,22,51,.35), 0 0 0 1px rgba(11,22,51,.06); overflow:hidden; color:#0B1633">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 18px; border-bottom:1px solid rgba(11,22,51,.08)">
+          <span style="display:flex; align-items:center; gap:10px; font-size:14px; font-weight:600"><span style="width:22px; height:22px; border-radius:6px; background:#0B1633; display:inline-block"></span>{{ t.mock.title }}</span>
+          <span style="font-size:12px; font-weight:600; color:#1F8A5B; background:rgba(79,207,140,.16); padding:3px 9px; border-radius:999px; white-space:nowrap">{{ t.mock.chip }}</span>
+        </div>
+        <div style="padding:18px">
+          <div style="display:flex; justify-content:space-between; align-items:baseline; font-size:12px; color:#6B7590"><span>{{ t.mock.weeks }}</span><span style="font-family:'JetBrains Mono',monospace">W3 / W8</span></div>
+          <div style="position:relative; margin-top:10px; height:8px; border-radius:999px; background:#EEF1F7"><div style="position:absolute; left:0; top:0; bottom:0; width:37.5%; border-radius:999px; background:#0B1633"></div><div style="position:absolute; left:calc(37.5% - 6px); top:-2px; width:12px; height:12px; border-radius:50%; background:var(--pink); box-shadow: 0 0 0 3px #fff"></div></div>
+          <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:11px; color:#6B7590"><span>{{ t.mock.m1 }} · W1</span><span>{{ t.mock.m2 }} · W8</span></div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:18px">
+            <div style="padding:12px 14px; border-radius:8px; background:#F6F8FC"><div style="font-size:11px; color:#6B7590">{{ t.mock.demo }}</div><div style="font-size:15px; font-weight:600; margin-top:4px">{{ t.mock.demoVal }}</div></div>
+            <div style="padding:12px 14px; border-radius:8px; background:#F6F8FC"><div style="font-size:11px; color:#6B7590">{{ t.mock.reply }}</div><div style="font-size:15px; font-weight:600; margin-top:4px">24 h</div></div>
+          </div>
+          <div style="margin-top:16px; display:grid">
+            <sc-for list="{{ mockRows }}" as="r" hint-placeholder-count="3">
+              <div style="display:flex; align-items:center; gap:12px; padding:9px 0; border-top:1px solid rgba(11,22,51,.06); font-size:13px"><span style="flex:none; width:18px; height:18px; border-radius:50%; background: {{ r.dotBg }}; border: 1.5px solid {{ r.dotBorder }}; display:grid; place-items:center; color:#fff"><sc-if value="{{ r.done }}" hint-placeholder-val="{{ true }}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if></span><span style="flex:1; color: {{ r.color }}">{{ r.label }}</span><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#6B7590">{{ r.week }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute; left:-24px; bottom:0; width:min(340px, 78%); background:#0B1633; border-radius:10px; box-shadow: 0 30px 70px -20px rgba(11,22,51,.5), 0 0 0 1px rgba(255,255,255,.08); color:#EEF1FA; overflow:hidden">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 16px; border-bottom:1px solid rgba(255,255,255,.08); font-size:12px"><span style="font-weight:600; color:#C9D1E8">{{ t.hero.cta2 }}</span><span style="color:#4FCF8C; font-weight:600">{{ t.mock.live }}</span></div>
+        <div style="padding:14px 16px 16px; display:flex; flex-direction:column; gap:12px; min-height:128px">
+          <div data-demo-q style="align-self:flex-end; max-width:88%; min-width:32px; min-height:32px; background:rgba(255,255,255,.10); border-radius:12px 12px 3px 12px; padding:7px 12px; font-size:13px; line-height:1.4"></div>
+          <div style="display:flex; gap:10px; align-items:flex-start"><span style="flex:none; width:22px; height:22px; border-radius:6px; background:var(--pink); margin-top:1px"></span><p data-demo-a style="font-size:13px; line-height:1.55; color:#EEF1FA; min-height:20px"></p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ isHeroB }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Hero B" style="position:relative; padding: 150px 0 0; overflow:hidden; background:#fff">
+  <div style="position:relative; max-width:1440px; margin:0 auto; padding:0 clamp(20px,4vw,48px); text-align:center; display:flex; flex-direction:column; align-items:center; opacity:0; animation: fadeUp .9s cubic-bezier(.2,.8,.2,1) forwards .1s">
+    <div style="font-size:15px; font-weight:600; color:var(--pink-text)">{{ t.hero.eyebrow }}</div>
+    <h1 style="font-size: clamp(42px, 6vw, 84px); line-height:1; letter-spacing:-.038em; font-weight:700; margin-top:18px; color:#0B1633; max-width:18ch; text-wrap:balance">{{ t.hero.title }}</h1>
+    <p style="font-size: clamp(17px, 1.4vw, 20px); line-height:1.6; color:#4A5578; max-width:58ch; margin-top:24px; text-wrap:pretty">{{ t.hero.lead }}</p>
+    <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin-top:32px">
+      <button onClick="{{ goContact }}" style="display:inline-flex; align-items:center; gap:4px; height:44px; padding:0 12px 0 20px; border-radius:999px; background:#0B1633; color:#fff; font-size:15px; font-weight:600; transition: background .2s, transform .2s, box-shadow .2s" style-hover="background:#1B2A5E; transform: translateY(-1px); box-shadow: 0 10px 28px -8px rgba(11,22,51,.45)">{{ t.hero.cta1 }}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+      <button onClick="{{ goAi }}" style="display:inline-flex; align-items:center; gap:4px; height:44px; padding:0 12px 0 20px; border-radius:999px; background:#fff; color:#0B1633; font-size:15px; font-weight:600; border:1px solid rgba(11,22,51,.14); transition: border-color .2s, transform .2s" style-hover="border-color: rgba(11,22,51,.3); transform: translateY(-1px)">{{ t.hero.cta2 }}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+    </div>
+    <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:8px 14px; margin-top:26px; font-size:14px; font-weight:500; color:#4A5578"><span>{{ t.hero.trust1 }}</span><span style="opacity:.5">·</span><span>{{ t.hero.trust2 }}</span><span style="opacity:.5">·</span><span>{{ t.hero.trust3 }}</span></div>
+  </div>
+  <div data-mock-stage style="position:relative; max-width:1200px; margin:64px auto 0; padding:56px clamp(20px,4vw,48px) 0; opacity:0; animation: fadeUp 1s cubic-bezier(.2,.8,.2,1) forwards .35s">
+    <div aria-hidden="true" style="position:absolute; left:0; right:0; top:120px; bottom:0; clip-path: polygon(0 12%, 100% 0, 100% 100%, 0 100%); background: linear-gradient(135deg, #7B86F0 0%, #A86EE8 45%, #4AA6EF 100%); overflow:hidden">
+      <canvas ref="{{ gradRef }}" style="position:absolute; inset:0; width:100%; height:100%; display:block"></canvas>
+    </div>
+    <div style="position:relative; max-width:900px; margin:0 auto; background:#fff; border-radius:12px 12px 0 0; box-shadow: 0 -20px 80px -30px rgba(11,22,51,.35), 0 0 0 1px rgba(11,22,51,.06); overflow:hidden; color:#0B1633">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 22px; border-bottom:1px solid rgba(11,22,51,.08)">
+        <span style="display:flex; align-items:center; gap:10px; font-size:14px; font-weight:600"><span style="width:22px; height:22px; border-radius:6px; background:#0B1633; display:inline-block"></span>{{ t.mock.title }}</span>
+        <span style="font-size:12px; font-weight:600; color:#1F8A5B; background:rgba(79,207,140,.16); padding:3px 9px; border-radius:999px; white-space:nowrap">{{ t.mock.chip }}</span>
+      </div>
+      <div style="display:grid; grid-template-columns: {{ heroBCols }}; gap:0">
+        <div style="padding:22px">
+          <div style="display:flex; justify-content:space-between; align-items:baseline; font-size:12px; color:#6B7590"><span>{{ t.mock.weeks }}</span><span style="font-family:'JetBrains Mono',monospace">W3 / W8</span></div>
+          <div style="position:relative; margin-top:10px; height:8px; border-radius:999px; background:#EEF1F7"><div style="position:absolute; left:0; top:0; bottom:0; width:37.5%; border-radius:999px; background:#0B1633"></div><div style="position:absolute; left:calc(37.5% - 6px); top:-2px; width:12px; height:12px; border-radius:50%; background:var(--pink); box-shadow: 0 0 0 3px #fff"></div></div>
+          <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:11px; color:#6B7590"><span>{{ t.mock.m1 }} · W1</span><span>{{ t.mock.m2 }} · W8</span></div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:18px">
+            <div style="padding:12px 14px; border-radius:8px; background:#F6F8FC"><div style="font-size:11px; color:#6B7590">{{ t.mock.demo }}</div><div style="font-size:15px; font-weight:600; margin-top:4px">{{ t.mock.demoVal }}</div></div>
+            <div style="padding:12px 14px; border-radius:8px; background:#F6F8FC"><div style="font-size:11px; color:#6B7590">{{ t.mock.reply }}</div><div style="font-size:15px; font-weight:600; margin-top:4px">24 h</div></div>
+          </div>
+          <div style="margin-top:16px; display:grid">
+            <sc-for list="{{ mockRows }}" as="r" hint-placeholder-count="3">
+              <div style="display:flex; align-items:center; gap:12px; padding:9px 0; border-top:1px solid rgba(11,22,51,.06); font-size:13px"><span style="flex:none; width:18px; height:18px; border-radius:50%; background: {{ r.dotBg }}; border: 1.5px solid {{ r.dotBorder }}; display:grid; place-items:center; color:#fff"><sc-if value="{{ r.done }}" hint-placeholder-val="{{ true }}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if></span><span style="flex:1; color: {{ r.color }}">{{ r.label }}</span><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#6B7590">{{ r.week }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#0B1633; color:#EEF1FA; padding:18px 20px; display:flex; flex-direction:column; gap:12px">
+          <div style="display:flex; align-items:center; justify-content:space-between; font-size:12px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,.08)"><span style="font-weight:600; color:#C9D1E8">{{ t.hero.cta2 }}</span><span style="color:#4FCF8C; font-weight:600">{{ t.mock.live }}</span></div>
+          <div data-demo-q style="align-self:flex-end; max-width:88%; min-width:32px; min-height:32px; background:rgba(255,255,255,.10); border-radius:12px 12px 3px 12px; padding:7px 12px; font-size:13px; line-height:1.4"></div>
+          <div style="display:flex; gap:10px; align-items:flex-start"><span style="flex:none; width:22px; height:22px; border-radius:6px; background:var(--pink); margin-top:1px"></span><p data-demo-a style="font-size:13px; line-height:1.55; color:#EEF1FA; min-height:20px"></p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<section data-screen-label="Referenzen" style="padding: 56px 0 24px; background:#fff">
+  <div style="max-width:1440px; margin:0 auto; padding:0 clamp(20px,4vw,48px)">
+    <div style="text-align:center; font-size:14px; font-weight:500; color:#6B7590">{{ t.brands.label }}</div>
+    <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:14px 48px; margin-top:22px">
+      <sc-for list="{{ brands }}" as="b" hint-placeholder-count="9"><span style="font-size:19px; font-weight:700; letter-spacing:-.025em; color:#0B1633; opacity:.45; white-space:nowrap">{{ b }}</span></sc-for>
+    </div>
+    <p style="font-size:12px; color:#6B7590; text-align:center; margin-top:22px; line-height:1.5">{{ t.brands.note }}</p>
+  </div>
+</section>
+
+<section id="services" data-screen-label="Leistungen" style="padding: clamp(72px,8vw,120px) 0; background:#fff">
+  <div style="max-width:1440px; margin:0 auto; padding:0 clamp(20px,4vw,48px)">
+    <div data-reveal style="max-width:680px">
+      <div style="font-size:15px; font-weight:600; color:var(--pink-text)">{{ t.services.eyebrow }}</div>
+      <h2 style="font-size: clamp(30px,3.6vw,48px); line-height:1.1; letter-spacing:-.03em; font-weight:700; color:#0B1633; margin-top:10px; text-wrap:balance">{{ t.services.title }}</h2>
+      <p style="font-size:18px; line-height:1.6; color:#4A5578; margin-top:16px; text-wrap:pretty">{{ t.services.desc }}</p>
+    </div>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:40px 40px; margin-top:60px">
+      <sc-for list="{{ services }}" as="s" hint-placeholder-count="4">
+        <div data-reveal="{{ s.delay }}">
+          <button onClick="{{ s.openModal }}" style="display:flex; flex-direction:column; align-items:flex-start; text-align:left; height:100%; width:100%; color:#0B1633">
+            <span style="width:40px; height:40px; border-radius:10px; background:var(--pink-soft); color:var(--pink-text); display:grid; place-items:center">{{ s.icon }}</span>
+            <span style="display:block; font-size:20px; letter-spacing:-.02em; font-weight:600; margin-top:20px">{{ s.title }}</span>
+            <span style="display:block; font-size:15px; line-height:1.6; color:#4A5578; margin-top:8px; flex:1">{{ s.short }}</span>
+            <span style="display:inline-flex; align-items:center; gap:2px; margin-top:16px; font-size:15px; font-weight:600; color:var(--pink-text)">{{ t.common.details }}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></span>
+          </button>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<section id="ai" data-screen-label="KI-Konsole" style="position:relative; background:#0B1633; color:#EEF1FA; padding: calc(4vw + 72px) 0 calc(4vw + 72px); clip-path: polygon(0 4vw, 100% 0, 100% 100%, 0 calc(100% - 4vw))">
+  <div style="position:relative; max-width:1440px; margin:0 auto; padding:0 clamp(20px,4vw,48px)">
+    <div style="display:grid; grid-template-columns: {{ aiCols }}; gap: clamp(36px,5vw,96px); align-items:start">
+      <div data-reveal>
+        <div style="font-size:15px; font-weight:600; color:#FF7DB1">{{ t.ai.eyebrow }}</div>
+        <h2 style="font-size: clamp(30px,3.6vw,48px); line-height:1.1; letter-spacing:-.03em; font-weight:700; color:#fff; margin-top:10px; text-wrap:balance">{{ t.ai.title }}</h2>
+        <p style="font-size:18px; line-height:1.6; color:#A9B3D1; margin-top:16px; max-width:50ch; text-wrap:pretty">{{ t.ai.desc }}</p>
+        <ul style="list-style:none; padding:0; margin-top:26px; display:grid; gap:12px">
+          <sc-for list="{{ aiPoints }}" as="p" hint-placeholder-count="3">
+            <li style="display:flex; gap:12px; font-size:15px; line-height:1.55; color:#C9D1E8"><span style="flex:none; color:#4FCF8C; margin-top:3px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span><span>{{ p }}</span></li>
+          </sc-for>
+        </ul>
+        <p style="font-size:13px; line-height:1.55; color:#8C97BC; margin-top:26px; max-width:46ch">{{ t.ai.privacy }}</p>
+      </div>
+      <div data-reveal="0.1">
+        <div style="background:#111D42; border:1px solid rgba(255,255,255,.10); border-radius:12px; box-shadow: 0 40px 100px -30px rgba(0,0,0,.7); overflow:hidden">
+          <div style="display:flex; align-items:center; gap:2px; padding:8px 10px 0; border-bottom:1px solid rgba(255,255,255,.08)">
+            <button onClick="{{ setModeAsk }}" style="padding:10px 14px; font-size:13px; font-weight:600; color: {{ askFg }}; border-bottom:2px solid {{ askLine }}; margin-bottom:-1px; transition: color .2s, border-color .2s">{{ t.ai.modeAsk }}</button>
+            <button onClick="{{ setModeBrief }}" style="padding:10px 14px; font-size:13px; font-weight:600; color: {{ briefFg }}; border-bottom:2px solid {{ briefLine }}; margin-bottom:-1px; transition: color .2s, border-color .2s">{{ t.ai.modeBrief }}</button>
+            <span style="margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:11px; color:#8C97BC; padding-right:8px">{{ t.ai.model }}</span>
+          </div>
+          <div ref="{{ aiListRef }}" style="height:330px; overflow-y:auto; padding:20px 18px; display:flex; flex-direction:column; gap:14px">
+            <div style="display:flex; gap:12px; align-items:flex-start; max-width:92%"><span style="flex:none; width:24px; height:24px; border-radius:6px; background:var(--pink)"></span><p style="font-size:14px; line-height:1.6; color:#EEF1FA">{{ aiIntro }}</p></div>
+            <sc-for list="{{ aiMessages }}" as="m" hint-placeholder-count="1">
+              <sc-if value="{{ m.isUser }}" hint-placeholder-val="{{ false }}"><div style="align-self:flex-end; max-width:86%; background:rgba(255,255,255,.10); color:#fff; border-radius:12px 12px 3px 12px; padding:9px 14px; font-size:14px; line-height:1.5">{{ m.text }}</div></sc-if>
+              <sc-if value="{{ m.isBot }}" hint-placeholder-val="{{ false }}"><div style="display:flex; gap:12px; align-items:flex-start; max-width:92%"><span style="flex:none; width:24px; height:24px; border-radius:6px; background:var(--pink)"></span><p style="font-size:14px; line-height:1.6; color:#EEF1FA; white-space:pre-wrap">{{ m.text }}</p></div></sc-if>
+            </sc-for>
+            <sc-if value="{{ aiThinking }}" hint-placeholder-val="{{ false }}"><div style="display:flex; gap:12px; align-items:center"><span style="flex:none; width:24px; height:24px; border-radius:6px; background:var(--pink); opacity:.7"></span><span style="font-size:13px; color:#8C97BC">{{ t.ai.thinking }}</span></div></sc-if>
+            <sc-if value="{{ aiTypingShown }}" hint-placeholder-val="{{ false }}"><div style="display:flex; gap:12px; align-items:flex-start; max-width:92%"><span style="flex:none; width:24px; height:24px; border-radius:6px; background:var(--pink)"></span><p data-ai-typing style="font-size:14px; line-height:1.6; color:#EEF1FA; white-space:pre-wrap; min-height:22px"></p></div></sc-if>
+          </div>
+          <div style="display:flex; gap:8px; padding:0 18px 12px; flex-wrap:wrap">
+            <sc-for list="{{ chips }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.ask }}" style="font-size:12px; font-weight:500; padding:6px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.14); color:#C9D1E8; transition: border-color .2s, background .2s, color .2s" style-hover="border-color: rgba(255,255,255,.4); color:#fff; background: rgba(255,255,255,.06)">{{ c.label }}</button></sc-for>
+          </div>
+          <form onSubmit="{{ aiSubmit }}" style="display:flex; gap:10px; padding:14px 18px 18px; border-top:1px solid rgba(255,255,255,.08)">
+            <input ref="{{ aiInputRef }}" type="text" maxLength="500" placeholder="{{ aiPlaceholder }}" aria-label="{{ aiPlaceholder }}" style="flex:1; min-width:0; height:44px; padding:0 16px; border-radius:8px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.06); color:#fff; font-size:14px; outline:none; transition: border-color .2s, box-shadow .2s" style-focus="border-color: var(--pink); box-shadow: 0 0 0 4px var(--pink-ring)">
+            <button type="submit" style="flex:none; height:44px; padding:0 16px; border-radius:8px; background:#fff; color:#0B1633; font-size:14px; font-weight:600; transition: transform .2s, background .2s" style-hover="background:#F6F8FC; transform: translateY(-1px)">{{ t.ai.send }}</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div id="stack" data-reveal style="margin-top: clamp(56px,6vw,88px); padding-top:32px; border-top:1px solid rgba(255,255,255,.10); display:flex; flex-wrap:wrap; align-items:center; gap:20px 48px">
+      <div style="font-size:14px; font-weight:600; color:#A9B3D1; flex:none">{{ t.ai.stack }}</div>
+      <div style="display:flex; flex-wrap:wrap; gap:18px 30px; align-items:center">
+        <sc-for list="{{ logos }}" as="l" hint-placeholder-count="0"><span role="img" aria-label="{{ l.alt }}" title="{{ l.alt }}" style="display:block; width:24px; height:24px; background:#fff; opacity:.55; transition: opacity .2s; -webkit-mask: url({{ l.src }}) center / contain no-repeat; mask: url({{ l.src }}) center / contain no-repeat" style-hover="opacity:1"></span></sc-for>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="work" data-screen-label="Arbeiten" style="padding: clamp(72px,8vw,120px) 0; background:#fff">
+  <div style="max-width:1440px; margin:0 auto; padding:0 clamp(20px,4vw,48px)">
+    <div data-reveal style="max-width:680px">
+      <div style="font-size:15px; font-weight:600; color:var(--pink-text)">{{ t.work.eyebrow }}</div>
+      <h2 style="font-size: clamp(30px,3.6vw,48px); line-height:1.1; letter-spacing:-.03em; font-weight:700; color:#0B1633; margin-top:10px; text-wrap:balance">{{ t.work.title }}</h2>
+      <p style="font-size:18px; line-height:1.6; color:#4A5578; margin-top:16px; text-wrap:pretty">{{ t.work.desc }}</p>
+    </div>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:32px; margin-top:52px">
+      <sc-for list="{{ cases }}" as="c" hint-placeholder-count="2">
+        <div data-reveal="{{ c.delay }}">
+          <article role="button" tabIndex="0" onClick="{{ c.openModal }}" onKeyDown="{{ keyActivate }}" style="height:100%; background:#fff; border-radius:10px; box-shadow: 0 1px 2px rgba(11,22,51,.06), 0 8px 24px -12px rgba(11,22,51,.18), 0 0 0 1px rgba(11,22,51,.06); overflow:hidden; cursor:pointer; transition: transform .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s; display:flex; flex-direction:column" style-hover="transform: translateY(-3px); box-shadow: 0 1px 2px rgba(11,22,51,.06), 0 24px 48px -16px rgba(11,22,51,.25), 0 0 0 1px rgba(11,22,51,.08)">
+            <div style="height:250px; background: {{ c.visualBg }}; position:relative; overflow:hidden; display:grid; place-items:center; padding:24px">
+              <sc-if value="{{ c.isRecall }}" hint-placeholder-val="{{ true }}">
+                <div style="width:100%; max-width:400px; background:#0B1633; border-radius:8px; padding:14px 16px; font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.8; color:#A9B3D1; box-shadow: 0 20px 40px -16px rgba(11,22,51,.5)">
+                  <div><span style="color:#7B86F0">$</span> recall write "auth uses refresh tokens"</div>
+                  <div><span style="color:#4FCF8C">✓</span> stamped onto commit <span style="color:#EEF1FA">a91f3c</span></div>
+                  <div><span style="color:#7B86F0">$</span> recall read auth</div>
+                  <div><span style="color:var(--pink)">→</span> 0.04 ms · 0 tokens</div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ c.isSite }}" hint-placeholder-val="{{ false }}">
+                <div style="width:100%; max-width:400px; background:#fff; border-radius:8px; padding:16px 18px; box-shadow: 0 20px 40px -16px rgba(11,22,51,.3), 0 0 0 1px rgba(11,22,51,.06)">
+                  <div style="display:flex; justify-content:space-between; font-size:12px; color:#6B7590"><span style="font-weight:600; color:#0B1633">Lighthouse</span><span style="font-family:'JetBrains Mono',monospace">CLS 0 · TBT 0 ms</span></div>
+                  <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-top:14px">
+                    <sc-for list="{{ lhScores }}" as="l" hint-placeholder-count="4"><div style="text-align:center"><div style="font-size:24px; font-weight:700; letter-spacing:-.03em; color:#1F8A5B">100</div><div style="font-size:10px; color:#6B7590; margin-top:2px; line-height:1.3">{{ l }}</div></div></sc-for>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+            <div style="padding:22px 24px 24px; display:flex; flex-direction:column; flex:1">
+              <div style="display:flex; gap:10px; align-items:center; font-size:12px; color:#6B7590"><span style="font-weight:600; color:#1F8A5B; background:rgba(79,207,140,.16); padding:2px 8px; border-radius:999px">{{ c.status }}</span><span>{{ c.kind }}</span></div>
+              <h3 style="font-size:22px; letter-spacing:-.02em; font-weight:600; margin-top:12px; color:#0B1633">{{ c.title }}</h3>
+              <p style="color:#4A5578; font-size:15px; line-height:1.6; margin-top:8px; flex:1">{{ c.short }}</p>
+              <div style="margin-top:18px; font-size:13px; color:#6B7590"><span style="font-weight:600; color:#0B1633">Stack</span> · {{ c.stack }}</div>
+              <div style="margin-top:14px; display:inline-flex; align-items:center; gap:2px; color:var(--pink-text); font-weight:600; font-size:15px">{{ t.common.viewCase }}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></div>
+            </div>
+          </article>
+        </div>
+      </sc-for>
+    </div>
+    <p data-reveal style="margin-top:22px; font-size:13px; color:#6B7590; line-height:1.5">{{ t.work.note }}</p>
+  </div>
+</section>
+
+<section id="studio" data-screen-label="Studio" style="padding: clamp(72px,8vw,120px) 0; background:#F6F8FC">
+  <div style="max-width:1440px; margin:0 auto; padding:0 clamp(20px,4vw,48px)">
+    <div data-reveal style="max-width:680px">
+      <div style="font-size:15px; font-weight:600; color:var(--pink-text)">{{ t.studio.eyebrow }}</div>
+      <h2 style="font-size: clamp(30px,3.6vw,48px); line-height:1.1; letter-spacing:-.03em; font-weight:700; color:#0B1633; margin-top:10px; text-wrap:balance">{{ t.studio.title }}</h2>
+      <p style="font-size:18px; line-height:1.6; color:#4A5578; margin-top:16px; text-wrap:pretty">{{ t.studio.desc }}</p>
+    </div>
+    <div data-reveal data-count-group style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:32px 24px; margin-top:56px; padding-top:36px; border-top:1px solid rgba(11,22,51,.10)">
+      <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+        <div><div style="font-size: clamp(38px,4vw,56px); font-weight:700; letter-spacing:-.04em; line-height:1; color:#0B1633"><span data-count="{{ s.to }}" data-from="{{ s.from }}" data-prefix="{{ s.prefix }}" data-suffix="{{ s.suffix }}">{{ s.display }}</span></div><div style="margin-top:10px; font-size:15px; line-height:1.5; color:#4A5578; max-width:24ch">{{ s.label }}</div></div>
+      </sc-for>
+    </div>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:24px; margin-top:56px">
+      <sc-for list="{{ team }}" as="p" hint-placeholder-count="2">
+        <div data-reveal="{{ p.delay }}" style="display:flex; gap:18px; align-items:flex-start; padding:24px; border-radius:10px; background:#fff; box-shadow: 0 1px 2px rgba(11,22,51,.06), 0 0 0 1px rgba(11,22,51,.06)">
+          <div style="flex:none; width:56px; height:56px; border-radius:12px; background: {{ p.grad }}; display:grid; place-items:center; color:#fff; font-weight:700; font-size:22px">{{ p.initial }}</div>
+          <div><div style="font-size:18px; font-weight:600; color:#0B1633">{{ p.name }}</div><div style="font-size:14px; color:#6B7590; margin-top:2px">{{ p.role }}</div><div style="font-size:14px; color:#4A5578; margin-top:8px; line-height:1.55">{{ p.bio }}</div></div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<section id="process" data-screen-label="Ablauf" style="padding: clamp(72px,8vw,120px) 0; background:#fff">
+  <div style="max-width:1440px; margin:0 auto; padding:0 clamp(20px,4vw,48px); display:grid; grid-template-columns: {{ processCols }}; gap: clamp(36px,5vw,96px); align-items:start">
+    <div data-reveal style="position: {{ stickyPos }}; top:104px">
+      <div style="font-size:15px; font-weight:600; color:var(--pink-text)">{{ t.process.eyebrow }}</div>
+      <h2 style="font-size: clamp(30px,3.6vw,48px); line-height:1.1; letter-spacing:-.03em; font-weight:700; color:#0B1633; margin-top:10px; text-wrap:balance">{{ t.process.title }}</h2>
+      <p style="font-size:18px; line-height:1.6; color:#4A5578; margin-top:16px; max-width:44ch; text-wrap:pretty">{{ t.process.desc }}</p>
+      <div style="display:flex; align-items:baseline; gap:10px; margin-top:32px; font-family:'JetBrains Mono',monospace; color:#0B1633"><span data-process-current style="font-size:44px; font-weight:500; letter-spacing:-.04em; line-height:1">01</span><span style="font-size:13px; color:#6B7590">{{ t.process.of }}</span></div>
+    </div>
+    <div data-process-steps style="position:relative; padding-left:56px">
+      <div aria-hidden="true" style="position:absolute; left:19px; top:10px; bottom:40px; width:2px; background:rgba(11,22,51,.10); border-radius:2px"><div data-process-fill style="width:100%; height:0%; background:var(--pink); border-radius:2px"></div></div>
+      <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+        <div data-step data-reveal style="position:relative; padding-bottom:48px">
+          <div data-step-dot style="position:absolute; left:-56px; top:-2px; width:40px; height:40px; border-radius:50%; border:2px solid rgba(11,22,51,.12); background:#fff; display:grid; place-items:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:#0B1633; transition: background .4s, border-color .4s">{{ s.n }}</div>
+          <div style="font-size:13px; font-weight:600; color:var(--pink-text)">{{ s.time }}</div>
+          <h3 style="font-size:22px; letter-spacing:-.02em; font-weight:600; margin-top:6px; color:#0B1633">{{ s.title }}</h3>
+          <p style="color:#4A5578; line-height:1.6; margin-top:10px; max-width:56ch; font-size:16px">{{ s.text }}</p>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<section id="faq" data-screen-label="FAQ" style="padding: clamp(72px,8vw,120px) 0; background:#F6F8FC">
+  <div style="max-width:1440px; margin:0 auto; padding:0 clamp(20px,4vw,48px); display:grid; grid-template-columns: {{ faqCols }}; gap: clamp(36px,5vw,96px); align-items:start">
+    <div data-reveal>
+      <div style="font-size:15px; font-weight:600; color:var(--pink-text)">{{ t.faq.eyebrow }}</div>
+      <h2 style="font-size: clamp(30px,3.6vw,48px); line-height:1.1; letter-spacing:-.03em; font-weight:700; color:#0B1633; margin-top:10px; text-wrap:balance">{{ t.faq.title }}</h2>
+      <p style="font-size:18px; line-height:1.6; color:#4A5578; margin-top:16px; max-width:40ch; text-wrap:pretty">{{ t.faq.desc }}</p>
+    </div>
+    <div data-reveal="0.1" style="background:#fff; border-radius:10px; padding:4px 24px; box-shadow: 0 1px 2px rgba(11,22,51,.06), 0 0 0 1px rgba(11,22,51,.06)">
+      <sc-for list="{{ faqs }}" as="f" hint-placeholder-count="6">
+        <div style="border-top: {{ f.border }}">
+          <button onClick="{{ f.toggle }}" aria-expanded="{{ f.open }}" style="width:100%; display:flex; justify-content:space-between; align-items:center; gap:16px; padding:20px 0; text-align:left; font-size:17px; font-weight:600; color:#0B1633"><span>{{ f.q }}</span><span style="flex:none; width:26px; height:26px; border-radius:50%; display:grid; place-items:center; background: {{ f.iconBg }}; color: {{ f.iconFg }}; transform: {{ f.rot }}; transition: transform .35s cubic-bezier(.2,.8,.2,1), background .3s, color .3s"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg></span></button>
+          <div style="display:grid; grid-template-rows: {{ f.rows }}; transition: grid-template-rows .4s cubic-bezier(.2,.8,.2,1)"><div style="overflow:hidden; min-height:0"><p style="margin:0 0 22px; color:#4A5578; line-height:1.65; font-size:15px; max-width:64ch">{{ f.a }}</p></div></div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<section id="contact" data-screen-label="Kontakt" style="padding: clamp(72px,8vw,120px) 0; background:#fff">
+  <div style="max-width:1440px; margin:0 auto; padding:0 clamp(20px,4vw,48px); display:grid; grid-template-columns: {{ contactCols }}; gap: clamp(36px,5vw,96px); align-items:start">
+    <div data-reveal>
+      <div style="font-size:15px; font-weight:600; color:var(--pink-text)">{{ t.contact.eyebrow }}</div>
+      <h2 style="font-size: clamp(30px,3.6vw,48px); line-height:1.1; letter-spacing:-.03em; font-weight:700; color:#0B1633; margin-top:10px; text-wrap:balance">{{ t.contact.title }}</h2>
+      <p style="font-size:18px; line-height:1.6; color:#4A5578; margin-top:16px; max-width:46ch; text-wrap:pretty">{{ t.contact.desc }}</p>
+      <div style="display:grid; gap:14px; margin-top:32px; font-size:15px; color:#4A5578">
+        <a href="mailto:info@mccain-digital.com" style="display:flex; gap:12px; align-items:center; color:#0B1633; font-weight:600" style-hover="color: var(--pink-text)"><span style="color:var(--pink-text)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg></span>info@mccain-digital.com</a>
+        <div style="display:flex; gap:12px; align-items:center"><span style="color:var(--pink-text)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><path d="M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path></svg></span>{{ t.contact.address }}</div>
+        <div style="display:flex; gap:12px; align-items:center"><span style="color:var(--pink-text)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"></path><path d="M12 6v6l4 2"></path></svg></span>{{ t.contact.hours }}</div>
+      </div>
+    </div>
+    <div data-reveal="0.1" style="background:#fff; border-radius:12px; padding:28px; box-shadow: 0 1px 2px rgba(11,22,51,.06), 0 24px 60px -24px rgba(11,22,51,.25), 0 0 0 1px rgba(11,22,51,.06)">
+      <sc-if value="{{ formIdle }}" hint-placeholder-val="{{ true }}">
+        <form onSubmit="{{ formSubmit }}" style="display:grid; gap:16px; position:relative">
+          <label style="display:grid; gap:6px; font-size:13px; font-weight:600; color:#0B1633">{{ t.contact.name }}<input name="name" type="text" required autoComplete="name" style="width:100%; height:46px; padding:0 14px; border:1px solid rgba(11,22,51,.16); border-radius:8px; background:#fff; font-size:15px; font-weight:400; outline:none; transition: border-color .2s, box-shadow .2s" style-focus="border-color: var(--pink); box-shadow: 0 0 0 4px var(--pink-ring)"></label>
+          <label style="display:grid; gap:6px; font-size:13px; font-weight:600; color:#0B1633">{{ t.contact.email }}<input name="email" type="email" required autoComplete="email" style="width:100%; height:46px; padding:0 14px; border:1px solid rgba(11,22,51,.16); border-radius:8px; background:#fff; font-size:15px; font-weight:400; outline:none; transition: border-color .2s, box-shadow .2s" style-focus="border-color: var(--pink); box-shadow: 0 0 0 4px var(--pink-ring)"></label>
+          <label style="display:grid; gap:6px; font-size:13px; font-weight:600; color:#0B1633">{{ t.contact.msg }}<textarea name="message" rows="4" required placeholder="{{ t.contact.msgHint }}" style="width:100%; padding:12px 14px; border:1px solid rgba(11,22,51,.16); border-radius:8px; background:#fff; font-size:15px; font-weight:400; line-height:1.5; outline:none; resize:vertical; transition: border-color .2s, box-shadow .2s" style-focus="border-color: var(--pink); box-shadow: 0 0 0 4px var(--pink-ring)"></textarea></label>
+          <input name="company" type="text" tabIndex="-1" autoComplete="off" aria-hidden="true" style="position:absolute; left:-9999px; width:1px; height:1px; opacity:0">
+          <button type="submit" style="display:inline-flex; align-items:center; justify-content:center; gap:4px; height:48px; padding:0 20px; border-radius:999px; background:#0B1633; color:#fff; font-size:15px; font-weight:600; margin-top:4px; transition: background .2s, transform .2s, box-shadow .2s" style-hover="background:#1B2A5E; transform: translateY(-1px); box-shadow: 0 10px 28px -8px rgba(11,22,51,.45)">{{ t.contact.send }}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+          <p style="font-size:12px; color:#6B7590; line-height:1.5">{{ t.contact.privacy }}</p>
+        </form>
+      </sc-if>
+      <sc-if value="{{ formSent }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid; gap:12px; padding:20px 0; text-align:center; justify-items:center; animation: fadeUp .5s cubic-bezier(.2,.8,.2,1)">
+          <span style="width:48px; height:48px; border-radius:50%; background:rgba(79,207,140,.18); color:#1F8A5B; display:grid; place-items:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span>
+          <h3 style="font-size:22px; font-weight:600; letter-spacing:-.02em; color:#0B1633">{{ t.contact.thanks }}</h3>
+          <p style="font-size:15px; color:#4A5578; line-height:1.6; max-width:34ch">{{ t.contact.thanksText }}</p>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</section>
+
+<footer data-screen-label="Footer" style="padding: 56px 0 36px; background:#fff; border-top:1px solid rgba(11,22,51,.08)">
+  <div style="max-width:1440px; margin:0 auto; padding:0 clamp(20px,4vw,48px)">
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:32px 24px">
+      <sc-for list="{{ footerCols }}" as="col" hint-placeholder-count="5">
+        <div>
+          <div style="font-size:14px; font-weight:600; color:#0B1633; margin-bottom:12px">{{ col.title }}</div>
+          <sc-for list="{{ col.links }}" as="l" hint-placeholder-count="4"><a href="{{ l.href }}" target="{{ l.target }}" rel="noopener" onClick="{{ l.onClick }}" style="display:block; font-size:14px; color:#4A5578; padding:5px 0; transition: color .2s" style-hover="color: var(--pink-text)">{{ l.label }}</a></sc-for>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:16px; margin-top:48px; padding-top:24px; border-top:1px solid rgba(11,22,51,.08); font-size:13px; color:#6B7590">
+      <div style="display:flex; align-items:center; gap:10px"><svg width="22" height="22" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="7" fill="#0B1633"></rect><path d="M7 19v-7.5a3 3 0 0 1 6 0V19M13 19v-7.5a3 3 0 0 1 6 0V19" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round"></path><circle cx="22" cy="8" r="2.6" fill="var(--pink)"></circle></svg><span>{{ t.footer.copy }}</span></div>
+      <div style="display:flex; align-items:center; gap:14px"><span>{{ t.footer.tagline }}</span>
+        <div role="group" aria-label="Sprache" style="display:flex; border:1px solid rgba(11,22,51,.14); border-radius:999px; padding:2px; font-size:12px; font-weight:600">
+          <button onClick="{{ setDe }}" style="padding:4px 9px; border-radius:999px; background: {{ deBgFoot }}; color: {{ deFgFoot }}">DE</button>
+          <button onClick="{{ setEn }}" style="padding:4px 9px; border-radius:999px; background: {{ enBgFoot }}; color: {{ enFgFoot }}">EN</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<sc-if value="{{ mobileOpen }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Mobiles Menü" style="position:fixed; inset:0; z-index:70; background:#fff; overflow-y:auto; padding: 88px clamp(20px,5vw,48px) 40px; animation: fadeIn .25s ease">
+  <div style="display:grid">
+    <sc-for list="{{ mobileGroups }}" as="g" hint-placeholder-count="6">
+      <div style="padding:14px 0; border-bottom:1px solid rgba(11,22,51,.08)">
+        <div style="font-size:13px; font-weight:600; color:var(--pink-text)">{{ g.title }}</div>
+        <div style="display:grid; margin-top:6px">
+          <sc-for list="{{ g.links }}" as="l" hint-placeholder-count="3"><button onClick="{{ l.onClick }}" style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; font-size:18px; font-weight:600; color:#0B1633; text-align:left">{{ l.label }}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8C95B0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button></sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+  <button onClick="{{ goContact }}" style="display:flex; align-items:center; justify-content:center; gap:4px; width:100%; height:48px; margin-top:24px; border-radius:999px; background:#0B1633; color:#fff; font-size:15px; font-weight:600">{{ t.nav.contact }}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+</div>
+</sc-if>
+
+<sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Modal" onClick="{{ closeModal }}" style="position:fixed; inset:0; z-index:90; display:grid; place-items:center; padding:24px; background: rgba(11,22,51,.5); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: {{ modalOp }}; transition: opacity .3s">
+  <div role="dialog" aria-modal="true" aria-label="{{ modal.title }}" onClick="{{ stop }}" style="position:relative; width:100%; max-width:760px; max-height: min(88vh, 900px); overflow-y:auto; background:#fff; border-radius:14px; box-shadow: 0 40px 120px -20px rgba(11,22,51,.45); transform: {{ modalTf }}; opacity: {{ modalOp }}; transition: transform .35s cubic-bezier(.2,.8,.2,1), opacity .3s; color:#0B1633">
+    <button onClick="{{ closeModal }}" aria-label="{{ t.common.close }}" style="position:absolute; top:16px; right:16px; width:38px; height:38px; border-radius:50%; background:#F6F8FC; display:grid; place-items:center; color:#0B1633; transition: background .2s" style-hover="background:#E9EDF7"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+    <div style="padding: 36px clamp(24px,4vw,44px) 40px">
+      <div style="display:flex; align-items:center; gap:14px">
+        <div style="flex:none; width:44px; height:44px; border-radius:11px; background:var(--pink-soft); color:var(--pink-text); display:grid; place-items:center">{{ modal.icon }}</div>
+        <div><div style="font-size:13px; font-weight:600; color:var(--pink-text)">{{ modal.kicker }}</div><h3 style="font-size: clamp(24px,3vw,32px); letter-spacing:-.03em; font-weight:700; margin-top:2px; color:#0B1633">{{ modal.title }}</h3></div>
+      </div>
+      <p style="font-size:17px; line-height:1.6; color:#4A5578; margin-top:22px; text-wrap:pretty">{{ modal.lead }}</p>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:28px; margin-top:28px">
+        <div>
+          <div style="font-size:13px; font-weight:600; color:#0B1633">{{ modal.listTitle }}</div>
+          <ul style="list-style:none; padding:0; margin-top:12px; display:grid; gap:10px">
+            <sc-for list="{{ modal.items }}" as="i" hint-placeholder-count="4"><li style="display:flex; gap:10px; font-size:15px; line-height:1.5; color:#0B1633"><span style="flex:none; color:var(--pink-text); margin-top:3px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span>{{ i }}</li></sc-for>
+          </ul>
+        </div>
+        <div style="display:grid; gap:16px; align-content:start; padding:18px; border-radius:10px; background:#F6F8FC">
+          <sc-for list="{{ modal.facts }}" as="f" hint-placeholder-count="4"><div><div style="font-size:12px; font-weight:600; color:#6B7590">{{ f.k }}</div><div style="font-size:15px; margin-top:3px; color:#0B1633; line-height:1.45">{{ f.v }}</div></div></sc-for>
+        </div>
+      </div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:32px; padding-top:24px; border-top:1px solid rgba(11,22,51,.10)">
+        <button onClick="{{ modalCta }}" style="display:inline-flex; align-items:center; gap:4px; height:44px; padding:0 12px 0 20px; border-radius:999px; background:#0B1633; color:#fff; font-size:15px; font-weight:600; transition: background .2s, transform .2s" style-hover="background:#1B2A5E; transform: translateY(-1px)">{{ modal.cta }}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+        <sc-if value="{{ modal.hasLink }}" hint-placeholder-val="{{ false }}"><a href="{{ modal.link }}" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:8px; height:44px; padding:0 20px; border-radius:999px; background:#fff; color:#0B1633; font-size:15px; font-weight:600; border:1px solid rgba(11,22,51,.14); transition: border-color .2s" style-hover="border-color: rgba(11,22,51,.3); color:#0B1633">{{ modal.linkLabel }}<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a></sc-if>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;heroVariant&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A&quot;,&quot;B&quot;],&quot;default&quot;:&quot;A&quot;,&quot;tsType&quot;:&quot;'A' | 'B'&quot;,&quot;section&quot;:&quot;Hero&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;options&quot;:[&quot;#FF3D8A&quot;,&quot;#F0468F&quot;,&quot;#E8337F&quot;,&quot;#FF5CA8&quot;],&quot;default&quot;:&quot;#FF3D8A&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Farbe&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Bewegung&quot;}}">
+class Component extends DCLogic {
+  static MENU_W = { services: 640, work: 540, studio: 560, process: 540, resources: 440, pricing: 480 };
+  static GRAD = ['#7B86F0', '#A86EE8', '#4AA6EF', '#3FC9C2', '#4FCF8C'];
+  static ICONS = {
+    sparkles: ['M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z', 'M19 17v4', 'M17 19h4'],
+    layout: ['M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z', 'M3 9h18', 'M9 21V9'],
+    globe: ['M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z', 'M2 12h20', 'M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z'],
+    server: ['M4 4h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z', 'M4 14h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1z', 'M7 7h.01', 'M7 17h.01'],
+    book: ['M12 7v14', 'M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z'],
+    file: ['M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z', 'M14 2v4a2 2 0 0 0 2 2h4', 'M10 9H8', 'M16 13H8', 'M16 17H8'],
+    layers: ['M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z', 'M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12', 'M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17'],
+    commit: ['M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'M3 12h6', 'M15 12h6'],
+    gauge: ['m12 14 4-4', 'M3.34 19a10 10 0 1 1 17.32 0']
+  };
+  static T = {
+    nav: { services: { de: 'Leistungen', en: 'Services' }, work: { de: 'Arbeiten', en: 'Work' }, studio: 'Studio', process: { de: 'Ablauf', en: 'Process' }, resources: { de: 'Ressourcen', en: 'Resources' }, pricing: { de: 'Preise', en: 'Pricing' }, contact: { de: 'Kontakt', en: 'Contact' }, menu: { de: 'Menü', en: 'Menu' } },
+    hero: {
+      eyebrow: { de: 'Digital Product Studio · Bayern · seit 2016', en: 'Digital product studio · Bavaria · since 2016' },
+      title: { de: 'Software, die in Produktion geht.', en: 'Software that ships to production.' },
+      lead: { de: 'KI-Werkzeuge auf Ihren eigenen Daten, Web-Apps, Websites und Individualsoftware – geplant, gebaut und betrieben von den zwei Gründern, die Ihr Angebot schreiben.', en: 'AI tools on your own data, web apps, websites and custom software — planned, built and run by the two founders who write your quote.' },
+      cta1: { de: 'Projekt anfragen', en: 'Start a project' }, cta2: { de: 'Die Seite fragen', en: 'Ask the site' },
+      trust1: { de: 'Antwort in 24 Stunden', en: 'Reply within 24 hours' }, trust2: { de: 'Festpreis in 48 Stunden', en: 'Fixed quote within 48 hours' }, trust3: { de: 'Kein Verkaufsgespräch', en: 'No sales call' }
+    },
+    mock: { title: { de: 'Projektübersicht', en: 'Project overview' }, chip: { de: 'Festpreis bestätigt', en: 'Fixed quote confirmed' }, weeks: { de: 'Woche 1–8', en: 'Week 1–8' }, m1: { de: 'Prototyp', en: 'Prototype' }, m2: 'MVP', demo: { de: 'Nächste Demo', en: 'Next demo' }, demoVal: { de: 'Freitag, 14:00', en: 'Friday, 2 pm' }, reply: { de: 'Antwortzeit', en: 'Response time' }, live: 'Live',
+      rows: { de: ['Klickbarer Prototyp', 'Auth & Zahlungen', 'Launch'], en: ['Clickable prototype', 'Auth & payments', 'Launch'] } },
+    brands: { label: { de: 'Zwei Jahrzehnte Erfahrung – unter anderem für', en: 'Two decades of experience — including work for' }, note: { de: 'Berufliche Referenzen der Gründer aus zwei Jahrzehnten – keine Kundenliste von McCain Digital.', en: 'Career references of the founders over two decades — not a client list of McCain Digital.' } },
+    services: { eyebrow: { de: 'Leistungen', en: 'Services' }, title: { de: 'Vier Leistungen. Durchgehend senior.', en: 'Four services. Senior throughout.' }, desc: { de: 'Kein Baukasten: Jede Leistung wird von denselben zwei Personen geplant, gebaut und nach dem Launch betreut.', en: 'No hand-offs: every service is planned, built and supported after launch by the same two people.' } },
+    ai: {
+      eyebrow: { de: 'KI, eingebaut', en: 'AI, built in' }, title: { de: 'Fragen Sie diese Seite.', en: 'Ask this page.' },
+      desc: { de: 'Die meisten Agentur-Websites sprechen über KI. Diese hier beantwortet Ihre Fragen selbst – zu Kosten, Dauer und Vorgehen – oder schreibt aus einer Zeile Projektidee eine erste Zusammenfassung.', en: 'Most agency websites talk about AI. This one answers your questions itself — on cost, timing and approach — or turns a one-line project idea into a first brief.' },
+      points: { de: ['Antwortet nur aus der Wissensbasis dieser Seite – keine erfundenen Preise oder Referenzen', 'Erkennt, was wir nicht anbieten, und nennt die Alternative', 'Dieselbe Technik, die wir für Kunden bauen: Modell, Leitplanken, Enthaltungspfad'], en: ['Answers only from this site’s knowledge base — no invented prices or references', 'Recognises what we do not offer and names the alternative', 'The same engineering we build for clients: model, guardrails, abstain path'] },
+      modeAsk: { de: 'Fragen', en: 'Ask' }, modeBrief: { de: 'Projekt-Brief', en: 'Project brief' }, send: { de: 'Senden', en: 'Send' },
+      thinking: { de: 'Antwort wird geschrieben …', en: 'Writing an answer …' },
+      privacy: { de: 'Antworten kommen von Claude (Anthropic). Es wird nichts gespeichert. Ist das Modell nicht erreichbar, antwortet die Seite aus ihrer eigenen Wissensbasis.', en: 'Answers come from Claude (Anthropic). Nothing is stored. If the model is unavailable, the page answers from its own knowledge base.' },
+      intro: { de: 'Fragen Sie mich zu Kosten, Dauer oder Vorgehen – oder beschreiben Sie Ihr Vorhaben in einer Zeile.', en: 'Ask me about cost, timing or approach — or describe your project in one line.' },
+      introBrief: { de: 'Beschreiben Sie Ihr Vorhaben in einer Zeile. Ich fasse zusammen, was wir bauen würden, wie lange es dauert und wie es weitergeht.', en: 'Describe your project in one line. I will summarise what we would build, how long it takes and what happens next.' },
+      placeholderAsk: { de: 'Ihre Frage …', en: 'Your question …' }, placeholderBrief: { de: 'Ihr Vorhaben in einer Zeile …', en: 'Your project in one line …' },
+      model: 'claude-haiku-4-5', stack: { de: 'Womit wir arbeiten', en: 'What we work with' },
+      chipsAsk: { de: ['Was kostet ein Projekt?', 'Wie lange dauert eine Web-App?', 'Wer baut das konkret?', 'Können wir selbst hosten?'], en: ['What does a project cost?', 'How long does a web app take?', 'Who actually builds it?', 'Can we host it ourselves?'] },
+      chipsBrief: { de: ['Ein Buchungssystem für unsere Praxis', 'Eine KI-Suche über unsere Verträge', 'Ein Kundenportal für Bestandskunden'], en: ['A booking system for our clinic', 'An AI search across our contracts', 'A customer portal for existing clients'] },
+      fallback: { de: 'Das Modell ist gerade nicht erreichbar. Kurz aus der Wissensbasis: Antwort in 24 Stunden, Festpreis in 48 – schreiben Sie an info@mccain-digital.com.', en: 'The model is not reachable right now. From the knowledge base: a reply within 24 hours, a fixed quote within 48 — write to info@mccain-digital.com.' }
+    },
+    work: { eyebrow: { de: 'Arbeiten', en: 'Work' }, title: { de: 'Ausgewählte Projekte.', en: 'Selected work.' }, desc: { de: 'Beides ist live und gehört uns. Kundenprojekte folgen, sobald die Freigaben vorliegen.', en: 'Both are live and ours. Client work follows once it is cleared.' }, note: { de: 'Kundenreferenzen werden erst nach schriftlicher Freigabe veröffentlicht. Nichts auf dieser Seite ist erfunden.', en: 'Client references are published only after written clearance. Nothing on this page is invented.' } },
+    studio: { eyebrow: 'Studio', title: { de: 'Zwei Gründer. Keine Übergaben.', en: 'Two founders. No hand-offs.' }, desc: { de: 'Seit 2016 als unabhängiges Studio. Die Personen, die Ihr Angebot schreiben, bauen das Produkt – und sind auch im dritten Jahr noch erreichbar.', en: 'An independent studio since 2016. The people who write your quote build the product — and still pick up the phone in year three.' } },
+    process: { eyebrow: { de: 'Ablauf', en: 'Process' }, title: { de: 'Vom ersten Kontakt zum Festpreis.', en: 'From first contact to a fixed quote.' }, desc: { de: 'Vier Schritte. Sie können nach jedem davon aufhören – bis dahin kostet Sie nichts etwas.', en: 'Four steps. You can stop after any of them — nothing up to that point costs you anything.' }, of: { de: 'von 04', en: 'of 04' } },
+    faq: { eyebrow: { de: 'Fragen & Antworten', en: 'Questions & answers' }, title: { de: 'Klare Antworten.', en: 'Straight answers.' }, desc: { de: 'Kosten, Dauer, Zuständigkeiten – und wann wir die falsche Wahl sind.', en: 'Cost, timing, who does what — and when we are the wrong choice.' } },
+    contact: {
+      eyebrow: { de: 'Kontakt', en: 'Contact' }, title: { de: 'Erzählen Sie uns von Ihrem Vorhaben.', en: 'Tell us about your project.' },
+      desc: { de: 'Eine Antwort innerhalb von 24 Stunden, ein Festpreis innerhalb von 48 – von einer der zwei Personen, die es bauen würden.', en: 'A reply within 24 hours, a fixed quote within 48 — from one of the two people who would build it.' },
+      name: 'Name', email: { de: 'E-Mail', en: 'Email' }, msg: { de: 'Worum geht es?', en: 'What is it about?' }, msgHint: { de: 'Eine Zeile reicht.', en: 'One line is enough.' },
+      send: { de: 'Anfrage senden', en: 'Send request' }, thanks: { de: 'Danke – Ihre Nachricht ist da.', en: 'Thank you — your message is in.' },
+      thanksText: { de: 'Sie hören innerhalb von 24 Stunden von Christian oder Kathi.', en: 'You will hear from Christian or Kathi within 24 hours.' },
+      hours: { de: 'Mo–Fr · 9:00–18:00 Uhr (MEZ)', en: 'Mon–Fri · 9:00–18:00 CET' }, address: { de: 'Holderweg 1 · 86869 Oberostendorf · Bayern', en: 'Holderweg 1 · 86869 Oberostendorf · Bavaria' },
+      privacy: { de: 'Ihre Angaben werden nur zur Beantwortung Ihrer Anfrage verwendet.', en: 'Your details are used only to answer your request.' }
+    },
+    footer: {
+      services: { de: 'Leistungen', en: 'Services' }, work: { de: 'Arbeiten', en: 'Work' }, studio: 'Studio', resources: { de: 'Ressourcen', en: 'Resources' }, legal: { de: 'Rechtliches', en: 'Legal' },
+      team: 'Team', news: 'News', process: { de: 'Ablauf', en: 'Process' }, faq: { de: 'Fragen & Antworten', en: 'Questions & answers' }, contact: { de: 'Kontakt', en: 'Contact' },
+      notes: { de: 'Tech-Notizen', en: 'Tech notes' }, llms: { de: 'llms.txt & KI-Lesbarkeit', en: 'llms.txt & AI readability' }, stack: { de: 'Stack & Werkzeuge', en: 'Stack & tools' },
+      imprint: { de: 'Impressum', en: 'Imprint' }, privacy: { de: 'Datenschutz', en: 'Privacy' }, terms: { de: 'AGB', en: 'Terms' }, withdrawal: { de: 'Widerruf', en: 'Withdrawal' },
+      copy: { de: '© 2026 McCain Digital · Oberostendorf, Bayern', en: '© 2026 McCain Digital · Oberostendorf, Bavaria' }, tagline: { de: 'Gebaut von den zwei Personen, die es anbieten.', en: 'Built by the two people who quote it.' }
+    },
+    menus: {
+      servicesFoot: { de: 'Nicht sicher, was passt?', en: 'Not sure what fits?' }, askSite: { de: 'Die Seite fragen', en: 'Ask the site' }, seeProcess: { de: 'Ablauf ansehen', en: 'See the process' },
+      workFoot: { de: 'Kundenprojekte folgen nach Freigabe.', en: 'Client work follows after clearance.' },
+      studioTitle: { de: 'Das Studio', en: 'The studio' }, studioText: { de: 'Unabhängig seit 2016. Zwei Senior-Gründer, keine Junioren, keine Account-Manager.', en: 'Independent since 2016. Two senior founders, no juniors, no account managers.' }, teamTitle: 'Team', studioFootNote: { de: 'Kosten, Dauer, Zuständigkeiten.', en: 'Cost, timing, who does what.' }, studioFoot: { de: 'Fragen & Antworten', en: 'Questions & answers' },
+      processFoot: { de: 'Sie können nach jedem Schritt aufhören.', en: 'You can stop after any step.' },
+      soon: { de: 'Bald', en: 'Soon' },
+      resNotes: { de: 'Tech-Notizen', en: 'Tech notes' }, resNotesText: { de: 'Kurze Beiträge aus der Praxis – RAG, Performance, Betrieb.', en: 'Short notes from practice — RAG, performance, operations.' },
+      resLlms: { de: 'llms.txt & KI-Lesbarkeit', en: 'llms.txt & AI readability' }, resLlmsText: { de: 'Wie diese Seite von KI-Agenten gelesen wird – und warum das zählt.', en: 'How AI agents read this site — and why that matters.' },
+      resStack: { de: 'Stack & Werkzeuge', en: 'Stack & tools' }, resStackText: { de: 'Womit wir bauen, und warum.', en: 'What we build with, and why.' },
+      pricingTitle: { de: 'Der Weg zum Festpreis', en: 'The way to a fixed quote' }, pricingText: { de: 'Keine Preisliste. Jedes Angebot ist eine konkrete Zahl mit klar definiertem Umfang.', en: 'No price list. Every quote is a concrete number with a clearly defined scope.' },
+      pricingFoot: { de: 'Bis zum Angebot kostet Sie nichts etwas.', en: 'Nothing costs anything until the quote.' }, pricingCta: { de: 'Anfrage starten', en: 'Start a request' }
+    },
+    common: { details: { de: 'Details', en: 'Details' }, viewCase: { de: 'Projekt ansehen', en: 'View project' }, viewAll: { de: 'Alle Projekte', en: 'All projects' }, close: { de: 'Schließen', en: 'Close' }, cta: { de: 'Projekt anfragen', en: 'Start a project' }, visit: { de: 'Produkt öffnen', en: 'Open product' }, visitSite: { de: 'Seite öffnen', en: 'Open site' }, get: { de: 'Was Sie bekommen', en: 'What you get' }, done: { de: 'Was gebaut wurde', en: 'What was built' }, service: { de: 'Leistung', en: 'Service' }, caseLabel: { de: 'Projekt', en: 'Project' } }
+  };
+  static SERVICES = [
+    { id: 'ai', icon: 'sparkles', title: { de: 'KI-Tools', en: 'AI tools' }, duration: { de: '4–10 Wochen', en: '4–10 weeks' },
+      menu: { de: 'RAG, Agenten, MCP-Server – auf Ihren Daten', en: 'RAG, agents, MCP servers — on your data' },
+      short: { de: 'Produktive KI auf Ihren eigenen Daten: RAG mit Quellenangaben, Agenten mit Leitplanken, MCP-Server in CRM und ERP. Modellunabhängig.', en: 'Production AI on your own data: RAG with citations, agents with guardrails, MCP servers into your CRM and ERP. Model-agnostic.' },
+      lead: { de: 'KI, die im Betrieb funktioniert – nicht als nachträglich angeschraubtes Chatfenster. Systeme, die Quellen nennen, „Ich weiß es nicht“ sagen können und in Ihre bestehenden Werkzeuge greifen.', en: 'AI that works in production — not a chat window bolted on afterwards. Systems that cite their sources, can say “I don’t know”, and reach into the tools you already run.' },
+      items: { de: ['RAG über Ihre Daten – pgvector oder Qdrant, mit Zitaten und Enthaltungspfad', 'Agenten und Automatisierung – Leitplanken, Protokolle, menschliche Freigabe', 'MCP-Tool-Server mit Auth, Rate-Limits und Audit-Log', 'Modellunabhängig: Frontier-APIs oder offene Gewichte (Llama, Mistral, Qwen)'], en: ['RAG over your data — pgvector or Qdrant, with citations and an abstain path', 'Agents and automation — guardrails, logs, human approval', 'MCP tool servers with auth, rate limits and audit logging', 'Model-agnostic: frontier APIs or open weights (Llama, Mistral, Qwen)'] },
+      facts: [{ k: { de: 'Typische Dauer', en: 'Typical duration' }, v: { de: '4–10 Wochen', en: '4–10 weeks' } }, { k: 'Proof of Value', v: { de: '2–4 Wochen an einem Workflow mit Ihren echten Daten', en: '2–4 weeks on one workflow with your real data' } }, { k: 'Stack', v: 'Python · TypeScript · pgvector · MCP · Claude, GPT, Llama' }, { k: { de: 'Betrieb', en: 'Hosting' }, v: { de: 'Self-hosted oder Cloud – Ihre Schlüssel, Ihre Daten', en: 'Self-hosted or cloud — your keys, your data' } }] },
+    { id: 'apps', icon: 'layout', title: { de: 'Web-Apps', en: 'Web apps' }, duration: { de: '6–12 Wochen (MVP)', en: '6–12 weeks (MVP)' },
+      menu: { de: 'React, Next.js, TypeScript – vom MVP bis zur Skalierung', en: 'React, Next.js, TypeScript — from MVP to scale' },
+      short: { de: 'React, Next.js und TypeScript, durchgehend typisiert. Core Web Vitals im grünen Bereich ab Tag eins – vom MVP bis zur Skalierung ohne Neuentwicklung.', en: 'React, Next.js and TypeScript end to end. Core Web Vitals green from day one — from MVP to scale without a rewrite.' },
+      lead: { de: 'Bewusst unaufgeregte Technologieentscheidungen, damit Sie in zwei Jahren noch dafür einstellen können. Performance ist eine Architekturentscheidung mit Budget in der CI, kein Aufräumen am Ende.', en: 'Deliberately boring technology choices, so you can still hire for the stack in two years. Performance is an architecture decision with a budget in CI, not a clean-up at the end.' },
+      items: { de: ['Echtzeit, Authentifizierung und Zahlungen integriert', 'Lighthouse-Budget in der CI – grüne Vitals als Abnahmekriterium', 'Eine Codebasis, die Ihr nächstes Team weiterentwickeln kann', 'Klickbarer Prototyp innerhalb von sieben Tagen'], en: ['Real-time, authentication and payments wired in', 'Lighthouse budget in CI — green vitals as an acceptance criterion', 'A codebase your next team can carry on', 'Clickable prototype within seven days'] },
+      facts: [{ k: { de: 'Typische Dauer', en: 'Typical duration' }, v: { de: '6–12 Wochen bis zum MVP', en: '6–12 weeks to MVP' } }, { k: { de: 'Erster Klick', en: 'First click' }, v: { de: 'Prototyp in Woche eins', en: 'Prototype in week one' } }, { k: 'Stack', v: 'React · Next.js · TypeScript · PostgreSQL' }, { k: { de: 'Übergabe', en: 'Hand-over' }, v: { de: 'Vollständiger Quellcode in Ihrem Repository', en: 'Full source in your repository' } }] },
+    { id: 'web', icon: 'globe', title: { de: 'Websites', en: 'Websites' }, duration: { de: '3–6 Wochen', en: '3–6 weeks' },
+      menu: { de: 'Handgebaut, Lighthouse 100, lesbar für Mensch und KI', en: 'Hand-built, Lighthouse 100, readable by people and AI' },
+      short: { de: 'Handgebaute Marketing-Websites mit Bestwerten in Lighthouse, strukturierten Daten und llms.txt – lesbar für Menschen, Suchmaschinen und KI-Agenten.', en: 'Hand-built marketing sites with top Lighthouse scores, structured data and llms.txt — readable by people, search engines and AI agents.' },
+      lead: { de: 'Kein Page-Builder, kein Template. Semantisches HTML, JSON-LD, Sitemap und optimierte Bilder – damit Ihre Seite von Menschen wie von Maschinen gleich klar gelesen wird.', en: 'No page builder, no template. Semantic HTML, JSON-LD, sitemap and optimised images — so your site reads as clearly to machines as it does to people.' },
+      items: { de: ['Lighthouse 100/100/100/100 als Zielwert – gemessen, nicht behauptet', 'Semantisches HTML, JSON-LD, Sitemap, llms.txt', 'Eigenes Design statt Template', 'CMS oder rein statisch – Ihre Entscheidung'], en: ['Lighthouse 100/100/100/100 as the target — measured, not claimed', 'Semantic HTML, JSON-LD, sitemap, llms.txt', 'Custom design instead of a template', 'CMS or fully static — your call'] },
+      facts: [{ k: { de: 'Typische Dauer', en: 'Typical duration' }, v: { de: '3–6 Wochen vom Briefing bis live', en: '3–6 weeks from brief to live' } }, { k: { de: 'Nachweis', en: 'Proof' }, v: { de: 'Diese Seite: 100/100/100/100, CLS 0, TBT 0 ms', en: 'This site: 100/100/100/100, CLS 0, TBT 0 ms' } }, { k: 'Stack', v: 'HTML · CSS · TypeScript · optional CMS' }, { k: 'SEO', v: { de: 'Strukturierte Daten und llms.txt ab Tag eins', en: 'Structured data and llms.txt from day one' } }] },
+    { id: 'software', icon: 'server', title: { de: 'Software für Unternehmen', en: 'Software for companies' }, duration: { de: '8–14 Wochen', en: '8–14 weeks' },
+      menu: { de: 'Dashboards, interne Tools, Integrationen – Cloud oder on-premise', en: 'Dashboards, internal tools, integrations — cloud or on-premise' },
+      short: { de: 'Dashboards, interne Werkzeuge und Integrationen – ERP, CRM, REST/SOAP und Altsysteme inklusive. Betrieb in der Cloud oder on-premise.', en: 'Dashboards, internal tools and integrations — ERP, CRM, REST/SOAP and legacy systems included. Runs in the cloud or on-premise.' },
+      lead: { de: 'Bevor wir etwas entwerfen, nehmen wir auf, wie die Arbeit tatsächlich läuft. Danach entsteht Software, die dort betrieben wird, wo Ihre Daten liegen – und die Ihnen gehört.', en: 'Before we design anything, we map how the work really runs. Then we build software that runs where your data lives — and that you own.' },
+      items: { de: ['Prozessaufnahme vor dem ersten Entwurf', 'Dokumentiert, getestet, übergeben', 'Vollständiger Quellcode in Ihrem Repository – kein Lock-in, keine Lizenz pro Nutzer', 'Deployment dort, wo Ihre Daten liegen'], en: ['Process mapping before the first draft', 'Documented, tested, handed over', 'Full source in your repository — no lock-in, no per-seat licence', 'Deployed where your data lives'] },
+      facts: [{ k: { de: 'Typische Dauer', en: 'Typical duration' }, v: { de: '8–14 Wochen', en: '8–14 weeks' } }, { k: { de: 'Integrationen', en: 'Integrations' }, v: 'ERP · CRM · REST/SOAP · Legacy' }, { k: 'Stack', v: 'TypeScript · Python · PostgreSQL · Docker' }, { k: { de: 'Betrieb', en: 'Hosting' }, v: { de: 'Cloud oder on-premise', en: 'Cloud or on-premise' } }] }
+  ];
+  static CASES = [
+    { id: 'recall', kind: { de: 'Eigenes Produkt', en: 'Own product' }, status: 'Live', title: 'whatever-recall', link: 'https://whatever-recall.com', tileBg: 'linear-gradient(135deg,#7B86F0,#A86EE8)', visualBg: 'linear-gradient(135deg, #EEF0FD, #F7ECFA)',
+      menu: { de: 'KI-natives Projektgedächtnis – live, self-hosted', en: 'AI-native project memory — live, self-hosted' },
+      short: { de: 'KI-natives Projektgedächtnis für Software-Teams. Wissen wird beim Schreiben an den Git-Commit gestempelt und in Mikrosekunden zurückgelesen – ohne Tokens.', en: 'AI-native project memory for software teams. Knowledge is stamped onto the git commit at write time and read back in microseconds — for zero tokens.' },
+      stack: 'TypeScript · Python · pgvector · MCP',
+      lead: { de: 'Software-Teams verlieren Kontext: Warum wurde etwas so gebaut? whatever-recall hält dieses Wissen dort fest, wo es entsteht – am Commit – und macht es für Menschen und KI-Assistenten abrufbar, ohne Upload und ohne Telemetrie.', en: 'Software teams lose context: why was something built this way? whatever-recall keeps that knowledge where it originates — on the commit — and makes it available to people and AI assistants, with no upload and no telemetry.' },
+      items: { de: ['Wissen wird beim Schreiben an den Git-Commit gestempelt – während die KI noch weiß, warum', 'Rücklesen in Mikrosekunden, ohne Tokens', 'Self-hosted: keine Telemetrie, kein Upload', 'MCP-Anbindung für Claude und andere Assistenten'], en: ['Knowledge is stamped onto the git commit at write time — while the AI still knows why', 'Read back in microseconds, for zero tokens', 'Self-hosted: no telemetry, no upload', 'MCP integration for Claude and other assistants'] },
+      facts: [{ k: { de: 'Umfang', en: 'Scope' }, v: { de: 'Produkt, Marke, Website, Lizenzierung', en: 'Product, brand, site, licensing' } }, { k: 'Stack', v: 'TypeScript · Python · pgvector · MCP' }, { k: 'Status', v: 'Live · self-hosted' }] },
+    { id: 'site', kind: { de: 'Website', en: 'Website' }, status: 'Live', title: 'mccain-digital.com', link: 'https://mccain-digital.com', tileBg: 'linear-gradient(135deg,#3FC9C2,#4FCF8C)', visualBg: 'linear-gradient(135deg, #E9F8F5, #EAF9F0)',
+      menu: { de: 'Handgeschrieben, 100/100/100/100 in Lighthouse', en: 'Hand-written, 100/100/100/100 in Lighthouse' },
+      short: { de: 'Handgeschrieben ohne Framework und Build-Schritt, mit eigener Canvas-Physik-Engine – bei 100/100/100/100 in Lighthouse, CLS 0 und TBT 0 ms.', en: 'Hand-written with no framework and no build step, running a custom canvas physics engine — at 100/100/100/100 in Lighthouse, CLS 0 and TBT 0 ms.' },
+      stack: 'HTML · CSS · JavaScript · Canvas · JSON-LD',
+      lead: { de: 'Die eigene Website als Nachweis: Jedes Wort ist echter DOM-Text, strukturiert mit JSON-LD und zusammengefasst in llms.txt – lesbar für Menschen, Suchmaschinen und KI-Agenten, bei perfekten Messwerten.', en: 'Our own website as proof: every word is real DOM text, structured with JSON-LD and summarised in llms.txt — readable by people, search engines and AI agents, at perfect scores.' },
+      items: { de: ['Lighthouse 100/100/100/100 – Performance, Barrierefreiheit, Best Practices, SEO', 'Cumulative Layout Shift 0, Total Blocking Time 0 ms', 'JSON-LD, Sitemap und llms.txt für Maschinen', 'Eigene Pixel-Physik-Engine auf Canvas, die sich bei Inaktivität schlafen legt'], en: ['Lighthouse 100/100/100/100 — performance, accessibility, best practices, SEO', 'Cumulative Layout Shift 0, Total Blocking Time 0 ms', 'JSON-LD, sitemap and llms.txt for machines', 'Custom canvas pixel-physics engine that sleeps when idle'] },
+      facts: [{ k: { de: 'Nachweis', en: 'Proof' }, v: '100 / 100 / 100 / 100 · CLS 0 · TBT 0 ms' }, { k: 'Stack', v: 'Vanilla HTML/CSS/JS · Canvas · JSON-LD' }, { k: 'Status', v: 'Live' }] }
+  ];
+  static FAQS = [
+    { q: { de: 'Was kostet ein Projekt?', en: 'What does a project cost?' }, a: { de: 'Es gibt keine Preisliste. Innerhalb von 48 Stunden nach Ihrer Beschreibung erhalten Sie ein Festpreisangebot – eine konkrete Zahl, keine Spanne, die sich später verdoppelt. Eine kleine Website beginnt im niedrigen fünfstelligen Bereich; ein KI-Werkzeug auf Ihren Daten kostet mehr, weil die Arbeit in den Daten steckt, nicht im Modell.', en: 'There is no price list. Within 48 hours of your description you receive a fixed quote — a concrete number, not a range that doubles later. A small website starts in the low five figures; an AI tool on your data costs more, because the work is in the data, not in the model.' } },
+    { q: { de: 'Wie lange dauert es?', en: 'How long does it take?' }, a: { de: 'Marketing-Website 3–6 Wochen. Web-App-MVP 6–12 Wochen. KI-Werkzeug auf Ihren Daten 4–10 Wochen, je nach Zustand der Daten. Interne Software 8–14 Wochen. In der ersten Woche sehen Sie etwas Klickbares.', en: 'Marketing site 3–6 weeks. Web app MVP 6–12 weeks. AI tool on your data 4–10 weeks, depending on how tidy the data is. Internal software 8–14 weeks. You see something clickable in the first week.' } },
+    { q: { de: 'Wer baut es konkret?', en: 'Who actually builds it?' }, a: { de: 'Die zwei Gründer. Christian entwickelt und betreibt, Kathi verantwortet Design und Marke. Keine Junioren, die auf Ihrem Budget lernen, kein Account-Manager zwischen Ihnen und der Arbeit, keine Weitergabe an Dritte.', en: 'The two founders. Christian builds and runs, Kathi does design and brand. No juniors learning on your budget, no account manager between you and the work, no subcontracting.' } },
+    { q: { de: 'Ist KI bei Ihnen mehr als ein Schlagwort?', en: 'Is AI more than a buzzword here?' }, a: { de: 'Wir betreiben ein eigenes KI-Produkt: whatever-recall, Projektgedächtnis für Software-Teams – live und self-hosted. Die Konsole auf dieser Seite ist ebenfalls von uns.', en: 'We run our own AI product: whatever-recall, project memory for software teams — live and self-hosted. The console on this page is ours too.' } },
+    { q: { de: 'Was passiert nach dem Launch?', en: 'What happens after launch?' }, a: { de: 'Wir bleiben. Das ist der Grund, warum das Studio aus zwei Senior-Leuten besteht und nicht aus fünfzehn: Auch im dritten Jahr erreichen Sie dieselben Personen. Wartung, Änderungen, neue Funktionen – ohne erneutes Einarbeiten.', en: 'We stay. That is why the studio is two senior people rather than fifteen: in year three you still reach the same people. Maintenance, changes, new features — no re-onboarding.' } },
+    { q: { de: 'Können wir selbst hosten?', en: 'Can we host it ourselves?' }, a: { de: 'Ja – für alles, was Ihre Daten berührt, empfehlen wir es. Self-hosted, Ihre Schlüssel, Ihre Hardware. Kein Lock-in, keine Lizenz pro Nutzer. Sie erhalten Repository und Dokumentation.', en: 'Yes — and for anything touching your data we recommend it. Self-hosted, your keys, your hardware. No lock-in, no per-seat licence. You get the repository and the documentation.' } },
+    { q: { de: 'Wann sind wir die falsche Wahl?', en: 'When are we the wrong choice?' }, a: { de: 'Wenn Sie bis Montag zwanzig Leute brauchen – wir sind zwei. Wenn Sie das günstigste Angebot suchen – das werden wir nicht sein. Wenn Sie täglich jemanden vor Ort brauchen – wir sitzen in Bayern und arbeiten remote.', en: 'If you need twenty people on it by Monday — we are two. If you want the cheapest bid — we will not be it. If you need someone on site every day — we are in Bavaria and work remotely.' } }
+  ];
+  static STEPS = [
+    { n: '01', time: { de: 'innerhalb von 24 Stunden', en: 'within 24 hours' }, title: { de: 'Eine persönliche Antwort', en: 'A personal reply' }, menu: { de: 'Von Christian oder Kathi, zu Ihrem konkreten Vorhaben.', en: 'From Christian or Kathi, about your actual project.' }, text: { de: 'Von Christian oder Kathi, zu Ihrem konkreten Vorhaben. Wenn die ehrliche Antwort lautet, dass Sie uns dafür nicht brauchen, sagen wir das – kostenlos.', en: 'From Christian or Kathi, about your actual project. If the honest answer is that you do not need us for this, that is what you get — free of charge.' } },
+    { n: '02', time: { de: '30–45 Minuten', en: '30–45 minutes' }, title: { de: 'Ein Gespräch', en: 'One conversation' }, menu: { de: 'Telefon oder Video – über Ihr Ziel, nicht über unseren Prozess.', en: 'Phone or video — about your goal, not our process.' }, text: { de: 'Telefon oder Video, wie es Ihnen passt. Es geht um Ihr Ziel, nicht um unseren Prozess. Keine Präsentation, keine zweite Person, die mitschreibt.', en: 'Phone or video, whichever suits you. About what you want to achieve, not about our process. No slide deck, no second person taking notes.' } },
+    { n: '03', time: { de: 'innerhalb von 48 Stunden', en: 'within 48 hours' }, title: { de: 'Ein Festpreis', en: 'A fixed quote' }, menu: { de: 'Eine konkrete Zahl mit klar definiertem Umfang.', en: 'A concrete number with a clearly defined scope.' }, text: { de: 'Eine konkrete Zahl mit klar definiertem Umfang. Ändert sich der Umfang später, ändert sich die Zahl – sichtbar, schriftlich, vor der Arbeit.', en: 'A concrete number with a clearly defined scope. If the scope changes later, so does the number — visibly, in writing, before the work.' } },
+    { n: '04', time: { de: 'Woche eins', en: 'Week one' }, title: { de: 'Etwas Klickbares', en: 'Something clickable' }, menu: { de: 'Echte Screens in Woche eins, danach jede Woche eine Demo.', en: 'Real screens in week one, then a demo every week.' }, text: { de: 'Echte Screens in der ersten Woche, danach jede Woche eine funktionierende Demo. Sie steuern durchgehend mit – es gibt keine große Enthüllung am Ende.', en: 'Real screens in the first week and a working demo every week after that. You steer the whole way — there is no big reveal at the end.' } }
+  ];
+  static STATS = [
+    { from: 1980, to: 2016, prefix: '', suffix: '', label: { de: 'gegründet – unabhängig seit dem ersten Tag', en: 'founded — independent from day one' } },
+    { from: 0, to: 20, prefix: '', suffix: '+', label: { de: 'Jahre Erfahrung in der Branche', en: 'years in the industry' } },
+    { from: 0, to: 2, prefix: '', suffix: '', label: { de: 'Ansprechpartner – dieselben, die bauen', en: 'people you talk to — the same two who build' } },
+    { from: 0, to: 100, prefix: '4 × ', suffix: '', label: { de: 'Lighthouse-Wertung der eigenen Website', en: 'Lighthouse score of our own website' } }
+  ];
+  static TEAM = [
+    { name: 'Christian', initial: 'C', grad: 'linear-gradient(135deg,#4AA6EF,#7B86F0)', role: { de: 'Mitgründer · Entwicklung & Betrieb', en: 'Co-founder · engineering & operations' }, bio: { de: 'Baut und liefert: Architektur, Code, Deployment – und der Anruf im dritten Jahr.', en: 'Builds and ships: architecture, code, deployment — and the call in year three.' } },
+    { name: 'Kathi', initial: 'K', grad: 'linear-gradient(135deg,#A86EE8,#FF3D8A)', role: { de: 'Mitgründerin · Design & Marke', en: 'Co-founder · design & brand' }, bio: { de: 'Verantwortet Gestaltung, Marke und die Klarheit jeder Oberfläche.', en: 'Owns design, brand and the clarity of every interface.' } }
+  ];
+  static BRANDS = ['Porsche', 'Deutsche Bank', 'Apple', 'Microsoft', 'Blizzard', 'Deutsches Museum', 'Ravensburger', 'Travian', 'AOK'];
+  static DEMO = [
+    { q: { de: 'Was kostet eine Website?', en: 'What does a website cost?' }, a: { de: 'Es gibt keine Preisliste – Sie erhalten innerhalb von 48 Stunden ein Festpreisangebot. Eine kleine Website beginnt im niedrigen fünfstelligen Bereich.', en: 'There is no price list — you receive a fixed quote within 48 hours. A small website starts in the low five figures.' } },
+    { q: { de: 'Wer baut das konkret?', en: 'Who actually builds it?' }, a: { de: 'Die zwei Gründer: Christian entwickelt, Kathi verantwortet Design und Marke. Keine Junioren, keine Übergaben.', en: 'The two founders: Christian builds, Kathi does design and brand. No juniors, no hand-offs.' } },
+    { q: { de: 'Wie lange dauert eine Web-App?', en: 'How long does a web app take?' }, a: { de: 'Ein MVP typischerweise 6–12 Wochen. Etwas Klickbares sehen Sie in der ersten Woche.', en: 'An MVP typically takes 6–12 weeks. You see something clickable in the first week.' } }
+  ];
+  static LOGOS = ['react', 'nextjs', 'typescript', 'postgresql', 'python', 'claude', 'openai', 'modelcontextprotocol', 'n8n', 'docker', 'vercel', 'playwright', 'qdrant', 'supabase'];
+  static FACTS = 'McCain Digital is a digital product studio in Bavaria, Germany, founded 2016. Two founders, no juniors and no account managers: Christian (builds and ships, engineering and operations) and Kathi (design and brand). Between them over twenty years in the industry. Contact: info@mccain-digital.com, Holderweg 1, 86869 Oberostendorf, Germany. Hours Monday to Friday 09:00-18:00 CET. Promise: a real reply within 24 hours, a fixed quote within 48. No sales call.\nFour services: (1) AI tools - production AI on the client\'s own data: RAG with citations and an abstain path, agents with guardrails and human approval, MCP tool servers with auth, rate limits and audit logging; model-agnostic (frontier APIs or open weights like Llama, Mistral, Qwen); proof of value 2-4 weeks on one workflow; typical 4-10 weeks; budget band EUR 20-60k. (2) Web apps - React, Next.js, TypeScript, PostgreSQL; Lighthouse budget in CI; clickable prototype within seven days; MVP typically 6-12 weeks; no published budget band (fixed quote within 48 hours). (3) Websites - hand-built, no page builder, semantic HTML, JSON-LD, sitemap, llms.txt, custom design; typically 3-6 weeks; budget band EUR 8-25k. (4) Software for companies - dashboards, internal tools, integrations (ERP, CRM, REST/SOAP, legacy), cloud or on-premise, full source in the client\'s repository, no lock-in, no per-seat licence; typically 8-14 weeks; budget band EUR 25-70k. Online shops: 6-10 weeks, EUR 15-35k.\nNative mobile apps (iOS/Android) are NOT offered; propose a web app instead.\nOwn product: whatever-recall - AI-native project memory for software teams; knowledge is stamped onto the git commit at write time and read back in microseconds for zero tokens; self-hosted, no telemetry, no upload; https://whatever-recall.com. The studio\'s own website scores 100/100/100/100 in Lighthouse with CLS 0 and TBT 0 ms.\nSelf-hosting is recommended for anything touching client data: your keys, your hardware. Clients get the repository and documentation. After launch the same two people stay available. When the studio is the wrong choice: if you need twenty people by Monday, if you want the cheapest bid, or if you need someone on site every day (the studio is in Bavaria and works remotely). Brands the founders worked for over two decades (career references, not clients of the studio): Porsche, Deutsche Bank, Apple, Microsoft, Blizzard, Deutsches Museum, Ravensburger, Travian, AOK. No client testimonials are published until cleared; never invent a client or a quote.';
+
+  state = { lang: 'de', vw: 1280, scrolled: false, menu: null, fresh: true, panelLeft: 0, panelW: 560, panelH: 0, caretLeft: 0, mobileOpen: false, modal: null, modalIn: false, faqOpen: 0, aiMode: 'ask', aiMessages: [], aiBusy: false, aiPhase: null, formSent: false };
+
+  icon(name, size) {
+    const paths = Component.ICONS[name] || [];
+    return React.createElement('svg', { width: size || 20, height: size || 20, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true' }, paths.map((d, i) => React.createElement('path', { key: i, d })));
+  }
+  loc(v) {
+    const lang = this.state.lang;
+    if (Array.isArray(v)) return v.map((x) => this.loc(x));
+    if (v && typeof v === 'object' && !React.isValidElement(v)) {
+      if ('de' in v && 'en' in v) return v[lang] != null ? v[lang] : v.de;
+      const o = {}; for (const k in v) o[k] = this.loc(v[k]); return o;
+    }
+    return v;
+  }
+  reduced() { return this.props.motion === false || (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  accent() { const a = this.props.accent; return (typeof a === 'string' && /^#[0-9a-f]{6}$/i.test(a)) ? a : '#FF3D8A'; }
+  hexRgb(h) { return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; }
+
+  componentDidMount() {
+    this.mounted = true; this._prev = Object.assign({}, this.state); this._prevProps = Object.assign({}, this.props);
+    try { const l = localStorage.getItem('mcd.lang'); if (l === 'de' || l === 'en') this.setState({ lang: l }); } catch (e) {}
+    this.onResize = () => { if (!this.mounted) return; const vw = Math.round((this.rootEl && this.rootEl.getBoundingClientRect().width) || document.documentElement.clientWidth || window.innerWidth); if (vw && vw !== this.state.vw) this.setState({ vw }); };
+    this.onResize();
+    setTimeout(this.onResize, 0); setTimeout(this.onResize, 300); setTimeout(this.onResize, 1200);
+    window.addEventListener('resize', this.onResize);
+    if (typeof ResizeObserver === 'function' && this.rootEl) { this.rootRo = new ResizeObserver(this.onResize); this.rootRo.observe(this.rootEl); }
+    window.addEventListener('scroll', this.onScroll, { passive: true });
+    window.addEventListener('keydown', this.onKey);
+    this.applyAccent();
+    this.initReveal();
+    this.startDemo();
+    this.onScroll();
+  }
+  componentWillUnmount() {
+    this.mounted = false;
+    window.removeEventListener('resize', this.onResize); window.removeEventListener('scroll', this.onScroll); window.removeEventListener('keydown', this.onKey);
+    clearTimeout(this.demoT); clearTimeout(this.closeT); clearTimeout(this.modalT); clearInterval(this.typeT);
+    this.stopGradient(); if (this.io) this.io.disconnect(); if (this.rootRo) this.rootRo.disconnect(); document.body.style.overflow = '';
+  }
+  componentDidUpdate(prevProps) {
+    const S = this.state, prevState = this._prev || {}; prevProps = prevProps || this._prevProps || {};
+    this._prev = Object.assign({}, S); this._prevProps = Object.assign({}, this.props);
+    if (S.menu && (prevState.menu !== S.menu || prevState.lang !== S.lang || prevState.vw !== S.vw)) this.measurePanel();
+    if (S.fresh && S.menu && S.panelH > 0 && !this.freshT) { this.freshT = requestAnimationFrame(() => { this.freshT = 0; if (this.mounted && this.state.fresh) this.setState({ fresh: false }); }); }
+    if (prevProps.accent !== this.props.accent) this.applyAccent();
+    if (prevState.lang !== S.lang || prevProps.heroVariant !== this.props.heroVariant) this.startDemo();
+    this.initReveal();
+    if (prevState.aiMessages !== S.aiMessages || prevState.aiPhase !== S.aiPhase) this.scrollChat();
+  }
+
+  renderVals() {
+    const S = this.state, C = Component, t = this.loc(C.T);
+    const isDesktop = S.vw >= 880;
+    const heroA = String(this.props.heroVariant || 'A').toUpperCase() !== 'B';
+    const onGradient = heroA && !S.scrolled && !S.menu && !S.mobileOpen;
+    const navFg = onGradient ? '#fff' : '#0B1633';
+    const ids = ['services', 'work', 'studio', 'process', 'resources', 'pricing'];
+    const activeIdx = ids.indexOf(S.menu);
+    const navItems = ids.map((id, i) => { const on = S.menu === id; return { id, label: t.nav[id], open: () => this.openMenu(id), toggle: () => this.toggleMenu(id), color: navFg, bg: on ? (onGradient ? 'rgba(255,255,255,.16)' : 'rgba(11,22,51,.06)') : 'transparent', opacity: (S.menu && !on) ? 0.6 : 1, chev: on ? 'rotate(180deg)' : 'none' }; });
+    const mv = {}; ids.forEach((id, i) => { const on = S.menu === id; const sign = activeIdx < 0 ? 1 : (i < activeIdx ? -1 : 1); mv[id] = { op: on ? 1 : 0, tf: on ? 'translateX(0)' : 'translateX(' + (sign * -28) + 'px)', pe: on ? 'auto' : 'none' }; });
+    const ease = 'cubic-bezier(.2,.8,.2,1)';
+    const panelTransition = S.fresh ? 'opacity .22s, transform .3s ' + ease : 'left .35s ' + ease + ', width .35s ' + ease + ', height .35s ' + ease + ', opacity .22s, transform .3s ' + ease;
+    const services = this.loc(C.SERVICES).map((s, i) => Object.assign(s, { icon: this.icon(C.SERVICES[i].icon, 22), iconSm: this.icon(C.SERVICES[i].icon, 18), delay: (i * 0.08).toFixed(2), openModal: () => this.openModal('service', s.id) }));
+    const cases = this.loc(C.CASES).map((c, i) => Object.assign(c, { delay: (i * 0.1).toFixed(2), isRecall: c.id === 'recall', isSite: c.id === 'site', iconSm: this.icon(c.id === 'recall' ? 'commit' : 'gauge', 18), openModal: () => this.openModal('case', c.id) }));
+    const faqs = this.loc(C.FAQS).map((f, i) => { const open = S.faqOpen === i; return Object.assign(f, { open, toggle: () => this.setState({ faqOpen: open ? -1 : i }), rows: open ? '1fr' : '0fr', rot: open ? 'rotate(45deg)' : 'rotate(0deg)', iconBg: open ? '#0B1633' : '#F0F3FA', iconFg: open ? '#fff' : '#0B1633', border: i === 0 ? '0' : '1px solid rgba(11,22,51,.08)' }); });
+    const steps = this.loc(C.STEPS);
+    const stats = this.loc(C.STATS).map((s) => Object.assign(s, { display: s.prefix + s.to + s.suffix }));
+    const team = this.loc(C.TEAM).map((p, i) => Object.assign(p, { delay: (i * 0.1).toFixed(2) }));
+    const mockRows = t.mock.rows.map((label, i) => ({ label, week: ['W1', 'W3', 'W8'][i], done: i < 2, dotBg: i < 2 ? '#0B1633' : '#fff', dotBorder: i < 2 ? '#0B1633' : 'rgba(11,22,51,.2)', color: i < 2 ? '#0B1633' : '#6B7590' }));
+    const chips = (S.aiMode === 'ask' ? t.ai.chipsAsk : t.ai.chipsBrief).map((label) => ({ label, ask: () => this.ask(label) }));
+    const aiMessages = S.aiMessages.map((m, i) => ({ text: m.content, isUser: m.role === 'user', isBot: m.role !== 'user', key: i }));
+    const logos = C.LOGOS.map((n) => ({ src: 'img/logos/' + n + '.svg', alt: n }));
+    const resItems = [
+      { icon: this.icon('book', 18), title: t.menus.resNotes, text: t.menus.resNotesText, soon: true, href: '#', target: '_self', onClick: (e) => e.preventDefault() },
+      { icon: this.icon('file', 18), title: t.menus.resLlms, text: t.menus.resLlmsText, soon: false, href: 'https://mccain-digital.com/llms.txt', target: '_blank' },
+      { icon: this.icon('layers', 18), title: t.menus.resStack, text: t.menus.resStackText, soon: false, href: '#stack', target: '_self', onClick: this.goHandler('stack') }
+    ];
+    const priceSteps = steps.slice(0, 3).map((s) => ({ n: s.n, time: s.time, title: s.title }));
+    const ext = (href) => ({ href, target: '_blank' });
+    const footerCols = [
+      { title: t.footer.services, links: services.map((s) => ({ label: s.title, href: '#services', target: '_self', onClick: (e) => { e.preventDefault(); this.openModal('service', s.id); } })) },
+      { title: t.footer.work, links: cases.map((c) => ({ label: c.title, href: '#work', target: '_self', onClick: (e) => { e.preventDefault(); this.openModal('case', c.id); } })) },
+      { title: t.footer.studio, links: [{ label: t.footer.team, href: '#studio', target: '_self', onClick: this.goHandler('studio') }, { label: t.footer.news, href: 'McCain Digital News.dc.html', target: '_self' }, { label: t.footer.process, href: '#process', target: '_self', onClick: this.goHandler('process') }, { label: t.footer.faq, href: '#faq', target: '_self', onClick: this.goHandler('faq') }, { label: t.footer.contact, href: '#contact', target: '_self', onClick: this.goHandler('contact') }] },
+      { title: t.footer.resources, links: [{ label: t.footer.notes, href: '#', target: '_self', onClick: (e) => e.preventDefault() }, Object.assign({ label: t.footer.llms }, ext('https://mccain-digital.com/llms.txt')), { label: t.footer.stack, href: '#stack', target: '_self', onClick: this.goHandler('stack') }] },
+      { title: t.footer.legal, links: [Object.assign({ label: t.footer.imprint }, ext('https://mccain-digital.com/legal/imprint.html')), Object.assign({ label: t.footer.privacy }, ext('https://mccain-digital.com/legal/privacy.html')), Object.assign({ label: t.footer.terms }, ext('https://mccain-digital.com/legal/terms.html')), Object.assign({ label: t.footer.withdrawal }, ext('https://mccain-digital.com/legal/withdrawal.html'))] }
+    ];
+    const mobileGroups = [
+      { title: t.nav.services, links: services.map((s) => ({ label: s.title, onClick: s.openModal })) },
+      { title: t.nav.work, links: cases.map((c) => ({ label: c.title, onClick: c.openModal })) },
+      { title: t.nav.studio, links: [{ label: t.footer.team, onClick: this.goHandler('studio') }, { label: t.footer.faq, onClick: this.goHandler('faq') }] },
+      { title: t.nav.process, links: steps.map((s) => ({ label: s.n + ' · ' + s.title, onClick: this.goHandler('process') })) },
+      { title: t.nav.resources, links: resItems.map((r) => ({ label: r.title, onClick: r.onClick || (() => window.open(r.href, '_blank', 'noopener')) })) },
+      { title: t.nav.pricing, links: [{ label: t.menus.pricingTitle, onClick: this.goHandler('process') }, { label: t.menus.pricingCta, onClick: this.goHandler('contact') }] }
+    ];
+    let modal = { title: '', items: [], facts: [] };
+    if (S.modal) {
+      if (S.modal.kind === 'service') { const s = services.find((x) => x.id === S.modal.id) || services[0]; modal = { kicker: t.common.service, title: s.title, lead: s.lead, listTitle: t.common.get, items: s.items, facts: s.facts, icon: s.icon, cta: t.common.cta, hasLink: false, link: '', linkLabel: '' }; }
+      else { const c = cases.find((x) => x.id === S.modal.id) || cases[0]; modal = { kicker: t.common.caseLabel, title: c.title, lead: c.lead, listTitle: t.common.done, items: c.items, facts: c.facts, icon: this.icon(c.id === 'recall' ? 'commit' : 'gauge', 22), cta: t.common.cta, hasLink: true, link: c.link, linkLabel: c.id === 'recall' ? t.common.visit : t.common.visitSite }; }
+    }
+    const de = S.lang === 'de';
+    const menuOpen = !!S.menu;
+    return {
+      rootRef: this.rootRef, gradRef: this.gradRef, aiListRef: this.aiListRef, aiInputRef: this.aiInputRef,
+      t, isDesktop, isMobile: !isDesktop, isHeroA: heroA, isHeroB: !heroA, logosReady: true, showLangInNav: !isDesktop || S.vw >= 1080,
+      heroCols: isDesktop ? '1.05fr .95fr' : '1fr', heroBCols: isDesktop ? '1.15fr .85fr' : '1fr', aiCols: isDesktop ? '.9fr 1.1fr' : '1fr', processCols: isDesktop ? '.8fr 1.2fr' : '1fr', faqCols: isDesktop ? '.8fr 1.2fr' : '1fr', contactCols: isDesktop ? '1fr 1fr' : '1fr', stickyPos: isDesktop ? 'sticky' : 'static',
+      navBg: onGradient ? 'transparent' : 'rgba(255,255,255,.88)', navShadow: (S.scrolled && !S.mobileOpen) ? '0 1px 0 rgba(11,22,51,.08), 0 8px 30px -14px rgba(11,22,51,.14)' : 'none', navBlur: onGradient ? 'none' : 'saturate(1.4) blur(14px)',
+      navFg, markBg: onGradient ? '#fff' : '#0B1633', markFg: onGradient ? '#0B1633' : '#fff', toggleBorder: onGradient ? 'rgba(255,255,255,.35)' : 'rgba(11,22,51,.14)',
+      ctaBg: onGradient ? '#fff' : '#0B1633', ctaFg: onGradient ? '#0B1633' : '#fff',
+      deBg: de ? (onGradient ? '#fff' : '#0B1633') : 'transparent', deFg: de ? (onGradient ? '#0B1633' : '#fff') : navFg, enBg: !de ? (onGradient ? '#fff' : '#0B1633') : 'transparent', enFg: !de ? (onGradient ? '#0B1633' : '#fff') : navFg,
+      deBgFoot: de ? '#0B1633' : 'transparent', deFgFoot: de ? '#fff' : '#4A5578', enBgFoot: !de ? '#0B1633' : 'transparent', enFgFoot: !de ? '#fff' : '#4A5578',
+      setDe: () => this.setLang('de'), setEn: () => this.setLang('en'),
+      navLeave: this.navLeave, panelEnter: this.panelEnter, navItems, mv,
+      panelLeft: S.panelLeft, panelW: S.panelW, panelH: S.panelH, caretLeft: S.caretLeft, panelOp: menuOpen ? 1 : 0, panelTf: menuOpen ? 'translateY(0) scale(1)' : 'translateY(-6px) scale(.985)', panelPe: menuOpen ? 'auto' : 'none', panelTransition,
+      goTop: this.goHandler('top'), goContact: this.goHandler('contact'), goAi: this.goHandler('ai'), goWork: this.goHandler('work'), goStudio: this.goHandler('studio'), goProcess: this.goHandler('process'), goFaq: this.goHandler('faq'),
+      toggleMobile: () => this.setState({ mobileOpen: !S.mobileOpen, menu: null }), mobileOpen: S.mobileOpen, mobileClosed: !S.mobileOpen, mobileGroups,
+      services, cases, faqs, steps, stats, team, brands: C.BRANDS, mockRows, lhScores: ['Performance', 'Accessibility', 'Best Practices', 'SEO'], logos, resItems, priceSteps, footerCols, keyActivate: this.keyActivate,
+      aiPoints: t.ai.points, chips, aiMessages, aiIntro: S.aiMode === 'ask' ? t.ai.intro : t.ai.introBrief, aiPlaceholder: S.aiMode === 'ask' ? t.ai.placeholderAsk : t.ai.placeholderBrief,
+      askFg: S.aiMode === 'ask' ? '#fff' : '#8C97BC', askLine: S.aiMode === 'ask' ? 'var(--pink)' : 'transparent', briefFg: S.aiMode === 'brief' ? '#fff' : '#8C97BC', briefLine: S.aiMode === 'brief' ? 'var(--pink)' : 'transparent',
+      setModeAsk: () => this.setState({ aiMode: 'ask' }), setModeBrief: () => this.setState({ aiMode: 'brief' }), aiThinking: S.aiPhase === 'thinking', aiTypingShown: S.aiPhase === 'typing', aiSubmit: this.aiSubmit,
+      formIdle: !S.formSent, formSent: S.formSent, formSubmit: this.formSubmit,
+      modalOpen: !!S.modal, modalOp: S.modalIn ? 1 : 0, modalTf: S.modalIn ? 'translateY(0) scale(1)' : 'translateY(18px) scale(.98)', modal, closeModal: this.closeModal, stop: this.stop, modalCta: this.modalCta
+    };
+  }
+
+  rootRef = (el) => { this.rootEl = el; };
+  aiListRef = (el) => { this.aiList = el; };
+  aiInputRef = (el) => { this.aiInput = el; };
+  keyActivate = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.currentTarget.click(); } };
+  stop = (e) => e.stopPropagation();
+
+  setLang(l) { this.setState({ lang: l }); try { localStorage.setItem('mcd.lang', l); } catch (e) {} document.documentElement.lang = l; }
+  go(id) {
+    this.setState({ menu: null, mobileOpen: false });
+    if (this.state.modal) this.closeModal();
+    const root = this.rootEl || document; const el = root.querySelector('#' + id); if (!el) return;
+    const top = id === 'top' ? 0 : el.getBoundingClientRect().top + window.scrollY - 72;
+    window.scrollTo({ top, behavior: this.reduced() ? 'auto' : 'smooth' });
+  }
+  goHandler(id) { this._go = this._go || {}; if (!this._go[id]) this._go[id] = (e) => { if (e && e.preventDefault) e.preventDefault(); this.go(id); }; return this._go[id]; }
+
+  openMenu(id) { clearTimeout(this.closeT); if (this.state.menu === id) return; this.setState({ menu: id, fresh: this.state.menu == null }); }
+  toggleMenu(id) { if (this.state.menu === id) this.setState({ menu: null }); else this.openMenu(id); }
+  navLeave = () => { clearTimeout(this.closeT); this.closeT = setTimeout(() => { if (this.mounted) this.setState({ menu: null }); }, 160); };
+  panelEnter = () => clearTimeout(this.closeT);
+  measurePanel() {
+    const root = this.rootEl, S = this.state; if (!root || !S.menu) return;
+    const item = root.querySelector('[data-nav-item="' + S.menu + '"]'), content = root.querySelector('[data-menu-content="' + S.menu + '"]'), wrap = root.querySelector('[data-nav-inner]');
+    if (!item || !content || !wrap) return;
+    const w = Component.MENU_W[S.menu] || 520, wr = wrap.getBoundingClientRect(), ir = item.getBoundingClientRect();
+    const center = ir.left - wr.left + ir.width / 2;
+    const left = Math.round(Math.max(8, Math.min(center - w / 2, wr.width - w - 8)));
+    const h = content.offsetHeight, caretLeft = Math.round(center - 7);
+    if (left !== S.panelLeft || w !== S.panelW || h !== S.panelH || caretLeft !== S.caretLeft) this.setState({ panelLeft: left, panelW: w, panelH: h, caretLeft });
+  }
+  onKey = (e) => { if (e.key === 'Escape') { if (this.state.modal) this.closeModal(); else if (this.state.mobileOpen) this.setState({ mobileOpen: false }); else if (this.state.menu) this.setState({ menu: null }); } };
+  onScroll = () => { if (this.scrollRaf) return; this.scrollRaf = requestAnimationFrame(() => { this.scrollRaf = 0; if (!this.mounted) return; const sc = window.scrollY > 12; if (sc !== this.state.scrolled) this.setState({ scrolled: sc }); this.updateProcess(); }); };
+
+  openModal(kind, id) {
+    clearTimeout(this.modalT);
+    this.setState({ modal: { kind, id }, modalIn: false, menu: null, mobileOpen: false });
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(() => requestAnimationFrame(() => { if (this.mounted && this.state.modal) this.setState({ modalIn: true }); }));
+  }
+  closeModal = () => { this.setState({ modalIn: false }); clearTimeout(this.modalT); this.modalT = setTimeout(() => { if (this.mounted) this.setState({ modal: null }); document.body.style.overflow = ''; }, 280); };
+  modalCta = () => { this.closeModal(); setTimeout(() => { if (this.mounted) this.go('contact'); }, 80); };
+
+  startDemo() {
+    clearTimeout(this.demoT); this.demoIdx = this.demoIdx || 0;
+    const run = () => {
+      const root = this.rootEl; if (!root || !this.mounted) return;
+      const qEl = root.querySelector('[data-demo-q]'), aEl = root.querySelector('[data-demo-a]');
+      if (!qEl || !aEl) { this.demoT = setTimeout(run, 800); return; }
+      const pairs = this.loc(Component.DEMO), pair = pairs[this.demoIdx % pairs.length];
+      qEl.textContent = pair.q; aEl.textContent = '';
+      if (this.reduced()) { aEl.textContent = pair.a; this.demoIdx++; this.demoT = setTimeout(run, 6000); return; }
+      let k = 0;
+      const tick = () => { if (!this.mounted) return; k += 2; aEl.textContent = pair.a.slice(0, k); if (k < pair.a.length) this.demoT = setTimeout(tick, 16); else { this.demoIdx++; this.demoT = setTimeout(run, 4200); } };
+      this.demoT = setTimeout(tick, 700);
+    };
+    run();
+  }
+
+  initReveal() {
+    const root = this.rootEl; if (!root) return;
+    const els = root.querySelectorAll('[data-reveal]:not([data-rv])'); if (!els.length) return;
+    if (!this.io) this.io = new IntersectionObserver((entries) => { entries.forEach((e) => { if (e.isIntersecting) { const el = e.target; el.style.opacity = '1'; el.style.transform = 'none'; this.io.unobserve(el); if (el.hasAttribute('data-count-group')) this.runCounters(el); } }); }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    const reduced = this.reduced();
+    els.forEach((el) => { el.setAttribute('data-rv', '1'); if (reduced) { if (el.hasAttribute('data-count-group')) return; return; } const d = parseFloat(el.getAttribute('data-reveal')) || 0; el.style.opacity = '0'; el.style.transform = 'translateY(22px)'; el.style.transition = 'opacity .8s cubic-bezier(.2,.8,.2,1) ' + d + 's, transform .8s cubic-bezier(.2,.8,.2,1) ' + d + 's'; this.io.observe(el); });
+  }
+  runCounters(group) {
+    group.querySelectorAll('[data-count]').forEach((el) => {
+      const to = parseFloat(el.getAttribute('data-count')), from = parseFloat(el.getAttribute('data-from') || '0'), pre = el.getAttribute('data-prefix') || '', suf = el.getAttribute('data-suffix') || '';
+      const t0 = performance.now(), dur = 1400;
+      const step = (now) => { const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3); el.textContent = pre + Math.round(from + (to - from) * e) + suf; if (p < 1) requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    });
+  }
+  updateProcess() {
+    const root = this.rootEl, wrap = root && root.querySelector('[data-process-steps]'); if (!wrap) return;
+    const r = wrap.getBoundingClientRect(), mid = window.innerHeight * 0.55;
+    const p = Math.max(0, Math.min(1, (mid - r.top) / Math.max(1, r.height - 40)));
+    const fill = wrap.querySelector('[data-process-fill]'); if (fill) fill.style.height = (p * 100).toFixed(1) + '%';
+    let cur = 0;
+    wrap.querySelectorAll('[data-step]').forEach((s, i) => { const on = s.getBoundingClientRect().top < mid; if (on) cur = i; const dot = s.querySelector('[data-step-dot]'); if (dot) { dot.style.background = on ? 'var(--pink)' : '#fff'; dot.style.borderColor = on ? 'var(--pink)' : 'rgba(11,22,51,.12)'; } });
+    const ind = root.querySelector('[data-process-current]'); if (ind) ind.textContent = '0' + (cur + 1);
+  }
+
+  formSubmit = (e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); if (fd.get('company')) return; this.setState({ formSent: true }); };
+
+  aiSubmit = (e) => { e.preventDefault(); this.ask(this.aiInput ? this.aiInput.value : ''); };
+  ask = async (q) => {
+    q = String(q || '').trim(); if (!q || this.state.aiBusy) return;
+    const mode = this.state.aiMode, lang = this.state.lang;
+    const history = this.state.aiMessages.concat([{ role: 'user', content: q }]);
+    this.setState({ aiMessages: history, aiBusy: true, aiPhase: 'thinking' });
+    if (this.aiInput) this.aiInput.value = '';
+    let text = '';
+    try {
+      if (!window.claude || !window.claude.complete) throw new Error('no claude');
+      const res = await window.claude.complete({ model: 'claude-haiku-4-5', max_tokens: 450, system: this.systemPrompt(mode, lang), messages: history.slice(-8).map((m) => ({ role: m.role, content: m.content })) });
+      text = String(res || '').trim(); if (!text) throw new Error('empty');
+    } catch (err) { text = this.localAnswer(q, lang); }
+    if (!this.mounted) return;
+    await this.typeInto(text);
+    if (!this.mounted) return;
+    this.setState({ aiMessages: this.state.aiMessages.concat([{ role: 'assistant', content: text }]), aiBusy: false, aiPhase: null });
+  };
+  typeInto(text) {
+    return new Promise((resolve) => {
+      this.setState({ aiPhase: 'typing' });
+      const reduced = this.reduced(); let k = 0, tries = 0; clearInterval(this.typeT);
+      const start = () => {
+        const el = this.rootEl && this.rootEl.querySelector('[data-ai-typing]');
+        if (!el) { if (++tries > 40) return resolve(); setTimeout(start, 50); return; }
+        if (reduced) { el.textContent = text; return resolve(); }
+        this.typeT = setInterval(() => { k += 3; el.textContent = text.slice(0, k); this.scrollChat(); if (k >= text.length) { clearInterval(this.typeT); resolve(); } }, 14);
+      };
+      requestAnimationFrame(start);
+    });
+  }
+  scrollChat() { const el = this.aiList; if (el) el.scrollTop = el.scrollHeight; }
+  systemPrompt(mode, lang) {
+    const L = lang === 'de' ? 'German' : 'English';
+    const base = 'You answer on the website of McCain Digital, a two-person software studio in Bavaria. Everything you know is below; answer ONLY from it. If something is not covered, say so in one sentence and point to info@mccain-digital.com. Never invent a price, timeline, client or case study. Native mobile apps are not offered; suggest a web app instead. Write as "we". Plain text only: no markdown, no bullet symbols, no greeting, no sign-off. Answer in ' + L + ' unless the user clearly writes in another language.\n\nFACTS:\n' + Component.FACTS;
+    if (mode === 'brief') return base + '\n\nTASK: The user describes a project in one line. Write a compact brief (max 120 words) in three short labelled paragraphs, labels in ' + L + ': what you understood (2 sentences); the proposed approach (which of the four services, the stack, the typical duration band, and the budget band ONLY if one exists for that kind); the next step (a 30-45 minute call, then a fixed quote within 48 hours).';
+    return base + '\n\nSTYLE: Two or three sentences is usually the whole answer.';
+  }
+  localAnswer(q, lang) {
+    const s = q.toLowerCase(), de = lang === 'de';
+    if (/kost|preis|price|cost|budget|teuer/.test(s)) return de ? 'Es gibt keine Preisliste – Sie erhalten innerhalb von 48 Stunden ein Festpreisangebot. Eine kleine Website beginnt im niedrigen fünfstelligen Bereich; ein KI-Werkzeug auf Ihren Daten kostet mehr.' : 'There is no price list — you receive a fixed quote within 48 hours. A small website starts in the low five figures; an AI tool on your data costs more.';
+    if (/lange|dauer|zeit|long|time|weeks|wochen|deadline/.test(s)) return de ? 'Website 3–6 Wochen, Web-App-MVP 6–12 Wochen, KI-Werkzeug 4–10 Wochen, interne Software 8–14 Wochen. Etwas Klickbares sehen Sie in der ersten Woche.' : 'Website 3–6 weeks, web app MVP 6–12 weeks, AI tool 4–10 weeks, internal software 8–14 weeks. You see something clickable in the first week.';
+    if (/wer |who|team|baut|build|christian|kathi/.test(s)) return de ? 'Die zwei Gründer: Christian entwickelt und betreibt, Kathi verantwortet Design und Marke. Keine Junioren, keine Account-Manager.' : 'The two founders: Christian builds and runs, Kathi does design and brand. No juniors, no account managers.';
+    if (/host|server|daten|data|dsgvo|gdpr|cloud/.test(s)) return de ? 'Ja – für alles, was Ihre Daten berührt, empfehlen wir Self-Hosting. Ihre Schlüssel, Ihre Hardware, kein Lock-in. Sie erhalten Repository und Dokumentation.' : 'Yes — for anything touching your data we recommend self-hosting. Your keys, your hardware, no lock-in. You get the repository and the documentation.';
+    return this.loc(Component.T.ai.fallback);
+  }
+
+  applyAccent() {
+    const hex = this.accent(), c = this.hexRgb(hex), root = document.documentElement;
+    root.style.setProperty('--pink', hex);
+    root.style.setProperty('--pink-soft', 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',.10)');
+    root.style.setProperty('--pink-ring', 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',.28)');
+    root.style.setProperty('--pink-text', '#' + c.map((v) => Math.round(v * 0.78).toString(16).padStart(2, '0')).join(''));
+    if (this.gradSetColors) this.gradSetColors();
+  }
+  gradRef = (el) => { if (el === this.gradCanvas) return; this.stopGradient(); this.gradCanvas = el; if (el) this.startGradient(el); };
+  stopGradient() { if (this.gradCleanup) { this.gradCleanup(); this.gradCleanup = null; } this.gradCanvas = null; }
+  startGradient(canvas) {
+    let gl = null; try { gl = canvas.getContext('webgl', { antialias: false, alpha: false, depth: false, powerPreference: 'low-power' }); } catch (e) {}
+    if (!gl) return;
+    const vs = 'attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}';
+    const fs = 'precision mediump float;uniform float u_time;uniform vec2 u_res;uniform vec3 u_c0,u_c1,u_c2,u_c3,u_c4,u_c5;' +
+      'vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}vec2 mod289(vec2 x){return x-floor(x*(1.0/289.0))*289.0;}vec3 permute(vec3 x){return mod289(((x*34.0)+1.0)*x);}' +
+      'float snoise(vec2 v){const vec4 C=vec4(0.211324865405187,0.366025403784439,-0.577350269189626,0.024390243902439);vec2 i=floor(v+dot(v,C.yy));vec2 x0=v-i+dot(i,C.xx);vec2 i1=(x0.x>x0.y)?vec2(1.0,0.0):vec2(0.0,1.0);vec4 x12=x0.xyxy+C.xxzz;x12.xy-=i1;i=mod289(i);vec3 p=permute(permute(i.y+vec3(0.0,i1.y,1.0))+i.x+vec3(0.0,i1.x,1.0));vec3 m=max(0.5-vec3(dot(x0,x0),dot(x12.xy,x12.xy),dot(x12.zw,x12.zw)),0.0);m=m*m;m=m*m;vec3 x=2.0*fract(p*C.www)-1.0;vec3 h=abs(x)-0.5;vec3 ox=floor(x+0.5);vec3 a0=x-ox;m*=1.79284291400159-0.85373472095314*(a0*a0+h*h);vec3 g;g.x=a0.x*x0.x+h.x*x0.y;g.yz=a0.yz*x12.xz+h.yz*x12.yw;return 130.0*dot(m,g);}' +
+      'float blob(vec2 p,vec2 c,float r){float d=length(p-c);return exp(-d*d/(r*r));}' +
+      'void main(){vec2 uv=gl_FragCoord.xy/u_res;float asp=u_res.x/u_res.y;vec2 p=vec2(uv.x*asp,uv.y);float t=u_time*0.05;' +
+      'float n1=snoise(p*0.8+vec2(t*0.7,-t*0.4));float n2=snoise(p*1.3-vec2(t*0.5,t*0.6)+7.3);vec2 q=p+vec2(n1,n2)*0.3;' +
+      'vec3 col=vec3(0.0);float ws=0.0;float w;' +
+      'w=blob(q,vec2(0.10*asp+0.12*sin(t*0.9),0.85+0.08*cos(t*0.7)),0.7);col+=w*u_c0;ws+=w;' +
+      'w=blob(q,vec2(0.45*asp+0.16*cos(t*0.6+1.0),0.95+0.10*sin(t*0.8)),0.7);col+=w*u_c1;ws+=w;' +
+      'w=blob(q,vec2(0.90*asp+0.12*sin(t*0.5+2.0),0.75+0.10*cos(t*0.9+1.0)),0.7);col+=w*u_c2;ws+=w;' +
+      'w=blob(q,vec2(0.30*asp+0.15*cos(t*0.8+3.0),0.40+0.12*sin(t*0.6+2.0)),0.65);col+=w*u_c3;ws+=w;' +
+      'w=blob(q,vec2(0.75*asp+0.12*sin(t*0.7+4.0),0.35+0.12*cos(t*0.5+3.0)),0.65);col+=w*u_c4;ws+=w;' +
+      'w=blob(q,vec2(0.55*asp+0.22*cos(t*0.6+5.0),0.05+0.10*sin(t*0.9+4.0)),0.8);col+=w*u_c5;ws+=w;' +
+      'col/=max(ws,0.0001);col=mix(col,vec3(1.0),0.06);' +
+      'float g=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453)*0.025-0.0125;' +
+      'gl_FragColor=vec4(col+g,1.0);}';
+    const mk = (type, src) => { const sh = gl.createShader(type); gl.shaderSource(sh, src); gl.compileShader(sh); if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) { console.warn(gl.getShaderInfoLog(sh)); return null; } return sh; };
+    const v = mk(gl.VERTEX_SHADER, vs), f = mk(gl.FRAGMENT_SHADER, fs); if (!v || !f) return;
+    const prog = gl.createProgram(); gl.attachShader(prog, v); gl.attachShader(prog, f); gl.linkProgram(prog); if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return; gl.useProgram(prog);
+    const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(prog, 'a'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    const uTime = gl.getUniformLocation(prog, 'u_time'), uRes = gl.getUniformLocation(prog, 'u_res');
+    const setColors = () => { Component.GRAD.concat([this.accent()]).forEach((hex, i) => { const c = this.hexRgb(hex); gl.uniform3f(gl.getUniformLocation(prog, 'u_c' + i), c[0] / 255, c[1] / 255, c[2] / 255); }); };
+    setColors(); this.gradSetColors = setColors;
+    const reduced = this.reduced(); let visible = true, raf = 0; const t0 = performance.now();
+    const resize = () => { const r = canvas.getBoundingClientRect(); const k = Math.min(window.devicePixelRatio || 1, 1.5) * 0.5; const W = Math.max(2, Math.round(r.width * k)), H = Math.max(2, Math.round(r.height * k)); if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; gl.viewport(0, 0, W, H); } };
+    const draw = () => { resize(); gl.uniform1f(uTime, (performance.now() - t0) / 1000 + 40); gl.uniform2f(uRes, canvas.width, canvas.height); gl.drawArrays(gl.TRIANGLES, 0, 3); };
+    const loop = () => { raf = 0; if (!this.gradCanvas || !visible) return; draw(); if (!reduced) raf = requestAnimationFrame(loop); };
+    resize(); loop();
+    const ro = new ResizeObserver(() => { resize(); if (reduced || !raf) draw(); }); ro.observe(canvas);
+    const io = new IntersectionObserver((en) => { visible = en[0].isIntersecting; if (visible && !raf) loop(); }); io.observe(canvas);
+    this.gradCleanup = () => { cancelAnimationFrame(raf); raf = 0; ro.disconnect(); io.disconnect(); this.gradSetColors = null; try { const ext = gl.getExtension('WEBGL_lose_context'); if (ext) ext.loseContext(); } catch (e) {} };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+User-agent: *
+Allow: /
+
+# The Claude Design export the site is built FROM. It is in .vercelignore and
+# should never be reachable, but if a deploy ever leaks it, the export must not
+# compete with the page it produced - two copies of the same headline.
+Disallow: /mccain-design-system/
+
+# AI crawlers are explicitly welcome. /llms.txt is a structured summary of the
+# whole site, written for them rather than scraped out of the markup.
+#
+# Each group is repeated in full on purpose: a crawler obeys ONLY the most
+# specific group that matches it (RFC 9309 2.2.1), so a Disallow that lives only
+# in the "*" group does not apply to any agent that has a group of its own.
+User-agent: GPTBot
+Allow: /
+Disallow: /mccain-design-system/
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /mccain-design-system/
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /mccain-design-system/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /mccain-design-system/
+
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /mccain-design-system/
+
+User-agent: anthropic-ai
+Allow: /
+Disallow: /mccain-design-system/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /mccain-design-system/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /mccain-design-system/
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /mccain-design-system/
+
+User-agent: CCBot
+Allow: /
+Disallow: /mccain-design-system/
+
+Sitemap: https://mccain-digital.com/sitemap.xml

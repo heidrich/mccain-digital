@@ -1,8 +1,21 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "trailingSlash": true,
   "redirects": [
-    { "source": "/contact.html", "destination": "/kontakt.html", "permanent": true },
-    { "source": "/contact", "destination": "/kontakt.html", "permanent": true }
+    { "source": "/contact.html", "destination": "/kontakt/", "permanent": true },
+    { "source": "/contact", "destination": "/kontakt/", "permanent": true },
+    { "source": "/kontakt.html", "destination": "/kontakt/", "permanent": true },
+    { "source": "/brand-guide.html", "destination": "/marke/", "permanent": true },
+
+    { "source": "/services/ai-tools.html", "destination": "/leistungen/ki-automatisierung/", "permanent": true },
+    { "source": "/services/web-apps.html", "destination": "/leistungen/web-apps/", "permanent": true },
+    { "source": "/services/websites.html", "destination": "/leistungen/websites/", "permanent": true },
+    { "source": "/services/software.html", "destination": "/leistungen/individualsoftware/", "permanent": true },
+
+    { "source": "/legal/imprint.html", "destination": "/rechtliches/#impressum", "permanent": true },
+    { "source": "/legal/privacy.html", "destination": "/rechtliches/#datenschutz", "permanent": true },
+    { "source": "/legal/terms.html", "destination": "/rechtliches/#agb", "permanent": true },
+    { "source": "/legal/withdrawal.html", "destination": "/rechtliches/#widerruf", "permanent": true }
   ],
   "headers": [
     {

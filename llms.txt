@@ -1,73 +1,47 @@
 # McCain Digital
+> Digital Product Studio in Bayern, seit 2016. Zwei Gründer: Christian (Entwicklung, Architektur, Betrieb), Kathi (Design, Marke, Inhalt). Keine Junioren, kein Vertrieb.
 
-> Digital-Produktstudio in Oberostendorf, Bayern. Gegründet 2016, zwei Gründer,
-> keine Junioren und keine Account-Manager: KI-Werkzeuge auf Ihren eigenen
-> Daten, Web-Apps, Websites und Unternehmenssoftware.
+## Leistungen
+- KI & Automatisierung (https://mccain-digital.com/leistungen/ki-automatisierung/): RAG auf eigenen Daten, Agenten mit Werkzeugen, MCP-Server, Automatisierung. Self-hostbar. Proof of Value in 2–4 Wochen.
+- Web-Apps & Plattformen (https://mccain-digital.com/leistungen/web-apps/): React, Next.js, TypeScript, PostgreSQL. Klickbarer Prototyp in 7 Tagen, MVP in 6–12 Wochen.
+- Websites (https://mccain-digital.com/leistungen/websites/): handgeschrieben, Lighthouse 100, kein Page-Builder, 3–6 Wochen.
+- Individualsoftware (https://mccain-digital.com/leistungen/individualsoftware/): Dashboards, interne Tools, Integrationen in ERP, CRM und Altsysteme. 8–14 Wochen.
 
-Kontakt: info@mccain-digital.com · Holderweg 1, 86869 Oberostendorf, Bayern, Deutschland
-Antwort: eine persönliche Antwort innerhalb von 24 Stunden, ein Festpreis innerhalb von 48. Kein Verkaufsgespräch.
+## Produkt
+- md-recall (https://mccain-digital.com/md-recall/): Projektgedächtnis, das am Git-Commit hängt. HTML-Dashboard, MCP-Server, self-hosted, keine Telemetrie. Einrichtung über einen Claude-Befehl. Kostenlos für Teams bis fünf Personen.
 
-## Seiten
+## Konditionen
+- Antwort in 24 Stunden, Festpreis in 48 Stunden nach dem Erstgespräch.
+- Festpreis statt Stundenzähler; Schätzrisiko liegt beim Studio.
+- Jedes Projekt wird als Git-Repository übergeben, mit Dokumentation und Patch Notes. Quellcode gehört dem Kunden, kein Lock-in, keine Lizenz pro Nutzer.
+- 30 Tage Support nach dem Launch inklusive; Betrieb optional 190–890 € im Monat.
+- Größenordnungen: Website ab etwa 12.000 €, KI-Assistent 22.000–35.000 €, SaaS-MVP 38.000–60.000 €, internes Tool 45.000–75.000 €.
 
-- [Startseite](https://mccain-digital.com/): das Studio, ausgewählte Projekte, die vier
-  Leistungen, eine KI-Konsole, der man Fragen stellen kann, Preise, Ablauf, FAQ und
-  der Kontaktweg. Alles auf einer Seite; die Leistungen öffnen sich als Detail-Ansichten.
-- [Marke & Downloads](https://mccain-digital.com/brand-guide.html): das Zeichen, seine
-  Konstruktion, Fassungen, Farbe, Typografie, Icons und jede Markendatei zum Herunterladen.
-- [Impressum](https://mccain-digital.com/legal/imprint.html): Firmenangaben, Anschrift und
-  Verantwortliche (§ 5 DDG). Wortlaut auf Englisch.
-- [Datenschutz](https://mccain-digital.com/legal/privacy.html): welche Daten verarbeitet
-  werden, wozu, und Ihre Rechte nach DSGVO. Wortlaut auf Englisch.
-- [AGB](https://mccain-digital.com/legal/terms.html): die Bedingungen, unter denen die
-  Leistungen erbracht werden. Wortlaut auf Englisch.
-- [Widerruf](https://mccain-digital.com/legal/withdrawal.html): Widerrufsrecht und
-  Muster-Widerrufsformular für Verbraucher. Wortlaut auf Englisch.
+## Kontakt
+- E-Mail: info@mccain-digital.com
+- Kontaktseite: https://mccain-digital.com/kontakt/
+- Preise und Rechner: https://mccain-digital.com/preise/
 
-## Die vier Leistungen
+## Alle Seiten
 
-- **KI, die auf Ihren Daten läuft** — RAG über eigene Dokumente mit Belegstellen, Agenten
-  mit Leitplanken, MCP-Werkzeugserver an CRM und ERP, lokale und On-Premise-Modelle.
-- **Web-Apps, die skalieren statt neu gebaut zu werden** — Produkte, die vom MVP bis zum
-  Betrieb auf einer Codebasis bleiben.
-- **Websites, die man sich merkt** — handgebaute Seiten, messbar schnell, SEO und
-  maschinenlesbare Struktur von Tag eins an.
-- **Software für Ihre echten Abläufe** — Dashboards, interne Werkzeuge und Integrationen,
-  ERP, CRM und Altsysteme eingeschlossen. On-Premise oder Cloud.
-
-## Eigenes Produkt
-
-- **whatever-recall** — Projektgedächtnis für Software-Teams, das am Commit hängt:
-  Entscheidungen, Lehren und Blast-Radius werden beim Commit geschrieben und offline
-  zurückgelesen. Live und self-hosted.
-
-## Größenordnungen und Dauer
-
-Es gibt keine Preisliste. Innerhalb von 48 Stunden nach Ihrer Beschreibung kommt ein
-Festpreisangebot — eine konkrete Zahl, keine Spanne. Eine kleine Website beginnt im
-niedrigen fünfstelligen Bereich; ein KI-Werkzeug auf eigenen Daten kostet mehr, weil die
-Arbeit in den Daten steckt, nicht im Modell.
-
-- Marketing-Website: 3–6 Wochen
-- Web-App-MVP: 6–12 Wochen
-- KI-Werkzeug auf Ihren Daten: 4–10 Wochen, je nach Zustand der Daten
-- Interne Software: 8–14 Wochen
-
-In der ersten Woche gibt es etwas Klickbares.
-
-## Wer baut
-
-Die zwei Gründer. Christian entwickelt und betreibt, Kathi verantwortet Design und Marke.
-Keine Junioren, die auf dem Budget lernen, kein Account-Manager dazwischen, keine Weitergabe
-an Dritte. Nach dem Launch bleiben dieselben zwei Personen erreichbar.
-
-## Hinweise für Maschinen
-
-- Sprache der Website: Deutsch, mit einem Umschalter auf Englisch. Die Rechtstexte liegen
-  derzeit ausschließlich auf Englisch vor.
-- Die Startseite wird aus einer Design-Komponente vorgerendert: der gesamte Text steht als
-  echter DOM-Text im ausgelieferten HTML, nicht erst nach JavaScript.
-- Strukturierte Daten: ProfessionalService, WebSite und FAQPage als JSON-LD auf der
-  Startseite, Organization auf dem Impressum.
-- Beispiele aus Branchen auf der Website sind illustrativ und ausdrücklich **keine**
-  Kundenreferenzen.
-- Es werden keine Schriften, Skripte oder sonstige Ressourcen von Drittanbietern geladen.
+- [McCain Digital · Software, die in Produktion geht](https://mccain-digital.com/)
+- [Leistungen, Technologien & Vergleiche im Überblick · McCain Digital](https://mccain-digital.com/leistungen/)
+- [KI & Automatisierung entwickeln lassen · McCain Digital](https://mccain-digital.com/leistungen/ki-automatisierung/)
+- [Web-App entwickeln lassen · React & Next.js · McCain Digital](https://mccain-digital.com/leistungen/web-apps/)
+- [Website erstellen lassen · Lighthouse 100 · McCain Digital](https://mccain-digital.com/leistungen/websites/)
+- [Individualsoftware & ERP-Integration · McCain Digital](https://mccain-digital.com/leistungen/individualsoftware/)
+- [Next.js-Entwicklung für skalierende Produkte · McCain Digital](https://mccain-digital.com/leistungen/nextjs-entwicklung/)
+- [MCP-Server entwickeln lassen · ERP & CRM für Claude · McCain Digital](https://mccain-digital.com/leistungen/mcp-server-entwickeln/)
+- [RAG auf eigenen Daten – mit Quellenangabe · McCain Digital](https://mccain-digital.com/leistungen/rag-beratung/)
+- [ERP-Integration: SAP, Business Central, Altsysteme · McCain Digital](https://mccain-digital.com/leistungen/erp-integration/)
+- [WordPress oder handgeschrieben? Ehrlicher Vergleich · McCain Digital](https://mccain-digital.com/vergleich/wordpress-oder-handgeschrieben/)
+- [ChatGPT-Abo oder eigener KI-Assistent? · McCain Digital](https://mccain-digital.com/vergleich/chatgpt-oder-eigenes-rag/)
+- [md-recall · Projektgedächtnis am Commit · Download](https://mccain-digital.com/md-recall/)
+- [Preise: Was kostet Website, Web-App oder KI? · McCain Digital](https://mccain-digital.com/preise/)
+- [Studio: zwei Gründer aus Bayern, seit 2016 · McCain Digital](https://mccain-digital.com/studio/)
+- [Kontakt · Antwort in 24 Stunden · McCain Digital](https://mccain-digital.com/kontakt/)
+- [Impressum, Datenschutz, AGB, Widerruf · McCain Digital](https://mccain-digital.com/rechtliches/)
+- [Styleguide · Farben, Typografie, Komponenten · McCain Digital](https://mccain-digital.com/styleguide/)
+- [News · McCain Digital](https://mccain-digital.com/news/)
+- [recall heißt jetzt md-recall · News · McCain Digital](https://mccain-digital.com/news/md-recall/)
+- [Marke & Downloads · McCain Digital](https://mccain-digital.com/marke/)

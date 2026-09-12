@@ -1,0 +1,30 @@
+<!-- @dsCard group="Components" viewport="700x700" subtitle="SectionHeader, Tile, Stat, FaqItem" name="Content" -->
+<!doctype html><html lang="de"><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script><script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script><script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>body{margin:0;padding:16px;font-family:var(--font-sans);background:#fff;color:#0A2540}.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.l{font:500 11px/1.4 var(--font-mono);color:#727F96;margin:14px 0 6px}</style></head><body><div id="root"></div>
+<script type="text/plain" id="app">
+const { SectionHeader, Tile, Stat, FaqItem, Badge } = NS;
+function App(){ return (<div>
+  <SectionHeader eyebrow="Leistungen" title="Vier Dinge, die wir richtig gut können." desc="Jede Kachel öffnet die ganze Leistung – Anwendungsfälle, Ablauf, Stack und Fragen." />
+  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginTop:24}}>
+    <Tile title="KI, die auf Ihren Daten läuft" text="RAG mit Quellenangabe, Agenten mit Leitplanken, MCP-Server in Ihre Systeme." colors={["#FF5A8C","#FFB46B","#C05CFF"]} minHeight={380} padding={20} onClick={() => {}}>
+      <div style={{position:'absolute',left:'8%',right:'8%',top:'18%',display:'grid',gap:8}}><div style={{justifySelf:'end',maxWidth:'84%',background:'#fff',borderRadius:'14px 14px 4px 14px',padding:'8px 12px',fontSize:12,boxShadow:'0 14px 34px -14px rgba(10,37,64,.4)'}}>Wie lange ist die Gewährleistung?</div><div style={{justifySelf:'start',maxWidth:'90%',background:'#fff',borderRadius:'14px 14px 14px 4px',padding:'8px 12px',fontSize:12,boxShadow:'0 14px 34px -14px rgba(10,37,64,.4)'}}>24 Monate ab Lieferung.<br/><Badge tone="indigo" style={{marginTop:6}}>handbuch-v4.pdf · S. 12</Badge></div></div>
+    </Tile>
+    <Tile title="Unsere eigene Seite: 4×100" meta={<div className="row"><Badge tone="success">Live</Badge><span style={{fontSize:12,color:'#727F96'}}>Projekt · Website</span></div>} text="Lighthouse gemessen, nicht behauptet." colors={["#5FC3FF","#FFB46B","#FF5A8C"]} minHeight={380} padding={20} onClick={() => {}}>
+      <div style={{position:'absolute',left:'8%',right:'8%',top:'18%',background:'#fff',borderRadius:12,padding:14,boxShadow:'var(--shadow-mock)',display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>{['Performance','A11y','Best Practices','SEO'].map(l => <div key={l} style={{textAlign:'center'}}><div style={{width:40,height:40,margin:'0 auto',borderRadius:'50%',border:'3px solid #15BE53',display:'grid',placeItems:'center',fontSize:12,fontWeight:700,color:'#0E8A4C',background:'rgba(21,190,83,.08)'}}>100</div><div style={{fontSize:9,color:'#727F96',marginTop:4}}>{l}</div></div>)}</div>
+    </Tile>
+  </div>
+  <div style={{display:'flex',gap:36,marginTop:24}}><Stat value="48 h" label="bis zum Festpreis" /><Stat value="2–4 Wo." label="bis zum lauffähigen Proof of Value" /><Stat value="100 %" label="self-hostbar" /></div>
+  <div style={{marginTop:20,borderTop:'1px solid var(--mc-line)'}}><FaqItem q="Wem gehört der Code?" a="Ihnen. Vollständiger Quellcode in Ihrem Repository, dokumentiert, kein Lock-in, keine Lizenz pro Nutzer." defaultOpen /><FaqItem q="Was kostet ein KI-Projekt?" a="Ein fokussierter Proof of Value dauert typischerweise 2–4 Wochen; Festpreis in 48 Stunden." /></div>
+</div>); }
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+<script>
+(async () => {
+  function findNS(k) { for (const n of Object.getOwnPropertyNames(window)) { try { const v = window[n]; if (v && typeof v === 'object' && typeof v[k] === 'function') return v; } catch (e) {} } return null; }
+  let NS = findNS('Button');
+  if (!NS) { NS = {}; for (const f of ["../core/Badge.jsx","SectionHeader.jsx","Tile.jsx","Stat.jsx","FaqItem.jsx"]) { let s = await (await fetch(f)).text(); const names = [...s.matchAll(/export function (\w+)/g)].map((m) => m[1]); s = 'const {useState,useEffect,useRef}=React;\n' + s.replace(/import\b[\s\S]*?from\s*["'][^"']+["'];?/g, '').replace(/export\s+default\s+/g, '').replace(/export\s+(const|let|class)\s+/g, '$1 ').replace(/export function/g, 'function') + '\n' + names.map((n) => 'NS.' + n + '=' + n + ';').join(''); new Function('React', 'NS', Babel.transform(s, { presets: [['react', { runtime: 'classic' }]] }).code)(React, NS); } }
+  window.MC = NS;
+  new Function('React', 'ReactDOM', 'NS', Babel.transform(document.getElementById('app').textContent, { presets: [['react', { runtime: 'classic' }]] }).code)(React, ReactDOM, NS);
+})();
+</script></body></html>

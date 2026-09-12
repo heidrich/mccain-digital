@@ -1,0 +1,19 @@
+:root{
+  --font-sans:'Instrument Sans',system-ui,-apple-system,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,SFMono-Regular,monospace;
+  /* Größen */
+  --fs-display:clamp(40px,5.4vw,72px);   /* Hero h1 */
+  --fs-h2:clamp(30px,3.6vw,48px);        /* Sektions-Titel */
+  --fs-h2-dark:clamp(24px,2.5vw,36px);   /* Titel auf dunkler Fläche */
+  --fs-modal:clamp(28px,3.4vw,44px);     /* Modal-Titel */
+  --fs-h3:clamp(22px,1.7vw,27px);        /* Kachel-Titel */
+  --fs-h4:clamp(22px,2.4vw,30px);        /* Modal-Abschnitte */
+  --fs-stat:clamp(40px,4.4vw,64px);      /* Große Zahlen */
+  --fs-lead:18px; --fs-body:15px; --fs-ui:15px; --fs-small:14px; --fs-caption:13px; --fs-meta:12px; --fs-mono:11px; --fs-eyebrow:15px; --fs-eyebrow-dark:13px;
+  /* Zeilenhöhen */
+  --lh-display:1.02; --lh-heading:1.1; --lh-h3:1.15; --lh-lead:1.6; --lh-body:1.55; --lh-tight:1;
+  /* Laufweiten */
+  --ls-display:-.035em; --ls-heading:-.03em; --ls-h3:-.025em; --ls-stat:-.04em; --ls-mono-eyebrow:.06em;
+  /* Gewichte */
+  --fw-regular:400; --fw-medium:500; --fw-semibold:600; --fw-bold:700;
+}

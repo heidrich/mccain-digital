@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mccain-digital.com/sitemap.xml

@@ -12,12 +12,32 @@ import { chromium } from "playwright-core";
 import { findChrome } from "./browser.mjs";
 
 const BASE = process.argv[2] || "http://127.0.0.1:8898";
+/* All 21 routes since the v4 import. Kept in step with LIVE_PAGES in
+ * tools/verify_site.mjs by hand, for the same reason: two lists that disagree
+ * are a finding, one shared list only proves the file agrees with itself. */
 const PAGES = [
-  "/kontakt.html",
-  "/services/ai-tools.html",
-  "/services/web-apps.html",
-  "/services/websites.html",
-  "/services/software.html",
+  "/",
+  "/leistungen/",
+  "/leistungen/ki-automatisierung/",
+  "/leistungen/web-apps/",
+  "/leistungen/websites/",
+  "/leistungen/individualsoftware/",
+  "/leistungen/nextjs-entwicklung/",
+  "/leistungen/mcp-server-entwickeln/",
+  "/leistungen/rag-beratung/",
+  "/leistungen/erp-integration/",
+  "/vergleich/wordpress-oder-handgeschrieben/",
+  "/vergleich/chatgpt-oder-eigenes-rag/",
+  "/md-recall/",
+  "/preise/",
+  "/studio/",
+  "/kontakt/",
+  "/rechtliches/",
+  "/styleguide/",
+  "/news/",
+  "/news/md-recall/",
+  "/marke/",
+  "/404.html",
 ];
 const WIDTHS = [390, 768, 1024, 1440];
 

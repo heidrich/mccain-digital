@@ -1,0 +1,27 @@
+<!-- @dsCard group="Components" viewport="700x360" subtitle="Button, Badge, DataNode, Input" name="Core" -->
+<!doctype html><html lang="de"><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script><script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script><script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>body{margin:0;padding:16px;font-family:var(--font-sans);background:#fff;color:#0A2540}.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.l{font:500 11px/1.4 var(--font-mono);color:#727F96;margin:14px 0 6px}</style></head><body><div id="root"></div>
+<script type="text/plain" id="app">
+const { Button, Badge, DataNode, Input } = NS;
+function App(){ return (<div>
+  <div className="l">Button · primary / ghost / dark / outline · sm md lg</div>
+  <div className="row"><Button chevron>Projekt anfragen</Button><Button variant="ghost">Die Seite fragen</Button><Button variant="dark">Konsole öffnen</Button><Button variant="outline">whatever-recall.dev</Button><Button size="sm">Klein</Button><Button size="lg" chevron>Groß</Button><Button disabled>Deaktiviert</Button></div>
+  <div className="l">Badge</div>
+  <div className="row"><Badge tone="success">Live</Badge><Badge tone="dark" dot>Agentic Browsing 3/3</Badge><Badge tone="indigo">handbuch-v4.pdf · S. 12</Badge><Badge tone="neutral">CLS 0</Badge><Badge tone="neutral">TBT 0 ms</Badge><Badge tone="success" size="md">+18 %</Badge></div>
+  <div className="l">DataNode · dark = KI · light = Web/Infra · hot = aktiv</div>
+  <div className="row"><DataNode tone="dark" color="#C05CFF" label="LLM → tool_call" /><DataNode color="#15BE53" label="TLS 1.3 ✓" /><DataNode tone="dark" color="#635BFF" label="embedding · 1536d" /><DataNode color="#5FC3FF" label="GET /api/v1 · 200" /><DataNode hot color="#FFB46B" label="RAG · 3 Quellen" /></div>
+  <div className="l">Input</div>
+  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,maxWidth:560}}><Input label="E-Mail" type="email" placeholder="name@firma.de" /><Input label="Firma" placeholder="Optional" hint="Antwort in 24 Stunden." /></div>
+</div>); }
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+<script>
+(async () => {
+  function findNS(k) { for (const n of Object.getOwnPropertyNames(window)) { try { const v = window[n]; if (v && typeof v === 'object' && typeof v[k] === 'function') return v; } catch (e) {} } return null; }
+  let NS = findNS('Button');
+  if (!NS) { NS = {}; for (const f of ["Button.jsx","Badge.jsx","DataNode.jsx","Input.jsx"]) { let s = await (await fetch(f)).text(); const names = [...s.matchAll(/export function (\w+)/g)].map((m) => m[1]); s = 'const {useState,useEffect,useRef}=React;\n' + s.replace(/import\b[\s\S]*?from\s*["'][^"']+["'];?/g, '').replace(/export\s+default\s+/g, '').replace(/export\s+(const|let|class)\s+/g, '$1 ').replace(/export function/g, 'function') + '\n' + names.map((n) => 'NS.' + n + '=' + n + ';').join(''); new Function('React', 'NS', Babel.transform(s, { presets: [['react', { runtime: 'classic' }]] }).code)(React, NS); } }
+  window.MC = NS;
+  new Function('React', 'ReactDOM', 'NS', Babel.transform(document.getElementById('app').textContent, { presets: [['react', { runtime: 'classic' }]] }).code)(React, ReactDOM, NS);
+})();
+</script></body></html>

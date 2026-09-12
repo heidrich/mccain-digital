@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#EEF1F6;color:#0A2540;font-family:'Instrument Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+*,*::before,*::after{box-sizing:border-box}
+a{color:#4D47C7;text-decoration:none}a:hover{color:#0A2540}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer}
+h1,h2,h3,p{margin:0}
+@keyframes tile-in{0%{opacity:0;transform:scale(.88)}100%{opacity:1;transform:scale(1)}}
+@keyframes px-in{0%,30%{opacity:0;transform:translate(-14px,14px)}100%{opacity:1;transform:none}}
+@keyframes px-wave{0%,100%{opacity:1}50%{opacity:.28}}
+@keyframes dot-in{0%{opacity:0;transform:scale(.2)}100%{opacity:1;transform:none}}
+@keyframes word-in{0%{opacity:0;clip-path:inset(-30% 100% -40% -5%)}35%{opacity:1}100%{opacity:1;clip-path:inset(-30% -5% -40% -5%)}}
+@keyframes st-in{0%,20%{opacity:0;transform:scale(0)}100%{opacity:1;transform:scale(1)}}
+@keyframes st-flow{0%,100%{opacity:1}50%{opacity:.18}}
+@keyframes cut-in-l{0%,42%{clip-path:polygon(0 0,118% 0,102% 100%,0 100%)}100%{clip-path:polygon(0 0,58% 0,42% 100%,0 100%)}}
+@keyframes cut-in-r{0%,42%{clip-path:polygon(118% 0,100% 0,100% 100%,102% 100%)}100%{clip-path:polygon(58% 0,100% 0,100% 100%,42% 100%)}}
+@keyframes cut-loop-l{0%,100%{clip-path:polygon(0 0,58% 0,42% 100%,0 100%)}50%{clip-path:polygon(0 0,72% 0,56% 100%,0 100%)}}
+@keyframes cut-loop-r{0%,100%{clip-path:polygon(58% 0,100% 0,100% 100%,42% 100%)}50%{clip-path:polygon(72% 0,100% 0,100% 100%,56% 100%)}}
+@keyframes zf-in{0%{opacity:0;transform:translateX(-8px)}100%{opacity:1;transform:none}}
+@keyframes zf-loop{0%{opacity:1;transform:none}70%,100%{opacity:0;transform:translateX(7px)}}
+@keyframes zf-loopin{0%,30%{opacity:0;transform:translateX(-7px)}100%{opacity:1;transform:none}}
+@keyframes zf-cycle{0%{opacity:0;transform:translate(-14px,3px) scale(.6)}45%{opacity:1;transform:none}76%{opacity:1;transform:none}100%{opacity:0;transform:translate(2px,-1px)}}
+@keyframes zf-cycle-b{0%{opacity:0;transform:translate(-14px,-3px) scale(.6)}45%{opacity:1;transform:none}76%{opacity:1;transform:none}100%{opacity:0;transform:translate(2px,1px)}}
+@keyframes zf-deep-in{0%{opacity:0;transform:translateX(-16px) scale(.5)}100%{opacity:1;transform:none}}
+@keyframes zf-shimmer{0%,100%{opacity:1}50%{opacity:.78}}
+@keyframes zf-breathe{0%,100%{opacity:1}50%{opacity:.35}}
+[data-off] *{animation-play-state:paused!important}
+@media (prefers-reduced-motion:reduce){[data-motion] *{animation:none!important}}
+</style>
+</helmet>
+<sc-for list="{{ rounds }}" as="rd" hint-placeholder-count="2">
+<sc-if value="{{ rd.isSketch }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="{{ rd.label }}" style="padding:48px 48px 12px; display:flex; flex-direction:column; gap:24px">
+  <div style="display:flex; flex-direction:column; gap:12px; max-width:1000px">
+    <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap">
+      <span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:#4D47C7; background:#fff; padding:6px 10px; border-radius:6px; box-shadow:0 0 0 1px #E3E8EE">{{ rd.badge }}</span>
+      <h1 style="font-size:28px; font-weight:700; letter-spacing:-.03em">{{ rd.title }}</h1>
+    </div>
+    <p style="font-size:15px; line-height:1.55; color:#425466; text-wrap:pretty">{{ rd.desc }}</p>
+  </div>
+  <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(292px, 1fr)); gap:16px; max-width:1880px">
+    <sc-for list="{{ rd.items }}" as="m" hint-placeholder-count="6">
+      <article id="{{ m.id }}" data-screen-label="{{ m.label }}" style="background:#fff; border-radius:16px; box-shadow:0 0 0 1px #E3E8EE, 0 20px 50px -30px rgba(10,37,64,.2); overflow:hidden">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:10px">
+          <div style="aspect-ratio:1; border-radius:12px; background:#F6F9FC; display:grid; place-items:center">
+            <svg viewBox="0 0 64 64" width="96" height="96" aria-hidden="true" style="display:block"><defs><linearGradient id="{{ m.gid }}" gradientUnits="userSpaceOnUse" x1="{{ m.g.x1 }}" y1="{{ m.g.y1 }}" x2="{{ m.g.x2 }}" y2="{{ m.g.y2 }}"><sc-for list="{{ m.g.stops }}" as="s" hint-placeholder-count="3"><stop offset="{{ s.o }}" stop-color="{{ s.c }}"></stop></sc-for></linearGradient></defs><sc-for list="{{ m.shapes }}" as="p" hint-placeholder-count="2"><path d="{{ p.d }}" fill="{{ p.fill }}" opacity="{{ p.o }}" stroke="{{ p.stroke }}" stroke-width="{{ p.sw }}" stroke-linecap="round" stroke-linejoin="round"></path></sc-for></svg>
+          </div>
+          <div style="aspect-ratio:1; border-radius:12px; background:#0A2540; display:grid; place-items:center; grid-template-columns:repeat(2, 1fr); gap:6px; padding:12px">
+            <svg viewBox="0 0 64 64" width="44" height="44" aria-hidden="true" style="display:block"><sc-for list="{{ m.shapes }}" as="p" hint-placeholder-count="2"><path d="{{ p.d }}" fill="{{ p.fill }}" opacity="{{ p.o }}" stroke="{{ p.stroke }}" stroke-width="{{ p.sw }}" stroke-linecap="round" stroke-linejoin="round"></path></sc-for></svg>
+            <svg viewBox="0 0 64 64" width="24" height="24" aria-hidden="true" style="display:block"><sc-for list="{{ m.shapes }}" as="p" hint-placeholder-count="2"><path d="{{ p.d }}" fill="{{ p.fill }}" opacity="{{ p.o }}" stroke="{{ p.stroke }}" stroke-width="{{ p.sw }}" stroke-linecap="round" stroke-linejoin="round"></path></sc-for></svg>
+            <div style="grid-column:1 / -1; display:flex; align-items:center; gap:8px; margin-top:2px"><svg viewBox="0 0 64 64" width="20" height="20" aria-hidden="true" style="display:block; flex:none"><sc-for list="{{ m.shapes }}" as="p" hint-placeholder-count="2"><path d="{{ p.d }}" fill="{{ p.fill }}" opacity="{{ p.o }}" stroke="{{ p.stroke }}" stroke-width="{{ p.sw }}" stroke-linecap="round" stroke-linejoin="round"></path></sc-for></svg><span style="font-family:'Instrument Sans',sans-serif; font-weight:600; font-size:12.5px; letter-spacing:-.03em; color:#fff; white-space:nowrap">mccain digital</span></div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:flex-start; gap:10px; padding:4px 14px 14px">
+          <a href="#{{ m.id }}" style="flex:none; font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; color:#fff; background:#635BFF; padding:3px 7px; border-radius:5px">{{ m.id }}</a>
+          <div style="min-width:0"><div style="display:flex; align-items:baseline; gap:8px; flex-wrap:wrap"><h2 style="font-size:15px; font-weight:700; letter-spacing:-.02em">{{ m.name }}</h2><span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:#5A6880">{{ m.tag }}</span></div><p style="font-size:12.5px; line-height:1.5; color:#425466; margin-top:3px; text-wrap:pretty">{{ m.rule }}</p></div>
+        </div>
+      </article>
+    </sc-for>
+  </div>
+</section>
+</sc-if>
+<sc-if value="{{ rd.isCards }}" hint-placeholder-val="{{ true }}">
+<section data-motion data-screen-label="{{ rd.label }}" style="padding:48px 48px 12px; display:flex; flex-direction:column; gap:24px">
+  <div style="display:flex; flex-wrap:wrap; align-items:flex-start; gap:16px 28px; max-width:1240px">
+    <div style="display:flex; flex-direction:column; gap:12px; max-width:900px">
+      <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:#4D47C7; background:#fff; padding:6px 10px; border-radius:6px; box-shadow:0 0 0 1px #E3E8EE">{{ rd.badge }}</span>
+        <h1 style="font-size:28px; font-weight:700; letter-spacing:-.03em">{{ rd.title }}</h1>
+      </div>
+      <p style="font-size:15px; line-height:1.55; color:#425466; text-wrap:pretty">{{ rd.desc }}</p>
+    </div>
+    <button onClick="{{ replay }}" style="display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 18px; border-radius:999px; background:#635BFF; color:#fff; font-size:14px; font-weight:600; margin-left:auto; transition: background .2s" style-hover="background:#0A2540"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg>Nochmal abspielen</button>
+  </div>
+  <div style="display:flex; flex-wrap:wrap; gap:28px; align-items:flex-start">
+    <sc-for list="{{ rd.cards }}" as="b" hint-placeholder-count="3">
+    <article id="{{ b.id }}" data-screen-label="{{ b.label }}" style="width:min(600px, 100%); background:#fff; border-radius:20px; box-shadow:0 0 0 1px #E3E8EE, 0 20px 50px -30px rgba(10,37,64,.25); overflow:hidden">
+      <div style="display:flex; align-items:flex-start; gap:14px; padding:24px 28px 20px">
+        <a href="#{{ b.id }}" style="flex:none; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:#fff; background:#635BFF; padding:5px 9px; border-radius:6px">{{ b.id }}</a>
+        <div>
+          <h2 style="font-size:22px; font-weight:700; letter-spacing:-.02em">{{ b.name }}</h2>
+          <p style="font-size:14px; line-height:1.55; color:#425466; margin-top:6px; text-wrap:pretty">{{ b.rule }}</p>
+          <p style="font-family:'JetBrains Mono',monospace; font-size:11.5px; color:#5A6880; margin-top:10px; letter-spacing:.02em">{{ b.nums }}</p>
+        </div>
+      </div>
+      <div style="padding:18px 28px 22px; border-top:1px solid #E3E8EE">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:#5A6880">Marke · dunkel, hell, einfarbig</div>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:12px">
+          <sc-for list="{{ b.marks }}" as="t" hint-placeholder-count="3">
+            <div style="aspect-ratio:1; border-radius:14px; background: {{ t.field }}; display:grid; place-items:center">
+              <svg viewBox="0 0 64 64" width="{{ t.size }}" height="{{ t.size }}" aria-hidden="true" style="display:block; flex:none; animation: {{ t.tileAnim }}"><rect x="0.5" y="0.5" width="63" height="63" rx="14.7" fill="{{ t.bg }}" stroke="{{ t.ring }}"></rect><sc-for list="{{ t.cells }}" as="c" hint-placeholder-count="0"><rect fill-opacity="{{ c.o }}" x="{{ c.x }}" y="{{ c.y }}" width="{{ c.s }}" height="{{ c.s }}" rx="{{ c.r }}" fill="{{ c.fill }}" style="transform-box: fill-box; transform-origin: center; animation: {{ c.anim }}"></rect></sc-for><sc-for list="{{ t.paths }}" as="p" hint-placeholder-count="0"><path d="{{ p.d }}" fill="{{ p.fill }}" fill-opacity="{{ p.o }}"></path></sc-for></svg>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="padding:18px 28px 22px; border-top:1px solid #E3E8EE">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:#5A6880">Wortmarke</div>
+        <div style="display:grid; gap:10px; margin-top:12px">
+          <sc-for list="{{ b.lockups }}" as="l" hint-placeholder-count="2">
+            <div style="display:flex; align-items:center; gap:18px; padding:22px 24px; border-radius:14px; background: {{ l.field }}; box-shadow: {{ l.ring }}"><svg viewBox="0 0 64 64" width="{{ l.tile.size }}" height="{{ l.tile.size }}" aria-hidden="true" style="display:block; flex:none; animation: {{ l.tile.tileAnim }}"><rect x="0.5" y="0.5" width="63" height="63" rx="14.7" fill="{{ l.tile.bg }}" stroke="{{ l.tile.ring }}"></rect><sc-for list="{{ l.tile.cells }}" as="c" hint-placeholder-count="0"><rect fill-opacity="{{ c.o }}" x="{{ c.x }}" y="{{ c.y }}" width="{{ c.s }}" height="{{ c.s }}" rx="{{ c.r }}" fill="{{ c.fill }}"></rect></sc-for><sc-for list="{{ l.tile.paths }}" as="p" hint-placeholder-count="0"><path d="{{ p.d }}" fill="{{ p.fill }}" fill-opacity="{{ p.o }}"></path></sc-for></svg><span style="font-family:'Instrument Sans',sans-serif; font-weight:600; font-size: {{ l.wsize }}px; line-height:1; letter-spacing:-.03em; color: {{ l.color }}; white-space:nowrap">mccain digital</span></div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="padding:18px 28px 22px; border-top:1px solid #E3E8EE">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px"><div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:#5A6880">Bewegung</div><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#5A6880">ease .2 .8 .2 1</span></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px">
+          <sc-for list="{{ b.motion }}" as="m" hint-placeholder-count="2">
+            <div style="border-radius:14px; background:#F6F9FC; padding:16px 18px">
+              <div data-stage style="height:80px; display:flex; align-items:center"><sc-if value="{{ motionOn }}" hint-placeholder-val="{{ true }}"><svg viewBox="0 0 64 64" width="{{ m.tile.size }}" height="{{ m.tile.size }}" aria-hidden="true" style="display:block; flex:none; animation: {{ m.tile.tileAnim }}"><rect x="0.5" y="0.5" width="63" height="63" rx="14.7" fill="{{ m.tile.bg }}" stroke="{{ m.tile.ring }}"></rect><sc-for list="{{ m.tile.cells }}" as="c" hint-placeholder-count="0"><rect fill-opacity="{{ c.o }}" x="{{ c.x }}" y="{{ c.y }}" width="{{ c.s }}" height="{{ c.s }}" rx="{{ c.r }}" fill="{{ c.fill }}" style="transform-box: fill-box; transform-origin: center; animation: {{ c.anim }}"></rect></sc-for><sc-for list="{{ m.tile.paths }}" as="p" hint-placeholder-count="0"><path d="{{ p.d }}" fill="{{ p.fill }}" fill-opacity="{{ p.o }}"></path></sc-for></svg></sc-if></div>
+              <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-top:8px"><span style="font-size:13px; font-weight:600">{{ m.title }}</span><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#5A6880">{{ m.time }}</span></div>
+              <p style="font-size:12.5px; line-height:1.5; color:#425466; margin-top:4px">{{ m.note }}</p>
+            </div>
+          </sc-for>
+        </div>
+        <div style="border-radius:14px; background:#F6F9FC; padding:16px 18px; margin-top:12px; display:flex; align-items:center; gap:20px; flex-wrap:wrap">
+          <div data-stage style="height:56px; display:flex; align-items:center; gap:22px; flex:1 1 300px"><sc-if value="{{ motionOn }}" hint-placeholder-val="{{ true }}"><svg viewBox="0 0 64 64" width="{{ b.sign.tile.size }}" height="{{ b.sign.tile.size }}" aria-hidden="true" style="display:block; flex:none; animation: {{ b.sign.tile.tileAnim }}"><rect x="0.5" y="0.5" width="63" height="63" rx="14.7" fill="{{ b.sign.tile.bg }}" stroke="{{ b.sign.tile.ring }}"></rect><sc-for list="{{ b.sign.tile.cells }}" as="c" hint-placeholder-count="0"><rect fill-opacity="{{ c.o }}" x="{{ c.x }}" y="{{ c.y }}" width="{{ c.s }}" height="{{ c.s }}" rx="{{ c.r }}" fill="{{ c.fill }}" style="transform-box: fill-box; transform-origin: center; animation: {{ c.anim }}"></rect></sc-for><sc-for list="{{ b.sign.tile.paths }}" as="p" hint-placeholder-count="0"><path d="{{ p.d }}" fill="{{ p.fill }}" fill-opacity="{{ p.o }}"></path></sc-for></svg><span style="font-family:'Instrument Sans',sans-serif; font-weight:600; font-size: {{ b.sign.wsize }}px; line-height:1; letter-spacing:-.03em; color: {{ b.sign.color }}; white-space:nowrap; animation: {{ b.sign.anim }}">mccain digital</span></sc-if></div>
+          <div style="flex:1 1 180px"><div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px"><span style="font-size:13px; font-weight:600">Anmelden</span><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#5A6880">1,3 s</span></div><p style="font-size:12.5px; line-height:1.5; color:#425466; margin-top:4px">Der Strom steht, dann wischt das Wort ein. Das Wort kommt nach dem Strom, nie davor.</p></div>
+        </div>
+      </div>
+      <div style="padding:18px 28px 22px; border-top:1px solid #E3E8EE; display:grid; grid-template-columns:1fr 1fr; gap:24px">
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:#5A6880">Mindestgrößen</div>
+          <div style="display:flex; align-items:flex-end; gap:18px; margin-top:14px; height:78px">
+            <sc-for list="{{ b.sizes }}" as="t" hint-placeholder-count="4"><div style="display:flex; flex-direction:column; align-items:center; gap:8px"><svg viewBox="0 0 64 64" width="{{ t.size }}" height="{{ t.size }}" aria-hidden="true" style="display:block; flex:none; animation: {{ t.tileAnim }}"><rect x="0.5" y="0.5" width="63" height="63" rx="14.7" fill="{{ t.bg }}" stroke="{{ t.ring }}"></rect><sc-for list="{{ t.cells }}" as="c" hint-placeholder-count="0"><rect fill-opacity="{{ c.o }}" x="{{ c.x }}" y="{{ c.y }}" width="{{ c.s }}" height="{{ c.s }}" rx="{{ c.r }}" fill="{{ c.fill }}"></rect></sc-for><sc-for list="{{ t.paths }}" as="p" hint-placeholder-count="0"><path d="{{ p.d }}" fill="{{ p.fill }}" fill-opacity="{{ p.o }}"></path></sc-for></svg><span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:#5A6880">{{ t.size }}</span></div></sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:#5A6880">In der Navigation</div>
+          <div style="margin-top:14px; height:52px; display:flex; align-items:center; gap:14px; padding:0 14px; border-radius:10px; background:#fff; box-shadow:0 0 0 1px #E3E8EE, 0 6px 16px -10px rgba(10,37,64,.25)"><svg viewBox="0 0 64 64" width="{{ b.nav.tile.size }}" height="{{ b.nav.tile.size }}" aria-hidden="true" style="display:block; flex:none; animation: {{ b.nav.tile.tileAnim }}"><rect x="0.5" y="0.5" width="63" height="63" rx="14.7" fill="{{ b.nav.tile.bg }}" stroke="{{ b.nav.tile.ring }}"></rect><sc-for list="{{ b.nav.tile.cells }}" as="c" hint-placeholder-count="0"><rect fill-opacity="{{ c.o }}" x="{{ c.x }}" y="{{ c.y }}" width="{{ c.s }}" height="{{ c.s }}" rx="{{ c.r }}" fill="{{ c.fill }}"></rect></sc-for><sc-for list="{{ b.nav.tile.paths }}" as="p" hint-placeholder-count="0"><path d="{{ p.d }}" fill="{{ p.fill }}" fill-opacity="{{ p.o }}"></path></sc-for></svg><span style="font-family:'Instrument Sans',sans-serif; font-weight:600; font-size: {{ b.nav.wsize }}px; line-height:1; letter-spacing:-.03em; color: #0A2540; white-space:nowrap">mccain digital</span><span style="margin-left:auto; display:flex; gap:12px; font-size:12px; color:#425466"><span>Leistungen</span><span>Arbeiten</span></span></div>
+        </div>
+      </div>
+    </article>
+    </sc-for>
+  </div>
+</section>
+</sc-if>
+</sc-for>
+<div style="padding:0 48px 24px"><button onClick="{{ toggleOld }}" style="display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 18px; border-radius:999px; background:#fff; color:#0A2540; font-size:14px; font-weight:600; box-shadow:0 0 0 1px #E3E8EE; transition: box-shadow .2s" style-hover="box-shadow:0 0 0 1px #635BFF">{{ oldLabel }}</button></div>
+<sc-if value="{{ showOld }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Runde 2" style="padding:48px 48px 12px; display:flex; flex-direction:column; gap:24px">
+  <div style="display:flex; flex-direction:column; gap:12px; max-width:1000px">
+    <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap">
+      <span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:#4D47C7; background:#fff; padding:6px 10px; border-radius:6px; box-shadow:0 0 0 1px #E3E8EE">Runde 2 · 24 Skizzen</span>
+      <h1 style="font-size:28px; font-weight:700; letter-spacing:-.03em">Austoben: Strom, Pixel, Knoten, Zeichen, Fläche</h1>
+    </div>
+    <p style="font-size:15px; line-height:1.55; color:#425466; text-wrap:pretty">Alle auf derselben Kachel (64, Ecken 23,4 %), Navy oder Weiß, Verlauf Orange → Pink → Violett. Absichtlich roh: Jede Skizze ist eine Idee, keine Ausarbeitung. Sag, welche Nummern weiterkommen – daraus baue ich Kachel, Wortmarke, Bewegung wie in <a href="#1a">Runde 1</a>.</p>
+  </div>
+  <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(292px, 1fr)); gap:16px; max-width:1880px">
+    <sc-for list="{{ r2 }}" as="m" hint-placeholder-count="24">
+      <article id="{{ m.id }}" data-screen-label="{{ m.label }}" style="background:#fff; border-radius:16px; box-shadow:0 0 0 1px #E3E8EE, 0 20px 50px -30px rgba(10,37,64,.2); overflow:hidden">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:10px">
+          <div style="aspect-ratio:1; border-radius:12px; background:#F6F9FC; display:grid; place-items:center">
+            <svg viewBox="0 0 64 64" width="96" height="96" aria-hidden="true" style="display:block"><defs><linearGradient id="{{ m.gid }}" gradientUnits="userSpaceOnUse" x1="{{ m.g.x1 }}" y1="{{ m.g.y1 }}" x2="{{ m.g.x2 }}" y2="{{ m.g.y2 }}"><sc-for list="{{ m.g.stops }}" as="s" hint-placeholder-count="3"><stop offset="{{ s.o }}" stop-color="{{ s.c }}"></stop></sc-for></linearGradient></defs><sc-for list="{{ m.shapes }}" as="p" hint-placeholder-count="2"><path d="{{ p.d }}" fill="{{ p.fill }}" opacity="{{ p.o }}" stroke="{{ p.stroke }}" stroke-width="{{ p.sw }}" stroke-linecap="round" stroke-linejoin="round"></path></sc-for></svg>
+          </div>
+          <div style="aspect-ratio:1; border-radius:12px; background:#0A2540; display:grid; place-items:center; grid-template-columns:repeat(2, 1fr); gap:6px; padding:12px">
+            <svg viewBox="0 0 64 64" width="44" height="44" aria-hidden="true" style="display:block"><sc-for list="{{ m.shapes }}" as="p" hint-placeholder-count="2"><path d="{{ p.d }}" fill="{{ p.fill }}" opacity="{{ p.o }}" stroke="{{ p.stroke }}" stroke-width="{{ p.sw }}" stroke-linecap="round" stroke-linejoin="round"></path></sc-for></svg>
+            <svg viewBox="0 0 64 64" width="24" height="24" aria-hidden="true" style="display:block"><sc-for list="{{ m.shapes }}" as="p" hint-placeholder-count="2"><path d="{{ p.d }}" fill="{{ p.fill }}" opacity="{{ p.o }}" stroke="{{ p.stroke }}" stroke-width="{{ p.sw }}" stroke-linecap="round" stroke-linejoin="round"></path></sc-for></svg>
+            <div style="grid-column:1 / -1; display:flex; align-items:center; gap:8px; margin-top:2px"><svg viewBox="0 0 64 64" width="20" height="20" aria-hidden="true" style="display:block; flex:none"><sc-for list="{{ m.shapes }}" as="p" hint-placeholder-count="2"><path d="{{ p.d }}" fill="{{ p.fill }}" opacity="{{ p.o }}" stroke="{{ p.stroke }}" stroke-width="{{ p.sw }}" stroke-linecap="round" stroke-linejoin="round"></path></sc-for></svg><span style="font-family:'Instrument Sans',sans-serif; font-weight:600; font-size:12.5px; letter-spacing:-.03em; color:#fff; white-space:nowrap">mccain digital</span></div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:flex-start; gap:10px; padding:4px 14px 14px">
+          <a href="#{{ m.id }}" style="flex:none; font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; color:#fff; background:#635BFF; padding:3px 7px; border-radius:5px">{{ m.id }}</a>
+          <div style="min-width:0"><div style="display:flex; align-items:baseline; gap:8px; flex-wrap:wrap"><h2 style="font-size:15px; font-weight:700; letter-spacing:-.02em">{{ m.name }}</h2><span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:#5A6880">{{ m.tag }}</span></div><p style="font-size:12.5px; line-height:1.5; color:#425466; margin-top:3px; text-wrap:pretty">{{ m.rule }}</p></div>
+        </div>
+      </article>
+    </sc-for>
+  </div>
+</section>
+<section data-motion data-screen-label="Runde 1" style="padding:48px; display:flex; flex-direction:column; gap:28px">
+  <div style="display:flex; flex-wrap:wrap; align-items:flex-start; gap:16px 28px; max-width:1880px">
+    <div style="display:flex; flex-direction:column; gap:12px; max-width:900px">
+      <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:#4D47C7; background:#fff; padding:6px 10px; border-radius:6px; box-shadow:0 0 0 1px #E3E8EE">Runde 1 · 3 Richtungen</span>
+        <h1 style="font-size:28px; font-weight:700; letter-spacing:-.03em">Logo für McCain Digital</h1>
+      </div>
+      <p style="font-size:15px; line-height:1.55; color:#425466; text-wrap:pretty">Wie bei Hallvern ist jede Marke eine Regel, kein gezeichnetes Bild: wenige Zahlen aus dem Vokabular der neuen Seite – Pixelstrom, Verlauf, Auflösung. Kein Buchstabe. Jede funktioniert als Kachel (Ecken 23,4 %), auf Hell und Dunkel, einfarbig, im Favicon und in der Navigation, und hat drei Zustände: Ankommen, Anmelden, Warten. Die Wortmarke bleibt konstant: mccain digital, Instrument Sans 600, klein geschrieben.</p>
+    </div>
+    <button onClick="{{ replay }}" style="display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 18px; border-radius:999px; background:#635BFF; color:#fff; font-size:14px; font-weight:600; margin-left:auto; transition: background .2s" style-hover="background:#0A2540"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg>Nochmal abspielen</button>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:28px; align-items:flex-start">
+
+    <article id="1a" data-screen-label="1a Drei Pixel" style="width:min(600px, 100%); background:#fff; border-radius:20px; box-shadow:0 0 0 1px #E3E8EE, 0 20px 50px -30px rgba(10,37,64,.25); overflow:hidden">
+      <div style="display:flex; align-items:flex-start; gap:14px; padding:24px 28px 20px">
+        <a href="#1a" style="flex:none; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:#fff; background:#635BFF; padding:5px 9px; border-radius:6px">1a</a>
+        <div>
+          <h2 style="font-size:22px; font-weight:700; letter-spacing:-.02em">Drei Pixel</h2>
+          <p style="font-size:14px; line-height:1.55; color:#425466; margin-top:6px; text-wrap:pretty">Drei Pixel aus dem Strom – Orange, Pink, Violett – im Schritt von einer Kante. In der Wortmarke werden sie zu den drei i-Punkten von mccain digital: Der Strom kommt an.</p>
+          <p style="font-family:'JetBrains Mono',monospace; font-size:11.5px; color:#5A6880; margin-top:10px; letter-spacing:.02em">Kante 12/64 · Schritt 12 · Radius 2 · Platte Navy</p>
+        </div>
+      </div>
+      <div style="padding:18px 28px 22px; border-top:1px solid #E3E8EE">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:#5A6880">Marke · dunkel, hell, einfarbig</div>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:12px">
+          <sc-for list="{{ a.marks }}" as="t" hint-placeholder-count="3">
+            <div style="aspect-ratio:1; border-radius:14px; background: {{ t.field }}; display:grid; place-items:center">
+              <svg viewBox="0 0 64 64" width="{{ t.size }}" height="{{ t.size }}" aria-hidden="true" style="display:block; flex:none; animation: {{ t.tileAnim }}"><rect x="0.5" y="0.5" width="63" height="63" rx="14.7" fill="{{ t.bg }}" stroke="{{ t.ring }}"></rect><sc-for list="{{ t.px }}" as="p" hint-placeholder-count="3"><rect x="{{ p.x }}" y="{{ p.y }}" width="12" height="12" rx="2" fill="{{ p.fill }}" style="animation: {{ p.anim }}"></rect></sc-for></svg>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="padding:18px 28px 22px; border-top:1px solid #E3E8EE">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:#5A6880">Wortmarke · die i-Punkte tragen die Farbe</div>
+        <div style="display:grid; gap:10px; margin-top:12px">
+          <sc-for list="{{ a.lockups }}" as="l" hint-placeholder-count="2">
+            <div style="display:flex; align-items:center; gap:18px; padding:22px 24px; border-radius:14px; background: {{ l.field }}; box-shadow: {{ l.ring }}">
+              <svg viewBox="0 0 64 64" width="{{ l.tile.size }}" height="{{ l.tile.size }}" aria-hidden="true" style="display:block; flex:none; animation: {{ l.tile.tileAnim }}"><rect x="0.5" y="0.5" width="63" height="63" rx="14.7" fill="{{ l.tile.bg }}" stroke="{{ l.tile.ring }}"></rect><sc-for list="{{ l.tile.px }}" as="p" hint-placeholder-count="3"><rect x="{{ p.x }}" y="{{ p.y }}" width="12" height="12" rx="2" fill="{{ p.fill }}" style="animation: {{ p.anim }}"></rect></sc-for></svg>
+              <span role="img" aria-label="mccain digital" style="font-family:'Instrument Sans',sans-serif; font-weight:600; font-size: {{ l.wsize }}px; line-height:1; letter-spacing:-.03em; color: {{ l.color }}; white-space:nowrap; animation: {{ l.anim }}">mcca<span style="position:relative; display:inline-block">ı<span style="position:absolute; left:50%; top: {{ dotTop }}; width: {{ dotSize }}; height: {{ dotSize }}; margin-left: calc({{ dotSize }} / -2); background: {{ l.d1.fill }}; animation: {{ l.d1.anim }}"></span></span>n d<span style="position:relative; display:inline-block">ı<span style="position:absolute; left:50%; top: {{ dotTop }}; width: {{ dotSize }}; height: {{ dotSize }}; margin-left: calc({{ dotSize }} / -2); background: {{ l.d2.fill }}; animation: {{ l.d2.anim }}"></span></span>g<span style="position:relative; display:inline-block">ı<span style="position:absolute; left:50%; top: {{ dotTop }}; width: {{ dotSize }}; height: {{ dotSize }}; margin-left: calc({{ dotSize }} / -2); background: {{ l.d3.fill }}; animation: {{ l.d3.anim }}"></span></span>tal</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="padding:18px 28px 22px; border-top:1px solid #E3E8EE">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px"><div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:#5A6880">Bewegung</div><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#5A6880">ease .2 .8 .2 1</span></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px">
+          <sc-for list="{{ a.motion }}" as="m" hint-placeholder-count="2">
+            <div style="border-radius:14px; background:#F6F9FC; padding:16px 18px">
+              <div data-stage style="height:80px; display:flex; align-items:center"><sc-if value="{{ motionOn }}" hint-placeholder-val="{{ true }}"><svg viewBox="0 0 64 64" width="{{ m.tile.size }}" height="{{ m.tile.size }}" aria-hidden="true" style="display:block; flex:none; animation: {{ m.tile.tileAnim }}"><rect x="0.5" y="0.5" width="63" height="63" rx="14.7" fill="{{ m.tile.bg }}" stroke="{{ m.tile.ring }}"></rect><sc-for list="{{ m.tile.px }}" as="p" hint-placeholder-count="3"><rect x="{{ p.x }}" y="{{ p.y }}" width="12" height="12" rx="2" fill="{{ p.fill }}" style="animation: {{ p.anim }}"></rect></sc-for></svg></sc-if></div>
+              <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-top:8px"><span style="font-size:13px; font-weight:600">{{ m.title }}</span><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#5A6880">{{ m.time }}</span></div>
+              <p style="font-size:12.5px; line-height:1.5; color:#425466; margin-top:4px">{{ m.note }}</p>
+            </div>
+          </sc-for>
+        </div>
+        <div style="border-radius:14px; background:#F6F9FC; padding:16px 18px; margin-top:12px; display:flex; align-items:center; gap:20px; flex-wrap:wrap">
+          <div data-stage style="height:56px; display:flex; align-items:center; gap:22px; flex:1 1 300px"><sc-if value="{{ motionOn }}" hint-placeholder-val="{{ true }}">
+            <svg viewBox="0 0 64 64" width="{{ a.sign.tile.size }}" height="{{ a.sign.tile.size }}" aria-hidden="true" style="display:block; flex:none; animation: {{ a.sign.tile.tileAnim }}"><rect x="0.5" y="0.5" width="63" height="63" rx="14.7" fill="{{ a.sign.tile.bg }}" stroke="{{ a.sign.tile.ring }}"></rect><sc-for list="{{ a.sign.tile.px }}" as="p" hint-placeholder-count="3"><rect x="{{ p.x }}" y="{{ p.y }}" width="12" height="12" rx="2" fill="{{ p.fill }}" style="animation: {{ p.anim }}"></rect></sc-for></svg>
+            <span role="img" aria-label="mccain digital" style="font-family:'Instrument Sans',sans-serif; font-weight:600; font-size: {{ a.sign.wsize }}px; line-height:1; letter-spacing:-.03em; color: {{ a.sign.color }}; white-space:nowrap; animation: {{ a.sign.anim }}">mcca<span style="position:relative; display:inline-block">ı<span style="position:absolute; left:50%; top: {{ dotTop }}; width: {{ dotSize }}; height: {{ dotSize }}; margin-left: calc({{ dotSize }} / -2); background: {{ a.sign.d1.fill }}; animation: {{ a.sign.d1.anim }}"></span></span>n d<span style="position:relative; display:inline-block">ı<span style="position:absolute; left:50%; top: {{ dotTop }}; width: {{ dotSize }}; height: {{ dotSize }}; margin-left: calc({{ dotSize }} / -2); background: {{ a.sign.d2.fill }}; animation: {{ a.sign.d2.anim }}"></span></span>g<span style="position:relative; display:inline-block">ı<span style="position:absolute; left:50%; top: {{ dotTop }}; width: {{ dotSize }}; height: {{ dotSize }}; margin-left: calc({{ dotSize }} / -2); background: {{ a.sign.d3.fill }}; animation: {{ a.sign.d3.anim }}"></span></span>tal</span>
+          </sc-if></div>
+          <div style="flex:1 1 180px"><div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px"><span style="font-size:13px; font-weight:600">Anmelden</span><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#5A6880">1,3 s</span></div><p style="font-size:12.5px; line-height:1.5; color:#425466; margin-top:4px">Erst die Pixel, dann wischt das Wort ein – die drei Punkte setzen sich als Letztes.</p></div>
+        </div>
+      </div>
+      <div style="padding:18px 28px 22px; border-top:1px solid #E3E8EE; display:grid; grid-template-columns:1fr 1fr; gap:24px">
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:#5A6880">Mindestgrößen</div>
+          <div style="display:flex; align-items:flex-end; gap:18px; margin-top:14px; height:78px">
+            <sc-for list="{{ a.sizes }}" as="t" hint-placeholder-count="4">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:8px"><svg viewBox="0 0 64 64" width="{{ t.size }}" height="{{ t.size }}" aria-hidden="true" style="display:block; flex:none; animation: {{ t.tileAnim }}"><rect x="0.5" y="0.5" width="63" height="63" rx="14.7" fill="{{ t.bg }}" stroke="{{ t.ring }}"></rect><sc-for list="{{ t.px }}" as="p" hint-placeholder-count="3"><rect x="{{ p.x }}" y="{{ p.y }}" width="12" height="12" rx="2" fill="{{ p.fill }}" style="animation: {{ p.anim }}"></rect></sc-for></svg><span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:#5A6880">{{ t.size }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:#5A6880">In der Navigation</div>
+          <div style="margin-top:14px; height:52px; display:flex; align-items:center; gap:14px; padding:0 14px; border-radius:10px; background:#fff; box-shadow:0 0 0 1px #E3E8EE, 0 6px 16px -10px rgba(10,37,64,.25)">
+            <svg viewBox="0 0 64 64" width="{{ a.nav.tile.size }}" height="{{ a.nav.tile.size }}" aria-hidden="true" style="display:block; flex:none"><rect x="0.5" y="0.5" width="63" height="63" rx="14.7" fill="{{ a.nav.tile.bg }}" stroke="{{ a.nav.tile.ring }}"></rect><sc-for list="{{ a.nav.tile.px }}" as="p" hint-placeholder-count="3"><rect x="{{ p.x }}" y="{{ p.y }}" width="12" height="12" rx="2" fill="{{ p.fill }}"></rect></sc-for></svg>
+            <span role="img" aria-label="mccain digital" style="font-family:'Instrument Sans',sans-serif; font-weight:600; font-size: {{ a.nav.wsize }}px; line-height:1; letter-spacing:-.03em; color:#0A2540; white-space:nowrap">mcca<span style="position:relative; display:inline-block">ı<span style="position:absolute; left:50%; top: {{ dotTop }}; width: {{ dotSize }}; height: {{ dotSize }}; margin-left: calc({{ dotSize }} / -2); background:#FFB46B"></span></span>n d<span style="position:relative; display:inline-block">ı<span style="position:absolute; left:50%; top: {{ dotTop }}; width: {{ dotSize }}; height: {{ dotSize }}; margin-left: calc({{ dotSize }} / -2); background:#FF5A8C"></span></span>g<span style="position:relative; display:inline-block">ı<span style="position:absolute; left:50%; top: {{ dotTop }}; width: {{ dotSize }}; height: {{ dotSize }}; margin-left: calc({{ dotSize }} / -2); background:#C05CFF"></span></span>tal</span>
+            <span style="margin-left:auto; display:flex; gap:12px; font-size:12px; color:#425466"><span>Leistungen</span><span>Arbeiten</span></span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <div style="width:280px; padding:24px 28px; border-radius:20px; background:#fff; box-shadow:0 0 0 1px #E3E8EE"><a href="#3a" style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:#fff; background:#635BFF; padding:5px 9px; border-radius:6px">1b</a><h2 style="font-size:20px; font-weight:700; letter-spacing:-.02em; margin-top:14px">Der Strom</h2><p style="font-size:14px; line-height:1.55; color:#425466; margin-top:6px">Weiterentwickelt in Runde 3 – als Bogen (<a href="#3a">3a</a>), als S (<a href="#3b">3b</a>) und als D (<a href="#3c">3c</a>) – und in Runde 4 in vier Fassungen des D (<a href="#4a">4a</a>–<a href="#4d">4d</a>).</p></div>
+
+    <article id="1c" data-screen-label="1c Das Fenster" style="width:min(600px, 100%); background:#fff; border-radius:20px; box-shadow:0 0 0 1px #E3E8EE, 0 20px 50px -30px rgba(10,37,64,.25); overflow:hidden">
+      <div style="display:flex; align-items:flex-start; gap:14px; padding:24px 28px 20px">
+        <a href="#1c" style="flex:none; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:#fff; background:#635BFF; padding:5px 9px; border-radius:6px">1c</a>
+        <div>
+          <h2 style="font-size:22px; font-weight:700; letter-spacing:-.02em">Das Fenster</h2>
+          <p style="font-size:14px; line-height:1.55; color:#425466; margin-top:6px; text-wrap:pretty">Ein Verlauf, zwei Auflösungen. Links Pixel, rechts glatt – getrennt durch eine Kante, die von 58 auf 42 % fällt. Links die Daten, rechts das Produkt.</p>
+          <p style="font-family:'JetBrains Mono',monospace; font-size:11.5px; color:#5A6880; margin-top:10px; letter-spacing:.02em">Kante 58 → 42 % · Raster 8 × 8 · Fuge 1 · Verlauf 135°</p>
+        </div>
+      </div>
+      <div style="padding:18px 28px 22px; border-top:1px solid #E3E8EE">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:#5A6880">Marke · dunkel, hell, einfarbig</div>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:12px">
+          <sc-for list="{{ c.marks }}" as="t" hint-placeholder-count="3">
+            <div style="aspect-ratio:1; border-radius:14px; background: {{ t.field }}; display:grid; place-items:center">
+              <div aria-hidden="true" style="position:relative; flex:none; width: {{ t.size }}px; height: {{ t.size }}px; border-radius:23.4%; overflow:hidden; background: {{ t.bg }}; animation: {{ t.tileAnim }}"><div style="position:absolute; inset:0; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr); gap: {{ t.gap }}; clip-path: polygon(0 0, 58% 0, 42% 100%, 0 100%); animation: {{ t.animL }}"><sc-for list="{{ t.cells }}" as="q" hint-placeholder-count="0"><div style="background: {{ q.fill }}"></div></sc-for></div><div style="position:absolute; inset:0; background: {{ t.smooth }}; clip-path: polygon(58% 0, 100% 0, 100% 100%, 42% 100%); animation: {{ t.animR }}"></div></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="padding:18px 28px 22px; border-top:1px solid #E3E8EE">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:#5A6880">Wortmarke</div>
+        <div style="display:grid; gap:10px; margin-top:12px">
+          <sc-for list="{{ c.lockups }}" as="l" hint-placeholder-count="2">
+            <div style="display:flex; align-items:center; gap:18px; padding:22px 24px; border-radius:14px; background: {{ l.field }}; box-shadow: {{ l.ring }}">
+              <div aria-hidden="true" style="position:relative; flex:none; width: {{ l.tile.size }}px; height: {{ l.tile.size }}px; border-radius:23.4%; overflow:hidden; background: {{ l.tile.bg }}"><div style="position:absolute; inset:0; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr); gap: {{ l.tile.gap }}; clip-path: polygon(0 0, 58% 0, 42% 100%, 0 100%)"><sc-for list="{{ l.tile.cells }}" as="q" hint-placeholder-count="0"><div style="background: {{ q.fill }}"></div></sc-for></div><div style="position:absolute; inset:0; background: {{ l.tile.smooth }}; clip-path: polygon(58% 0, 100% 0, 100% 100%, 42% 100%)"></div></div>
+              <span style="font-family:'Instrument Sans',sans-serif; font-weight:600; font-size: {{ l.wsize }}px; line-height:1; letter-spacing:-.03em; color: {{ l.color }}; white-space:nowrap">mccain digital</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="padding:18px 28px 22px; border-top:1px solid #E3E8EE">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px"><div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:#5A6880">Bewegung</div><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#5A6880">ease .2 .8 .2 1</span></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px">
+          <sc-for list="{{ c.motion }}" as="m" hint-placeholder-count="2">
+            <div style="border-radius:14px; background:#F6F9FC; padding:16px 18px">
+              <div data-stage style="height:80px; display:flex; align-items:center"><sc-if value="{{ motionOn }}" hint-placeholder-val="{{ true }}"><div aria-hidden="true" style="position:relative; flex:none; width: {{ m.tile.size }}px; height: {{ m.tile.size }}px; border-radius:23.4%; overflow:hidden; background: {{ m.tile.bg }}; animation: {{ m.tile.tileAnim }}"><div style="position:absolute; inset:0; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr); gap: {{ m.tile.gap }}; clip-path: polygon(0 0, 58% 0, 42% 100%, 0 100%); animation: {{ m.tile.animL }}"><sc-for list="{{ m.tile.cells }}" as="q" hint-placeholder-count="0"><div style="background: {{ q.fill }}"></div></sc-for></div><div style="position:absolute; inset:0; background: {{ m.tile.smooth }}; clip-path: polygon(58% 0, 100% 0, 100% 100%, 42% 100%); animation: {{ m.tile.animR }}"></div></div></sc-if></div>
+              <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-top:8px"><span style="font-size:13px; font-weight:600">{{ m.title }}</span><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#5A6880">{{ m.time }}</span></div>
+              <p style="font-size:12.5px; line-height:1.5; color:#425466; margin-top:4px">{{ m.note }}</p>
+            </div>
+          </sc-for>
+        </div>
+        <div style="border-radius:14px; background:#F6F9FC; padding:16px 18px; margin-top:12px; display:flex; align-items:center; gap:20px; flex-wrap:wrap">
+          <div data-stage style="height:56px; display:flex; align-items:center; gap:22px; flex:1 1 300px"><sc-if value="{{ motionOn }}" hint-placeholder-val="{{ true }}">
+            <div aria-hidden="true" style="position:relative; flex:none; width: {{ c.sign.tile.size }}px; height: {{ c.sign.tile.size }}px; border-radius:23.4%; overflow:hidden; background: {{ c.sign.tile.bg }}; animation: {{ c.sign.tile.tileAnim }}"><div style="position:absolute; inset:0; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr); gap: {{ c.sign.tile.gap }}; clip-path: polygon(0 0, 58% 0, 42% 100%, 0 100%); animation: {{ c.sign.tile.animL }}"><sc-for list="{{ c.sign.tile.cells }}" as="q" hint-placeholder-count="0"><div style="background: {{ q.fill }}"></div></sc-for></div><div style="position:absolute; inset:0; background: {{ c.sign.tile.smooth }}; clip-path: polygon(58% 0, 100% 0, 100% 100%, 42% 100%); animation: {{ c.sign.tile.animR }}"></div></div>
+            <span style="font-family:'Instrument Sans',sans-serif; font-weight:600; font-size: {{ c.sign.wsize }}px; line-height:1; letter-spacing:-.03em; color: {{ c.sign.color }}; white-space:nowrap; animation: {{ c.sign.anim }}">mccain digital</span>
+          </sc-if></div>
+          <div style="flex:1 1 180px"><div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px"><span style="font-size:13px; font-weight:600">Anmelden</span><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#5A6880">1,3 s</span></div><p style="font-size:12.5px; line-height:1.5; color:#425466; margin-top:4px">Rendern, dann das Wort. Die Kante landet, bevor der erste Buchstabe erscheint.</p></div>
+        </div>
+      </div>
+      <div style="padding:18px 28px 22px; border-top:1px solid #E3E8EE; display:grid; grid-template-columns:1fr 1fr; gap:24px">
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:#5A6880">Mindestgrößen</div>
+          <div style="display:flex; align-items:flex-end; gap:18px; margin-top:14px; height:78px">
+            <sc-for list="{{ c.sizes }}" as="t" hint-placeholder-count="4">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:8px"><div aria-hidden="true" style="position:relative; flex:none; width: {{ t.size }}px; height: {{ t.size }}px; border-radius:23.4%; overflow:hidden; background: {{ t.bg }}"><div style="position:absolute; inset:0; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr); gap: {{ t.gap }}; clip-path: polygon(0 0, 58% 0, 42% 100%, 0 100%)"><sc-for list="{{ t.cells }}" as="q" hint-placeholder-count="0"><div style="background: {{ q.fill }}"></div></sc-for></div><div style="position:absolute; inset:0; background: {{ t.smooth }}; clip-path: polygon(58% 0, 100% 0, 100% 100%, 42% 100%)"></div></div><span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:#5A6880">{{ t.size }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:#5A6880">In der Navigation</div>
+          <div style="margin-top:14px; height:52px; display:flex; align-items:center; gap:14px; padding:0 14px; border-radius:10px; background:#fff; box-shadow:0 0 0 1px #E3E8EE, 0 6px 16px -10px rgba(10,37,64,.25)">
+            <div aria-hidden="true" style="position:relative; flex:none; width: {{ c.nav.tile.size }}px; height: {{ c.nav.tile.size }}px; border-radius:23.4%; overflow:hidden; background: {{ c.nav.tile.bg }}"><div style="position:absolute; inset:0; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr); gap: {{ c.nav.tile.gap }}; clip-path: polygon(0 0, 58% 0, 42% 100%, 0 100%)"><sc-for list="{{ c.nav.tile.cells }}" as="q" hint-placeholder-count="0"><div style="background: {{ q.fill }}"></div></sc-for></div><div style="position:absolute; inset:0; background: {{ c.nav.tile.smooth }}; clip-path: polygon(58% 0, 100% 0, 100% 100%, 42% 100%)"></div></div>
+            <span style="font-family:'Instrument Sans',sans-serif; font-weight:600; font-size: {{ c.nav.wsize }}px; line-height:1; letter-spacing:-.03em; color:#0A2540; white-space:nowrap">mccain digital</span>
+            <span style="margin-left:auto; display:flex; gap:12px; font-size:12px; color:#425466"><span>Leistungen</span><span>Arbeiten</span></span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+  </div>
+</section>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  static EASE = 'cubic-bezier(.2,.8,.2,1)';
+  static C = { navy: '#0A2540', ind: '#635BFF', white: '#FFFFFF', hair: '#E3E8EE', field: '#F6F9FC', stops: ['#FFB46B', '#FF5A8C', '#C05CFF', '#5FC3FF'] };
+  state = { take: 0, motionOn: true, showOld: false, dotTop: '0.17em', dotSize: '0.12em' };
+  toggleOld = () => this.setState({ showOld: !this.state.showOld });
+
+  componentDidMount() {
+    this.mounted = true;
+    const go = () => this.measureDots();
+    if (document.fonts && document.fonts.load) document.fonts.load('600 100px "Instrument Sans"').then(go, go); else setTimeout(go, 800);
+    this.watchStages();
+  }
+  componentDidUpdate() { this.watchStages(); }
+  watchStages() {
+    if (typeof IntersectionObserver !== 'function') return;
+    if (!this.io) { this.io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) e.target.removeAttribute('data-off'); else e.target.setAttribute('data-off', ''); }), { rootMargin: '160px' }); this.seen = new WeakSet(); }
+    document.querySelectorAll('[data-stage]').forEach((el) => { if (this.seen.has(el)) return; this.seen.add(el); el.setAttribute('data-off', ''); this.io.observe(el); });
+  }
+  componentWillUnmount() { this.mounted = false; if (this.io) this.io.disconnect(); }
+
+  // The i-dots are set as squares over dotless ı; their place comes from the font's own metrics.
+  measureDots() {
+    try {
+      const c = document.createElement('canvas').getContext('2d'); c.font = '600 100px "Instrument Sans", sans-serif';
+      const mi = c.measureText('i'), md = c.measureText('\u0131');
+      const asc = mi.actualBoundingBoxAscent / 100, xh = md.actualBoundingBoxAscent / 100;
+      const fba = (mi.fontBoundingBoxAscent != null ? mi.fontBoundingBoxAscent : 95) / 100, fbd = (mi.fontBoundingBoxDescent != null ? mi.fontBoundingBoxDescent : 25) / 100;
+      if (!(asc > xh)) return;
+      const boxTop = fba + (1 - fba - fbd) / 2, size = Math.min(0.16, Math.max(0.09, (asc - xh) * 0.62));
+      if (this.mounted) this.setState({ dotTop: (boxTop - asc).toFixed(3) + 'em', dotSize: size.toFixed(3) + 'em' });
+    } catch (e) {}
+  }
+
+  hex(h) { return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; }
+  grad(stops, t) { const n = stops.length - 1, i = Math.min(n - 1, Math.max(0, Math.floor(t * n))), f = t * n - i, a = this.hex(stops[i]), b = this.hex(stops[i + 1]); return 'rgb(' + a.map((v, k) => Math.round(v + (b[k] - v) * f)).join(',') + ')'; }
+  plate(v) { const C = Component.C; return { bg: v === 'dark' ? C.navy : v === 'mono' ? C.ind : C.white, ring: v === 'light' ? C.hair : 'none' }; }
+
+  tileA(size, v, mode) {
+    const C = Component.C, E = Component.EASE, cols = v === 'mono' ? [C.white, C.white, C.white] : v === 'navy' ? [C.navy, C.navy, C.navy] : C.stops.slice(0, 3);
+    const px = [[14, 38], [26, 26], [38, 14]].map((p, i) => ({ x: p[0], y: p[1], fill: cols[i], anim: mode === 'in' ? 'px-in .7s ' + E + ' ' + (0.12 * i).toFixed(2) + 's both' : mode === 'loop' ? 'px-wave 1.8s ease-in-out ' + (0.3 * i).toFixed(1) + 's infinite' : 'none' }));
+    return Object.assign({ size, px, tileAnim: mode === 'in' ? 'tile-in .52s ' + E + ' both' : 'none' }, this.plate(v));
+  }
+  static KINDS = {
+    arc: { n: 16, cell: 3, gap: 1, hw0: 1.2, hw1: 4.2, path: (o, cub) => cub([[32, 8], [60, 8], [58, 50], [11, 53]], 160) },
+    s: { n: 16, cell: 3, gap: 1, hw0: 1.2, hw1: 4.2, path: (o, cub) => cub([[57, 12], [-14, 12], [78, 52], [7, 52]], 160) },
+    d: { n: 16, cell: 3, gap: 1, hw0: 1.0, hw1: 4.2, path: (o, cub) => { for (let i = 0; i <= 40; i++) o.push([14, 52 - i]); cub([[14, 12], [60, 12], [60, 52], [14, 52]], 160); } },
+    dfein: { n: 20, cell: 2.4, gap: 0.8, hw0: 0.9, hw1: 3.8, path: (o, cub) => { for (let i = 0; i <= 40; i++) o.push([14, 52 - i]); cub([[14, 12], [60, 12], [60, 52], [14, 52]], 160); } },
+    daus: { n: 16, cell: 3, gap: 1, hw0: 1.0, hw1: 4.6, path: (o, cub) => { for (let i = 0; i <= 40; i++) o.push([14, 52 - i]); cub([[14, 12], [60, 12], [60, 52], [14, 52]], 160); cub([[14, 52], [8, 54], [3, 60], [-4, 70]], 40); } },
+    dblatt: { n: 16, cell: 3, gap: 1, hw0: 1.0, hw1: 4.2, path: (o, cub) => { cub([[15, 52], [5, 44], [5, 20], [15, 12]], 60); cub([[15, 12], [60, 12], [60, 52], [15, 52]], 160); } },
+    dscharf: { n: 16, cell: 3, gap: 1, hw0: 1.0, hw1: 4.2, dither: 'none', path: (o, cub) => { for (let i = 0; i <= 40; i++) o.push([14, 52 - i]); cub([[14, 12], [60, 12], [60, 52], [14, 52]], 160); } },
+    dfaeden: { n: 20, cell: 2.4, gap: 0.8, hw0: 1, hw1: 4, strands: { count: 5, sp0: 1.1, sp1: 3.4, w: 1.05, dens: [0.5, 0.72, 0.9, 0.72, 0.5] }, path: (o, cub) => { for (let i = 0; i <= 40; i++) o.push([15, 51 - i]); cub([[15, 11], [58, 11], [58, 51], [15, 51]], 160); } },
+    bfaeden: { n: 20, cell: 2.4, gap: 0.8, hw0: 1, hw1: 4, strands: { count: 5, sp0: 1.1, sp1: 3.4, w: 1.05, dens: [0.5, 0.72, 0.9, 0.72, 0.5] }, path: (o, cub) => cub([[32, 8], [60, 8], [58, 50], [11, 53]], 160) },
+    ddicht: { n: 20, cell: 2.4, gap: 0.8, hw0: 1, hw1: 4, strands: { count: 7, sp0: 1.0, sp1: 2.5, w: 1.0, dens: [1, 1, 1, 1, 1, 1, 1] }, path: (o, cub) => { for (let i = 0; i <= 40; i++) o.push([15, 51 - i]); cub([[15, 11], [58, 11], [58, 51], [15, 51]], 160); } },
+    durchlauf: { n: 20, cell: 2.4, gap: 0.8, hw0: 1, hw1: 4, strands: { count: 6, sp0: 2.0, sp1: 3.4, w: 1.05, dens: [0.5, 0.7, 0.9, 0.9, 0.7, 0.5] }, path: (o, cub) => cub([[30, -4], [72, 4], [66, 62], [-4, 54]], 200) },
+    hero: { n: 24, cell: 2, gap: 0.667, hw0: 1, hw1: 4, strands: { count: 7, sp0: 3.0, sp1: 4.6, w: 1.0, dens: [0.45, 0.6, 0.8, 0.9, 0.9, 0.7, 0.5], ops: [0.3, 0.5, 0.85, 1, 1, 0.8, 0.45], haze: 0.14, flip: true, small: 1 }, path: (o, cub) => cub([[-6, 4], [70, 0], [70, 64], [-6, 60]], 240) },
+    herok: { n: 20, cell: 2.4, gap: 0.8, hw0: 1, hw1: 4, strands: { clean: true, count: 5, sp0: 3.4, sp1: 4.8, w: 1.1, dens: [0.7, 0.9, 1, 0.9, 0.7], ops: [0.7, 1, 1, 1, 0.7], flip: true, small: 1 }, path: (o, cub) => cub([[-6, 6], [58, 0], [58, 64], [-6, 58]], 240) },
+    hero2: { n: 32, cell: 1.5, gap: 0.5, hw0: 1, hw1: 4, strands: { clean: true, tip: 0.45, count: 9, sp0: 1.4, sp1: 3.2, w: 0.78, dens: [0.7, 0.7, 0.7, 0.85, 0.95, 0.9, 0.85, 0.8, 0.8], ops: [0.7, 0.7, 0.7, 0.9, 1, 1, 0.9, 0.9, 0.9], haze: 0.16, flip: true, small: 1.5 }, path: (o) => { for (let i = 0; i <= 240; i++) { const a = (-112 + 224 * i / 240) * Math.PI / 180; o.push([14 + 30 * Math.cos(a), 32 + 34 * Math.sin(a)]); } } },
+    hero6: { n: 32, cell: 1.5, gap: 0.5, hw0: 1, hw1: 4, strands: { clean: true, tip: 0.45, count: 7, sp0: 1.0, sp1: 2.6, w: 0.75, dens: [0.7, 0.7, 0.85, 0.95, 0.85, 0.7, 0.7], ops: [0.75, 0.8, 0.95, 1, 0.95, 0.8, 0.75], haze: 0.14, flip: true, small: 1 }, path: (o) => { for (let i = 0; i <= 240; i++) { const a = (-118 + 236 * i / 240) * Math.PI / 180; o.push([10 + 36 * Math.cos(a), 32 + 33 * Math.sin(a)]); } } },
+    hero7: { n: 32, cell: 1.5, gap: 0.5, hw0: 1, hw1: 4, strands: { clean: true, tip: 0.5, count: 9, sp0: 1.0, sp1: 2.5, w: 0.7, dens: [0.65, 0.75, 0.9, 0.95, 1, 0.95, 0.9, 0.75, 0.65], ops: [0.7, 0.8, 0.9, 1, 1, 1, 0.9, 0.8, 0.7], haze: 0.1, flip: true, small: 1.2 }, path: (o) => { for (let i = 0; i <= 240; i++) { const a = (-116 + 232 * i / 240) * Math.PI / 180; o.push([12 + 33 * Math.cos(a), 32 + 34 * Math.sin(a)]); } } },
+    hero8: { n: 32, cell: 1.5, gap: 0.5, hw0: 1, hw1: 4, strands: { clean: true, tip: 0.3, twist: 1, phase: 1.5708, shade: true, count: 9, sp0: 2.2, sp1: 3.4, w: 0.7, dens: [0.7, 0.8, 0.9, 0.95, 1, 0.95, 0.9, 0.8, 0.7], ops: [0.75, 0.85, 0.95, 1, 1, 1, 0.95, 0.85, 0.75], haze: 0.08, flip: true, small: 1.2 }, path: (o) => { for (let i = 0; i <= 240; i++) { const a = (-116 + 232 * i / 240) * Math.PI / 180; o.push([12 + 33 * Math.cos(a), 32 + 34 * Math.sin(a)]); } } },
+    hero9: { n: 32, cell: 1.5, gap: 0.5, hw0: 1, hw1: 4, strands: { clean: true, tip: 0.5, shade: true, count: 9, sp0: 1.0, sp1: 2.5, w: 0.7, dens: [0.65, 0.75, 0.9, 0.95, 1, 0.95, 0.9, 0.75, 0.65], ops: [0.45, 0.55, 0.7, 0.85, 1, 1, 0.95, 0.9, 0.85], haze: 0.1, flip: true, small: 1.2 }, path: (o) => { for (let i = 0; i <= 240; i++) { const a = (-116 + 232 * i / 240) * Math.PI / 180; o.push([12 + 33 * Math.cos(a), 32 + 34 * Math.sin(a)]); } } },
+    hero3: { n: 24, cell: 2, gap: 0.667, hw0: 1, hw1: 4, strands: { clean: true, tip: 0.35, count: 7, sp0: 1.8, sp1: 5.4, w: 1.0, dens: [0.45, 0.6, 0.8, 0.9, 0.9, 0.7, 0.5], ops: [0.3, 0.5, 0.85, 1, 1, 0.8, 0.45], haze: 0.14, flip: true, small: 1 }, path: (o, cub) => cub([[-6, 4], [64, -4], [62, 68], [-6, 58]], 240) },
+    hero4: { n: 24, cell: 2, gap: 0.667, hw0: 1, hw1: 4, strands: { clean: true, tip: 0.35, count: 7, sp0: 2.0, sp1: 4.6, w: 1.0, dens: [0.45, 0.6, 0.8, 0.9, 0.9, 0.7, 0.5], ops: [0.3, 0.5, 0.85, 1, 1, 0.8, 0.45], haze: 0.14, along: true, small: 1 }, path: (o, cub) => cub([[-6, 6], [58, 0], [58, 64], [-6, 58]], 240) },
+    hero5: { n: 24, cell: 2, gap: 0.667, hw0: 1, hw1: 4, strands: { clean: true, tip: 0.35, count: 7, sp0: 2.0, sp1: 4.6, w: 1.0, dens: [0.35, 0.45, 1, 1, 1, 0.5, 0.35], ops: [0.3, 0.45, 1, 1, 1, 0.6, 0.35], haze: 0.1, flip: true, small: 1 }, path: (o, cub) => cub([[-6, 6], [58, 0], [58, 64], [-6, 58]], 240) },
+    dpinsel: { n: 16, cell: 3, gap: 1, hw0: 4.2, hw1: 0.9, path: (o, cub) => { for (let i = 0; i <= 40; i++) o.push([14, 52 - i]); cub([[14, 12], [60, 12], [60, 52], [19, 51]], 160); } }
+  };
+  rrPath(x, y, s, r) { const f = (v) => +v.toFixed(2); return 'M' + f(x + r) + ' ' + f(y) + 'h' + f(s - 2 * r) + 'a' + r + ' ' + r + ' 0 0 1 ' + r + ' ' + r + 'v' + f(s - 2 * r) + 'a' + r + ' ' + r + ' 0 0 1 -' + r + ' ' + r + 'h-' + f(s - 2 * r) + 'a' + r + ' ' + r + ' 0 0 1 -' + r + ' -' + r + 'v-' + f(s - 2 * r) + 'a' + r + ' ' + r + ' 0 0 1 ' + r + ' -' + r + 'z'; }
+  tileB(size, v, mode, kind) {
+    const C = Component.C, E = Component.EASE, k = kind || 'arc', spec = Component.KINDS[k], key = [k, size, v, mode].join('|');
+    this._tc = this._tc || {}; if (this._tc[key]) return this._tc[key];
+    const isStatic = mode !== 'in' && mode !== 'loop', groups = {}, raw = [];
+    const cells = { push: (c) => { if (!isStatic) { raw.push(c); return; } c.o = Math.round(c.o * 20) / 20; const g = c.fill + '|' + c.o; if (!groups[g]) groups[g] = { fill: c.fill, o: c.o, d: '' }; groups[g].d += this.rrPath(c.x, c.y, c.s, c.r); } };
+    const q = (t) => Math.round(t * 11) / 11;
+    this._curves = this._curves || {};
+    if (!this._curves[k]) {
+      const o = [], cub = (P, n) => { for (let i = 0; i <= n; i++) { const t = i / n, u = 1 - t, w = [u * u * u, 3 * u * u * t, 3 * u * t * t, t * t * t]; o.push([w[0] * P[0][0] + w[1] * P[1][0] + w[2] * P[2][0] + w[3] * P[3][0], w[0] * P[0][1] + w[1] * P[1][1] + w[2] * P[2][1] + w[3] * P[3][1]]); } };
+      spec.path(o, cub);
+      // t follows arc length, so width and colour run evenly along the whole stroke
+      let L = 0; const cum = [0]; for (let i = 1; i < o.length; i++) { L += Math.hypot(o[i][0] - o[i - 1][0], o[i][1] - o[i - 1][1]); cum.push(L); }
+      this._curves[k] = o.map((p, i) => { const a = o[Math.max(0, i - 1)], b = o[Math.min(o.length - 1, i + 1)], tl = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; return [p[0], p[1], L ? cum[i] / L : 0, (b[0] - a[0]) / tl, (b[1] - a[1]) / tl]; });
+    }
+    const cv = this._curves[k], n = spec.n, cs = spec.cell, pitch = cs + spec.gap, off = (64 - (n * pitch - spec.gap)) / 2, ds = cs / 3;
+    const inside = (cx, cy) => { const r = 13, qx = Math.max(Math.abs(cx - 32) - (30 - r), 0), qy = Math.max(Math.abs(cy - 32) - (30 - r), 0); return Math.hypot(qx, qy) <= r; };
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+      const cx = off + pitch * x + cs / 2, cy = off + pitch * y + cs / 2; if (!inside(cx, cy)) continue; let best = 1e9, bt = 0;
+      let bi = 0; for (let i = 0; i < cv.length; i++) { const d = Math.hypot(cx - cv[i][0], cy - cv[i][1]); if (d < best) { best = d; bt = cv[i][2]; bi = i; } }
+      if (spec.strands) {
+        // filaments: signed offset from the curve, snapped to the nearest strand; strands fan out along t, carry gaps, and may sit in a faint haze
+        const st = spec.strands, half = (st.count - 1) / 2, sp = st.sp0 + (st.sp1 - st.sp0) * bt, P = cv[bi], sd = (cx - P[0]) * -P[4] + (cy - P[1]) * P[3]; let fill, o = 1;
+        const hsh = (a, b) => { const s = Math.sin(a * 12.9898 + b * 78.233 + 3.7) * 43758.5453; return s - Math.floor(s); };
+        const col = (kk) => st.along ? this.grad(C.stops, Math.max(0, Math.min(1, q(bt) + kk * 0.05))) : this.grad(C.stops, st.flip ? (half - kk) / (2 * half) : (kk + half) / (2 * half));
+        const tap = st.tip ? Math.min(1, bt / st.tip) : 1; if (Math.abs(sd) > (half * sp + st.w) * tap) continue;
+        if (size < 40) { const hs = st.small != null ? st.small : half; if (Math.abs(sd) > (hs * sp + st.w) * tap) continue; fill = this.grad(C.stops, q(bt)); }
+        else {
+          // 3D: the bundle may twist like a ribbon (strands cross, the back ones dim) and brighten towards the apex
+          const seg = Math.floor(bt * 36), phi = Math.PI * (st.twist || 0) * bt + (st.phase || 0), cph = st.twist ? Math.cos(phi) : 1, sph = st.twist ? Math.sin(phi) : 0;
+          let kk = Math.round(sd / (sp * (Math.abs(cph) > 0.05 ? cph : 0.05))), on = Math.abs(kk) <= half && Math.abs(sd - kk * sp * cph) <= st.w, depth = 0;
+          if (st.twist) { kk = null; for (let kq = -half; kq <= half; kq++) { if (Math.abs(sd - kq * sp * cph) <= st.w) { const dq = sph * kq / (half || 1); if (kk === null || dq > depth) { kk = kq; depth = dq; } } } on = kk !== null; if (!on) kk = Math.max(-half, Math.min(half, Math.round(sd / sp))); }
+          const bright = st.shade ? 0.6 + 0.4 * Math.sin(Math.PI * bt) : 1, ramp = st.clean && kk < 0 ? Math.max(0, Math.min(1, (bt - 0.15) / 0.35)) : 1;
+          if (on) { if (hsh(kk, seg) > st.dens[kk + half] * ramp) continue; o = (st.ops ? st.ops[kk + half] : 1) * bright * (st.twist ? 0.55 + 0.45 * (depth + 1) / 2 : 1); fill = col(kk); }
+          else { if (!st.haze || (st.clean && sd < 0) || Math.abs(sd) > half * sp * Math.abs(cph) + st.w || hsh(x * 7 + 1, y * 3) > (st.clean ? 0.5 : 0.35)) continue; o = st.haze * bright; fill = col(Math.max(-half, Math.min(half, kk))); }
+          o = +o.toFixed(2);
+        }
+        cells.push({ x: +(off + pitch * x).toFixed(2), y: +(off + pitch * y).toFixed(2), s: cs, r: +(cs / 6).toFixed(2), o, fill: v === 'mono' ? C.white : v === 'navy' ? C.navy : fill, anim: mode === 'in' ? 'st-in .5s ' + E + ' ' + (0.6 * bt).toFixed(2) + 's both' : mode === 'loop' ? 'st-flow 1.8s ease-in-out ' + (1.3 * bt).toFixed(2) + 's infinite' : 'none' });
+        continue;
+      }
+      // frayed edges only where they can be seen: two rings from 64 px, one ring from 40 px, none below
+      const hw = spec.hw0 + (spec.hw1 - spec.hw0) * bt, dith = spec.dither === 'none' ? 0 : size >= 64 ? 2 : size >= 40 ? 1 : 0; let o = 0;
+      if (best <= hw) o = 1; else if (dith >= 1 && best <= hw + 2.2 * ds && (x + y) % 2 === 0) o = 0.5; else if (dith >= 2 && best <= hw + 4.2 * ds && (x * 3 + y) % 4 === 0) o = 0.22;
+      if (!o) continue;
+      cells.push({ x: +(off + pitch * x).toFixed(2), y: +(off + pitch * y).toFixed(2), s: cs, r: +(cs / 6).toFixed(2), o, fill: v === 'mono' ? C.white : v === 'navy' ? C.navy : this.grad(C.stops, q(bt)), anim: mode === 'in' ? 'st-in .5s ' + E + ' ' + (0.6 * bt).toFixed(2) + 's both' : mode === 'loop' ? 'st-flow 1.8s ease-in-out ' + (1.3 * bt).toFixed(2) + 's infinite' : 'none' });
+    }
+    const out = Object.assign({ size, cells: raw, paths: Object.keys(groups).map((g) => groups[g]), tileAnim: mode === 'in' ? 'tile-in .52s ' + E + ' both' : 'none' }, this.plate(v));
+    this._tc[key] = out; return out;
+  }
+  // Zerfall: a dense pixel block whose edge dissolves into dust
+  tileZ(size, v, mode, kind) {
+    const C = Component.C, E = Component.EASE, key = ['z', kind, size, v, mode].join('|'); this._tc = this._tc || {}; if (this._tc[key]) return this._tc[key];
+    const isStatic = mode !== 'in' && mode !== 'loop', groups = {}, raw = [];
+    const push = (c) => { if (!isStatic) { raw.push(c); return; } c.o = Math.round(c.o * 20) / 20; const g = c.fill + '|' + c.o; if (!groups[g]) groups[g] = { fill: c.fill, o: c.o, d: '' }; groups[g].d += this.rrPath(c.x, c.y, c.s, c.r); };
+    const hsh = (a, b) => { const s = Math.sin(a * 12.9898 + b * 78.233 + 3.7) * 43758.5453; return s - Math.floor(s); };
+    const colOf = (t) => v === 'mono' ? C.white : v === 'navy' ? C.navy : this.grad(C.stops, Math.max(0, Math.min(1, t)));
+    const loopName = kind === 'build' ? 'zf-cycle' : 'zf-loop', deep = kind === 'build';
+    const cell = (cx, cy, s, o, t, dist, part, jt) => {
+      const j = jt || 0;
+      let anim = 'none';
+      if (deep) {
+        // one continuous stream: dust arrives in two drifting lanes, the porous edge breathes, the solid block shimmers
+        const lane = j > 0.25 ? 'zf-cycle-b' : 'zf-cycle';
+        if (mode === 'in') anim = part === 'block' ? 'st-in .6s ' + E + ' ' + (0.1 + 0.35 * dist).toFixed(2) + 's both' : part === 'edge' ? 'st-in .5s ' + E + ' ' + (0.5 + 0.35 * dist + j * 0.4).toFixed(2) + 's both' : 'zf-deep-in 1.1s ' + E + ' ' + (0.2 + 0.8 * dist + j).toFixed(2) + 's both';
+        else if (mode === 'loop') anim = part === 'block' ? 'zf-shimmer 4s ease-in-out ' + (1.5 * dist).toFixed(2) + 's infinite' : part === 'edge' ? 'zf-breathe 2.8s ease-in-out ' + (1.4 * dist + j).toFixed(2) + 's infinite' : lane + ' 3s ' + E + ' ' + (1.8 * dist + j * 1.6).toFixed(2) + 's infinite';
+      } else anim = mode === 'in' ? (part === 'block' ? 'st-in .5s ' + E + ' ' + (0.1 + 0.3 * dist).toFixed(2) + 's both' : 'zf-in .6s ' + E + ' ' + (0.35 + 0.7 * dist + j).toFixed(2) + 's both') : mode === 'loop' ? (part === 'block' ? 'none' : loopName + ' 1.8s ease-in-out ' + (1.2 * dist + j).toFixed(2) + 's infinite') : 'none';
+      push({ x: +(cx - s / 2).toFixed(2), y: +(cy - s / 2).toFixed(2), s: +s.toFixed(2), r: +(s / 6).toFixed(2), o: +o.toFixed(2), fill: colOf(t), anim });
+    };
+    const P = 3.2, CS = 2.4, jit = (a, b, k) => (hsh(a, b) - 0.5) * k;
+    const dust = (cx, cy, d, t, gx, gy, spread) => { if (d < 0 || d > 1) return; const p = Math.pow(1 - d, 1.5) * 0.95; if (hsh(gx * 3, gy * 5) > p) return; if (size < 40 && d > 0.55) return; cell(cx + jit(gx, gy, spread), cy + jit(gy, gx, spread), CS * (1 - 0.5 * d), 0.55 + 0.45 * (1 - d), t, d, 'dust'); };
+    for (let gy = 0; gy < 20; gy++) for (let gx = 0; gx < 20; gx++) {
+      const cx = 0.4 + P * gx + CS / 2, cy = 0.4 + P * gy + CS / 2;
+      if (kind === 'right' || kind === 'build') {
+        if (cy < 14 || cy > 50) continue;
+        const inBlk = kind === 'right' ? cx >= 8 && cx <= 34 : cx >= 24 && cx <= 56;
+        if (inBlk) {
+          if (deep) { const e = Math.min(1, (cx - 24) / 16), keep = 0.2 + 0.8 * e * e; if (hsh(gx * 3, gy * 5) > keep) { cell(cx + jit(gx, gy, 1.2), cy + jit(gy, gx, 1.2), CS * (0.7 + 0.3 * e), 0.5 + 0.3 * e, (cx - 8) / 48, 1 - e, 'dust', hsh(gy, gx) * 0.5); continue; } if (e < 1) { cell(cx, cy, CS, 0.7 + 0.3 * e, (cx - 8) / 48, 1 - e, 'edge', hsh(gy, gx) * 0.6); continue; } }
+          cell(cx, cy, CS, 1, (cx - 8) / 48, kind === 'right' ? (cx - 8) / 26 : (56 - cx) / 26, 'block'); continue;
+        }
+        if (deep) { const d = (24 - cx) / 24; if (d < 0 || d > 1) continue; const p = Math.pow(1 - d, 1.3) * 0.9; if (hsh(gx * 3, gy * 5) > p) continue; if (size < 40 && d > 0.6) continue; cell(cx + jit(gx, gy, 2), cy + jit(gy, gx, 2), CS * (1 - 0.55 * d), 0.5 + 0.5 * (1 - d), (cx - 8) / 48, d, 'dust', hsh(gy, gx) * 0.5); continue; }
+        dust(cx, cy, kind === 'right' ? (cx - 34) / 26 : (30 - cx) / 26, (cx - 8) / 48, gx, gy, 1.6);
+      } else if (kind === 'stream') {
+        if (cx <= 30) { if (Math.abs(cy - 32) <= 6) cell(cx, cy, CS, 1, (cx - 4) / 56, (cx - 4) / 26, 'block'); continue; }
+        const d = (cx - 30) / 30, hw = 6 + 13 * d; if (Math.abs(cy - 32) > hw) continue;
+        dust(cx, cy, Math.max(d, Math.abs(cy - 32) / hw * 0.9), (cx - 4) / 56, gx, gy, 1.6);
+      } else if (kind === 'round') {
+        const r = Math.hypot(cx - 32, cy - 32);
+        if (r <= 11) { cell(cx, cy, CS, 1, 0.15 + 0.3 * (cx - 21) / 22, r / 11, 'block'); continue; }
+        dust(cx, cy, (r - 11) / 18, 0.4 + 0.6 * (r - 11) / 18, gx, gy, 1.8);
+      } else if (kind === 'arc') {
+        if (cx >= 10 && cx <= 30 && cy >= 34 && cy <= 54) { cell(cx, cy, CS, 1, (cx - 10) / 60 + (54 - cy) / 80, (cx - 10) / 20, 'block'); continue; }
+      }
+    }
+    if (kind === 'arc') { for (let i = 0; i <= 70; i++) for (let k = 0; k < 3; k++) { const t = i / 70, u = 1 - t, x = u * u * u * 30 + 3 * u * u * t * 54 + 3 * u * t * t * 52 + t * t * t * 58, y = u * u * u * 44 + 3 * u * u * t * 44 + 3 * u * t * t * 28 + t * t * t * 6; if (hsh(i * 7 + k, k * 11) > Math.pow(1 - t, 1.2) * 0.75) continue; if (size < 40 && t > 0.6) continue; const sp = 1.5 + 9 * t; cell(x + jit(i, k, sp), y + jit(k, i, sp), CS * (1 - 0.5 * t), 0.55 + 0.45 * (1 - t), 0.45 + 0.55 * t, t, 'dust'); } }
+    const out = Object.assign({ size, cells: raw, paths: Object.keys(groups).map((g) => groups[g]), tileAnim: mode === 'in' ? 'tile-in .52s ' + E + ' both' : 'none' }, this.plate(v));
+    this._tc[key] = out; return out;
+  }
+  tileC(size, v, mode) {
+    const C = Component.C, E = Component.EASE, three = C.stops.slice(0, 3), cells = [];
+    for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) cells.push({ fill: v === 'mono' ? C.ind : v === 'navy' ? C.navy : this.grad(three, (x + y + 1) / 16) });
+    return { size, cells, bg: v === 'dark' ? C.navy : C.white, ring: 'none', gap: size >= 48 ? (size / 64).toFixed(2) + 'px' : size >= 24 ? '1px' : '0px', smooth: v === 'mono' ? C.ind : v === 'navy' ? C.navy : 'linear-gradient(135deg, #FFB46B 0%, #FF5A8C 50%, #C05CFF 100%)', tileAnim: mode === 'in' ? 'tile-in .52s ' + E + ' both' : 'none', animL: mode === 'in' ? 'cut-in-l .9s ' + E + ' both' : mode === 'loop' ? 'cut-loop-l 1.8s ease-in-out infinite' : 'none', animR: mode === 'in' ? 'cut-in-r .9s ' + E + ' both' : mode === 'loop' ? 'cut-loop-r 1.8s ease-in-out infinite' : 'none' };
+  }
+  word(color, mode, wsize) {
+    const E = Component.EASE, st = Component.C.stops, dot = (i) => ({ fill: st[i], anim: mode === 'sign' ? 'dot-in .3s ' + E + ' ' + (0.95 + 0.15 * i).toFixed(2) + 's both' : 'none' });
+    return { wsize, color, anim: mode === 'sign' ? 'word-in .62s ' + E + ' .7s both' : 'none', d1: dot(0), d2: dot(1), d3: dot(2) };
+  }
+  dir(fn, notes) {
+    const C = Component.C;
+    return {
+      marks: [fn(96, 'dark', 'static'), fn(96, 'light', 'static'), fn(96, 'mono', 'static')].map((t, i) => Object.assign(t, { field: i === 1 ? C.navy : C.field })),
+      lockups: [{ field: C.white, ring: 'inset 0 0 0 1px ' + C.hair, color: C.navy, tile: fn(36, 'dark', 'static') }, { field: C.navy, ring: 'none', color: C.white, tile: fn(36, 'light', 'static') }].map((l) => Object.assign(l, this.word(l.color, 'static', 24))),
+      motion: [{ title: 'Ankommen', time: '900 ms', note: notes[0], tile: fn(64, 'dark', 'in') }, { title: 'Warten', time: '1,8 s · Loop', note: notes[1], tile: fn(64, 'dark', 'loop') }],
+      sign: Object.assign({ tile: fn(44, 'dark', 'in') }, this.word(C.navy, 'sign', 30)),
+      sizes: [64, 32, 24, 16].map((s) => fn(s, 'dark', 'static')),
+      nav: Object.assign({ tile: fn(28, 'dark', 'static') }, this.word(C.navy, 'static', 17))
+    };
+  }
+  replay = () => { this.setState({ motionOn: false }); requestAnimationFrame(() => requestAnimationFrame(() => { if (this.mounted) this.setState({ motionOn: true, take: this.state.take + 1 }); })); };
+
+  marks2() {
+    if (this._m2) return this._m2;
+    const NAVY = '#0A2540', W = '#FFFFFF', IND = '#635BFF', HAIR = '#E3E8EE', G3 = ['#FFB46B', '#FF5A8C', '#C05CFF'];
+    const BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
+    const n2 = (v) => +v.toFixed(2);
+    const rr = (x, y, w, h, r) => { const R = Math.min(r, w / 2, h / 2); return 'M' + n2(x + R) + ' ' + n2(y) + 'H' + n2(x + w - R) + 'A' + R + ' ' + R + ' 0 0 1 ' + n2(x + w) + ' ' + n2(y + R) + 'V' + n2(y + h - R) + 'A' + R + ' ' + R + ' 0 0 1 ' + n2(x + w - R) + ' ' + n2(y + h) + 'H' + n2(x + R) + 'A' + R + ' ' + R + ' 0 0 1 ' + n2(x) + ' ' + n2(y + h - R) + 'V' + n2(y + R) + 'A' + R + ' ' + R + ' 0 0 1 ' + n2(x + R) + ' ' + n2(y) + 'Z'; };
+    const px = (x, y, s, r) => rr(x, y, s, s, r == null ? Math.max(0.6, s * 0.14) : r);
+    const circ = (cx, cy, r) => 'M' + (cx - r) + ' ' + cy + 'a' + r + ' ' + r + ' 0 1 0 ' + 2 * r + ' 0a' + r + ' ' + r + ' 0 1 0 ' + -2 * r + ' 0Z';
+    const poly = (pts, close) => 'M' + pts.map((p) => n2(p[0]) + ' ' + n2(p[1])).join('L') + (close ? 'Z' : '');
+    const arcPts = (cx, cy, r, a0, a1, n) => { const o = []; for (let i = 0; i <= n; i++) { const a = a0 + (a1 - a0) * i / n; o.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); } return o; };
+    const rrPts = (x, y, w, h, r) => [].concat(arcPts(x + r, y + r, r, Math.PI, 1.5 * Math.PI, 8), arcPts(x + w - r, y + r, r, 1.5 * Math.PI, 2 * Math.PI, 8), arcPts(x + w - r, y + h - r, r, 0, 0.5 * Math.PI, 8), arcPts(x + r, y + h - r, r, 0.5 * Math.PI, Math.PI, 8));
+    const clip = (pts, f) => { const out = []; for (let i = 0; i < pts.length; i++) { const P = pts[i], Q = pts[(i + 1) % pts.length], fp = f(P), fq = f(Q); if (fp >= 0) out.push(P); if ((fp >= 0) !== (fq >= 0)) { const t = fp / (fp - fq); out.push([P[0] + (Q[0] - P[0]) * t, P[1] + (Q[1] - P[1]) * t]); } } return out; };
+    const shift = (pts, dx) => pts.map((p) => [p[0] + dx, p[1]]);
+    const bez = (a, b, c, d, t) => { const u = 1 - t; return [u * u * u * a[0] + 3 * u * u * t * b[0] + 3 * u * t * t * c[0] + t * t * t * d[0], u * u * u * a[1] + 3 * u * u * t * b[1] + 3 * u * t * t * c[1] + t * t * t * d[1]]; };
+    const quad = (a, b, c, t) => { const u = 1 - t; return [u * u * a[0] + 2 * u * t * b[0] + t * t * c[0], u * u * a[1] + 2 * u * t * b[1] + t * t * c[1]]; };
+    const sh = (d, fill, o, stroke, sw) => ({ d, fill: fill || 'none', o: o == null ? 1 : o, stroke: stroke || 'none', sw: sw || 0 });
+    const plate = (kind, url) => kind === 'navy' ? [sh(rr(0, 0, 64, 64, 15), NAVY)] : kind === 'white' ? [sh(rr(0, 0, 64, 64, 15), W), sh(rr(0.5, 0.5, 63, 63, 14.7), 'none', 1, HAIR, 1)] : kind === 'grad' ? [sh(rr(0, 0, 64, 64, 15), url)] : [];
+    const grad = (x1, y1, x2, y2, stops) => { const s = stops || G3; return { x1, y1, x2, y2, stops: s.map((c, i) => ({ o: n2(i / (s.length - 1)), c })) }; };
+    const M = []; const add = (id, name, tag, rule, plateKind, g, mk) => { const url = 'url(#g-' + id + ')'; M.push({ id, name, tag, rule, label: id + ' ' + name, gid: 'g-' + id, g, shapes: plate(plateKind, url).concat(mk(url)) }); };
+    const streamPts = (() => { const o = []; for (let i = 0; i <= 4; i++) o.push([10 + i, 46]); for (let i = 0; i <= 60; i++) o.push(bez([14, 46], [30, 46], [26, 18], [42, 18], i / 60)); for (let i = 0; i <= 12; i++) o.push([42 + i, 18]); return o; })();
+    const dist = (p, pts) => { let m = 1e9; for (let i = 0; i < pts.length; i++) { const d = Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1]); if (d < m) m = d; } return m; };
+    const xl = (y) => 37.12 - 10.24 * y / 64;
+
+    add('2a', 'Schleife', 'Strom', 'Der gewundene Strom als ein einziger Zug, zehn Einheiten breit, im Verlauf.', 'navy', grad(10, 0, 54, 0), (u) => [sh('M10 46H14C30 46 26 18 42 18H54', 'none', 1, u, 10)]);
+    add('2b', 'Strom, gepixelt', 'Pixel', 'Derselbe Strom in Pixeln: Kern voll, Rand gedithert – wie im Hero.', 'navy', grad(4, 0, 60, 0), (u) => { const g = { 1: [], 0.5: [], 0.22: [] }; for (let j = 0; j < 10; j++) for (let i = 0; i < 10; i++) { const cx = 4.5 + 6 * i, cy = 4.5 + 6 * j, d = dist([cx, cy], streamPts); if (d <= 4.6) g[1].push(px(cx - 2.5, cy - 2.5, 5, 0.7)); else if (d <= 7.8 && (i + j) % 2 === 0) g[0.5].push(px(cx - 2.5, cy - 2.5, 5, 0.7)); else if (d <= 10.5 && (i * 3 + j) % 4 === 0) g[0.22].push(px(cx - 2.5, cy - 2.5, 5, 0.7)); } return Object.keys(g).filter((k) => g[k].length).map((k) => sh(g[k].join(''), u, +k)); });
+    add('2c', 'Kreuzung', 'Strom', 'Zwei Bahnen, eine kreuzt über der anderen: Daten rein, Produkt raus.', 'navy', grad(12, 52, 52, 12), (u) => [sh('M12 12L24 24M40 40L52 52', 'none', 1, W, 10), sh('M12 52L52 12', 'none', 1, u, 10)]);
+    add('2d', 'Wellen', 'Strom', 'Drei Wellen, leiser werdend – die Linien aus dem Zahlen-Block.', 'navy', grad(10, 0, 54, 0), (u) => [0, 1, 2].map((k) => { const pts = []; for (let i = 0; i <= 40; i++) { const x = 10 + 44 * i / 40; pts.push([x, 20 + 12 * k + (5 - k) * Math.sin(2 * Math.PI * (x - 10) / 30 + k * 0.9)]); } return sh(poly(pts), 'none', 1 - 0.25 * k, u, 3.6 - 0.7 * k); }));
+    add('2e', 'Mündung', 'Strom', 'Ein Strom, der breiter wird, je weiter er kommt.', 'navy', grad(12, 52, 52, 12), (u) => { const L = [], R = []; for (let i = 0; i <= 24; i++) { const t = i / 24, c = [12 + 40 * t, 52 - 40 * t + 6 * Math.sin(Math.PI * t)], n = 0.7071 * (2 + 7 * t); L.push([c[0] - n, c[1] - n]); R.push([c[0] + n, c[1] + n]); } return [sh(poly(L.concat(R.reverse()), true), u)]; });
+    add('2f', 'Dither', 'Pixel', 'Ein Feld, das sich von leer zu voll verdichtet – Bayer-Dither auf 8 × 8.', 'navy', grad(4, 4, 60, 60), (u) => { let d = ''; for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) if ((BAYER[y % 4][x % 4] + 0.5) / 16 < (x + y) / 14) d += px(4.5 + 7 * x, 4.5 + 7 * y, 6, 0.8); return [sh(d, u)]; });
+    add('2g', 'Auflösung', 'Pixel', 'Ein Punkt, zwei Auflösungen: links Pixel, rechts glatt. Kante 58 → 42 %.', 'navy', grad(11, 0, 53, 0), (u) => { let d = ''; for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) { const cx = 7.5 + 7 * x, cy = 7.5 + 7 * y; if (Math.hypot(cx - 32, cy - 32) <= 20.5 && cx < xl(cy) - 1.5) d += px(cx - 3, cy - 3, 6, 0.8); } return [sh(d, u), sh(poly(clip(arcPts(32, 32, 21, 0, 2 * Math.PI, 72), (p) => p[0] - xl(p[1])), true), u)]; });
+    add('2h', 'Vier Pixel', 'Pixel', 'Die vier Farben des Verlaufs als Pixel – eines tritt aus dem Raster.', 'white', grad(0, 0, 64, 64), () => [sh(px(12, 12, 16, 2.5), '#FFB46B'), sh(px(32, 12, 16, 2.5), '#FF5A8C'), sh(px(12, 32, 16, 2.5), '#C05CFF'), sh(px(36, 36, 16, 2.5), '#5FC3FF')]);
+    add('2i', 'Komet', 'Knoten', 'Ein Knoten mit Schweif – der Datenknoten, der auf dem Strom reitet.', 'navy', grad(10, 50, 47, 17), (u) => { const o = [sh(px(40, 10, 14, 2), u)]; [[0.2, 9, 0.8], [0.38, 7, 0.6], [0.55, 5.5, 0.45], [0.72, 4, 0.3], [0.88, 3, 0.2]].forEach((t) => { const p = quad([47, 17], [38, 44], [10, 50], t[0]); o.push(sh(px(p[0] - t[1] / 2, p[1] - t[1] / 2, t[1], 0.8), u, t[2])); }); return o; });
+    add('2j', 'Punkt', 'Pixel', 'Ein Punkt, ehrlich gepixelt – 7 × 7 Zellen im Verlauf.', 'navy', grad(8, 8, 56, 56), (u) => { let d = ''; for (let y = 0; y < 7; y++) for (let x = 0; x < 7; x++) { const cx = 11 + 7 * x, cy = 11 + 7 * y; if (Math.hypot(cx - 32, cy - 32) <= 20.5) d += px(cx - 3, cy - 3, 6, 0.8); } return [sh(d, u)]; });
+    add('2k', 'Zusammenführen', 'Knoten', 'Zwei Quellen laufen in einem Knoten zusammen – daraus ein Produkt.', 'navy', grad(0, 0, 64, 0), () => [sh('M14 18C26 18 24 32 34 32M14 46C26 46 24 32 34 32M34 32H52', 'none', 0.9, W, 3), sh(px(10, 14, 8, 1.5), '#FFB46B'), sh(px(10, 42, 8, 1.5), '#C05CFF'), sh(px(29.5, 27.5, 9, 1.5), '#FF5A8C'), sh(px(46.5, 26.5, 11, 2), W)]);
+    add('2l', 'Kern', 'Knoten', 'Ein Kern, vier Anschlüsse – die Integration als Bild.', 'navy', grad(23, 23, 41, 41), (u) => [sh('M14 14L26 26M50 14L38 26M14 50L26 38M50 50L38 38', 'none', 0.4, W, 1.5), sh(px(23, 23, 18, 3), u), sh(px(11, 11, 6, 1) + px(47, 11, 6, 1) + px(11, 47, 6, 1) + px(47, 47, 6, 1), W, 0.92)]);
+    add('2m', 'Orbit', 'Knoten', 'Eine Schleife, ein Knoten darauf – der Agent, der seine Arbeit prüft.', 'navy', grad(13, 0, 51, 0), (u) => [sh(circ(32, 32, 19), 'none', 1, u, 5), sh(px(40.4, 13.6, 10, 1.8), W)]);
+    add('2n', 'Prompt', 'Zeichen', 'Zeichen und Cursor – die Stelle, an der die KI anfängt.', 'white', grad(37, 24, 47, 40), (u) => [sh('M17 20L31 32L17 44', 'none', 1, NAVY, 6.5), sh(px(37, 24, 10, 1.5), u)]);
+    add('2o', 'Klammer', 'Zeichen', 'Ein Token in Klammern – das kleinste Stück Bedeutung.', 'white', grad(26, 26, 38, 38), (u) => [sh('M22 16H14V48H22M42 16H50V48H42', 'none', 1, NAVY, 4), sh(px(26, 26, 12, 2), u)]);
+    add('2p', 'Schnitt', 'Fläche', 'Eine Kachel, geschnitten wie das Hallvern-h: zwei Hälften, 2,5 auseinander – Indigo und Verlauf.', 'none', grad(27, 4, 60, 60), (u) => { const pts = rrPts(4, 4, 56, 56, 13), f = (p) => p[0] - (36.48 - 8.96 * (p[1] - 4) / 56); return [sh(poly(shift(clip(pts, (p) => -f(p)), -2.5), true), IND), sh(poly(shift(clip(pts, f), 2.5), true), u)]; });
+    add('2q', 'Negativ', 'Fläche', 'Der Verlauf als Fläche – und ein Pixel, das fehlt.', 'grad', grad(0, 0, 64, 64), () => [sh(px(38, 14, 10, 1.5), W)]);
+    add('2r', 'Rahmen', 'Fläche', 'Ein Rahmen, durch den der Strom hindurchgeht – Fenster, nicht Grenze.', 'navy', grad(4, 0, 60, 0), (u) => [sh('M12 24V12H24M40 12H52V24M12 40V52H24M52 40V52H40', 'none', 1, W, 4), sh('M4 44C20 44 24 20 36 20H60', 'none', 1, u, 6)]);
+    add('2s', 'Biss', 'Fläche', 'Glatt mit einer Pixel-Ecke: Das Produkt zeigt, woraus es gemacht ist.', 'navy', grad(10, 54, 58, 14), (u) => [sh(circ(30, 34, 20), u), sh(px(42, 14, 8, 1.2) + px(50, 14, 8, 1.2) + px(50, 22, 8, 1.2), u)]);
+    add('2t', 'Signal', 'Zeichen', 'Ein Pixel, das sendet – drei Bögen, leiser werdend.', 'navy', grad(13, 16, 48, 51), (u) => [sh(px(13, 41, 10, 1.5), u), sh('M18 32A14 14 0 0 1 32 46', 'none', 1, u, 4), sh('M18 24A22 22 0 0 1 40 46', 'none', 0.65, u, 4), sh('M18 16A30 30 0 0 1 48 46', 'none', 0.4, u, 4)]);
+    add('2u', 'Faden', 'Strom', 'Aus Punkten wird eine Linie – Daten, die zu einem Zug werden.', 'navy', grad(8, 0, 56, 0), (u) => [sh(rr(8, 30.5, 3, 3, 0.6) + rr(13.5, 30.5, 4, 3, 0.6) + rr(20, 30.5, 5, 3, 0.6) + rr(27, 30.5, 6, 3, 0.6), u), sh('M35 32C42 32 47 24 56 22', 'none', 1, u, 3)]);
+    add('2v', 'Pegel', 'Pixel', 'Der Querschnitt des Stroms: fünf Pegel, eine Kurve.', 'white', grad(10, 0, 56, 0), (u) => [sh([14, 26, 40, 30, 18].map((h, i) => rr(10 + 10 * i, 32 - h / 2, 6, h, 2)).join(''), u)]);
+    add('2w', 'Trichter', 'Knoten', 'Viele Pixel oben, ein Knoten unten – aus Daten eine Antwort.', 'navy', grad(7, 0, 57, 0), (u) => { let d = ''; [[9, [7, 16, 25, 34, 43, 52]], [21, [15.5, 24.5, 33.5, 42.5]], [33, [24, 35]]].forEach((r) => r[1].forEach((x) => { d += px(x, r[0], 5, 0.7); })); return [sh(d, u), sh(px(26.5, 44, 11, 2), W)]; });
+    add('2x', 'Überlagerung', 'Fläche', 'Zwei Kacheln übereinander: eine aus Pixeln, eine glatt.', 'navy', grad(24, 24, 54, 54), (u) => { let d = ''; for (let j = 0; j < 5; j++) for (let i = 0; i < 5; i++) { if ((i === 0 || i === 4) && (j === 0 || j === 4)) continue; d += px(10.5 + 6 * i, 10.5 + 6 * j, 5, 0.7); } return [sh(d, W, 0.85), sh(rr(24, 24, 30, 30, 7), u)]; });
+    this._m2 = M; return M;
+  }
+
+  marks9() {
+    if (this._m9) return this._m9;
+    const NAVY = '#0A2540', W = '#FFFFFF', OR = '#FFB46B', PK = '#FF5A8C', VI = '#C05CFF', SK = '#5FC3FF';
+    const n2 = (v) => +v.toFixed(2);
+    const rr = (x, y, w, hh, r) => { const R = Math.min(r, w / 2, hh / 2); return 'M' + n2(x + R) + ' ' + n2(y) + 'H' + n2(x + w - R) + 'A' + R + ' ' + R + ' 0 0 1 ' + n2(x + w) + ' ' + n2(y + R) + 'V' + n2(y + hh - R) + 'A' + R + ' ' + R + ' 0 0 1 ' + n2(x + w - R) + ' ' + n2(y + hh) + 'H' + n2(x + R) + 'A' + R + ' ' + R + ' 0 0 1 ' + n2(x) + ' ' + n2(y + hh - R) + 'V' + n2(y + R) + 'A' + R + ' ' + R + ' 0 0 1 ' + n2(x + R) + ' ' + n2(y) + 'Z'; };
+    const px = (x, y, s) => rr(x - s / 2, y - s / 2, s, s, s * 0.18);
+    const circ = (cx, cy, r) => 'M' + (cx - r) + ' ' + cy + 'a' + r + ' ' + r + ' 0 1 0 ' + 2 * r + ' 0a' + r + ' ' + r + ' 0 1 0 ' + -2 * r + ' 0Z';
+    const bez = (P, t) => { const u = 1 - t; return [u * u * u * P[0][0] + 3 * u * u * t * P[1][0] + 3 * u * t * t * P[2][0] + t * t * t * P[3][0], u * u * u * P[0][1] + 3 * u * u * t * P[1][1] + 3 * u * t * t * P[2][1] + t * t * t * P[3][1]]; };
+    const cubic = (P) => 'M' + P[0].join(' ') + 'C' + P[1].join(' ') + ' ' + P[2].join(' ') + ' ' + P[3].join(' ');
+    const hsh = (a) => { const s = Math.sin(a * 12.9898 + 4.1) * 43758.5453; return s - Math.floor(s); };
+    const mix = (a, b, t) => { const A = this.hex(a), B = this.hex(b); return 'rgb(' + A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(',') + ')'; };
+    const sh = (d, fill, o, stroke, sw) => ({ d, fill: fill || 'none', o: o == null ? 1 : o, stroke: stroke || 'none', sw: sw || 0 });
+    // a stream of pixels along a cubic: colour runs from c0 to c1, size and density may grow
+    const dots = (P, c0, c1, n, s0, s1, keep, seed) => { const out = []; for (let i = 0; i <= n; i++) { const t = i / n; if (hsh(i * 3.3 + seed) > keep) continue; const p = bez(P, t); out.push(sh(px(p[0], p[1], s0 + (s1 - s0) * t), mix(c0, c1, t))); } return out; };
+    const plate = sh(rr(0, 0, 64, 64, 15), NAVY);
+    const M = []; const add = (id, name, tag, rule, shapes) => M.push({ id, name, tag, rule, label: id + ' ' + name, gid: 'g-' + id, g: { x1: 0, y1: 0, x2: 64, y2: 0, stops: [{ o: 0, c: OR }, { o: 1, c: VI }] }, shapes: [plate].concat(shapes) });
+    const A = [[8, 15], [26, 15], [20, 32], [30, 32]], B = [[8, 49], [26, 49], [20, 32], [30, 32]];
+    add('9a', 'Pixel → Knoten', 'Knoten', 'Zwei Pixelströme – Orange und Violett – laufen in einem pinken Knoten zusammen. Was herauskommt, ist eine Linie: das Produkt.', dots(A, OR, PK, 14, 1.8, 3, 0.8, 1).concat(dots(B, VI, PK, 14, 1.8, 3, 0.8, 7), [sh(px(32, 32, 10), PK), sh('M39 32H49', 'none', 1, W, 3), sh(px(52.5, 32, 9), W)]));
+    add('9b', 'Drei Quellen', 'Knoten', 'Drei Ströme, ein Knoten. Aus dem Knoten löst sich rechts eine weiße Pixelspur – das Ergebnis, wieder als Daten.', dots([[6, 13], [26, 13], [20, 32], [31, 32]], OR, PK, 14, 1.8, 3, 0.8, 2).concat(dots([[6, 32], [18, 32], [24, 32], [31, 32]], PK, PK, 8, 1.8, 3, 0.85, 3), dots([[6, 51], [26, 51], [20, 32], [31, 32]], VI, PK, 14, 1.8, 3, 0.8, 4), [sh(px(36, 32, 12), W)], dots([[43, 32], [48, 32], [52, 32], [58, 32]], W, W, 6, 3, 1.6, 0.85, 5).map((d) => Object.assign(d, { o: 0.85 }))));
+    add('9c', 'Verlauf-Knoten', 'Knoten', 'Die Ströme sind glatte Züge im Verlauf, der Knoten trägt den Verlauf ganz – und rechts zerfällt das Ergebnis wieder in Pixel.', [sh(cubic(A), 'none', 1, OR, 4), sh(cubic(B), 'none', 1, VI, 4), sh(rr(25, 25, 14, 14, 4), 'url(#g-9c)')].concat(dots([[41, 32], [46, 32], [50, 32], [58, 32]], W, W, 7, 3, 1.4, 0.8, 6)));
+    add('9d', 'Y aus Pixeln', 'Pixel', 'Kein Knoten, nur Pixel: Oben Orange, unten Violett, nach der Vereinigung Pink bis Sky – eine Gabel aus Daten.', dots([[6, 13], [24, 13], [20, 32], [32, 32]], OR, PK, 16, 1.6, 3, 0.8, 8).concat(dots([[6, 51], [24, 51], [20, 32], [32, 32]], VI, PK, 16, 1.6, 3, 0.8, 9), dots([[32, 32], [40, 32], [48, 32], [58, 32]], PK, SK, 12, 3, 3.6, 0.9, 10)));
+    add('9e', 'Knoten-Kette', 'Knoten', 'Vier Knoten: zwei Quellen links, die Verbindung in der Mitte, das Produkt rechts. Die Wege sind gepunktet, die Knoten fest.', [sh(px(11, 12, 10), OR), sh(px(11, 52, 10), VI)].concat(dots([[16, 14], [26, 14], [22, 32], [28, 32]], OR, PK, 9, 1.8, 1.8, 0.9, 11), dots([[16, 50], [26, 50], [22, 32], [28, 32]], VI, PK, 9, 1.8, 1.8, 0.9, 12), [sh(circ(32, 32, 5.5), PK), sh('M39 32H47', 'none', 1, W, 2.4), sh(px(52, 32, 10), W)]));
+    add('9f', 'Fluss', 'Strom', 'Zwei breite Ströme werden einer: Orange und Violett fließen zu Pink zusammen und enden in einem hellen Knoten.', [sh(cubic([[6, 14], [24, 14], [22, 32], [36, 32]]), 'none', 1, OR, 7), sh(cubic([[6, 50], [24, 50], [22, 32], [36, 32]]), 'none', 1, VI, 7), sh('M34 32H50', 'none', 1, PK, 9), sh(circ(52, 32, 6.5), W)]);
+    const ref = this.marks2().find((m) => m.id === '2k'); if (ref) M.unshift(Object.assign({}, ref, { id: '9-ref', name: 'Original 2k', label: '9-ref Original 2k', tag: 'Referenz', rule: ref.rule }));
+    this._m9 = M; return M;
+  }
+
+  marks10() {
+    if (this._m10) return this._m10;
+    const NAVY = '#0A2540', W = '#FFFFFF', OR = '#FFB46B', PK = '#FF5A8C', VI = '#C05CFF', SK = '#5FC3FF', IND = '#635BFF', HAIR = '#E3E8EE';
+    const n2 = (v) => +v.toFixed(2);
+    const rr = (x, y, w, hh, r) => { const R = Math.min(r, w / 2, hh / 2); return 'M' + n2(x + R) + ' ' + n2(y) + 'H' + n2(x + w - R) + 'A' + R + ' ' + R + ' 0 0 1 ' + n2(x + w) + ' ' + n2(y + R) + 'V' + n2(y + hh - R) + 'A' + R + ' ' + R + ' 0 0 1 ' + n2(x + w - R) + ' ' + n2(y + hh) + 'H' + n2(x + R) + 'A' + R + ' ' + R + ' 0 0 1 ' + n2(x) + ' ' + n2(y + hh - R) + 'V' + n2(y + R) + 'A' + R + ' ' + R + ' 0 0 1 ' + n2(x + R) + ' ' + n2(y) + 'Z'; };
+    const px = (x, y, s) => rr(x - s / 2, y - s / 2, s, s, s * 0.18);
+    const circ = (cx, cy, r) => 'M' + n2(cx - r) + ' ' + cy + 'a' + r + ' ' + r + ' 0 1 0 ' + 2 * r + ' 0a' + r + ' ' + r + ' 0 1 0 ' + -2 * r + ' 0Z';
+    const arc = (cx, cy, r, a0, a1) => { const p = (a) => n2(cx + r * Math.cos(a)) + ' ' + n2(cy + r * Math.sin(a)); return 'M' + p(a0) + 'A' + r + ' ' + r + ' 0 ' + (Math.abs(a1 - a0) > Math.PI ? 1 : 0) + ' 1 ' + p(a1); };
+    const hsh = (a) => { const s = Math.sin(a * 12.9898 + 4.1) * 43758.5453; return s - Math.floor(s); };
+    const mix = (a, b, t) => { const A = this.hex(a), B = this.hex(b); return 'rgb(' + A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(',') + ')'; };
+    const g4 = (t) => this.grad([OR, PK, VI, SK], Math.max(0, Math.min(1, t)));
+    const sh = (d, fill, o, stroke, sw) => ({ d, fill: fill || 'none', o: o == null ? 1 : o, stroke: stroke || 'none', sw: sw || 0 });
+    const gradU = (x1, y1, x2, y2) => ({ x1, y1, x2, y2, stops: [{ o: 0, c: OR }, { o: 0.5, c: PK }, { o: 1, c: VI }] });
+    const M = []; const add = (id, name, tag, rule, plateKind, g, mk) => { const url = 'url(#g-' + id + ')'; const pl = plateKind === 'navy' ? [sh(rr(0, 0, 64, 64, 15), NAVY)] : plateKind === 'white' ? [sh(rr(0, 0, 64, 64, 15), W), sh(rr(0.5, 0.5, 63, 63, 14.7), 'none', 1, HAIR, 1)] : []; M.push({ id, name, tag, rule, label: id + ' ' + name, gid: 'g-' + id, g, shapes: pl.concat(mk(url)) }); };
+    const ring = (cx, cy, r, a0, a1, n, s, seed, keep) => { const o = []; for (let i = 0; i <= n; i++) { const t = i / n; if (hsh(i * 2.7 + seed) > keep) continue; const a = a0 + (a1 - a0) * t; o.push(sh(px(cx + r * Math.cos(a), cy + r * Math.sin(a), s), g4(t))); } return o; };
+
+    add('10a', 'Komet', 'Strom', 'Ein glatter Bogen im Verlauf, der am Ende in Pixel zerfällt – Bewegung, die zu Daten wird.', 'navy', gradU(10, 50, 54, 14), (u) => [sh(arc(38, 38, 26, Math.PI * 1.02, Math.PI * 1.62), 'none', 1, u, 6)].concat([[0.05, 3.2], [0.14, 2.8], [0.22, 2.4], [0.3, 2.2], [0.38, 2], [0.47, 1.8], [0.56, 1.6]].map((k, i) => { const a = Math.PI * (1.62 + 0.36 * k[0]); return sh(px(38 + 26 * Math.cos(a) + (hsh(i) - 0.5) * 5, 38 + 26 * Math.sin(a) + (hsh(i + 9) - 0.5) * 5, k[1]), VI, 1 - k[0] * 1.3); })));
+    add('10b', 'Halbmond', 'Pixel', 'Ein Mond aus Pixeln: innen dicht, nach außen dünner. Der Bogen als Fläche statt als Linie.', 'navy', gradU(14, 0, 50, 0), () => { const o = []; for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { const cx = 2 + 4 * x, cy = 2 + 4 * y, d1 = Math.hypot(cx - 30, cy - 32), d2 = Math.hypot(cx - 20, cy - 32); if (d1 <= 24 && d2 >= 20) { const e = Math.min(24 - d1, d2 - 20) / 6; if (hsh(x * 17 + y) < Math.min(1, e + 0.25)) o.push(sh(px(cx, cy, 3), g4((cy - 8) / 48))); } } return o; });
+    add('10c', 'Welle', 'Strom', 'Eine Welle, die anschwillt: dünn links, breit rechts, im Verlauf.', 'navy', gradU(6, 0, 58, 0), (u) => { const L = [], R = []; for (let i = 0; i <= 40; i++) { const t = i / 40, x = 6 + 52 * t, y = 32 + 12 * Math.sin(t * Math.PI * 2 - 0.4), w = 0.8 + 5.2 * t; L.push([x, y - w]); R.push([x, y + w]); } return [sh('M' + L.concat(R.reverse()).map((p) => n2(p[0]) + ' ' + n2(p[1])).join('L') + 'Z', u)]; });
+    add('10d', 'Orbit aus Fäden', 'Fäden', 'Drei Fäden kreisen, jeder in seiner Farbe, keiner geschlossen – die Schleife, die sich prüft.', 'navy', gradU(0, 0, 64, 0), () => [sh(arc(32, 32, 20, -1.2, 3.6), 'none', 1, OR, 2.6), sh(arc(32, 32, 15, 0.4, 5.2), 'none', 1, PK, 2.6), sh(arc(32, 32, 10, 2.0, 6.6), 'none', 1, VI, 2.6), sh(px(32, 32, 6), W)]);
+    add('10e', 'Pegel', 'Pixel', 'Vier Säulen aus Pixeln, die wachsen – jede in der nächsten Farbe.', 'navy', gradU(0, 0, 64, 0), () => { const o = []; [[14, 4, OR], [26, 7, PK], [38, 10, VI], [50, 13, SK]].forEach((c, k) => { for (let i = 0; i < c[1]; i++) o.push(sh(px(c[0], 50 - 4 * i, 3.2), c[2], i === c[1] - 1 ? 1 : 0.55 + 0.45 * i / c[1])); }); return o; });
+    add('10f', 'Spirale', 'Pixel', 'Pixel auf einer Spirale, von innen nach außen im Verlauf – Daten, die sich ordnen.', 'navy', gradU(0, 0, 64, 0), () => { const o = []; for (let i = 0; i < 46; i++) { const t = i / 45, a = t * Math.PI * 4.6, r = 3 + 24 * t; o.push(sh(px(32 + r * Math.cos(a), 32 + r * Math.sin(a), 2.2 + 1.4 * t), g4(t))); } return o; });
+    add('10g', 'Portal', 'Fläche', 'Ein Rahmen im Verlauf, durch den ein Pixelstrom hindurchzieht.', 'navy', gradU(12, 12, 52, 52), (u) => [sh(rr(12, 12, 40, 40, 10), 'none', 1, u, 3.5)].concat([[4, 40], [9, 38], [14, 36], [20, 34], [26, 32], [32, 30], [38, 28], [44, 26], [50, 24], [56, 22], [61, 20]].map((p, i) => sh(px(p[0], p[1], 3), W, 0.5 + 0.5 * Math.abs(Math.sin(i))))));
+    add('10h', 'Cursor', 'Zeichen', 'Ein Cursor und der Staub davor: die Stelle, an der etwas entsteht.', 'white', gradU(14, 0, 30, 0), (u) => [sh(rr(36, 16, 5, 32, 2.5), NAVY)].concat([[14, 22], [20, 20], [26, 26], [18, 32], [27, 36], [14, 40], [22, 44], [29, 30]].map((p, i) => sh(px(p[0], p[1], 3.2 + (i % 3)), g4(i / 7), 0.7 + 0.3 * hsh(i)))));
+    add('10i', 'Drei Schräge', 'Fäden', 'Drei schräge Fäden, Orange, Pink, Violett – mit Lücken, wie Datenpakete.', 'navy', gradU(0, 0, 64, 0), () => { const o = []; [[OR, -10], [PK, 0], [VI, 10]].forEach((c, k) => { for (let i = 0; i < 12; i++) { if (hsh(i * 5 + k * 31) > 0.78) continue; const t = i / 11; o.push(sh(px(16 + c[1] + 32 * t, 50 - 36 * t, 3.4), c[0])); } }); return o; });
+    add('10j', 'Satellit', 'Knoten', 'Ein Knoten und ein Bogen, der ihn umkreist und in Pixel ausläuft.', 'navy', gradU(10, 40, 50, 20), (u) => [sh(px(32, 32, 14), W), sh(arc(32, 32, 22, Math.PI * 0.65, Math.PI * 1.75), 'none', 1, u, 4)].concat([0.06, 0.14, 0.24, 0.36].map((k, i) => { const a = Math.PI * (1.75 + k); return sh(px(32 + 22 * Math.cos(a), 32 + 22 * Math.sin(a), 3.4 - i * 0.5), VI, 1 - i * 0.22); })));
+    add('10k', 'Puls', 'Zeichen', 'Eine Linie mit einem Ausschlag – der Moment, in dem das System antwortet.', 'navy', gradU(8, 0, 56, 0), (u) => [sh('M8 36H22L28 18L36 50L42 36H56', 'none', 1, u, 3.6), sh(px(36, 50, 5), W)]);
+    add('10l', 'Zerfall', 'Fläche', 'Ein Quadrat im Verlauf, dessen rechte Kante sich in Pixel auflöst.', 'navy', gradU(12, 0, 48, 0), (u) => { const o = [sh(rr(12, 14, 26, 36, 6), u)]; for (let y = 0; y < 9; y++) for (let x = 0; x < 5; x++) { const cx = 39.5 + 4 * x, cy = 16 + 4 * y; if (hsh(x * 13 + y * 7) < 1 - x * 0.2) o.push(sh(px(cx, cy, 3), g4(0.6 + x * 0.1))); } return o; });
+    add('10m', 'Doppelbogen', 'Strom', 'Zwei Bögen ineinander, Orange und Violett, dazwischen Pink – der Strom als Echo.', 'navy', gradU(0, 0, 64, 0), () => [sh(arc(10, 32, 36, -0.82, 0.82), 'none', 1, SK, 3), sh(arc(10, 32, 30, -0.88, 0.88), 'none', 1, VI, 3.4), sh(arc(10, 32, 24, -0.95, 0.95), 'none', 1, PK, 3.8), sh(arc(10, 32, 18, -1.02, 1.02), 'none', 1, OR, 4.2)]);
+    add('10n', 'Netz', 'Knoten', 'Neun Knoten, verbunden – einer trägt den Verlauf: der, der gerade rechnet.', 'navy', gradU(28, 28, 44, 44), (u) => { const o = [sh('M16 16H48M16 32H48M16 48H48M16 16V48M32 16V48M48 16V48', 'none', 0.35, W, 1.2)]; [16, 32, 48].forEach((x) => [16, 32, 48].forEach((y) => o.push(sh(px(x, y, x === 32 && y === 32 ? 12 : 5), x === 32 && y === 32 ? u : W, x === 32 && y === 32 ? 1 : 0.9)))); return o; });
+    add('10o', 'Blatt', 'Fläche', 'Ein Blatt aus zwei Bögen, gefüllt mit Pixeln im Verlauf.', 'navy', gradU(0, 0, 64, 0), () => { const o = []; for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { const cx = 2 + 4 * x, cy = 2 + 4 * y, u = (cx - 8) / 48, v = (cy - 32) / 20; if (u < 0 || u > 1) continue; const hw = Math.sin(u * Math.PI) * 0.95; if (Math.abs(v) <= hw && hsh(x * 19 + y) < 0.85) o.push(sh(px(cx, cy, 3), g4(u))); } return o; });
+    add('10p', 'Schleife', 'Strom', 'Eine Acht im Verlauf – der Agent, der plant, handelt, prüft, und wieder von vorn.', 'navy', gradU(8, 0, 56, 0), (u) => [sh('M32 32C38 22 48 20 52 26C56 32 48 44 40 42C32 40 26 24 18 22C10 20 6 30 12 36C18 42 28 38 32 32Z', 'none', 1, u, 4.2), sh(px(32, 32, 5.5), W)]);
+    add('10q', 'Offener Ring', 'Pixel', 'Ein Ring aus Pixeln mit einer Lücke – das System, das „Ich weiß es nicht“ sagen kann.', 'navy', gradU(0, 0, 64, 0), () => ring(32, 32, 21, -1.1, 4.4, 30, 3.4, 5, 0.92).concat([sh(px(32 + 21 * Math.cos(-1.5), 32 + 21 * Math.sin(-1.5), 3.4), W, 0.4)]));
+    add('10r', 'Mündung, gepixelt', 'Strom', 'Ein Strom, der breiter wird und in Pixel zerfällt – der Verlauf läuft mit.', 'navy', gradU(8, 0, 58, 0), () => { const o = []; for (let i = 0; i <= 30; i++) { const t = i / 30, x = 8 + 50 * t, hw = 1 + 11 * t, rows = Math.max(1, Math.round(hw / 2.2)); for (let j = 0; j < rows; j++) { const y = 32 - hw + (2 * hw) * (rows === 1 ? 0.5 : j / (rows - 1)); if (hsh(i * 7 + j * 3) < 1.05 - t * 0.55) o.push(sh(px(x, y + 8 * Math.sin(t * 3), 2.4 + 0.8 * t), g4(t))); } } return o; });
+    this._m10 = M; return M;
+  }
+
+  renderVals() {
+    const S = this.state, DN = ['Der Strom zieht den Stamm hoch, schwingt um den Bogen und kommt breit unten links an.', 'Ein Impuls läuft das D entlang, endlos.'];
+    const HN = ['Die Fäden legen sich in den Bogen, von oben links nach unten links.', 'Ein Impuls läuft den Bogen entlang, endlos.'];
+    const ZN = ['Der Block setzt sich von links nach rechts, dann lösen sich die Pixel – die entferntesten zuletzt.', 'Die Pixel treiben ab und lösen sich auf, endlos. Der Block bleibt.'];
+    const Z = (kind, id, name, rule, nums, notes) => Object.assign(this.dir((s, v, m) => this.tileZ(s, v, m, kind), notes || ZN), { id, name, label: id + ' ' + name, rule, nums });
+    const D = (kind, id, name, rule, nums, notes) => Object.assign(this.dir((s, v, m) => this.tileB(s, v, m, kind), notes), { id, name, label: id + ' ' + name, rule, nums });
+    return {
+      r2: this.marks2(), r9: this.marks9(), r10: this.marks10(),
+      take: S.take, motionOn: S.motionOn, replay: this.replay, dotTop: S.dotTop, dotSize: S.dotSize, showOld: S.showOld, toggleOld: this.toggleOld, oldLabel: S.showOld ? 'Ältere Runden (1–5) ausblenden' : 'Ältere Runden (1–5) einblenden',
+      a: this.dir(this.tileA.bind(this), ['Die Platte skaliert von 88 %, die Pixel kommen von links unten den Strom herauf – das letzte landet zuletzt.', 'Das Licht läuft die drei Pixel hinauf. Kein Spinner, kein Balken.']),
+      rounds: ((r) => (S.showOld ? r : r.filter((x) => +x.label.replace(/\D/g, '') >= 6)).map((x) => Object.assign(x, { isCards: !x.isSketch })))([
+        { label: 'Runde 11', badge: 'Runde 11 · Zerfall, aus 10l', title: 'Der Block, der zu Pixeln wird', desc: 'Alles ist Pixel: Der Block ist ein dichtes Raster im Verlauf, und an seiner Kante wird er zu Staub – kleiner, dünner, seltener, je weiter er kommt. Fünf Richtungen des Zerfalls, jede mit Ankommen, Warten und Anmelden. Beim Warten treiben die Pixel endlos ab; der Block bleibt stehen.', cards: [
+          Z('right', '11a', 'Zerfall · rechts', 'Das Original aus 10l, jetzt als Raster: Block links, Staub nach rechts, Farbe läuft von Orange über Pink bis Sky durch.', 'Raster 20 × 20 · Block 26 × 36 · Staub über 26, Dichte (1 − d)^1,5 · Größe 2,4 → 1,2'),
+          Z('stream', '11b', 'Zerfall · Strom', 'Ein Band statt Block: links kompakt, rechts fächert es auf und zerfällt – der Datenstrom als Kachel.', 'Raster 20 × 20 · Band 12 hoch · Fächer bis 38 · Dichte fällt mit Abstand und Winkel'),
+          Z('arc', '11c', 'Zerfall · Bogen', 'Der Block unten links, der Staub steigt im Bogen nach oben rechts – Zerfall mit Schwung.', 'Raster 20 × 20 · Block 20 × 20 · Staub entlang einer Kurve, Streuung 1,5 → 10'),
+          Z('round', '11d', 'Zerfall · rundum', 'Ein Punkt, der nach allen Seiten zerfällt – der Knoten, der sendet.', 'Raster 20 × 20 · Scheibe r 11 · Staub bis r 29', ['Die Scheibe wächst von innen, dann löst sich der Rand nach außen.', 'Der Rand treibt nach außen und löst sich auf, endlos.']),
+          Z('build', '11e', 'Aufbau', 'Umgekehrt: Der Staub kommt von links und setzt sich rechts zum Block zusammen – aus Daten wird Produkt. Der Zerfall reicht tief in den Block: Seine linke Hälfte ist porös, erst rechts wird er fest.', 'Raster 20 × 20 · Block 32 × 36, porös von 24 bis 40 (Mitte 32) · Staub bis zum linken Rand, Größe 2,4 → 1,1 · Zyklus 2,6 s', ['Der Block verdichtet sich von rechts nach links, die poröse Kante setzt sich zuletzt; der Staub fliegt aus der Ferne an, wächst dabei und landet weich.', 'Zwei Bahnen Staub driften an, setzen sich, halten, verblassen – jedes Pixel in eigenem Takt. Die poröse Kante atmet, der feste Block schimmert.'])
+        ] },
+        { label: 'Runde 10', isSketch: true, badge: 'Runde 10 · 18 neue Skizzen', title: 'Noch einmal breit: Strom, Pixel, Fäden, Knoten, Zeichen, Fläche', desc: 'Achtzehn frische Ideen, alle in Seitenfarben und auf der Kachel. Bewusst breit gestreut, damit sich eine Richtung zeigt: Komet, Halbmond, Welle, Orbit, Pegel, Spirale, Portal, Cursor, Schräge, Satellit, Puls, Zerfall, Doppelbogen, Netz, Blatt, Schleife, offener Ring, Mündung. Nummern nennen, ich baue weiter.', items: this.marks10() },
+        { label: 'Runde 9', isSketch: true, badge: 'Runde 9 · Zurück zu 2k', title: 'Zusammenführen – sechs Fassungen', desc: 'Der Kern von 2k (links als Referenz): Quellen laufen in einem Knoten zusammen, heraus kommt ein Produkt. Hier verknüpft mit den Pixeln und Farben der Seite – Orange und Violett als Quellen, Pink als Vereinigung, Weiß als Ergebnis.', items: this.marks9() },
+        { label: 'Runde 8', badge: 'Runde 8 · Tiefe', title: 'Der Schwung in 3D', desc: 'Zwei Wege, dem Bogen Raum zu geben. 8a dreht das Bündel wie ein Band: Die Fäden kreuzen sich an den Enden, hinten liegende werden dunkler, am Apex liegt das Band flach und breit. 8b bleibt ungedreht, aber schattiert: außen hell, innen dunkler, zum Apex hin heller – als läge Licht von rechts darauf.', cards: [
+          D('hero8', '8a', 'Hero-Bogen · Band', 'Ein halber Twist über den Bogen: schmal und gekreuzt an den Enden, breit und flach am Apex. Hintere Fäden auf 55 %, vordere voll.', 'Raster 32 × 32 · 9 Fäden · Twist ½ · Tiefe 55–100 % · Helligkeit 60–100 % entlang t', HN),
+          D('hero9', '8b', 'Hero-Bogen · Licht', 'Wie 7f, aber schattiert: Die inneren Fäden liegen im Schatten, die äußeren im Licht, und der Apex ist die hellste Stelle.', 'Raster 32 × 32 · 9 Fäden · Deckkraft innen 45 % → außen 100 % · Helligkeit 60–100 % entlang t', HN)
+        ] },
+        { label: 'Runde 7', badge: 'Runde 7 · Feilen an 6a', title: 'Vier Feinschliffe des Hero-Bogens', desc: '6a bleibt unverändert. Alle vier laufen oben spitz zu, fächern erst im Bogen auf, bleiben mit dem Apex in der Kachel (kein Loch am rechten Rand) und tragen außen keinen Schleier mehr – die äußeren Fäden bauen sich erst im Bogen auf. Dazu je eine Stellschraube: feineres Raster, mehr Schwung, Farbe entlang des Laufs statt pro Faden, und ein klarer Kern für kleine Größen.', cards: [
+          D('hero2', '7a', 'Hero-Bogen · fein', 'Neun Fäden auf 32 × 32 Zellen auf einem elliptischen Bogen – keine Geraden, nur Schwung. Innen Orange, außen Sky, oben spitz, unten aufgefächert.', 'Raster 32 × 32 · Ellipse 30 × 34, Mitte 14/32 · 9 Fäden · Abstand 1,4 → 3,2 · Deckkraft 70–100 % · Schleier 16 %', HN),
+          D('hero7', '7f', 'Hero-Bogen · Mitte', 'Zwischen 7a und 7e: neun Fäden, aber enger und dünner gebündelt, weniger Lücken in der Mitte, weniger Schleier – und etwas mehr Ausholen nach rechts.', 'Raster 32 × 32 · Ellipse 33 × 34, Mitte 12/32 · 9 Fäden · Abstand 1 → 2,5 · Schleier 10 %', HN),
+          D('hero6', '7e', 'Hero-Bogen · schlank', 'Zum Vergleich: sieben Fäden, enger gebündelt, auf einer weiter nach rechts ausholenden Ellipse.', 'Raster 32 × 32 · Ellipse 36 × 33, Mitte 10/32 · 7 Fäden · Abstand 1 → 2,6', HN),
+          D('hero3', '7b', 'Hero-Bogen · Schwung', 'Der Bogen holt weiter aus: Apex weiter rechts, unten breiter aufgefächert, oben enger.', 'Raster 24 × 24 · 7 Fäden · Abstand 1,8 → 5,4 · Apex bei 46/64', HN),
+          D('hero4', '7c', 'Hero-Bogen · entlang', 'Die Farbe läuft entlang des Bogens – oben Orange, in der Mitte Pink, unten Violett und Sky – jeder Faden leicht versetzt.', 'Raster 24 × 24 · 7 Fäden · Verlauf entlang t, Versatz 5 % je Faden', HN),
+          D('hero5', '7d', 'Hero-Bogen · Kern', 'Drei innere Fäden ohne Lücken, außen nur noch Hauch: ruhiger, und im Favicon eine klare Linie.', 'Raster 24 × 24 · 3 volle + 4 blasse Fäden · Schleier 10 %', HN)
+        ] },
+        { label: 'Runde 6', badge: 'Runde 6 · Der Hero-Bogen', title: 'Nachgebaut: der Bogen aus dem Hero', desc: 'Der Bogen, den du nachgezeichnet hast: Er kommt oben links herein, schwingt weit nach rechts aus und geht unten links wieder hinaus. Innen Orange, dann Pink, außen Violett und Sky – die hellen Fäden tragen, die äußeren verblassen, dazwischen ein leichter Schleier wie auf der Seite.', cards: [
+          D('hero', '6a', 'Hero-Bogen', 'Sieben Fäden auf 24 × 24 Zellen, innen kräftig, außen verblassend, mit Lücken und Schleier – der Strom der Seite als Kachel. Unter 40 px bleiben nur die drei inneren Fäden als Fläche.', 'Raster 24 × 24 · 7 Fäden · Abstand 3 → 4,6 · Deckkraft 30–100 % · Schleier 14 %', ['Die Fäden legen sich in den Bogen, von oben links nach unten links.', 'Ein Impuls läuft den Bogen entlang, endlos.']),
+          D('herok', '6b', 'Hero-Bogen · kräftig', 'Derselbe Bogen mit fünf dichten Fäden ohne Schleier – für kleine Größen und einfarbige Anwendungen.', 'Raster 20 × 20 · 5 Fäden · Abstand 3,4 → 4,8 · Dichte 70–100 %', ['Die Fäden legen sich in den Bogen, von oben links nach unten links.', 'Ein Impuls läuft den Bogen entlang, endlos.'])
+        ] },
+        { label: 'Runde 5', badge: 'Runde 5 · Fäden', title: 'Der Strom, wie er auf der Seite ist', desc: 'Der Strom der Seite ist kein Band, sondern viele feine Fäden, die sich auffächern, Lücken haben und je eine eigene Farbe tragen. Vier Fassungen, die genau das einfangen. Unter 40 px werden die Fäden zur Fläche, damit die Marke scharf bleibt.', cards: [
+          D('dfaeden', '5a', 'D · Fäden', 'Das D aus fünf Fäden: eng am Anfang, aufgefächert am Ende, jeder Faden in seiner Farbe, mit Lücken wie im Strom.', 'Raster 20 × 20 · 5 Fäden · Abstand 1 → 3,4 · Dichte 50–90 %', DN),
+          D('bfaeden', '5b', 'Bogen · Fäden', 'Der Bogen aus Runde 3 als Fächer aus fünf Fäden – ohne Stamm, ganz Strom.', 'Raster 20 × 20 · 5 Fäden · Abstand 1 → 3,4 · Dichte 50–90 %', ['Die Fäden legen sich entlang des Bogens, vom engen Anfang zum Fächer.', 'Ein Impuls läuft die Fäden entlang, endlos.']),
+          D('ddicht', '5c', 'D · gestreift', 'Sieben Fäden ohne Lücken: ein gestreiftes D, das den Verlauf quer trägt statt längs.', 'Raster 20 × 20 · 7 Fäden · Abstand 1 → 2,5 · keine Lücken', DN),
+          D('durchlauf', '5d', 'Durchlauf', 'Kein Buchstabe: der Strom zieht als Bogen durch die Kachel, kommt oben in der Mitte herein, schwingt rechts aus und geht unten links wieder hinaus – ein Ausschnitt aus dem Hero.', 'Raster 20 × 20 · 6 Fäden · Abstand 2 → 3,4 · beide Enden offen', ['Die Fäden ziehen durch die Kachel, von oben in der Mitte nach unten links.', 'Ein Impuls läuft durch die Kachel, endlos.'])
+        ] },
+        { label: 'Runde 4', badge: 'Runde 4 · Das D, fünf Fassungen', title: 'Feilen am D', desc: 'Fünf Fassungen von 3c: feineres Raster, ein Auslauf in den Strom, eine ganz ohne Dither, ein gewölbter Stamm, ein Pinselzug. Alle Fassungen lassen die ausgefransten Ränder unter 40 px weg und zeigen unter 64 px nur noch einen Ring – auf 32, 24 und 16 px bleibt der Zug scharf.', cards: [
+          D('dfein', '4a', 'D · fein', 'Dasselbe D auf 20 × 20 Zellen: kleinere Pixel, weichere Kurve, näher am Strom der Seite.', 'Raster 20 × 20 · Zelle 2,4, Fuge 0,8 · Breite 1 → 3 Zellen', DN),
+          D('daus', '4b', 'D · Auslauf', 'Der Zug endet nicht am Anfang: Er läuft breit weiter über die Ecke aus der Kachel hinaus – das D hängt am Strom der Seite.', 'Raster 16 × 16 · Zelle 3, Fuge 1 · Breite 1 → 3,5 Zellen · Auslauf über die Ecke', DN),
+          D('dblatt', '4c', 'D · Blatt', 'Auch der Stamm ist gebogen: ein Zug ohne gerade Linie, mehr Blatt als Buchstabe.', 'Raster 16 × 16 · Zelle 3, Fuge 1 · Stamm gewölbt 10 · Breite 1 → 3 Zellen', DN),
+          D('dscharf', '4e', 'D · scharf', 'Ganz ohne Dither: nur der Kern, harte Kante. Jede Zelle bleibt eine Zelle – auch auf 16 px.', 'Raster 16 × 16 · Zelle 3, Fuge 1 · Breite 1 → 3 Zellen · kein Dither', DN),
+          D('dpinsel', '4d', 'D · Pinsel', 'Umgekehrt: breit unten am Stamm los, um den Bogen immer feiner, bis der Zug als Spitze an den Stamm zurückkommt.', 'Raster 16 × 16 · Zelle 3, Fuge 1 · Breite 3 → 1 Zellen', ['Breit am Stamm los, um den Bogen immer feiner – die Spitze landet zuletzt.', 'Ein Impuls läuft den Pinselzug entlang, endlos.'])
+        ] },
+        { label: 'Runde 3', badge: 'Runde 3 · Der Strom, zwei Läufe', title: 'Bogen oder S', desc: 'Derselbe Strom aus Runde 1, feiner gerastert (16 × 16) und schmal beginnend, breit auslaufend. Als Bogen, als S – und als ein Zug, der zum D wird. Alles andere ist gleich.', cards: [
+        Object.assign(this.dir((s, v, m) => this.tileB(s, v, m, 'arc'), ['Die Zellen setzen sich entlang des Bogens – vom schmalen Anfang oben bis zum breiten Ende unten links.', 'Ein Impuls läuft den Bogen entlang, endlos.']), { id: '3a', name: 'Der Strom · Bogen', rule: 'Ein Bogen: schmal oben in der Mitte beginnend, nach rechts ausschwingend, breit unten links auslaufend – im Kern voll, an den Rändern gedithert. Die Farbe folgt dem Lauf: Orange, Pink, Violett, Sky.', nums: 'Raster 16 × 16 · Zelle 3, Fuge 1 · Breite 1 → 3 Zellen · Dither ½ und ¼' }),
+        Object.assign(this.dir((s, v, m) => this.tileB(s, v, m, 's'), ['Die Zellen setzen sich entlang des S – vom schmalen Anfang oben rechts bis zum breiten Ende unten links.', 'Ein Impuls läuft das S entlang, endlos.']), { id: '3b', name: 'Der Strom · S', rule: 'Ein S: schmal oben rechts, durch die Mitte geschwungen, breit unten links auslaufend – im Kern voll, an den Rändern gedithert. Die Farbe folgt dem Lauf.', nums: 'Raster 16 × 16 · Zelle 3, Fuge 1 · Breite 1 → 3 Zellen · Dither ½ und ¼' }),
+        Object.assign(this.dir((s, v, m) => this.tileB(s, v, m, 'd'), ['Der Strom zieht den Stamm hoch, schwingt um den Bogen und kommt breit unten links an.', 'Ein Impuls läuft das D entlang, endlos.']), { id: '3c', name: 'Der Strom · D', rule: 'Ein Zug, der ein D wird: schmal unten links los, den Stamm hinauf, im Bogen nach rechts und breit zurück zum Anfang. Kein gesetzter Buchstabe – der Strom selbst schreibt ihn.', nums: 'Raster 16 × 16 · Zelle 3, Fuge 1 · Stamm 40, Bogen bis 48 · Breite 1 → 3 Zellen' })
+        ] }
+      ]),
+      c: this.dir(this.tileC.bind(this), ['Erst nur Pixel. Ab 42 % der Zeit rendert die rechte Hälfte glatt – die Kante landet zuletzt.', 'Die Kante wandert vor und zurück; das Bild rendert und zerfällt.'])
+    };
+  }
+}
+</script>
+</body>
+</html>

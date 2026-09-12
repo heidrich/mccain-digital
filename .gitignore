@@ -34,3 +34,10 @@ internal/shots/
 # `python tools/lighthouse_audit.py`. The numbers that matter are written
 # down in HANDOFF.md instead.
 internal/lighthouse/
+
+# The v4 export's canvas scratch: 119 unreferenced files, 23 MB, and most of it
+# is the HALLVERN brand - assets the owner dragged into the Claude Design canvas
+# as reference while drawing this site. Nothing in the export links to any of
+# it (grep for "uploads/" across mccain-design-system/ finds nothing).
+# Kept on disk, out of the history; recoverable from the parked export zip.
+mccain-design-system/uploads/

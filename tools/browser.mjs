@@ -93,7 +93,15 @@ export async function launch(width, height) {
     );
     process.exit(2);
   }
-  const browser = await chromium.launch({ executablePath, headless: true });
+  /* MCD_HEADED=1 runs a visible browser. Not a debugging nicety: Web3Forms sits
+   * behind a Cloudflare bot check that answers a headless Chromium - and plain
+   * node fetch, browser User-Agent or not - with a 403 challenge page. The only
+   * way to prove the contact channel actually carries a message is to send it
+   * from a real browser. See tools/form_probe.mjs. */
+  const browser = await chromium.launch({
+    executablePath,
+    headless: !process.env.MCD_HEADED,
+  });
   const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 1 });
   return { browser, context };
 }

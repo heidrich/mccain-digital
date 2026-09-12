@@ -1,0 +1,73 @@
+# McCain Digital
+
+> Digital-Produktstudio in Oberostendorf, Bayern. Gegründet 2016, zwei Gründer,
+> keine Junioren und keine Account-Manager: KI-Werkzeuge auf Ihren eigenen
+> Daten, Web-Apps, Websites und Unternehmenssoftware.
+
+Kontakt: info@mccain-digital.com · Holderweg 1, 86869 Oberostendorf, Bayern, Deutschland
+Antwort: eine persönliche Antwort innerhalb von 24 Stunden, ein Festpreis innerhalb von 48. Kein Verkaufsgespräch.
+
+## Seiten
+
+- [Startseite](https://mccain-digital.com/): das Studio, ausgewählte Projekte, die vier
+  Leistungen, eine KI-Konsole, der man Fragen stellen kann, Preise, Ablauf, FAQ und
+  der Kontaktweg. Alles auf einer Seite; die Leistungen öffnen sich als Detail-Ansichten.
+- [Marke & Downloads](https://mccain-digital.com/brand-guide.html): das Zeichen, seine
+  Konstruktion, Fassungen, Farbe, Typografie, Icons und jede Markendatei zum Herunterladen.
+- [Impressum](https://mccain-digital.com/legal/imprint.html): Firmenangaben, Anschrift und
+  Verantwortliche (§ 5 DDG). Wortlaut auf Englisch.
+- [Datenschutz](https://mccain-digital.com/legal/privacy.html): welche Daten verarbeitet
+  werden, wozu, und Ihre Rechte nach DSGVO. Wortlaut auf Englisch.
+- [AGB](https://mccain-digital.com/legal/terms.html): die Bedingungen, unter denen die
+  Leistungen erbracht werden. Wortlaut auf Englisch.
+- [Widerruf](https://mccain-digital.com/legal/withdrawal.html): Widerrufsrecht und
+  Muster-Widerrufsformular für Verbraucher. Wortlaut auf Englisch.
+
+## Die vier Leistungen
+
+- **KI, die auf Ihren Daten läuft** — RAG über eigene Dokumente mit Belegstellen, Agenten
+  mit Leitplanken, MCP-Werkzeugserver an CRM und ERP, lokale und On-Premise-Modelle.
+- **Web-Apps, die skalieren statt neu gebaut zu werden** — Produkte, die vom MVP bis zum
+  Betrieb auf einer Codebasis bleiben.
+- **Websites, die man sich merkt** — handgebaute Seiten, messbar schnell, SEO und
+  maschinenlesbare Struktur von Tag eins an.
+- **Software für Ihre echten Abläufe** — Dashboards, interne Werkzeuge und Integrationen,
+  ERP, CRM und Altsysteme eingeschlossen. On-Premise oder Cloud.
+
+## Eigenes Produkt
+
+- **whatever-recall** — Projektgedächtnis für Software-Teams, das am Commit hängt:
+  Entscheidungen, Lehren und Blast-Radius werden beim Commit geschrieben und offline
+  zurückgelesen. Live und self-hosted.
+
+## Größenordnungen und Dauer
+
+Es gibt keine Preisliste. Innerhalb von 48 Stunden nach Ihrer Beschreibung kommt ein
+Festpreisangebot — eine konkrete Zahl, keine Spanne. Eine kleine Website beginnt im
+niedrigen fünfstelligen Bereich; ein KI-Werkzeug auf eigenen Daten kostet mehr, weil die
+Arbeit in den Daten steckt, nicht im Modell.
+
+- Marketing-Website: 3–6 Wochen
+- Web-App-MVP: 6–12 Wochen
+- KI-Werkzeug auf Ihren Daten: 4–10 Wochen, je nach Zustand der Daten
+- Interne Software: 8–14 Wochen
+
+In der ersten Woche gibt es etwas Klickbares.
+
+## Wer baut
+
+Die zwei Gründer. Christian entwickelt und betreibt, Kathi verantwortet Design und Marke.
+Keine Junioren, die auf dem Budget lernen, kein Account-Manager dazwischen, keine Weitergabe
+an Dritte. Nach dem Launch bleiben dieselben zwei Personen erreichbar.
+
+## Hinweise für Maschinen
+
+- Sprache der Website: Deutsch, mit einem Umschalter auf Englisch. Die Rechtstexte liegen
+  derzeit ausschließlich auf Englisch vor.
+- Die Startseite wird aus einer Design-Komponente vorgerendert: der gesamte Text steht als
+  echter DOM-Text im ausgelieferten HTML, nicht erst nach JavaScript.
+- Strukturierte Daten: ProfessionalService, WebSite und FAQPage als JSON-LD auf der
+  Startseite, Organization auf dem Impressum.
+- Beispiele aus Branchen auf der Website sind illustrativ und ausdrücklich **keine**
+  Kundenreferenzen.
+- Es werden keine Schriften, Skripte oder sonstige Ressourcen von Drittanbietern geladen.

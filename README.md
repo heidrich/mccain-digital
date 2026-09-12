@@ -17,33 +17,33 @@ Germany (AI tools, web apps, websites and custom software).
 > this build is `noindex`, and pointing an indexed domain at a noindex site asks
 > Google to remove it. Turn `noindex` off first, rebuild, verify, then move DNS.
 
-> **The site is `noindex` right now.** The 2026 relaunch is not finished —
-> subpages are still being built and two owner decisions are open (see
-> `HANDOFF.md`). The switch is `site.config.json`; flipping it is the go-live
-> gesture, and `tools/verify_site.mjs` fails if the generators, the meta tags and
-> the `X-Robots-Tag` header disagree about it.
+> **The site is `noindex` right now, deliberately.** Owner's call on 12.9.2026:
+> the copy still has to be revised and md-recall finished before this is
+> indexed. The switch is `site.config.json`; flipping it is the go-live gesture,
+> and `tools/verify_site.mjs` fails if the build, the meta tags and the
+> `X-Robots-Tag` header disagree about it.
 
 ---
 
 ## What this repository is
 
 **The repository root *is* the deployed site.** `git push` is the deploy. But
-unlike the version this replaced, the root is now **generated**: the start page
-and the brand guide are built out of a Claude Design component export that lives
-in [`mccain-design-system/`](mccain-design-system/) and is never itself served.
+the root is **generated**: all 21 pages are built out of the Claude Design
+export in [`mccain-design-system/`](mccain-design-system/), which is never
+itself served.
 
-`index.html` and `brand-guide.html` are build output. **Editing them by hand is
+Every `index.html` under the root is build output. **Editing one by hand is
 lost work** — change the export and run the build.
 
 ### Why there is a build at all
 
-The export is a client-rendered React component: every word of copy is a
-`{{ }}` placeholder resolved at runtime from `content.json`. Measured on the
-untouched export, a crawler that does not run JavaScript reads **145 words** of
-decoration — no headline, no title, no prose. Rendered, the same page carries
-**1,896**. Meta tags alone would have been cosmetic.
+Each artboard is a client-rendered React component: every word of copy is a
+`{{ }}` placeholder resolved at runtime from `content.json`. A crawler that does
+not run JavaScript reads a few dozen words of decoration — no headline, no
+title, no prose. Rendered, the 21 pages carry **33,498 words**. Meta tags alone
+would have been cosmetic.
 
-So the build renders the component in a real browser and ships **both copies**:
+So the build renders each component in a real browser and ships **both copies**:
 
 | in the page | what it is for |
 |---|---|
@@ -57,27 +57,66 @@ JavaScript keeps a readable page.
 
 Two mistakes in that design each shipped a page that looked perfect and was
 completely dead. Both are written up at the top of
-[`tools/prerender.mjs`](tools/prerender.mjs) and in `HANDOFF.md`. Read that file
-before changing the build.
+[`tools/prerender.mjs`](tools/prerender.mjs). Read that file before changing the
+build.
 
----
+### What the build fixes in the export
+
+The export is a design deliverable, not a website, and the difference is not
+cosmetic. `tools/prerender.mjs` documents each of these where it makes them:
+
+- **the contact forms send nothing.** All 21 pages ship
+  `this.setState({ formSent: true })` with no request. Wired to Web3Forms, and
+  the patch **asserts its own count per page** so a redesigned handler fails the
+  build rather than quietly going back to lying.
+- **three pages carry the legal page's `<helmet>`**, canonical included. The
+  route decides the canonical; the descriptions come from each page's own hero.
+- **60 nav links resolve to nothing** off the start page (`#work`, `#process`,
+  `#faq`, `#stack`). Rewritten per page, only where the page cannot resolve them.
+- **asset paths are relative**, so anything a folder deep 404s.
+- **nine brand-guide icons** hand an array to a single `<path d>`.
+- **React and both typefaces load from CDNs** — see below, that one is legal.
+
+## The 21 pages
+
+| route | artboard |
+|---|---|
+| `/` | McCain Digital v2 |
+| `/leistungen/` | Uebersicht |
+| `/leistungen/ki-automatisierung/` · `web-apps/` · `websites/` · `individualsoftware/` | the four services |
+| `/leistungen/nextjs-entwicklung/` · `mcp-server-entwickeln/` · `rag-beratung/` · `erp-integration/` | the four technology pages |
+| `/vergleich/wordpress-oder-handgeschrieben/` · `chatgpt-oder-eigenes-rag/` | the two comparisons |
+| `/md-recall/` | the product page |
+| `/preise/` · `/studio/` · `/kontakt/` · `/rechtliches/` · `/styleguide/` | |
+| `/news/` · `/news/md-recall/` | index and first article |
+| `/marke/` | brand guide and downloads |
+
+Eighteen of those routes come from the export's own `sitemap.xml`. Three —
+`/news/`, `/news/md-recall/`, `/marke/` — are not in it and were read off the
+design rather than invented; `tools/prerender.mjs` says how.
+
+Old URLs 301 to their new route: `/kontakt.html`, `/brand-guide.html`, the four
+`/services/*.html` and the four `/legal/*.html`.
 
 ## Measured, not claimed
 
-Numbers from the deployed site, 11 September 2026:
+Numbers from this build, 12 September 2026, measured locally with production
+headers:
 
 |     |     |
 | --- | --- |
+| Pages | **21** |
 | Third-party hosts | **0** — React and both typefaces are vendored |
 | Console errors / warnings | **0** on every page |
-| Requests, start page | ~30, all same-origin |
-| `index.html` | 661 KB raw, **66 KB brotli** |
-| Words of real text for a crawler | 1,896 |
-| Structured data | `ProfessionalService`, `WebSite`, `FAQPage` (7 questions) |
+| Failed requests | **0** on every page |
+| Words of rendered text | **33,498** across the 21 pages |
+| Horizontal overflow | none at 390 / 768 / 1024 / 1440 |
+| Broken links, missing anchors, duplicate ids | none |
+| Contact forms that actually post | 22 of 22 |
 
 A Lighthouse / PageSpeed score for **this** build has not been taken yet. The
-four-times-100 figure that appears on the page itself is a number from the
-previous site and is one of the open items in `HANDOFF.md`.
+"4×100" figure that appears in the page's own background text is a number from
+the previous site and is an open item in `HANDOFF.md`.
 
 ### Why React and the fonts are in the repository
 
@@ -110,31 +149,35 @@ selectable, crawlable DOM underneath. Touch devices and
 
 ```text
 index.html              GENERATED   the start page
-brand-guide.html        GENERATED   the brand and download page
-kontakt.html            GENERATED   the contact page (/contact.html 301s here)
-services/               GENERATED   ai-tools, web-apps, websites, software
-legal/                  GENERATED   imprint, privacy, terms, withdrawal
-404.html
-site.config.json        the noindex switch, read by every generator
-support.js              the Claude Design runtime (third party, unmodified)
+leistungen/             GENERATED   overview + 4 services + 4 technology pages
+vergleich/              GENERATED   the two comparison pages
+md-recall/ preise/ studio/ kontakt/ rechtliches/ styleguide/   GENERATED
+news/ news/md-recall/   GENERATED   index and first article
+marke/                  GENERATED   brand guide and downloads
+404.html                the ONLY hand-written page — it must work when the
+                        runtime does not, so it depends on nothing
+
+site.config.json        the noindex switch, read by the build and the gate
+support.js              the Claude Design runtime (third party, minified only)
 pixel-engine.js         the canvas pixel-physics engine
+image-slot.js           the canvas image-slot component (10 empty slots on
+                        /md-recall/ are waiting for screenshots)
 content.json            every word of copy, de + en
 vendor/                 React 18.3.1 UMD
-fonts/ img/ team/ brand/ assets
-robots.txt · sitemap.xml · llms.txt · og-image.png
-vercel.json             edge cache, security headers, X-Robots-Tag
+fonts/ img/ team/ brand/
+robots.txt · sitemap.xml · llms.txt · og-image.png      all GENERATED but robots
+vercel.json             redirects, edge cache, security headers, X-Robots-Tag
 .vercelignore           what must NOT be published — archive/, internal/, tools/
 
 mccain-design-system/   the Claude Design export the site is BUILT FROM
-tools/                  generators and gates
-api/ask.js              the only server-side function
+tools/                  the builder and the gates
 
+archive/old3/           the site the v4 import replaced (September 2026).
 archive/site-apache/    the site that was live on Apache until the Vercel move.
-                        SOURCE OF RECORD for the reviewed legal wording and for
-                        the old contact page.
+                        SOURCE OF RECORD for the reviewed legal wording.
 archive/site-v3/        the site the 2026 relaunch replaced.
-internal/               audit findings, design notes, parked experiments,
-                        screen recordings and source material.
+archive/site-v3-tools/  the generators the v4 import made obsolete.
+internal/               audit findings, design notes, the parked export zip.
 HANDOFF.md              the working notes — start here, it opens with a
                         READ-THIS-FIRST block
 ```
@@ -153,24 +196,25 @@ component through it.
 ```bash
 python prodserve.py 8898 --dev      # must be running
 python tools/vendor_assets.py       # React + the typefaces into the repo
-node  tools/prerender.mjs           # index.html, brand-guide.html, og-image.png
-node  tools/extract_design.mjs > internal/design-reference.json
-python tools/build_pages.py         # contact + the four service pages
-python tools/build_legal.py         # the four legal pages
-python tools/build_sitemap.py       # last: it checks itself against the disk
+node  tools/prerender.mjs           # ALL 21 pages, sitemap.xml, llms.txt, og-image
 node  tools/verify_site.mjs         # REQUIRED before every push
 ```
+
+`prerender.mjs` is the whole build now. It renders each artboard through the dev
+server, writes the page, copies the assets, and writes `sitemap.xml` and the
+page index in `llms.txt` from the same route table — so those cannot drift from
+what exists.
 
 ### The gates
 
 |     |     |
 | --- | --- |
-| `verify_site.mjs` | **clicks.** Hydration, the mega menu, a modal, the pixel engine, the console, `noindex`, and what must stay 404. Takes a URL to run against production. |
+| `verify_site.mjs` | **clicks.** All 21 pages: hydration, the inert template, the mega menu, a modal, the pixel engine, the console, `noindex`, that every route is reachable from `/`, that the forms are wired, and what must stay 404. Takes a URL to run against production. |
 | `console_audit.mjs` | every console message, grouped by shape |
 | `requests_audit.mjs` | every request, counted — a duplicate is the finding |
 | `weigh.mjs` | what the shipped bytes actually consist of |
 | `responsive_audit.mjs` | horizontal overflow at 390 / 768 / 1024 / 1440, and the element that causes it |
-| `form_probe.mjs` | fills a contact form, submits it, and reports what left the browser |
+| `form_probe.mjs` | fills the forms on `/` and `/kontakt/`, submits, and asserts a POST left the browser **and** that success is never claimed without one. `MCD_HEADED=1` to get past the bot filter and prove delivery end to end. |
 | `domain_check.mjs` | whether the canonical domain actually serves this build — it does not |
 | `check_links.py` | internal links, anchors and duplicate ids on deployed pages |
 
@@ -178,6 +222,10 @@ node  tools/verify_site.mjs         # REQUIRED before every push
 relaunch went live with 200s, loaded images, correct meta tags and 1,886 words of
 text — and every button dead. Nothing that was measured had asked whether
 anything *does* something.
+
+`form_probe.mjs` exists for the same reason one level down: the v3 site and then
+the v4 export both shipped a contact form that said "Ihre Nachricht ist da" and
+posted nothing. Only asking the network can see that.
 
 ---
 

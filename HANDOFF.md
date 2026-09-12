@@ -1,99 +1,123 @@
-# Uebergabe — Stand 11. September 2026
+# Uebergabe — Stand 12. September 2026
 
-## ⛔ ZUERST: `mccain-digital.com` liefert NICHT diesen Stand
+## ▶ ZUERST: die ganze Seite ist neu — v4, 21 Seiten aus dem Claude-Design-Export
 
-Die Domain zeigt **nicht** auf Vercel und hat es nie getan. Gemessen am 11.9.:
+Der Owner hat am 12.9. ein neues ZIP geliefert („v3" im Dateinamen, im Repo die
+**v4-Generation**): 26 Artboards, davon **21 echte Seiten**, untereinander
+verlinkt, jede mit eigenem `<helmet>`, Canonical und JSON-LD.
 
-| | `mccain-digital.com` | `mccain-digital.vercel.app` |
-| --- | --- | --- |
-| Server | **nginx** (SiteGround, Google-Cloud-IPs) | Vercel |
-| Inhalt | die **englische v2** vom 21. Juni 2026 | der Relaunch |
-| `lang` | `en` | `de` |
-| robots | **`index, follow`** — ist indexiert | `noindex, follow` |
-| Kontakt + 4 Leistungsseiten | **404** | 200 |
+**Was daraus geworden ist**
 
-Das Vercel-Projekt `mccain-digital` (`prj_UPXVc2IOpokV6yA4zzxqpPPAQGZX`) traegt
-**nur** seine drei automatischen `*.vercel.app`-Domains. `mccain-digital.com`
-ist dort gar nicht eingetragen.
+- Die alte Seite liegt vollstaendig unter **`archive/old3/`** (mit `git mv`, die
+  Historie folgt). Am Wurzelverzeichnis ist **nichts** davon uebrig.
+- Der Export liegt unter **`mccain-design-system/`** und wird nie ausgeliefert.
+- Das ZIP selbst liegt in `internal/parked/` (gitignored).
+- Die Generatoren `build_pages.py`, `build_legal.py`, `pagekit.py`, `chrome.py`
+  und `extract_design.mjs` sind **weg** → `archive/site-v3-tools/`. Sie haben die
+  Unterseiten gebaut, die der Export jetzt selbst mitbringt.
+- `tools/prerender.mjs` ist der **ganze Build**: eine Schleife ueber eine
+  Routen-Tabelle. Diese Tabelle (`PAGES`) ist die einzige Wahrheit darueber, was
+  existiert und unter welcher URL — `sitemap.xml` und das Seitenverzeichnis in
+  `llms.txt` werden daraus geschrieben.
 
-**Folge fuer jede Messung in diesem Dokument:** wo „live" steht, ist
-`mccain-digital.vercel.app` gemeint — die Auslieferung, nicht die Adresse, die
-jemand eintippt. `node tools/domain_check.mjs` stellt die Frage direkt und
-faellt durch, solange beide auseinanderlaufen.
+**Der Build ist keine Kosmetik.** Der Export ist ein Design-Ergebnis, keine
+Website. Sechs Dinge waren kaputt und sind im Build repariert, jedes an seiner
+Stelle im Code begruendet:
 
-**Und die Falle beim Umschalten:** dieser Build ist `noindex`. Eine **indexierte**
-Domain auf eine noindex-Seite zu zeigen, heisst Google zu bitten, sie aus dem
-Index zu nehmen. Reihenfolge deshalb: erst `site.config.json` auf
-`"noindex": false` **und** den `X-Robots-Tag` aus `vercel.json` nehmen, neu
-bauen, `node tools/verify_site.mjs` — **dann** die Domain umhaengen.
+| | |
+| --- | --- |
+| **22 Formulare, die luegen** | `this.setState({ formSent: true })` ohne einen einzigen Request — auf **allen 21 Seiten**. Zum zweiten Mal derselbe Fehler aus einem Export. Jetzt an Web3Forms verdrahtet, und der Patch **zaehlt sich selbst pro Seite**, damit ein umgebauter Handler den Build bricht statt still wieder zu luegen. |
+| **3 Seiten mit dem Kopf der Rechtsseite** | `/news/`, `/news/md-recall/` und `/marke/` trugen den `<helmet>` von „Recht" woertlich: gleiches Canonical, gleiche Description, gleiches og:image, bei `/marke/` sogar der gleiche `<title>`. |
+| **60 tote Navigationslinks** | `#work`, `#process`, `#faq`, `#stack` gibt es nur auf der Startseite. Auf den anderen 20 Seiten passierte beim Klick **nichts**. |
+| **Relative Asset-Pfade** | Seiten zwei Ordner tief haben `brand/…` zu `/leistungen/ki-automatisierung/brand/…` aufgeloest. Auch die zwei fiesen Formen: `url(&quot;team/…&quot;)` und die `href`-Felder in `brand/files.json`, aus denen die Markenseite ihre 45 Downloads baut. |
+| **9 Icons im Brand Guide** | Ein Array in einem einzelnen `<path d>`. |
+| **CDN-Ladungen** | React und beide Schriften kamen von unpkg und Google. Wie bisher vendored — das ist der DSGVO-Punkt, keine Vorliebe. |
 
-Die Umstellung selbst ist eine Owner-Entscheidung und steht aus.
+**Gemessen nach dem Import (lokal, Produktionsheader):** 21 Seiten, 33.498
+Woerter gerendert, **0** Drittanbieter-Hosts, **0** Konsolenfehler, **0**
+fehlgeschlagene Requests, kein horizontaler Ueberlauf bei 390/768/1024/1440,
+keine kaputten Links, keine fehlenden Anker, keine doppelten IDs.
+`node tools/verify_site.mjs` → **all checks passed**.
+
+**Die Zustellung des Kontaktformulars ist bewiesen:** ein echter Browser
+bekommt HTTP 200, eine Testnachricht liegt in `info@mccain-digital.com`
+(12.9.). Ein **headless** Browser wird von Cloudflare mit 403 abgewiesen — und
+genau dann zeigt die Seite ihren ehrlichen Fehler statt „gesendet".
+`MCD_HEADED=1 node tools/form_probe.mjs` fuer den Ende-zu-Ende-Beweis.
 
 ---
 
-## ▶ WO ES WEITERGEHT — Polishing (Owner-Ansage 11.9., nach dem Compact)
+## ⛔ WEITERHIN: `mccain-digital.com` liefert NICHT diesen Stand
 
-Der Bau steht. Was aussteht, sind **Inhalts-Entscheidungen und Feinschliff**,
-nicht Technik. Reihenfolge nach Dringlichkeit:
+Unveraendert seit dem 11.9. und **nicht** durch diesen Import beruehrt: die
+Domain zeigt auf nginx/SiteGround und liefert die englische v2 vom 21. Juni,
+**indexiert**. Das Vercel-Projekt `mccain-digital` traegt nur seine
+`*.vercel.app`-Domains. `node tools/domain_check.mjs` stellt die Frage direkt.
 
-### 1. Die „4×100 Lighthouse"-Aussage ist falsch — DRINGEND
+Wo in diesem Dokument „live" steht, ist `mccain-digital.vercel.app` gemeint.
 
-Sie steht als Projektkarten-Aussage über die **eigene** Seite auf der Startseite.
-Gemessen (Lighthouse Desktop, lokale Produktionsheader): **Startseite 68**,
-gebunden an 1.493 ms Skriptauswertung für ~2.140 React-Elemente. Die Zahl stammt
-vom v3-Build.
+**Die Reihenfolge beim Umschalten bleibt:** erst `site.config.json` auf
+`"noindex": false` **und** den `X-Robots-Tag` aus `vercel.json` nehmen, neu
+bauen, `node tools/verify_site.mjs` — **dann** die Domain umhaengen. Eine
+indexierte Domain auf eine noindex-Seite zu zeigen, heisst Google zu bitten,
+sie aus dem Index zu nehmen.
 
-Das ist eine unzutreffende Tatsachenbehauptung auf einer Werbeseite, unabhängig
-vom Livegang. Zu tun: Stelle in `content.json` bzw. im Komponenten-Skript
-suchen, dem Owner zwei bis drei ehrliche Formulierungen vorschlagen (die
-**Unterseiten** liegen tatsächlich bei 100/100/100 — das ist eine wahre und
-starke Aussage), die gewählte einbauen über `tools/patch_export.py`.
+---
 
-### 2. Die Logo-Reihe im Hero
+## ▶ NOINDEX BLEIBT AN — Owner-Ansage 12.9.
 
-Deutsche Bank, Apple, Microsoft, Blizzard, Deutsches Museum, Ravensburger,
-Travian, AOK — direkt über einer Sektion, die „Was Kunden sagen – **sobald sie
-es dürfen**" heißt. Die `readme.md` des Design-Systems sagt selbst, Beispiele
-seien „illustrativ, nie Kundenreferenzen". Sind das keine freigegebenen Kunden,
-ist das in DE ein Abmahn-Risiko. **Owner-Entscheidung, kein Code.**
+> „die seite bitte vorerst auf no index stellen, wir müssen wenn alles fertig
+> ist noch alle texte überarbeiten und recall fertig machen"
 
-### 3. „Tech-Notizen" zeigt auf `#`
+`site.config.json` steht auf `noindex: true`, jede der 21 Seiten traegt das
+Meta-Tag, `vercel.json` schickt zusaetzlich den Header. Nicht anfassen, bis die
+beiden Punkte unten erledigt sind.
 
-Toter Platzhalter in der Fußzeile. Entweder den Eintrag entfernen (eine Zeile in
-`patch_export.py`) oder die Seite bauen. Owner wählt.
+---
 
-### 4. Kam die Prüfnachricht an?
+## ▶ WAS JETZT AUSSTEHT
 
-Im Postfach `info@mccain-digital.com` sollte „[AUTOMATISCHE PRUEFUNG]
-Kontaktformular mccain-digital.com" liegen. Die API meldete `success: true`.
-**Kommt sie nicht an, stimmt etwas an der Web3Forms-Zustellung** — dann ist das
-der nächste Bug, nicht Polishing.
+### 1. Alle Texte ueberarbeiten (Owner-Ansage)
 
-### 5. Noch nicht gebaut
+Die Texte kommen aus dem Design-Export. Beim Import sind drei Stellen
+aufgefallen, die **inhaltlich** und nicht nur stilistisch falsch sind:
 
-Eine **About-Seite** und **Projektseiten — die erste für whatever-recall**, dessen
-Inhalt und URL hierher geholt werden sollen. Beides mit `tools/pagekit.py` +
-`tools/build_pages.py`, genau wie die Leistungsseiten. Für recall muss der Owner
-sagen, welcher Inhalt von `whatever-recall.com` herüberkommt.
+- **`/news/`, `/news/md-recall/`, `/marke/` haben geliehene Descriptions.** Ich
+  habe sie aus dem jeweiligen Hero-Text der Seite ersetzt (in `PAGES` in
+  `tools/prerender.mjs`, als `meta`-Ueberschreibung markiert). Das ist korrekt,
+  aber es ist Werbetext — beim Textdurchgang bitte selbst formulieren.
+- **„4×100" steht immer noch im Hintergrundtext** (`mccain-digital.com · 4×100`
+  im Datenstrom der Hero-Sektion). Gemessen wurde das nie fuer diesen Build.
+  Die **Unterseiten** lagen im v3-Build tatsaechlich bei 100/100/100 — das ist
+  eine wahre und starke Aussage; die Startseite lag bei 68.
+- **Die Logo-Reihe im Hero** (Deutsche Bank, Apple, Microsoft, Blizzard,
+  Deutsches Museum, Ravensburger, Travian, AOK) steht weiterhin ueber einer
+  Sektion, die „sobald sie es duerfen" heisst. Sind das keine freigegebenen
+  Kunden, ist das in DE ein Abmahnrisiko. **Owner-Entscheidung, kein Code.**
 
-### 6. Bewusst liegen gelassen (Fremd-Markup, Risiko)
+### 2. md-recall fertigmachen (Owner-Ansage)
 
-- Der Startseite fehlt ein `<main>`-Landmark → A11y 99 statt 100. `role="main"`
-  auf `#dc-root` wäre **falsch**, dort stehen Kopf- und Fußzeile mit drin.
-- Der Brand Guide liegt bei A11y 91: Bilder ohne `width`/`height`, Kontraste,
-  Links im Fließtext ohne nicht-farbliche Unterscheidung.
+`/md-recall/` hat **10 leere Bildslots** (`<image-slot>` mit Platzhaltertext:
+„Editor · Die Begruendung steht, wo der Code steht", „CLI · md-recall why", …).
+Da gehoeren Screenshots hinein. Der Slot-Mechanismus ist eine
+Claude-Design-Canvas-Komponente — auf einer ausgelieferten Seite kann man dort
+nichts ablegen. Die Bilder muessen also **im Export** gesetzt werden, oder die
+Slots werden durch normale `<img>` ersetzt.
 
-Wenn das gemacht wird, gehört es in `tools/patch_export.py`, sonst verschluckt
-es der nächste Export.
+### 3. Kleinere offene Punkte
 
-### Zustände, die eine neue Sitzung braucht
-
-- `python prodserve.py 8898 --dev` — **muss laufen**, der Build rendert darüber
-- `python prodserve.py 8897` — nur zum **Messen** (Lighthouse), Produktionsheader
-- Arbeitsbaum sauber, `main` = `origin/main`
-- Pflicht vor jedem Push: `node tools/verify_site.mjs`
-- Und: `node tools/domain_check.mjs` — fällt durch, bis die Domain umgehängt ist.
-  Das ist gewollt und kein Defekt.
+- **„Tech-Notizen" in der Fusszeile** zeigt weiterhin auf `#`. Immerhin
+  ehrlich: der Eintrag ist `soon: true` und faengt den Klick ab. Entweder Seite
+  bauen oder Eintrag entfernen — Owner waehlt.
+- **Die KI-Konsole antwortet lokal.** Sie ruft `window.claude.complete` auf,
+  das es nur im Design-Canvas gibt, und faellt sauber auf eine eingebaute
+  Antwort zurueck. Das alte `api/ask.js` ist mit nach `archive/old3/`
+  gewandert: es verlangte `../data.js`, die es am Wurzelverzeichnis seit dem
+  Umzug nicht mehr gab — der Endpunkt war also ohnehin tot. Wer die Konsole
+  echt haben will, verdrahtet `window.claude.complete` auf eine neue Funktion.
+- **`brand/mccain-og-marke.png`** war im Export nicht enthalten und wird jetzt
+  aus `mccain-og-light.svg` gerendert. Wenn die Markenseite ein eigenes
+  Social-Bild bekommen soll, gehoert es in den Export.
 
 ---
 
