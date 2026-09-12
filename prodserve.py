@@ -70,8 +70,17 @@ class Handler(SimpleHTTPRequestHandler):
 
     def end_headers(self):
         path = self.path.split("?")[0]
-        for key, value in SECURITY_HEADERS:
-            self.send_header(key, value)
+        # NOT ON THE EXPORT. The policy describes the BUILT site; the artboards
+        # under /mccain-design-system/ are the build's input and still load
+        # React from unpkg and the fonts from Google, the way Claude Design
+        # wrote them. Sending them the site's CSP blocked both, the component
+        # never mounted, and tools/prerender.mjs failed on every page - the
+        # exact "a wrong CSP kills it silently" shape, aimed at our own build.
+        # Vercel never sees this folder either: it is not deployed, and
+        # verify_site asserts it answers 404.
+        if not path.startswith("/mccain-design-system/"):
+            for key, value in SECURITY_HEADERS:
+                self.send_header(key, value)
         if self.dev:
             # no-store, not no-cache: no-cache still stores and revalidates,
             # and a 304 off a stale Last-Modified is exactly the failure mode

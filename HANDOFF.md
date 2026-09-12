@@ -162,8 +162,9 @@ unberührt.
 
 Gemessen, nicht geschätzt — pro Seite:
 
-- **„Tech-Notizen" → `#`**, im Kopfmenü *und* in der Fußzeile, auf **allen 21
-  Seiten**. Trägt ehrlich ein „Bald"-Schild. Seite bauen oder Eintrag weg.
+- ~~„Tech-Notizen" → `#`~~ — **erledigt 12.9.**, Owner: „tech notizen kann raus,
+  das machen wir eh nicht". Eintrag aus Menü **und** Fußzeile entfernt, nicht nur
+  der Link. Tote Anker im SEO-Befund **23 → 4**.
 - **`/news/` zeigt drei Artikel, zwei davon zeigen auf `#`** („Warum der…",
   „Zwei Personen…"). Nur `md-recall` existiert.
 - **`/md-recall/`: „Repository öffnen" → `#`.** Eine URL zu raten ist genau das,

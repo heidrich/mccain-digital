@@ -738,6 +738,44 @@ const MARK_TO = "mark(size, v, mode) {\n    const t = this.tileFree(size, v, 'st
 const NAVLOOP_FROM =
   "this.navLoopT = setTimeout(() => { if (this.mounted) this.setState({ navLoop: true }); }, 1600);";
 
+/* "TECH-NOTIZEN" POINTED AT '#', IN THE MEGA MENU AND IN THE FOOTER, ON ALL 21
+ * PAGES.
+ *
+ * It carried a "Bald" badge and an onClick that swallowed the click, so it was
+ * at least honest - but it was still two links per page that go nowhere, and
+ * they were 42 of the 46 dead anchors tools/seo_audit.mjs found.
+ *
+ * Owner 12.9.2026: "tech notizen kann raus, das machen wir eh nicht". So the
+ * entries are removed rather than pointed somewhere: a menu with one fewer row
+ * is a menu, a link to a page that will never exist is a promise.
+ *
+ * Removed from the resource list and the footer column the export builds them
+ * from, so the row disappears with its icon, its text and its badge - not just
+ * its href. The prerendered copy is dealt with in snapshot(), because it is
+ * captured before any of this runs. */
+const NOTES_MENU_FROM =
+  "{ icon: this.icon('book', 18), title: t.menus.resNotes, text: t.menus.resNotesText, " +
+  "soon: true, href: '#', target: '_self', onClick: (e) => e.preventDefault() },";
+const NOTES_FOOT_FROM =
+  "{ label: t.footer.notes, href: '#', target: '_self', onClick: (e) => e.preventDefault() },";
+
+/* What the removed rows say, in both languages - the snapshot is matched on the
+ * visible text because that is all a settled DOM still carries. */
+const NOTES_LABELS = ["Tech-Notizen", "Tech notes"];
+
+function dropTechNotes(script, name) {
+  for (const [what, lit] of [["menu", NOTES_MENU_FROM], ["footer", NOTES_FOOT_FROM]]) {
+    const n = script.split(lit).length - 1;
+    if (n !== 1) {
+      throw new Error(
+        `prerender: expected exactly one Tech-Notizen ${what} entry in ${name}, found ${n}. ` +
+          `The export changed shape - re-read it and update NOTES_${what.toUpperCase()}_FROM.`
+      );
+    }
+  }
+  return { script: script.split(NOTES_MENU_FROM).join("").split(NOTES_FOOT_FROM).join("") };
+}
+
 function stillMark(script, name) {
   const marks = script.split(MARK_FROM).length - 1;
   if (marks !== 1) {
@@ -1007,11 +1045,33 @@ async function snapshot(page) {
    * base value the static mode leaves them at, so clearing the declaration
    * reproduces static exactly rather than approximating it. viewBox
    * "0 0 64 64" is the mark and nothing else: the export uses it in one place. */
-  return await page.evaluate(() => {
+  const swept = await page.evaluate((labels) => {
     const cells = document.querySelectorAll('svg[viewBox="0 0 64 64"] rect');
     for (const c of cells) c.style.animation = "none";
-    return cells.length;
-  });
+
+    /* The same rows dropTechNotes() takes out of the script, in case the
+     * settled markup carries them too - matched on visible text, because that
+     * is all a rendered DOM still has. Whole row, not just the href: the menu
+     * entry is an <a> holding an icon, a title and a "Bald" badge. */
+    let notes = 0;
+    for (const a of document.querySelectorAll('a[href="#"], a[href=""]')) {
+      const t = (a.textContent || "").trim();
+      if (labels.some((l) => t === l || t.startsWith(l + " "))) {
+        a.remove();
+        notes++;
+      }
+    }
+    return { cells: cells.length, notes };
+  }, NOTES_LABELS);
+
+  /* Measured: today this finds ZERO, and that is correct - the resource list
+   * and the footer column are built by the component at runtime, so those two
+   * rows exist only in React's render and never in the settled copy. The sweep
+   * stays as the other half of the fix rather than as dead code: if a future
+   * export prerenders them, they go here too and the build says how many. An
+   * assertion on a specific count would be asserting which half of the export
+   * happens to render them, which is not a thing worth pinning. */
+  return swept;
 }
 
 async function grab(page, pinned, name) {
@@ -1069,7 +1129,7 @@ for (const page of PAGES) {
   if (!fs.existsSync(srcFile)) throw new Error(`prerender: ${page.src} is not in the export`);
 
   const tab = await open(context, `${EXPORT_URL}/${encodeURIComponent(page.src)}`);
-  const stilledCells = await snapshot(tab);
+  const stilled = await snapshot(tab);
   const snap = await grab(tab, page.h1, page.src);
   await tab.close();
 
@@ -1086,7 +1146,8 @@ for (const page of PAGES) {
   if (meta.canonicalWasWrong) fixedCanonicals++;
 
   const wired = wireForms(localise(scriptTag[0]), page.src);
-  const still = stillMark(wired.script, page.src);
+  const notes = dropTechNotes(wired.script, page.src);
+  const still = stillMark(notes.script, page.src);
   const icons = fixIconGallery(still.script);
   const helmet = stripHelmetSeo(localise(template), page.src);
   const preTiles = fixTileRoles(localise(snap.body));
@@ -1165,7 +1226,8 @@ ${SWAP}
   console.log(
     `  ${page.route.padEnd(44)} ${String(snap.words).padStart(5)} words  ${String(snap.els).padStart(5)} els  ${String(Math.round(html.length / 1024)).padStart(4)} KB` +
       `  ${wired.forms} form${wired.forms === 1 ? " " : "s"} wired` +
-      `  ${stilledCells} mark cells stilled` +
+      `  ${stilled.cells} mark cells stilled` +
+      (stilled.notes ? `  ${stilled.notes} dead "Tech-Notizen" swept from the snapshot` : "") +
       `  ${helmet.stripped} helmet meta dropped` +
       (tiles ? `  ${tiles} tile roles fixed` : "") +
       (anchors.fixed ? `  ${anchors.fixed} anchors → /` : "") +
