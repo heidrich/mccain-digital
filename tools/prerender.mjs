@@ -902,7 +902,7 @@ const MARKIMG_TO =
   "        return '<rect x=\"' + c.x + '\" y=\"' + c.y + '\" width=\"' + c.s + '\" height=\"' + c.s + '\" rx=\"' + c.r + '\" fill=\"' + c.fill + '\"' + (c.o == null ? '' : ' fill-opacity=\"' + c.o + '\"') + '/>';\n" +
   "      }).join('') + '</svg>';\n" +
   "    }\n" +
-  "    return React.createElement('img', { src: '/brand/mark-' + key + '.svg', width: t.size, height: t.size, alt: '', 'aria-hidden': 'true', decoding: 'async', style: { display: 'block', flex: 'none' } });\n" +
+  "    return React.createElement('img', { src: '/brand/mark-' + key + '.svg', width: t.size, height: t.size, alt: '', 'aria-hidden': 'true', fetchPriority: 'high', style: { display: 'block', flex: 'none' } });\n" +
   "  }\n";
 
 function markToFile(script, name) {
@@ -914,6 +914,38 @@ function markToFile(script, name) {
     );
   }
   return { script: script.split(MARKIMG_FROM).join(MARKIMG_TO) };
+}
+
+/* THE CONSENT NOTICE HAD A GRADIENT BORDER THAT SCROLLED FOREVER.
+ *
+ * Owner 13.9.2026, reading Lighthouse's "Nicht zusammengesetzte Animationen":
+ * "nimm den mal bei dem cookie banner raus, den brauchen wir da eh nicht".
+ *
+ * It was the worst placement of the five: `animation: streamBorder 8s linear
+ * infinite` on an element that is also `position: fixed`, so it kept a
+ * composited layer alive and repainted for the whole life of the page - and
+ * `background-position` cannot be composited at all, which is exactly what
+ * Lighthouse named it for.
+ *
+ * The gradient itself STAYS. Only the scrolling stops: the border keeps its
+ * colours, the panel keeps its fadeUp entrance. Nothing about the design
+ * changes except that a decoration nobody watches stops burning frames.
+ *
+ * The other four (the three inputs and the pill) are left alone on purpose -
+ * they are small, they sit where someone is looking, and the owner asked for
+ * this one. */
+const CONSENT_ANIM_FROM = "animation: streamBorder 8s linear infinite, fadeUp";
+const CONSENT_ANIM_TO = "animation: fadeUp";
+
+function calmConsent(template, name) {
+  const n = template.split(CONSENT_ANIM_FROM).length - 1;
+  if (n !== 1) {
+    throw new Error(
+      `prerender: expected exactly one animated consent border in ${name}, found ${n}. ` +
+        `The export changed the notice - re-read it and update CONSENT_ANIM_FROM.`
+    );
+  }
+  return { template: template.split(CONSENT_ANIM_FROM).join(CONSENT_ANIM_TO), calmed: n };
 }
 
 /* NO PAGE HAD A <main>.
@@ -1376,7 +1408,8 @@ for (const page of PAGES) {
   const marks = markToFile(still.script, page.src);
   const icons = fixIconGallery(marks.script);
   const helmet = stripHelmetSeo(localise(template), page.src);
-  const tplTiles = fixTileRoles(helmet.template);
+  const calm = calmConsent(helmet.template, page.src);
+  const tplTiles = fixTileRoles(calm.template);
   const anchors = fixAnchors({ template: tplTiles.html, script: icons.script });
   const tiles = tplTiles.fixed;
   const templateLocal = wrapMain(anchors.template, page.src, "template");
@@ -1388,6 +1421,21 @@ for (const page of PAGES) {
    * trees agree. Wrapping the rendered markup instead would insert an element
    * React does not know about, and hydration would reject the whole page. */
   const prerendered = await ssrRender({ head, template: templateLocal, script }, page.src);
+
+  /* THE MARK IN THE HEADER IS AN LCP CANDIDATE, AND IT IS A REQUEST NOW.
+   *
+   * Turning 146 nodes into one <img> traded DOM for a fetch, and PageSpeed put
+   * a number on that trade: 170 ms of "resource load delay" before the browser
+   * even starts it, because it cannot see the tag until the parser reaches the
+   * header. Preloading the FIRST mark the page renders - the one in the header -
+   * removes the delay. Only that one: preloading the marks further down would
+   * take priority away from the one above the fold. The file is 15 KB raw and
+   * 1.283 B on the wire, so this costs nothing and is shared by all 21 pages. */
+  const firstMark = /\/brand\/mark-[\w-]+\.svg/.exec(prerendered);
+  const headWithMark = firstMark
+    ? head + `
+<link rel="preload" as="image" href="${firstMark[0]}" fetchpriority="high">`
+    : head;
   assertClean(head + prerendered + templateLocal + script, page.out);
   assertNoExportLinks(head + prerendered + templateLocal + script, page.out);
 
@@ -1408,7 +1456,7 @@ for (const page of PAGES) {
      If React never arrives, the markup simply stays and the page is readable. -->
 <html lang="de">
 <head>
-${head}
+${headWithMark}
 <script src="/support.js" defer></script>
 <script src="/motion-budget.js" defer></script>
 </head>
