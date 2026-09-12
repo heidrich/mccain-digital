@@ -2,7 +2,8 @@
 <!-- GENERATED - do not edit by hand.  python tools/build_pages.py
 
      Copy comes from content.json ('web') and from the rendered start page
-     via internal/design-reference.json. Editing this file is lost work. -->
+     via internal/design-reference.json. Editing this file is lost work.
+     Section order for this page: hero -> signature -> cases -> caps -> stack -> steps -> faq -> rel -->
 <html lang="de">
 <head>
 <meta charset="utf-8">
@@ -27,18 +28,34 @@
 <link rel="preload" href="../fonts/instrument-sans-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../fonts/jetbrains-mono-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../fonts/fonts.css">
+<script>(function(d){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;var c=d.documentElement.classList;c.add('mcd-pre');setTimeout(function(){c.remove('mcd-pre')},2500)})(document)</script>
 <style>
+:root{--acc:#635BFF;--acc-soft:rgba(99,91,255,.10);--acc-ring:rgba(99,91,255,.28);
+  --acc-text:#4d47c7;--ink:#0A2540;--body:#425466;--muted:#626F8A;--rule:#E3E8EE;
+  --tint:#F6F9FC;--navy:#0A1F44;--navy-ink:#C5D0F5;
+  /* the chrome's own five, read off the start page with the rest */
+  --muted2:#727F96;--navy-mut:#8DA2E0;--dock:#10285A;--dock-in:#0F2456;
+  --nav-h:72px;
+  --ease:cubic-bezier(.2,.8,.2,1);--ease-out:cubic-bezier(.16,1,.3,1)}
 *,*::before,*::after{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
-body{margin:0;background:#fff;color:#0A2540;
+/* The six nav triggers are <button>s. Without this they render as boxed
+   controls with the platform border, which is exactly what they looked like
+   the first time the real header was pasted in. */
+button{font:inherit;color:inherit;background:none;border:0;padding:0;
+  cursor:pointer;text-align:inherit}
+input,textarea,select{font:inherit}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;
+  scrollbar-color:var(--acc) var(--tint)}
+body{margin:0;background:#fff;color:var(--ink);
   font-family:'Instrument Sans',system-ui,-apple-system,sans-serif;
-  font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;
+  overflow-x:hidden}
 img{max-width:100%;height:auto}
 ::selection{background:rgba(99,91,255,.22)}
-a{color:#4D47C7;text-decoration:none}
-a:hover{color:#0A2540;text-decoration:underline}
-:focus-visible{outline:2px solid #635BFF;outline-offset:2px;
-  box-shadow:0 0 0 4px rgba(99,91,255,.28);border-radius:4px}
+a{color:var(--acc-text);text-decoration:none}
+a:hover{color:var(--ink);text-decoration:underline}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px;
+  box-shadow:0 0 0 4px var(--acc-ring);border-radius:4px}
 h1,h2,h3,h4,p,ul,ol,figure{margin:0}
 /* A link inside running text must be tellable apart WITHOUT colour - measured
    as "Links rely on color to be distinguishable" on every page that has one.
@@ -46,159 +63,686 @@ h1,h2,h3,h4,p,ul,ol,figure{margin:0}
    text blocks, and underlining them would just be noise. */
 main p a,main li a,.faq p a{text-decoration:underline;
   text-underline-offset:2px;text-decoration-thickness:1px}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--tint)}
+::-webkit-scrollbar-thumb{background:var(--acc);border-radius:999px;
+  border:2px solid var(--tint)}
 
-.skip{position:absolute;left:-9999px;top:0;z-index:20;background:#fff;
-  padding:12px 18px;border-radius:8px;box-shadow:0 0 0 1px #E3E8EE}
+.skip{position:absolute;left:-9999px;top:0;z-index:60;background:#fff;
+  padding:12px 18px;border-radius:8px;box-shadow:0 0 0 1px var(--rule)}
 .skip:focus{left:16px;top:16px}
 
-/* ---------------------------------------------------------------- chrome */
-header.site{position:sticky;top:0;z-index:10;min-height:72px;display:flex;
-  align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
-  padding:10px clamp(20px,4vw,48px);
-  background:rgba(255,255,255,.92);backdrop-filter:blur(14px);
-  box-shadow:0 1px 0 #E3E8EE}
-.lockup{display:flex;align-items:center;gap:12px;color:#0A2540;font-weight:600;
-  font-size:17px;letter-spacing:-.02em}
-.lockup:hover{text-decoration:none;color:#0A2540}
-.lockup img{display:block}
-.lockup .sep{color:#C6CEDA;font-weight:400}
-.lockup .kind{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;
-  letter-spacing:.06em;color:#626F8A;font-weight:400}
-.hnav{display:flex;align-items:center;gap:clamp(12px,2vw,24px);flex-wrap:wrap;
-  font-size:15px;font-weight:500}
-.hnav a{color:#425466}
-.hnav a:hover{color:#0A2540;text-decoration:none}
-.hnav a[aria-current]{color:#0A2540;font-weight:600}
+/* Reveal targets are hidden by a class the inline head script adds, never by a
+   stylesheet - so with JavaScript off, or if reveal.js fails to load, the page
+   is complete rather than blank. The previous site had it the other way round. */
+.mcd-pre [data-reveal]{opacity:0}
+/* ...but never the fold. A [data-reveal] inside the hero delays First
+   Contentful Paint by however long the deferred script takes to run - measured
+   on services/ai-tools.html at 1012 ms (1192 -> 180). The hero is painted, not
+   revealed; its motion is the gradient stream, which costs no paint delay
+   because the canvas is empty in the HTML. */
+.mcd-pre .hero [data-reveal]{opacity:1}
+
 .btn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 20px;
-  border-radius:999px;background:#635BFF;color:#fff;font-weight:600;font-size:15px;
+  border-radius:999px;background:var(--acc);color:#fff;font-weight:600;font-size:15px;
   border:0;cursor:pointer;transition:background .2s,transform .2s}
 .btn:hover{background:#7A73FF;color:#fff;text-decoration:none;transform:translateY(-1px)}
-.btn.ghost{background:#fff;color:#0A2540;box-shadow:0 0 0 1px #E3E8EE}
-.btn.ghost:hover{background:#F6F9FC;color:#0A2540}
+/* The start page's ghost-on-white: accent text inside an accent hairline, not a
+   grey-ringed white box. Hover tightens the ring to full accent and lifts. */
+.btn.ghost{background:rgba(255,255,255,.9);color:var(--acc-text);
+  box-shadow:inset 0 0 0 1px rgba(99,91,255,.35)}
+.btn.ghost:hover{background:rgba(255,255,255,.9);color:var(--acc-text);
+  box-shadow:inset 0 0 0 1px var(--acc);transform:translateY(-1px)}
+/* 999px = "go somewhere", 8px = "do something here". Both exist on the start
+   page and the distinction is deliberate. */
+.btn.square{border-radius:8px}
 
 /* ---------------------------------------------------------------- layout */
 main{display:block}
-.wrap{max-width:1120px;margin:0 auto;padding:0 clamp(20px,4vw,48px)}
-.prose{max-width:720px}
-section.band{padding:clamp(52px,7vw,104px) 0}
-section.band.tint{background:#F6F9FC;box-shadow:0 1px 0 #E3E8EE inset,0 -1px 0 #E3E8EE inset}
-.crumb{font-size:13px;color:#626F8A;margin:0 0 18px}
-.crumb a{color:#626F8A}
-.crumb b{color:#0A2540;font-weight:600}
+.wrap{max-width:1440px;margin:0 auto;padding:0 clamp(20px,4vw,48px)}
+.prose{max-width:760px}
+section.band{padding:clamp(72px,8vw,120px) 0;scroll-margin-top:72px;
+  position:relative}
+section.band.wide{padding:clamp(96px,10vw,150px) 0}
+/* The start page never paints a full-width grey stripe. Its tint is a soft
+   radial wash that fades in and out, sitting behind the content. */
+section.band.tint::before{content:"";position:absolute;inset:0;z-index:-2;
+  pointer-events:none;
+  background:radial-gradient(55% 60% at 100% 0%, rgba(255,180,107,.12), transparent 60%),
+    radial-gradient(50% 50% at 0% 100%, rgba(95,195,255,.12), transparent 60%),
+    linear-gradient(180deg, rgba(246,249,252,0) 0%, var(--tint) 22%,
+      var(--tint) 78%, rgba(246,249,252,0) 100%)}
+.crumb{font-size:13px;color:var(--muted);margin:0 0 18px}
+.crumb a{color:var(--muted)}
+.crumb b{color:var(--ink);font-weight:600}
 .crumb i{font-style:normal;padding:0 8px;color:#C6CEDA}
-.eyebrow{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;
-  letter-spacing:.06em;color:#4D47C7;margin:0 0 14px;text-transform:uppercase}
+.eyebrow{font-size:15px;font-weight:600;color:var(--acc-text);margin:0 0 10px}
 
-h1{font-size:clamp(34px,5vw,58px);line-height:1.05;letter-spacing:-.04em;
+h1{font-size:clamp(34px,4.9vw,74px);line-height:1.04;letter-spacing:-.04em;
   font-weight:600;text-wrap:balance}
-h2{font-size:clamp(27px,3.3vw,42px);line-height:1.12;letter-spacing:-.03em;
+h2{font-size:clamp(30px,3.6vw,48px);line-height:1.1;letter-spacing:-.03em;
   font-weight:700;text-wrap:balance}
-h3{font-size:clamp(18px,1.7vw,23px);line-height:1.2;letter-spacing:-.025em;
+h3{font-size:clamp(22px,1.7vw,27px);line-height:1.2;letter-spacing:-.025em;
   font-weight:600;text-wrap:balance}
-.lead{font-size:clamp(18px,1.6vw,21px);line-height:1.55;color:#425466;
-  margin:20px 0 0;text-wrap:pretty}
-p{color:#425466;text-wrap:pretty}
-.kicker{color:#626F8A;margin:12px 0 0;font-size:17px}
-.head{margin:0 0 clamp(28px,4vw,52px)}
+.lead{font-size:18px;line-height:1.6;color:var(--body);margin:18px 0 0;
+  text-wrap:pretty}
+p{color:var(--body);text-wrap:pretty}
+.kicker{color:var(--body);margin:16px 0 0;font-size:18px}
+.kicker.small{font-size:15px;color:var(--muted)}
+.head{margin:0 0 clamp(34px,4.5vw,58px)}
 
-/* ----------------------------------------------------------- components */
+/* --------------------------------------------------------------- artwork */
+/* ONE canvas for the whole document, exactly as the start page carries it
+   (index.html: <canvas data-global> position:fixed inset:0 z-index:-1
+   pointer-events:none image-rendering:pixelated). The first version of this
+   file put a small bounded canvas inside the hero instead, with its own curve
+   - and the owner saw immediately what that was: "der datenstrohm geht in die
+   falsche richtung". It was not a wrong direction, it was a different object.
+   The start page's ribbon is ONE S-curve travelling through the whole document
+   as you scroll; a box in the hero cannot be that. */
+.pagestream{position:fixed;inset:0;width:100%;height:100%;display:block;
+  z-index:-1;pointer-events:none;image-rendering:pixelated}
+
+/* ------------------------------------------------------------------ hero */
+.hero{position:relative;padding:clamp(48px,6vw,84px) 0 clamp(56px,7vw,96px);
+  scroll-margin-top:72px}
+.hero-grid{display:grid;gap:clamp(28px,4vw,56px);align-items:center;
+  grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)}
+@media (max-width:980px){.hero-grid{grid-template-columns:minmax(0,1fr)}}
+.hero-copy{min-width:0}
+.hero-viz{min-width:0;justify-self:end;width:100%;max-width:520px}
+@media (max-width:980px){.hero-viz{justify-self:start;max-width:100%}}
 .actions{display:flex;flex-wrap:wrap;gap:12px;margin:30px 0 0}
 
-.stats{display:grid;gap:18px;margin:44px 0 0;
-  grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
-.stat{background:#fff;border-radius:16px;padding:22px 24px;
-  box-shadow:0 0 0 1px #E3E8EE,0 1px 2px rgba(10,37,64,.04)}
+/* ----------------------------------------------------------------- stats */
+.stats{display:grid;gap:16px;margin:clamp(34px,4vw,52px) 0 0;
+  grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr))}
+.stat{background:#fff;border-radius:16px;padding:20px 22px;
+  box-shadow:0 0 0 1px var(--rule),0 1px 2px rgba(10,37,64,.04);
+  transition:transform .45s var(--ease),box-shadow .45s var(--ease)}
+.stat:hover{transform:translateY(-4px);
+  box-shadow:0 0 0 1px var(--rule),0 34px 70px -30px rgba(10,37,64,.28)}
 .stat b{display:block;font-size:clamp(26px,2.6vw,34px);line-height:1.1;
-  letter-spacing:-.03em;font-weight:700;color:#0A2540}
-.stat span{display:block;margin-top:8px;font-size:15px;color:#425466}
+  letter-spacing:-.03em;font-weight:700;color:var(--ink);
+  font-variant-numeric:tabular-nums}
+.stat span{display:block;margin-top:6px;font-size:15px;color:var(--body)}
 
-.grid{display:grid;gap:18px;
-  grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
-.card{background:#fff;border-radius:16px;padding:26px;
-  box-shadow:0 0 0 1px #E3E8EE,0 1px 2px rgba(10,37,64,.04)}
+/* ----------------------------------------------------------------- cards */
+.grid{display:grid;gap:20px;
+  grid-template-columns:repeat(auto-fit,minmax(min(290px,100%),1fr))}
+.grid.two{grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr))}
+.card{position:relative;background:#fff;border-radius:16px;padding:26px;
+  box-shadow:0 0 0 1px var(--rule),0 1px 2px rgba(10,37,64,.04);
+  transition:transform .45s var(--ease),box-shadow .45s var(--ease)}
+.card:hover{transform:translateY(-4px);
+  box-shadow:0 0 0 1px var(--rule),0 34px 70px -30px rgba(10,37,64,.28)}
 .card h3{margin:0 0 10px}
-.card p{margin:0;font-size:16px}
-.tag{display:inline-block;font-family:'JetBrains Mono',ui-monospace,monospace;
-  font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#4D47C7;
-  background:rgba(99,91,255,.10);border-radius:999px;padding:5px 10px;margin:0 0 14px}
-.out{margin:14px 0 0;font-size:15px;color:#0A2540;font-weight:600;
-  display:flex;gap:8px;align-items:flex-start}
-.out::before{content:"→";color:#635BFF;flex:none}
+.card p{margin:0;font-size:15px}
+/* The stack pill, as the start page draws it: sans, ink, tint, inset hairline.
+   The mono-uppercase version was a v3 idiom and is gone from the start page. */
+.tag{display:inline-block;font-size:11px;font-weight:600;color:var(--ink);
+  background:var(--tint);box-shadow:inset 0 0 0 1px var(--rule);
+  border-radius:999px;padding:4px 10px;margin:0 0 14px}
+.out{margin:14px 0 0;font-size:15px;color:var(--ink);font-weight:600;
+  display:flex;gap:10px;align-items:flex-start}
+.out::before{content:"";flex:none;width:22px;height:22px;border-radius:7px;
+  background:var(--acc-soft);color:var(--acc-text);margin-top:1px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234d47c7' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+  background-size:13px;background-position:center;background-repeat:no-repeat}
 
-.steps{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
-.step{position:relative;background:#fff;border-radius:16px;padding:26px;
-  box-shadow:0 0 0 1px #E3E8EE,0 1px 2px rgba(10,37,64,.04)}
-.step .n{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;
-  letter-spacing:.08em;color:#635BFF;font-weight:500;display:block;margin:0 0 12px}
+/* the bloom - the one component that makes the four pages different */
+.bloom{position:absolute;inset:-40%;opacity:.9;pointer-events:none;
+  border-radius:inherit}
+.bloom i{position:absolute;inset:0;display:block;will-change:transform}
+.bloom i:first-child{animation:flowA 26s ease-in-out infinite}
+.bloom i:last-child{animation:flowB 32s ease-in-out infinite;opacity:.85}
+@keyframes flowA{0%{transform:translate3d(-7%,-5%,0) scale(1.1)}
+  50%{transform:translate3d(7%,6%,0) scale(1.3)}
+  100%{transform:translate3d(-7%,-5%,0) scale(1.1)}}
+@keyframes flowB{0%{transform:translate3d(6%,7%,0) scale(1.25)}
+  50%{transform:translate3d(-7%,-6%,0) scale(1.05)}
+  100%{transform:translate3d(6%,7%,0) scale(1.25)}}
 
-.chips{display:flex;flex-wrap:wrap;gap:10px;margin:0}
-.chip{list-style:none;font-family:'JetBrains Mono',ui-monospace,monospace;
-  font-size:13px;color:#0A2540;background:#fff;border-radius:8px;padding:8px 12px;
-  box-shadow:0 0 0 1px #E3E8EE}
+/* --------------------------------------------------------------- stepper */
+/* The start page walks its process on a rail with a filling line and numbered
+   dots, not on a flat grid of boxes. */
+.stepper{position:relative;display:grid;gap:0;padding:0;margin:0;
+  grid-template-columns:44px minmax(0,1fr);column-gap:clamp(18px,2.4vw,32px)}
+.stepper::before{content:"";position:absolute;left:21px;top:22px;bottom:22px;
+  width:2px;background:var(--rule);border-radius:2px}
+.stepper .fill{position:absolute;left:21px;top:22px;width:2px;border-radius:2px;
+  background:linear-gradient(180deg,var(--acc),#C05CFF);height:0;
+  transition:height .45s var(--ease)}
+.stepper .n{grid-column:1;justify-self:center;position:relative;z-index:1;
+  width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
+  background:#fff;box-shadow:0 0 0 1px var(--rule);font-size:14px;font-weight:700;
+  color:var(--muted);font-variant-numeric:tabular-nums;
+  transition:background .35s var(--ease),color .35s var(--ease),
+    box-shadow .35s var(--ease)}
+.stepper .st[data-on] .n{background:var(--acc);color:#fff;
+  box-shadow:0 0 0 1px var(--acc),0 10px 22px -10px rgba(99,91,255,.7)}
+.stepper .st{display:contents}
+.stepper .body{grid-column:2;padding:0 0 clamp(28px,3.4vw,44px)}
+.stepper .st:last-child .body{padding-bottom:0}
+.stepper .body h3{margin:8px 0 8px}
+.stepper .body p{font-size:16px;max-width:64ch}
 
-.faq{max-width:820px}
-.faq details{border-bottom:1px solid #E3E8EE;padding:4px 0}
-.faq summary{cursor:pointer;list-style:none;padding:20px 34px 20px 0;
-  font-size:clamp(17px,1.5vw,19px);font-weight:600;color:#0A2540;position:relative;
+/* ----------------------------------------------------------------- chips */
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin:0;padding:0}
+.chip{list-style:none;font-size:13px;font-weight:600;color:var(--ink);
+  background:#fff;border-radius:999px;padding:8px 14px;
+  box-shadow:inset 0 0 0 1px var(--rule);
+  transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+.chip:hover{transform:translateY(-2px);box-shadow:inset 0 0 0 1px var(--acc)}
+
+/* ------------------------------------------------------------------- faq */
+/* One white card, hairline dividers, a plus that turns into an x. <details>
+   keeps it correct with no JavaScript; the script upgrades the open to an
+   animated grid row. */
+.faq{max-width:860px;background:#fff;border-radius:16px;padding:4px 24px;
+  box-shadow:0 1px 2px rgba(10,37,64,.06),0 0 0 1px rgba(10,37,64,.06)}
+.faq details{border-top:1px solid rgba(10,37,64,.08)}
+.faq details:first-of-type{border-top:0}
+.faq summary{cursor:pointer;list-style:none;display:flex;gap:16px;
+  align-items:flex-start;justify-content:space-between;padding:20px 0;
+  font-size:clamp(17px,1.5vw,19px);font-weight:600;color:var(--ink);
   text-wrap:balance}
 .faq summary::-webkit-details-marker{display:none}
-.faq summary::after{content:"";position:absolute;right:6px;top:50%;width:9px;height:9px;
-  border-right:2px solid #8DA2E0;border-bottom:2px solid #8DA2E0;
-  transform:translateY(-70%) rotate(45deg);transition:transform .2s}
-.faq details[open] summary::after{transform:translateY(-30%) rotate(225deg)}
-.faq details p{margin:0 0 20px;font-size:17px;max-width:68ch}
+.faq summary::after{content:"";flex:none;width:26px;height:26px;border-radius:50%;
+  background:#F0F3FA no-repeat center/12px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke='%230A2540' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M12 5v14M5 12h14'/%3E%3C/svg%3E");
+  transition:transform .4s var(--ease),background-color .4s var(--ease)}
+.faq details[open] summary::after{transform:rotate(45deg);background-color:#E3E8F5}
+.faq .a{display:grid;grid-template-rows:1fr;overflow:hidden}
+.faq .a>div{min-height:0}
+.faq details p{margin:0 0 22px;font-size:16px;max-width:68ch}
 
-.rel{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+/* ---------------------------------------------------------------- related */
+.rel{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr))}
 .rel a{display:flex;align-items:center;justify-content:space-between;gap:12px;
-  background:#fff;border-radius:14px;padding:18px 20px;color:#0A2540;font-weight:600;
-  box-shadow:0 0 0 1px #E3E8EE,0 1px 2px rgba(10,37,64,.04);transition:transform .2s}
-.rel a:hover{text-decoration:none;transform:translateY(-2px);color:#4D47C7}
-.rel a span{color:#635BFF}
+  background:#fff;border-radius:16px;padding:18px 20px;color:var(--ink);font-weight:600;
+  box-shadow:0 0 0 1px var(--rule),0 1px 2px rgba(10,37,64,.04);
+  transition:transform .45s var(--ease),box-shadow .45s var(--ease)}
+.rel a:hover{text-decoration:none;transform:translateY(-4px);color:var(--acc-text);
+  box-shadow:0 0 0 1px var(--rule),0 34px 70px -30px rgba(10,37,64,.28)}
+.rel a span{color:var(--acc)}
 
-/* ------------------------------------------------------------------ cta */
-.cta{background:#0A1F44;color:#EEF1FA;border-radius:22px;
-  padding:clamp(34px,5vw,56px);margin:0}
-.cta h2{color:#fff}
-.cta p{color:#C5D0F5;margin:16px 0 0;font-size:18px;max-width:58ch}
-.cta .btn.ghost{background:rgba(255,255,255,.10);color:#fff;box-shadow:0 0 0 1px rgba(255,255,255,.22)}
-.cta .btn.ghost:hover{background:rgba(255,255,255,.18);color:#fff}
+/* ------------------------------------------------------------------- cta */
+.cta{position:relative;overflow:hidden;background:var(--navy);color:#EEF1FA;
+  border-radius:16px;padding:clamp(34px,5vw,64px);margin:0}
+.cta h2{color:#fff;position:relative}
+.cta p{color:var(--navy-ink);margin:16px 0 0;font-size:18px;max-width:58ch;
+  position:relative}
+.cta .actions{position:relative}
+.cta .btn.ghost{background:rgba(255,255,255,.10);color:#fff;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
+.cta .btn.ghost:hover{background:rgba(255,255,255,.18);color:#fff;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.45)}
+.cta .bloom{opacity:.34;mix-blend-mode:screen}
 
 /* ---------------------------------------------------------------- forms */
 .form{display:grid;gap:16px;max-width:560px}
-.form label{display:grid;gap:6px;font-size:13px;font-weight:600;color:#0A2540}
+.form label{display:grid;gap:6px;font-size:13px;font-weight:600;color:var(--ink)}
 .form input,.form textarea,.form select{width:100%;font:inherit;font-size:16px;
-  color:#0A2540;background:#fff;border:1px solid #E3E8EE;border-radius:10px;
+  color:var(--ink);background:#fff;border:1px solid var(--rule);border-radius:10px;
   padding:12px 14px;transition:border-color .2s,box-shadow .2s}
 .form textarea{resize:vertical;min-height:130px}
 .form input:focus,.form textarea:focus,.form select:focus{outline:none;
-  border-color:#635BFF;box-shadow:0 0 0 4px rgba(99,91,255,.28)}
+  border-color:var(--acc);box-shadow:0 0 0 4px var(--acc-ring)}
 .form .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
-.form .hint{font-size:13px;color:#626F8A;font-weight:400}
-.form .note{font-size:13px;color:#626F8A}
-.form .note a{color:#4D47C7}
+.form .hint{font-size:13px;color:var(--muted);font-weight:400}
+.form .note{font-size:13px;color:var(--muted)}
+.form .note a{color:var(--acc-text)}
 #form-status{margin:0;font-size:15px;font-weight:600}
 #form-status[data-state="error"]{color:#B4232A}
 #form-status[data-state="ok"]{color:#0A7C3F}
 
-/* --------------------------------------------------------------- footer */
-footer.site{background:#0A1F44;color:#C5D0F5;
-  padding:clamp(46px,6vw,72px) 0 34px;margin-top:clamp(64px,8vw,110px)}
-footer.site a{color:#C5D0F5}
-footer.site a:hover{color:#fff}
-footer.site a[aria-current]{color:#fff;font-weight:600}
-.fcols{display:grid;gap:32px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
-.fcol h2{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;
-  letter-spacing:.08em;text-transform:uppercase;color:#8DA2E0;font-weight:500;
-  margin:0 0 14px;letter-spacing:.08em}
-.fcol ul{list-style:none;padding:0;margin:0;display:grid;gap:10px;font-size:15px}
-.fbot{display:flex;flex-wrap:wrap;gap:12px 26px;align-items:center;
-  margin-top:38px;padding-top:22px;font-size:14px;
-  border-top:1px solid rgba(255,255,255,.08)}
-.fbot .copy{color:#8DA2E0}
+/* The header, the mobile drawer, the footer and the "Die Seite fragen"
+   pill are NOT defined here. They are the start page's own chrome, lifted
+   out of the export and generated by tools/chrome.py - one object on every
+   page, so a subpage cannot wear a different header from the page it came
+   from. chrome.CSS is appended to this stylesheet in head(). */
+/* `animation:none` was the wrong instrument here and it shipped: it removes
+   the `forwards` fill, so anything that relies on an animation to reach its end
+   state stays at its START state - invisible content under reduced motion.
+   .01ms always lands. This is the start page's rule, verbatim. */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;
+    animation-iteration-count:1!important;transition-duration:.01ms!important;
+    scroll-behavior:auto!important}}
 
-@media (prefers-reduced-motion:reduce){*{animation:none!important;
-  transition:none!important;scroll-behavior:auto!important}}
-</style>
+.endband{position:relative;padding:0;color:#EEF1FA}
+.endband>.ground{position:absolute;inset:0;z-index:-2;background:var(--navy)}
+.endband .inner{max-width:1440px;margin:0 auto;
+  padding:clamp(56px,6vw,96px) clamp(20px,4vw,48px) clamp(48px,5vw,80px);
+  border-left:1px solid rgba(255,255,255,.08);
+  border-right:1px solid rgba(255,255,255,.08);
+  display:grid;grid-template-columns:1fr 1fr;gap:clamp(36px,5vw,96px);
+  align-items:start}
+@media (max-width:900px){.endband .inner{grid-template-columns:1fr}}
+.endband .eyebrow{font-size:13px;font-weight:600;letter-spacing:.02em;
+  color:#9F99FF;margin:0}
+.endband h2{font-size:clamp(26px,2.6vw,36px);line-height:1.25;letter-spacing:-.02em;
+  font-weight:600;color:#fff;margin-top:14px;text-wrap:pretty}
+.endband .lead{font-size:16px;line-height:1.6;color:var(--navy-mut);margin-top:14px;
+  max-width:46ch}
+.endband .rows{display:grid;gap:14px;margin-top:32px;font-size:15px;
+  color:var(--navy-ink)}
+.endband .rows>*{display:flex;gap:12px;align-items:center}
+.endband .rows a{color:#fff;font-weight:600}
+.endband .rows a:hover{color:#fff}
+.endband .ib{flex:0 0 auto;width:36px;height:36px;border-radius:8px;
+  background:#14275F;color:var(--navy-ink);display:grid;place-items:center;
+  box-shadow:inset 0 0 0 1px rgba(143,161,230,.22)}
+.endband .ib svg{width:17px;height:17px}
+.endband .card{background:var(--dock);color:#EEF1FA;
+  border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:28px;
+  box-shadow:0 40px 100px -30px rgba(0,0,0,.7)}
+.endband form{display:grid;gap:16px;position:relative}
+.endband label{display:grid;gap:6px;font-size:13px;font-weight:600;
+  color:var(--navy-ink)}
+.endband input,.endband textarea{width:100%;padding:0 14px;height:46px;
+  border:1px solid rgba(255,255,255,.14);border-radius:8px;
+  background:rgba(255,255,255,.06);color:#fff;font-size:15px;font-weight:400;
+  outline:none;transition:border-color .2s,box-shadow .2s}
+.endband textarea{height:auto;padding:12px 14px;line-height:1.5;resize:vertical}
+.endband input:focus,.endband textarea:focus{border-color:var(--acc);
+  box-shadow:0 0 0 4px var(--acc-ring)}
+.endband ::placeholder{color:rgba(197,208,245,.55)}
+/* a grid item stretches; on the start page the submit is an auto-width pill */
+.endband form .btn{justify-self:start}
+.endband .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.endband .note{font-size:13px;color:var(--navy-mut);margin:0}
+.endband .note a{color:var(--navy-ink);text-decoration:underline}
+.endband #form-status{margin:0;font-size:14px;font-weight:600}
+.endband #form-status[data-state="ok"]{color:#7BE0A8}
+.endband #form-status[data-state="error"]{color:#FF9AA2}
+/* The band and the footer are ONE navy region on the start page, with the
+   stream running through both. The footer's own top margin would cut a white
+   stripe between them. */
+.endband+.site-foot{margin-top:0}
+.sprite{position:absolute;width:0;height:0;overflow:hidden}
+
+/* =====================================================================
+   HEADER
+   Start page: position:fixed, z-index 80, height 72, background
+   rgba(255,255,255,.92), backdrop-filter blur(14px) saturate(1.4),
+   box-shadow "0 1px 0 #E3E8EE" -> scrolled adds
+   "0 10px 30px -18px rgba(10,37,64,.18)", transition box-shadow .3s.
+
+   Deliberate deviation: sticky instead of fixed. The start page is fixed
+   because its hero carries clamp(150px,17vw,196px) of top padding to sit
+   under it. A prose subpage has no such hero, and fixed would need a
+   body padding-top that every page then has to remember.
+   ===================================================================== */
+.site-head{position:sticky;top:0;z-index:80;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(14px) saturate(1.4);
+  -webkit-backdrop-filter:blur(14px) saturate(1.4);
+  box-shadow:0 1px 0 var(--rule);transition:box-shadow .3s}
+.site-head[data-scrolled="true"]{
+  box-shadow:0 1px 0 var(--rule),0 10px 30px -18px rgba(10,37,64,.18)}
+.nav-inner{position:relative;max-width:1440px;margin:0 auto;
+  padding:0 clamp(20px,4vw,48px);height:var(--nav-h);
+  display:flex;align-items:center;gap:18px}
+
+/* lockup: 34px mark + 14px gap + 18px/600/-.03em wordmark */
+.lockup{display:flex;align-items:center;gap:14px;color:var(--ink);flex:none}
+.lockup:hover{color:var(--ink)}
+.lockup .mark{display:block;flex:none;width:34px;height:34px}
+.lockup .word{font-weight:600;letter-spacing:-.03em;font-size:18px;line-height:1}
+/* The start page also prints the page kind after the wordmark on subpages
+   (pagekit does: "mccain digital / KI-Tools"). Kept - it is the one thing a
+   subpage header knows that the start page does not. */
+.lockup .sep{color:#C6CEDA;font-weight:400;font-size:18px;line-height:1}
+.lockup .kind{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;
+  letter-spacing:.06em;color:var(--muted2);font-weight:400;line-height:1}
+
+/* ---- desktop nav ------------------------------------------------- */
+.nav-list{position:relative;display:flex;align-items:center;gap:4px;
+  margin-left:8px}
+.nav-ind{position:absolute;top:50%;height:36px;margin-top:-18px;border-radius:8px;
+  background:rgba(10,37,64,.06);opacity:0;pointer-events:none;left:0;width:0;
+  transition:left .35s var(--ease),width .35s var(--ease),opacity .2s}
+.nav-list[data-open="true"] .nav-ind{opacity:1}
+.nav-item{position:relative;display:flex;align-items:center;gap:3px;
+  padding:8px 12px;border-radius:8px;font-size:15px;font-weight:500;
+  white-space:nowrap;color:var(--ink);opacity:1;transition:opacity .2s}
+/* the export dims the OTHER triggers to .6 while a menu is open */
+.nav-list[data-open="true"] .nav-item{opacity:.6}
+.nav-list[data-open="true"] .nav-item[aria-expanded="true"]{opacity:1}
+.nav-item .chev{width:13px;height:13px;opacity:.55;transition:transform .3s}
+.nav-item[aria-expanded="true"] .chev{transform:rotate(180deg)}
+
+/* ---- the shared dropdown panel ----------------------------------- */
+.nav-caret{position:absolute;top:69px;left:0;width:14px;height:14px;
+  background:#fff;transform:rotate(45deg);border-radius:3px;opacity:0;
+  pointer-events:none;z-index:2;
+  transition:left .35s var(--ease),opacity .2s,visibility 0s .25s;
+  visibility:hidden}
+.nav-panel{position:absolute;top:76px;left:0;width:560px;height:0;
+  background:#fff;border-radius:12px;
+  box-shadow:0 30px 90px -20px rgba(10,37,64,.30),
+             0 2px 10px rgba(10,37,64,.08),
+             0 0 0 1px rgba(10,37,64,.05);
+  opacity:0;visibility:hidden;transform:translateY(-6px) scale(.985);
+  transform-origin:50% 0;pointer-events:none;overflow:hidden;z-index:1;
+  transition:opacity .22s,transform .3s var(--ease),visibility 0s .25s}
+/* "fresh" = opening from closed: no left/width/height animation, or the panel
+   slides in from wherever it last was. Matches panelTransition in the export. */
+.nav-panel[data-move="true"]{
+  transition:left .35s var(--ease),width .35s var(--ease),height .35s var(--ease),
+             opacity .22s,transform .3s var(--ease),visibility 0s}
+.nav-panel[data-open="true"],.nav-caret[data-open="true"]{
+  opacity:1;visibility:visible;pointer-events:auto;transition-delay:0s}
+.nav-panel[data-open="true"]{transform:translateY(0) scale(1)}
+.pane{position:absolute;top:0;left:0;opacity:0;visibility:hidden;
+  pointer-events:none;transform:translateX(-28px);
+  transition:opacity .25s,transform .35s var(--ease),visibility 0s .25s}
+.pane[data-on="true"]{opacity:1;visibility:visible;pointer-events:auto;
+  transform:translateX(0);transition-delay:0s}
+/* widths are Component.MENU_W, verbatim */
+.pane-services{width:780px}
+.pane-work{width:540px}
+.pane-studio{width:560px}
+.pane-process{width:540px}
+.pane-resources{width:440px}
+.pane-pricing{width:480px}
+.pane-grid{display:grid;gap:2px;padding:14px}
+.pane-services .pane-grid{grid-template-columns:1fr 1fr 214px;gap:2px 12px}
+.pane-studio .pane-grid{grid-template-columns:1fr 1fr;gap:10px;padding:16px}
+.mi{display:flex;gap:14px;align-items:flex-start;padding:12px;border-radius:8px;
+  color:var(--ink);transition:background .2s}
+.mi:hover{background:var(--tint);color:var(--ink);text-decoration:none}
+.mi .ic{flex:none;width:36px;height:36px;border-radius:9px;color:#fff;
+  display:grid;place-items:center;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+.mi .ic svg{width:18px;height:18px}
+.mi .tx{display:block;min-width:0}
+.mi .t{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;
+  color:var(--ink)}
+.mi .d{display:block;font-size:13px;line-height:1.45;color:var(--muted);
+  margin-top:3px}
+/* "you are here": the dot rides the TITLE, not the flex row - a row-level
+   ::after floats in the empty middle of a two-line card and reads as a stray. */
+.mi[aria-current="page"] .t{color:var(--acc-text)}
+.mi[aria-current="page"] .t::after{content:"";width:6px;height:6px;
+  border-radius:50%;background:var(--acc);flex:none}
+
+/* service icon grounds - Component.FLOW, first and third stop */
+.ic-ai{background:linear-gradient(135deg,#FF5A8C,#C05CFF)}
+.ic-apps{background:linear-gradient(135deg,#6E7BFF,#C05CFF)}
+.ic-web{background:linear-gradient(135deg,#FFB46B,#FF8A5B)}
+.ic-software{background:linear-gradient(135deg,#C05CFF,#FF5A8C)}
+.ic-case-recall{background:linear-gradient(135deg,#6E7BFF,#C05CFF)}
+.ic-case-site{background:linear-gradient(135deg,#5FC3FF,#6E7BFF)}
+.ic-res{background:linear-gradient(135deg,#1D3B60,#0A2540);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
+.badge{font-size:11px;font-weight:600;color:#1F8A5B;background:rgba(79,207,140,.16);
+  padding:2px 8px;border-radius:999px}
+.badge.soon{color:var(--muted);background:none;
+  border:1px solid rgba(10,37,64,.14);padding:1px 7px}
+
+/* the tall gradient promo card in the Leistungen panel */
+.promo{grid-column:3;grid-row:1 / span 2;position:relative;overflow:hidden;
+  border-radius:10px;padding:16px;text-align:left;color:#fff;background:var(--navy);
+  display:flex;flex-direction:column;justify-content:flex-end;gap:6px;
+  min-height:190px;transition:transform .3s}
+.promo:hover{transform:translateY(-2px);color:#fff;text-decoration:none}
+.promo .flow{position:absolute;inset:-40%;opacity:.9}
+.promo .flow i{position:absolute;inset:0;display:block;will-change:transform}
+.promo .flow .a{background:
+  radial-gradient(42% 46% at 30% 36%,#FF5A8C 0%,transparent 100%),
+  radial-gradient(46% 50% at 74% 28%,#FFB46B 0%,transparent 100%),
+  linear-gradient(135deg,#FF5A8C,#C05CFF);
+  animation:flowA 26s ease-in-out infinite}
+.promo .flow .b{background:
+  radial-gradient(48% 52% at 66% 72%,#C05CFF 0%,transparent 100%),
+  radial-gradient(36% 40% at 22% 78%,#FFB46B 0%,transparent 100%);
+  opacity:.85;animation:flowB 32s ease-in-out infinite}
+.promo .veil{position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(10,31,68,0) 25%,rgba(10,31,68,.88) 100%)}
+.promo span{position:relative}
+.promo .live{display:inline-flex;align-items:center;gap:6px;font-size:11px;
+  font-weight:600}
+.promo .dot{width:7px;height:7px;border-radius:50%;background:#15BE53;
+  animation:pulseDot 2.2s ease-out infinite}
+.promo .h{font-size:16px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+.promo .s{font-size:12px;line-height:1.45;color:rgba(255,255,255,.85)}
+.pane-foot{display:flex;align-items:center;justify-content:space-between;
+  gap:16px;padding:13px 22px;background:var(--tint);
+  border-top:1px solid rgba(10,37,64,.06);font-size:13px}
+.pane-foot .note{color:var(--muted)}
+.pane-foot a{font-weight:600;color:var(--ink)}
+.pane-foot a.acc{color:var(--acc-text)}
+.studio-card{display:block;padding:16px;border-radius:10px;background:var(--tint);
+  text-align:left;transition:background .2s;color:var(--ink)}
+.studio-card:hover{background:#EEF2F9;text-decoration:none;color:var(--ink)}
+.studio-card .k{display:block;font-size:13px;font-weight:600;color:var(--acc-text)}
+.studio-card .y{display:block;font-size:26px;font-weight:700;letter-spacing:-.03em;
+  color:var(--ink);margin-top:8px}
+.studio-card .p{display:block;font-size:13px;line-height:1.5;color:var(--body);
+  margin-top:8px}
+.stack{display:grid;gap:2px;align-content:start}
+.stack .lbl{display:block;font-size:12px;font-weight:600;color:var(--muted);
+  padding:6px 12px 4px}
+.person{display:flex;gap:12px;align-items:center;padding:9px 12px;border-radius:8px;
+  transition:background .2s;color:var(--ink)}
+.person:hover{background:var(--tint);text-decoration:none;color:var(--ink)}
+.person .av{flex:none;width:34px;height:34px;border-radius:8px;color:#fff;
+  font-weight:700;font-size:14px;display:grid;place-items:center}
+.person .n{display:block;font-size:14px;font-weight:600;color:var(--ink)}
+.person .r{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.step{display:flex;gap:16px;align-items:flex-start;padding:11px 12px;
+  border-radius:8px;transition:background .2s;color:var(--ink)}
+.step:hover{background:var(--tint);text-decoration:none;color:var(--ink)}
+.step .n{flex:none;font-family:'JetBrains Mono',ui-monospace,monospace;
+  font-size:12px;font-weight:500;color:var(--acc-text);margin-top:3px}
+.step .hd{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.step .t{font-size:15px;font-weight:600;color:var(--ink)}
+.step .w{font-size:12px;color:var(--muted)}
+.step .d{display:block;font-size:13px;line-height:1.45;color:var(--muted);
+  margin-top:3px}
+.price-head{padding:20px 22px 6px}
+.price-head .k{font-size:13px;font-weight:600;color:var(--acc-text)}
+.price-head .t{font-size:20px;font-weight:700;letter-spacing:-.025em;
+  color:var(--ink);margin-top:6px}
+.price-head p{font-size:13px;line-height:1.5;color:var(--muted);margin-top:6px}
+.price-row{display:flex;gap:14px;align-items:center;padding:10px 0;
+  border-top:1px solid rgba(10,37,64,.08)}
+.price-row .n{flex:none;width:26px;height:26px;border-radius:50%;
+  background:var(--acc-soft);color:var(--acc-text);
+  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;
+  font-weight:500;display:grid;place-items:center}
+.price-row .t{font-size:14px;font-weight:600;color:var(--ink);flex:1}
+.price-row .w{font-size:12px;color:var(--muted);white-space:nowrap}
+.pane-pricing .pane-foot{margin-top:8px}
+.btn-sm{display:inline-flex;align-items:center;gap:4px;height:32px;
+  padding:0 8px 0 14px;border-radius:8px;background:var(--acc);color:#fff;
+  font-size:13px;font-weight:600;transition:background .2s}
+.btn-sm:hover{background:var(--ink);color:#fff;text-decoration:none}
+/* .pane-foot a (0,2,1) outranks .btn-sm (0,1,0) and painted the label ink-on-
+   indigo at 3.31:1. Measured, not guessed - a class next to a descendant
+   selector loses quietly. */
+.pane-foot a.btn-sm{color:#fff}
+.btn-sm svg{width:14px;height:14px}
+
+/* ---- right-hand group -------------------------------------------- */
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.cta{display:inline-flex;align-items:center;white-space:nowrap;gap:4px;
+  height:40px;padding:0 12px 0 16px;border-radius:6px;background:var(--acc);
+  color:#fff;font-size:14px;font-weight:600;transition:background .2s}
+.cta:hover{background:var(--ink);color:#fff;text-decoration:none}
+.cta svg{width:16px;height:16px}
+.cta[aria-current="page"]{background:var(--ink)}
+.burger{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;
+  color:var(--ink);border:1px solid rgba(10,37,64,.14)}
+.burger svg{width:20px;height:20px}
+.burger .ico-x{display:none}
+.burger[aria-expanded="true"] .ico-x{display:block}
+.burger[aria-expanded="true"] .ico-burger{display:none}
+
+/* The six labels + the lockup + the CTA need room. Measured in Chromium:
+   lockup 166 + nav 599 + CTA 98 + 2x18 gap + 2x40 padding = 979px, so at
+   960-1179 the "/ Kind" suffix has to go and the nav has to tighten - exactly
+   the band in which the export drops DE/EN (showLangInNav). Without this the
+   document scrolls sideways by 29px at 1000px wide. */
+@media (min-width:960px) and (max-width:1179px){
+  .lockup .sep,.lockup .kind{display:none}
+.nav-list{gap:2px;margin-left:4px}
+.nav-item{padding:8px 10px}
+}
+
+/* ---- breakpoint: isDesktop = vw >= 960 in the export -------------- */
+@media (max-width:959px){
+  .nav-list,.nav-panel,.nav-caret,.nav-right .cta{display:none}
+.lockup .kind,.lockup .sep{display:none}
+}
+@media (min-width:960px){ .burger{display:none} }
+
+/* ---- mobile drawer ----------------------------------------------- */
+.drawer{position:fixed;inset:0;z-index:70;background:#fff;overflow-y:auto;
+  padding:88px clamp(20px,5vw,48px) 40px;animation:fadeIn .25s ease}
+.drawer[hidden]{display:none}
+.dgroup{padding:14px 0;border-bottom:1px solid rgba(10,37,64,.08)}
+.dgroup > .t{font-size:13px;font-weight:600;color:var(--acc-text)}
+.dgroup .links{display:grid;margin-top:6px}
+.dgroup a{display:flex;justify-content:space-between;align-items:center;
+  gap:12px;padding:10px 0;font-size:18px;font-weight:600;color:var(--ink);
+  text-align:left}
+.dgroup a:hover{text-decoration:none;color:var(--acc-text)}
+.dgroup a svg{width:16px;height:16px;color:#8898AA;flex:none}
+.dgroup a[aria-current="page"]{color:var(--acc-text)}
+.drawer .cta{display:flex;justify-content:center;width:100%;height:48px;
+  margin-top:24px;border-radius:8px;font-size:15px;padding:0}
+.drawer .lang{margin:22px auto 0;width:max-content}
+
+/* =====================================================================
+   FOOTER
+   The start page footer is background:transparent with an absolutely
+   positioned #0A1F44 layer at z-index:-2, because a WebGL canvas sits at
+   z-index:-1 behind the whole page. On a page without that canvas the
+   z-index:-2 layer paints BEHIND the document background and the footer
+   comes out white. So: paint the ground directly.
+   ===================================================================== */
+.site-foot{background:var(--navy);color:var(--navy-ink);
+  margin-top:clamp(64px,8vw,110px)}
+.site-foot .inner{max-width:1440px;margin:0 auto;
+  padding:48px clamp(20px,4vw,48px) 36px;
+  border-left:1px solid rgba(255,255,255,.08);
+  border-right:1px solid rgba(255,255,255,.08);
+  border-top:1px solid rgba(255,255,255,.08)}
+.fcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:32px 24px}
+.fcol h2{font-size:14px;font-weight:600;color:#fff;margin:0 0 12px}
+.fcol ul{list-style:none;padding:0;margin:0}
+.fcol a{display:block;font-size:14px;color:var(--navy-ink);padding:5px 0;
+  transition:color .2s}
+.fcol a:hover{color:#fff;text-decoration:none}
+.fcol a[aria-current="page"]{color:#fff;font-weight:600}
+.fbot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;
+  gap:16px;margin-top:48px;padding-top:24px;
+  border-top:1px solid rgba(255,255,255,.1);font-size:13px;color:var(--navy-mut)}
+/* Without this the global a{color:var(--acc-text)}
+paints #4D47C7 on #0A1F44 -
+   a 1.9:1 contrast ratio. Measured; see chrome.md. */
+.fbot a{color:var(--navy-ink)}
+.fbot a:hover{color:#fff}
+.fbot .id{display:flex;align-items:center;gap:11px}
+.fbot .id svg{display:block;width:28px;height:28px}
+.fbot .meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.fbot .brand{display:inline-flex;align-items:center;gap:6px;color:var(--navy-ink);
+  font-weight:600}
+.fbot .brand:hover{color:#fff;text-decoration:none}
+.fbot .brand svg{width:14px;height:14px}
+.fbot .lang{border-color:rgba(255,255,255,.18)}
+.fbot .lang a,.fbot .lang span{color:var(--navy-mut)}
+.fbot .lang [aria-current]{background:rgba(255,255,255,.14);color:#fff}
+.fbot .lang a:hover{color:#fff}
+
+/* =====================================================================
+   "Die Seite fragen" PILL
+   ===================================================================== */
+.dock{position:fixed;right:20px;bottom:20px;z-index:60;display:flex;
+  flex-direction:column;align-items:flex-end;gap:10px;
+  opacity:0;visibility:hidden;transform:translateY(10px);
+  transition:opacity .3s,transform .3s var(--ease),visibility 0s .3s}
+.dock[data-show="true"]{opacity:1;visibility:visible;transform:none;
+  transition-delay:0s}
+@media (max-width:599px){.dock{display:none}}   /* dockShow requires vw >= 600 */
+.dock-btn{display:inline-flex;align-items:center;gap:10px;height:48px;
+  padding:0 18px 0 12px;border-radius:999px;background:var(--navy);color:#fff;
+  font-size:14px;font-weight:600;
+  box-shadow:0 20px 50px -20px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.12);
+  transition:transform .2s,box-shadow .2s}
+.dock-btn:hover{transform:translateY(-2px);
+  box-shadow:0 24px 60px -20px rgba(0,0,0,.7),0 0 0 1px rgba(159,153,255,.5)}
+.dock-btn svg{display:block;flex:none;width:26px;height:26px}
+.dock-panel{width:min(380px,calc(100vw - 40px));background:var(--dock);
+  color:#EEF1FA;border:1px solid rgba(255,255,255,.10);border-radius:14px;
+  box-shadow:0 40px 100px -30px rgba(0,0,0,.7);overflow:hidden;
+  animation:fadeUp .35s var(--ease)}
+.dock-panel[hidden]{display:none}
+.dock-head{display:flex;align-items:center;gap:10px;padding:12px 14px;
+  border-bottom:1px solid rgba(255,255,255,.08)}
+.dock-head svg.mk{width:26px;height:26px;flex:none}
+.dock-head .t{font-weight:600;font-size:14px}
+.dock-head .src{margin-left:auto;font-family:'JetBrains Mono',ui-monospace,monospace;
+  font-size:11px;color:var(--navy-mut)}
+.dock-close{width:30px;height:30px;border-radius:8px;display:grid;
+  place-items:center;color:var(--navy-ink);transition:background .2s}
+.dock-close:hover{background:rgba(255,255,255,.08);color:#fff}
+.dock-close svg{width:16px;height:16px}
+.dock-list{height:min(320px,45vh);overflow-y:auto;padding:14px;display:flex;
+  flex-direction:column;gap:12px}
+.dock-list .intro{font-size:13.5px;line-height:1.55;color:var(--navy-ink)}
+.msg-u{align-self:flex-end;max-width:88%;background:rgba(255,255,255,.10);
+  color:#fff;border-radius:12px 12px 3px 12px;padding:8px 12px;font-size:13.5px;
+  line-height:1.5}
+.msg-b{display:flex;gap:10px;align-items:flex-start;max-width:94%}
+.msg-b svg{width:22px;height:22px;flex:none}
+.msg-b p{font-size:13.5px;line-height:1.55;color:#EEF1FA;white-space:pre-wrap;
+  margin:0}
+.dock-chips{display:flex;gap:6px;padding:0 14px 10px;flex-wrap:wrap}
+.dock-chips button{font-size:11.5px;font-weight:500;padding:5px 10px;
+  border-radius:999px;border:1px solid rgba(255,255,255,.14);
+  color:var(--navy-ink);transition:border-color .2s,color .2s}
+.dock-chips button:hover{border-color:rgba(255,255,255,.4);color:#fff}
+.dock-form{display:flex;gap:8px;padding:12px 14px 14px;
+  border-top:1px solid rgba(255,255,255,.08)}
+.dock-form .ring{flex:1;min-width:0;display:flex;border-radius:9px;padding:1.5px;
+  background:linear-gradient(90deg,#FFB46B,#FF5A8C,#C05CFF,#5FC3FF,#FFB46B);
+  background-size:300% 100%;animation:streamBorder 7s linear infinite}
+.dock-form input{flex:1;min-width:0;height:41px;padding:0 16px;border-radius:7.5px;
+  border:0;background:var(--dock-in);color:#fff;font-size:14px;outline:none;
+  transition:background .2s}
+.dock-form input:focus{background:#132C66}
+.dock-form button{flex:none;height:44px;padding:0 14px;border-radius:8px;
+  background:var(--acc);color:#fff;font-size:14px;font-weight:600;
+  transition:background .2s}
+.dock-form button:hover{background:#7A73FF}
+
+/* ------------------------------------------------------------ keyframes
+   Verbatim from the export's <helmet> block. */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}
+to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}
+to{opacity:1}}
+@keyframes flowA{0%{transform:translate3d(-7%,-5%,0) scale(1.1)}50%{transform:translate3d(7%,6%,0) scale(1.3)}100%{transform:translate3d(-7%,-5%,0) scale(1.1)}}
+@keyframes flowB{0%{transform:translate3d(6%,7%,0) scale(1.25)}50%{transform:translate3d(-7%,-6%,0) scale(1.05)}100%{transform:translate3d(6%,7%,0) scale(1.25)}}
+@keyframes pulseDot{0%,100%{box-shadow:0 0 0 0 rgba(21,190,83,.55)}70%{box-shadow:0 0 0 7px rgba(21,190,83,0)}}
+@keyframes streamBorder{to{background-position:300% 0}}
+@keyframes tileIn{from{opacity:0;transform:scale(.88)}
+to{opacity:1;transform:none}}
+.lockup .mark{animation:tileIn .6s var(--ease) both}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;
+    animation-iteration-count:1!important;transition-duration:.01ms!important}
+html{scroll-behavior:auto}
+}
+
+/* --- demo page only, not part of the chrome ----------------------- */
+.demo{max-width:760px;margin:0 auto;padding:56px clamp(20px,4vw,48px) 0}</style>
 <script type="application/ld+json">{
  "@context": "https://schema.org",
  "@graph": [
@@ -290,146 +834,638 @@ footer.site a[aria-current]{color:#fff;font-weight:600}
 }</script>
 </head>
 <body>
+<canvas class="pagestream" data-global aria-hidden="true" data-stream="web" data-scroll-offset="1200"></canvas>
 <a class="skip" href="#content">Zum Inhalt springen</a>
+<svg class="sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+  <!-- lifted from brand/mccain-icons.svg -->
+  <symbol id="i-chev-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-chev-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-arrow-ur" viewBox="0 0 24 24"><path d="M7 17 17 7M7 7h10v10" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <!-- Component.ICONS, drawn at stroke-width 1.75 like the export's icon() -->
+  <symbol id="i-sparkles" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 17v4"/><path d="M17 19h4"/></g></symbol>
+  <symbol id="i-layout" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 9h18"/><path d="M9 21V9"/></g></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></g></symbol>
+  <symbol id="i-server" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M4 14h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1z"/><path d="M7 7h.01"/><path d="M7 17h.01"/></g></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></g></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></g></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></g></symbol>
+  <symbol id="i-commit" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M3 12h6"/><path d="M15 12h6"/></g></symbol>
+  <symbol id="i-gauge" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></g></symbol>
+</svg>
+<header class="site-head" data-chrome-header data-scrolled="false">
+  <div class="nav-inner" data-nav-inner>
 
-<header class="site">
-  <a class="lockup" href="../index.html">
-    <img src="../brand/mccain-mark-free-color.svg" alt="" width="28" height="28">
-    <span>mccain digital</span>
-    <span class="sep">/</span>
-    <span class="kind">Leistung</span>
-  </a>
-  <nav class="hnav" aria-label="Leistungen">
-    <a href="../services/ai-tools.html">KI-Tools</a>
-    <a href="../services/web-apps.html">Web-Apps</a>
-    <a href="../services/websites.html" aria-current="page">Websites</a>
-    <a href="../services/software.html">Software</a>
-    <a href="../kontakt.html">Kontakt</a>
-  </nav>
-</header>
+    <a class="lockup" href="../index.html">
+      <img class="mark" src="../brand/mccain-mark-free-color.svg" width="28" height="28" alt="">
+      <span class="word">mccain digital</span>
+      <span class="sep" aria-hidden="true">/</span>
+      <span class="kind">Leistung</span>
+    </a>
 
-<main id="content">
-  <section class="band">
-    <div class="wrap">
-      <nav class="crumb" aria-label="Brotkrume"><a href="../index.html" aria-label="Zur Startseite">Start</a><i aria-hidden="true">/</i><a href="../index.html#services">Leistungen</a><i aria-hidden="true">/</i><b aria-current="page">Websites</b></nav>
-      <div class="prose">
-        <p class="eyebrow">Leistung · Websites</p>
-        <h1>Websites, die man sich merkt</h1>
-        <p class="lead">Kein Page-Builder, kein Template. Semantisches HTML, JSON-LD, Sitemap und optimierte Bilder – damit Ihre Seite von Menschen wie von Maschinen gleich klar gelesen wird.</p>
-        <div class="actions">
-          <a class="btn" href="../kontakt.html">Projekt anfragen</a>
-          <a class="btn ghost" href="../index.html#services">Alle Leistungen</a>
+    <nav class="nav-list" data-nav-list data-open="false" aria-label="Hauptnavigation">
+      <span class="nav-ind" data-nav-ind aria-hidden="true"></span>
+
+      <button class="nav-item" type="button" id="nt-services" data-menu="services" data-section-current="true"
+              aria-expanded="false" aria-controls="np-services">
+        Leistungen<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-down"></use></svg>
+      </button>
+      <button class="nav-item" type="button" id="nt-work" data-menu="work"
+              aria-expanded="false" aria-controls="np-work">
+        Arbeiten<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-down"></use></svg>
+      </button>
+      <button class="nav-item" type="button" id="nt-studio" data-menu="studio"
+              aria-expanded="false" aria-controls="np-studio">
+        Studio<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-down"></use></svg>
+      </button>
+      <button class="nav-item" type="button" id="nt-process" data-menu="process"
+              aria-expanded="false" aria-controls="np-process">
+        Ablauf<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-down"></use></svg>
+      </button>
+      <button class="nav-item" type="button" id="nt-resources" data-menu="resources"
+              aria-expanded="false" aria-controls="np-resources">
+        Ressourcen<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-down"></use></svg>
+      </button>
+      <button class="nav-item" type="button" id="nt-pricing" data-menu="pricing"
+              aria-expanded="false" aria-controls="np-pricing">
+        Preise<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-down"></use></svg>
+      </button>
+    </nav>
+
+    <!-- Caret + panel sit here, directly after the <nav>, so Tab from the
+         last trigger lands INSIDE the open panel. The export puts them after
+         the right-hand group, which makes Tab jump over DE/EN and Kontakt
+         first. Same pixels, better order. -->
+    <div class="nav-caret" data-nav-caret aria-hidden="true"></div>
+
+    <div class="nav-panel" data-nav-panel data-open="false">
+
+      <!-- ---------------------------------------------- Leistungen -->
+      <div class="pane pane-services" id="np-services" data-pane="services"
+           role="group" aria-labelledby="nt-services">
+        <div class="pane-grid">
+          <a class="mi" href="../services/ai-tools.html">
+            <span class="ic ic-ai"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sparkles"></use></svg></span>
+            <span class="tx"><span class="t">KI-Tools</span>
+              <span class="d">RAG, Agenten, MCP-Server &ndash; auf Ihren Daten</span></span>
+          </a>
+          <a class="mi" href="../services/web-apps.html">
+            <span class="ic ic-apps"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-layout"></use></svg></span>
+            <span class="tx"><span class="t">Web-Apps</span>
+              <span class="d">React, Next.js, TypeScript &ndash; vom MVP bis zur Skalierung</span></span>
+          </a>
+          <a class="mi" href="../services/websites.html" aria-current="page">
+            <span class="ic ic-web"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-globe"></use></svg></span>
+            <span class="tx"><span class="t">Websites</span>
+              <span class="d">Handgebaut, Lighthouse 100, lesbar f&uuml;r Mensch und KI</span></span>
+          </a>
+          <a class="mi" href="../services/software.html">
+            <span class="ic ic-software"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-server"></use></svg></span>
+            <span class="tx"><span class="t">Software f&uuml;r Unternehmen</span>
+              <span class="d">Dashboards, interne Tools, Integrationen &ndash; Cloud oder on-premise</span></span>
+          </a>
+          <a class="promo" href="../index.html#ai">
+            <span class="flow" aria-hidden="true"><i class="a"></i><i class="b"></i></span>
+            <span class="veil" aria-hidden="true"></span>
+            <span class="live"><span class="dot" aria-hidden="true"></span>Live &middot; Claude</span>
+            <span class="h">Fragen Sie diese Seite.</span>
+            <span class="s">Die Seite fragen &rsaquo;</span>
+          </a>
+        </div>
+        <div class="pane-foot">
+          <span class="note">Nicht sicher, was passt?</span>
+          <span style="display:flex;gap:18px">
+            <a class="acc" href="../index.html#ai">Die Seite fragen &rsaquo;</a>
+            <a href="../index.html#process">Ablauf ansehen &rsaquo;</a>
+          </span>
         </div>
       </div>
-      <div class="stats"><div class="stat"><b>3–6 Wo.</b><span>vom Briefing bis live</span></div><div class="stat"><b>4×100</b><span>Lighthouse – gemessen, nicht behauptet</span></div><div class="stat"><b>0</b><span>Page-Builder, Themes, Plugins</span></div></div>
+
+      <!-- ------------------------------------------------- Arbeiten -->
+      <div class="pane pane-work" id="np-work" data-pane="work"
+           role="group" aria-labelledby="nt-work">
+        <div class="pane-grid">
+          <a class="mi" href="../index.html#work">
+            <span class="ic ic-case-recall"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-commit"></use></svg></span>
+            <span class="tx"><span class="t">whatever-recall<span class="badge">Live</span></span>
+              <span class="d">KI-natives Projektged&auml;chtnis &ndash; live, self-hosted</span></span>
+          </a>
+          <a class="mi" href="../index.html#work">
+            <span class="ic ic-case-site"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-gauge"></use></svg></span>
+            <span class="tx"><span class="t">mccain-digital.com<span class="badge">Live</span></span>
+              <span class="d">Handgeschrieben, 100/100/100/100 in Lighthouse</span></span>
+          </a>
+        </div>
+        <div class="pane-foot">
+          <span class="note">Kundenprojekte folgen nach Freigabe.</span>
+          <a href="../index.html#work">Alle Projekte &rsaquo;</a>
+        </div>
+      </div>
+
+      <!-- --------------------------------------------------- Studio -->
+      <div class="pane pane-studio" id="np-studio" data-pane="studio"
+           role="group" aria-labelledby="nt-studio">
+        <div class="pane-grid">
+          <a class="studio-card" href="../index.html#studio">
+            <span class="k">Das Studio</span>
+            <span class="y">2016 &rarr;</span>
+            <span class="p">Unabh&auml;ngig seit 2016. Zwei Senior-Gr&uuml;nder, keine Junioren,
+              keine Account-Manager.</span>
+          </a>
+          <div class="stack">
+            <span class="lbl">Team</span>
+            <a class="person" href="../index.html#studio">
+              <span class="av" style="background:linear-gradient(135deg,#5FC3FF,#6E7BFF)">C</span>
+              <span><span class="n">Christian</span>
+                <span class="r">Mitgr&uuml;nder &middot; Entwicklung &amp; Betrieb</span></span>
+            </a>
+            <a class="person" href="../index.html#studio">
+              <span class="av" style="background:linear-gradient(135deg,#C05CFF,#FF5A8C)">K</span>
+              <span><span class="n">Kathi</span>
+                <span class="r">Mitgr&uuml;nderin &middot; Design &amp; Marke</span></span>
+            </a>
+          </div>
+        </div>
+        <div class="pane-foot">
+          <span class="note">Kosten, Dauer, Zust&auml;ndigkeiten.</span>
+          <a href="../index.html#faq">Fragen &amp; Antworten &rsaquo;</a>
+        </div>
+      </div>
+
+      <!-- --------------------------------------------------- Ablauf -->
+      <div class="pane pane-process" id="np-process" data-pane="process"
+           role="group" aria-labelledby="nt-process">
+        <div class="pane-grid">
+          <a class="step" href="../index.html#process"><span class="n">01</span>
+            <span><span class="hd"><span class="t">Eine pers&ouml;nliche Antwort</span>
+              <span class="w">innerhalb von 24 Stunden</span></span>
+              <span class="d">Von Christian oder Kathi, zu Ihrem konkreten Vorhaben.</span></span></a>
+          <a class="step" href="../index.html#process"><span class="n">02</span>
+            <span><span class="hd"><span class="t">Ein Gespr&auml;ch</span>
+              <span class="w">30&ndash;45 Minuten</span></span>
+              <span class="d">Telefon oder Video &ndash; &uuml;ber Ihr Ziel, nicht &uuml;ber unseren Prozess.</span></span></a>
+          <a class="step" href="../index.html#process"><span class="n">03</span>
+            <span><span class="hd"><span class="t">Ein Festpreis</span>
+              <span class="w">innerhalb von 48 Stunden</span></span>
+              <span class="d">Eine konkrete Zahl mit klar definiertem Umfang.</span></span></a>
+          <a class="step" href="../index.html#process"><span class="n">04</span>
+            <span><span class="hd"><span class="t">Etwas Klickbares</span>
+              <span class="w">Woche eins</span></span>
+              <span class="d">Echte Screens in Woche eins, danach jede Woche eine Demo.</span></span></a>
+        </div>
+        <div class="pane-foot">
+          <span class="note">Sie k&ouml;nnen nach jedem Schritt aufh&ouml;ren.</span>
+          <a class="acc" href="../kontakt.html">Anfrage starten &rsaquo;</a>
+        </div>
+      </div>
+
+      <!-- ----------------------------------------------- Ressourcen -->
+      <div class="pane pane-resources" id="np-resources" data-pane="resources"
+           role="group" aria-labelledby="nt-resources">
+        <div class="pane-grid">
+          <!-- "Tech-Notizen" is NOT here on purpose: on the start page it is
+               href="#" + preventDefault (dc.html:1081), a link that goes
+               nowhere. A subpage should not ship one. -->
+          <a class="mi" href="../llms.txt">
+            <span class="ic ic-res"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-file"></use></svg></span>
+            <span class="tx"><span class="t">llms.txt &amp; KI-Lesbarkeit</span>
+              <span class="d">Wie diese Seite von KI-Agenten gelesen wird &ndash; und warum das z&auml;hlt.</span></span>
+          </a>
+          <a class="mi" href="../index.html#stack">
+            <span class="ic ic-res"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-layers"></use></svg></span>
+            <span class="tx"><span class="t">Stack &amp; Werkzeuge</span>
+              <span class="d">Womit wir bauen, und warum.</span></span>
+          </a>
+          <a class="mi" href="../brand-guide.html">
+            <span class="ic ic-res"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-book"></use></svg></span>
+            <span class="tx"><span class="t">Marke &amp; Downloads</span>
+              <span class="d">Logo, Farben, Typografie &ndash; als Dateien zum Mitnehmen.</span></span>
+          </a>
+        </div>
+      </div>
+
+      <!-- ---------------------------------------------------- Preise -->
+      <div class="pane pane-pricing" id="np-pricing" data-pane="pricing"
+           role="group" aria-labelledby="nt-pricing">
+        <div class="price-head">
+          <div class="k">Preise</div>
+          <div class="t">Der Weg zum Festpreis</div>
+          <p>Keine Preisliste. Jedes Angebot ist eine konkrete Zahl mit klar
+             definiertem Umfang.</p>
+          <div style="margin-top:14px">
+            <div class="price-row"><span class="n">01</span>
+              <span class="t">Eine pers&ouml;nliche Antwort</span>
+              <span class="w">innerhalb von 24 Stunden</span></div>
+            <div class="price-row"><span class="n">02</span>
+              <span class="t">Ein Gespr&auml;ch</span>
+              <span class="w">30&ndash;45 Minuten</span></div>
+            <div class="price-row"><span class="n">03</span>
+              <span class="t">Ein Festpreis</span>
+              <span class="w">innerhalb von 48 Stunden</span></div>
+          </div>
+        </div>
+        <div class="pane-foot">
+          <span class="note">Bis zum Angebot kostet Sie nichts etwas.</span>
+          <a class="btn-sm" href="../kontakt.html">Anfrage starten<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-right"></use></svg></a>
+        </div>
+      </div>
+
+    </div><!-- /.nav-panel -->
+
+    <div class="nav-right">
+      <!-- DE/EN: present here ONLY to show the control. It must NOT ship on a
+           subpage until build_pages.py emits English pages - see chrome.md,
+           section "DE/EN". On the start page it is a state toggle
+           (localStorage 'mcd.lang'); a static page cannot honour that. -->
+
+      <a class="cta" href="../kontakt.html">Kontakt<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-right"></use></svg></a>
+
+      <button class="burger" type="button" data-burger aria-expanded="false"
+              aria-controls="mcd-drawer" aria-label="Men&uuml;">
+        <svg class="ico-burger" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.75" stroke-linecap="round" aria-hidden="true">
+          <path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path>
+        </svg>
+        <svg class="ico-x" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-x"></use></svg>
+      </button>
+    </div>
+
+  </div><!-- /.nav-inner -->
+</header>
+<div class="drawer" id="mcd-drawer" data-drawer hidden>
+  <div class="dgroup">
+    <div class="t">Leistungen</div>
+    <div class="links">
+      <a href="../services/ai-tools.html">KI-Tools<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-right"></use></svg></a>
+      <a href="../services/web-apps.html">Web-Apps<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-right"></use></svg></a>
+      <a href="../services/websites.html" aria-current="page">Websites<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-right"></use></svg></a>
+      <a href="../services/software.html">Software f&uuml;r Unternehmen<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-right"></use></svg></a>
+    </div>
+  </div>
+  <div class="dgroup">
+    <div class="t">Arbeiten</div>
+    <div class="links">
+      <a href="../index.html#work">whatever-recall<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-right"></use></svg></a>
+      <a href="../index.html#work">mccain-digital.com<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-right"></use></svg></a>
+    </div>
+  </div>
+  <div class="dgroup">
+    <div class="t">Studio</div>
+    <div class="links">
+      <a href="../index.html#studio">Team<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-right"></use></svg></a>
+      <a href="../index.html#faq">Fragen &amp; Antworten<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-right"></use></svg></a>
+    </div>
+  </div>
+  <div class="dgroup">
+    <div class="t">Ablauf</div>
+    <div class="links">
+      <a href="../index.html#process">01 &middot; Eine pers&ouml;nliche Antwort<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-right"></use></svg></a>
+      <a href="../index.html#process">02 &middot; Ein Gespr&auml;ch<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-right"></use></svg></a>
+      <a href="../index.html#process">03 &middot; Ein Festpreis<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-right"></use></svg></a>
+      <a href="../index.html#process">04 &middot; Etwas Klickbares<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-right"></use></svg></a>
+    </div>
+  </div>
+  <div class="dgroup">
+    <div class="t">Ressourcen</div>
+    <div class="links">
+      <a href="../llms.txt">llms.txt &amp; KI-Lesbarkeit<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-right"></use></svg></a>
+      <a href="../index.html#stack">Stack &amp; Werkzeuge<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-right"></use></svg></a>
+      <a href="../brand-guide.html">Marke &amp; Downloads<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-right"></use></svg></a>
+    </div>
+  </div>
+  <div class="dgroup">
+    <div class="t">Preise</div>
+    <div class="links">
+      <a href="../index.html#process">Der Weg zum Festpreis<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-right"></use></svg></a>
+    </div>
+  </div>
+  <a class="cta" href="../kontakt.html">Kontakt<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chev-right"></use></svg></a>
+</div>
+
+<main id="content">
+  <section class="hero" id="top">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <nav class="crumb" aria-label="Brotkrume"><a href="../index.html" aria-label="Zur Startseite">Start</a><i aria-hidden="true">/</i><a href="../index.html#services">Leistungen</a><i aria-hidden="true">/</i><b aria-current="page">Websites</b></nav>
+        <div>
+          <p class="eyebrow">Leistung · Websites</p>
+          <h1>Websites, die man sich merkt</h1>
+          <p class="lead">Kein Page-Builder, kein Template. Semantisches HTML, JSON-LD, Sitemap und optimierte Bilder – damit Ihre Seite von Menschen wie von Maschinen gleich klar gelesen wird.</p>
+          <div class="actions">
+            <a class="btn" href="../kontakt.html">Projekt anfragen</a>
+            <a class="btn ghost" href="../index.html#services">Alle Leistungen</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="stats"><div class="stat"><b><span data-count="3" data-prefix="" data-suffix="–6 Wo.">3–6 Wo.</span></b><span>vom Briefing bis live</span></div><div class="stat"><b><span data-count="4" data-prefix="" data-suffix="×100">4×100</span></b><span>Lighthouse – gemessen, nicht behauptet</span></div><div class="stat"><b><span data-count="0" data-prefix="" data-suffix="">0</span></b><span>Page-Builder, Themes, Plugins</span></div></div>
     </div>
   </section>
 
-  <section class="band tint">
+  <section class="band tint" id="cases">
     <div class="wrap">
-      <div class="head prose">
+      <div class="head prose" data-reveal>
         <h2>Was wir bauen würden</h2>
         <p class="kicker">Konkrete Projekte, gruppiert nach Aufgabe.</p>
-        <p class="kicker">Die Branchen sind Beispiele, um die Form zu zeigen – keine Kundenreferenzen. Ihre Situation ist anders: Erzählen Sie sie uns.</p>
+        <p class="kicker small">Die Branchen sind Beispiele, um die Form zu zeigen – keine Kundenreferenzen. Ihre Situation ist anders: Erzählen Sie sie uns.</p>
       </div>
-      <div class="grid"><article class="card"><p class="tag">B2B / Industrie</p><h3>Eine Unternehmensseite, die senior wirkt</h3><p class="out">Sie wirken nicht länger kleiner, als Sie sind.</p></article><article class="card"><p class="tag">Beratung / Dienstleistung</p><h3>Eine Seite, die vor dem Anruf antwortet</h3><p class="out">Weniger, bessere Gespräche – die, die Ihre Zeit wert sind.</p></article><article class="card"><p class="tag">Produkt / Launch</p><h3>Eine Landingpage, die konvertiert statt Preise zu gewinnen</h3><p class="out">Ladezeit unter einer Sekunde – und eine Zahl, auf die Sie zeigen können.</p></article><article class="card"><p class="tag">Jede Seite</p><h3>Ein Relaunch, der den Score repariert, nicht die Farbe</h3><p class="out">Perfektes Lighthouse – die Zahl, nicht das Gefühl.</p></article><article class="card"><p class="tag">Marketing-Teams</p><h3>Ein CMS, das Ihr Team wirklich benutzt</h3><p class="out">Sie ändern es selbst – ohne Ticket.</p></article></div>
+      <div class="grid" data-reveal-group data-reveal-step="0.08"><article class="card" data-reveal><p class="tag">B2B / Industrie</p><h3>Eine Unternehmensseite, die senior wirkt</h3><p class="out">Sie wirken nicht länger kleiner, als Sie sind.</p></article><article class="card" data-reveal><p class="tag">Beratung / Dienstleistung</p><h3>Eine Seite, die vor dem Anruf antwortet</h3><p class="out">Weniger, bessere Gespräche – die, die Ihre Zeit wert sind.</p></article><article class="card" data-reveal><p class="tag">Produkt / Launch</p><h3>Eine Landingpage, die konvertiert statt Preise zu gewinnen</h3><p class="out">Ladezeit unter einer Sekunde – und eine Zahl, auf die Sie zeigen können.</p></article><article class="card" data-reveal><p class="tag">Jede Seite</p><h3>Ein Relaunch, der den Score repariert, nicht die Farbe</h3><p class="out">Perfektes Lighthouse – die Zahl, nicht das Gefühl.</p></article><article class="card" data-reveal><p class="tag">Marketing-Teams</p><h3>Ein CMS, das Ihr Team wirklich benutzt</h3><p class="out">Sie ändern es selbst – ohne Ticket.</p></article></div>
     </div>
   </section>
 
-  <section class="band">
+  <section class="band" id="caps">
     <div class="wrap">
-      <div class="head prose">
+      <div class="head prose" data-reveal>
         <h2>Wie tief wir gehen</h2>
         <p class="kicker">Der Motor unter den Anwendungsfällen.</p>
       </div>
-      <div class="grid"><article class="card"><h3>Lighthouse 100, Core Web Vitals grün</h3><p>Ladezeit unter einer Sekunde, kein Layout-Shift, nichts Render-Blockierendes. Schlankes HTML, kritisches CSS inline, Bilder in modernen Formaten und exakt bemessen.</p></article><article class="card"><h3>SEO ab Tag eins</h3><p>Semantisches HTML, JSON-LD, echte Sitemap, saubere Meta- und Open-Graph-Daten – plus llms.txt, damit KI-Suche und agentische Browser Sie ebenfalls lesen.</p></article><article class="card"><h3>Design, das in einer Sekunde Vertrauen schafft</h3><p>Individuell, nie Template. Typografie, Rhythmus und Bewegung wirken hochwertig und bewusst – auf dem Handy wie auf dem 32-Zoll-Monitor.</p></article><article class="card"><h3>Ein CMS, das Sie selbst bedienen</h3><p>Headless-CMS mit sauberem Admin und automatischen Rebuilds – oder rein statisch mit der gelegentlichen Änderung per E-Mail. Ihre Entscheidung, Ihr Eigentum.</p></article></div>
+      <div class="grid" data-reveal-group data-reveal-step="0.08"><article class="card" data-reveal><h3>Lighthouse 100, Core Web Vitals grün</h3><p>Ladezeit unter einer Sekunde, kein Layout-Shift, nichts Render-Blockierendes. Schlankes HTML, kritisches CSS inline, Bilder in modernen Formaten und exakt bemessen.</p></article><article class="card" data-reveal><h3>SEO ab Tag eins</h3><p>Semantisches HTML, JSON-LD, echte Sitemap, saubere Meta- und Open-Graph-Daten – plus llms.txt, damit KI-Suche und agentische Browser Sie ebenfalls lesen.</p></article><article class="card" data-reveal><h3>Design, das in einer Sekunde Vertrauen schafft</h3><p>Individuell, nie Template. Typografie, Rhythmus und Bewegung wirken hochwertig und bewusst – auf dem Handy wie auf dem 32-Zoll-Monitor.</p></article><article class="card" data-reveal><h3>Ein CMS, das Sie selbst bedienen</h3><p>Headless-CMS mit sauberem Admin und automatischen Rebuilds – oder rein statisch mit der gelegentlichen Änderung per E-Mail. Ihre Entscheidung, Ihr Eigentum.</p></article></div>
     </div>
   </section>
 
-  <section class="band tint">
+  <section class="band tint" id="stack">
     <div class="wrap">
-      <div class="head prose">
+      <div class="head prose" data-reveal>
+        <h2>Womit wir das bauen</h2>
+      </div>
+      <ul class="chips" data-reveal><li class="chip">HTML</li><li class="chip">CSS</li><li class="chip">JavaScript</li><li class="chip">Astro</li><li class="chip">Next.js</li><li class="chip">Tailwind</li><li class="chip">Sanity</li><li class="chip">Headless CMS</li><li class="chip">Vercel</li><li class="chip">Cloudflare</li><li class="chip">JSON-LD</li><li class="chip">llms.txt</li><li class="chip">Lighthouse</li><li class="chip">WebP / AVIF</li></ul>
+    </div>
+  </section>
+
+  <section class="band" id="steps">
+    <div class="wrap">
+      <div class="head prose" data-reveal>
         <h2>So läuft es</h2>
         <p class="kicker">Vier Schritte, jeder mit Ausstieg.</p>
       </div>
-      <div class="steps"><article class="step"><span class="n">01</span><h3>Botschaft &amp; Struktur</h3><p>Ein Arbeitstermin: Mit wem sprechen Sie, was sollen die Leute tun? Wir planen die Seiten, die ihren Platz verdienen – und streichen die anderen.</p></article><article class="step"><span class="n">02</span><h3>Die erste Sekunde gestalten</h3><p>Ein eigenes Design für Ihre Marke – Schrift, Farbe, Rhythmus, Bewegung. Echte Screens statt Vorlage, iteriert, bis der erste Eindruck stimmt.</p></article><article class="step"><span class="n">03</span><h3>Schlank bauen, 100 erreichen</h3><p>Handgeschrieben für Tempo und Suche: semantisches HTML, JSON-LD, optimierte Bilder, CMS bei Bedarf. Lighthouse wird während des Baus gemessen, nicht am Ende.</p></article><article class="step"><span class="n">04</span><h3>Live &amp; übergeben</h3><p>Live auf Vercel oder Cloudflare, dokumentiert, Ihr Eigentum. Sie pflegen es selbst oder schicken uns die gelegentliche Änderung. Plus 30 Tage Support.</p></article></div>
+      <ol class="stepper" data-stepper data-reveal-group data-reveal-step="0.10"><span class="fill" aria-hidden="true"></span><div class="st" data-reveal><span class="n" aria-hidden="true">01</span><div class="body"><h3>Botschaft &amp; Struktur</h3><p>Ein Arbeitstermin: Mit wem sprechen Sie, was sollen die Leute tun? Wir planen die Seiten, die ihren Platz verdienen – und streichen die anderen.</p></div></div><div class="st" data-reveal><span class="n" aria-hidden="true">02</span><div class="body"><h3>Die erste Sekunde gestalten</h3><p>Ein eigenes Design für Ihre Marke – Schrift, Farbe, Rhythmus, Bewegung. Echte Screens statt Vorlage, iteriert, bis der erste Eindruck stimmt.</p></div></div><div class="st" data-reveal><span class="n" aria-hidden="true">03</span><div class="body"><h3>Schlank bauen, 100 erreichen</h3><p>Handgeschrieben für Tempo und Suche: semantisches HTML, JSON-LD, optimierte Bilder, CMS bei Bedarf. Lighthouse wird während des Baus gemessen, nicht am Ende.</p></div></div><div class="st" data-reveal><span class="n" aria-hidden="true">04</span><div class="body"><h3>Live &amp; übergeben</h3><p>Live auf Vercel oder Cloudflare, dokumentiert, Ihr Eigentum. Sie pflegen es selbst oder schicken uns die gelegentliche Änderung. Plus 30 Tage Support.</p></div></div></ol>
     </div>
   </section>
 
-  <section class="band">
+  <section class="band tint" id="faq">
     <div class="wrap">
-      <div class="head prose"><h2>Womit wir das bauen</h2></div>
-      <ul class="chips"><li class="chip">HTML</li><li class="chip">CSS</li><li class="chip">JavaScript</li><li class="chip">Astro</li><li class="chip">Next.js</li><li class="chip">Tailwind</li><li class="chip">Sanity</li><li class="chip">Headless CMS</li><li class="chip">Vercel</li><li class="chip">Cloudflare</li><li class="chip">JSON-LD</li><li class="chip">llms.txt</li><li class="chip">Lighthouse</li><li class="chip">WebP / AVIF</li></ul>
-    </div>
-  </section>
-
-  <section class="band tint">
-    <div class="wrap">
-      <div class="head prose">
+      <div class="head prose" data-reveal>
         <h2>Fragen</h2>
         <p class="kicker">Was Sie wirklich fragen.</p>
       </div>
-      <div class="faq"><details><summary>Wie garantieren Sie Tempo und den perfekten Lighthouse-Score?</summary><p>Indem wir während des Baus messen, nicht am Ende. Schlankes HTML, kritisches CSS inline, exakt bemessene Bilder. Der Beweis ist unsere eigene Seite: 100 auf allen vier Achsen – mit laufender Canvas-Engine.</p></details><details><summary>Bekommen wir ein CMS, um die Seite selbst zu pflegen?</summary><p>Wenn Sie eins wollen, ja – Headless-CMS mit sauberem Admin und automatischen Rebuilds. Rein statisch mit Änderungen per E-Mail ist günstiger und schneller. Wir sagen Ihnen, was Ihre Seite wirklich braucht.</p></details><details><summary>Ist SEO inklusive – oder eine eigene Rechnung?</summary><p>Inklusive. Semantische Struktur, JSON-LD, Sitemap, saubere Meta-Daten und crawlbarer DOM-Text gehören zum Bau, nicht zum Upsell. Dazu llms.txt, damit KI-Suche Sie so klar liest wie Google.</p></details><details><summary>Was kostet eine Website, und wie lange dauert sie?</summary><p>Typischerweise 3–6 Wochen vom Briefing bis live, echte Screens in Woche eins. Festpreis in 48 Stunden – eine echte Zahl. Eine kleine Seite beginnt im niedrigen fünfstelligen Bereich.</p></details><details><summary>Warum kein WordPress?</summary><p>Weil das, was WordPress bequem macht, es auch langsam macht: Themes, Plugins, Datenbankabfragen für Inhalte, die sich nie ändern. Für eine Marketing-Seite ist handgeschrieben und statisch schneller, sicherer und günstiger im Betrieb.</p></details></div>
+      <div class="faq" data-reveal><details><summary>Wie garantieren Sie Tempo und den perfekten Lighthouse-Score?</summary><div class="a"><div><p>Indem wir während des Baus messen, nicht am Ende. Schlankes HTML, kritisches CSS inline, exakt bemessene Bilder. Der Beweis ist unsere eigene Seite: 100 auf allen vier Achsen – mit laufender Canvas-Engine.</p></div></div></details><details><summary>Bekommen wir ein CMS, um die Seite selbst zu pflegen?</summary><div class="a"><div><p>Wenn Sie eins wollen, ja – Headless-CMS mit sauberem Admin und automatischen Rebuilds. Rein statisch mit Änderungen per E-Mail ist günstiger und schneller. Wir sagen Ihnen, was Ihre Seite wirklich braucht.</p></div></div></details><details><summary>Ist SEO inklusive – oder eine eigene Rechnung?</summary><div class="a"><div><p>Inklusive. Semantische Struktur, JSON-LD, Sitemap, saubere Meta-Daten und crawlbarer DOM-Text gehören zum Bau, nicht zum Upsell. Dazu llms.txt, damit KI-Suche Sie so klar liest wie Google.</p></div></div></details><details><summary>Was kostet eine Website, und wie lange dauert sie?</summary><div class="a"><div><p>Typischerweise 3–6 Wochen vom Briefing bis live, echte Screens in Woche eins. Festpreis in 48 Stunden – eine echte Zahl. Eine kleine Seite beginnt im niedrigen fünfstelligen Bereich.</p></div></div></details><details><summary>Warum kein WordPress?</summary><div class="a"><div><p>Weil das, was WordPress bequem macht, es auch langsam macht: Themes, Plugins, Datenbankabfragen für Inhalte, die sich nie ändern. Für eine Marketing-Seite ist handgeschrieben und statisch schneller, sicherer und günstiger im Betrieb.</p></div></div></details></div>
     </div>
   </section>
 
-  <section class="band">
+  <section class="band" id="rel">
     <div class="wrap">
-      <div class="head prose"><h2>Weitere Leistungen</h2></div>
-      <div class="rel"><a href="../services/ai-tools.html">KI-Tools<span aria-hidden="true">→</span></a><a href="../services/web-apps.html">Web-Apps<span aria-hidden="true">→</span></a><a href="../services/software.html">Software<span aria-hidden="true">→</span></a></div>
-    </div>
-  </section>
-
-  <section class="band">
-    <div class="wrap">
-      <div class="cta">
-        <h2>Bereit für ein Gespräch?</h2>
-        <p>Antwort in 24 Stunden, Festpreis in 48 – von einer der zwei Personen,
-           die es bauen würden.</p>
-        <div class="actions">
-          <a class="btn" href="../kontakt.html">Projekt anfragen</a>
-          <a class="btn ghost" href="mailto:info@mccain-digital.com">info@mccain-digital.com</a>
-        </div>
+      <div class="head prose" data-reveal>
+        <h2>Weitere Leistungen</h2>
       </div>
+      <div class="rel" data-reveal-group data-reveal-step="0.06"><a href="../services/ai-tools.html" data-reveal>KI-Tools<span aria-hidden="true">&#8594;</span></a><a href="../services/web-apps.html" data-reveal>Web-Apps<span aria-hidden="true">&#8594;</span></a><a href="../services/software.html" data-reveal>Software<span aria-hidden="true">&#8594;</span></a></div>
     </div>
   </section>
 </main>
 
-<footer class="site">
-  <div class="wrap">
+<section class="endband" id="kontakt">
+  <div class="ground" aria-hidden="true"></div>
+  <div class="inner">
+    <div data-reveal>
+      <p class="eyebrow">Kontakt</p>
+      <h2>Erzählen Sie uns von Ihrem Vorhaben.</h2>
+      <p class="lead">Eine Antwort innerhalb von 24 Stunden, ein Festpreis innerhalb
+        von 48 &#8211; von einer der zwei Personen, die es bauen würden.</p>
+      <div class="rows">
+        <a href="mailto:info@mccain-digital.com"><span class="ib" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><use href="../brand/mccain-icons.svg#mail"></use></svg></span>info@mccain-digital.com</a>
+        <a href="tel:+491705922203"><span class="ib" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><use href="../brand/mccain-icons.svg#phone"></use></svg></span>+49 170 59 222 03</a>
+        <div><span class="ib" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><use href="../brand/mccain-icons.svg#globe"></use></svg></span>
+          Holderweg 1 &#183; 86869 Oberostendorf &#183; Bayern</div>
+        <div><span class="ib" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><use href="../brand/mccain-icons.svg#calendar"></use></svg></span>
+          Mo&#8211;Fr &#183; 9:00&#8211;18:00 Uhr (MEZ)</div>
+      </div>
+    </div>
+    <div class="card" data-reveal="0.1">
+      <form id="contact-form" method="POST" action="https://api.web3forms.com/submit">
+        <input type="hidden" name="access_key" value="d3e1fa0a-cbe1-45cd-b823-c63eff37c66a">
+        <input type="hidden" name="subject" value="Anfrage über mccain-digital.com">
+        <input type="hidden" name="from_name" value="mccain-digital.com">
+        <input type="hidden" name="redirect" value="https://mccain-digital.com/kontakt.html?sent=1">
+        <label>Name<input name="name" type="text" required autocomplete="name"></label>
+        <label>E-Mail<input name="email" type="email" required autocomplete="email"></label>
+        <label>Worum geht es?<textarea name="message" rows="4" required
+          placeholder="Eine Zeile reicht."></textarea></label>
+        <div class="hp" aria-hidden="true">
+          <label>Firma<input name="company" type="text" tabindex="-1" autocomplete="off"></label>
+        </div>
+        <button class="btn" type="submit">Anfrage senden
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><use href="../brand/mccain-icons.svg#chevron-right"></use></svg></button>
+        <p id="form-status" role="status" aria-live="polite"></p>
+        <p class="note">Ihre Angaben werden nur zur Beantwortung Ihrer Anfrage
+          verwendet &#8211; <a href="../legal/privacy.html">Datenschutz</a>.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer class="site-foot">
+  <div class="inner">
     <div class="fcols">
       <div class="fcol">
         <h2>Leistungen</h2>
-        <ul><li><a href="../services/ai-tools.html">KI-Tools</a></li><li><a href="../services/web-apps.html">Web-Apps</a></li><li><a href="../services/websites.html" aria-current="page">Websites</a></li><li><a href="../services/software.html">Software</a></li></ul>
+        <ul>
+          <li><a href="../services/ai-tools.html">KI-Tools</a></li>
+          <li><a href="../services/web-apps.html">Web-Apps</a></li>
+          <li><a href="../services/websites.html" aria-current="page">Websites</a></li>
+          <li><a href="../services/software.html">Software f&uuml;r Unternehmen</a></li>
+        </ul>
+      </div>
+      <div class="fcol">
+        <h2>Arbeiten</h2>
+        <ul>
+          <li><a href="../index.html#work">whatever-recall</a></li>
+          <li><a href="../index.html#work">mccain-digital.com</a></li>
+        </ul>
       </div>
       <div class="fcol">
         <h2>Studio</h2>
         <ul>
-          <li><a href="../kontakt.html">Kontakt</a></li>
-          <li><a href="../index.html">Startseite</a></li>
           <li><a href="../index.html#studio">Team</a></li>
           <li><a href="../index.html#process">Ablauf</a></li>
+          <li><a href="../index.html#faq">Fragen &amp; Antworten</a></li>
+          <li><a href="../kontakt.html">Kontakt</a></li>
         </ul>
       </div>
       <div class="fcol">
         <h2>Ressourcen</h2>
         <ul>
-          <li><a href="../brand-guide.html">Marke &amp;amp; Downloads</a></li>
-          <li><a href="../llms.txt">llms.txt</a></li>
-          <li><a href="../index.html#faq">Fragen &amp; Antworten</a></li>
+          <li><a href="../brand-guide.html">Marke &amp; Downloads</a></li>
+          <li><a href="../llms.txt">llms.txt &amp; KI-Lesbarkeit</a></li>
+          <li><a href="../index.html#stack">Stack &amp; Werkzeuge</a></li>
         </ul>
       </div>
       <div class="fcol">
         <h2>Rechtliches</h2>
-        <ul><li><a href="../legal/imprint.html">Impressum</a></li><li><a href="../legal/privacy.html">Datenschutz</a></li><li><a href="../legal/terms.html">AGB</a></li><li><a href="../legal/withdrawal.html">Widerruf</a></li></ul>
+        <ul>
+          <li><a href="../legal/imprint.html">Impressum</a></li>
+          <li><a href="../legal/privacy.html">Datenschutz</a></li>
+          <li><a href="../legal/terms.html">AGB</a></li>
+          <li><a href="../legal/withdrawal.html">Widerruf</a></li>
+        </ul>
       </div>
     </div>
+
     <div class="fbot">
-      <span class="copy">© 2026 McCain Digital · Oberostendorf, Bayern</span>
-      <a href="mailto:info@mccain-digital.com">info@mccain-digital.com</a>
-      <a href="tel:+491705922203">+49 170 59 222 03</a>
+      <div class="id">
+        <img src="../brand/mccain-mark-free-color.svg" width="28" height="28" alt="">
+        <span>&copy; 2026 McCain Digital &middot; Oberostendorf, Bayern</span>
+      </div>
+      <div class="meta">
+        <a class="brand" href="../brand-guide.html">Marke &amp; Downloads<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow-ur"></use></svg></a>
+        <span>Gebaut von den zwei Personen, die es anbieten.</span>
+        <a href="mailto:info@mccain-digital.com">info@mccain-digital.com</a>
+        <a href="tel:+491705922203">+49&nbsp;170&nbsp;59&nbsp;222&nbsp;03</a>
+      </div>
     </div>
   </div>
 </footer>
+<div class="dock" data-dock data-show="false">
+
+  <div class="dock-panel" data-dock-panel id="mcd-ask" hidden>
+    <div class="dock-head">
+      <img class="mk" src="../brand/mccain-mark-free-color.svg" width="28" height="28" alt="">
+      <span class="t">Fragen</span>
+      <!-- The start page prints "claude-haiku-4-5" here. On a static page no
+           model answers - say what actually answers. -->
+      <span class="src">Wissensbasis</span>
+      <button class="dock-close" type="button" data-dock-close aria-label="Schlie&szlig;en">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-x"></use></svg>
+      </button>
+    </div>
+
+    <div class="dock-list" data-dock-list role="log" aria-live="polite" aria-label="Antworten">
+      <p class="intro">Fragen Sie mich zu Kosten, Dauer oder Vorgehen &ndash; oder
+         beschreiben Sie Ihr Vorhaben in einer Zeile.</p>
+    </div>
+
+    <div class="dock-chips" data-dock-chips>
+      <button type="button">Was kostet ein Projekt?</button>
+      <button type="button">Wie lange dauert eine Web-App?</button>
+      <button type="button">Wer baut das konkret?</button>
+      <button type="button">K&ouml;nnen wir selbst hosten?</button>
+    </div>
+
+    <form class="dock-form" data-dock-form>
+      <span class="ring">
+        <input type="text" maxlength="500" placeholder="Ihre Frage &hellip;"
+               aria-label="Ihre Frage" data-dock-input>
+      </span>
+      <button type="submit">Senden</button>
+    </form>
+  </div>
+
+  <button class="dock-btn" type="button" data-dock-toggle aria-expanded="false"
+          aria-controls="mcd-ask">
+    <img src="../brand/mccain-mark-free-color.svg" width="28" height="28" alt="">
+    <span data-dock-label>Die Seite fragen</span>
+  </button>
+</div>
+<script>
+(function(){
+  var h=document.querySelector('header.site');
+  if(h){var t=function(){if(scrollY>12)h.setAttribute('data-scrolled','');
+    else h.removeAttribute('data-scrolled')};t();
+    addEventListener('scroll',t,{passive:true})}
+  /* <details> cannot animate its own open, so the height is animated on a grid
+     row inside it and the element is kept open for the length of the close. */
+  var red=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('.faq details').forEach(function(d){
+    var a=d.querySelector('.a'); if(!a||red) return;
+    a.style.gridTemplateRows=d.open?'1fr':'0fr';
+    d.querySelector('summary').addEventListener('click',function(e){
+      e.preventDefault();
+      if(d.open){a.style.gridTemplateRows='0fr';
+        var end=function(){d.open=false;a.removeEventListener('transitionend',end)};
+        a.addEventListener('transitionend',end);
+      }else{d.open=true;a.offsetHeight;a.style.gridTemplateRows='1fr'}
+    });
+  });
+
+  /* The process stepper lights up as it is read past, the way the start page's
+     does: a step is "on" once its dot has crossed the reading line at 55% of
+     the viewport, and the rail fills to the last lit dot. Pure decoration -
+     every step is fully readable without it. */
+  document.querySelectorAll('[data-stepper]').forEach(function(st){
+    var dots=[].slice.call(st.querySelectorAll('.st')),
+        fill=st.querySelector('.fill');
+    if(!dots.length) return;
+    var tick=function(){
+      var line=innerHeight*0.55, last=-1;
+      dots.forEach(function(d,i){
+        var n=d.querySelector('.n'); if(!n) return;
+        var r=n.getBoundingClientRect();
+        if(r.top+r.height/2<=line){d.setAttribute('data-on','');last=i}
+        else d.removeAttribute('data-on');
+      });
+      if(fill){
+        if(last<0){fill.style.height='0px';return}
+        var a=dots[0].querySelector('.n').getBoundingClientRect(),
+            b=dots[last].querySelector('.n').getBoundingClientRect();
+        fill.style.height=Math.max(0,(b.top+b.height/2)-(a.top+a.height/2))+'px';
+      }
+    };
+    var q=0,run=function(){q=0;tick()};
+    var sched=function(){if(!q)q=requestAnimationFrame(run)};
+    tick(); addEventListener('scroll',sched,{passive:true});
+    addEventListener('resize',sched);
+  });
+})();
+</script>
+<script src="../stream.js" defer></script>
+<script src="../chrome.js" defer></script>
+<script src="../reveal.js" defer></script>
+<script>
+(function () {
+  var f = document.getElementById('contact-form');
+  var out = document.getElementById('form-status');
+  if (!f || !out) return;
+
+  /* Web3Forms redirects here after a native (non-fetch) submit, which is the
+     fallback path both this form and the start page's form use when the request
+     cannot be made. Without this the visitor lands on a contact page that looks
+     like nothing happened. */
+  if (/[?&]sent=1(&|$)/.test(location.search)) {
+    out.setAttribute('data-state', 'ok');
+    out.textContent = 'Danke – Ihre Nachricht ist da. Sie hören innerhalb von 24 Stunden von Christian oder Kathi.';
+    if (history.replaceState) history.replaceState({}, '', location.pathname);
+  }
+
+  if (!window.fetch || !window.FormData) return;
+  f.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (f.elements.company && f.elements.company.value) return;   /* honeypot */
+    var btn = f.querySelector('button[type=submit]');
+    var label = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Wird gesendet …'; }
+    out.removeAttribute('data-state');
+    out.textContent = '';
+    fetch(f.action, { method: 'POST', body: new FormData(f) })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d || d.success !== true) throw new Error('rejected');
+        f.reset();
+        out.setAttribute('data-state', 'ok');
+        out.textContent = 'Danke – Ihre Nachricht ist da. Sie hören innerhalb von 24 Stunden von Christian oder Kathi.';
+      })
+      .catch(function () {
+        /* Never claim it was sent. Let the browser post the form the ordinary
+           way; if that is blocked too, the address next to the form still is. */
+        out.setAttribute('data-state', 'error');
+        out.textContent = 'Das Senden hat nicht geklappt – wir versuchen es direkt.';
+        f.submit();
+      })
+      .then(function () { if (btn) { btn.disabled = false; btn.textContent = label; } });
+  });
+})();
+</script>
 </body>
 </html>

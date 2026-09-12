@@ -19,6 +19,10 @@ import io
 import os
 import json
 import re
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import pagekit as pk  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SITE = os.path.dirname(HERE)
@@ -78,47 +82,8 @@ PAGES = [
 # Only the values actually used, taken from mccain-design-system/tokens/*.css.
 # Inlined rather than linked: four small pages, and one fewer render-blocking
 # request beats the shared-cache win at this size.
-CSS = """
-*,*::before,*::after{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{margin:0;background:#fff;color:#0A2540;
-  font-family:'Instrument Sans',system-ui,-apple-system,sans-serif;
-  -webkit-font-smoothing:antialiased}
-::selection{background:rgba(99,91,255,.22)}
-a{color:#4D47C7;text-decoration:none}
-a:hover{color:#0A2540;text-decoration:underline}
-:focus-visible{outline:2px solid #635BFF;outline-offset:2px;
-  box-shadow:0 0 0 4px rgba(99,91,255,.28);border-radius:4px}
-
-.skip{position:absolute;left:-9999px;top:0;z-index:10;background:#fff;
-  padding:12px 18px;border-radius:8px;box-shadow:0 0 0 1px #E3E8EE}
-.skip:focus{left:16px;top:16px}
-
-header.site{position:sticky;top:0;z-index:5;height:72px;display:flex;
-  align-items:center;justify-content:space-between;
-  padding:0 clamp(20px,4vw,48px);
-  background:rgba(255,255,255,.92);backdrop-filter:blur(14px);
-  box-shadow:0 1px 0 #E3E8EE}
-.lockup{display:flex;align-items:center;gap:12px;color:#0A2540;font-weight:600;
-  font-size:17px;letter-spacing:-.02em}
-.lockup:hover{text-decoration:none;color:#0A2540}
-.lockup img{display:block}
-.lockup .sep{color:#C6CEDA;font-weight:400}
-.lockup .kind{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;
-  letter-spacing:.06em;color:#626F8A;font-weight:400}
-.back{display:inline-flex;align-items:center;gap:8px;font-size:15px;
-  font-weight:600;color:#0A2540}
-.back:hover{color:#4D47C7;text-decoration:none}
-
-main{padding:clamp(48px,7vw,96px) clamp(20px,4vw,48px) 0}
+LEGAL_CSS = """
 .col{max-width:720px;margin:0 auto}
-.crumb{font-size:13px;color:#626F8A;margin:0 0 18px}
-.crumb a{color:#626F8A}
-.crumb b{color:#0A2540;font-weight:600}
-.crumb i{font-style:normal;padding:0 8px;color:#C6CEDA}
-.eyebrow{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;
-  letter-spacing:.06em;color:#4D47C7;margin:0 0 12px;text-transform:uppercase}
-
 .legal h1{font-size:clamp(32px,4.2vw,48px);line-height:1.1;letter-spacing:-.03em;
   font-weight:700;margin:0 0 28px;text-wrap:balance}
 .legal h2{font-size:clamp(20px,2.2vw,24px);line-height:1.25;letter-spacing:-.02em;
@@ -147,104 +112,10 @@ main{padding:clamp(48px,7vw,96px) clamp(20px,4vw,48px) 0}
 .l-updated{margin:56px 0 0;padding-top:20px;border-top:1px solid #E3E8EE;
   font-size:13px;color:#626F8A}
 
-footer.site{margin-top:clamp(64px,8vw,110px);background:#0A1F44;color:#C5D0F5;
-  padding:clamp(40px,5vw,64px) clamp(20px,4vw,48px)}
-footer.site .in{max-width:720px;margin:0 auto;display:flex;flex-wrap:wrap;
-  gap:16px 28px;align-items:center;font-size:14px}
-footer.site a{color:#C5D0F5}
-footer.site a:hover{color:#fff}
-footer.site .legal-links{display:flex;flex-wrap:wrap;gap:16px;
-  width:100%;padding-top:18px;margin-top:4px;
-  border-top:1px solid rgba(255,255,255,.08)}
-footer.site .legal-links a[aria-current]{color:#fff;font-weight:600}
 
-@media (prefers-reduced-motion:reduce){*{animation:none!important;
-  transition:none!important;scroll-behavior:auto!important}}
 """
 
-SHELL = """<!DOCTYPE html>
-<!-- GENERATED - do not edit by hand.
 
-     Body text is VERBATIM from archive/site-apache/upload/legal/{src}; that wording is legally
-     reviewed. Regenerate with `python tools/build_legal.py` rather than editing
-     the prose here. The shell (header, footer, styles) is ours.
-
-     lang="en" is deliberate: the reviewed wording is English while the rest of
-     the site is German. See the note at the top of tools/build_legal.py. -->
-<html lang="en">
-
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{title} — McCain Digital</title>
-<meta name="description" content="{desc}">
-<link rel="canonical" href="{origin}/legal/{src}">
-<meta name="robots" content="{ROBOTS}">
-<meta name="theme-color" content="#635BFF">
-<meta property="og:type" content="article">
-<meta property="og:site_name" content="McCain Digital">
-<meta property="og:locale" content="en_GB">
-<meta property="og:url" content="{origin}/legal/{src}">
-<meta property="og:title" content="{title} — McCain Digital">
-<meta property="og:description" content="{desc}">
-<meta property="og:image" content="{origin}/og-image.png">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="../brand/mccain-favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="../brand/apple-touch-icon-180.png">
-{preloads}
-<link rel="stylesheet" href="../fonts/fonts.css">
-<style>{css}</style>{ld}
-</head>
-
-<body>
-<a class="skip" href="#content">Skip to content</a>
-
-<header class="site" lang="de">
-  <a class="lockup" href="../index.html">
-    <img src="../brand/mccain-mark-free-color.svg" alt="" width="28" height="28">
-    <span>mccain digital</span>
-    <span class="sep">/</span>
-    <span class="kind">{kind}</span>
-  </a>
-  <a class="back" href="../index.html">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M19 12H5M12 19l-7-7 7-7"/>
-    </svg>
-    Zur Startseite
-  </a>
-</header>
-
-<main id="content">
-  <div class="col">
-    <nav class="crumb" lang="de" aria-label="Brotkrume">
-      <a href="../index.html" aria-label="Zur Startseite">Start</a><i aria-hidden="true">/</i><b aria-current="page">{kind}</b>
-    </nav>
-    <p class="eyebrow" lang="de">{kind}</p>
-    <article class="legal">
-{body}
-      <p class="l-updated">Wording taken unchanged from the reviewed live-site text.</p>
-    </article>
-  </div>
-</main>
-
-<footer class="site">
-  <div class="in">
-    <a class="lockup" href="../index.html" style="color:#fff">
-      <img src="../brand/mccain-mark-free-white.svg" alt="" width="24" height="24">
-      <span>mccain digital</span>
-    </a>
-    <span lang="de">© {year} · Bayern, Deutschland</span>
-    <nav class="legal-links" lang="de" aria-label="Rechtliches">
-{footlinks}
-    </nav>
-  </div>
-</footer>
-
-</body>
-
-</html>
-"""
 
 
 def body_of(path):
@@ -270,35 +141,55 @@ def body_of(path):
 
 
 def main():
-    fonts = os.path.join(SITE, "fonts")
-    if not os.path.isdir(fonts):
-        raise SystemExit("fonts/ is missing - run tools/vendor_assets.py first")
-    preloads = "\n".join(
-        f'<link rel="preload" href="../fonts/{f}" as="font" type="font/woff2" crossorigin>'
-        for f in sorted(os.listdir(fonts))
-        if f.endswith("-normal-latin.woff2")
-    )
-    if preloads.count("<link") != 2:
-        raise SystemExit("expected 2 upright latin faces in fonts/ - "
-                         "run tools/vendor_assets.py")
-
     os.makedirs(DST, exist_ok=True)
     for src, title, kind, desc, ld in PAGES:
-        footlinks = "\n".join(
-            '      <a href="{h}"{cur}>{k}</a>'.format(
-                h=p[0], k=p[2], cur=' aria-current="page"' if p[0] == src else ""
-            )
-            for p in PAGES
-        )
+        path = "legal/" + src
         body = body_of(os.path.join(SRC, src))
-        html = SHELL.format(
-            src=src, title=title, kind=kind, desc=desc, body=body, ld=ld,
-            css=CSS, preloads=preloads, origin=ORIGIN, year=2026,
-            footlinks=footlinks, ROBOTS=ROBOTS,
+        head = pk.head(
+            title=f"{title} — McCain Digital",
+            desc=desc,
+            canonical=path,
+            depth=1,
+            ld=ld,
+            extra="\n<style>" + LEGAL_CSS + "</style>",
         )
+        # The page declares German because the shell around the text - header,
+        # six menus, contact band, footer - is German and is most of the markup.
+        # The reviewed wording itself is English and says so on the <article>,
+        # which is the element the text is actually in. Machine-translating
+        # reviewed legal wording is not on the table; see the note at the top.
+        html_body = f"""{pk.page_stream("kontakt")}
+{pk.header(kind=kind, depth=1, current=path)}
+
+<main id="content">
+  <section class="band">
+    <div class="wrap">
+      {pk.crumb(depth=1, trail=[("index.html", "Start"), (None, kind)])}
+      <p class="eyebrow">{kind}</p>
+      <article class="legal prose" lang="en">
+{body}
+        <p class="l-updated" lang="de">Wortlaut unverändert aus der geprüften Fassung
+          der Live-Seite übernommen.</p>
+      </article>
+    </div>
+  </section>
+</main>
+
+{pk.footer(depth=1, current=path)}
+{pk.scripts(depth=1, stream=True)}"""
+
+        banner = "\n".join([
+            "GENERATED - do not edit by hand.  python tools/build_legal.py",
+            "",
+            f"     Body text is VERBATIM from archive/site-apache/upload/legal/{src};",
+            "     that wording is legally reviewed. Regenerate rather than editing",
+            "     the prose here. The shell is the site's own, from tools/pagekit.py.",
+        ])
+        out_html = pk.document(lang="de", banner=banner, head_html=head,
+                               body_html=html_body)
         out = os.path.join(DST, src)
-        io.open(out, "w", encoding="utf-8", newline="\n").write(html)
-        print(f"  {('legal/' + src):<24} {len(html):>7,} bytes   "
+        io.open(out, "w", encoding="utf-8", newline="\n").write(out_html)
+        print(f"  {path:<24} {len(out_html):>7,} bytes   "
               f"{body.count('<h2')} sections")
 
 

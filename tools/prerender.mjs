@@ -80,7 +80,7 @@ const HERO_H1 = "KI-Tools, die auf Ihren Daten laufen.";
  * gate would catch it, because the gate clicks.
  *
  * Both are re-derived on every build, so the two editions cannot drift. */
-const MINIFY = new Set(["pixel-engine.js", "support.js"]);
+const MINIFY = new Set(["pixel-engine.js", "support.js", "stream.js", "reveal.js", "chrome.js"]);
 
 /* Copied so the site root is self-contained and a deploy never has to reach
  * into mccain-design-system/, which is .vercelignore'd. */
@@ -91,6 +91,14 @@ const ASSETS = {
   "mccain-design-system/reference/img": "img",
   "mccain-design-system/reference/team": "team",
   "mccain-design-system/brand": "brand",
+  /* The two subpage effect modules. They are not part of the Claude Design
+   * export - they were lifted OUT of it - so their commented sources live in
+   * internal/fx/ (never served) and the minified editions are copied here,
+   * exactly like support.js and pixel-engine.js. One source, two editions,
+   * re-derived on every build so they cannot drift. */
+  "internal/fx/stream.js": "stream.js",
+  "internal/fx/reveal.js": "reveal.js",
+  "internal/fx/chrome.js": "chrome.js",
 };
 
 const RESOURCE_MAP = {
