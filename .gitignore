@@ -47,3 +47,7 @@ mccain-design-system/uploads/
 # tools/prerender.mjs is running; a crash can leave it behind.
 _dcbuild/
 
+
+# Owner drops DevTools traces here while measuring - never committed.
+Trace-*.json
+Trace-*.json.gz

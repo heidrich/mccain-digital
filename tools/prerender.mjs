@@ -852,6 +852,70 @@ function patchRuntime(code) {
   return code.split(HYDRATE_FROM).join(HYDRATE_TO).split(MOUNT_FROM).join(MOUNT_TO);
 }
 
+/* THE BRAND MARK IS 146 DOM NODES IN A 34-PIXEL BOX, FIVE TIMES PER PAGE.
+ *
+ * Measured 13.9.2026 on the start page: five marks x 146 cells = 730 elements,
+ * 23 % of the whole document, and 138.026 B of the 845.734 B of HTML - for
+ * logos between 22 and 34 pixels. PageSpeed named it without being asked: "Die
+ * meisten untergeordneten Elemente: header > div > button > svg ... 146".
+ *
+ * Why that is expensive even standing still: every one of those rects carries
+ * an inline style, so each of them is a row in every style recalculation, a box
+ * in every layout pass and a paint op in every paint. The owner's own recording
+ * put Recalculate style, Layerize, Layout, Paint, Commit and Pre-paint together
+ * at 65 % of the profile - the pipeline, not the script. Nothing shrinks that
+ * like removing a quarter of the DOM.
+ *
+ * So the mark becomes ONE <img> pointing at a standalone SVG file. Identical
+ * pixels - it is the same geometry, the same fills, written out instead of
+ * built as elements - but the browser rasterises it once in an image context
+ * and caches it across all 21 pages. Zero nodes, zero style rows, zero layout
+ * boxes on the page itself.
+ *
+ * The files are not hand-written: mark() itself stashes the SVG it WOULD have
+ * built into window.__dcMarks while ssrRender() runs, and the build writes
+ * whatever it finds there. So the file and the markup cannot drift - they come
+ * from the same call.
+ *
+ * The key is size plus colour variant, which is exactly what tileFree() varies
+ * on now that stillMark() has pinned the mode: a 22px mark has 146 cells, the
+ * 52px one 152 and the 88px one 151, so the geometry really is per size.
+ *
+ * Runs AFTER stillMark(), and matches the stilled text on purpose: chaining the
+ * assertions means a re-export that changes either one fails loudly instead of
+ * silently keeping 730 nodes.
+ */
+const MARKIMG_FROM =
+  "  mark(size, v, mode) {\n" +
+  "    const t = this.tileFree(size, v, 'static');\n" +
+  "    return React.createElement('svg', { viewBox: '0 0 64 64', width: t.size, height: t.size, 'aria-hidden': 'true', style: { display: 'block', flex: 'none' } },\n" +
+  "      t.cells.map((c, i) => React.createElement('rect', { key: i, fillOpacity: c.o, x: c.x, y: c.y, width: c.s, height: c.s, rx: c.r, fill: c.fill, style: { transformBox: 'fill-box', transformOrigin: 'center', animation: c.anim } })));\n" +
+  "  }\n";
+
+const MARKIMG_TO =
+  "  mark(size, v, mode) {\n" +
+  "    const t = this.tileFree(size, v, 'static');\n" +
+  "    const key = t.size + '-' + (v === 'white' ? 'w' : 'c');\n" +
+  "    if (typeof window !== 'undefined') {\n" +
+  "      const reg = (window.__dcMarks = window.__dcMarks || {});\n" +
+  "      if (!reg[key]) reg[key] = '<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"' + t.size + '\" height=\"' + t.size + '\">' + t.cells.map(function (c) {\n" +
+  "        return '<rect x=\"' + c.x + '\" y=\"' + c.y + '\" width=\"' + c.s + '\" height=\"' + c.s + '\" rx=\"' + c.r + '\" fill=\"' + c.fill + '\"' + (c.o == null ? '' : ' fill-opacity=\"' + c.o + '\"') + '/>';\n" +
+  "      }).join('') + '</svg>';\n" +
+  "    }\n" +
+  "    return React.createElement('img', { src: '/brand/mark-' + key + '.svg', width: t.size, height: t.size, alt: '', 'aria-hidden': 'true', decoding: 'async', style: { display: 'block', flex: 'none' } });\n" +
+  "  }\n";
+
+function markToFile(script, name) {
+  const n = script.split(MARKIMG_FROM).length - 1;
+  if (n !== 1) {
+    throw new Error(
+      `prerender: expected exactly one mark() to turn into an <img> in ${name}, found ${n}. ` +
+        `The export redrew the brand mark - re-read it and update MARKIMG_FROM.`
+    );
+  }
+  return { script: script.split(MARKIMG_FROM).join(MARKIMG_TO) };
+}
+
 /* NO PAGE HAD A <main>.
  *
  * The content sections sit as siblings between <header> and <footer>, so a
@@ -1173,7 +1237,10 @@ ${script}
         return { error: "data-props is not readable: " + e.message };
       }
       try {
-        return { html: window.ReactDOMServer.renderToString(window.React.createElement(Root, props)), props: Object.keys(props) };
+        const html = window.ReactDOMServer.renderToString(window.React.createElement(Root, props));
+        /* markToFile() stashed the SVG each mark WOULD have built while this
+         * render ran, so file and markup come from the same call. */
+        return { html, props: Object.keys(props), marks: window.__dcMarks || {} };
       } catch (e) {
         return { error: "renderToString threw: " + (e && e.message) };
       }
@@ -1186,6 +1253,41 @@ ${script}
     if (out.html.includes("{{")) throw new Error(`prerender: unresolved {{ }} in the render of ${name}`);
     const errs = tab.mcdErrors.filter((e) => e.startsWith("pageerror:"));
     if (errs.length) throw new Error(`prerender: ${name} threw while rendering - ${errs[0].slice(0, 200)}`);
+
+    /* One file per size and colour variant, shared by all 21 pages and cached
+     * for a year (/(.*).svg is immutable in vercel.json). Written only when the
+     * bytes change, so a rebuild does not churn the working tree. */
+    const dir = path.join(SITE, "brand");
+    fs.mkdirSync(dir, { recursive: true });
+    for (const [key, svg] of Object.entries(out.marks || {})) {
+      const file = path.join(dir, `mark-${key}.svg`);
+      const cur = fs.existsSync(file) ? fs.readFileSync(file, "utf8") : null;
+      if (cur !== svg) fs.writeFileSync(file, svg, "utf8");
+      markFiles.set(key, svg.length);
+    }
+    if (!Object.keys(out.marks || {}).length) {
+      throw new Error(`prerender: ${name} rendered no brand mark - markToFile() did not run`);
+    }
+    /* THE BRAND GUIDE DRAWS THE MARK ITSELF, AND THERE IT IS THE SUBJECT.
+     *
+     * Everywhere else the mark comes from mark(), so after markToFile() there
+     * must be no inline one left - a leftover means the patch missed a call
+     * site and that page keeps its 146 nodes. /marke/ is different: seven marks
+     * are written straight into the template, because showing the logo in its
+     * variants IS that page's content. Those are counted rather than forbidden,
+     * so a redesign that adds a twentieth still fails here instead of slipping
+     * through. Nineteen, not the seven literals in the template: <sc-for>
+     * multiplies them. At 146 cells each that is 2.774 of that page's 3.696
+     * elements - which is why /marke/ has the largest DOM of the 21, and why it
+     * is the obvious follow-up. */
+    const inline = (out.html.match(/viewBox="0 0 64 64"/g) || []).length;
+    const allowed = name === "McCain Digital Brand Guide v2.dc.html" ? 19 : 0;
+    if (inline !== allowed) {
+      throw new Error(
+        `prerender: ${name} carries ${inline} inline brand mark(s), expected ${allowed}` +
+          (allowed ? " written into the template" : " - markToFile() missed a call site")
+      );
+    }
     return out.html;
   } finally {
     await tab.close();
@@ -1240,6 +1342,7 @@ async function grab(page, pinned, name) {
 
 const built = [];
 let fixedCanonicals = 0;
+const markFiles = new Map();
 
 for (const page of PAGES) {
   const srcFile = path.join(EXPORT_DIR, page.src);
@@ -1270,7 +1373,8 @@ for (const page of PAGES) {
   const wired = wireForms(localise(scriptTag[0]), page.src);
   const notes = dropTechNotes(wired.script, page.src);
   const still = stillMark(notes.script, page.src);
-  const icons = fixIconGallery(still.script);
+  const marks = markToFile(still.script, page.src);
+  const icons = fixIconGallery(marks.script);
   const helmet = stripHelmetSeo(localise(template), page.src);
   const tplTiles = fixTileRoles(helmet.template);
   const anchors = fixAnchors({ template: tplTiles.html, script: icons.script });
