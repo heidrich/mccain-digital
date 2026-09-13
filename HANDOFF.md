@@ -1,5 +1,92 @@
 # Uebergabe — Stand 13. September 2026
 
+## ▶ STAND 13.9. 03:00 — zwei weitere Runden, alles live
+
+`main` = `55d2a32`. Alle Tore grün, 21 Seiten, 0 Konsolenfehler.
+**Google mobil und desktop je 82** (Desktop kam von 59 — größter Sprung des Tages).
+
+### Was heute Nacht dazu kam
+
+| Runde | Was | Gemessen |
+| --- | --- | ---: |
+| 5 | Notizen: kein 2-s-Layout-Poll, Start nach `load`+10 s, nur `(pointer:fine)` | Layoutlesungen 4.010 -> 1.823 |
+| 6 | Hero-Rotation gezielt, Pixel-Engine deferred, Cookie auf 7 s | TBT 1.440 -> 1.185 ms, lange Aufgaben 18 -> 16 |
+
+### DIE EINE ZAHL, DIE NOCH NICHT STIMMT, UND WARUM
+
+Auf der Startseite mit Hero im Bild — **und genau so sieht Lighthouse die
+Seite, es scrollt nie** — rendert React alle **6,5 Sekunden** den ganzen Baum
+neu. Beweis: dieses eine Intervall blockiert und neu gemessen:
+
+| | mit Rotation | ohne |
+| --- | ---: | ---: |
+| längste Ruhe | 6.432 ms | **26.171 ms** |
+| lange Aufgaben nach 5 s | 4 | **0** |
+
+**NÄCHSTE RUNDE, Owner hat sie schon entschieden:** *„warum ist das js und nicht
+reines css.. macht keinen sinn das als js rotieren zu lassen."* Richtig. Der
+Haken ist nicht Schwierigkeit, sondern: CSS kann nur Wörter überblenden, die
+**alle im DOM** stehen — und der Export begründet selbst, warum sie es nicht
+sind: *„only the active variant stays in the DOM – otherwise the h1 reads as
+four concatenated sentences."* Eine SEO-Entscheidung auf einer
+Performance-Entscheidung. Vor dem Bauen klären: wie liest Google eine H1 mit
+vier Varianten, von denen drei per CSS unsichtbar sind.
+
+### Tote Bytes — exakt gezählt, nicht geschätzt
+
+Chromes Abdeckungsrekorder, ganze Seite durchgescrollt:
+
+**221,3 KB JS ausgeliefert, 139,4 KB nie ausgeführt = 63 %**
+
+| Datei | geliefert | nie ausgeführt | |
+| --- | ---: | ---: | ---: |
+| `pixel-engine.js` | 42,1 KB | 38,7 KB | **92 %** |
+| `react-dom` | 128,7 KB | 76,8 KB | 60 % |
+| `support.js` | 36,5 KB | 16,7 KB | 46 % |
+
+**Wichtig:** die 92 % sind nicht tot, sondern **unerreichbar**. `window.PixelFX`
+bietet 16 Eingänge, die Seite ruft **zwei** (`PX.button`, `PX.image`, je 21×).
+Löschen ist eine eigene Entscheidung mit eigenem Risiko — erst jeden Eingang
+gegen alle 21 Seiten UND gegen Interaktion prüfen, nicht nur gegen Scrollen.
+
+CSS: 91 % ungenutzt, aber nur 13,3 KB — und die Messung sieht `style=""`
+überhaupt nicht, und das ist hier die Mehrheit der Gestaltung.
+
+### Owner-Entscheidungen von heute Nacht
+
+- Notizen: nicht nur „kein Telefon", sondern **nur mit Maus** — `(pointer:fine)`
+  plus 1280 px. Fängt Tablets im Querformat, die eine Breitenregel durchlässt.
+- Cookie-Hinweis: **7 Sekunden**.
+- Erste Hero-Rotation: darf später starten (7 s).
+- Deko-Animationen dürfen generell später anfangen — **aber**: Einblender starten
+  bei `opacity:0`, die anzuhalten hieße leere Seite. Trennung: Endlosschleifen
+  warten, einmalige Einblender laufen sofort. NOCH NICHT GEBAUT.
+- JS splitten: bringt **keine** Auswertungszeit (dieselben Bytes), aber
+  Zuordnung und echtes Deferring. Wert dafür, nicht für die 460 ms.
+
+### Werkzeuge, die es jetzt gibt (jetzt in `tools/`)
+
+- `quiet.mjs` — rechnet Lighthouses TTI/TBT auf dem eigenen Longtask-Strom nach.
+  **Das Werkzeug, das diese ganze Runde möglich gemacht hat.** `--cpu 4`.
+- `whoruns.mjs` — CPU-Profil in einem SPÄTEN Fenster. Was hier auftaucht, tut die
+  Seite für immer.
+- `deadcode.mjs` — Abdeckung JS+CSS. Achtung: V8 verschachtelt Bereiche, äußere
+  zuerst; „count>0 = benutzt" meldet **0 % tot** für jede Datei. In Reihenfolge
+  anwenden und innere überschreiben lassen.
+- `count.mjs` — zählt `getBoundingClientRect` und ResizeObserver pro Sekunde.
+- `pxcheck.mjs` — beweist, dass die Pixeleffekte initialisiert haben.
+
+### Nicht nochmal probieren
+
+- **PageSpeed-API ohne Schlüssel** — Tageskontingent des geteilten Projekts ist
+  aufgebraucht, 429. Braucht einen API-Key oder den Bericht aus dem Browser.
+- **`ResizeObserver` auf `<body>` als Verdächtigen für Dauerlast** — gemessen:
+  feuert 4× in 22 s, ist unschuldig.
+- Die 60 `getBoundingClientRect`/s sind die **Pixel-Engine** (`movePoints` liest
+  jeden Frame `canvas.getBoundingClientRect()`), nicht die Notizen.
+
+---
+
 ## ▶ STAND 13.9. NACHTS — vier Runden gebaut, alles live
 
 `main` = `25aef20`. Alle Tore grün, `hydrateRoot` auf allen 21 Seiten,
