@@ -29,6 +29,42 @@
  * The whole file is inert when the visitor asked for less motion - the site
  * already honours that itself, and a pauser fighting a reduced-motion sheet
  * would only add work.
+ *
+ * ---------------------------------------------------------------------------
+ * 13.9.2026, SECOND PASS: PAUSING LATE IS NOT THE SAME AS NOT STARTING.
+ *
+ * Owner: "DAS IST DOCH IRRE FALSCH MAN. Niemand schaut in 5 sec 130
+ * animationen. niemand. das sagt doch schon das alles gleichzeitig geladen
+ * wird." He is right, and the census proves it. On the start page:
+ *
+ *      72  CSS-Animationen insgesamt   (nur 3 liefen noch)
+ *      59  davon ENDLOS   - Dekoration
+ *      13  davon einmalig - Einblender
+ *      14  im Bild
+ *       6  endlos UND im Bild   <- mehr braucht ein Besucher nicht
+ *
+ * The version above already paused 69 of 72 - but only AFTER all 72 had
+ * started. observe() does not answer synchronously; its first callback arrives
+ * after the next layout, so every animation on the page runs for a frame or
+ * more, is styled, is composited, and is then stopped again. The work happens
+ * either way. Pausing late buys the steady state and pays for the load.
+ *
+ * So loops are now held from the moment they are first seen, without waiting
+ * for the observer, and released 6 s after `load` - and even then only where
+ * somebody is looking.
+ *
+ * WHY LOOPS AND NOT SIMPLY EVERYTHING. Owner: "generell koennen alle
+ * animationen nach 6 sekunden starten oder 7, macht vorher doch eh kein sinn.
+ * die leute muessen sich auch orientieren." Almost - an entrance animation
+ * starts at opacity:0, so holding those would hold the PAGE: six seconds of
+ * white. The 13 one-shot animations are exactly those entrances and they run
+ * immediately; the 59 loops are exactly the decoration and they wait. The
+ * split is read from the animation's own iteration count, not from a list of
+ * names that would rot at the next export.
+ *
+ * The pixel stream is unaffected either way - it is requestAnimationFrame
+ * inside pixel-engine.js, not a CSS animation, so the hero is alive from the
+ * first frame while the decoration waits.
  */
 (function () {
   "use strict";
@@ -41,8 +77,27 @@
    * enough that a phone screen's worth of off-screen sections still pauses. */
   var MARGIN = "300px 0px 300px 0px";
 
+  /* After `load`, not after navigation start: on a slow connection the page is
+   * still arriving at second six, and a countdown that ignores that would set
+   * the decoration going into the middle of it. */
+  var HOLD_MS = 6000;
+  var released = false;
+
   var watched = new WeakSet();
   var visible = new WeakSet();
+
+  /* A loop is decoration; a one-shot is an entrance the page needs in order to
+   * be visible at all. getTiming().iterations is the only honest source for
+   * that - most of these animations are declared in inline style attributes,
+   * so nothing about them can be read from a stylesheet. */
+  function loops(an) {
+    try {
+      var it = an.effect.getTiming().iterations;
+      return it === Infinity || it == null;
+    } catch (e) {
+      return false;
+    }
+  }
 
   var io = new IntersectionObserver(
     function (entries) {
@@ -84,8 +139,29 @@
 
   function play(el) {
     var a = cssAnimations(el);
-    for (var i = 0; i < a.length; i++) if (a[i].playState === "paused") a[i].play();
+    for (var i = 0; i < a.length; i++) {
+      /* Before the hold lifts, only entrances may run. A loop that is on screen
+       * still waits - that is the whole point of the hold. */
+      if (a[i].playState === "paused" && (released || !loops(a[i]))) a[i].play();
+    }
   }
+
+  /* Six seconds after load the decoration is allowed to live, and then only
+   * where it can be seen. */
+  function release() {
+    if (released) return;
+    released = true;
+    var list = document.getAnimations();
+    for (var i = 0; i < list.length; i++) {
+      var an = list[i];
+      if (!an.animationName || an.playState !== "paused" || an.__mbDone) continue;
+      var el = an.effect && an.effect.target;
+      if (el && visible.has(el)) an.play();
+    }
+  }
+  function armRelease() { setTimeout(release, HOLD_MS); }
+  if (document.readyState === "complete") armRelease();
+  else window.addEventListener("load", armRelease, { once: true });
 
   function scan() {
     var list = document.getAnimations();
@@ -96,7 +172,14 @@
       if (!el || el.nodeType !== 1 || el.closest("[data-motion-keep]")) continue;
       if (!watched.has(el)) {
         watched.add(el);
+        /* Held HERE, synchronously, not in the observer callback. observe()
+         * answers after the next layout, and by then the animation has already
+         * run, been styled and been composited - the cost this file exists to
+         * avoid. */
+        if (!released && loops(an) && an.playState === "running") an.pause();
         io.observe(el);
+      } else if (!released && loops(an) && an.playState === "running") {
+        an.pause();
       } else if (!visible.has(el) && an.playState === "running") {
         /* A re-render restarted the animation on an element that is still out
          * of view; the observer will not fire again for it. */
@@ -132,5 +215,10 @@
 
   scan();
   window.addEventListener("load", soon);
-  window.__motionBudget = { scan: scan, watching: function () { return document.getAnimations().length; } };
+  window.__motionBudget = {
+    scan: scan,
+    release: release,
+    held: function () { return !released; },
+    watching: function () { return document.getAnimations().length; },
+  };
 })();

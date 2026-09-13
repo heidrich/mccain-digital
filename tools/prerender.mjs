@@ -1247,6 +1247,102 @@ function laterConsent(script, name) {
   return { script: script.split(CONSENT_T_FROM).join(CONSENT_T_TO), delayed: n };
 }
 
+/* TWENTY SECTIONS LAID OUT FOR A VISITOR WHO CAN SEE ONE.
+ *
+ * Owner 13.9.2026: "die INHALTE der seite. die muessen gedefert werden. das ist
+ * doch irre, so eine riesen seite direkt zu rendern. vor allem sind das alles
+ * sectionen, die kann man MIT den dazugehoerigen animationen defern." And:
+ * "der hero und die ersten 2 sectionen oder die erste muessen geladen werden,
+ * der rest bei scroll."
+ *
+ * The measurement that made him say it - the start page, mobile, 4x CPU, in
+ * 250 ms slices:
+ *
+ *        ab        Skript  Stil+Layout  Rendern  Other  Parsen
+ *      1000 ms          1        168       24      28     20   = 241 von 250
+ *      1250 ms          0        190       23      14     30   = 256 von 250
+ *      1500 ms          1         94       90      56      1   = 241 von 250
+ *      1750 ms         22        142       13      23     57   = 258 von 250
+ *
+ * From 1,0 s to 1,9 s the main thread is fully occupied and SCRIPT EVALUATION
+ * IS ONE MILLISECOND. Nothing is running. The browser is laying out 2.408
+ * nodes - all nineteen sections, nineteen thousand pixels of page - for
+ * somebody looking at nine hundred of them. That is also the answer to "the
+ * logo takes 2.030 ms": it does not. Its bytes were there at 330 ms and there
+ * was no free moment to paint them until the layout was done.
+ *
+ * `content-visibility: auto` is the platform's own answer and needs no
+ * JavaScript: a section outside the viewport is skipped for style, layout and
+ * paint, its animations do not tick, and Chrome renders it when it is either
+ * approached or the main thread is idle. Measured ceiling before building it,
+ * same page, same conditions:
+ *
+ *     LCP  2.980 -> 1.516 ms   (-49 %)      Seitenhoehe 19.611 -> 19.611 px
+ *
+ * TBT does not move, and that is expected rather than disappointing: TBT here
+ * is one 636 ms hydration block, which is script, not layout. This fixes the
+ * layout half.
+ *
+ * WHY AN ATTRIBUTE AND NOT A LIST OF SECTION NAMES. The labels are German and
+ * carry umlauts ("Uebergabe" is spelled with the umlaut in the export), they
+ * differ per artboard, and a selector list would have to be escaped and
+ * regenerated for all 21 pages. A build-time `data-cv` marks exactly the
+ * elements that qualify and the stylesheet stays one line.
+ *
+ * WHAT IS EXCLUDED, AND WHY IT MATTERS MORE THAN WHAT IS INCLUDED:
+ *
+ *   position:fixed / sticky   The navigation, the cookie notice, the chat
+ *                             dock, the mobile menu and the modal. They are
+ *                             not in the flow; containing them would clip or
+ *                             collapse an overlay - the kind of break that
+ *                             shows up only when somebody opens the menu.
+ *
+ * The first version of this read only the attributes written BEFORE
+ * data-screen-label, and on four of the five overlays `style` is written
+ * AFTER it. All four were marked; the modal and the mobile menu would have
+ * been contained, and nothing would have said so until somebody tapped the
+ * menu. The tag is matched whole now, quotes and all, and the build refuses to
+ * continue unless it recognises at least four fixed screens - a silent zero
+ * there is exactly the shape of that bug.
+ *   the first two in flow     Hero and the section under it. They are on
+ *                             screen at once, so skipping them would cost a
+ *                             re-render and gain nothing.
+ *
+ * contain-intrinsic-size uses the `auto` keyword, so the browser substitutes
+ * the real height once it has measured a section and only falls back to the
+ * 900 px guess for one it has never rendered. Measured: total page height is
+ * identical with and without, which is the check that matters - a wrong guess
+ * shows up as a scrollbar that changes length while you read.
+ */
+const CV_CSS =
+  "<style>[data-cv]{content-visibility:auto;contain-intrinsic-size:auto 900px}</style>";
+
+const CV_EAGER = 2; /* hero + the section under it */
+/* The WHOLE opening tag, quoted values included, so the position test sees
+ * every attribute rather than only the ones that happen to be written first. */
+const SECTION_TAG = /<([a-z]+)((?:[^>"']|"[^"]*"|'[^']*')*)>/g;
+const CV_MIN_FIXED = 4; /* nav, notice, dock, menu, modal - four is the floor */
+
+function deferSections(template, name) {
+  let inFlow = 0, marked = 0, fixed = 0;
+  const out = template.replace(SECTION_TAG, (whole, tag, attrs) => {
+    if (!/\sdata-screen-label="/.test(attrs)) return whole;
+    if (/position\s*:\s*(fixed|sticky)/.test(attrs)) { fixed++; return whole; }
+    inFlow++;
+    if (inFlow <= CV_EAGER) return whole;
+    marked++;
+    return `<${tag} data-cv=""${attrs}>`;
+  });
+  if (marked === 0 || fixed < CV_MIN_FIXED) {
+    throw new Error(
+      `prerender: section deferral looks wrong in ${name} - ${marked} marked, ` +
+        `${inFlow} in flow, ${fixed} fixed (expected at least ${CV_MIN_FIXED}). ` +
+        `The export changed data-screen-label or how the overlays are positioned.`
+    );
+  }
+  return { template: out, marked, eager: Math.min(inFlow, CV_EAGER), fixed };
+}
+
 /* NO PAGE HAD A <main>.
  *
  * The content sections sit as siblings between <header> and <footer>, so a
@@ -1712,7 +1808,8 @@ for (const page of PAGES) {
   const helmet = stripHelmetSeo(localise(template), page.src);
   const calm = calmConsent(helmet.template, page.src);
   const pxe = deferPixelEngine(calm.template, page.src);
-  const tplTiles = fixTileRoles(pxe.template);
+  const cv = deferSections(pxe.template, page.src);
+  const tplTiles = fixTileRoles(cv.template);
   const anchors = fixAnchors({ template: tplTiles.html, script: cons.script });
   const tiles = tplTiles.fixed;
   const templateLocal = wrapMain(anchors.template, page.src, "template");
@@ -1739,7 +1836,7 @@ for (const page of PAGES) {
     ? head + `
 <link rel="preload" as="image" href="${firstMark[0]}" fetchpriority="high">`
     : head;
-  const headOut = headWithMark + "\n" + PT_MOBILE_CSS;
+  const headOut = headWithMark + "\n" + PT_MOBILE_CSS + "\n" + CV_CSS;
   assertClean(head + prerendered + templateLocal + script, page.out);
   assertNoExportLinks(head + prerendered + templateLocal + script, page.out);
 
