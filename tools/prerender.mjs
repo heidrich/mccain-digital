@@ -948,52 +948,132 @@ function calmConsent(template, name) {
   return { template: template.split(CONSENT_ANIM_FROM).join(CONSENT_ANIM_TO), calmed: n };
 }
 
-/* THE DRIFTING STREAM LABELS ARE A DESKTOP THING.
+/* THE DRIFTING STREAM LABELS: A MOUSE THING, A LATE THING, AND NOT A POLLING
+ * THING.
  *
- * Owner 13.9.2026: "auf mobile würde ich die mitlaufenden notes nicht anzeigen,
- * das sieht man eh nicht und kann sie nicht usen." Right on both counts, and it
- * is the device class where it matters most.
+ * Three separate defects lived in one function, found by profiling the page
+ * eighteen seconds AFTER load - a window in which a finished page should be
+ * doing nothing at all. It was doing 1.275 ms of work, and 791 ms of that
+ * (62 %) was here:
  *
- * What they cost while nobody can use them: nine labels, each written twice per
- * frame (transform and opacity) - measured at 5.458 style writes in ten seconds.
- * On this machine that is 63 ms of a 5,7 s profile, about 1 %. But the owner put
- * the right frame around that number: five per cent of a fast desktop is thirty
- * to fifty per cent of an old laptop or a mid-range phone, and that is the
- * hardware Lighthouse runs on.
+ *     getBoundingClientRect   553 ms   3,0 %
+ *     movePointsGlobal        238 ms   1,3 %
  *
- * Two halves, because one alone is not enough:
+ * WHY THAT NUMBER MATTERS FAR MORE THAN IT LOOKS. Lighthouse does not report
+ * "blocking time during load". It reports blocking time from FCP to TTI, and
+ * TTI is the first instant after which the main thread stays free of long
+ * tasks for FIVE SECONDS. Measured on the live page at 4x CPU: a long task
+ * every 6,5 seconds, forever, which leaves a longest quiet gap of 6,4 s. That
+ * clears the five-second bar by 1,4 s. On a slower machine it does not clear
+ * it at all - and then TTI slides to the END of the trace and every long task
+ * of the whole session counts as blocking time. That is the difference between
+ * the 210 ms this machine measures and the 13.060 ms Google reports on a page
+ * that paints in 0,8 s. It is a cliff, not a slope, and we were standing on
+ * the edge of it.
  *
- *   CSS   hides the layer below the 880 px breakpoint the component itself uses
- *         for `isDesktop`. It applies at the FIRST paint, before any script -
- *         so a phone never lays the labels out or paints them at all.
- *   JS    leaves movePointsGlobal immediately at the same width, so no frame
- *         work happens even though the elements are still in React's tree.
+ * The three fixes, in the order they matter:
+ *
+ * 1. STOP POLLING THE LAYOUT.  Owner 13.9.2026: "muessen die notes alle 2 sec
+ *    neue css bekommen, das reicht doch wenn die einmal beim spawnen die
+ *    parameter bekommen." Correct. Per FRAME each label gets a transform and
+ *    an opacity - that is what drifting means, and both are composited. But
+ *    every TWO SECONDS the function also rebuilt its "avoid" list by calling
+ *    getBoundingClientRect() on every h1..p, li, button, a, img, svg, form and
+ *    footer in the document. A page's layout does not change every two
+ *    seconds. It changes when the viewport changes or when the document grows,
+ *    and a ResizeObserver on <body> says exactly when that happened - so the
+ *    scan is now event-driven instead of timed. The 30 s fallback is insurance
+ *    against a layout change that alters no box we watch; it is 6x Lighthouse's
+ *    quiet threshold, so it can never cost us TTI.
+ *
+ * 2. START LATE.  Owner: "kann man denn die notes defern, das die erst nach 10
+ *    sec auftauchen". Nothing about a drifting decoration needs to exist while
+ *    the page is still being read for the first time. Ten seconds after `load`,
+ *    which scales with a slow connection instead of racing it. The labels ship
+ *    with opacity:0, visibility:hidden and a .3s opacity transition, so they
+ *    fade in when their turn comes - there is no pop to hide.
+ *
+ * 3. MOUSE ONLY, NOT JUST "NOT A PHONE".  Owner: "auf mobile wuerde ich die
+ *    mitlaufenden notes nicht anzeigen, das sieht man eh nicht und kann sie
+ *    nicht usen" and then "auch tablets". The honest test is not a width, it is
+ *    whether there is a pointer that can hover one - a label you cannot hover
+ *    is a label doing nothing but cost. `(pointer:fine)` catches every touch
+ *    device at any size, including an iPad in landscape, which a width alone
+ *    misses; the 1280 px floor additionally keeps small laptop windows clear.
+ *
+ * Two halves for the gate, because one alone is not enough:
+ *
+ *   CSS   hides the layer, and applies at the FIRST paint before any script -
+ *         so a phone or tablet never lays the labels out or paints them.
+ *   JS    leaves movePointsGlobal before it touches the DOM, so no frame work
+ *         happens even though the elements are still in React's tree.
  *
  * Not removed from the DOM: React owns that subtree, and fighting it over ~30
  * nodes would cost more than it saves. display:none takes them out of layout
  * and paint, which is the expensive part.
+ *
+ * The ResizeObserver is deliberately never disconnected. It is one observer per
+ * page, hung on the canvas, and this root does not unmount for the lifetime of
+ * the document - a teardown path would be dead code pretending to be hygiene.
  */
 const PT_MOBILE_CSS =
-  "<style>@media (max-width:879px){[data-pt-layer]{display:none!important}}</style>";
+  "<style>@media (max-width:1279px),(pointer:coarse){[data-pt-layer]{display:none!important}}</style>";
 
-const PT_BAIL_FROM =
-  "  movePointsGlobal(tm, canvas) {\n" +
-  "    const root = this.rootEl; if (!root) return;\n";
+/* Anchors are matched against the RAW export, and each one is counted: if a
+ * re-export rewrites the label engine the build stops here instead of quietly
+ * shipping a page that polls the layout forever again. */
+const PT_BAIL_FROM = `  movePointsGlobal(tm, canvas) {
+    const root = this.rootEl; if (!root) return;
+`;
 
-const PT_BAIL_TO =
-  "  movePointsGlobal(tm, canvas) {\n" +
-  "    const root = this.rootEl; if (!root) return;\n" +
-  "    if (window.innerWidth < 880) return;\n";
+const PT_BAIL_TO = `  movePointsGlobal(tm, canvas) {
+    const root = this.rootEl; if (!root) return;
+    if (this.ptGate === undefined) {
+      this.ptGate = window.matchMedia ? window.matchMedia('(min-width:1280px) and (pointer:fine)') : null;
+      const arm = () => setTimeout(() => { this.ptLate = 1; }, 10000);
+      if (document.readyState === 'complete') arm();
+      else window.addEventListener('load', arm, { once: true });
+    }
+    if (!this.ptLate || (this.ptGate && !this.ptGate.matches)) return;
+`;
+
+const PT_POLL_FROM = `    if (!canvas._pool || (tm - (canvas._ptT || 0)) > 2) {
+`;
+
+const PT_POLL_TO = `    if (!canvas._ptRO && window.ResizeObserver) {
+      canvas._ptRO = new ResizeObserver(() => { canvas._ptDirty = 1; });
+      canvas._ptRO.observe(document.body);
+    }
+    if (!canvas._pool || canvas._ptDirty || (tm - (canvas._ptT || 0)) > 30) {
+`;
+
+/* The line that closes the rebuild: clearing the flag has to happen where the
+ * work actually happened, not where it was requested. */
+const PT_STAMP_FROM =
+  "canvas._pool = { els, avoid, span: Math.max(window.innerHeight * 2, " +
+  "document.documentElement.scrollHeight) + 240 }; canvas._ptT = tm;";
+const PT_STAMP_TO = PT_STAMP_FROM + " canvas._ptDirty = 0;";
 
 function ptDesktopOnly(script, name) {
-  const n = script.split(PT_BAIL_FROM).length - 1;
-  if (n !== 1) {
-    throw new Error(
-      `prerender: expected exactly one movePointsGlobal in ${name}, found ${n}. ` +
-        `The export changed the stream labels - re-read it and update PT_BAIL_FROM.`
-    );
+  for (const [label, from] of [
+    ["movePointsGlobal", PT_BAIL_FROM],
+    ["the 2 s layout poll", PT_POLL_FROM],
+    ["the pool stamp", PT_STAMP_FROM],
+  ]) {
+    const n = script.split(from).length - 1;
+    if (n !== 1) {
+      throw new Error(
+        `prerender: expected exactly one ${label} in ${name}, found ${n}. ` +
+          `The export changed the stream labels - re-read it and update the PT_ anchors.`
+      );
+    }
   }
-  return { script: script.split(PT_BAIL_FROM).join(PT_BAIL_TO) };
+  return {
+    script: script
+      .split(PT_BAIL_FROM).join(PT_BAIL_TO)
+      .split(PT_POLL_FROM).join(PT_POLL_TO)
+      .split(PT_STAMP_FROM).join(PT_STAMP_TO),
+  };
 }
 
 /* NO PAGE HAD A <main>.

@@ -238,7 +238,7 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
 @keyframes ai-grad{0%{background-position:0% 50%}100%{background-position:200% 50%}}
 </style>
 <link rel="preload" as="image" href="/brand/mark-34-c.svg" fetchpriority="high">
-<style>@media (max-width:879px){[data-pt-layer]{display:none!important}}</style>
+<style>@media (max-width:1279px),(pointer:coarse){[data-pt-layer]{display:none!important}}</style>
 <script src="/support.js" defer></script>
 <script src="/motion-budget.js" defer></script>
 </head>
@@ -2616,14 +2616,24 @@ class Component extends DCLogic {
   }
   movePointsGlobal(tm, canvas) {
     const root = this.rootEl; if (!root) return;
-    if (window.innerWidth < 880) return;
-    if (!canvas._pool || (tm - (canvas._ptT || 0)) > 2) {
+    if (this.ptGate === undefined) {
+      this.ptGate = window.matchMedia ? window.matchMedia('(min-width:1280px) and (pointer:fine)') : null;
+      const arm = () => setTimeout(() => { this.ptLate = 1; }, 10000);
+      if (document.readyState === 'complete') arm();
+      else window.addEventListener('load', arm, { once: true });
+    }
+    if (!this.ptLate || (this.ptGate && !this.ptGate.matches)) return;
+    if (!canvas._ptRO && window.ResizeObserver) {
+      canvas._ptRO = new ResizeObserver(() => { canvas._ptDirty = 1; });
+      canvas._ptRO.observe(document.body);
+    }
+    if (!canvas._pool || canvas._ptDirty || (tm - (canvas._ptT || 0)) > 30) {
       const layer = root.querySelector('[data-pt-layer]'); if (!layer) return;
       const sy0 = window.scrollY || 0, avoid = [];
       root.querySelectorAll('[data-avoid], [data-hero-copy], h1, h2, h3, h4, p, li, button, a, img, svg, form, footer').forEach((a) => { if (a.closest('header, [data-pt-layer], [role="dialog"]')) return; const c = a.getBoundingClientRect(); if (c.width < 24 || c.height < 10) return; avoid.push({ left: c.left - 12, right: c.right + 12, top: c.top + sy0 - 22, bottom: c.bottom + sy0 + 10 }); });
       const prev = canvas._pool ? canvas._pool.els : [];
       const els = Array.from(layer.querySelectorAll('[data-pt]')).map((el, i) => { const o = prev[i] && prev[i].el === el ? prev[i] : { off: 0, on: false, x: 0, y: 0 }; return { el, i, off: o.off, on: o.on, x: o.x, y: o.y, w: el.offsetWidth || 120, h: el.offsetHeight || 26 }; });
-      canvas._pool = { els, avoid, span: Math.max(window.innerHeight * 2, document.documentElement.scrollHeight) + 240 }; canvas._ptT = tm;
+      canvas._pool = { els, avoid, span: Math.max(window.innerHeight * 2, document.documentElement.scrollHeight) + 240 }; canvas._ptT = tm; canvas._ptDirty = 0;
       if (this.ptHot) this.ptHot = els.find((n) => n.el === this.ptHot.el) || null;
     }
     const P = canvas._pool, els = P.els, N = els.length; if (!N) return;
