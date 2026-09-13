@@ -1,5 +1,71 @@
 # Uebergabe — Stand 13. September 2026
 
+## ▶ STAND 13.9. MITTAGS — Startseite als reines HTML nachgebaut (Stufe 1), NICHT committet, NICHT gepusht
+
+**Owner-Entscheidung:** Neubau statt weiter tunen. Maßstab old2
+(`archive/site-apache/upload-v2/`: reines HTML/CSS/JS, kein React, 4×100 —
+137 KB Startseite, 4 `style=`-Attribute). Kein Astro, kein Framework. Nur Dev-Server.
+
+### Der Befund, der das entschieden hat (`tools/reactprof.mjs`)
+
+Die Startseite ist EINE Klassenkomponente, ~40 State-Felder, 53 `setState` auf der
+Wurzel. Gemessen (mobil, 4× CPU, 30 s): **15 komplette Neu-Renders, je 64–84 ms**
+(`aiVisible` 4×, `heroIdx`, `heroVisible`, `scrolled`, `heroH`, `consent` …).
+Hydration nur 155 ms React-Arbeit — die 515-ms-Aufgabe ist also überwiegend
+Export-Laufzeit, nicht Rendern. `memo`/Suspense unmöglich: es gibt keine Teilbäume.
+
+### Was gebaut ist
+
+- `node tools/v5build.mjs` (Dev-Server :8898 muss laufen) → `v5/index.html`,
+  `v5/logic.gen.js`; handgeschrieben `v5/home.js`. Ansehen: <http://127.0.0.1:8898/v5/>
+- **Markup = Reacts eigenes Render, 32-mal:** 8 Breiten (die Logik legt per `vw` in
+  JS aus: 520/600/620/760/960/1080/1180 — das ausgelieferte Markup ist NUR die
+  1280er Fassung!) × 4 Zustände (Grund, Consent, Consent-Details, Mobilmenü).
+  Knotenweise zusammengeführt: Breitenunterschiede → Media Queries, Zustands-Knoten
+  → `data-v5-when/unless` + Flag an `<html>`, `style-hover/focus` → echtes CSS.
+- **Verhalten = die Methoden der Seite, wörtlich kopiert** (`logic.gen.js`),
+  `home.js` liefert nur `state`/`setState` (fasst genau die betroffenen Knoten an)
+  und die Verdrahtung aus `data-on`/`data-ref`/`data-dyn`.
+- Hero-Rotation reines CSS; Varianten 2–4 als `content: attr()` → H1 liest einen Satz.
+- Liegt NUR auf dem Zweig `v5-preview` (Vercel-Preview, unter `/v5/`). `main`, die
+  Produktion und die React-Startseite `index.html` sind unberührt (Owner: "nicht die
+  react seite überschreiben").
+
+### Gemessen
+
+| | alt | v5 |
+| --- | ---: | ---: |
+| Startseite roh | 676 KB | 271 KB (CSS 83 KB inline) |
+| Pixelvergleich (`tools/v5compare.mjs`) | – | 0,06 % Desktop, 0,5 % mobil, Höhen gleich — Rest ist 0,3-px-Kantenglättung |
+| TBT 25 s, 4× CPU (`quiet.mjs`) | 906 ms | **423 ms** |
+| TTI | 3.002 ms | **1.736 ms** |
+| lange Aufgaben nach 5 s | 4 | 1 |
+
+Funktionsprobe im Browser, 0 Konsolenfehler: Reveal (41), Mobilmenü auf/zu,
+FAQ, Nav-Schatten, Pixelstrom-Canvas, Consent nach 7 s inkl. Details + Quittieren.
+
+### Offen — Stufe 2 (Owner hat Stufe 1 gewählt, Rest nächste Woche)
+
+Mega-Menü, Modal, Suche, KI-Konsole + Dock, DE/EN, zustandsabhängige Hover
+(`S.hover`), Formulare (derzeit **blockiert**, damit keins "gesendet" vortäuscht).
+**Die restlichen ~400 ms TBT:** IntersectionObserver 531 ms (`motion-budget` +
+Reveal/Fx/Flow-Observer), eine 177-ms-Skriptauswertung bei 1,96 s, ~250 ms Layout
+durch das Reveal-Verstecken von 41 Elementen.
+
+### Fallen (heute teuer gelernt)
+
+- **Vorlagen-IDs nicht selbst zählen.** Die Tag-Zählung über die rohe Vorlage
+  stimmte mit dem Desktop-Markup 1605/1605 überein und driftete trotzdem ab ID ~55
+  in allen anderen Breiten. Quelle ist `window.__dcAnnotatedTemplate`.
+- **Die annotierte Vorlage ist DOM-serialisiert:** `onClick` heißt dort `onclick`.
+- **Lighthouse-CLI kann hier gerade gar nicht navigieren** — `FAILED_DOCUMENT_REQUEST`
+  gegen 8897 UND 8898, obwohl curl 200 bekommt. Nicht wiederholen; `quiet.mjs`
+  (Argumente: `<url> <sekunden> --cpu 4`, Reihenfolge zählt) oder PageSpeed vom Owner.
+- `logic.gen.js`: die letzte Methode trägt sonst die schließende Klammer der Klasse
+  mit — der Build prüft jetzt mit `node --check`.
+
+---
+
 ## ▶ STAND 13.9. 03:30 — der Durchbruch war die Zeitachse, nicht die Summe
 
 `main` = `e97dfb0`. Alle Tore grün, 21 Seiten, 0 Konsolenfehler, Pixeleffekte
