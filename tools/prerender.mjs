@@ -1076,6 +1076,177 @@ function ptDesktopOnly(script, name) {
   };
 }
 
+/* THE HEADLINE THAT ROTATES ON ONE PAGE AND RE-RENDERS TWENTY-ONE.
+ *
+ * The export arms this in componentDidMount, on every artboard:
+ *
+ *     this.heroT = setInterval(() => { ... this.setState({ heroIdx: ... }) }, 6500);
+ *
+ * Two things are wrong with it, and both were found by measuring rather than
+ * reading. Profiling the live page at 4x CPU showed a long task every 6,5
+ * seconds, forever. Blocking that one interval and measuring again:
+ *
+ *                        mit Rotation   ohne
+ *     laengste Ruhe          6.432 ms   26.171 ms
+ *     lange Aufgaben >5 s           4   0
+ *
+ * The page goes completely silent. The 26 s is just where the measurement
+ * stopped, not where the quiet stopped.
+ *
+ * 1. IT RUNS ON TWENTY PAGES THAT DO NOT SHOW IT.  `heroLine` appears twice in
+ *    the start page - once as the value built in renderVals, once as the
+ *    binding that renders it. On the other twenty artboards it appears ONCE:
+ *    the value is built and nothing consumes it. So every 6,5 seconds React
+ *    reconciles a ~2.400-node tree on the imprint page to produce a screen
+ *    that is pixel-for-pixel what it already was. Those pages do not arm the
+ *    timer at all now.
+ *
+ * 2. ON THE ONE PAGE THAT DOES SHOW IT, IT RUNS OUT OF SIGHT.  Owner 13.9.:
+ *    "alles andere muss naklar pausieren, wenn nicht in sicht." The component
+ *    already knows - `heroVisible` is kept by an IntersectionObserver on
+ *    [data-screen-label="Hero A"] and was simply not consulted here. Scrolled
+ *    past the hero, the rotation now stops; scrolled back, it resumes. Nothing
+ *    anybody can see changes, because nobody can see it.
+ *
+ * 3. IT STARTS AT THE FIRST FRAME.  Owner 13.9.: "wir koennen die erste
+ *    rotation auch spaeter starten im hero, gar kein problem." So the interval
+ *    is armed seven seconds in rather than at mount, which takes the first
+ *    two re-renders out of the window Lighthouse measures blocking time in.
+ *    This only SHIFTS the ticks, it does not end them - see below.
+ *
+ * WHAT THIS STILL DOES NOT FIX, stated plainly so nobody reads a green number
+ * and thinks it is done: on the start page with the hero in view - which is
+ * exactly how Lighthouse sees it, since it never scrolls - the tree is still
+ * reconciled every 6,5 seconds, forever. The owner named the real answer:
+ * "warum ist das js und nicht reines css.. macht keinen sinn das als js
+ * rotieren zu lassen." Correct. The obstacle is not difficulty, it is that CSS
+ * can only cross-fade words that are all IN the DOM, and the export's own
+ * comment says why they are not: "only the active variant stays in the DOM -
+ * otherwise the h1 reads as four concatenated sentences." That is an SEO
+ * decision sitting on top of a performance one, and it gets its own round.
+ *
+ * What is deliberately NOT changed: the rotation itself, its 6,5 s cadence,
+ * and the remount-by-key that retriggers the word-in animation. That is the
+ * design, and the design is not a performance decision.
+ */
+const HERO_FROM =
+  "    this.heroT = setInterval(() => { if (this.mounted && !this.reduced() && " +
+  "!document.hidden && !this.state.modal) this.setState({ heroIdx: " +
+  "(this.state.heroIdx + 1) % 4 }); }, 6500);";
+
+/* Shown: keep the timer, add the visibility test the component already had an
+ * answer for. */
+const HERO_SEEN =
+  "    this.heroT = null; setTimeout(() => { if (!this.mounted) return; " +
+  "this.heroT = setInterval(() => { if (this.mounted && !this.reduced() && " +
+  "!document.hidden && !this.state.modal && this.state.heroVisible) this.setState({ heroIdx: " +
+  "(this.state.heroIdx + 1) % 4 }); }, 6500); }, 7000);";
+
+/* Not shown: never arm it. Left as an assignment so componentWillUnmount's
+ * clearInterval(this.heroT) stays valid. */
+const HERO_UNSEEN =
+  "    this.heroT = null; /* prerender: no heroLine binding on this page - " +
+  "rotating it would re-render the tree to produce the same pixels */";
+
+function heroCalm(script, template, name) {
+  const n = script.split(HERO_FROM).length - 1;
+  if (n !== 1) {
+    throw new Error(
+      `prerender: expected exactly one hero rotation in ${name}, found ${n}. ` +
+        `The export changed the headline timer - re-read it and update HERO_FROM.`
+    );
+  }
+  const shown = template.includes("heroLine");
+  return {
+    script: script.split(HERO_FROM).join(shown ? HERO_SEEN : HERO_UNSEEN),
+    rotates: shown,
+  };
+}
+
+/* THE ONE SCRIPT THAT STILL BLOCKED THE PARSER.
+ *
+ * The export puts <script src="pixel-engine.js"></script> in its helmet, which
+ * means it lands in the MIDDLE of the rendered document - line 1.312 of 3.000
+ * on the start page. No defer, no async: the parser stops there, fetches 42 KB,
+ * parses and executes it, and only then keeps reading the page. support.js and
+ * motion-budget.js were both already deferred; this one was missed because it
+ * does not come from us, it comes from the artboard.
+ *
+ * Measured with Chrome's own coverage recorder, walking the whole page:
+ *
+ *     pixel-engine.js    42,1 KB geliefert    38,7 KB nie ausgefuehrt   92 %
+ *
+ * That is not dead code, and it must not be treated as such: the library
+ * offers headline, button, morph, sand, voidReveal, legibleStops, slides and
+ * image, and the site calls exactly TWO of them - PX.button and PX.image,
+ * 21 times each, once per page. The other entry points and everything only
+ * they reach are simply never entered. Deleting them is a separate decision
+ * with a separate risk; moving the parse off the critical path is neither.
+ *
+ * WHY IT MOVES INTO THE HEAD RATHER THAN JUST GETTING A defer ATTRIBUTE WHERE
+ * IT STANDS.  Deferred scripts run in DOCUMENT ORDER, and support.js sits in
+ * the head at line 259. Deferring the engine in place would run it AFTER
+ * support.js has booted React and called initPixels - which begins
+ * `const PX = window.PixelFX; if (!PX) return;` and fails silently. Every
+ * pixel effect on the site would disappear without a single console message.
+ * So the tag is lifted out of the helmet and re-emitted in the head BEFORE
+ * support.js, where defer preserves the order it needs.
+ *
+ * Both sides are counted: exactly one tag comes out of each template, and the
+ * head puts exactly one back.
+ */
+const PXE_TAG = /<script src="\.{0,2}\/?pixel-engine\.js"><\/script>/g;
+
+function deferPixelEngine(template, name) {
+  const n = (template.match(PXE_TAG) || []).length;
+  if (n !== 1) {
+    throw new Error(
+      `prerender: expected exactly one pixel-engine script in ${name}, found ${n}. ` +
+        `The export changed how it loads the engine - re-read it and update PXE_TAG.`
+    );
+  }
+  return { template: template.replace(PXE_TAG, ""), moved: n };
+}
+
+/* THE COOKIE NOTICE ARRIVED AT 1,4 SECONDS.
+ *
+ * Owner 13.9.: "der cookie hinweis muss auch gedefert werden man! der kann
+ * nicht nach 3 sec kommen, mach den mal 7!" Measured, it was worse than he
+ * thought - the export asks at 1.400 ms:
+ *
+ *     if (!localStorage.getItem('mcd.consent'))
+ *       setTimeout(() => this.setState({ consent: 'ask' }), 1400);
+ *
+ * Two reasons that number is wrong, and only one of them is about speed.
+ *
+ * It lands ON the first contentful paint. A banner that slides in while the
+ * page is still assembling reads as part of the page failing to settle, and it
+ * asks for a decision from somebody who has not yet seen what they are
+ * deciding about. Seven seconds is enough to read a headline first.
+ *
+ * And `setState` on this root re-renders the whole ~2.400-node tree. At 1.400
+ * ms that lands inside the window Lighthouse measures blocking time in; at
+ * 7.000 ms it lands after it. Same work, and it stops counting against a
+ * number that decides how the site ranks.
+ *
+ * Counted per page: exactly one notice, or the build stops.
+ */
+const CONSENT_T_FROM =
+  "if (this.mounted) this.setState({ consent: 'ask' }); }, 1400);";
+const CONSENT_T_TO =
+  "if (this.mounted) this.setState({ consent: 'ask' }); }, 7000);";
+
+function laterConsent(script, name) {
+  const n = script.split(CONSENT_T_FROM).length - 1;
+  if (n !== 1) {
+    throw new Error(
+      `prerender: expected exactly one consent timer in ${name}, found ${n}. ` +
+        `The export changed the notice - re-read it and update CONSENT_T_FROM.`
+    );
+  }
+  return { script: script.split(CONSENT_T_FROM).join(CONSENT_T_TO), delayed: n };
+}
+
 /* NO PAGE HAD A <main>.
  *
  * The content sections sit as siblings between <header> and <footer>, so a
@@ -1536,10 +1707,13 @@ for (const page of PAGES) {
   const marks = markToFile(still.script, page.src);
   const icons = fixIconGallery(marks.script);
   const ptDesk = ptDesktopOnly(icons.script, page.src);
+  const hero = heroCalm(ptDesk.script, template, page.src);
+  const cons = laterConsent(hero.script, page.src);
   const helmet = stripHelmetSeo(localise(template), page.src);
   const calm = calmConsent(helmet.template, page.src);
-  const tplTiles = fixTileRoles(calm.template);
-  const anchors = fixAnchors({ template: tplTiles.html, script: ptDesk.script });
+  const pxe = deferPixelEngine(calm.template, page.src);
+  const tplTiles = fixTileRoles(pxe.template);
+  const anchors = fixAnchors({ template: tplTiles.html, script: cons.script });
   const tiles = tplTiles.fixed;
   const templateLocal = wrapMain(anchors.template, page.src, "template");
   const script = anchors.script;
@@ -1587,6 +1761,7 @@ for (const page of PAGES) {
 <html lang="de">
 <head>
 ${headOut}
+<script src="/pixel-engine.js" defer></script>
 <script src="/support.js" defer></script>
 <script src="/motion-budget.js" defer></script>
 </head>
