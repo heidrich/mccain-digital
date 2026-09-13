@@ -1,5 +1,112 @@
 # Uebergabe — Stand 13. September 2026
 
+## ▶ STAND 13.9. 03:30 — der Durchbruch war die Zeitachse, nicht die Summe
+
+`main` = `e97dfb0`. Alle Tore grün, 21 Seiten, 0 Konsolenfehler, Pixeleffekte
+geprüft. Google zwischendurch **82/82** (Desktop kam von 59) — das war VOR den
+zwei größten Änderungen der Nacht.
+
+### ZUERST LESEN: die Methode, nicht das Ergebnis
+
+Zehn Stunden lang wurden Summen über ganze Läufe gebildet. Die Antwort kam
+sofort, als dieselbe Messung **in 250-ms-Scheiben** ausgegeben wurde
+(`tools/mainthread.mjs`):
+
+| ab | Skript | Stil+Layout | Rendern | Other | Parsen | |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1000 ms | 1 | **168** | 24 | 28 | 20 | = 241 von 250 |
+| 1250 ms | 0 | **190** | 23 | 14 | 30 | = 256 von 250 |
+| 1500 ms | 1 | **94** | 90 | 56 | 1 | = 241 von 250 |
+| 2250 ms | **466** | 22 | 4 | 18 | 0 | = 510 von 250 |
+
+**Skript bei 1 ms, Hauptthread voll.** Damit war klar: das Problem ist nicht
+JavaScript, es ist das Auslegen von 2.408 Knoten. Eine Summe hätte das nie
+gezeigt — dort steht nur „Stil+Layout 1.389 ms" und daneben „Skript 1.076 ms",
+und man sucht am falschen Ende.
+
+### Was heute Nacht gebaut wurde (Runden 5–8)
+
+| # | Was | Gemessen |
+| --- | --- | ---: |
+| 5 | Notizen: kein 2-s-Layout-Poll, Start nach `load`+10 s, nur `(pointer:fine)` | Layoutlesungen 4.010 → 1.823 |
+| 6 | Hero-Rotation gezielt, Pixel-Engine deferred, Cookie 1,4 s → 7 s | TBT 1.440 → 1.185 ms |
+| 7 | **`content-visibility` auf 15 Sektionen** | **LCP 2.980 → 1.516 ms (−49 %)** |
+| 8 | Endlos-Animationen bis `load`+6 s gehalten | TBT 1.185 → **726 ms** |
+
+Mobil, 4× CPU, nach allem: TBT **726 ms**, lange Aufgaben **11**, längste
+**515 ms**, CLS **0,0012**.
+
+### DIE NÄCHSTE RUNDE — nur noch ein Block übrig
+
+Die verbleibende Blockierzeit ist im Wesentlichen **eine** Aufgabe: **Reacts
+Hydration, 515 ms an einem Stück** (bei 4× CPU). Das ist Skript, nicht Layout,
+und `content-visibility` rührt es nicht an. Wer hier weitermacht, arbeitet an
+genau dieser einen Zahl. Ideen, unbewertet: Hydration in Teilbäume zerlegen
+(braucht Suspense-Grenzen, die dieser Export nicht hat) — oder Phase 2, also
+Vorlage und Laufzeit-Übersetzer gar nicht mehr ausliefern.
+
+**Zweitens, vom Owner entschieden, noch nicht gebaut:** die Hero-Rotation
+gehört in CSS. *„warum ist das js und nicht reines css.. macht keinen sinn das
+als js rotieren zu lassen."* Stimmt — sie macht ein `setState` auf der Wurzel
+und rendert 2.400 Knoten neu, damit ein Wort wechselt. **Der Haken, der vorher
+zu klären ist:** CSS kann nur Wörter überblenden, die **alle im DOM** stehen,
+und der Export begründet selbst, warum sie es nicht sind: *„only the active
+variant stays in the DOM – otherwise the h1 reads as four concatenated
+sentences."* Eine SEO-Entscheidung auf einer Performance-Entscheidung.
+
+**Drittens, kleine Unsauberkeit:** `contain-intrinsic-size` schätzt eine nie
+gerenderte Sektion mit 900 px. Direkt nach dem Laden ist die Seite dadurch
+15.916 statt 19.611 px lang, die Bildlaufleiste also kurz; sie korrigiert sich
+beim Scrollen, CLS bleibt 0,0012. Sauber wäre, die echten Höhen zur Bauzeit zu
+messen und je Sektion einzusetzen.
+
+### Tote Bytes — exakt gezählt (`tools/deadcode.mjs`)
+
+**221,3 KB JS ausgeliefert, 139,4 KB nie ausgeführt = 63 %**
+
+| Datei | geliefert | nie ausgeführt | |
+| --- | ---: | ---: | ---: |
+| `pixel-engine.js` | 42,1 KB | 38,7 KB | **92 %** |
+| `react-dom` | 128,7 KB | 76,8 KB | 60 % |
+| `support.js` | 36,5 KB | 16,7 KB | 46 % |
+
+**Die 92 % sind nicht tot, sondern unerreichbar.** `window.PixelFX` bietet 16
+Eingänge, die Seite ruft **zwei** (`PX.button`, `PX.image`, je 21×). Vor dem
+Löschen jeden Eingang gegen alle 21 Seiten **und gegen Interaktion** prüfen,
+nicht nur gegen Scrollen — die Abdeckungsmessung scrollt nur.
+
+### Werkzeuge (alle in `tools/`, alle heute Nacht entstanden)
+
+| | |
+| --- | --- |
+| `mainthread.mjs` | **das wichtigste.** Lighthouses Gruppen + woraus „Other" besteht + die ersten 4 s in 250-ms-Scheiben |
+| `quiet.mjs` | rechnet TTI/TBT auf dem eigenen Longtask-Strom nach |
+| `whoruns.mjs` | CPU-Profil in einem SPÄTEN Fenster — was da auftaucht, läuft für immer |
+| `deadcode.mjs` | Abdeckung JS+CSS |
+| `animcensus.mjs` | Animationen: endlos vs. einmalig, im Bild vs. nicht |
+| `iocount.mjs` | IntersectionObserver und ihre Ziele, nach Erzeuger |
+| `count.mjs` | `getBoundingClientRect` pro Sekunde |
+| `cvtest.mjs` | A/B für `content-visibility` |
+| `pxcheck.mjs` | beweist, dass die Pixeleffekte initialisiert haben |
+
+### Nicht nochmal probieren / Fallen
+
+- **Lighthouse-CLI gegen 8897** endet in `FAILED_DOCUMENT_REQUEST / ERR_ABORTED`,
+  auch lokal. `tools/lighthouse_audit.py` funktioniert, `--save-assets` nicht.
+- **PageSpeed-API ohne Schlüssel:** Tageskontingent des geteilten Projekts
+  aufgebraucht, 429.
+- **V8-Abdeckung:** Bereiche sind **verschachtelt**, äußerster zuerst.
+  „`count>0` = benutzt" meldet **0 % tot für jede Datei**.
+- **`ResizeObserver` auf `<body>`** war der Hauptverdächtige für Dauerlast —
+  gemessen: **4 Aufrufe in 22 s**, unschuldig.
+- **Ein Attribut-Test darf nicht nur die Attribute VOR dem gesuchten lesen.**
+  Vier von fünf Overlays schreiben `style` nach `data-screen-label`; alle vier
+  waren markiert und Modal wie Menü wären eingesperrt gewesen, **lautlos**.
+- **Die 60 `getBoundingClientRect`/s** sind die Pixel-Engine (`movePoints` liest
+  jeden Frame `canvas.getBoundingClientRect()`), nicht die Notizen.
+
+---
+
 ## ▶ STAND 13.9. 03:00 — zwei weitere Runden, alles live
 
 `main` = `55d2a32`. Alle Tore grün, 21 Seiten, 0 Konsolenfehler.
