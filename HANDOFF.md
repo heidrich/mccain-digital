@@ -1,4 +1,187 @@
-# Uebergabe — Stand 13. September 2026
+# Uebergabe — Stand 16. September 2026
+
+## ▶ STAND 16.9. NACHMITTAGS — v5: „Other“ halbiert, nichts Unsichtbares in den ersten 10 s
+
+Owner: *„alles was nicht angezeigt wird, muss auch nicht in den ersten 10 sekunden
+geladen werden.“* Gebaut in `tools/v5build.mjs` (verankerte, gezählte Patches an
+der kopierten Logik, Markup-Schritte), `v5/home.js` und `tools/motion-budget.js`
+(gilt auch für die React-Seiten).
+
+### Gemessen (Mess-Server :8897, 4× CPU, 12 s)
+
+| | vorher | nachher |
+| --- | ---: | ---: |
+| Desktop: Other | 1.340 ms | 641 ms |
+| davon IntersectionObserver | 508 ms | 97 ms |
+| Desktop: Hauptthread gesamt | 3.560 ms | 2.164 ms |
+| Mobil: Other / gesamt | 881 / 2.167 ms | 552 / 1.785 ms |
+| beobachtete IO-Ziele | 132 | 25 |
+| lange Aufgaben nach 5 s | 1 (10,4 s) | 0 |
+| Anfragen in 12 s, Desktop | 28 | 11 (davon Pixel-Engine bei 10 s) |
+| DOM-Elemente | ~2.540 | 2.206 |
+
+TBT bleibt bei 28–29 ms, TTI geht von ~340 auf ~302 ms. `v5compare` ist unverändert
+(0,078 % / 0,491 %), `verify_site` meldet all checks passed.
+
+### Was gebaut ist
+
+**`motion-budget.js`**
+- Beobachtet werden die Container (nächstes `[data-cv]` oder `[data-screen-label]`)
+  statt jedes animierten Elements.
+- Ein neuer Scan läuft nur noch, wenn Elemente hinzukommen oder eine Sektion
+  gerendert wird.
+
+**`home.js`: Arbeit nur für gerenderte Blöcke**
+- Grundlage ist `contentvisibilityautostatechange`, als Rückfall beim Start dient
+  `checkVisibility`.
+- Daran gekoppelt sind:
+  - die IO-Ziele (`watchShown`)
+  - die Pixel-Buttons
+  - die Ablauf-Leiste
+  - die Ausweich-Liste der Notizen
+  - die Linien der Stack-Grafik (`dgRedo`)
+
+**Nachladen**
+- **`pixel-engine.js`** lädt erst bei der ersten echten Mausbewegung oder 10 s nach
+  load, und nur auf `(hover: hover) and (pointer: fine)`. Auf Touch-Geräten lädt
+  sie nie.
+- **Strom-Notizen** stehen als inertes `<template data-v5-pt>` im Markup (336
+  Elemente). Eingesetzt werden sie nur ab 1280 px mit Maus, 10 s nach load.
+- **Markenzeichen:** Nur das Header-Zeichen behält `fetchpriority="high"`, die
+  übrigen vier laden lazy.
+- **Mega-Menü:** Das geschlossene Panel (321 Knoten) bekommt
+  `content-visibility:hidden`, seine Bilder laden lazy. **Stufe 2 muss
+  `data-v5-open` setzen, bevor das Panel eingeblendet wird.**
+
+**Strom-Schleife**
+- keine Layout-Lesungen mehr pro Frame (Größe kommt aus dem ResizeObserver)
+- kein IO mehr auf dem fixierten Canvas
+- adaptive Bildrate (siehe Fallen)
+
+**Aufgeräumt**
+- Die Tipp-Demo hat alle 800 ms nach Elementen gesucht, die es in v5 nicht gibt.
+  Sie startet jetzt nicht mehr.
+- Es gibt nur noch ein `robots`-Tag.
+
+### Fallen (heute gemessen)
+
+- **Ein IO-Ziel in einem übersprungenen `content-visibility`-Block zwingt den
+  Browser, dessen Style zu berechnen.** Das hebelt `content-visibility` aus.
+  Beleg: Ohne diese `observe()`-Aufrufe laden die 14 Logo-Masken nicht mehr bei
+  125 ms.
+- **Chrome rendert `content-visibility:auto`-Blöcke ab 150 % Viewport-Höhe
+  Abstand** und überspringt sie ab dort wieder (gemessen bei 420, 900 und 915 px
+  Höhe).
+- **`document.getAnimations()` kennt die CSS-Animationen übersprungener Blöcke
+  nicht.** Sie entstehen erst beim Rendern, deshalb muss das Rendern einen neuen
+  Scan auslösen.
+- **Adaptive fps:** Aus 30-fps-Frames lässt sich nicht ablesen, ob 60 fps halten
+  würden, denn sie sind konstruktionsbedingt pünktlich. Deshalb wird 60 fps
+  *probiert*, mit wachsendem Abstand (5 → 10 → 20 → 40 → 60 s).
+  - Mit SwiftShader: 30 fps, dazu Probe-Versuche.
+  - Mit Apple-GPU: nie umgeschaltet.
+  - SwiftShader bei 2560×1440 schafft selbst mit 30-fps-Stufe nur ~13 fps. Offener
+    Hebel wäre eine niedrigere Canvas-Auflösung, das ändert aber die Optik.
+- **Der Dev-Server (`--dev`, `no-store`) lädt Schriften und Sprite doppelt.** Mit
+  :8897 ist es je eine Anfrage, das ist also kein Fehler.
+- **Test-Falle:** Die Seite hat `scroll-behavior:smooth`. Ein `scrollBy` im
+  40-ms-Takt bricht die eigene Animation ab, deshalb in Tests
+  `behavior:"instant"` verwenden.
+- **CPU-Drosselung verlangsamt den Shader nicht**, er läuft im GPU-Prozess. Echte
+  Grafiklast erzeugt man mit `--use-angle=swiftshader`.
+
+### Offen
+
+- **Nicht-composited Animationen** (siehe unten „Als naechstes“) halten weiterhin
+  jeden Frame den Hauptthread wach. Sie sind der größte Rest von `RunTask` (~390 ms).
+- **Die React-Seiten haben diese v5-Fixes nicht:** IO in übersprungenen Blöcken,
+  Markenzeichen-Priorität und Notizen im DOM. Übernommen haben sie nur
+  `motion-budget.js`.
+
+---
+
+## ▶ STAND 16.9. — Pixelstrom lief hinter den dunklen Bändern, Notizen über dem Text: behoben
+
+**Git-Stand vorher:** `main` = `v5-preview` = `0d3f091`. Der Block unten („NICHT
+committet, nur auf `v5-preview`“) ist damit überholt: v5 liegt auch auf `main` und
+ist in Produktion unter `/v5/` erreichbar (noindex wie die ganze Site).
+
+### 1. Der Strom verschwand hinter KI-Konsole, Studio, FAQ, News, Kontakt, Footer
+
+Ursache war die Performance-Runde 7 (`content-visibility`, `e97dfb0`). Die dunklen
+Bänder malen ihren Grund als erstes Kind: ein leeres `aria-hidden`-div mit
+`z-index:-2`, eine Stufe unter dem fixen Canvas (`-1`). `content-visibility` bringt
+Paint-Containment mit, und das macht die Sektion zu einem **eigenen Stacking
+Context**: Die ganze Sektion samt Grund wird über dem Canvas gemalt. Das betraf
+React und v5 gleichermaßen.
+
+**Fix** (`deferSections` in `tools/prerender.mjs`): Bei solchen Bändern sitzt
+`data-cv` jetzt auf dem Inhalts-Wrapper direkt nach dem Grund-Layer. Der Grund
+bleibt im Seiten-Kontext, der teure Inhalt wird weiter übersprungen.
+
+- **Gemessen, mit Strom ausgeblendet** (1440/1920/412 px, ganze Seite, Markierung
+  am Band gegen Markierung am Wrapper): nichts abgeschnitten, nur Textkanten im
+  Subpixel-Bereich.
+- **Build-Schutz:** Ein nicht-leerer Negativ-Layer bricht den Build ab.
+- **Prüf-Tor:** `verify_site.mjs` prüft jetzt auf jeder Seite *„no background layer
+  over the stream“*. Gegenprobe gegen `0d3f091`: 21 von 21 Seiten FAIL. Neuer Stand:
+  alle grün.
+
+### 2. Die Notizen lagen im Kontakt über dem Text
+
+Bisher unsichtbar, weil das Blau sie verdeckt hat. Die Ausweich-Liste von
+`movePointsGlobal` sollte über einen `ResizeObserver` auf `<body>` nachgebaut
+werden, aber `html,body{height:100%}` macht `body` immer genau viewport-hoch.
+Gemessen: `body` feuerte **1×**, das Wurzel-Element **16×** (16.523 → 12.477 px beim
+ersten Durchscrollen, weil die zurückgestellten Sektionen ihre echte Höhe
+bekommen). **Fix:** Der Observer hängt am Wurzel-Element (`root`). Die Liste folgt
+jetzt der echten Kontakt-Position.
+
+### 3. Werkzeug
+
+`tools/browser.mjs` fand auf dem Mac keinen Chromium: Neuere Playwright-Builds
+liefern „Google Chrome for Testing.app“ statt „Chromium.app“. Der Pfad ist ergänzt.
+Außerdem hat `npm --prefix tools install` den veralteten Lockfile an `package.json`
+angeglichen (esbuild ist eine normale Abhängigkeit, keine dev-Abhängigkeit).
+
+### Geprüft
+
+- `verify_site.mjs`: all checks passed.
+- `v5compare`: 1280 px 0,078 %, 412 px 0,49 %. Der einzige neue Unterschied ist eine
+  1-px-Haarlinie am Footer-Rand: React und v5 lagen vorher schon 1 px auseinander,
+  jetzt rundet der Wrapper diese Linie auf eine andere Pixelreihe.
+- **Falle:** Der Build kodiert die Bilder auf dem Mac minimal anders
+  (`og-image.png`, `*.webp`). Nach dem Build per `git checkout --` zurücksetzen,
+  wenn sich an den Bildern nichts geändert hat.
+
+### "Other" — gemessen, nicht geraten (`mainthread.mjs`, Desktop, 4× CPU, 12 s)
+
+| | React `/` | v5 |
+| --- | ---: | ---: |
+| Other | 1.477 ms | 1.486 ms |
+| davon `ThreadControllerImpl::RunTask` (Task-Hüllen) | 625 | 648 |
+| davon `IntersectionObserver…computeIntersections` | 518 | 577 |
+| Garbage Collection (eigene Gruppe) | 2 | 0 |
+
+**Einordnung der Gemini-Vorschläge:**
+
+- **Object Pooling bringt nichts:** Der Strom ist ein WebGL-Shader, es gibt keine
+  Pixel-Objekte pro Frame, und GC liegt bei 0–2 ms.
+- **`will-change`/`translateZ` auf dem Canvas:** Das Canvas ist bereits fix und
+  WebGL, ein Nutzen ist nicht zu erwarten.
+- **`scheduler.yield`:** Das teilt nur eigenes JS auf, die IO-Berechnung im
+  Browser erreicht es nicht.
+
+**Die echten Hebel:**
+
+- **Beobachtete Ziele:** 132 in 8 Observern (`iocount.mjs`), davon 76 aus
+  `motion-budget.js`.
+- **Arbeit pro Frame:** Der Strom erzwingt dauerhaft einen Frame-Zyklus, und damit
+  läuft die IO-Berechnung in jedem Frame.
+
+Googles 30.533-ms-Wert bleibt ohne Googles JSON-Bericht unerklärt.
+
+---
 
 ## ▶ STAND 13.9. MITTAGS — Startseite als reines HTML nachgebaut (Stufe 1), NICHT committet, NICHT gepusht
 
