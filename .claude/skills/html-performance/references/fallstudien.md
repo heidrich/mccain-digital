@@ -7,6 +7,7 @@
 
 | Datum | Projekt | Fall | Ergebnis (Zahlen) | Regel(n) |
 |---|---|---|---|---|
+| 2026-09-16 nachts | mccain-digital | v5: Dev-Modus „Werkstatt“ ohne Kosten vor der ersten Aktion | 16 s ohne Aktion: 0 Knoten, 0 Anfragen; Schalter 10.086 ms nach Klick/Taste; Modul 15 Dateien erst beim Klick; verify_site und v5dev-check grün | [](laden-javascript.md#16-besucher-werkzeuge-erst-nach-echter-aktion-plus-verzögerung-laden-davor-null-bytes) |
 | 2026-09-16 abends | mccain-digital | v5: Platzhalterhöhen aus dem Build, Motion-Budget-Timer, WebGL-Gegenprobe | Drift beim ersten Scroll mobil +3.402→0 px, Desktop −3.095→−1 px; setTimeout(250) im Sweep 25→0; rAF-Aufschub für WebGL: FCP 2,4→2,2 s, TBT 0→2,2 s | [](rendern-hauptthread.md#2-contain-intrinsic-size-genau-setzen-und-die-auto-form-nutzen), [](rendern-hauptthread.md#6-auf-contentvisibilityautostatechange-hören-checkvisibility-nur-als-start-fallback), [](rendern-canvas-webgl.md#1-getcontext-ist-synchron-der-erste-paint-darf-nicht-auf-canvas-oder-webgl-warten), [](widerlegt.md#51-zwei-requestanimationframe-ticks-nach-dem-skript-start-garantieren-einen-gemalten-ersten-frame--webgl-danach-zu-starten-entlastet-fcp-und-score) |
 | 2026-09-16 | mccain-digital | v5-Optimierungsrunde + Chromium-Verifikation | "Other" 1.340→641ms, IO 508→97ms, PSI mobil 95→60→100 | [](rendern-hauptthread.md#4-content-visibility-erzeugt-einen-stacking-context-und-einen-containing-block), [](rendern-hauptthread.md#16-intersectionobserver-kosten-skalieren-mit-der-zielzahl-nicht-der-instanzzahl), lighthouse-psi.md#2-rechne-beim-psi-standard-mit-1000-ms-ruhefenster-nicht-5250-ms, widerlegt.md#3-object-pooling-verbessert-die-webgl-pixelstrom-performance |
 | 2026-09-13 | mccain-digital | Prerender + Hydration in vier Runden | PSI mobil 84→91, LCP −49% (2.980→1.516ms) | react-nextjs.md, [](rendern-hauptthread.md#1-content-visibility-auto-auf-lange-off-screen-sektionen-anwenden), [](laden-auslieferung.md#2-html-und-die-zugehörige-runtime-js-datei-nie-gemeinsam-immutable-cachen) |
@@ -33,6 +34,18 @@
 | ADR-040 | mccain-cms | Browser-Runtime-Tests für DOM-Effekte | 13/13 grün im neuen Harness | [[browser-verify]], messen.md |
 | alpha.164 / B7-B8 | mccain-cms | Zwei widerlegte Annahmen (GSAP, Reduced-Motion) | Subsystem entfernt, 33 Tests gestrichen | widerlegt.md#8-gsaps-scrolltriggerscroll-ist-der-korrekte-weg-zum-externen-scrubben, widerlegt.md#9-ein-automatisches-reduced-motion-system-schützt-ohne-kosten |
 | — | whatever-recall-internal | 3D-Preview: 0×-Verifikation überzeugte trotzdem nicht | Feature nicht auf Homepage ausgeliefert | (Produktentscheidung, keine Performance-Regel) |
+
+## 2026-09-16 nachts · mccain-digital · v5: Dev-Modus „Werkstatt“ ohne Kosten vor der ersten Aktion
+
+**Ausgangslage:** Der Owner wollte einen zuschaltbaren Dev-Modus auf der Startseite (DOM, Code, zutreffende CSS-Regeln, Messwerte des Besuchs, Crawler-Sicht), aber PageSpeed durfte davon nichts merken. Das Modul sind 15 native ES-Module unter `v5/dev/` (~190 KB unkomprimiert) plus ein Stylesheet.
+
+**Vorgehen:** Kein Byte davon im HTML. `home.js` hört auf `window` (Capture, passiv) auf `pointerdown`, `keydown`, `wheel`, `touchstart`; die erste Aktion startet einen 10-s-Timer (Owner: „10 sec nach interaktion ist genug“), der den Schalter setzt; erst der Klick lädt das Modul. Ein Prüfskript (`tools/v5dev-check.mjs`) macht die Regel testbar, weil Lighthouse sie nie prüft: es interagiert nicht, und `scrollTo` der Messskripte löst keines der vier Ereignisse aus.
+
+**Messung (Chrome for Testing headless, Seite auf 8898):** 16 s nach load mit `scrollTo` und zwei Mausbewegungen: 0 Werkstatt-Knoten, 0 Anfragen an `/v5/dev/`. Taste (Shift) → kein Schalter bei 8.500 ms, Schalter bei 10.086 ms; früher Klick bei 1 s → Schalter 10.086 ms nach dem Klick. Öffnen: 17 Anfragen, alle erst nach dem Klick; Escape entfernt jeden Knoten, Stil und Listener; Wiederöffnen ohne neue Modul-Anfrage. verify_site (21 Seiten) grün.
+
+**Nebenbefunde beim Bau, allgemein gültig:** `inert` auf der Seite nimmt sie aus der Trefferprüfung (`elementsFromPoint` → nur `<html>`), ein Inspektor muss Ereignisse in der Capture-Phase abfangen. `offsetParent` ist bei `position:fixed` immer `null`. Ein `fetch` mit `HEAD` auf eine gzip-komprimierte Antwort meldet Chrome als `net::ERR_ABORTED`, obwohl die Promise erfüllt wird. `CSSStyleDeclaration` iteriert Longhands, `cssText` faltet sie zurück. Ein Reset mit Id-Selektor (`#x button`) schlägt jede Komponentenklasse; Resets gehören in `:where()`.
+
+**Regeln:** [laden-javascript.md Regel 16](laden-javascript.md#16-besucher-werkzeuge-erst-nach-echter-aktion-plus-verzögerung-laden-davor-null-bytes); Details `docs/plans/2026-09-16-dev-modus-design.md` im Projekt.
 
 ## 2026-09-16 abends · mccain-digital · v5: Platzhalterhöhen aus dem Build, Motion-Budget-Timer, WebGL-Gegenprobe
 

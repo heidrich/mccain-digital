@@ -27,7 +27,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 # moved to the repository root, and every page answered 404 with no error in
 # the log — the server was healthy, it was pointed at nothing.
 ROOT = os.path.dirname(os.path.abspath(__file__))
-COMPRESSIBLE = (".html", ".css", ".js", ".svg", ".json", ".txt", ".xml")
+COMPRESSIBLE = (".html", ".css", ".js", ".svg", ".json", ".txt", ".xml", ".md")
 IMMUTABLE = (".woff2", ".webp", ".jpg", ".png", ".svg", ".css", ".js")
 
 
@@ -67,6 +67,15 @@ class Handler(SimpleHTTPRequestHandler):
         super().__init__(*a, directory=ROOT, **kw)
 
     dev = False
+
+    def guess_type(self, path):
+        # The Markdown twins (v5/index.md) are read by language models and by
+        # the workshop's crawler view. vercel.json sends them as
+        # text/markdown; charset=utf-8 - the same here, so a wrong charset
+        # cannot hide behind the local server.
+        if path.endswith(".md"):
+            return "text/markdown; charset=utf-8"
+        return super().guess_type(path)
 
     def end_headers(self):
         path = self.path.split("?")[0]

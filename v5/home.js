@@ -246,6 +246,77 @@
       document.head.appendChild(s);
     }
 
+    /* THE WORKSHOP COMES LATE, AND ONLY FOR SOMEONE WHO IS HERE.
+     *
+     * The workshop (v5/dev/) shows the page from the inside: DOM, code, the
+     * CSS that applies, the numbers of this very visit. Before it is asked for
+     * it costs nothing: no node, no request, no style. Its switch appears ten
+     * seconds after the visitor's first real action - a pointer press, a key,
+     * the wheel, a touch (owner, 16.9.2026). Moving the mouse is not an action.
+     * Lighthouse never does any of these, and the measuring scripts scroll
+     * with scrollTo, which fires none of them, so nothing here is ever
+     * measured. `?werkstatt` in the URL opens it at once, for showing it. */
+    armDevMode() {
+      var EVENTS = ["pointerdown", "keydown", "wheel", "touchstart"];
+      var onAct = () => {
+        for (var i = 0; i < EVENTS.length; i++) window.removeEventListener(EVENTS[i], onAct, true);
+        setTimeout(() => this.showDevSwitch(), 10000);
+      };
+      for (var i = 0; i < EVENTS.length; i++) window.addEventListener(EVENTS[i], onAct, { capture: true, passive: true });
+      if (/[?&]werkstatt(=|&|$)/.test(location.search)) {
+        for (var j = 0; j < EVENTS.length; j++) window.removeEventListener(EVENTS[j], onAct, true);
+        this.showDevSwitch();
+        this.loadDev();
+      }
+    }
+
+    /* The switch and its few rules arrive together, so the page's stylesheet
+     * carries nothing for a control most visits never see. The module takes
+     * the button over once it runs (open, close, aria-expanded). */
+    showDevSwitch() {
+      if (document.querySelector("[data-v5-dev-switch]")) return;
+      var css = document.createElement("style");
+      css.id = "v5-dev-switch-css";
+      css.textContent =
+        ".v5-dev-switch{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:70;display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 14px 0 12px;border-radius:999px;background:#0A2540;color:#fff;font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;box-shadow:0 0 0 1px rgba(10,37,64,.08),0 10px 30px -12px rgba(10,37,64,.5);cursor:pointer;animation:v5DevIn .5s cubic-bezier(.2,.8,.2,1) both;transition:background .2s,transform .2s}" +
+        ".v5-dev-switch::before{content:'';width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#FFB46B,#FF5A8C,#C05CFF,#5FC3FF)}" +
+        ".v5-dev-switch:hover{background:#0A1F44;transform:translateY(-1px)}" +
+        ".v5-dev-switch:focus-visible{outline:2px solid #635BFF;outline-offset:3px}" +
+        ".v5-dev-switch[data-state=loading]{opacity:.7;cursor:progress}" +
+        ".v5-dev-switch[data-state=failed]{background:#425466}" +
+        "@keyframes v5DevIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}" +
+        "@media (prefers-reduced-motion:reduce){.v5-dev-switch{animation:none;transition:none}}";
+      document.head.appendChild(css);
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "v5-dev-switch";
+      b.setAttribute("data-v5-dev-switch", "");
+      b.setAttribute("data-state", "idle");
+      b.setAttribute("aria-haspopup", "dialog");
+      b.setAttribute("aria-expanded", "false");
+      b.textContent = "Werkstatt";
+      b.addEventListener("click", () => this.loadDev());
+      document.body.appendChild(b);
+    }
+
+    loadDev() {
+      if (this.devState) return;
+      this.devState = "loading";
+      var b = document.querySelector("[data-v5-dev-switch]");
+      if (b) b.setAttribute("data-state", "loading");
+      var s = document.createElement("script");
+      s.type = "module";
+      s.src = "/v5/dev/index.js";
+      s.onload = () => { this.devState = "ready"; };
+      s.onerror = () => {
+        /* A dropped connection must not cost the workshop for the rest of the visit: the next click tries again. */
+        this.devState = null;
+        s.remove();
+        if (b) { b.setAttribute("data-state", "failed"); b.textContent = "Werkstatt · erneut versuchen"; }
+      };
+      document.head.appendChild(s);
+    }
+
     wirePixels() {
       var els = this.rootEl.querySelectorAll("[data-px], [data-px-img]");
       for (var i = 0; i < els.length; i++) {
@@ -396,6 +467,7 @@
       }
       this.armPixels();
       this.armNotes();
+      this.armDevMode();
     }
   }
 

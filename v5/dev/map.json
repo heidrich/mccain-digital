@@ -1,0 +1,268 @@
+{
+  "files": {
+    "home": {
+      "name": "home.js",
+      "url": "/v5/home.js",
+      "lang": "js",
+      "what": "Bindet das bereits fertig gerenderte HTML ohne React an: Event-Delegation, State-Updates auf einzelne Knoten, die Loader für Pixel-Effekte und Stream-Notizen.",
+      "why": "Ein React-Rerender der ganzen Seite kostete 15 volle Durchläufe in 30 s bei 64–84 ms je Durchlauf (tools/reactprof.mjs, 4x CPU); home.js schreibt stattdessen gezielt in den DOM."
+    },
+    "logic": {
+      "name": "logic.gen.js",
+      "url": "/v5/logic.gen.js",
+      "lang": "js",
+      "what": "Die für die Startseite kopierten Methoden der früheren React-Komponente: Strom, Zähler, Prozessleiste, Integrations-Diagramm, Demo, Scroll-Ziele.",
+      "why": "tools/v5build.mjs kopiert diese Methoden wörtlich aus derselben Klasse in index.html, damit Vorlage und Startseite nie auseinanderlaufen. Generiert, nicht von Hand editieren."
+    },
+    "motion": {
+      "name": "motion-budget.js",
+      "url": "/v5/dev/motion-budget.src.js",
+      "lang": "js",
+      "what": "Pausiert CSS-Animationen, die gerade niemand sieht, und hält Endlos-Schleifen sechs Sekunden nach dem Laden zurück.",
+      "why": "Gemessen 13.9.2026: 25 laufende CSS-Animationen oben im Dokument, nur 5 davon im Bild; das vollständige Abschalten aller Animationen sparte LCP 3.650→2.759 ms und TBT 793→530 ms."
+    },
+    "css": {
+      "name": "style#v5-css",
+      "lang": "css",
+      "what": "Die aus 32 Renderzuständen zusammengeführten, auf #dc-root skopierten Klassenregeln plus Hero-, Zustands- und Panel-CSS.",
+      "why": "Jede Regel ist mit der Spezifität (1,1,0) genauso stark wie der Inline-Style, den sie ersetzt, damit beim Bauen nichts umsortiert werden musste."
+    },
+    "build": {
+      "name": "tools/v5build.mjs (Bauzeit, nicht ausgeliefert)",
+      "lang": "js",
+      "what": "Rendert die frühere React-Komponente 32-mal (8 Breiten × 4 Zustände) serverseitig und führt die Ergebnisse zu statischem HTML und CSS zusammen.",
+      "why": "Die Komponente hatte keine Teilbäume zum Memoisieren; sie in echtes HTML zu zerlegen war der einzige Weg, die Rerender-Kosten loszuwerden."
+    }
+  },
+  "entries": [
+    {
+      "match": "canvas[data-ref=\"gradRef\"]",
+      "title": "Der Strom",
+      "file": "logic",
+      "symbol": "startGradient",
+      "also": [
+        { "file": "logic", "symbol": "gradRef" },
+        { "file": "logic", "symbol": "stopGradient" }
+      ],
+      "what": "Zeichnet den animierten Farbverlauf im Hintergrund über WebGL, gekoppelt an Scrollposition und Mauszeiger.",
+      "why": "Die Zeichenschleife liest pro Bild keine Layout-Werte mehr (vorher erzwang scrollY/clientWidth pro Frame einen Reflow, gemessen 52 ms) und schaltet bei 90 Bildern mit mehr als 18 verspäteten selbst auf 30 Bilder/s."
+    },
+    {
+      "match": "[data-cv]",
+      "title": "Aufgeschobener Abschnitt",
+      "file": "home",
+      "symbol": "region",
+      "also": [
+        { "file": "home", "symbol": "whenShown" },
+        { "file": "home", "symbol": "isSkipped" },
+        { "file": "build", "section": "THE DEFERRED BLOCKS GET A NAME AND THEIR MEASURED HEIGHT" }
+      ],
+      "what": "Meldet, ob dieser Abschnitt gerade vom Browser übersprungen oder gerendert wird, und gibt wartende Beobachter frei.",
+      "why": "content-visibility:auto erspart Layout und Malen außerhalb des Bildschirms; die Platzhalterhöhe kommt aus vorab gemessenen Werten, weil eine einzige Zahl für 15 Abschnitte beim ersten Scrollen um +3.402 px (Handy) bzw. −3.095 px (Desktop) danebenlag."
+    },
+    {
+      "match": "[data-reveal]",
+      "title": "Einblendung beim Scrollen",
+      "file": "logic",
+      "symbol": "initReveal",
+      "what": "Blendet einen Block ein, sobald er zu 8 % im Bild ist, und stößt dabei bei Bedarf seine Zähler an.",
+      "why": "Beobachtet wird nur, solange der Block gerendert ist (watchShown in home.js): ein Beobachter-Ziel in einem übersprungenen Block zwingt den Browser sonst, ihn trotzdem zu layouten."
+    },
+    {
+      "match": "[data-fx], [data-fxnum]",
+      "title": "Kennzahlen-Loop",
+      "file": "logic",
+      "symbol": "initFx",
+      "also": [
+        { "file": "logic", "symbol": "countTo" }
+      ],
+      "what": "Zählt eine Kennzahl hoch, sobald ihr Block ins Bild kommt, und wiederholt das alle 7 Sekunden.",
+      "why": "Das Intervall läuft nur, während der Block sichtbar ist; ein Zähler, den niemand sieht, ist reine Rechenlast im Hintergrund."
+    },
+    {
+      "match": "[data-count], [data-count-group]",
+      "title": "Statistik-Zähler",
+      "file": "logic",
+      "symbol": "runCounters",
+      "what": "Zählt mehrere Zahlen einer Gruppe gemeinsam von einem Startwert bis zum Zielwert hoch.",
+      "why": "Der Start hängt an initReveal statt am Laden der Seite, damit eine Zahl außerhalb des Bildschirms nicht schon fertig gezählt hat, wenn sie ankommt."
+    },
+    {
+      "match": "[data-process-steps], [data-step]",
+      "title": "Prozessleiste",
+      "file": "logic",
+      "symbol": "updateProcess",
+      "also": [
+        { "file": "home", "symbol": "onRegion" }
+      ],
+      "what": "Füllt die Fortschrittsleiste des Ablaufs nach Scrollposition und markiert den erreichten Schritt.",
+      "why": "Die Funktion liest bei jedem Scroll-Frame das Layout eines fernen Abschnitts; home.js überspringt das, solange der Abschnitt per content-visibility übersprungen ist, und stößt es stattdessen an, sobald er gerendert wird (onRegion)."
+    },
+    {
+      "match": "[data-dgflow], [data-dgnode]",
+      "title": "Integrations-Diagramm",
+      "file": "logic",
+      "symbol": "dgRef",
+      "also": [
+        { "file": "logic", "symbol": "dgPaths" },
+        { "file": "logic", "symbol": "dgPulse" }
+      ],
+      "what": "Zeichnet die laufenden Verbindungslinien und den wandernden Puls zwischen den Systemknoten des Diagramms.",
+      "why": "Die Pfade werden neu berechnet, sobald der Diagramm-Block sichtbar wird oder seine Größe sich ändert, statt starr zu festen Zeiten nach dem Start zu laufen – sonst würde der Browser Positionen in einem noch übersprungenen Block messen."
+    },
+    {
+      "match": "[data-console-full]",
+      "title": "KI-Konsole",
+      "file": "logic",
+      "symbol": "watchConsole",
+      "what": "Beobachtet, ob die vollständige KI-Konsole im Bild ist, und blendet danach das schwebende Frage-Dock ein oder aus.",
+      "why": "Nur eine Konsole mit eigenem Transkript darf das Dock verstecken; ein einfacher Frage-Block muss es sichtbar lassen."
+    },
+    {
+      "match": "[data-flow], [data-anim]",
+      "title": "Ablauf-Animation",
+      "file": "logic",
+      "symbol": "initFlow",
+      "what": "Pausiert oder startet eine CSS-Animation danach, ob ihr Container gerade im Bild ist.",
+      "why": "Ein gemeinsamer IntersectionObserver für den Container steuert alle seine Animationen zusammen, statt für jedes einzelne animierte Element einen eigenen Beobachter zu betreiben."
+    },
+    {
+      "match": "[data-px], [data-px-img]",
+      "title": "Pixel-Hover-Effekt",
+      "file": "home",
+      "symbol": "armPixels",
+      "also": [
+        { "file": "home", "symbol": "loadPixels" },
+        { "file": "home", "symbol": "wirePixels" },
+        { "file": "logic", "symbol": "initPixels" }
+      ],
+      "what": "Lädt den Pixelraster-Effekt über Buttons und Bildern nach und verdrahtet ihn mit dem jeweiligen Element.",
+      "why": "pixel-engine.js wiegt 42 KB beim Parsen (16 KB übertragen) für einen Effekt, der nur unter einer Maus existiert; das Skript lädt erst bei der ersten echten Mausbewegung oder zehn Sekunden nach dem Laden, nie bei Touch oder reduzierter Bewegung."
+    },
+    {
+      "match": "[data-pt-layer]",
+      "title": "Die Stream-Notizen",
+      "file": "home",
+      "symbol": "armNotes",
+      "also": [
+        { "file": "logic", "symbol": "movePointsGlobal" },
+        { "file": "build", "section": "THE STREAM NOTES SHIP INERT" }
+      ],
+      "what": "Setzt die vorbeiziehenden Code-Notizen erst ein, wenn zehn Sekunden lang ein breiter Bildschirm mit Maus da war.",
+      "why": "Die 112 Labels sind 336 Elemente, 13 % des DOM der Seite; auf dem Handy gibt es sie nie, deshalb liegen sie bis dahin reglos in einem <template>, das kein Gerät rendert, stylt oder zählt."
+    },
+    {
+      "match": "[data-on]",
+      "title": "Klick-Weiterleitung",
+      "file": "home",
+      "symbol": "mount",
+      "also": [
+        { "file": "home", "symbol": "handlerName" }
+      ],
+      "what": "Ein einziger Klick-Listener am document sucht über data-on das nächste passende Element und ruft dessen Handler auf.",
+      "why": "Event-Delegation statt eines eigenen Listeners pro Button erspart hunderte Listener auf einer Seite mit weit über hundert klickbaren data-on-Elementen."
+    },
+    {
+      "match": "[data-dyn]",
+      "title": "Berechneter Stil",
+      "file": "home",
+      "symbol": "bind",
+      "what": "Schreibt einen einzelnen State-Wert (Farbe, Transform, Höhe …) auf genau die Elemente, deren Stil davon abhängt.",
+      "why": "data-dyn hält fest, welche der früher von React inline gesetzten Stil-Eigenschaften an einem State-Feld hängen; bind() ersetzt so den vollständigen Rerender durch ein gezieltes style.setProperty."
+    },
+    {
+      "match": "[data-v5-when], [data-v5-unless]",
+      "title": "Zustandsabhängiges Element",
+      "file": "home",
+      "symbol": "setState",
+      "also": [
+        { "file": "home", "symbol": "apply" }
+      ],
+      "what": "Blendet ein Element ein oder aus, das nur in einem bestimmten Zustand existiert, etwa das offene Mobilmenü oder den Consent-Hinweis.",
+      "why": "setState() ruft apply() auf, das die passenden data-v5-*-Flags per toggleAttribute auf <html> setzt; je ein CSS-Regelpaar pro Zustand blendet den Rest aus, statt Knoten aus dem DOM zu entfernen und wieder einzufügen."
+    },
+    {
+      "match": "[data-screen-label]",
+      "title": "Motion-Budget",
+      "file": "motion",
+      "symbol": "containerOf",
+      "also": [
+        { "file": "motion", "symbol": "scan" }
+      ],
+      "what": "Ordnet eine laufende CSS-Animation ihrem nächsten [data-cv]- oder [data-screen-label]-Container zu und beobachtet nur diesen Container statt jedes einzelnen animierten Elements.",
+      "why": "Der Beobachter selbst kostete gemessen 508 von 1.340 ms „Other“ in Lighthouse und skaliert mit der Zahl der beobachteten Ziele; vorher beobachtete diese Datei 76 von 132 Zielen der Seite einzeln, jetzt eine Handvoll stillstehender Container."
+    },
+    {
+      "match": "h1[data-hero-h1]",
+      "title": "Die Überschrift",
+      "file": "build",
+      "section": "one headline",
+      "also": [
+        { "file": "css", "selector": ".v5-w" }
+      ],
+      "what": "Zeigt genau eine Hero-Headline mit Eintrittsanimation, statt die Wortliste des früheren Exports per CSS durchzurotieren.",
+      "why": "Jede rotierende Variante war ein neuer, größerer LCP-Kandidat; PageSpeed maß dadurch LCP 20,5 s, weil es bis zur Ruhe der Seite wartet. Die zweite bis vierte Variante werden seither gar nicht mehr ausgeliefert."
+    },
+    {
+      "match": "img[fetchpriority=\"high\"]",
+      "title": "Das Logo mit Vorrang",
+      "file": "build",
+      "section": "ONE MARK LOADS FIRST",
+      "what": "Nur die Kopfzeilen-Marke behält fetchpriority=\"high\"; sie ist der LCP-Kandidat und wird im <head> vorab geladen.",
+      "why": "Der frühere Export gab allen fünf Marken fetchpriority=\"high\", darunter vier, die beim Laden niemand sieht (Konsole, Diagramm, Footer, Consent-Hinweis); die laden jetzt lazy, sobald ihr Block gerendert wird."
+    },
+    {
+      "match": ".skip-link",
+      "selector": ".skip-link",
+      "title": "Sprung zum Inhalt",
+      "file": "css",
+      "what": "Versteckt den Link „Zum Inhalt springen“, bis er per Tastatur fokussiert wird.",
+      "why": "position:fixed mit top:-60px hält den Link unsichtbar, ohne ihn aus der Tab-Reihenfolge zu nehmen; :focus schiebt ihn ins Bild."
+    },
+    {
+      "match": "[data-v5-dev-switch]",
+      "title": "Werkstatt-Schalter",
+      "file": "home",
+      "symbol": "armDevMode",
+      "also": [
+        { "file": "home", "symbol": "loadDev" }
+      ],
+      "what": "Zeigt den Schalter zu dieser Werkstatt erst, wenn wirklich jemand da ist: 15 Sekunden nach dem Laden oder bei der ersten echten Aktion.",
+      "why": "Vor dem ersten Aufruf kostet die Werkstatt keinen Knoten, keinen Request, keinen Stil; Lighthouse und automatisierte Messungen lösen keines der Ereignisse aus und sehen den Schalter deshalb nie."
+    },
+    {
+      "match": "[data-on~=\"click:l.onClick\"]",
+      "title": "Ziel auf der Seite",
+      "file": "logic",
+      "symbol": "go",
+      "also": [
+        { "file": "logic", "symbol": "goHandler" },
+        { "file": "home", "symbol": "handlers" }
+      ],
+      "what": "Scrollt sanft zu einem Anker dieser Seite oder öffnet die Zielseite, wenn der Anker hier (noch) nicht existiert.",
+      "why": "go() sucht erst per ID, dann über eine Alias-Liste und weicht erst auf eine externe Seite aus, wenn nichts davon trifft – so bleibt ein einziger Handler für Navigation, Footer und Mobilmenü zuständig."
+    },
+    {
+      "match": "[data-on~=\"click:f.toggle\"]",
+      "title": "FAQ aufklappen",
+      "file": "home",
+      "symbol": "handlers",
+      "also": [
+        { "file": "home", "symbol": "apply" }
+      ],
+      "what": "Öffnet eine FAQ-Antwort und schließt die zuvor offene, wenn eine andere Frage angeklickt wird.",
+      "why": "apply() schreibt bei jeder Änderung nur Höhe, Pfeil-Drehung und Icon-Farben der betroffenen Zeile per data-dyn, statt die ganze FAQ-Liste neu aufzubauen."
+    },
+    {
+      "match": "[data-v5-when=\"consent\"]",
+      "title": "Datenschutz-Hinweis",
+      "file": "home",
+      "symbol": "handlers",
+      "also": [
+        { "file": "home", "symbol": "apply" }
+      ],
+      "what": "Zeigt den Consent-Hinweis sieben Sekunden nach dem Laden, wenn noch keine Einwilligung gespeichert ist, und blendet ihn nach dem Annehmen sanft aus.",
+      "why": "Die Einwilligung wird in localStorage gemerkt; ist der Speicher blockiert, kommt der Hinweis bei jedem Besuch einfach wieder, statt die Seite abstürzen zu lassen."
+    }
+  ]
+}

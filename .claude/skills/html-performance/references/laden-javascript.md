@@ -24,6 +24,7 @@ Bis zum 16.9.2026 stand dieser Inhalt zusammen mit den anderen `Laden`-Themen in
 - **Ein dokumentiertes Bundle-Größen-Budget als laufende Guardrail** — ein Byte-Budget mit fester Schwelle prüft sich bei jedem PR, "so klein wie möglich" nicht ([→](#13-ein-dokumentiertes-bundle-größen-budget-als-laufende-guardrail))
 - **Vor dem Löschen von scheinbar ungenutztem JS: unreached ist nicht dasselbe wie tot** — eine Coverage-Messung zeigt "unerreicht in dieser Aufnahme", nicht "tot" — 63 % Beispielquote ([→](#14-vor-dem-löschen-von-scheinbar-ungenutztem-js-unreached-ist-nicht-dasselbe-wie-tot))
 - **Resource Hints (preconnect/dns-prefetch/Early Hints) nur für wirklich bald gebrauchte Origins** — preconnect nur für bald wirklich gebrauchte Origins, sonst dns-prefetch oder nichts ([→](#15-resource-hints-preconnectdns-prefetchearly-hints-nur-für-wirklich-bald-gebrauchte-origins))
+- **Besucher-Werkzeuge erst nach echter Aktion plus Verzögerung laden, davor null Bytes** — Dev-Modus, Chat, Feedback: Schalter erst Sekunden nach pointerdown/keydown/wheel/touchstart, Modul erst beim Klick; Lighthouse löst nichts davon aus ([→](#16-besucher-werkzeuge-erst-nach-echter-aktion-plus-verzögerung-laden-davor-null-bytes))
 
 ## Inhalt
 
@@ -136,6 +137,13 @@ Bis zum 16.9.2026 stand dieser Inhalt zusammen mit den anderen `Laden`-Themen in
 **Woran man es erkennt:** Mehr als drei bis vier <link rel="preconnect">-Einträge im <head>, oder ein preconnect zu einem Origin, der erst Sekunden später oder gar nicht gebraucht wird.
 **Fix:** <link rel="preconnect"> gezielt für jeden externen Host setzen, von dem above-the-fold Assets (Bilder, Fonts, API) geladen werden; für weniger kritische Drittanbieter-Domains stattdessen dns-prefetch. Die "richtige" Obergrenze ist uneinheitlich belegt (siehe Offene Fragen) — Praxis-Konsens tendiert zu 2–4 wirklich kritischen Origins pro Seite. Ob 103 Early Hints auf der eigenen Plattform ankommt, per curl -v gegen eine echte Deployment-URL verifizieren, nicht annehmen.
 **Beleg:** meza-website, CHANGELOG "Performance": <link rel=preconnect> zu Supabase Storage ergänzt, ~300 ms DNS/TLS gespart (dokumentiert, nicht gemessen) | web.dev, Preconnect and dns-prefetch | MDN, HTTP 103. · Sicherheit: dokumentiert
+**Gilt für:** allgemein
+
+### 16. Besucher-Werkzeuge erst nach echter Aktion plus Verzögerung laden, davor null Bytes
+**Warum:** Alles, was nur ein interessierter Besucher braucht (ein Dev-Modus, ein Chat-Widget, ein Feedback-Knopf), kostet jeden Besuch, wenn es mit der Seite kommt: Bytes, einen DOM-Knoten, Stilberechnung, oft einen Long Task. Lighthouse und PSI interagieren nie, und die eigenen Messskripte scrollen mit `scrollTo`, das kein Ereignis der Klasse „Nutzeraktion“ auslöst. Ein Werkzeug, das erst nach der ersten echten Aktion und einer Verzögerung erscheint, existiert im Labor also gar nicht, und ein echter Besucher bekommt es genau dann, wenn er zeigt, dass er bleibt.
+**Woran man es erkennt:** Ein Widget-Skript im `<head>` oder per `defer`, ein Knopf mit `position:fixed` schon im HTML, ein `setTimeout` allein (ohne Aktion) als Gate, oder `pointermove` als „Aktion“ (die Maus bewegt sich auch beim Vorbeischauen).
+**Fix:** Auf `window` in der Capture-Phase auf `pointerdown`, `keydown`, `wheel` und `touchstart` hören (`{capture:true, passive:true}`), beim ersten Treffer alle vier abhängen und einen Timer starten (10 s haben sich bewährt); erst der Timer setzt den Schalter (Button plus eigenes kleines `<style>`), erst der Klick lädt das Modul (`<script type="module">` oder `import()`). Mausbewegung zählt nicht. Die Regel ist ein Versprechen, das kein Lighthouse-Lauf prüft, also gehört ein eigenes Skript dazu: N Sekunden ohne Aktion (mit `scrollTo` und Mausbewegung) → kein Knoten, keine Anfrage; Aktion → nichts nach 8,5 s, Schalter zwischen 10 und 12,5 s.
+**Beleg:** mccain-digital v5, 16.9.2026, `tools/v5dev-check.mjs`: 16 s nach load mit `scrollTo` und zwei `mouse.move` null Werkstatt-Knoten und null Anfragen an `/v5/dev/`; Taste bzw. Klick → Schalter nach 10.086 ms, keiner bei 8.500 ms; das Modul (15 Dateien, ~190 KB unkomprimiert) lädt erst beim Klick. · Sicherheit: gemessen
 **Gilt für:** allgemein
 
 ## Offene Fragen

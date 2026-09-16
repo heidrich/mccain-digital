@@ -201,7 +201,7 @@ Jede Referenzdatei beginnt mit einer `## Kurzfassung`, die alle Regeln als Liste
 - [messen.md](references/messen.md#kurzfassung) — 58 Regeln
 - [lighthouse-psi.md](references/lighthouse-psi.md#kurzfassung) — 24 Regeln
 - [laden-kritischer-pfad.md](references/laden-kritischer-pfad.md#kurzfassung) — 29 Regeln
-- [laden-javascript.md](references/laden-javascript.md#kurzfassung) — 15 Regeln
+- [laden-javascript.md](references/laden-javascript.md#kurzfassung) — 16 Regeln
 - [laden-auslieferung.md](references/laden-auslieferung.md#kurzfassung) — 19 Regeln
 - [rendern-hauptthread.md](references/rendern-hauptthread.md#kurzfassung) — 33 Regeln
 - [rendern-animationen.md](references/rendern-animationen.md#kurzfassung) — 16 Regeln

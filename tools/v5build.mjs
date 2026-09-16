@@ -44,6 +44,7 @@ import path from "node:path";
 import { BASE, launch, open, requireServer } from "./browser.mjs";
 
 import { HEIGHTS_FILE, cvKey } from "./v5cv.mjs";
+import { HTML_TO_MARKDOWN } from "./markdown.mjs";
 
 const SITE = path.join(import.meta.dirname, "..");
 const OUT = path.join(SITE, "v5");
@@ -352,8 +353,9 @@ const merged = await tab.evaluate((TPL) => {
   });
   return { html, css, warns, faq, styles: styleIds.size, rules: rules.size, stateStyleDiffs, bytes: renders.map((r) => r.length) };
 }, TPL);
-await browser.close();
-if (merged.fatal) throw new Error("v5build: " + merged.fatal);
+/* The tab stays open: the Markdown twin below is made from the finished page
+ * in the same browser, after every patch has run on the string. */
+if (merged.fatal) { await browser.close(); throw new Error("v5build: " + merged.fatal); }
 
 /* --------------------------------------------------------- one headline */
 /* Owner, 16.9.2026: "wir nutzen nur noch einen headline". Stage 1 rebuilt the
@@ -624,7 +626,9 @@ const outHead = head
   .replace(/<script src="\/pixel-engine\.js" defer><\/script>/, "")
   .replace(/<style>x-dc\{display:none!important\}<\/style>/g, "")
   .replace(/\s*<meta name="robots"[^>]*>/g, "")
-  .replace("</title>", '</title>\n  <meta name="robots" content="noindex">');
+  .replace("</title>", '</title>\n  <meta name="robots" content="noindex">')
+  /* The Markdown twin (written below) is announced the way feeds are: a typed alternate. */
+  .replace("</title>", '</title>\n  <link rel="alternate" type="text/markdown" href="/v5/index.md">');
 if (outHead.includes("pixel-engine.js")) throw new Error("v5build: the head still loads pixel-engine.js - home.js loads it on demand");
 /* THE DEFERRED BLOCKS GET A NAME AND THEIR MEASURED HEIGHT.
  *
@@ -692,10 +696,41 @@ const page = `<!DOCTYPE html>
 `;
 fs.writeFileSync(path.join(OUT, "index.html"), page, "utf8");
 
+/* THE MARKDOWN TWIN. A language model or a crawler that asks for
+ * /v5/index.md gets the page's words with their structure and none of the
+ * layout markup (the pattern docs.anthropic.com uses for every page). It is
+ * made from the finished body in the still-open tab, inside an inert
+ * <template> so no script runs, with the head's title, description and
+ * canonical as its front matter. tools/markdown.mjs holds the converter;
+ * tools/markdown-check.mjs tests it against the served page. */
+const headMeta = {
+  title: (headOut.match(/<title>([^<]*)<\/title>/) || [])[1] || "",
+  description: (headOut.match(/<meta name="description" content="([^"]*)"/) || [])[1] || "",
+  canonical: (headOut.match(/<link rel="canonical" href="([^"]*)"/) || [])[1] || "",
+  lang: "de",
+};
+const twin = await tab.evaluate(([src, body, meta]) => {
+  const t = document.createElement("template");
+  t.innerHTML = body;
+  return new Function("return " + src)()(t.content, meta);
+}, [HTML_TO_MARKDOWN, html, headMeta]);
+await browser.close();
+if (!twin || twin.words < 500 || twin.headings < 10) {
+  merged.warns.push(`v5/index.md looks thin: ${twin ? `${twin.words} words, ${twin.headings} headings` : "no result"} - check tools/markdown.mjs against the page`);
+  process.exitCode = 1;
+}
+fs.writeFileSync(path.join(OUT, "index.md"), twin.markdown, "utf8");
+
+/* The workshop (v5/dev/) shows motion-budget.js as readable source; the
+ * deployed root file is the minified build of tools/motion-budget.js. */
+fs.mkdirSync(path.join(OUT, "dev"), { recursive: true });
+fs.copyFileSync(path.join(import.meta.dirname, "motion-budget.js"), path.join(OUT, "dev", "motion-budget.src.js"));
+
 console.log(`renders: ${merged.bytes.length}, ${Math.min(...merged.bytes)}-${Math.max(...merged.bytes)} B`);
 console.log(`unique styles ${merged.styles}, CSS rules ${merged.rules}, style diffs between states ${merged.stateStyleDiffs}`);
 console.log(`faq entries ${merged.faq.length}, statics copied: ${statics.join(", ") || "-"}`);
 console.log(`v5/index.html ${page.length} B (css ${merged.css.length} B), logic.gen.js ${gen.length} B`);
 console.log(`deferred blocks: ${cvKeys.join(" ")}\n  ${cvHeightsNote}`);
+console.log(`v5/index.md ${twin.markdown.length} B: ${twin.words} words, ${twin.headings} headings, ${twin.links} links (skipped ${twin.skipped.nav} nav, ${twin.skipped.hidden} hidden); v5/dev/motion-budget.src.js copied`);
 console.log(`this.* used by copied methods: ${selfRefs.join(" ")}`);
 if (merged.warns.length) console.log("warnings:\n  " + merged.warns.join("\n  "));

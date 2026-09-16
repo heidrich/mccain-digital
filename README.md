@@ -212,7 +212,7 @@ what exists.
 
 ```bash
 python prodserve.py 8898 --dev      # must be running
-node tools/v5build.mjs              # writes v5/index.html and v5/logic.gen.js
+node tools/v5build.mjs              # writes v5/index.html, v5/logic.gen.js, v5/index.md
 ```
 
 The deferred sections (`data-cv`) carry a measured placeholder height per
@@ -227,7 +227,30 @@ node tools/v5build.mjs
 
 `v5build.mjs` names every block it could not find in the file; the skill's
 `cv-audit.mjs` reports a page-height drift above 24 px when the numbers have
-gone stale. `v5/home.js` is the only hand-written file in `v5/`.
+gone stale. Hand-written in `v5/`: `home.js` and the workshop under `v5/dev/`.
+
+The build also writes `v5/index.md`, the page as Markdown for crawlers and
+language models (converter in `tools/markdown.mjs`, announced with
+`<link rel="alternate" type="text/markdown">`, served as `text/markdown` by
+`vercel.json` and `prodserve.py`). `node tools/markdown-check.mjs` reads the
+twin back from the served page and checks its shape.
+
+#### The workshop (Dev-Modus)
+
+`v5/dev/` is the page shown from the inside: DOM tree, the element's HTML and
+the CSS rules that apply, the source files with jumps from element to function
+(`map.json`, hand-maintained), the numbers of the visit (LCP, layout shifts,
+long tasks, waterfall, frame rate, skipped blocks, device), knobs, and how
+Google and language models read the page. Native ES modules, no build step;
+texts live in `texte.js`. Nothing of it exists before the visitor's first
+click, key, wheel or touch, and the switch appears ten seconds after that
+(`armDevMode` in `home.js`); `?werkstatt` opens it at once. The rule is
+checked, not trusted:
+
+```bash
+python prodserve.py 8897            # or 8898 --dev
+node tools/v5dev-check.mjs          # five phases, screenshots in $TMPDIR/v5dev-check
+```
 
 ### The gates
 

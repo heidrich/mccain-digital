@@ -70,35 +70,75 @@ Juni, alte Ignore-Regel, siehe unten), die Entscheidung liegt beim Owner.
     geprüft. Die Kopie unter `.claude/skills/html-performance/` ist auf diesem
     Stand; am PC `cd ~/.claude && git pull`. Größter Rest: `messen.md`
     (~24k Tokens) ist ungeteilt.
-- **Dev-Modus (Owner-Idee 16.9., nach dem Skill, noch nicht begonnen, nur v5).**
-  Zwei zuschaltbare Sichten auf die Seite, für Kunden ohne Technik-Hintergrund:
-  1. **Röntgen (Owner-Ergänzung 16.9.: „wirklich den DOM anzeigen und auch viel
-     Code, ggf. interaktiv“):** Eine Linse folgt dem Zeiger und zeigt statt des
-     Designs den Bauplan. Dazu eine echte Werkstatt-Leiste wie in den DevTools:
-     der komplette DOM-Baum (auf- und zuklappbar, Hover markiert auf der Seite,
-     Klick auf der Seite springt im Baum), der Quellcode des Elements mit den
-     zutreffenden CSS-Regeln (aus `document.styleSheets` per `matches()`), die
-     Quelldateien selbst (`home.js`, `logic.gen.js`, CSS, GLSL des Stroms) mit
-     Sprungmarken von Element zu Funktion (handgepflegte Karte für unseren Code),
-     und Live-Daten dieses Besuchs: LCP-Element markiert, Ressourcen-Wasserfall,
-     Layout-Shifts mit Quelle, lange Aufgaben, Frame-Rate des Stroms, welche
-     Sektionen der Browser gerade überspringt. Interaktiv: Text und HTML eines
-     Knotens ändern (mit Zurücksetzen), Design-Tokens live drehen.
-  2. **Crawler- und KI-Sicht:** Wie Google und Sprachmodelle die Seite lesen
-     (Title, Robots, Überschriften-Baum, Landmarken, JSON-LD, Markdown-Zwilling,
-     `llms.txt`), jeder Block mit „Warum das gut ist“. Braucht pro Seite eine
-     Markdown-Fassung aus dem Prerender (`/index.md` ist heute 404).
-  - **Schutzregel:** Der Schalter erscheint nach 15 s, frühestens aber nach der
-    ersten echten Nutzeraktion (der spätere Zeitpunkt). Lighthouse interagiert nie,
-    also bleibt PageSpeed unberührt. Vorher null Bytes, kein DOM-Eintrag. Das Modul
-    wird nachgeladen (CSP erlaubt `script-src 'self'`, `style-src 'unsafe-inline'`),
-    Overlay `inert`, Escape schließt.
-  - **Messlatte (Owner):** „wunderschön, GEHALTVOLL und nützlich für den Kunden.
-    Er soll sehen, wir wollen nicht einfach verkaufen, wir können auch was.“
-    Heißt: Designsystem der Seite, nicht DevTools-Optik. Erklärtexte nach dem
-    Muster „was, warum, wie“ (siehe Durchgang 12.9.), mit echten Messwerten aus dem
-    Browser des Besuchers statt Behauptungen. Erst die Liste der Stationen und die
-    Texte, dann der Bau.
+- **Dev-Modus „Werkstatt" (Owner-Idee 16.9., GEBAUT 16.9. abends, nur v5).**
+  Owner am Abend: „baue erstmal die funktionen, die texte kannst du so reinhauen,
+  die texte der gesamten webseite passen wir am ende alle nochmal an" und „10 sec
+  nach interaktion ist genug". Design und Bau-Lehren:
+  `docs/plans/2026-09-16-dev-modus-design.md`.
+  - **Schutzregel (umgesetzt, geprüft):** vor der ersten echten Aktion
+    (`pointerdown`, `keydown`, `wheel`, `touchstart`) existiert nichts: kein
+    Knoten, keine Anfrage, kein Stil. Zehn Sekunden nach der Aktion setzt
+    `home.js` (`armDevMode`) den Schalter „Werkstatt" unten rechts; erst ein
+    Klick lädt `/v5/dev/index.js` als ES-Modul. Mausbewegung, `scrollTo` der
+    Messskripte und Lighthouse lösen nichts aus. `?werkstatt` öffnet sofort.
+    `node tools/v5dev-check.mjs` prüft fünf Phasen (16 s ohne Aktion → nichts;
+    Taste bzw. Klick → Schalter bei 10,1 s, nicht bei 8,5 s; Öffnen, alle Tabs,
+    Auswahl der h1 ohne Navigation, Crawler-Stationen; Escape räumt alles ab,
+    Wiederöffnen ohne neue Modul-Anfrage; Telefon mit `?werkstatt`).
+  - **Röntgen** (Tabs Element · Baum · Code · Messwerte · Regler, Knopf
+    „Wählen"): Linse mit Bauplan folgt dem Zeiger, Klick wählt; Element-Tafel
+    mit Pfad, HTML, zutreffenden CSS-Regeln (Spezifität, Überschreibungen,
+    Medienbedingung gilt/gilt nicht), berechneten Werten, Box-Modell,
+    Barrierefreiheit (Rolle, Name, Kontrast nach WCAG), „Im Code" aus
+    `v5/dev/map.json` (22 verifizierte Einträge Element → Funktion) mit Sprung
+    in den Code-Tab, „Ändern" (Text/HTML, Zurücksetzen). Baum: echter DOM,
+    lazy, Tastatur, cv-Zustand je Block. Code: index.html (Server und DOM
+    jetzt), `style#v5-css`, home.js, logic.gen.js, motion-budget.js (Quelle),
+    beide Shader aus logic.gen.js herausgelöst, Höhen-Style, map.json, die
+    Werkstatt selbst; Suche, Sprung zur Funktion per Regex zur Laufzeit.
+    Messwerte: TTFB/FCP/LCP/DCL/load, LCP-Element mit „Zeigen", Layout-Sprünge
+    mit Quelle (CLS nach Fensterregel), lange Aufgaben (TBT-Näherung),
+    Übertragung und Wasserfall, Bildrate live plus Strom-Modus
+    (`data-v5-fps`), übersprungene Blöcke live, Animationen und Motion-Budget,
+    DOM-Größe, Gerät (Kerne, RAM, Netz, GPU, DPR). Regler: Akzentfarbe (die
+    vier `--acc*`), Bewegung reduzieren, Schrift-Fallback, Platzhalter zeigen.
+  - **Google & KI:** Kopfzeilen mit SERP-Vorschau und Längenurteil, Antwort
+    des Servers (GET, nicht HEAD), Überschriften-Baum mit Prüfung, Landmarken
+    und Skip-Link, Bilder (alt, width/height), Links, JSON-LD als Karten,
+    lesbarer Text, Markdown-Zwilling, llms.txt, robots.txt (erlaubte KI-Crawler),
+    sitemap.xml. Jede Station mit ausklappbarem „Warum das gut ist".
+  - **Markdown-Zwilling:** `tools/v5build.mjs` schreibt `v5/index.md` aus dem
+    fertigen Dokument im Chromium-Tab (`tools/markdown.mjs`, geprüft von
+    `tools/markdown-check.mjs`: 1.945 Wörter, 25 Überschriften, 13 Links, 8
+    FAQ-Fragen, kein Ticker-Rauschen) und setzt `<link rel="alternate"
+    type="text/markdown" href="/v5/index.md">`. `vercel.json` und `prodserve.py`
+    liefern `.md` als `text/markdown; charset=utf-8`; `verify_site.mjs` prüft
+    den Zwilling positiv.
+  - **Texte:** alle vorläufig in `v5/dev/texte.js` (Sie-Anrede, Fachwort plus
+    Nutzen, Muster „was/warum/wie" gekürzt). Die Textrunde am Ende fasst nur
+    diese Datei und `map.json` an.
+  - **Offen am Dev-Modus:** Texte final; Erklärtexte je Station gegenlesen
+    (Kathi); Sprache EN; die Werkstatt auf den übrigen Seiten, wenn sie im
+    v5-Stil stehen; `llms.txt` auf die `.md`-Zwillinge verlinken, sobald es
+    mehrere gibt; nach dem nächsten Deploy einmal `curl -sI
+    https://mccain-digital.com/v5/index.md` (muss `text/markdown` liefern; ob
+    Vercel den Content-Type statischer Dateien per `headers` überschreibt, ist
+    in der Doku nicht ausdrücklich zugesichert).
+  - **Owner 16.9. spät, noch nicht umgesetzt:** „die position der page tools
+    (werkstatt) würde ich überdenken, und auch wie wir die user animieren da
+    drauf zu klicken, ggf brauchen wir auf der frontpage und webseite und web
+    apps eine kleine section – weil wir haben ja noch den ai chat." Der
+    Schalter sitzt heute unten rechts, wo in Stufe 2 das KI-Chat-Dock hinkommt.
+    Vorschlag zur Entscheidung: (A) die Werkstatt wird zweiter Eintrag im
+    Dock neben „Fragen"; bis das Dock steht, bleibt die Pille. (B) Zusätzlich
+    eine kleine Sektion „So ist diese Seite gebaut" auf Start-, Websites- und
+    Web-Apps-Seite mit drei Fakten und einem Knopf „Werkstatt öffnen" (der
+    Klick ist die erste Aktion und öffnet sofort); die Sektion ist statisches
+    HTML und kostet PageSpeed nichts.
+  - **Nebenbefund behoben:** `[object Object]` in der Karte „Unsere eigene
+    Seite: 4×100 in Lighthouse" (Export druckte `{{ l }}` statt `{{ l.k }}`);
+    Korrektur als `EXPORT_FIXES` in `tools/prerender.mjs`, gezählt je Seite,
+    alle 21 Seiten neu gebaut, Höhen neu gemessen.
 - **Weiterhin offen:**
   - nicht-composited Animationen, der Rest von `RunTask`
   - Canvas-Auflösung unter Software-GL

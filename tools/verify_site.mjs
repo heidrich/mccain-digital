@@ -498,6 +498,27 @@ if (WANT_NOINDEX && BASE.startsWith("http") && !BASE.includes("127.0.0.1")) {
   if (!headerSeen) fail("no X-Robots-Tag: noindex header - check vercel.json");
 }
 
+/* The Markdown twin is what a language model reads instead of the HTML. It is
+ * written by tools/v5build.mjs next to the page and must come back as
+ * text/markdown: a twin that 404s, or arrives as text/plain because a host
+ * rule is missing, is invisible to the model and to the workshop's crawler
+ * view alike, and nothing on the page would look different. */
+console.log("\n  markdown twins");
+for (const p of ["/v5/index.md"]) {
+  let status = 0, type = "", head = "";
+  try {
+    const res = await fetch(BASE + p);
+    status = res.status;
+    type = res.headers.get("content-type") || "";
+    head = (await res.text()).slice(0, 200);
+  } catch {
+    status = -1;
+  }
+  const good = status === 200 && type.startsWith("text/markdown") && head.startsWith("# ");
+  console.log(`    ${ok(good)} ${String(status).padStart(3)}  ${p}  ${type || "no content-type"}`);
+  if (!good) fail(`${p}: expected 200 text/markdown starting with "# " (got ${status} ${type || "no content-type"})`);
+}
+
 /* Reachability, the other direction: is every page actually linked FROM the
  * start page, in the DOM React renders - not in the prerendered copy that gets
  * thrown away. A page can be in the sitemap, answer 200 and still be an orphan

@@ -1209,6 +1209,31 @@ function heroCalm(script, template, name) {
  */
 const PXE_TAG = /<script src="\.{0,2}\/?pixel-engine\.js"><\/script>/g;
 
+/* SLIPS IN THE EXPORT, FIXED AT THE SOURCE OF THE BUILD.
+ *
+ * The work card "Unsere eigene Seite: 4×100 in Lighthouse" repeats over
+ * `lhScores`, whose items are objects ({ k: 'PERF', d: '0.12s' }), and prints
+ * `{{ l }}` - the whole object - so every label read "[object Object]" on the
+ * page, in the prerendered markup and in the Markdown twin (found 16.9.2026 by
+ * tools/markdown-check.mjs). The service tile next to it prints `{{ l.k }}`
+ * and is right. The export is Claude Design's output and comes back with the
+ * next export, so the correction lives here, counted: every page renders the
+ * same component template, so each find must occur exactly once per page, or
+ * the export changed and this list needs a look. */
+const EXPORT_FIXES = [
+  { find: 'line-height:1.3">{{ l }}</div>', repl: 'line-height:1.3">{{ l.k }}</div>' },
+];
+
+function fixExportTemplate(template, name) {
+  let out = template;
+  for (const f of EXPORT_FIXES) {
+    const n = out.split(f.find).length - 1;
+    if (n !== 1) throw new Error(`prerender: expected "${f.find}" exactly once in ${name}, found ${n} - the export changed, update EXPORT_FIXES`);
+    out = out.replace(f.find, () => f.repl);
+  }
+  return out;
+}
+
 function deferPixelEngine(template, name) {
   const n = (template.match(PXE_TAG) || []).length;
   if (n !== 1) {
@@ -1868,7 +1893,7 @@ for (const page of PAGES) {
   const cons = laterConsent(hero.script, page.src);
   const helmet = stripHelmetSeo(localise(template), page.src);
   const calm = calmConsent(helmet.template, page.src);
-  const pxe = deferPixelEngine(calm.template, page.src);
+  const pxe = deferPixelEngine(fixExportTemplate(calm.template, page.src), page.src);
   const cv = deferSections(pxe.template, page.src);
   const tplTiles = fixTileRoles(cv.template);
   const anchors = fixAnchors({ template: tplTiles.html, script: cons.script });
