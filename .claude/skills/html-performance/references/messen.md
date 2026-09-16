@@ -2,7 +2,7 @@
 
 > Teil des Skills [[html-performance]] · Stand 2026-09-16 · Belege: mccain-digital (HANDOFF, CHANGELOG, Commits), weitere Projekte des Owners, Recherche mit Quell-URLs
 
-Dieses Kapitel behandelt **wie** man misst und Ergebnisse liest — nicht wie man Befunde behebt (dafür [laden.md](laden.md) und [rendern.md](rendern.md)) und nicht, wie Lighthouse aus Messwerten einen Score errechnet (dafür [lighthouse-psi.md](lighthouse-psi.md)). Jede Regel nennt das Skript, das sie prüfbar macht.
+Dieses Kapitel behandelt **wie** man misst und Ergebnisse liest — nicht wie man Befunde behebt (dafür die `laden-*`- und `rendern-*`-Referenzen: [laden-kritischer-pfad.md](laden-kritischer-pfad.md), [laden-javascript.md](laden-javascript.md), [laden-auslieferung.md](laden-auslieferung.md), [rendern-hauptthread.md](rendern-hauptthread.md), [rendern-animationen.md](rendern-animationen.md), [rendern-canvas-webgl.md](rendern-canvas-webgl.md)) und nicht, wie Lighthouse aus Messwerten einen Score errechnet (dafür [lighthouse-psi.md](lighthouse-psi.md)). Jede Regel nennt das Skript, das sie prüfbar macht.
 
 ## Kurzfassung
 
@@ -338,7 +338,7 @@ Alle Angaben in diesem Abschnitt: Lighthouse 13.4.1 (main-Branch = aktuelles npm
 ### 34. getContext() blockiert synchron und kann den ersten Paint der ganzen Seite verzögern
 **Warum:** `HTMLCanvasElement.getContext()` ist ein synchroner Aufruf; unter Software-GL kann allein die Kontext-Erzeugung mehrere hundert Millisekunden Hauptthread-Zeit kosten (siehe Regel 21) — und liefert laut Spezifikation `null`, wenn aus irgendeinem Grund (nicht unterstützte Context-ID, GPU-Blacklisting, Ressourcenerschöpfung) kein Kontext erzeugt werden kann.
 **Woran man es erkennt:** Praxisbeobachtungen (sekundäre Quelle, nicht Google-primär): `--disable-gpu` erzwingt lautlos wieder SwiftShader; `--in-process-gpu` zerstört die von ANGLE benötigte GL-Surface; Mesa-llvmpipe braucht selbst headless eine echte GL/X11-Surface — ohne sie degradiert WebGL laut Beobachtung „silently … to a flat 2D fallback", während die Seite trotzdem HTTP 200 liefert.
-**Fix:** `getContext()`-Aufrufe für Deko-Canvases nie im kritischen Render-Pfad platzieren (das WIE gehört zu [rendern.md](rendern.md)); zur reinen Messung des Effekts `scripts/fps.mjs --software-gl` (Renderer-Bestätigung) mit einer FCP-Messung (Regel 21) kombinieren.
+**Fix:** `getContext()`-Aufrufe für Deko-Canvases nie im kritischen Render-Pfad platzieren (das WIE gehört zu [rendern-canvas-webgl.md](rendern-canvas-webgl.md#1-getcontext-ist-synchron-der-erste-paint-darf-nicht-auf-canvas-oder-webgl-warten)); zur reinen Messung des Effekts `scripts/fps.mjs --software-gl` (Renderer-Bestätigung) mit einer FCP-Messung (Regel 21) kombinieren.
 **Beleg:** Quelle: MDN `HTMLCanvasElement.getContext()`, abgerufen 2026-09-16 (Standardverhalten, primär); Microlink-Blog „WebGL without a GPU", abgerufen 2026-09-16 (Praxisbeobachtungen, sekundär, eigene Benchmarks des Autors). · Sicherheit: dokumentiert
 **Gilt für:** WebGL/Canvas
 

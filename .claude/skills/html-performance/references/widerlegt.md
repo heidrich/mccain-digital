@@ -86,70 +86,70 @@ Diese Datei sammelt Annahmen, die im Projekt gemessen oder aus Quellcode/Spec wi
 **Herkunft:** Eigene Projekt-Annahme beim Homepage-v2-Refresh (verbreitete generische PageSpeed-Empfehlung: render-blocking CSS per `<link rel="preload">` → `onload`-Swap asynchron nachladen), zusätzlich vorab per Pixelvergleich als "pixelidentisch" verifiziert.
 **Warum falsch:** Ist das nachgeladene Stylesheet layoutrelevant (hier: Nav-Layout), erzeugt der Aktivierungs-Moment einen ungestylten Flash (FOUC) mit vollem Seiten-Reflow — das zählt als Layout-Shift. Ein Pixelvergleich des FINALEN Renderings übersieht diesen kurzen Zwischenzustand während des Ladens.
 **Beleg:** Commit 4d8d049 verifizierte "pixel-identical render" für den Async-Swap; Commit 3ecda0d (2026-07-20) führte eine spätere CLS-Regression exakt auf dieses Muster zurück. CHANGELOG.md, Abschnitt "2026-07-20 — Homepage v2-Refresh": nach Rückbau auf render-blocking `styles.css` + inline Nav-Layout Lighthouse 4×100, CLS 0, FCP 0,5 s, LCP 0,6 s (Desktop) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Layoutrelevantes CSS (Nav, above-the-fold) bleibt render-blocking oder wird inline gesetzt; async-Swap nur für Stylesheets ohne Einfluss auf die erste Layoutberechnung. [laden.md](laden.md#8-nicht-kritisches-css-nicht-blockierend-nachladen).
+**Was stattdessen gilt:** Layoutrelevantes CSS (Nav, above-the-fold) bleibt render-blocking oder wird inline gesetzt; async-Swap nur für Stylesheets ohne Einfluss auf die erste Layoutberechnung. [laden-kritischer-pfad.md](laden-kritischer-pfad.md#8-nicht-kritisches-css-nicht-blockierend-nachladen).
 
 ### 2. „fonts.css inline ziehen verbessert die Performance“
 
 **Herkunft:** Eigene Optimierungsidee, zweimal notiert (STAND 13.9. und STAND A5-Bereich).
 **Warum falsch:** Umgesetzt und gemessen, aber ohne messbare Wirkung.
 **Beleg:** "fonts.css inline ziehen. Erledigt, gemessen, ohne Wirkung." (HANDOFF.md, "WAS ALS NAECHSTES DRAN IST", Zeile 702, wortgleich wiederholt Zeile 892) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Nicht jede Inline-Maßnahme wirkt; vor dem Umsetzen mit Vorher-Zahl planen, danach mit derselben Messung bestätigen (Grundsatz 10, SKILL.md). [laden.md](laden.md#6-kritisches-css-inline-den-rest-auslagern--und-den-trade-off-kennen).
+**Was stattdessen gilt:** Nicht jede Inline-Maßnahme wirkt; vor dem Umsetzen mit Vorher-Zahl planen, danach mit derselben Messung bestätigen (Grundsatz 10, SKILL.md). [laden-kritischer-pfad.md](laden-kritischer-pfad.md#6-kritisches-css-inline-den-rest-auslagern--und-den-trade-off-kennen).
 
 ### 3. „Object Pooling verbessert die WebGL-Pixelstrom-Performance“
 
 **Herkunft:** Gemini-Vorschlag.
 **Warum falsch:** Der Pixelstrom ist ein WebGL-Shader ohne Pixel-Objekte pro Frame — es gibt keine JS-Objekt-Allokation, die gepoolt werden könnte. "Garbage Collection" fällt laut der von Lighthouse und Chrome-DevTools gemeinsam genutzten Taxonomie (`task-groups.js`) zudem in eine von "Other" komplett getrennte Kategorie; Object Pooling wirkt auf GC-Pausen, nicht auf "Other".
 **Beleg:** Gemessen mit `mainthread.mjs` (Desktop 4×CPU, 12 s): Garbage Collection React 2 ms / v5 0 ms (HANDOFF.md, STAND 16.9. Pixelstrom, "Einordnung der Gemini-Vorschläge", Zeilen 227-230). Taxonomie: github.com/GoogleChrome/lighthouse/blob/main/core/lib/tracehouse/task-groups.js · Sicherheit: gemessen · dokumentiert.
-**Was stattdessen gilt:** Erst mit `mainthread.mjs` prüfen, in welcher Kategorie die Zeit wirklich anfällt, bevor eine generische Optimierung umgesetzt wird. [rendern.md](rendern.md#26-other-im-trace-richtig-einordnen--und-wissen-was-es-nicht-senkt).
+**Was stattdessen gilt:** Erst mit `mainthread.mjs` prüfen, in welcher Kategorie die Zeit wirklich anfällt, bevor eine generische Optimierung umgesetzt wird. [rendern-hauptthread.md](rendern-hauptthread.md#26-other-im-trace-richtig-einordnen--und-wissen-was-es-nicht-senkt).
 
 ### 4. „will-change und translateZ auf dem Canvas verbessern die Performance“
 
 **Herkunft:** Gemini-Vorschlag (Compositing-Hack).
 **Warum falsch:** Das Canvas ist bereits `fixed` positioniert und läuft als WebGL-Kontext bereits auf einer eigenen Compositor-/GPU-Ebene. `will-change`/`translateZ(0)` fallen laut derselben Taxonomie unter "Rendering" (`paintCompositeRender`), nicht unter "Other". `translateZ(0)` gilt zudem als veralteter Hack; `isolation: isolate` ist der modernere Weg für einen neuen Stacking-Context.
 **Beleg:** Bewertung anhand der bestehenden Eigenschaften des Canvas (`fixed` + WebGL), HANDOFF.md, STAND 16.9. Pixelstrom, Zeilen 227-232 · Quelle: developer.chrome.com/blog/hardware-accelerated-animations · Sicherheit: dokumentiert.
-**Was stattdessen gilt:** Bei einem bereits GPU-komponierten Canvas keine zusätzlichen Compositing-Hints ohne gemessenen Grund setzen. [rendern.md](rendern.md#32-will-changetransform-gezielt-einsetzen-nicht-pauschal).
+**Was stattdessen gilt:** Bei einem bereits GPU-komponierten Canvas keine zusätzlichen Compositing-Hints ohne gemessenen Grund setzen. [rendern-animationen.md](rendern-animationen.md#2-will-changetransform-gezielt-einsetzen-nicht-pauschal).
 
 ### 5. „scheduler.yield reduziert die Hauptthread-Blockierung“
 
 **Herkunft:** Gemini-Vorschlag.
 **Warum falsch:** `scheduler.yield()` teilt nur eigenen JS-Code auf; die eigentliche Kostenquelle war die browserinterne `IntersectionObserver`-Berechnung, die dadurch nicht erreicht wird. Der dokumentierte Nutzen liegt zudem nicht in weniger Gesamt-CPU-Zeit, sondern darin, dass zwischen Chunks hochpriorisierte Arbeit eingeschoben werden kann (INP) — jede Fortsetzung wird als neuer Task über denselben Scheduler eingeplant, der "Other" ausmacht.
 **Beleg:** `IntersectionObserver::computeIntersections` blieb mit 518 ms (React) / 577 ms (v5) der Hauptkostenblock im "Other"-Trace, unabhängig von JS-seitigen Yield-Strategien (HANDOFF.md, STAND 16.9., "Einordnung der Gemini-Vorschläge" und "Other"-Tabelle, Zeilen 218-235) · Quelle: developer.chrome.com/blog/use-scheduler-yield · Sicherheit: gemessen · dokumentiert.
-**Was stattdessen gilt:** Erst die Zielzahl von Observern reduzieren (Grundsatz 7, SKILL.md), dann über Yield-Strategien nachdenken. [rendern.md](rendern.md#29-scheduleryield-und-long-animation-frames-verbessern-inp-nicht-die-hauptthread-summe).
+**Was stattdessen gilt:** Erst die Zielzahl von Observern reduzieren (Grundsatz 7, SKILL.md), dann über Yield-Strategien nachdenken. [rendern-hauptthread.md](rendern-hauptthread.md#29-scheduleryield-und-long-animation-frames-verbessern-inp-nicht-die-hauptthread-summe).
 
 ### 6. „Nicht-immutable Cache-Header senken den Performance-Score“
 
 **Herkunft:** Eigene Projekt-Annahme; geplant war eine `?v=`-Query-Versionierung samt `tools/bump_assets.py`, um immutable Cache-Header zu ermöglichen.
 **Warum falsch:** Live gemessen blieb die Lighthouse-Desktop-Performance bei 99, obwohl `v3.css`/`common.js` revalidierende (`max-age=0, must-revalidate`) statt immutable Header trugen.
 **Beleg:** "Die Sorge um den Cache-Kompromiss war unbegründet — gemessen, nicht vermutet." LCP 0,7 s, TBT 0 ms, CLS 0,002 (HANDOFF.md, Zeile 2695-2699) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Die geplante Versionierungslösung wurde nie gebaut — Cache-Strategie erst mit realem Live-Score prüfen, bevor zusätzliche Build-Komplexität investiert wird. [laden.md](laden.md#48-cache-header-wirkung-nur-gegen-einen-produktionsnah-konfigurierten-server-prüfen).
+**Was stattdessen gilt:** Die geplante Versionierungslösung wurde nie gebaut — Cache-Strategie erst mit realem Live-Score prüfen, bevor zusätzliche Build-Komplexität investiert wird. [laden-auslieferung.md](laden-auslieferung.md#4-cache-header-wirkung-nur-gegen-einen-produktionsnah-konfigurierten-server-prüfen).
 
 ### 7. „Externe Platzhalter-Bilddienste sind performance-mäßig vernachlässigbar“
 
 **Herkunft:** Annahme für Demo-/Platzhalter-Content (z. B. picsum.photos) im 360-Projekt.
 **Warum falsch:** Sie waren tatsächlich der Hauptkostentreiber: 4,9 MB der gemessenen 8,9 MB Mobile-Payload stammten von picsum, plus ein zusätzlicher Drittanbieter-DNS-/Handshake auf der Landing-Page.
 **Beleg:** Root-Cause-Analyse im Zuge der Next.js-Migration; nach Entfernen (Ersatz durch selbst-gehostete CC0-Bilder) stieg der Mobile-PageSpeed-Score von 56 % auf 95 % (360/.claude/docs/nextjs-migration-plan.md; 360/.claude/docs/decisions.md ADR-28) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Auch Platzhalter-/Demo-Bilder selbst hosten oder zumindest ihre Byte- und Verbindungskosten vorab messen. [laden.md](laden.md#28-externe-platzhalterbild-dienste-sind-ein-versteckter-hauptkostentreiber).
+**Was stattdessen gilt:** Auch Platzhalter-/Demo-Bilder selbst hosten oder zumindest ihre Byte- und Verbindungskosten vorab messen. [laden-kritischer-pfad.md](laden-kritischer-pfad.md#28-externe-platzhalterbild-dienste-sind-ein-versteckter-hauptkostentreiber).
 
 ### 8. „GSAPs scrollTrigger.scroll ist der korrekte Weg zum externen Scrubben“
 
 **Herkunft:** GSAP-Forum-Antwort, offiziell dokumentierte Methode `scrollTrigger.scroll(pos)`.
 **Warum falsch:** Funktioniert nur auf einer "nackten" Seite ohne Smooth-Scroll-Wrapper. Sobald Lenis (oder ein iframe) zwischen Trigger und echtem Page-Scroller sitzt, wird das synthetische Scroll-Event lautlos verschluckt, bevor der Trigger es sieht; kommt es doch an, synct ScrollTrigger den Tween beim nächsten Refresh-Tick sofort wieder auf die echte Scroll-Position zurück — sichtbar als Loop.
 **Beleg:** Zwei Live-Test-Bugs (Play-Button "tat nichts", danach schien alles zu loopen) auf diese Ursache zurückgeführt; Fix (direktes `tween.progress()`-Treiben + ScrollTrigger währenddessen deaktivieren) durch neue Tests (`getProgressCalls`/`getDisableCalls`) verifiziert (mccain-cms/CHANGELOG.md alpha.164) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Bei Smooth-Scroll-Wrappern `tween.progress()` direkt treiben und ScrollTrigger währenddessen deaktivieren statt `scrollTrigger.scroll()` zu nutzen. [rendern.md](rendern.md#animationen).
+**Was stattdessen gilt:** Bei Smooth-Scroll-Wrappern `tween.progress()` direkt treiben und ScrollTrigger währenddessen deaktivieren statt `scrollTrigger.scroll()` zu nutzen. [rendern-animationen.md](rendern-animationen.md#animationen).
 
 ### 9. „Ein automatisches Reduced-Motion-System schützt ohne Kosten“
 
 **Herkunft:** Eigenes Systemdesign (mccain-cms): "nicht-essenzielle" Transform-Properties (scale/rotate/translate) unter einer Default-Stufe "minimal" automatisch herausfiltern.
 **Warum falsch:** Filterte lautlos jede transformbasierte Animation site-weit im Default-Zustand heraus; Autoren bauten Scale-Up-Hover- und Bounce-Effekte, die im Preview nie sichtbar feuerten, ohne Anzeige, was gerade unterdrückt wird.
 **Beleg:** Als "bevormundend" eingestuft und komplett entfernt statt repariert: 33 zugehörige Tests entfernt, das komplette Subsystem (`reduced-motion.ts`, `reduced-motion-resolver.ts`, `mobile-policy.ts` + UI) gestrichen (mccain-cms/CHANGELOG.md, "B7/B8 — Reduced-motion system removed wholesale") · Sicherheit: dokumentiert.
-**Was stattdessen gilt:** `prefers-reduced-motion` respektieren, aber sichtbar und pro Animation explizit, nicht als stille globale Default-Filterung. [rendern.md](rendern.md#35-prefers-reduced-motion-muss-auch-js-getriebene-kosten-abschalten-und-live-reagieren).
+**Was stattdessen gilt:** `prefers-reduced-motion` respektieren, aber sichtbar und pro Animation explizit, nicht als stille globale Default-Filterung. [rendern-animationen.md](rendern-animationen.md#5-prefers-reduced-motion-muss-auch-js-getriebene-kosten-abschalten-und-live-reagieren).
 
 ### 10. „Ein verifiziert ungeladener Code-Split-Chunk ist auf der Homepage risikofrei“
 
 **Herkunft:** Eigene Abwägung zu einem klick-gesplitteten WebGL/Three.js-Chunk.
 **Warum falsch:** Obwohl im Build-Output verifiziert war, dass der 645-KB-Three.js-Chunk beim initialen Laden 0× auftaucht, entschied der Owner trotzdem gegen den Einsatz auf der wichtigsten Konversions-Seite — selbst ein click-gated WebGL-Pfad wurde als unnötiges Risiko eingestuft.
 **Beleg:** internal/3d-preview/README.md dokumentiert die Entscheidung explizit; .recall/HANDOFF.md bestätigt die Verifikation des 0×-Ladeverhaltens VOR der Entscheidung, es trotzdem nicht auf der Homepage einzusetzen (whatever-recall-internal, 2026-06-18/21) · Sicherheit: dokumentiert.
-**Was stattdessen gilt:** Auf einer performance-kritischen Konversions-Seite zählt nicht nur der gemessene Ladeeffekt, sondern auch das Risiko-Budget des Owners — ein vorgerechnetes Standbild statt jeder WebGL-Option. [rendern.md](rendern.md#69-für-die-konversionskritischste-seite-ein-standbild-statt-live-webgl-erwägen).
+**Was stattdessen gilt:** Auf einer performance-kritischen Konversions-Seite zählt nicht nur der gemessene Ladeeffekt, sondern auch das Risiko-Budget des Owners — ein vorgerechnetes Standbild statt jeder WebGL-Option. [rendern-canvas-webgl.md](rendern-canvas-webgl.md#24-für-die-konversionskritischste-seite-ein-standbild-statt-live-webgl-erwägen).
 
 ### 11. „Lokal gemessene sehr niedrige Scores spiegeln die Live-Performance“
 
@@ -198,7 +198,7 @@ Diese Datei sammelt Annahmen, die im Projekt gemessen oder aus Quellcode/Spec wi
 **Herkunft:** Audit-Vorschlag (generisches Tool/Checkliste).
 **Warum falsch:** `.w` hat `overflow: clip`; das eigentliche Nadelöhr ist der `transform`, nicht die Opacity. Der Kopf läuft laut Kommentar zudem absichtlich "inside the 800-1600ms band" — Design-Auftritt, kein Defekt.
 **Beleg:** LCP gemessen bei 824/836 ms; `.w` mit `overflow: clip`; Transform als tatsächliches Gate identifiziert (HANDOFF.md, "AP-1 (LCP)", Zeile ~1933-1936) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Vor einem Audit-Vorschlag das tatsächlich blockierende CSS-Property identifizieren (hier: `transform`, nicht `opacity`). [rendern.md](rendern.md#45-den-wahren-verursacher-isoliert-messen-statt-der-naheliegenden-komponente-die-schuld-zu-geben).
+**Was stattdessen gilt:** Vor einem Audit-Vorschlag das tatsächlich blockierende CSS-Property identifizieren (hier: `transform`, nicht `opacity`). [rendern-animationen.md](rendern-animationen.md#15-den-wahren-verursacher-isoliert-messen-statt-der-naheliegenden-komponente-die-schuld-zu-geben).
 
 ### 18. „support.js deferren und React vorladen verbessert den Score“
 
@@ -212,14 +212,14 @@ Diese Datei sammelt Annahmen, die im Projekt gemessen oder aus Quellcode/Spec wi
 **Herkunft:** Eigene Annahme vor dem Test von `<link rel=preload>` für React.
 **Warum falsch:** Der React-Preload verschlechterte FCP messbar, weil er dem für FCP kritischen Pfad Bandbreite/Priorität wegnahm.
 **Beleg:** FCP 349 ms ohne Preload vs. 485 ms mit React-Preload (HANDOFF.md, Zeile ~1248-1251) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Preload konkurriert um Bandbreite/Priorität mit dem tatsächlich kritischen Pfad — vor jedem Preload messen. [laden.md](laden.md#44-resource-hints-preconnectdns-prefetchearly-hints-nur-für-wirklich-bald-gebrauchte-origins).
+**Was stattdessen gilt:** Preload konkurriert um Bandbreite/Priorität mit dem tatsächlich kritischen Pfad — vor jedem Preload messen. [laden-javascript.md](laden-javascript.md#15-resource-hints-preconnectdns-prefetchearly-hints-nur-für-wirklich-bald-gebrauchte-origins).
 
 ### 20. „Der WebGL-Pixelstrom ist Hauptursache der hohen TBT“
 
 **Herkunft:** Eigene Verdächtigung auf der Startseite (hohe TBT/Hauptthread-Zeit).
 **Warum falsch:** Vier identische Lighthouse-Läufe, die sich nur durch ein eingeschobenes Stylesheet unterschieden, zeigten: "Datenstrom aus" änderte den Score nur 63→64, TBT 1.026→1.010 ms, Hauptthread 8.497→8.485 ms. Die tatsächliche Ursache waren 146 unendliche CSS-Animationen in einem 34×34-px-Logo-SVG.
 **Beleg:** Vier-Varianten-Vergleichstabelle: unverändert 63/1.026 ms/8.497 ms; Datenstrom aus 64/1.010 ms/8.485 ms; Logo-Animation aus 68/778 ms/4.971 ms (HANDOFF.md, "✔ A — Performance: erledigt, und der Verdächtige war der falsche", Zeilen 924-937) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Verdächtige einzeln per A/B-Toggle isolieren statt den auffälligsten Codeblock zu vermuten. [rendern.md](rendern.md#45-den-wahren-verursacher-isoliert-messen-statt-der-naheliegenden-komponente-die-schuld-zu-geben).
+**Was stattdessen gilt:** Verdächtige einzeln per A/B-Toggle isolieren statt den auffälligsten Codeblock zu vermuten. [rendern-animationen.md](rendern-animationen.md#15-den-wahren-verursacher-isoliert-messen-statt-der-naheliegenden-komponente-die-schuld-zu-geben).
 
 ### 21. „PSI-Desktop TBT 13.060 ms zeigt einen realen Performance-Bug“
 
@@ -240,14 +240,14 @@ Diese Datei sammelt Annahmen, die im Projekt gemessen oder aus Quellcode/Spec wi
 **Herkunft:** Eigene Annahme beim Einsatz von `drawImage` mit `srcset`-Bildern.
 **Warum falsch:** `naturalWidth`/`naturalHeight` melden die dichte-korrigierte Größe in CSS-Pixeln, `drawImage` erwartet sein Quellrechteck aber in rohen Bitmap-Pixeln. Je nach gewählter `srcset`-Variante/DPR führte das zu einem falschen Bildausschnitt — im Extremfall war nur ein Viertel des Bildes sichtbar.
 **Beleg:** "code-screen-640.webp ist 640×440 auf der Platte und meldet 559×384 — der Ausschnitt griff also die linken oberen 87 % ... auf einer Anzeige, die per DPR die 1200w-Variante mit Dichte 2,14 wählt, griff er ein Viertel." (HANDOFF.md, Zeile 2883-2894) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Für `drawImage`-Quellrechtecke die tatsächliche Bitmap-Auflösung verwenden, nicht `naturalWidth`/`naturalHeight` blind übernehmen. [rendern.md](rendern.md#62-naturalwidth-und-naturalheight-sind-dichte-korrigierte-css-pixel-keine-bitmap-pixel).
+**Was stattdessen gilt:** Für `drawImage`-Quellrechtecke die tatsächliche Bitmap-Auflösung verwenden, nicht `naturalWidth`/`naturalHeight` blind übernehmen. [rendern-canvas-webgl.md](rendern-canvas-webgl.md#17-naturalwidth-und-naturalheight-sind-dichte-korrigierte-css-pixel-keine-bitmap-pixel).
 
 ### 24. „CSS-Opacity-Crossfade zweier deckender Ebenen blendet gleichmäßig“
 
 **Herkunft:** Eigene Annahme beim Übergang zwischen scharfem Foto und Mosaik-Ansicht.
 **Warum falsch:** Zwei deckende Ebenen, die per Opacity gegeneinander überblendet werden, ergeben rechnerisch `a + b(1-a)` — in der Mitte der Blende nur ca. 75 % Gesamtdeckkraft statt 100 %, was auf dunklen Karten als sichtbarer dunkler Helligkeits-Puls auffiel.
 **Beleg:** "CSS-Deckkraft geht dafür nicht: zwei deckende Ebenen, die aneinander vorbeiblenden, ergeben a + b(1-a), in der Mitte ~75 % — auf den dunklen Karten ein sichtbarer dunkler Puls." (HANDOFF.md, Zeile 2900-2908) · Sicherheit: gemessen · dokumentiert (Opazitäts-Formel).
-**Was stattdessen gilt:** Für einen echten Crossfade zwischen zwei vollständig deckenden Ebenen eine dritte, tatsächlich animierte Deckkraftquelle nutzen (z. B. Canvas-Compositing) statt zweier gegenläufiger CSS-`opacity`-Werte. [rendern.md](rendern.md#64-beim-schichten-von-canvas-ebenen-auf-korrektes-alpha-compositing-achten).
+**Was stattdessen gilt:** Für einen echten Crossfade zwischen zwei vollständig deckenden Ebenen eine dritte, tatsächlich animierte Deckkraftquelle nutzen (z. B. Canvas-Compositing) statt zweier gegenläufiger CSS-`opacity`-Werte. [rendern-canvas-webgl.md](rendern-canvas-webgl.md#19-beim-schichten-von-canvas-ebenen-auf-korrektes-alpha-compositing-achten).
 
 ### 25. „Eine isolierte Lab-Messung beschreibt die reale Seiten-Kostenlast“
 
@@ -268,7 +268,7 @@ Diese Datei sammelt Annahmen, die im Projekt gemessen oder aus Quellcode/Spec wi
 **Herkunft:** MengTo/Skills-Rezept "dither-background" (Referenz-Canvas-Implementierung für eine Dither-Wolke); eigene ursprüngliche Vermutung, die ~26.000 `fillRect`-Aufrufe pro Frame (3-px-Zellen) seien der Flaschenhals.
 **Warum falsch:** Die Referenz ruft `fillRect` PRO ZELLE PRO FRAME auf (bei 3-px-Zelle ca. 26.000 Zeichenaufrufe pro Frame) und berechnet zusätzlich vier Rausch-Oktaven (16 Sinus-Berechnungen, ca. 2 Millionen Sinus-Aufrufe pro Frame) PRO ZELLE JEDEN FRAME neu. Nicht das Zeichnen war die teure Hälfte, sondern das ständige Neuberechnen des Rauschens.
 **Beleg:** Mit drei Feldern in der ursprünglichen Form: 68 Long Tasks, 4 s blockierter Hauptthread, 27,5 % der Frames über 20 ms. Nach Umbau — Rauschfeld als Ring aus vorausberechneten Spalten scrollen (eine neue Spalte pro Takt): 0 Long Tasks, 0 % der Frames über 20 ms, p90 16,7 ms (Commit d73393b, 2026-09-01; HANDOFF.md, "MengTo/Skills — was davon brauchbar ist", ca. Zeile 2540-2547) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Externe Canvas-Rezepte vor der Übernahme auf Pro-Frame-Neuberechnung prüfen; teure prozedurale Berechnungen vorab cachen statt pro Frame neu auszuwerten. [rendern.md](rendern.md#55-teure-bildabtastung-einmal-pro-größe-cachen-im-loop-nur-lookup-und-lerp).
+**Was stattdessen gilt:** Externe Canvas-Rezepte vor der Übernahme auf Pro-Frame-Neuberechnung prüfen; teure prozedurale Berechnungen vorab cachen statt pro Frame neu auszuwerten. [rendern-canvas-webgl.md](rendern-canvas-webgl.md#10-teure-bildabtastung-einmal-pro-größe-cachen-im-loop-nur-lookup-und-lerp).
 
 ### 28. „Ein Attribut-Reihenfolge-Test erkennt zuverlässig alle Overlays“
 
@@ -303,21 +303,21 @@ Diese Datei sammelt Annahmen, die im Projekt gemessen oder aus Quellcode/Spec wi
 **Herkunft:** Eigene Vermutung zum Build-Prozess.
 **Warum falsch:** Gemessen: nur 15,3 ms — vernachlässigbar.
 **Beleg:** "Vorlagen-Umweg parse/serialisieren/parse: 15,3 ms." (unter "Gemessen und als Verdächtige ausgeschieden", HANDOFF.md, "STAND 13.9. NACHTS", Zeile 557) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Auch Build-Pipeline-Schritte vor dem Optimieren messen statt nach Bauchgefühl priorisieren. [laden.md](laden.md#55-gewichtsanteil-je-datei-einzeln-nachmessen-statt-zu-vermuten).
+**Was stattdessen gilt:** Auch Build-Pipeline-Schritte vor dem Optimieren messen statt nach Bauchgefühl priorisieren. [laden-auslieferung.md](laden-auslieferung.md#11-gewichtsanteil-je-datei-einzeln-nachmessen-statt-zu-vermuten).
 
 ### 33. „ResizeObserver auf body ist Hauptverdächtiger für Dauerlast“
 
 **Herkunft:** Eigene Vermutung zur kontinuierlichen Hauptthread-Dauerlast.
 **Warum falsch:** Direkt gemessen: der Observer feuert nur 4× in 22 Sekunden — unschuldig.
 **Beleg:** "gemessen: 4 Aufrufe in 22 s, unschuldig" (HANDOFF.md, "STAND 13.9. 03:30" und "STAND 13.9. 03:00", wortgleich wiederholt) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Verdächtige Observer mit `observers.mjs` direkt zählen statt nach Plausibilität zu vermuten. [rendern.md](rendern.md#19-resizeobserver-auf-einem-element-mit-height100-feuert-praktisch-nie).
+**Was stattdessen gilt:** Verdächtige Observer mit `observers.mjs` direkt zählen statt nach Plausibilität zu vermuten. [rendern-hauptthread.md](rendern-hauptthread.md#19-resizeobserver-auf-einem-element-mit-height100-feuert-praktisch-nie).
 
 ### 34. „60 getBoundingClientRect-Aufrufe pro Sekunde stammen vom Notes-Overlay“
 
 **Herkunft:** Eigene Vermutung zur Quelle der gemessenen Layout-Lesungen.
 **Warum falsch:** Per Profiling exakt zugeordnet: Ursache ist die Pixel-Engine — `movePoints` liest jeden Frame `canvas.getBoundingClientRect()`.
 **Beleg:** "Die 60 getBoundingClientRect/s sind die Pixel-Engine (movePoints liest jeden Frame canvas.getBoundingClientRect()), nicht die Notizen." (HANDOFF.md, "STAND 13.9. 03:30", Zeile 415-416) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Layout-Lesungen per Profiling der tatsächlichen Aufrufstelle zuordnen, nicht der naheliegendsten Komponente zuschreiben. [rendern.md](rendern.md#57-vor-der-naheliegenden-zeichenoperation-die-tatsächliche-ursache-profilen).
+**Was stattdessen gilt:** Layout-Lesungen per Profiling der tatsächlichen Aufrufstelle zuordnen, nicht der naheliegendsten Komponente zuschreiben. [rendern-canvas-webgl.md](rendern-canvas-webgl.md#12-vor-der-naheliegenden-zeichenoperation-die-tatsächliche-ursache-profilen).
 
 ### 35. „Eine Ressource wird laut Lighthouse-Tabelle sechsmal aufgerufen“
 
@@ -331,28 +331,28 @@ Diese Datei sammelt Annahmen, die im Projekt gemessen oder aus Quellcode/Spec wi
 **Herkunft:** Eigene Theorie: ein Mosaik tinte rund 44 % seiner Fläche ein und mittele auf Papier zu Grau — strukturelle Eigenschaft der Mosaik-Technik.
 **Warum falsch:** Die tatsächliche Ursache war ein Theme-Übergangs-Timing-Bug: Die erste Headline baute mitten im Theme-Wechsel (0,5-s-Übergangsanimation) und übernahm per `getComputedStyle` dauerhaft das Weiß des dunklen Themes (Kontrast 1,03:1) — keine strukturelle Eigenschaft der Mosaik-Technik selbst.
 **Beleg:** Nach Behebung des Theme-Timings (gespeichertes Theme inline im `<head>` vor dem Stylesheet anwenden, Commit a06f8e3) stieg der schlechteste Kontrast von 1,03:1 auf 3,42–4,21:1 (Commit 7e9b70d, 2026-09-01; HANDOFF.md, Zeile 3314-3320) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Theme-Zustand inline im `<head>` setzen, bevor irgendein Stylesheet oder Skript den ersten Frame rendert. "Das war eine Theorie über einen Effekt, dessen echte Ursache ich nicht gemessen hatte." [laden.md](laden.md#9-ein-persistiertes-theme-flag-gehört-synchron-inline-in-den-head-vor-dem-ersten-stylesheet).
+**Was stattdessen gilt:** Theme-Zustand inline im `<head>` setzen, bevor irgendein Stylesheet oder Skript den ersten Frame rendert. "Das war eine Theorie über einen Effekt, dessen echte Ursache ich nicht gemessen hatte." [laden-kritischer-pfad.md](laden-kritischer-pfad.md#9-ein-persistiertes-theme-flag-gehört-synchron-inline-in-den-head-vor-dem-ersten-stylesheet).
 
 ### 37. „Pixel-Dichte erhöhen heißt, die Blöcke größer zu machen“
 
 **Herkunft:** Eigene Umsetzung (Commit a4aee9f).
 **Warum falsch:** Bei Blockgröße ≥ Grid schließen sich die Lücken zwischen den Blöcken, und der Effekt liest sich gar nicht mehr als Pixel; außerdem war nur der Ruhezustand gesnappt, sodass Blöcke sich sichtbar änderten, sobald die interaktive Physik übernahm.
 **Beleg:** Versuch a4aee9f wurde in a607b64 zurückgerollt — "increase pixel density" bedeutet mehr, kleinere Pixel, nicht weniger, größere (Commit a4aee9f, 2026-08-31) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Pixel-Dichte erhöhen = Zellgröße verkleinern; Snapping muss auch für interaktive/physikbewegte Zustände gelten, nicht nur den Ruhezustand. [rendern.md](rendern.md#53-ein-gerastertes-mosaik-ist-ein-kleines-canvas-hochskaliert).
+**Was stattdessen gilt:** Pixel-Dichte erhöhen = Zellgröße verkleinern; Snapping muss auch für interaktive/physikbewegte Zustände gelten, nicht nur den Ruhezustand. [rendern-canvas-webgl.md](rendern-canvas-webgl.md#8-ein-gerastertes-mosaik-ist-ein-kleines-canvas-hochskaliert).
 
 ### 38. „Blasse Pixel-Headline-Farben zeigen zu geringe Grid-Dichte“
 
 **Herkunft:** Eigene Theorie zur Ursache blasser/ausgewaschener Farben.
 **Warum falsch:** Die Messung zeigte, dass die tatsächliche Ursache Antialiasing durch fraktionale Device-Pixel-Koordinaten war, nicht die Grobheit des Grids; Snappen auf ganze Device-Pixel behob die Blässe unabhängig von der Dichte.
 **Beleg:** "The washed-out look was antialiasing, not the grid."; mittlerer Alpha 140/255 → 255/255 nach dem Snapping (Commit aca605c, 2026-08-31) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Bei blassen Canvas-Farben zuerst auf fraktionale vs. ganzzahlige Device-Pixel-Koordinaten prüfen, bevor die Grid-Auflösung erhöht wird. [rendern.md](rendern.md#51-canvas-rasterzellen-auf-ganze-gerätepixel-klemmen).
+**Was stattdessen gilt:** Bei blassen Canvas-Farben zuerst auf fraktionale vs. ganzzahlige Device-Pixel-Koordinaten prüfen, bevor die Grid-Auflösung erhöht wird. [rendern-canvas-webgl.md](rendern-canvas-webgl.md#6-canvas-rasterzellen-auf-ganze-gerätepixel-klemmen).
 
 ### 39. „Pixel-Headlines lesen sich kürzer und dünner wegen eines Box-Bugs“
 
 **Herkunft:** Eigene Theorie: Schriftgrößen- oder Box-Geometrie-Fehler.
 **Warum falsch:** Die gemessene Geometrie war bereits exakt (Ink-Box 336 px vs. 337 px Text-Box, gleiche Schriftgröße, Webfont geladen); die tatsächliche Ursache war, dass `sampleField` antialiaste Glyphenkanten-Pixel per Einzelpunkt-Sampling pro Zelle verwarf.
 **Beleg:** Ink-Box 336 px gegen Text-Box 337 px gemessen gleich; behoben durch flächengemitteltes Downscale-Sampling mit Schwellenwert 120→70 (Commit a4aee9f, 2026-08-31) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Bei Canvas-Textsampling flächengemitteltes Downscale-Sampling statt Einzelpunkt-Sampling pro Zelle verwenden. [rendern.md](rendern.md#54-beim-verkleinern-auf-ein-grobes-zellraster-flächenmittelnd-downscalen).
+**Was stattdessen gilt:** Bei Canvas-Textsampling flächengemitteltes Downscale-Sampling statt Einzelpunkt-Sampling pro Zelle verwenden. [rendern-canvas-webgl.md](rendern-canvas-webgl.md#9-beim-verkleinern-auf-ein-grobes-zellraster-flächenmittelnd-downscalen).
 
 ### 40. „Der generierte hue-Farbverlauf bleibt im warmen Bereich“
 
@@ -366,7 +366,7 @@ Diese Datei sammelt Annahmen, die im Projekt gemessen oder aus Quellcode/Spec wi
 **Herkunft:** Eigener Test-Ansatz zur Verifikation einer CSS-Gradient-Animation.
 **Warum falsch:** `animation-delay` kann eine bereits pausierte Animation nicht mehr verschieben, daher waren beide Vergleichs-Screenshots immer identisch, unabhängig von der tatsächlichen Korrektheit — der Test erklärte einen bekannt fehlerhaften Build fälschlich für nahtlos.
 **Beleg:** Fehlerhafter Test: mittlere Kanal-Differenz 98,5 (schlechtester Wert 220) bei einem als "nahtlos" gemeldeten Build. Nach Umstellung auf direktes Setzen des Transforms als echte Messmethode: 0,2 (schlechtester Wert 1) am tatsächlich reparierten Build (Commit a2035d0, 2026-09-01) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Für Animationsphasen-Vergleiche den Transform/Zustand direkt setzen statt über `animation-delay` an einer pausierten Animation zu drehen. [rendern.md](rendern.md#36-werte-aus-laufenden-animationen-sind-beim-messen-unsicher).
+**Was stattdessen gilt:** Für Animationsphasen-Vergleiche den Transform/Zustand direkt setzen statt über `animation-delay` an einer pausierten Animation zu drehen. [rendern-animationen.md](rendern-animationen.md#6-werte-aus-laufenden-animationen-sind-beim-messen-unsicher).
 
 ### 42. „Die Startseite ruft PixelFX.headline zuletzt auf“
 
@@ -401,7 +401,7 @@ Diese Datei sammelt Annahmen, die im Projekt gemessen oder aus Quellcode/Spec wi
 **Herkunft:** Naheliegender Fix für ein 42-KB-Script-Tag, das den HTML-Parser bei Zeile 1.312 von 3.000 blockierte.
 **Warum falsch:** React ruft `initPixels` bereits selbst auf, dessen erste Zeile `if (!PX) return` lautet — ein `defer` hätte das Script erst NACH diesem Aufruf ausführen lassen und dadurch jeden Pixel-Effekt lautlos deaktiviert, ohne Konsolenfehler.
 **Beleg:** Commit 55d2a32 (2026-09-13, "perf: the headline stops re-rendering 20 pages, the engine stops blocking the parser"): Fix verschob das Script-Tag stattdessen unverändert (kein `defer`) vor `support.js` in den `<head>`, plus ein neuer Check, der auf fünf Seiten Canvases zählt, um ein stilles Scheitern künftig zu erkennen · Sicherheit: dokumentiert.
-**Was stattdessen gilt:** Eine Lade-Reihenfolge-Korrektur (Script früher platzieren) und eine Ausführungs-Reihenfolge-Korrektur (`defer`/`async`) sind nicht austauschbar, wenn anderer Code voraussetzt, dass das Script schon gelaufen ist. [laden.md](laden.md#29-defer-async-und-typemodule-unterscheiden-und-gezielt-wählen).
+**Was stattdessen gilt:** Eine Lade-Reihenfolge-Korrektur (Script früher platzieren) und eine Ausführungs-Reihenfolge-Korrektur (`defer`/`async`) sind nicht austauschbar, wenn anderer Code voraussetzt, dass das Script schon gelaufen ist. [laden-javascript.md](laden-javascript.md#1-defer-async-und-typemodule-unterscheiden-und-gezielt-wählen).
 
 ### 47. „Die Vercel-Deployment-URL zu messen ist gleichwertig zur Messung der Live-Produktionsseite“
 
@@ -459,49 +459,49 @@ Diese Datei sammelt Annahmen, die im Projekt gemessen oder aus Quellcode/Spec wi
 **Herkunft:** Eigene Recherche-Annahme: PSI/Lighthouse läuft ohne GPU, Chrome entfernt den automatischen SwiftShader-Fallback für WebGL.
 **Warum zu grob:** Bestätigt: DevTools-Warnung zum SwiftShader-Fallback seit Chrome 130; Re-Enable-Flag `--enable-unsafe-swiftshader` existiert; `getContext()` liefert laut MDN/Spezifikation grundsätzlich `null` bei fehlgeschlagener Kontext-Erzeugung. Nicht eindeutig verifizierbar: der exakte Meilenstein der tatsächlichen Default-Entfernung (eine Quelle nennt Desktop M137, eine andere M133) sowie ob Googles eigene PSI/Lightrider-Infrastruktur den Flag `--enable-unsafe-swiftshader` selbst setzt.
 **Beleg:** groups.google.com/a/chromium.org/g/blink-dev/c/yhFguWS_3pM · Sicherheit: dokumentiert.
-**Was stattdessen gilt:** Ein WebGL-Canvas darf nicht voraussetzen, dass `getContext('webgl')` in Lighthouse/PSI erfolgreich ist — immer auf `null` prüfen und einen Fallback (Standbild) vorhalten. [rendern.md](rendern.md#46-getcontext-ist-synchron-der-erste-paint-darf-nicht-auf-canvas-oder-webgl-warten).
+**Was stattdessen gilt:** Ein WebGL-Canvas darf nicht voraussetzen, dass `getContext('webgl')` in Lighthouse/PSI erfolgreich ist — immer auf `null` prüfen und einen Fallback (Standbild) vorhalten. [rendern-canvas-webgl.md](rendern-canvas-webgl.md#1-getcontext-ist-synchron-der-erste-paint-darf-nicht-auf-canvas-oder-webgl-warten).
 
 ### 5. „contentvisibilityautostatechange feuert garantiert genau einmal initial“
 
 **Herkunft:** Eigene Recherche-Annahme zum Event-Verhalten von `content-visibility: auto`.
 **Warum zu grob:** Für den Kernmechanismus bestätigt: Chromium, WebKit UND Gecko feuern das Event beim Übergang von "undefiniert" zu einem bestimmten Relevanz-Wert, praktisch für jedes Element beim ersten Layout. Es existiert aber ein offenes CSSWG-Issue (#9803, seit Februar 2024), das eine Race Condition beschreibt: wegen der asynchronen Viewport-Näherungs-Berechnung kann manchmal ein zusätzliches, redundantes zweites initiales Event feuern — uneinheitlich zwischen Durchläufen.
 **Beleg:** github.com/w3c/csswg-drafts/issues/9803 · Sicherheit: dokumentiert.
-**Was stattdessen gilt:** Listener für `contentvisibilityautostatechange` idempotent schreiben (doppeltes Feuern mit demselben `skipped`-Wert darf keine doppelte Nebenwirkung auslösen), nicht "genau ein Aufruf" voraussetzen. [rendern.md](rendern.md#6-auf-contentvisibilityautostatechange-hören-checkvisibility-nur-als-start-fallback).
+**Was stattdessen gilt:** Listener für `contentvisibilityautostatechange` idempotent schreiben (doppeltes Feuern mit demselben `skipped`-Wert darf keine doppelte Nebenwirkung auslösen), nicht "genau ein Aufruf" voraussetzen. [rendern-hauptthread.md](rendern-hauptthread.md#6-auf-contentvisibilityautostatechange-hören-checkvisibility-nur-als-start-fallback).
 
 ### 6. „IntersectionObserver-Ziele in gesperrten Subtrees erzwingen pro Frame Layout“
 
 **Herkunft:** Eigene, zu scharfe Lesart der gemessenen Kostenreduktion (508 ms → 97 ms bei 132 → 25 IO-Zielen) als "jedes IO-Ziel in einem übersprungenen Subtree kostet pro Frame Style/Layout".
 **Warum zu grob:** Im eingeschwungenen Zustand ist `LayoutObject* target = target_element.GetLayoutObject()` für Nachfahren übersprungener Subtrees bereits `nullptr` (`intersection_geometry.cc:313-334`), und `IsInLockedSubtreeCrossingFrames` (`display_lock_utilities.cc:668-692`) ist ein reiner Ancestor-Walk ohne Seiteneffekte — kein Aufruf von `UpdateStyleAndLayoutForNode` im IO-Pfad gefunden. Der gemessene Effekt hat zwei andere, belegte Ursachen: (1) In der Bootstrap-Phase, bevor `content-visibility: auto` seine Nähe zum Viewport bestimmt hat (CSS Containment 2 §4.3), läuft für jedes Ziel eine echte `IntersectionGeometry`-Berechnung inklusive Style/Layout/Bild-Fetch — das erklärt Kosten proportional zur Zielzahl. (2) Jedes Layout-Lesen (`getBoundingClientRect`, `offset*`, `client*`, `scroll*`) auf einem Knoten IN einem übersprungenen Block erzwingt über `Document::UpdateStyleAndLayoutForNode`/`ScopedForcedUpdate` Style und Layout der gesperrten Vorfahren und lädt dabei deren CSS-Bilder (`CSSImageValue::CacheImage` startet beim Style-Recalc).
 **Beleg:** Chromium main, HEAD cabdc32a717663075a71718eb8750f6abdaedb64 (`intersection_geometry.cc`, `display_lock_utilities.cc`, `display_lock_document_state.cc`, `document.cc:2990-3002`, `css_image_value.cc:113-131`); CSS Containment 2 §4.3/§4.5. Projekt-Messung: 132 → 25 IO-Ziele halbierte "Other", `computeIntersections` 508 ms → 97 ms, Anfragen 28 → 11 (chromium_io_verdict.md) · Sicherheit: gemessen · dokumentiert.
-**Was stattdessen gilt:** IO-Ziele in `content-visibility`-Blöcken erst beobachten/vermessen, wenn der Block rendert (`contentvisibilityautostatechange`, `skipped === false`, Grundsatz 7 in SKILL.md) — nicht weil ein Ziel im gesperrten Zustand selbst pro Frame kostet, sondern weil die Bootstrap-Phase und jedes Layout-Lesen im Block echte Kosten und Bild-Ladevorgänge auslösen. `hidden` bleibt dauerhaft gesperrt, nur `auto` ist betroffen. [rendern.md](rendern.md#7-intersectionobserver-in-einem-content-visibility-block-die-korrigierte-regel).
+**Was stattdessen gilt:** IO-Ziele in `content-visibility`-Blöcken erst beobachten/vermessen, wenn der Block rendert (`contentvisibilityautostatechange`, `skipped === false`, Grundsatz 7 in SKILL.md) — nicht weil ein Ziel im gesperrten Zustand selbst pro Frame kostet, sondern weil die Bootstrap-Phase und jedes Layout-Lesen im Block echte Kosten und Bild-Ladevorgänge auslösen. `hidden` bleibt dauerhaft gesperrt, nur `auto` ist betroffen. [rendern-hauptthread.md](rendern-hauptthread.md#7-intersectionobserver-in-einem-content-visibility-block-die-korrigierte-regel).
 
 ### 7. „getAnimations zeigt Animationen gesperrter Subtrees erst beim Rendern“
 
 **Herkunft:** Eigene Recherche-Annahme zu `document.getAnimations()` in `content-visibility`-Subtrees.
 **Warum zu grob:** Die CSSWG hat beschlossen, dass `content-visibility` CSS-Animationen in geskippten Subtrees PAUSIERT (wie `animation-play-state: paused`) — NICHT entfernt/zerstört. Eine pausierte Web-Animations-API-Animation bleibt nach dem allgemeinen Animationsmodell ein normales, weiterhin existierendes Animation-Objekt. Ein Chromium-Team-Hinweis deutet sogar darauf hin, dass direkte Abfragen weiterhin korrekt aufgelöst werden — das würde der ursprünglichen Annahme eher widersprechen.
 **Beleg:** github.com/w3c/csswg-drafts/issues/5611 · Sicherheit: dokumentiert (Mechanismus) — konkretes `getAnimations()`-Rückgabeverhalten nicht verifiziert, siehe Offen.
-**Was stattdessen gilt:** Nicht davon ausgehen, dass `getAnimations()` pausierte Animationen in gesperrten Subtrees verschweigt oder zeigt — vor produktivem Einsatz empirisch in Chrome/Firefox/Safari testen (siehe Offen). [rendern.md](rendern.md#8-documentgetanimations-in-übersprungenen-blöcken-nicht-blind-vertrauen).
+**Was stattdessen gilt:** Nicht davon ausgehen, dass `getAnimations()` pausierte Animationen in gesperrten Subtrees verschweigt oder zeigt — vor produktivem Einsatz empirisch in Chrome/Firefox/Safari testen (siehe Offen). [rendern-hauptthread.md](rendern-hauptthread.md#8-documentgetanimations-in-übersprungenen-blöcken-nicht-blind-vertrauen).
 
 ### 8. „Layout-lesende APIs pro Frame lösen einen Lighthouse-'forced reflow'-Befund aus“
 
 **Herkunft:** Eigene Recherche-Annahme, zusammengesetzt aus zwei Teilen: welche APIs Layout erzwingen, und wo Lighthouse das meldet.
 **Warum zu grob:** Erster Teil zu 100 % bestätigt: Paul Irishs Original-Gist listet `window.scrollX`/`scrollY`, `window.innerHeight`/`innerWidth`, `elem.getBoundingClientRect()`, `elem.clientWidth`/`clientHeight` u. a. explizit als Layout-erzwingende APIs — mit der wichtigen Ergänzung, dass das nur kostet, wenn Style/Layout seit dem letzten Flush bereits invalidiert wurde; reines wiederholtes Lesen ohne zwischenzeitliches Schreiben ist günstig. Zweiter Teil war selbst die zu grobe Korrektur: developer.chrome.com beschreibt "Forced reflow" zutreffend als Feature des Chrome-DevTools-Performance-Panels plus Konsolenwarnung, aber das ist nicht mehr die ganze Geschichte — Lighthouse 13 hat mit den 17 Performance Insights ein eigenes `forced-reflow-insight` eingeführt (`core/config/default-config.js`): ungewichtet (kein Score-Einfluss), aber sichtbar im Report, mit Top-Function-Call- und Bottom-up-Liste inklusive exakter Source-Location (Datei, Zeile, Spalte). Ein gescorter klassischer Lighthouse-Audit ist es also weiterhin nicht, ein Lighthouse-Report-Befund aber sehr wohl.
 **Beleg:** github.com/GoogleChrome/lighthouse/blob/main/core/config/default-config.js — claim_check "Liste der Lighthouse-13-Performance-Insights", CONFIRMED: forced-reflow-insight liefert Top-Function-Call und Bottom-up-Liste mit Source-Location (research_lighthouse.json) · developer.chrome.com/docs/performance/insights/forced-reflow (DevTools-Feature, weiterhin gültig) · eigener Befund 16.9.2026: PSI zeigte "Erzwungener dynamischer Umbruch", Quellort `logic.gen.js:336:113`, 52 ms, für einen Pro-Frame-`scrollY`-Read in der Pixelstrom-Animationsschleife, behoben in Commit ca40094 · Sicherheit: gemessen · dokumentiert.
-**Was stattdessen gilt:** Layout-Werte cachen und nur nach Scroll-/Resize-Events lesen, nie pro Frame nach einem DOM-Schreibzugriff (Grundsatz 6, SKILL.md) — und nach einem "forced reflow"-Befund sowohl im Chrome-DevTools-Performance-Panel als auch im Lighthouse-13-/PSI-Report unter den Performance Insights (`forced-reflow-insight`) suchen, nicht nur im einen oder anderen. [rendern.md](rendern.md#9-layout-werte-aus-scroll--und-resize-events-cachen-nie-pro-frame-live-lesen) und [lighthouse-psi.md](lighthouse-psi.md#die-17-performance-insights-lighthouse-13).
+**Was stattdessen gilt:** Layout-Werte cachen und nur nach Scroll-/Resize-Events lesen, nie pro Frame nach einem DOM-Schreibzugriff (Grundsatz 6, SKILL.md) — und nach einem "forced reflow"-Befund sowohl im Chrome-DevTools-Performance-Panel als auch im Lighthouse-13-/PSI-Report unter den Performance Insights (`forced-reflow-insight`) suchen, nicht nur im einen oder anderen. [rendern-hauptthread.md](rendern-hauptthread.md#9-layout-werte-aus-scroll--und-resize-events-cachen-nie-pro-frame-live-lesen) und [lighthouse-psi.md](lighthouse-psi.md#die-17-performance-insights-lighthouse-13).
 
 ### 9. „CPU-Drosselung lässt sich an gedrosselter Shader-Framerate erkennen“
 
 **Herkunft:** Eigene Beobachtung beim Testen (Chrome DevTools/Lighthouse CPU-Drosselung, z. B. 4×) plus eigene Folgerung "nur SwiftShader wird gedrosselt".
 **Warum zu grob:** Erster Teil bestätigt (wörtliches Chrome-Blog-Zitat): "DevTools CPU throttling doesn't touch the GPU process" — der WebGL-Shader läuft im GPU-Prozess, den die CPU-Drosselung des Browsers nicht erfasst. Die eigene Folgerung "also wird wenigstens SwiftShader-Softwarerendering gedrosselt" ist aber ebenfalls falsch: SwiftShader läuft laut Chromiums eigener Doku GENAUSO innerhalb des (von der Drosselung ausgenommenen) GPU-Prozesses, nicht im gedrosselten Renderer-Hauptthread. Der Unterscheidungsfaktor ist "welcher Prozess" (Renderer vs. GPU-Prozess), nicht "Hardware- vs. Software-GL".
 **Beleg:** Beobachtet beim Testen: reale Grafiklast entsteht erst mit dem expliziten Flag `--use-angle=swiftshader` (erzwungenes Software-Rendering), nicht durch DevTools-CPU-Throttling (HANDOFF.md, "STAND 16.9. NACHMITTAGS", "Fallen", Zeile 151-152). Quelle: chromium.googlesource.com/chromium/src/+/refs/heads/main/docs/gpu/swiftshader.md · Sicherheit: gemessen · dokumentiert.
-**Was stattdessen gilt:** Für einen echten Grafik-Stresstest `--use-angle=swiftshader` explizit setzen (`scripts/fps.mjs --software-gl`); CPU-Throttling allein sagt nichts über die Shader-Framerate aus, egal ob Hardware- oder Software-GL. [rendern.md](rendern.md#47-cpu-throttling-in-devtools-erreicht-den-gpu-prozess-nicht).
+**Was stattdessen gilt:** Für einen echten Grafik-Stresstest `--use-angle=swiftshader` explizit setzen (`scripts/fps.mjs --software-gl`); CPU-Throttling allein sagt nichts über die Shader-Framerate aus, egal ob Hardware- oder Software-GL. [rendern-canvas-webgl.md](rendern-canvas-webgl.md#2-cpu-throttling-in-devtools-erreicht-den-gpu-prozess-nicht).
 
 ### 10. „decoding async trägt zum Lazy-Load-Stopp im geschlossenen Menü bei“
 
 **Herkunft:** Eigene Annahme: `loading="lazy"` + `decoding="async"` auf Bildern innerhalb eines geschlossenen (`content-visibility: hidden`) Mega-Menüs verhindern gemeinsam das Laden beim Start.
 **Warum zu grob:** Der entscheidende Faktor ist `loading="lazy"`, nicht `decoding="async"`. Ein empirischer Cross-Browser-Test zeigt: `content-visibility: hidden` wirkt in Chrome für lazy-Bilder wie `display: none` — solange der Container versteckt ist (keine Layout-Box), feuert die native, geometriebasierte Lazy-Loading-Logik nicht. `decoding="async"` betrifft ausschließlich den Zeitpunkt des Bild-Decodings NACH dem Laden, nicht den Fetch-Zeitpunkt.
 **Beleg:** phpied.com/image-requests-in-hidden-content/ · Sicherheit: dokumentiert.
-**Was stattdessen gilt:** Bilder in geschlossenen Menüs/Panels brauchen `loading="lazy"` UND einen versteckten Container ohne Layout-Box; `decoding="async"` ist dafür irrelevant, aber unschädlich als generelle Praxis. [laden.md](laden.md#23-decodingasync-ergänzt-loading-ersetzt-es-nicht).
+**Was stattdessen gilt:** Bilder in geschlossenen Menüs/Panels brauchen `loading="lazy"` UND einen versteckten Container ohne Layout-Box; `decoding="async"` ist dafür irrelevant, aber unschädlich als generelle Praxis. [laden-kritischer-pfad.md](laden-kritischer-pfad.md#23-decodingasync-ergänzt-loading-ersetzt-es-nicht).
 
 ## Offen (nicht verifizierbar)
 

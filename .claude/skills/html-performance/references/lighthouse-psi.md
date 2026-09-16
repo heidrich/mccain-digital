@@ -2,7 +2,7 @@
 
 > Teil des Skills [[html-performance]] · Stand 2026-09-16 · Belege: mccain-digital (HANDOFF, CHANGELOG, Commits), weitere Projekte des Owners, Recherche mit Quell-URLs
 
-Bezug: Lighthouse 13.4.1 (main-Branch/npm latest, Stand 2026-09-16). Insights, Schwellen und Konfigurationswerte ändern sich mit Major-Versionen — Version bei jeder Neubewertung gegenprüfen. Wie man misst und Ergebnisse liest: [messen.md](messen.md). Wie man Ursachen behebt: [laden.md](laden.md) (Laden) und [rendern.md](rendern.md) (Laufzeit). Datierte Fälle mit vollem Zahlenverlauf: [fallstudien.md](fallstudien.md). Widerlegte Annahmen im Detail: [widerlegt.md](widerlegt.md).
+Bezug: Lighthouse 13.4.1 (main-Branch/npm latest, Stand 2026-09-16). Insights, Schwellen und Konfigurationswerte ändern sich mit Major-Versionen — Version bei jeder Neubewertung gegenprüfen. Wie man misst und Ergebnisse liest: [messen.md](messen.md). Wie man Ursachen behebt: [laden-kritischer-pfad.md](laden-kritischer-pfad.md), [laden-javascript.md](laden-javascript.md), [laden-auslieferung.md](laden-auslieferung.md) (Laden) und [rendern-hauptthread.md](rendern-hauptthread.md), [rendern-animationen.md](rendern-animationen.md), [rendern-canvas-webgl.md](rendern-canvas-webgl.md) (Laufzeit). Datierte Fälle mit vollem Zahlenverlauf: [fallstudien.md](fallstudien.md). Widerlegte Annahmen im Detail: [widerlegt.md](widerlegt.md).
 
 ## Kurzfassung
 
@@ -49,7 +49,7 @@ Die teuerste falsche Annahme über PSI: dass die Messung endet, sobald die Seite
 ### 1. Rechne mit einem neuen LCP-Kandidaten bis Klick, Tap, Taste oder Scroll
 **Warum:** Der LCP-Algorithmus (W3C-Spezifikation) vergleicht bei jedem Paint die Fläche des neu gemalten Bild-/Textknotens gegen die bisher größte Fläche; ist die neue Fläche größer, wird sie sofort neuer Kandidat. Das Reporting stoppt erst, wenn ein "trusted" Scroll-Event auftritt oder ein vollständiger Klick/Tap (pointerdown+up bzw. click) oder ein vollständiger Tastendruck (keydown+keyup) eine interactionId erzeugt. Reine Mausbewegung/Hover erzeugt keine interactionId und stoppt nichts. In einem normalen automatisierten Lighthouse-/PSI-Lauf (navigation-Modus) klickt, tippt und scrollt niemand — diese Stop-Bedingung greift dort praktisch nie. Was den Wettbewerb tatsächlich beendet, ist ausschließlich das Ende der Aufzeichnung (nächste Regel).
 **Woran man es erkennt:** Mit `scripts/lcp-window.mjs <url> --for 30`: mehrere LCP-Kandidaten-Zeitpunkte statt einem; im Rohtrace mehrere `largestContentfulPaint::Candidate`-Events, jedes mit größerer `size` (px²) als das vorherige — das letzte vor Tracende zählt.
-**Fix:** Fix siehe [laden.md](laden.md) (kein Element darf nach dem ersten sichtbaren Laden größer neu erscheinen als der bisherige LCP-Kandidat).
+**Fix:** Fix siehe [laden-kritischer-pfad.md](laden-kritischer-pfad.md#5-nach-dem-ersten-render-darf-kein-element-größer-werden-als-der-lcp-kandidat) (kein Element darf nach dem ersten sichtbaren Laden größer neu erscheinen als der bisherige LCP-Kandidat).
 **Beleg:** W3C Largest Contentful Paint, Abschnitt "Report largest contentful paint"; Event-Timing-Spezifikation für die interactionId-Auflösung (keyup/compositionstart/input/pointercancel/pointerup/click/contextmenu inkl. gepaarter keydown/pointerdown). Sicherheit: dokumentiert
 **Gilt für:** allgemein
 
@@ -63,7 +63,7 @@ Die teuerste falsche Annahme über PSI: dass die Messung endet, sobald die Seite
 ### 3. Rechne damit, dass eine späte Aufgabe das TTI-Fenster neu startet
 **Warum:** TBT ist laut Quellcode-Kommentar "die Summe aller Blocking Time zwischen First Contentful Paint und Interactive Time (TTI)" — jede Aufgabe über 50 ms trägt (Dauer − 50 ms) bei, alles davor/danach zählt nicht. Time to Interactive (TTI) hat zwar Gewicht 0 (Gruppe "hidden") im sichtbaren Score, wird aber weiterhin als eigener Audit UND als notwendige Abhängigkeit für das TBT-Fensterende berechnet (`Interactive.request(...)` im beobachteten Pfad, `LanternInteractive.request(...)` im simulierten). TTI selbst braucht ein Fenster von `REQUIRED_QUIET_WINDOW=5000 ms` ohne Long Task und mit höchstens `ALLOWED_CONCURRENT_REQUESTS=2` gleichzeitigen Requests, gerechnet ab FCP. Eine Aufgabe über 50 ms, die nach dem vermeintlich ruhigen Ladezeitpunkt anfällt, setzt dieses 5-Sekunden-Fenster zurück — sie zählt nicht nur selbst direkt zu TBT, sie verschiebt TTI nach hinten und zieht damit weitere, sonst ausgeschlossene Long Tasks mit ins TBT-Fenster. Besonders tückisch: Ein periodischer Task (`setInterval`) hat einen Wanduhr-Startabstand, der vom `cpuSlowdownMultiplier` unberührt bleibt, aber eine Ausführungsdauer, die mit ihm skaliert — auf einer langsameren Maschine schrumpft die Lücke zwischen zwei Tasks ohne Code-Änderung. Ein Task, der lokal die 5-s-Ruhe nur knapp einhält, kann auf der langsameren PSI-Lightrider-VM darunterfallen und TTI dauerhaft verschieben.
 **Woran man es erkennt:** `scripts/mainthread.mjs --slices` bzw. `scripts/lcp-window.mjs --for 30`: Long Tasks nach der 5-s-Marke. Ein wiederkehrender Task mit nur knappem Puffer über der 5-s-Grenze (z. B. 6,5-s-Intervall, 6,4-s-Ruhelücke = 1,4 s Puffer) ist ein Warnsignal, auch wenn TTI lokal noch erreicht wird.
-**Fix:** Fix siehe [rendern.md](rendern.md) (deferred/lazy Code ereignisgetrieben statt gebündelt initialisieren).
+**Fix:** Fix siehe [laden-javascript.md](laden-javascript.md#4-nachladen-strikt-an-echte-nutzerabsicht-und-zeit-koppeln) und [rendern-hauptthread.md](rendern-hauptthread.md#22-nicht-kritische-beobachter-und-schwere-effekte-erst-nach-interaktion-aktivieren) (deferred/lazy Code ereignisgetrieben statt gebündelt initialisieren).
 **Beleg:** Lighthouse `core/computed/metrics/total-blocking-time.js`, `core/computed/metrics/interactive.js`, Lighthouse 13.4.1. Projektfall 1: eine Long Task bei 10,4 s hielt das Fenster offen; nach Umstellung auf `contentvisibilityautostatechange`-getriebene, gebündelte Initialisierung verschwand sie (Long Tasks nach 5 s: 1→0; HANDOFF.md, "STAND 16.9. NACHMITTAGS", Zeile 80). Projektfall 2: ein `setInterval(…, 6500)` ohne sichtbare Wirkung auf 20 von 21 Seiten ließ nur 1,4 s Puffer über der 5-s-Grenze; nach Entfernen Ruhelücke 6,4→26,2 s, Long Tasks nach 5 s 4→0 (Commits 2713c58/55d2a32, 2026-09-13). Sicherheit: gemessen
 **Gilt für:** allgemein
 
@@ -81,28 +81,28 @@ Innerhalb des offenen Fensters (oben) entscheidet der LCP-Algorithmus selbst, we
 ### 5. Erkenne die vier Ausnahmen vom größer-gewinnt-Mechanismus
 **Warum:** Grundsätzlich gilt: Ist die Fläche eines neu gemalten Bild-/Textknotens größer als die des bisherigen Kandidaten, wird er neuer Kandidat (Regel 1). Vier Sonderfälle durchbrechen das: (1) Ein Kandidat, dessen Fläche exakt der Viewport-Fläche entspricht, wird NIE gezählt (`if size is equal to rootWidth times rootHeight, return null` — Heuristik gegen Splash-/Ladebildschirme). (2) Unterscheiden sich Breite UND Höhe des neuen Kandidaten jeweils um ≤3 px vom aktuellen, wird er verworfen (Rauschfilter gegen Sub-Pixel-Neuberechnungen). (3) Text mit Alpha-/Opacity-Wert ≤0 wird übersprungen, AUSSER er hat `text-shadow≠none`, `stroke-color≠transparent` oder `stroke-image≠none`. (4) Wird das aktuell größte Element aus DOM oder Viewport entfernt, bleibt es trotzdem der Kandidat, bis ein noch größeres erscheint — explizit als Limitation dokumentiert, wegen Bild-Karussells, was bei Splashscreens zum Problem wird.
 **Woran man es erkennt:** Ein Karussell-Slide, das nach dem Wechsel aus dem DOM entfernt wird, taucht im Trace trotzdem weiter als LCP-Kandidat auf; ein knapp abweichender Reflow-Kandidat (±2 px) erzeugt keinen neuen `Candidate`-Event.
-**Fix:** Fix siehe [laden.md](laden.md)/[rendern.md](rendern.md) (Slider/Carousel: nur das initial sichtbare Bild priorisieren).
+**Fix:** Fix siehe [laden-kritischer-pfad.md](laden-kritischer-pfad.md#4-fetchpriority-gezielt-und-sparsam-einsetzen-nie-zusammen-mit-loadinglazy-auf-demselben-bild)/[rendern-hauptthread.md](rendern-hauptthread.md#21-animationen-außerhalb-des-viewports-pausieren) (Slider/Carousel: nur das initial sichtbare Bild priorisieren).
 **Beleg:** W3C Largest Contentful Paint, Abschnitte "Determine the effective visual size", "Report largest contentful paint", "1.3 Limitations" (Karussell-Zitat). Sicherheit: dokumentiert
 **Gilt für:** allgemein
 
 ### 6. Erwarte, dass Gradient-Platzhalter und hochskalierte Bilder aus dem Rennen fallen
 **Warum:** Ein Bild-Kandidat zählt nur, wenn sein Transfer-Byte-Gewicht mindestens 0,004 Bytes pro dargestelltem Pixel beträgt (`if content length < size * 0.004, return null`) — das filtert stark komprimierte Low-Content-Bilder (einfarbige Flächen, CSS-Gradient-Ersatzbilder) aus dem LCP-Wettbewerb, auch bei großer Fläche. Wird ein Bild über seine native Auflösung hinaus hochskaliert (`scaleFactor>1`), wird seine gemeldete Größe durch den Skalierungsfaktor geteilt — ein verschwommen hochgezogenes kleines Bild wiegt im Kandidatenvergleich also weniger, als seine dargestellte Fläche vermuten lässt.
 **Woran man es erkennt:** Ein großflächiger, aber leichter Gradient-Hintergrund erscheint nie als LCP-Kandidat, obwohl er optisch den größten Bereich einnimmt.
-**Fix:** Fix siehe [laden.md](laden.md) (Bildpipeline: reale Auflösung statt Upscaling, keine Fake-Content-Platzhalter als LCP-Kandidat einplanen).
+**Fix:** Fix siehe [laden-kritischer-pfad.md](laden-kritischer-pfad.md#18-eine-reproduzierbare-bildpipeline-mit-festen-breiten-und-fester-webp-qualität-führen) (Bildpipeline: reale Auflösung statt Upscaling, keine Fake-Content-Platzhalter als LCP-Kandidat einplanen).
 **Beleg:** W3C Largest Contentful Paint, Abschnitt "Determine the effective visual size of an element". Sicherheit: dokumentiert
 **Gilt für:** allgemein
 
 ### 7. Erwarte pro Element nur einen LCP-Eintrag, auch bei Font-Swap
 **Warum:** Jedes Bild bzw. jeder Textknoten wird laut Spezifikation genau EINMAL gemeldet — beim ersten Paint, bei dem es "paintable" (Opacity/Visibility erfüllt) UND "contentful" ist (Bild geladen bzw. blockierende Fonts ausreichend geladen). Ein späterer Web-Font-Swap am selben Element erzeugt KEINEN zweiten Eintrag; nur wenn der Swap ein ANDERES, jetzt größeres Element zum neuen Sieger macht, entsteht ein neuer Kandidat. Ebenso erzeugen spätere Animationen/Resizes desselben, bereits gemeldeten Elements keinen neuen Eintrag.
 **Woran man es erkennt:** Ein Wechsel von Fallback- zu Webfont auf der H1 verändert die gemeldete LCP-Zeit nur, wenn dadurch ein anderer Textknoten größer wird als die H1 — nicht durch den Swap selbst.
-**Fix:** n/a — bei Font-bedingter LCP-Verzögerung an `font-display`/Preload ansetzen ([laden.md](laden.md)), nicht am Kandidaten-Mechanismus.
+**Fix:** n/a — bei Font-bedingter LCP-Verzögerung an `font-display`/Preload ansetzen ([laden-kritischer-pfad.md](laden-kritischer-pfad.md#fonts)), nicht am Kandidaten-Mechanismus.
 **Beleg:** W3C Largest Contentful Paint, Abschnitt "Report largest contentful paint"; ergänzend web.dev/articles/lcp. Sicherheit: dokumentiert
 **Gilt für:** allgemein
 
 ### 8. Prüfe den Eigenanteil des benannten LCP-Elements, bevor du es änderst
 **Warum:** Das von Lighthouse/PSI als "LCP-Element" benannte Element ist nicht notwendigerweise die Ursache einer langen LCP-Zeit — `lcp-breakdown-insight` zerlegt LCP in `timeToFirstByte`, `resourceLoadDelay`, `resourceLoadDuration` und `elementRenderDelay`; oft steckt die eigentliche Verzögerung in vorgelagerter Hauptthread- oder Ressourcen-Ketten-Arbeit, während das Element selbst nur wenige Millisekunden beiträgt.
 **Woran man es erkennt:** Ein Namens-Laufband (CSS-Marquee, neun Wörter) wurde als LCP-Element identifiziert, kostete aber gemessen nur 106 ms von insgesamt 3.659 ms LCP-Zeit (Vergleichsmessung mit/ohne Laufband: 3.659 ms vs. 3.553 ms).
-**Fix:** Vor jeder Optimierung/Entfernung eines vermeintlichen LCP-Elements per A/B-Messung (mit/ohne) prüfen, wie viel Zeit es tatsächlich selbst beiträgt — Fix für die eigentliche Ursache dann in [laden.md](laden.md)/[rendern.md](rendern.md).
+**Fix:** Vor jeder Optimierung/Entfernung eines vermeintlichen LCP-Elements per A/B-Messung (mit/ohne) prüfen, wie viel Zeit es tatsächlich selbst beiträgt — Fix für die eigentliche Ursache dann in der passenden `laden-*`-/`rendern-*`-Referenz ([Regelindex](../SKILL.md#regelindex)).
 **Beleg:** HANDOFF.md, Zeilen 1049-1053, 893-894, 703-704: 106 ms Differenz von 3.659 ms Gesamtzeit; Element unverändert belassen ("die Referenzen sind echt"). Sicherheit: gemessen
 **Gilt für:** allgemein
 
@@ -113,28 +113,28 @@ Kurzdefinitionen der fünf im Score gewichteten Lab-Metriken plus INP (Gewicht 0
 ### 9. Rechne TBT nur aus Millisekunden über 50 ms pro Aufgabe
 **Warum:** Total Blocking Time summiert ausschließlich den Anteil jeder Aufgabe, der 50 ms übersteigt (eine 110-ms-Aufgabe liefert 60 ms Blocking Time). Eine Reduktion der GESAMTEN Hauptthread- oder "Other"-Zeit verbessert TBT deshalb nicht zwangsläufig proportional — nur das Verkürzen oder Wegfallen von Aufgaben über 50 ms wirkt sich aus. Verteilt sich eingesparte Arbeit über viele kleine Tasks unter 50 ms, bewegt sich TBT kaum.
 **Woran man es erkennt:** In einem Owner-Projekt halbierte sich "Other" (Desktop 1.340→641 ms) und die Hauptthread-Gesamtzeit sank deutlich (3.560→2.164 ms) — TBT blieb bei 28-29 ms praktisch unverändert, TTI verbesserte sich nur leicht (~340→~302 ms).
-**Fix:** Bei der Erfolgsmessung TBT, TTI und Gesamtzeit gemeinsam betrachten, nicht nur eine Zahl als Stellvertreter nehmen; gezielt auf Aufgaben >50 ms zielen ([rendern.md](rendern.md)), nicht auf die Gesamtsumme.
+**Fix:** Bei der Erfolgsmessung TBT, TTI und Gesamtzeit gemeinsam betrachten, nicht nur eine Zahl als Stellvertreter nehmen; gezielt auf Aufgaben >50 ms zielen ([rendern-hauptthread.md](rendern-hauptthread.md#hauptthread-und-other)), nicht auf die Gesamtsumme.
 **Beleg:** HANDOFF.md, "STAND 16.9. NACHMITTAGS", Zeilen 71-84. Sicherheit: gemessen
 **Gilt für:** allgemein
 
 ### 10. Nimm für CLS die größte Session-Fenster-Summe, nicht die Summe aller Shifts
 **Warum:** Layout-Shifts werden zu "Session-Fenstern" gruppiert: Ein Shift mit weniger als 1 s Abstand zum vorherigen gehört zum selben Fenster, ein Fenster dauert maximal 5 s. Der CLS-Wert ist die höchste kumulierte Shift-Summe unter allen Fenstern der gesamten Seiten-Lebensdauer — nicht die Summe aller einzelnen Shifts. Ein einzelner später, großer Sprung kann also mehr wiegen als viele kleine frühe Sprünge, wenn er allein ein eigenes Fenster bildet.
 **Woran man es erkennt:** Lighthouse zeigt nur den finalen CLS-Wert; die zugrundeliegenden Fenster sieht man im DevTools-Performance-Panel (Experience-Spur) oder über `cls-culprits-insight` (Abschnitt "Die 17 Performance-Insights"), das je Cluster bis zu 3 Ursachen mit 500-ms-Rückschau meldet (Ursachentypen: WEB_FONT, IFRAMES, ANIMATIONS, UNSIZED_IMAGE).
-**Fix:** Fix siehe [laden.md](laden.md)/[rendern.md](rendern.md) (Bild-/Embed-Maße, Font-Fallback-Metriken, keine späten Einschübe oberhalb des sichtbaren Bereichs).
+**Fix:** Fix siehe [laden-kritischer-pfad.md](laden-kritischer-pfad.md#bilder)/[laden-kritischer-pfad.md](laden-kritischer-pfad.md#fonts) (Bild-/Embed-Maße, Font-Fallback-Metriken, keine späten Einschübe oberhalb des sichtbaren Bereichs).
 **Beleg:** web.dev, "Cumulative Layout Shift (CLS)": Session-Fenster <1 s Abstand, max. 5 s Fensterdauer, CLS = Maximum der Fenstersummen; `cls-culprits-insight` ROOT_CAUSE_WINDOW=500ms, MAX_TOP_CULPRITS=3 (@paulirish/trace_engine, LH 13.4.1). Sicherheit: dokumentiert
 **Gilt für:** allgemein
 
 ### 11. Erwarte von PSI nie einen Lab-INP-Wert
 **Warum:** Der Audit `interaction-to-next-paint` hat `supportedModes:['timespan']` — er läuft nie im normalen Single-Page-Load/"navigation"-Modus, den PSI nutzt — und liefert zusätzlich `{score:null, notApplicable:true}`, sobald `throttlingMethod==='simulate'` ist, was bei PSI immer zutrifft (Kommentar im Code: "responsiveness isn't yet supported by lantern"). INP hat außerdem Gewicht 0 im Performance-Score (wird trotzdem in der Metrik-Gruppe angezeigt, sofern ein Feldwert existiert). INP löste FID am 12. März 2024 offiziell als Core Web Vital ab.
 **Woran man es erkennt:** Ein PSI-Report enthält NIE einen Lab-INP-Wert — nur ggf. ein Feld-INP-Badge aus CrUX, wenn genug echte Nutzerdaten vorliegen (Abschnitt "CrUX-Felddaten").
-**Fix:** Für echte INP-Optimierung auf Feld-/RUM-Daten oder eigene Timespan-/User-Flow-Messungen setzen, nicht auf einen PSI-Lab-Wert warten, der nie kommt. Debounce-/Remount-Muster gegen hochfrequente Interaktionen: [rendern.md](rendern.md).
+**Fix:** Für echte INP-Optimierung auf Feld-/RUM-Daten oder eigene Timespan-/User-Flow-Messungen setzen, nicht auf einen PSI-Lab-Wert warten, der nie kommt. Debounce-/Remount-Muster gegen hochfrequente Interaktionen: [rendern-hauptthread.md](rendern-hauptthread.md#erzwungener-reflow).
 **Beleg:** Lighthouse `core/audits/metrics/interaction-to-next-paint.js`, Lighthouse 13.4.1; INP-Ablösung von FID: web.dev/blog/inp-cwv-march-12 ("INP will officially become a Core Web Vital and replace FID on March 12" 2024). Sicherheit: dokumentiert
 **Gilt für:** allgemein
 
 ### 12. Trenn FCP und Speed Index von Interaktivität
 **Warum:** FCP ist der Zeitpunkt des ersten gerenderten Inhalts (Text, Bild, Canvas, nicht-weißes SVG) — nicht des größten (das ist LCP) und keine Aussage über Interaktivität. Speed Index misst, wie schnell sich der sichtbare Seiteninhalt WÄHREND des Ladens vervollständigt: Lighthouse zeichnet den Seitenaufbau als Video auf und berechnet den visuellen Fortschritt zwischen den Frames (Speedline-Modul, Methodik nach WebPageTest.org) — ein niedriger Wert bedeutet, dass der größte Teil des finalen Layouts früh sichtbar ist, unabhängig davon, wann die Seite tatsächlich bedienbar wird.
 **Woran man es erkennt:** Eine Seite kann einen frühen FCP und dennoch einen späten Speed Index haben, wenn laufende Einblend-Animationen sie optisch lange "unfertig" wirken lassen, obwohl längst Inhalt gemalt wurde.
-**Fix:** n/a — Fix für frühen FCP in [laden.md](laden.md) (kritischer Pfad, Fonts), für sauberen Speed-Index-Verlauf in [rendern.md](rendern.md) (keine späten/laufenden Einblendungen über sichtbarem Content).
+**Fix:** n/a — Fix für frühen FCP in [laden-kritischer-pfad.md](laden-kritischer-pfad.md) (kritischer Pfad, Fonts), für sauberen Speed-Index-Verlauf in [rendern-animationen.md](rendern-animationen.md#14-früher-first-paint-später-speed-index-durch-weiterlaufende-einblend-animationen) (keine späten/laufenden Einblendungen über sichtbarem Content).
 **Beleg:** developer.chrome.com/docs/lighthouse/performance/speed-index; Lighthouse `core/config/default-config.js` (Metrik-Gewichte). Sicherheit: dokumentiert
 **Gilt für:** allgemein
 
@@ -145,7 +145,7 @@ Wie aus den fünf Lab-Metriken der eine sichtbare Performance-Score (0-100) wird
 ### 13. Kenn die Gewichte: FCP 10, SI 10, LCP 25, TBT 30, CLS 25
 **Warum:** Der Performance-Score ist eine gewichtete Summe von fünf Lab-Metriken; INP (Gewicht 0, wird trotzdem angezeigt) und die alte TTI-Metrik (Gewicht 0, Gruppe "hidden") fließen NICHT in den sichtbaren Score ein, obwohl beide weiterhin berechnet werden (Regel 3, Regel 11).
 **Woran man es erkennt:** `default-config.js`, category 'performance': first-contentful-paint 10, largest-contentful-paint 25, total-blocking-time 30, cumulative-layout-shift 25, speed-index 10, interaction-to-next-paint 0, interactive 0, max-potential-fid 0.
-**Fix:** Optimierungsreihenfolge nach Gewicht: TBT (30) und LCP/CLS (je 25) zuerst, FCP/SI (je 10) folgen meist automatisch mit. Details: [laden.md](laden.md), [rendern.md](rendern.md).
+**Fix:** Optimierungsreihenfolge nach Gewicht: TBT (30) und LCP/CLS (je 25) zuerst, FCP/SI (je 10) folgen meist automatisch mit. Details: die `laden-*`- und `rendern-*`-Referenzen, siehe [Regelindex](../SKILL.md#regelindex).
 **Beleg:** Lighthouse `core/config/default-config.js`, Lighthouse 13.4.1. Sicherheit: dokumentiert
 **Gilt für:** allgemein
 
@@ -243,7 +243,7 @@ Seit Lighthouse 12/13 heißen die alten Performance-Audits "Insights" und liegen
 ### 19. Erwarte beim Cache-Insight ein Altersdezil-Modell, keine starre 30-Tage-Grenze
 **Warum:** "Use efficient cache lifetimes" ignoriert Ressourcen mit TTL≥30 Tagen komplett, schätzt den Wasted-Bytes-Anteil für alles darunter aber über reale HTTP-Archive-Wiederbesuchs-Altersdezile ([0, 0.2, 1, 3, 8, 12, 24, 48, 72, 168, 8760, ∞] Stunden) statt eines starren Cutoffs; `IGNORE_THRESHOLD_IN_PERCENT=0,925`.
 **Woran man es erkennt:** Zwei Ressourcen mit gleicher TTL knapp unter 30 Tagen können unterschiedlich stark als "wasted" gemeldet werden, je nach geschätzter Wiederbesuchs-Wahrscheinlichkeit in diesem Dezil-Modell — nicht nach einer einfachen Ja/Nein-Schwelle.
-**Fix:** Fix siehe [laden.md](laden.md) (Cache-Control-/Immutable-Strategie).
+**Fix:** Fix siehe [laden-auslieferung.md](laden-auslieferung.md#caching-und-auslieferung) (Cache-Control-/Immutable-Strategie).
 **Beleg:** Lighthouse `@paulirish/trace_engine/models/trace/insights/Cache.js`, Lighthouse 13.4.1. Sicherheit: dokumentiert
 **Gilt für:** allgemein
 

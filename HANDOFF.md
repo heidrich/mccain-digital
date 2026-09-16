@@ -61,8 +61,15 @@ Juni, alte Ignore-Regel, siehe unten), die Entscheidung liegt beim Owner.
     passenden Referenz; falsche Annahme → `widerlegt.md`; im Sync-Repo committen
     und pushen. Bei jedem Webprojekt gilt die `bauanleitung.md` beim Bauen und
     der Performance-Pass vor dem Push (globale CLAUDE.md, Abschnitt Qualität).
-  - **Offen am Skill:** `rendern.md` (~38k Tokens) und `laden.md` (~25k) in je
-    zwei bis drei Themendateien teilen, damit ein gezielter Read billig bleibt.
+  - **Erledigt 16.9. abends:** `rendern.md` und `laden.md` sind in sechs
+    Themendateien geteilt (`rendern-hauptthread.md` 33 Regeln,
+    `rendern-animationen.md` 16, `rendern-canvas-webgl.md` 25,
+    `laden-kritischer-pfad.md` 29, `laden-javascript.md` 15,
+    `laden-auslieferung.md` 19; je 7–20k Tokens statt 24–36k). Regeln pro Datei
+    neu von 1 nummeriert, alle 600 Links im Skill maschinell umgestellt und
+    geprüft. Die Kopie unter `.claude/skills/html-performance/` ist auf diesem
+    Stand; am PC `cd ~/.claude && git pull`. Größter Rest: `messen.md`
+    (~24k Tokens) ist ungeteilt.
 - **Dev-Modus (Owner-Idee 16.9., nach dem Skill, noch nicht begonnen, nur v5).**
   Zwei zuschaltbare Sichten auf die Seite, für Kunden ohne Technik-Hintergrund:
   1. **Röntgen (Owner-Ergänzung 16.9.: „wirklich den DOM anzeigen und auch viel
