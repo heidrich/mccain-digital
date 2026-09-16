@@ -1,5 +1,54 @@
 # Uebergabe — Stand 16. September 2026
 
+## ▶ STAND 16.9. ABENDS — ZUERST LESEN
+
+**Git:** `main` = `ca40094` (gepusht, Vercel-Produktion). `v5-preview` steht noch auf
+`0d3f091` und wurde nicht mitgezogen. Ungetrackt ist `assets-src/` (7 Bilder vom
+Juni, alte Ignore-Regel, siehe unten), die Entscheidung liegt beim Owner.
+
+**Was heute passiert ist, in Reihenfolge:**
+
+1. **Pixelstrom hinter den dunklen Bändern behoben** (`e5d3353`, Details weiter unten).
+2. **v5-Performance-Runde** (`902108a`): „Other“ halbiert, nichts Unsichtbares in
+   den ersten 10 s.
+3. **Owner-PageSpeed danach: 95 → 60.** LCP lag bei 20,5 s, Ursache war die
+   Hero-Rotation. Varianten 2–4 wurden bei 13,5 / 20 / 26,5 s zu neuen, größeren
+   LCP-Kandidaten, und die neue Arbeit bei 7 s und 10 s hielt PageSpeed länger im
+   Messfenster. **Owner-Entscheidung: nur noch eine Headline** („die schreiben wir
+   dann auch bald um“). Umgesetzt in `ca40094`. Lokal gibt es danach über 30 s
+   genau einen LCP-Eintrag (256 ms Desktop, 240 ms mobil).
+4. **Im selben Commit:** PageSpeed meldete einen „erzwungenen Umbruch“ von 52 ms an
+   `scrollY` in der Strom-Schleife. Die Schleife liest jetzt pro Frame gar kein
+   Layout mehr (`this.view` aus Scroll- und Resize-Events, Start erst mit der
+   ersten Meldung des ResizeObservers).
+
+**Als nächstes:**
+
+- **Owner macht einen echten PageSpeed-Test auf `ca40094`.** Das Ergebnis abwarten
+  und die Zahlen hier eintragen.
+- **Danach, mit dem Owner abgestimmt: einen HTML-Performance-Skill bauen**, in dem
+  alle Lehren dieser Datei gesammelt werden (Methode, Fallen, Muster). Der Skill
+  soll bei jedem Projekt weiter wachsen.
+- **Weiterhin offen:**
+  - nicht-composited Animationen, der Rest von `RunTask`
+  - Canvas-Auflösung unter Software-GL
+  - React-Seiten ohne die v5-Fixes, die Startseite `/` rotiert dort noch per JS
+- **Merksatz für PageSpeed:** Es misst, bis die Seite ~5,25 s lang ohne lange
+  Aufgaben und ohne Netzverkehr war. Alles, was *nach* dem Laden neu erscheint,
+  kann in diesem Fenster zum LCP werden, sobald es größer ist als der bisherige
+  Kandidat. Späte Arbeit (Nachladen bei 7 s oder 10 s) verlängert das Fenster.
+
+**Werkzeug-Hinweise für diesen Mac:**
+
+- **git:** Nach dem Xcode-Update blockiert `/usr/bin/git`, bis die Lizenz akzeptiert
+  ist. Solange: `DEVELOPER_DIR=/Library/Developer/CommandLineTools git …`.
+  Push nur per SSH: `git push git@github.com:heidrich/mccain-digital.git main:main`.
+- **Messen:** Mess-Server ist `python3 prodserve.py 8897`, lange Browser-Tore mit
+  `caffeinate -i` starten.
+- **`squirrel`** ist nicht installiert.
+
+---
+
 ## ▶ STAND 16.9. NACHMITTAGS — v5: „Other“ halbiert, nichts Unsichtbares in den ersten 10 s
 
 Owner: *„alles was nicht angezeigt wird, muss auch nicht in den ersten 10 sekunden
