@@ -1,12 +1,12 @@
 # Messskripte des Skills `html-performance`
 
-Neun Kommandozeilen-Werkzeuge, die dieselben Fragen beantworten, die
+Zehn Kommandozeilen-Werkzeuge, die dieselben Fragen beantworten, die
 Lighthouse/PageSpeed Insights stellen - LCP, TBT, CLS, Hauptthread-Zeit,
 Requests, Observer-Last, `content-visibility`, Animationen, Bildrate -, aber
 mit Rohdaten und Zeitleisten statt nur einem Score, damit sich ein Befund
-tatsächlich einer Ursache im Code zuordnen lässt. Acht Skripte sind
+tatsächlich einer Ursache im Code zuordnen lässt. Neun Skripte sind
 Node-ESM-Module (`.mjs`) und messen per Playwright/CDP in echtem Chromium;
-das neunte, `prodserve.py`, ist kein Messwerkzeug, sondern der
+das zehnte, `prodserve.py`, ist kein Messwerkzeug, sondern der
 produktionsnahe Server, gegen den alle anderen messen. Jedes Skript läuft
 einzeln, nimmt eine URL als Argument und kennt `--json` sowie `--help`/`-h`.
 
@@ -65,15 +65,16 @@ Node 22 vorausgesetzt.
   Server-Modus (MESSEN, nicht ANSEHEN), dasselbe Geräte-Preset, dieselbe
   CPU-Drosselung, eine unbelastete Maschine. Alles andere vergleicht Rauschen.
 
-## Die neun Werkzeuge
+## Die zehn Werkzeuge
 
 | Skript | Frage | Aufruf | Worauf achten |
 |---|---|---|---|
-| `lcp-window.mjs` | Welches Element wird LCP, und wird die Seite je ruhig (TTI/TBT/CLS)? | `node lcp-window.mjs <url> --for 30 --mobile` | keine WARNUNG "später LCP-Kandidat"; TTI wird erreicht; TBT nicht "bis Fensterende" offen; CLS niedrig, Quellen bekannt |
+| `lcp-window.mjs` | Welches Element wird LCP, und wird die Seite je ruhig (TTI/TBT/CLS)? | `node lcp-window.mjs <url> --for 30 --mobile [--software-gl]` | keine WARNUNG "später LCP-Kandidat"; TTI wird erreicht; TBT nicht "bis Fensterende" offen; CLS niedrig, Quellen bekannt |
 | `mainthread.mjs` | Wohin gehen die Hauptthread-Millisekunden, was steckt in Lighthouses "Other"? | `node mainthread.mjs <url> --for 12 --mobile --slices` | "Other" erklärbar (IntersectionObserver-Zeile prüfen); teuerste Einzelereignisse einem Skript/einer Funktion zuordenbar |
 | `requests.mjs` | Was lädt wann, wie groß, doppelt, und sieht man es überhaupt? | `node requests.mjs <url> --for 12 --mobile` | keine unerklärten Duplikate; "geladen, aber unsichtbar" leer oder nur `loading=lazy`-Fälle |
 | `observers.mjs` | Wer beobachtet wie viele Elemente, wer liest Layout, wer pollt? | `node observers.mjs <url> --for 15 --sweep` | kein Observer mit unerklärt hoher Zielzahl; kein "Polling-Verdacht" bei setTimeout; rAF ~Bildwiederholrate |
 | `cv-audit.mjs` | Was tut `content-visibility` wirklich, und wo lauern seine Fallen? | `node cv-audit.mjs <url> --mobile` | Befund-Liste leer (keine Stacking-/Containing-Block-Falle, kein `contain-intrinsic-size: none`); Seitenhöhe ändert sich beim Sweep nicht |
+| `cv-heights.mjs` | Wie hoch ist jede `content-visibility`-Sektion wirklich, je Viewport-Breite? | `node cv-heights.mjs <url> --widths 412,768,1024,1350` | Delta-Spalte klein; den CSS-Vorschlag (`contain-intrinsic-size:auto <h>px` je Breite) über einen stabilen Schlüssel (id, data-Attribut) in den Build übernehmen, nach Inhaltsänderungen neu messen |
 | `animations.mjs` | Was animiert, wie lange noch, sichtbar, Compositor? | `node animations.mjs <url> --sweep --at2 8000` | keine endlose Animation läuft offscreen; laufende Animationen nur mit compositor-fähigen Properties |
 | `fps.mjs` | Hält die Seite ihre Bildrate, und drosselt sie sich selbst erkennbar? | `node fps.mjs <url> --for 8 --cpu 1,4 --software-gl` | mean/min fps nahe Bildwiederholrate, kein dauerhaftes Plateau darunter; `--attr`-Qualitätsstufe fährt nach Last wieder hoch |
 | `lighthouse-psi.mjs` | Wie bewertet Lighthouse im PSI-Modus die Seite? | `node lighthouse-psi.mjs <url> --runs 3` | kein `runtimeError`; observedLCP − observedFCP ≤ 3000 ms; Score/LCP/TBT/CLS im Zielbereich |
@@ -155,7 +156,7 @@ Für ein neues Skript:
    Ausgaben, per `addInitScript` einbinden) und `table()` (Textausgabe).
 2. Deutscher Kopfkommentar: welche Frage das Skript beantwortet, welche
    Methode es verwendet, welche Fallstricke es kennt.
-3. `--help`/`-h` nach dem Muster der anderen acht Skripte: `Nutzung: node
+3. `--help`/`-h` nach dem Muster der anderen neun Skripte: `Nutzung: node
    <skript>.mjs <url> [Optionen]`, eine Zeile Frage, `Optionen:`-Liste mit
    `--json` und `--help`, ein `Beispiel:`. Dieselbe Hilfe erscheint, wenn die
    URL fehlt.

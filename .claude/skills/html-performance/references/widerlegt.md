@@ -58,6 +58,7 @@ Diese Datei sammelt Annahmen, die im Projekt gemessen oder aus Quellcode/Spec wi
 - **"'0 page errors' vom Lade-Gate bedeutet, die Seite hat keine Konsolenfehler"** → pageerror feuert nur bei unabgefangenen Exceptions; 70 bzw. 37 Konsolenfehler blieben unsichtbar. ([→](#48-0-page-errors-vom-lade-gate-bedeutet-die-seite-hat-keine-konsolenfehler))
 - **"Wenn eine Drittanbieter-URL als Objekt-Schlüssel im Code auftaucht, wird dieser Origin auch tatsächlich geladen"** → window.__resources nutzt die URLs als Schlüssel gerade damit sie NIE angefragt werden. ([→](#49-wenn-eine-drittanbieter-url-als-objekt-schlüssel-im-code-auftaucht-wird-dieser-origin-auch-tatsächlich-geladen))
 - **"Ein grünes Ergebnis von check_links.py bedeutet, es gibt keine kaputten Links oder doppelten IDs"** → Zwei Prüfungen matchten einen Dokumentationskommentar bzw. escapte Beispiel-Prosa statt des echten Markups. ([→](#50-ein-grünes-ergebnis-von-check_linkspy-bedeutet-es-gibt-keine-kaputten-links-oder-doppelten-ids))
+- **"Zwei rAF-Ticks nach dem Skript-Start = der erste Frame ist gemalt; WebGL danach entlastet FCP und Score"** → Unter Software-GL blieb FCP bei 2,2 s, der Hauptthread bekam eine Long Task von 2,3 s nach FCP, TBT 0 → 2,2 s. ([→](#51-zwei-requestanimationframe-ticks-nach-dem-skript-start-garantieren-einen-gemalten-ersten-frame--webgl-danach-zu-starten-entlastet-fcp-und-score))
 
 **Präzisiert:**
 
@@ -430,6 +431,13 @@ Diese Datei sammelt Annahmen, die im Projekt gemessen oder aus Quellcode/Spec wi
 **Warum falsch:** Zwei Prüfungen matchten den falschen Text: eine erkannte einen Dokumentationskommentar, der `<template id="dc-template">` nur beschrieb, als das echte Tag und übersprang dadurch das tatsächliche, nachgelagerte Markup; eine andere hielt escapte Beispiel-Markup in der Brand-Guide-Prosa für eine echte doppelte ID.
 **Beleg:** Commit b99e912 (2026-09-11, "chore(repo): one archive folder, one internal folder, and a test that they stay unreachable"): Fix entfernt Kommentare aus dem Suchraum vor dem Pattern-Match und dekodiert escapte Entities wie ein Browser · Sicherheit: gemessen.
 **Was stattdessen gilt:** Ein textbasierter Prüf-Test muss Kommentare/Dokumentation aus seinem Suchraum ausschließen und Markup so dekodieren, wie ein Browser es täte — sonst kann er grün melden, während er den falschen Text prüft. [messen.md](messen.md).
+
+### 51. „Zwei requestAnimationFrame-Ticks nach dem Skript-Start garantieren einen gemalten ersten Frame – WebGL danach zu starten entlastet FCP und Score“
+
+**Herkunft:** Eigene Annahme beim v5-Befund „`getContext('webgl')` blockiert den ersten Paint“ (16.9.2026, HANDOFF: „Canvas erst nach dem ersten Frame starten“), gestützt auf das verbreitete Muster `requestAnimationFrame(() => requestAnimationFrame(start))`.
+**Warum falsch:** Der rAF-Callback läuft vor dem Paint eines Frames, und ob dieser Frame präsentiert wird, entscheidet der GPU-Prozess. Unter Software-GL (SwiftShader) präsentiert er den ersten Frame erst, nachdem die WebGL-Kontext-Erzeugung durch ist, egal ob der Hauptthread sie vor oder nach dem ersten Commit auslöst. Der Aufschub verschiebt die Blockade nur hinter FCP, wo Lighthouse sie als TBT zählt (TBT zählt erst ab FCP). Gemessen (`lcp-window.mjs --mobile --software-gl`, zwei Läufe): FCP 2.188/2.280 ms statt 2.388 ms, eine Long Task von 2.271/2.306 ms ab 106/142 ms, TBT 2.221/2.256 ms statt 0. Mit GPU unverändert unauffällig (FCP 100 ms, TBT 0).
+**Beleg:** mccain-digital v5, Gegenprobe 16.9.2026 abends, `scratchpad/v5base/exp_defer_swgl_*.json`; Ausgangslage FCP 2.388 ms mit Long Tasks 420 + 130 ms vor FCP · Sicherheit: gemessen (2 Läufe + Ausgangslage, ruhige Maschine).
+**Was stattdessen gilt:** Entweder den Block bewusst vor FCP lassen (kostet FCP/LCP, nicht TBT) oder `OffscreenCanvas` in einem Worker und den Start an `first-contentful-paint` (PerformanceObserver) hängen, nicht an rAF-Ticks. [rendern-canvas-webgl.md](rendern-canvas-webgl.md#1-getcontext-ist-synchron-der-erste-paint-darf-nicht-auf-canvas-oder-webgl-warten).
 
 ## Präzisiert (teilweise richtig)
 

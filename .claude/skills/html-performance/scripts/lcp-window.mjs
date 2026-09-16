@@ -39,6 +39,8 @@ Optionen:
   --width/--height <n>  Viewport-Preset überschreiben
   --interact <s>        bei Sekunde s per Tab-Taste eine Nutzereingabe auslösen
                          (beendet LCP-Reporting, wie in echten Browsern)
+  --software-gl         Chromium mit SwiftShader (Software-GL) starten: zeigt, ob der
+                         erste Paint auf getContext()/WebGL wartet
   --json                maschinenlesbare Ausgabe
   --help                diese Hilfe
 
@@ -58,6 +60,7 @@ const asJson = !!args.json;
 const launchOpts = {
   mobile: !!args.mobile,
   cpu: num(args.cpu, 1),
+  softwareGl: !!args["software-gl"],
   width: args.width === undefined ? undefined : Number(args.width),
   height: args.height === undefined ? undefined : Number(args.height),
 };

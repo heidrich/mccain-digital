@@ -229,8 +229,10 @@
     else if (known.has(box) && !visible.has(box)) an.pause();
   }
 
-  function scan() {
-    var list = document.getAnimations();
+  /* Without an argument the whole document; with a block (a deferred section
+   * that was just rendered) only that block - see the state-change listener. */
+  function scan(root) {
+    var list = root && root.getAnimations ? root.getAnimations({ subtree: true }) : document.getAnimations();
     for (var i = 0; i < list.length; i++) {
       var an = list[i];
       if (!an.animationName) continue;
@@ -288,9 +290,32 @@
   /* A deferred section (content-visibility) gets its CSS animations only when
    * the browser renders it, and that adds no element - so a render is a reason
    * to look again, too. Without this, a section scrolled into range after load
-   * ran its loops unheld and never paused. */
+   * ran its loops unheld and never paused.
+   *
+   * 16.9.2026, FOURTH PASS: SCOPED AND IMMEDIATE. This used to re-arm the
+   * 250 ms debounce above and end in a full document.getAnimations() walk for
+   * every section that came near while scrolling - observers.mjs (skill
+   * html-performance) booked it as polling: setTimeout(..., 250) nine times a
+   * second. Only the rendered block can carry new animations, and they exist by
+   * the next frame. So: one requestAnimationFrame for all blocks that changed
+   * in this frame, and getAnimations({subtree:true}) on each block instead of
+   * the document. The pauses arrive up to 250 ms earlier as well. */
+  var changed = [];
+  var frame = 0;
   document.addEventListener("contentvisibilityautostatechange", function (e) {
-    if (!e.skipped) soon();
+    var box = e.target;
+    if (e.skipped || !box || box.nodeType !== 1) return;
+    if (changed.indexOf(box) < 0) changed.push(box);
+    if (frame) return;
+    frame = requestAnimationFrame(function () {
+      frame = 0;
+      var boxes = changed;
+      changed = [];
+      for (var i = 0; i < boxes.length; i++) {
+        /* One broken node must not cost the rest of the batch its scan. */
+        try { if (boxes[i].isConnected) scan(boxes[i]); } catch (e) { /* skip this block */ }
+      }
+    });
   }, true);
 
   scan();

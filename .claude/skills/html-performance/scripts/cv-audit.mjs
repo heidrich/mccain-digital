@@ -150,6 +150,10 @@ function computeMargins(events, viewportH) {
   return [...byId.values()].map((v) => ({ desc: v.desc, showPx: avg(v.show), skipPx: avg(v.skip), n: v.show.length + v.skip.length }));
 }
 
+/* Ein paar Pixel Drift sind Messrauschen (Scrollbalken, Subpixel, ein spät geladenes Bild);
+ * erst darüber stimmt die Platzhalterhöhe wirklich nicht. */
+const DRIFT_TOLERANCE_PX = 24;
+
 function buildFindings(elements, sweepResult, features) {
   const out = [];
   if (!features.eventSupported) out.push("contentvisibilityautostatechange wird nicht unterstützt: Sweep-Messwerte fehlen, nur der statische Zustand ist verlässlich.");
@@ -159,7 +163,7 @@ function buildFindings(elements, sweepResult, features) {
     if (r.fixed > 0) out.push(`${r.desc}: ${r.fixed} fixed-positionierte(s) Kind (CONTAINING-BLOCK TRAP) - dieselbe Containment-Regel macht das Element zum containing block; "fixed" wirkt wie "absolute" relativ zum Container statt zum Viewport. Fix: das fixed-Element als Geschwister außerhalb des cv-Blocks platzieren.`);
     if (r.cis.includes("none")) out.push(`${r.desc}: contain-intrinsic-size ohne Fallback-Größe (berechnet: "${r.cis}") - der Platzhalter hat auf mindestens einer Achse keine reservierte Größe, das erste Rendern verschiebt den Rest der Seite. Fix: contain-intrinsic-size: auto <geschätzte Höhe>px setzen.`);
   }
-  if (sweepResult && sweepResult.after !== sweepResult.before) {
+  if (sweepResult && Math.abs(sweepResult.after - sweepResult.before) > DRIFT_TOLERANCE_PX) {
     out.push(`Seitenhöhe ändert sich beim Scrollen um ${sweepResult.after - sweepResult.before}px (${sweepResult.before}px → ${sweepResult.after}px) - contain-intrinsic-size passt nicht zur echten Höhe. Fix: reale Sektionshöhe messen (z. B. einmalig per ResizeObserver) und als contain-intrinsic-size persistieren.`);
   }
   return out;

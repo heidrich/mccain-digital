@@ -43,6 +43,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { BASE, launch, open, requireServer } from "./browser.mjs";
 
+import { HEIGHTS_FILE, cvKey } from "./v5cv.mjs";
+
 const SITE = path.join(import.meta.dirname, "..");
 const OUT = path.join(SITE, "v5");
 const STAGE_DIR = path.join(SITE, "_dcbuild");
@@ -624,10 +626,59 @@ const outHead = head
   .replace(/\s*<meta name="robots"[^>]*>/g, "")
   .replace("</title>", '</title>\n  <meta name="robots" content="noindex">');
 if (outHead.includes("pixel-engine.js")) throw new Error("v5build: the head still loads pixel-engine.js - home.js loads it on demand");
+/* THE DEFERRED BLOCKS GET A NAME AND THEIR MEASURED HEIGHT.
+ *
+ * prerender.mjs marks the blocks below the first screen with data-cv="" (which
+ * emit() above serialises as a bare data-cv) and one placeholder for all of
+ * them (contain-intrinsic-size:auto 900px). The
+ * placeholder is what the browser lays out until a block comes near, and one
+ * number for fifteen blocks was off by thousands of pixels either way
+ * (16.9.2026, cv-audit.mjs: +3.402 px on a phone, -3.095 px on a desktop
+ * during the first scroll). Here every block gets a stable key (see v5cv.mjs)
+ * and, from tools/v5-heights.json, the height it really has at each sample
+ * width - measured on the built page by `node tools/v5heights.mjs`. Keys the
+ * file does not know keep the 900px and are reported, so a renamed or added
+ * block cannot silently inherit a wrong number. */
+const cvKeys = [];
+html = html.replace(/<(section|div) data-cv(="[^"]*")?([^>]*)>/g, (tag, name, value, attrs) => {
+  /* A value that arrives from the export would be overwritten here without anyone noticing. */
+  if (value && value !== '=""') throw new Error("v5build: data-cv already carries a value in the export: " + tag.slice(0, 80));
+  const id = (attrs.match(/ id="([^"]*)"/) || [])[1];
+  const label = (attrs.match(/ data-screen-label="([^"]*)"/) || [])[1];
+  const key = cvKey({ id, label }, cvKeys.length + 1);
+  if (cvKeys.includes(key)) throw new Error("v5build: duplicate data-cv key " + key);
+  cvKeys.push(key);
+  return `<${name} data-cv="${key}"${attrs}>`;
+});
+const CV_STYLE = "<style>[data-cv]{content-visibility:auto;contain-intrinsic-size:auto 900px}</style>";
+if (outHead.split(CV_STYLE).length !== 2) throw new Error("v5build: the content-visibility style from prerender.mjs is not in the head exactly once");
+let cvHeightsCss = "";
+let cvHeightsNote = "no tools/v5-heights.json - all blocks start at 900px; run: node tools/v5heights.mjs";
+if (fs.existsSync(HEIGHTS_FILE)) {
+  const measured = JSON.parse(fs.readFileSync(HEIGHTS_FILE, "utf8"));
+  const widths = [...measured.widths].sort((a, b) => a - b);
+  const rulesAt = (w) =>
+    cvKeys
+      .filter((k) => measured.blocks[k] && measured.blocks[k][String(w)])
+      .map((k) => `[data-cv="${k}"]{contain-intrinsic-size:auto ${measured.blocks[k][String(w)]}px}`)
+      .join("");
+  cvHeightsCss = widths.map((w, i) => (i === 0 ? rulesAt(w) : `@media (min-width:${w}px){${rulesAt(w)}}`)).join("\n");
+  const unknown = cvKeys.filter((k) => !measured.blocks[k]);
+  const stale = Object.keys(measured.blocks).filter((k) => !cvKeys.includes(k));
+  cvHeightsNote = `heights from v5-heights.json (${measured.generated.slice(0, 10)}) for ${cvKeys.length - unknown.length}/${cvKeys.length} blocks at ${widths.join("/")}px`;
+  /* Not just log lines: a block that falls back to 900px is the bug this exists
+   * to fix, so it lands in the build's warnings and fails the exit code. */
+  if (unknown.length) { merged.warns.push(`deferred blocks WITHOUT measured height, 900px placeholder: ${unknown.join(", ")} - run: node tools/v5heights.mjs`); process.exitCode = 1; }
+  if (stale.length) merged.warns.push(`v5-heights.json names blocks that are not on the page: ${stale.join(", ")} - run: node tools/v5heights.mjs`);
+  const gaps = cvKeys.flatMap((k) => (measured.blocks[k] ? widths.filter((w) => !measured.blocks[k][String(w)]).map((w) => `${k}@${w}`) : []));
+  if (gaps.length) merged.warns.push(`deferred blocks without a sample at some width (the next smaller width applies): ${gaps.join(", ")}`);
+}
+const headOut = outHead.replace(CV_STYLE, CV_STYLE + (cvHeightsCss ? `\n<style id="v5-cv-heights">${cvHeightsCss}</style>` : ""));
+
 const json = (o) => JSON.stringify(o).replace(/</g, "\\u003c");
 const page = `<!DOCTYPE html>
 <html lang="de">
-<head>${outHead}
+<head>${headOut}
 <style id="v5-css">${merged.css}\n${heroCss}\n${stateCss}\n${panelCss}</style>
 <script src="/v5/logic.gen.js" defer></script>
 <script src="/v5/home.js" defer></script>
@@ -645,5 +696,6 @@ console.log(`renders: ${merged.bytes.length}, ${Math.min(...merged.bytes)}-${Mat
 console.log(`unique styles ${merged.styles}, CSS rules ${merged.rules}, style diffs between states ${merged.stateStyleDiffs}`);
 console.log(`faq entries ${merged.faq.length}, statics copied: ${statics.join(", ") || "-"}`);
 console.log(`v5/index.html ${page.length} B (css ${merged.css.length} B), logic.gen.js ${gen.length} B`);
+console.log(`deferred blocks: ${cvKeys.join(" ")}\n  ${cvHeightsNote}`);
 console.log(`this.* used by copied methods: ${selfRefs.join(" ")}`);
 if (merged.warns.length) console.log("warnings:\n  " + merged.warns.join("\n  "));

@@ -104,21 +104,52 @@ Juni, alte Ignore-Regel, siehe unten), die Entscheidung liegt beim Owner.
   - Canvas-Auflösung unter Software-GL
   - die übrigen 20 Seiten im v5-Stil nachbauen (`v5build.mjs` baut heute genau
     eine Seite), danach React entfernen (Owner 16.9.)
-  - **Neue Befunde der Skill-Messskripte (16.9. abends, nur gemessen, nichts
-    geändert):**
-    - Unter Software-GL (`--use-angle=swiftshader`, mobil) rückt der erste
-      Paint von 188 ms auf 2.216 ms (CPU 4×: 2.392 ms); `getContext("webgl")`
-      allein dauert 230–311 ms, die zugehörige Long Task 341–346 ms, dazu eine
-      zweite von 89–104 ms. Der Strom gehört hinter den ersten Paint
-      (Canvas erst nach dem ersten Frame starten, bis dahin CSS-Verlauf).
-      Relevant, falls PageSpeed ohne GPU misst.
-    - Platzhalterhöhen: Nach einem Scroll-Durchlauf ist die Seite am Desktop
-      3.095 px kürzer, mobil 3.402 px länger, weil jede `data-cv`-Sektion mit
-      `contain-intrinsic-size: auto 900px` startet (`#konfig-band` 981 → 245 px,
-      `div.s249` 1.806 → 2.274 px). Sprungmarken landen deshalb daneben.
-      Fix: gemessene Höhen pro Sektion und Breite in den Build.
-    - Beim Scrollen läuft ein `setTimeout(…, 250)` neunmal pro Sekunde
-      (Polling-Verdacht, `scripts/observers.mjs --sweep`), Ursache noch offen.
+  - **Drei Befunde der Skill-Messskripte (16.9. abends), Stand nach der
+    Abendrunde:**
+    - **Platzhalterhöhen: ERLEDIGT.** Jede `data-cv`-Sektion trägt jetzt einen
+      stabilen Schlüssel (`data-cv="fall"`, `"cv-2"` …, siehe `tools/v5cv.mjs`)
+      und eine gemessene Inhaltshöhe je Breite (412/620/760/960/1280/1350 px)
+      aus `tools/v5-heights.json`, die `v5build.mjs` als `<style id="v5-cv-heights">`
+      hinter die `[data-cv]`-Regel schreibt. Drift beim ersten Scroll: mobil
+      +3.402 → **0 px**, Desktop −3.095 → **−1 px**. Lehre: `contain-intrinsic-size`
+      ist die INHALTSBOX, mit Rahmenbox gemessen blieben −749/−902 px (+72 px
+      Padding je Sektion). **Nach jeder Inhalts- oder Layoutänderung:**
+      `python3 prodserve.py 8897` → `node tools/v5heights.mjs` →
+      `node tools/v5build.mjs`; der Build meldet Schlüssel ohne Messwert,
+      `cv-audit.mjs` meldet Drift > 24 px als Befund.
+    - **`setTimeout(…, 250)` beim Scrollen: ERLEDIGT, Ursache war der
+      Motion-Budget-Debounce.** `tools/motion-budget.js` stellte den 250-ms-Timer
+      bei jedem `contentvisibilityautostatechange` neu scharf und lief dann in
+      ein volles `document.getAnimations()`. Jetzt: ein `requestAnimationFrame`
+      je Frame und `getAnimations({subtree:true})` nur auf dem gerade
+      gerenderten Block (Pausen greifen bis 250 ms früher). Sweep 15 s Desktop:
+      25 → 0 Timer-Aufrufe während des Scrollens (Rest: Mount und die 10-s-Marke,
+      wo Notes/Pixel-Engine Elemente einfügen); Animations-Census vorher/nachher
+      identisch (37 endlose Loops offscreen innerhalb der 300-px-Marge, 41
+      laufend bei 8 s), keine Konsolenfehler. Root-`motion-budget.js` mit
+      demselben esbuild-Schritt wie in `prerender.mjs` neu erzeugt.
+    - **WebGL vor dem ersten Paint: OFFEN, Entscheidung nötig.** Gegenprobe mit
+      `lcp-window.mjs --mobile --software-gl`: den `getContext`-Start nur um zwei
+      `requestAnimationFrame`-Ticks zu schieben bringt NICHTS (FCP 2.188/2.280 ms
+      statt 2.388 ms), aber der Hauptthread bekommt eine Long Task von 2,3 s NACH
+      FCP → TBT 2.221/2.256 ms statt 0. Grund: der GPU-Prozess (SwiftShader)
+      präsentiert den ersten Frame erst nach der Kontext-Erzeugung, egal wer sie
+      auslöst. Heute liegt der Block VOR FCP, kostet dort FCP/LCP, aber keinen
+      TBT (zählt erst ab FCP) — für den Score die bessere Lage. Zwei Optionen:
+      **(A) so lassen** (mit GPU 12 ms, ohne GPU 2,2 s weiße Seite; PSI mobil
+      heute 100) oder **(C) Worker:** `OffscreenCanvas` + `stream.worker.js`,
+      Start erst nach `first-contentful-paint`, Shader und Zeitbasis in den
+      Worker, Notes/Maus/Scroll per `postMessage`; Hauptthread bleibt frei, PSI
+      FCP/LCP werden besser, Score bleibt. Aufwand etwa ein halber Tag plus
+      Sichtprüfung, Risiko: die Optik des Stroms (Shader bleibt identisch, aber
+      Zeitbasis, Maus-Loch und Notes müssen nachgezogen werden). Ob Lightrider
+      (PSI) ohne GPU misst, ist nicht belegt (PSI-API-Kontingent heute
+      erschöpft; Prüfung: `observedFirstContentfulPaint` im PSI-JSON ≥ 1,5 s
+      spräche für Software-GL).
+    - **Nebenbefunde (nur gemessen):** am Ende eines Scroll-Sweeps 255
+      `getBoundingClientRect`-Aufrufe in einer Sekunde aus `dgPaths`
+      (`logic.gen.js:55-69`, Diagramm-Pfade), und `UpdateLayoutTree` 325 ms in
+      12 s mobil (Style-Recalc im Leerlauf, Quelle offen).
 - **Merksatz für PageSpeed (korrigiert 16.9. abends, Quelle: Lighthouse 13.4.1
   `core/config/constants.js`, `lr-mobile-config.js`, eigene Läufe):** Der Trace
   läuft, bis Load, FCP, Netzruhe (≤ 2 offene Requests) und CPU-Ruhe (keine Long

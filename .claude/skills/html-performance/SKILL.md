@@ -45,13 +45,13 @@ Die 20 Bauregeln in Kurzform (Details, Begründung und Code in `references/bauan
 | 7 | Seiten-CSS inline in einem `<style>`; kein `preload`+`onload`-Swap für layoutrelevantes CSS | 1 |
 | 8 | Wenige kleine `defer`-Skripte (v5: Logik, Verdrahtung, Motion-Budget), keine Runtime-Bibliothek im kritischen Pfad, Drittanbieter erst nach Consent | 1 |
 | 9 | `content-visibility:auto` auf dem inneren Inhalts-Wrapper nach dem Hintergrund-Layer, nie auf einer Sektion mit Negativ-Z-Grund | 2 |
-| 10 | `contain-intrinsic-size` pro Sektion und Breite aus gemessenen Höhen, nie pauschal | 2 |
+| 10 | `contain-intrinsic-size` pro Sektion und Breite aus gemessenen Inhaltshöhen (`cv-heights.mjs`, ohne Padding), nie pauschal | 2 |
 | 11 | Genau ein Bild mit `fetchpriority="high"`; alles andere `loading="lazy" decoding="async"` mit festen Maßen | 3 |
 | 12 | Geschlossene Panels `content-visibility:hidden`; geräte-exklusiver Deko-DOM in `<template>` | 3 |
 | 13 | Nur `transform`/`opacity`(/`filter`) animieren, nie `top`/`width`/`color`/`box-shadow` | 4 |
 | 14 | Endlos-Animationen halten ~6 s nach dem Laden und laufen nur im Bild; Einblender sofort | 4 |
 | 15 | `prefers-reduced-motion` schaltet Dekoration ganz ab | 4 |
-| 16 | Canvas/WebGL erst nach dem ersten Paint, davor CSS-Verlauf; `getContext` nie im kritischen Pfad | 5 |
+| 16 | Canvas/WebGL in einen Worker (`OffscreenCanvas`), Start erst nach dem `first-contentful-paint`-Eintrag, davor CSS-Verlauf; ohne Worker bewusst vor FCP lassen, nie nur per rAF aufschieben (verschiebt die Blockade in TBT) | 5 |
 | 17 | DPR und Auflösung deckeln, Zeichnen pausiert außerhalb Sicht und Tab, Framerate adaptiv mit Backoff | 5 |
 | 18 | Layout-Werte aus einem Scroll-/Resize-Cache, nie pro Frame lesen; Beobachtungsziele bündeln und erst beobachten, wenn der Block rendert | 6 |
 | 19 | Build-Assertions erzwingen die Regeln (eine Headline, lazy Marks, Panel hidden, Template, keine eager Scripts) | 7 |
@@ -79,7 +79,7 @@ Erst bauen, dann messen (Ablauf unten), dann das Tor. Wer eine bestehende Seite 
    - LCP spät oder wandert → `lcp-window.mjs`, `requests.mjs` (was lädt wann, sichtbar?), `references/laden-kritischer-pfad.md`
    - TBT/„Other“ hoch, Seite wird nicht ruhig → `mainthread.mjs --slices`, `observers.mjs`, `animations.mjs`, `references/rendern-hauptthread.md`, `references/rendern-animationen.md`
    - Ruckeln, Canvas/WebGL → `fps.mjs --cpu 1,4 --software-gl`, `references/rendern-canvas-webgl.md`
-   - `content-visibility` im Spiel → `cv-audit.mjs` (Stacking-Falle, Platzhalterhöhen, 150-%-Rand)
+   - `content-visibility` im Spiel → `cv-audit.mjs` (Stacking-Falle, Platzhalterhöhen, 150-%-Rand); meldet er Höhen-Drift, liefert `cv-heights.mjs` die gemessenen Werte je Breite
    - Lighthouse-Insight rot (forced reflow, render-blocking, font display …) → `references/lighthouse-psi.md`
 3. **Eingreifen.** Die kleinste Änderung, die die Ursache trifft. Regeln und Code-Muster stehen in den drei `laden-*`- und drei `rendern-*`-Referenzen (Regelindex unten); für React/Next.js zusätzlich `references/react-nextjs.md`.
 4. **Nachmessen.** Dieselben Skripte, dieselben Bedingungen, ruhige Maschine. Beide Formfaktoren. Zahlen neben die Vorher-Zahlen.
@@ -114,7 +114,7 @@ PageSpeed Insights misst mit Lighthouse-Lightrider-Einstellungen: `simulate`, Mo
 | Konsolenfehler pro Platzhalter-Attribut, doppelt geladene Ressourcen, zu hohe Elementzahl beim Parsen | Ein Custom-Element mit lebendigem Platzhalter-Teilbaum rendert eine unsichtbare Zweitkopie der ganz… | Platzhalter-Markup in <template> kapseln statt als lebendigen Teilbaum auszuliefern | [Hauptthread](references/rendern-hauptthread.md#28-platzhalter-markup-gehört-in-ein-inertes-template-nie-in-einen-lebendigen-custom-element-teilbaum) |
 | LCP hoch, aber unklar warum | LCP hat vier Phasen mit je eigenem Fix — nicht pauschal optimieren | Phase per DevTools-Breakdown identifizieren, phasenspezifisch fixen | [Kritischer Pfad](references/laden-kritischer-pfad.md#1-lcp-in-vier-phasen-denken-und-pro-phase-gezielt-eingreifen) |
 | LCP-Element ist Text oder Bild, generischer Fix greift nicht | Text-LCP hängt am Font, Bild-LCP an Auffindbarkeit im HTML | Font preloaden (Text) bzw. Quelle im Server-HTML sichtbar halten (Bild) | [Kritischer Pfad](references/laden-kritischer-pfad.md#2-text-lcp-und-bild-lcp-brauchen-unterschiedliche-hebel) |
-| FCP >2 s nur in Software-GL/Headless, Lighthouse liefert NO_FCP unter Last | Ohne GPU blockiert getContext(webgl) den ersten Paint um ~2 s | Canvas/WebGL erst nach dem ersten Frame starten, CSS-Fallback bis dahin | [Kritischer Pfad](references/laden-kritischer-pfad.md#3-der-erste-paint-darf-nicht-von-webgl-canvas-oder-dem-gpu-prozess-abhängen) |
+| FCP >2 s nur in Software-GL/Headless, Lighthouse liefert NO_FCP unter Last | Ohne GPU blockiert getContext(webgl) den ersten Paint um ~2 s | `OffscreenCanvas` im Worker, Start nach dem FCP-Eintrag, CSS-Fallback bis dahin; ein Aufschub per rAF bringt keinen früheren FCP, sondern 2,3 s Long Task nach FCP (TBT) | [Kritischer Pfad](references/laden-kritischer-pfad.md#3-der-erste-paint-darf-nicht-von-webgl-canvas-oder-dem-gpu-prozess-abhängen) |
 | mehrere fetchpriority=high pro Seite, oder high+lazy am selben Bild | high sparsam (1–2 Bilder), low für Karussell-Nachbarn, nie high+lazy kombiniert | high nur aufs LCP-Bild, low fürs Karussell, Rest lazy+async | [Kritischer Pfad](references/laden-kritischer-pfad.md#4-fetchpriority-gezielt-und-sparsam-einsetzen-nie-zusammen-mit-loadinglazy-auf-demselben-bild) |
 | PSI-Score bricht ohne Codeänderung ein, LCP-Element wechselt zwischen Läufen | Browser meldet größere LCP-Kandidaten bis zur ersten Interaktion weiter | nichts nach dem ersten Render größer als den LCP-Kandidaten einsetzen | [Kritischer Pfad](references/laden-kritischer-pfad.md#5-nach-dem-ersten-render-darf-kein-element-größer-werden-als-der-lcp-kandidat) |
 | externer CSS-Request blockiert den ersten Render, oder Inline-Block ist riesig | Above-the-fold-CSS inline, Rest in eine cachebare Datei auslagern | kritisches CSS klein inline, Design-System in geteilte Datei | [Kritischer Pfad](references/laden-kritischer-pfad.md#6-kritisches-css-inline-den-rest-auslagern--und-den-trade-off-kennen) |
@@ -142,11 +142,12 @@ Skript-Bibliothek in `scripts/` (Node 22, `playwright-core`, ein vorhandenes Chr
 | Skript | Frage | Typischer Aufruf |
 | --- | --- | --- |
 | `lighthouse-psi.mjs` | Was sagt Lighthouse mit PSI-Einstellungen, beobachtet vs. simuliert, wann endete der Trace? | `node scripts/lighthouse-psi.mjs <url> [--desktop] [--method devtools]` |
-| `lcp-window.mjs` | Welches Element ist wann LCP-Kandidat, wird die Seite je ruhig (TTI/TBT), wo sind Layout-Shifts? | `node scripts/lcp-window.mjs <url> --for 30 [--mobile --cpu 4]` |
+| `lcp-window.mjs` | Welches Element ist wann LCP-Kandidat, wird die Seite je ruhig (TTI/TBT), wo sind Layout-Shifts? | `node scripts/lcp-window.mjs <url> --for 30 [--mobile --cpu 4 --software-gl]` |
 | `mainthread.mjs` | Wohin gehen die Hauptthread-Millisekunden, was steckt in „Other“, wann ist die Seite beschäftigt? | `node scripts/mainthread.mjs <url> --for 12 --cpu 4 --slices` |
 | `requests.mjs` | Was lädt wann, wie groß, doppelt, und sieht man es überhaupt? | `node scripts/requests.mjs <url> --for 12 [--interact 6]` |
 | `observers.mjs` | Wer beobachtet wie viele Ziele, wer liest Layout, wer pollt? | `node scripts/observers.mjs <url> --for 15 [--sweep]` |
 | `cv-audit.mjs` | Was tut `content-visibility` wirklich: Zustände, Stacking-Falle, Platzhalterhöhen, Umschaltabstand? | `node scripts/cv-audit.mjs <url> [--mobile]` |
+| `cv-heights.mjs` | Wie hoch ist jede `content-visibility`-Sektion wirklich, je Breite? Liefert fertige `contain-intrinsic-size`-Regeln für den Build | `node scripts/cv-heights.mjs <url> [--widths 412,768,1024,1350]` |
 | `animations.mjs` | Was animiert, wie lange, sichtbar oder nicht, Compositor oder Hauptthread? | `node scripts/animations.mjs <url> --sweep [--reduced-motion]` |
 | `fps.mjs` | Hält die Seite ihre Bildrate unter CPU-Last und ohne GPU, drosselt sie sich selbst? | `node scripts/fps.mjs <url> --for 8 --cpu 1,4 --software-gl` |
 | `prodserve.py` | Lokaler Server mit Produktionsheadern (gzip, Cache, CSP aus `vercel.json`) | `python3 scripts/prodserve.py <ordner> 8897 [--headers vercel.json]` |

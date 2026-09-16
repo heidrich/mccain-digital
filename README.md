@@ -205,6 +205,30 @@ server, writes the page, copies the assets, and writes `sitemap.xml` and the
 page index in `llms.txt` from the same route table — so those cannot drift from
 what exists.
 
+### v5, the static start page
+
+`v5/` is built from the rendered root `index.html`, so it follows a
+`prerender.mjs` run whenever the design export changed:
+
+```bash
+python prodserve.py 8898 --dev      # must be running
+node tools/v5build.mjs              # writes v5/index.html and v5/logic.gen.js
+```
+
+The deferred sections (`data-cv`) carry a measured placeholder height per
+viewport width (`tools/v5-heights.json`, keys from `tools/v5cv.mjs`). After any
+change to copy or layout, measure again before building:
+
+```bash
+python prodserve.py 8897            # the built page with production headers
+node tools/v5heights.mjs            # rewrites tools/v5-heights.json
+node tools/v5build.mjs
+```
+
+`v5build.mjs` names every block it could not find in the file; the skill's
+`cv-audit.mjs` reports a page-height drift above 24 px when the numbers have
+gone stale. `v5/home.js` is the only hand-written file in `v5/`.
+
 ### The gates
 
 |     |     |
