@@ -630,6 +630,45 @@ const outHead = head
   /* The Markdown twin (written below) is announced the way feeds are: a typed alternate. */
   .replace("</title>", '</title>\n  <link rel="alternate" type="text/markdown" href="/v5/index.md">');
 if (outHead.includes("pixel-engine.js")) throw new Error("v5build: the head still loads pixel-engine.js - home.js loads it on demand");
+/* THE INVITATION TO THE WORKSHOP. Owner, 16.9. nachts: a switch alone invites
+ * nobody, and the bottom-right corner belongs to the AI dock of stage 2. So
+ * the page gets a small band right after "Arbeiten" (whose last card is this
+ * very site): the Konfigurator band's own markup, cloned, so it wears the same
+ * classes whatever number the export gives them, with a button that opens the
+ * workshop at once (home.js listens for data-v5-dev-open). The texts are
+ * provisional; the text pass at the end edits WERKSTATT_BAND. The band is a
+ * deferred block like its sibling, so v5heights.mjs has to measure it. */
+const WERKSTATT_BAND = {
+  id: "werkstatt-band",
+  label: "Werkstatt-Hinweis",
+  eyebrow: "Werkstatt",
+  title: "Sehen Sie selbst, wie diese Seite gebaut ist.",
+  text: "Ein Klick öffnet die Werkstatt: der echte Aufbau der Seite, der Code, der sie bewegt, die Zeiten, die Ihr Browser gerade gemessen hat, und wie Google und Sprachmodelle sie lesen. Nichts wird gespeichert oder gesendet.",
+  cta: "Werkstatt öffnen",
+};
+{
+  const open = html.match(/<section [^>]*id="konfig-band"[^>]*>/);
+  if (!open) throw new Error("v5build: no section#konfig-band to clone for the workshop band");
+  const end = elementEnd(html, open.index);
+  let band = html.slice(open.index, end);
+  const spans = [...band.matchAll(/<span class="sc-interp">[^<]*<\/span>/g)];
+  if (spans.length !== 4) throw new Error(`v5build: the Konfigurator band has ${spans.length} text spans, expected 4 (eyebrow, title, text, cta)`);
+  const texts = [WERKSTATT_BAND.eyebrow, WERKSTATT_BAND.title, WERKSTATT_BAND.text, WERKSTATT_BAND.cta];
+  let k = 0;
+  band = band.replace(/<span class="sc-interp">[^<]*<\/span>/g, () => `<span class="sc-interp">${texts[k++]}</span>`);
+  band = once(band, 'id="konfig-band"', `id="${WERKSTATT_BAND.id}"`);
+  band = once(band, 'data-screen-label="Konfigurator-Hinweis"', `data-screen-label="${WERKSTATT_BAND.label}"`);
+  const cta = band.match(/<a href="[^"]*" data-px class="([^"]*)">/);
+  if (!cta) throw new Error("v5build: the Konfigurator band's CTA link is not where it was");
+  band = once(band, cta[0], `<button type="button" data-v5-dev-open data-px class="${cta[1]}">`);
+  if (band.split("</a>").length !== 2) throw new Error("v5build: expected exactly one </a> in the Konfigurator band");
+  band = band.replace("</a>", "</button>");
+  const work = html.match(/<section [^>]*id="work"[^>]*>/);
+  if (!work) throw new Error("v5build: no section#work to place the workshop band after");
+  const workEnd = elementEnd(html, work.index);
+  html = html.slice(0, workEnd) + "\n" + band + html.slice(workEnd);
+}
+
 /* THE DEFERRED BLOCKS GET A NAME AND THEIR MEASURED HEIGHT.
  *
  * prerender.mjs marks the blocks below the first screen with data-cv="" (which

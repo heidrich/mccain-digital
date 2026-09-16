@@ -124,17 +124,23 @@ Juni, alte Ignore-Regel, siehe unten), die Entscheidung liegt beim Owner.
     https://mccain-digital.com/v5/index.md` (muss `text/markdown` liefern; ob
     Vercel den Content-Type statischer Dateien per `headers` überschreibt, ist
     in der Doku nicht ausdrücklich zugesichert).
-  - **Owner 16.9. spät, noch nicht umgesetzt:** „die position der page tools
-    (werkstatt) würde ich überdenken, und auch wie wir die user animieren da
-    drauf zu klicken, ggf brauchen wir auf der frontpage und webseite und web
-    apps eine kleine section – weil wir haben ja noch den ai chat." Der
-    Schalter sitzt heute unten rechts, wo in Stufe 2 das KI-Chat-Dock hinkommt.
-    Vorschlag zur Entscheidung: (A) die Werkstatt wird zweiter Eintrag im
-    Dock neben „Fragen"; bis das Dock steht, bleibt die Pille. (B) Zusätzlich
-    eine kleine Sektion „So ist diese Seite gebaut" auf Start-, Websites- und
-    Web-Apps-Seite mit drei Fakten und einem Knopf „Werkstatt öffnen" (der
-    Klick ist die erste Aktion und öffnet sofort); die Sektion ist statisches
-    HTML und kostet PageSpeed nichts.
+  - **Owner 16.9. spät:** „die position der page tools (werkstatt) würde ich
+    überdenken, und auch wie wir die user animieren da drauf zu klicken, ggf
+    brauchen wir auf der frontpage und webseite und web apps eine kleine
+    section – weil wir haben ja noch den ai chat." → „bitte umsetzen".
+    **Umgesetzt (Startseite):** Band „Werkstatt-Hinweis" (`#werkstatt-band`,
+    `data-cv`) direkt nach „Arbeiten", geklont aus dem Konfigurator-Band im
+    Build (`WERKSTATT_BAND` in `tools/v5build.mjs`, Texte vorläufig); der Knopf
+    „Werkstatt öffnen" (`data-v5-dev-open`) ist die erste Aktion und öffnet
+    sofort (gemessen 89 ms), auch nach Schließen. Die Pille unten rechts bleibt
+    als zweiter Zugang, bis in Stufe 2 das KI-Chat-Dock steht; dann wird die
+    Werkstatt dort zweiter Eintrag neben „Fragen" (A). **Offen:** dasselbe Band
+    auf den Seiten Websites und Web-Apps, sobald sie im v5-Stil stehen (in die
+    React-Seiten lässt sich kein statischer Block ohne Hydration-Bruch
+    einfügen, und die Werkstatt liest heute die v5-Dateien).
+  - **Behoben 16.9. nachts (Owner):** die Leiste ließ sich nicht scrollen, das
+    Mausrad bewegte die Seite dahinter. Ursache: `.wk-view` war kein
+    Flex-Container mit `min-height:0`, der Body wuchs auf Inhaltshöhe.
   - **Nebenbefund behoben:** `[object Object]` in der Karte „Unsere eigene
     Seite: 4×100 in Lighthouse" (Export druckte `{{ l }}` statt `{{ l.k }}`);
     Korrektur als `EXPORT_FIXES` in `tools/prerender.mjs`, gezählt je Seite,

@@ -258,13 +258,20 @@
      * measured. `?werkstatt` in the URL opens it at once, for showing it. */
     armDevMode() {
       var EVENTS = ["pointerdown", "keydown", "wheel", "touchstart"];
-      var onAct = () => {
-        for (var i = 0; i < EVENTS.length; i++) window.removeEventListener(EVENTS[i], onAct, true);
-        setTimeout(() => this.showDevSwitch(), 10000);
-      };
+      var armed = true;
+      var disarm = () => { armed = false; for (var i = 0; i < EVENTS.length; i++) window.removeEventListener(EVENTS[i], onAct, true); };
+      var onAct = () => { disarm(); setTimeout(() => this.showDevSwitch(), 10000); };
       for (var i = 0; i < EVENTS.length; i++) window.addEventListener(EVENTS[i], onAct, { capture: true, passive: true });
+      /* The band's button (see WERKSTATT_BAND in the build) is the invitation:
+       * a click there is the first action and opens at once, no ten seconds. */
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest || !e.target.closest("[data-v5-dev-open]")) return;
+        if (armed) disarm();
+        this.showDevSwitch();
+        this.loadDev();
+      });
       if (/[?&]werkstatt(=|&|$)/.test(location.search)) {
-        for (var j = 0; j < EVENTS.length; j++) window.removeEventListener(EVENTS[j], onAct, true);
+        disarm();
         this.showDevSwitch();
         this.loadDev();
       }

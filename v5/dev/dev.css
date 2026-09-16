@@ -140,7 +140,11 @@
 .wk-tab:hover { color: var(--wk-navy) }
 .wk-tab[aria-selected="true"] { color: var(--wk-indigo-text); border-bottom-color: var(--wk-indigo) }
 
-.wk-body { flex: 1; overflow: auto; padding: 12px 12px 20px; scroll-behavior: smooth }
+/* The view is the flex column between head and foot; without min-height:0 a
+ * flex child never shrinks below its content and the body cannot scroll -
+ * the wheel then moved the page behind the drawer (owner, 16.9. nachts). */
+.wk-view { flex: 1; min-height: 0; display: flex; flex-direction: column }
+.wk-body { flex: 1; min-height: 0; overflow: auto; padding: 12px 12px 20px; scroll-behavior: smooth; overscroll-behavior: contain; -webkit-overflow-scrolling: touch }
 @media (prefers-reduced-motion: reduce) { .wk-body { scroll-behavior: auto } }
 .wk-panel { outline: none }
 .wk-panel[hidden] { display: none }

@@ -170,10 +170,14 @@ function close() {
 
 function toggle() { if (W.root) close(); else loadCss().then(open); }
 
-/* Boot: take the switch over and open, because the visitor just pressed it. */
+/* Boot: take the switch over and open, because the visitor just pressed it.
+ * The band's button (data-v5-dev-open) keeps working after the module is here. */
 switchBtn = document.querySelector("[data-v5-dev-switch]");
 if (switchBtn) {
   switchBtn.addEventListener("click", toggle);
   switchBtn.setAttribute("data-state", "ready");
 }
+document.addEventListener("click", (e) => {
+  if (e.target.closest && e.target.closest("[data-v5-dev-open]") && !W.root) loadCss().then(open);
+});
 loadCss().then(open);
