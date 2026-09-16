@@ -353,32 +353,26 @@ const merged = await tab.evaluate((TPL) => {
 await browser.close();
 if (merged.fatal) throw new Error("v5build: " + merged.fatal);
 
-/* --------------------------------------------------------- hero rotation in CSS */
-/* Only the first variant is text. The other three are generated content
- * (attr() in ::before), so the h1 reads as one sentence to a crawler and a
- * screen reader - the reason the export kept only one variant in the DOM. */
+/* --------------------------------------------------------- one headline */
+/* Owner, 16.9.2026: "wir nutzen nur noch einen headline". Stage 1 rebuilt the
+ * export's rotation in CSS and showed variants two to four as generated text at
+ * 13.5, 20 and 26.5 s. Each was a new, larger LCP candidate, and PageSpeed,
+ * which measures until the page has been quiet for five seconds, reported
+ * LCP 20,5 s (local run: 88.228 px2 at 19.876 ms against 34.450 px2 at 252 ms).
+ * The first variant stays, with its entrance; the rest of the export's words
+ * are no longer shipped. */
 const heroWords = (() => {
   const m = logicSrc.match(/heroWords:\s*\{\s*de:\s*(\[[^\]]*\])/);
   if (!m) throw new Error("v5build: heroWords not found");
   return Function(`return ${m[1]}`)();
 })();
-if (heroWords.length !== 4) throw new Error("v5build: expected 4 hero words");
+if (!heroWords.length || !heroWords[0].w || !heroWords[0].r) throw new Error("v5build: the first hero headline is missing");
 const h1Open = merged.html.search(/<h1 [^>]*data-hero-h1/);
 if (h1Open < 0) throw new Error("v5build: hero h1 not found");
 const h1Inner = merged.html.indexOf(">", h1Open) + 1;
 const h1Close = merged.html.indexOf("</h1>", h1Inner);
 const escT = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-const escA = (s) => escT(s).replace(/"/g, "&quot;");
-const heroHtml =
-  `<span class="v5-hero">` +
-  heroWords
-    .map((v, i) =>
-      i === 0
-        ? `<span class="v5-hv v5-hv0"><span class="v5-w">${escT(v.w)}</span><span class="v5-r">${escT(v.r)}</span></span>`
-        : `<span class="v5-hv v5-hv${i}" aria-hidden="true"><span class="v5-w" data-t="${escA(v.w)}"></span><span class="v5-r" data-t="${escA(v.r)}"></span></span>`
-    )
-    .join("") +
-  `</span>`;
+const heroHtml = `<span class="v5-hero"><span class="v5-w">${escT(heroWords[0].w)}</span><span class="v5-r">${escT(heroWords[0].r)}</span></span>`;
 let html = merged.html.slice(0, h1Inner) + heroHtml + merged.html.slice(h1Close);
 
 /* ONE MARK LOADS FIRST. The export gives every brand mark fetchpriority="high",
@@ -433,31 +427,15 @@ if (!html.slice(0, layerEnd).endsWith("</div>") || (layerInner.match(/<span data
 }
 html = html.slice(0, layerOpenEnd) + `<template data-v5-pt>${layerInner}</template>` + html.slice(layerEnd - "</div>".length);
 
-/* Cycle: the first swap at 13.5 s (7 s wait + one 6.5 s interval, as the
- * logic did), then every 6.5 s: v1, v2, v3, v0. */
-const CYCLE = 26, DELAY = 13.5, pct = (s) => +((s / CYCLE) * 100).toFixed(3);
 /* min-height: the render carries the logic's fallback 2.2em, which the page
- * then shrank to the measured tallest variant (71 px on a phone) after first
- * paint - itself a small layout shift. The grid holds all four variants in one
- * cell and is exactly that tall on its own. (1,1,1) outranks the class. */
-let heroCss =
-  `#dc-root h1[data-hero-h1]{min-height:0}.v5-hero{display:grid}.v5-hv{grid-area:1/1}.v5-hv [data-t]::before{content:attr(data-t)}` +
-  `.v5-w{display:inline-block;color:#635BFF;background-image:linear-gradient(90deg,#635BFF,#9B7BFF);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;padding-right:.04em}` +
-  `.v5-hv1,.v5-hv2,.v5-hv3{visibility:hidden}`;
-for (let i = 0; i < 4; i++) {
-  const slot = (i + 3) % 4; // v1 -> slot 0 ... v0 -> slot 3
-  const a = pct(slot * 6.5), b = pct((slot + 1) * 6.5);
-  const vis = slot === 0 ? `0%,${(b - 0.001).toFixed(3)}%{visibility:visible}${b}%,100%{visibility:hidden}`
-    : `0%,${(a - 0.001).toFixed(3)}%{visibility:hidden}${a}%,${(b - 0.001).toFixed(3)}%{visibility:visible}${b}%,100%{visibility:hidden}`;
-  heroCss += `@keyframes v5s${i}{${vis}}`;
-  heroCss += `@keyframes v5w${i}{0%,${a}%{opacity:0;transform:translateY(55%) rotate(2deg);animation-timing-function:cubic-bezier(.2,.8,.2,1)}${pct(slot * 6.5 + 0.7)}%,100%{opacity:1;transform:none}}`;
-  heroCss += `@keyframes v5r${i}{0%,${a}%{opacity:0;animation-timing-function:ease}${pct(slot * 6.5 + 1)}%,100%{opacity:1}}`;
-  const first = i === 0;
-  heroCss += `.v5-hv${i}{animation:v5s${i} ${CYCLE}s linear ${DELAY}s infinite}`;
-  heroCss += `.v5-hv${i} .v5-w{animation:${first ? "wordIn .7s cubic-bezier(.2,.8,.2,1) both," : ""}v5w${i} ${CYCLE}s linear ${DELAY}s infinite}`;
-  heroCss += `.v5-hv${i} .v5-r{animation:${first ? "restIn 1s ease both," : ""}v5r${i} ${CYCLE}s linear ${DELAY}s infinite}`;
-}
-heroCss += `@media (prefers-reduced-motion:reduce){.v5-hero,.v5-hero *{animation:none!important}}`;
+ * shrank to the measured headline after first paint - a small layout shift.
+ * The headline is exactly as tall as its text on its own. (1,1,1) outranks
+ * the class. */
+const heroCss =
+  `#dc-root h1[data-hero-h1]{min-height:0}` +
+  `.v5-w{display:inline-block;color:#635BFF;background-image:linear-gradient(90deg,#635BFF,#9B7BFF);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;padding-right:.04em;animation:wordIn .7s cubic-bezier(.2,.8,.2,1) both}` +
+  `.v5-r{animation:restIn 1s ease both}` +
+  `@media (prefers-reduced-motion:reduce){.v5-hero *{animation:none!important}}`;
 
 /* State flags on <html> switch the overlays that exist only in one state. */
 const stateCss = ["consent", "consentOpen", "mobile"]
@@ -535,15 +513,22 @@ const V5_PATCHES = [
     find: "if (!canvas._pool || canvas._ptDirty || (tm - (canvas._ptT || 0)) > 30) {",
     repl: "if (!canvas._pool || canvas._ptDirty || this.ptStale || (tm - (canvas._ptT || 0)) > 30) {\n      this.ptStale = false;",
   },
+  { find: "const sy0 = window.scrollY || 0, avoid = [];", repl: "const sy0 = this.view.sy, avoid = [];" },
+  { find: "const W = window.innerWidth, VH = window.innerHeight, sy = window.scrollY || 0,", repl: "const W = this.view.w, VH = this.view.h, sy = this.view.sy," },
   {
     find: `.forEach((a) => { if (a.closest('header, [data-pt-layer], [role="dialog"]')) return;`,
     repl: `.forEach((a) => { if (a.closest('header, [data-pt-layer], [role="dialog"]') || this.isSkipped(a)) return;`,
   },
   /* THE STREAM LOOP.
-   * 1. No layout reads per frame. resize() called getBoundingClientRect() and
-   *    the draw read clientWidth/clientHeight three times, every frame; when
-   *    anything had dirtied the layout that frame, each read forced it. The
-   *    size now comes from the ResizeObserver the loop already had.
+   * 1. No layout reads per frame. resize() called getBoundingClientRect(), the
+   *    draw read clientWidth/clientHeight and window.scrollY, and the notes
+   *    read scrollY, innerWidth and innerHeight - every frame, and each read
+   *    forces style and layout when anything has changed since the last one
+   *    (PageSpeed: 52 ms "forced reflow" at the scrollY line). The canvas size
+   *    now comes from the ResizeObserver the loop already had, the viewport
+   *    (this.view) from scroll and resize events. The loop starts on the
+   *    observer's first report, which arrives after the first layout - reading
+   *    the size at mount forced that whole layout synchronously.
    * 2. Adaptive frame rate. 60 fps where the machine keeps up; where more than
    *    a fifth of 90 frames arrive late (> 25 ms), it draws at 30 fps. Whether
    *    60 would hold again cannot be read from 30 fps frames - they are all on
@@ -560,7 +545,9 @@ const V5_PATCHES = [
   {
     find: "const reduced = this.reduced(); let visible = true, raf = 0, cleanup = null; const t0 = performance.now();",
     repl:
-      "const reduced = this.reduced(); let visible = true, raf = 0, timer = 0, cleanup = null, cssW = 0, cssH = 0; const t0 = performance.now();\n" +
+      "const reduced = this.reduced(); let visible = true, raf = 0, timer = 0, cleanup = null, cssW = 0, cssH = 0, started = false; const t0 = performance.now();\n" +
+      "    const view = this.view || (this.view = { sy: 0, w: 0, h: 0 });\n" +
+      "    if (!this.viewOn) { this.viewOn = true; addEventListener('scroll', () => { view.sy = window.scrollY || 0; }, { passive: true }); addEventListener('resize', () => { view.w = window.innerWidth; view.h = window.innerHeight; }); }\n" +
       "    let low = false, lastT = 0, frames = 0, late = 0, wait = 5000, probeAt = 0;\n" +
       "    const mode = (l, t) => { low = l; frames = 0; late = 0; lastT = 0; if (l) { probeAt = t + wait; wait = Math.min(wait * 2, 60000); } canvas.setAttribute('data-v5-fps', l ? '30' : '60'); };\n" +
       "    const pace = (t) => { if (low) { if (t >= probeAt) mode(false, t); return; } const d = lastT ? t - lastT : 0; lastT = t; if (!d || d > 250) return; frames++; if (d > 25) late++; if (frames < 90) return; if (late > 18) mode(true, t); else { frames = 0; late = 0; } };\n" +
@@ -568,10 +555,9 @@ const V5_PATCHES = [
   },
   {
     find: "const resize = () => { const r = canvas.getBoundingClientRect(); const k = 3 / 3.5; const W = Math.max(2, Math.round(r.width * k)), H = Math.max(2, Math.round(r.height * k));",
-    repl:
-      "const measure = () => { const r = canvas.getBoundingClientRect(); cssW = r.width; cssH = r.height; };\n" +
-      "    const resize = () => { const k = 3 / 3.5; const W = Math.max(2, Math.round(cssW * k)), H = Math.max(2, Math.round(cssH * k));",
+    repl: "const resize = () => { const k = 3 / 3.5; const W = Math.max(2, Math.round(cssW * k)), H = Math.max(2, Math.round(cssH * k));",
   },
+  { find: "gl.uniform1f(uScroll, window.scrollY || 0);", repl: "gl.uniform1f(uScroll, view.sy);" },
   { find: "gl.uniform1f(uVh, canvas.clientHeight || 1);", repl: "gl.uniform1f(uVh, cssH || 1);" },
   { find: "kk = canvas.width / Math.max(1, canvas.clientWidth);", repl: "kk = canvas.width / Math.max(1, cssW);" },
   { find: "(canvas.clientHeight - smy) * kk", repl: "(cssH - smy) * kk" },
@@ -579,10 +565,10 @@ const V5_PATCHES = [
     find: "const loop = () => { raf = 0; if (!canvas.isConnected) { if (cleanup) cleanup(); if (this.streams) this.streams.delete(canvas); return; } if (!visible) return; draw(); if (!reduced) raf = requestAnimationFrame(loop); };",
     repl: "const loop = (t) => { raf = 0; if (!canvas.isConnected) { if (cleanup) cleanup(); if (this.streams) this.streams.delete(canvas); return; } if (!visible) return; if (t) pace(t); draw(); if (!reduced) schedule(); };",
   },
-  { find: "resize(); loop();", repl: "measure(); resize(); loop();" },
+  { find: "resize(); loop();", repl: "/* the loop starts on the observer's first report, after layout */" },
   {
     find: "const ro = new ResizeObserver(() => { resize(); draw(); }); ro.observe(canvas);",
-    repl: "const ro = new ResizeObserver((en) => { const b = en[0].contentRect; cssW = b.width; cssH = b.height; resize(); draw(); }); ro.observe(canvas);",
+    repl: "const ro = new ResizeObserver((en) => { const b = en[0].contentRect; cssW = b.width; cssH = b.height; if (!started) { started = true; view.sy = window.scrollY || 0; view.w = window.innerWidth; view.h = window.innerHeight; resize(); loop(); } else { resize(); draw(); } }); ro.observe(canvas);",
   },
   { find: "if (visible && !raf) loop(); }); io.observe(canvas);", repl: "if (visible && !raf && !timer) loop(); }); if (!isGlobal) io.observe(canvas);" },
   { find: "cleanup = () => { cancelAnimationFrame(raf); raf = 0; ro.disconnect();", repl: "cleanup = () => { cancelAnimationFrame(raf); raf = 0; clearTimeout(timer); timer = 0; ro.disconnect();" },

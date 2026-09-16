@@ -243,7 +243,7 @@ class V5Logic {
     if (!canvas._pool || canvas._ptDirty || this.ptStale || (tm - (canvas._ptT || 0)) > 30) {
       this.ptStale = false;
       const layer = root.querySelector('[data-pt-layer]'); if (!layer) return;
-      const sy0 = window.scrollY || 0, avoid = [];
+      const sy0 = this.view.sy, avoid = [];
       root.querySelectorAll('[data-avoid], [data-hero-copy], h1, h2, h3, h4, p, li, button, a, img, svg, form, footer').forEach((a) => { if (a.closest('header, [data-pt-layer], [role="dialog"]') || this.isSkipped(a)) return; const c = a.getBoundingClientRect(); if (c.width < 24 || c.height < 10) return; avoid.push({ left: c.left - 12, right: c.right + 12, top: c.top + sy0 - 22, bottom: c.bottom + sy0 + 10 }); });
       const prev = canvas._pool ? canvas._pool.els : [];
       const els = Array.from(layer.querySelectorAll('[data-pt]')).map((el, i) => { const o = prev[i] && prev[i].el === el ? prev[i] : { off: 0, on: false, x: 0, y: 0 }; return { el, i, off: o.off, on: o.on, x: o.x, y: o.y, w: el.offsetWidth || 120, h: el.offsetHeight || 26 }; });
@@ -252,7 +252,7 @@ class V5Logic {
     }
     const P = canvas._pool, els = P.els, N = els.length; if (!N) return;
     const dt = canvas._lastTm == null ? 0 : tm - canvas._lastTm; canvas._lastTm = tm;
-    const W = window.innerWidth, VH = window.innerHeight, sy = window.scrollY || 0, t = tm * 0.10, D = [-0.62, 0.5, -0.3, 0.68, 0.05, -0.7, 0.32, -0.45, 0.6, -0.15, 0.2, -0.55, 0.42, -0.05], m = this.mouse || { x: -9999, y: -9999 };
+    const W = this.view.w, VH = this.view.h, sy = this.view.sy, t = tm * 0.10, D = [-0.62, 0.5, -0.3, 0.68, 0.05, -0.7, 0.32, -0.45, 0.6, -0.15, 0.2, -0.55, 0.42, -0.05], m = this.mouse || { x: -9999, y: -9999 };
     let hit = null;
     for (let i = 0; i < N; i++) {
       const n = els[i], el = n.el;
@@ -326,18 +326,19 @@ class V5Logic {
     const setColors = () => { const G = V5Logic.GRAD; [G[0], G[1], G[2], this.accent(), G[3], G[4]].forEach((hex, i) => { const c = this.hexRgb(hex); gl.uniform3f(gl.getUniformLocation(prog, 'u_c' + i), c[0] / 255, c[1] / 255, c[2] / 255); }); };
     setColors();
     const cfg = (canvas.getAttribute('data-cfg') || '0.57,0.45,0,0').split(',').map(Number); gl.uniform4f(gl.getUniformLocation(prog, 'u_cfg'), cfg[0], cfg[1], cfg[2], cfg[3]); const wScale = +(canvas.getAttribute('data-w') || 1); gl.uniform1f(gl.getUniformLocation(prog, 'u_w'), wScale); const isHero = canvas.hasAttribute('data-hero'), isGlobal = canvas.hasAttribute('data-global'); gl.uniform1f(gl.getUniformLocation(prog, 'u_mode'), isGlobal ? 1 : 0); const uScroll = gl.getUniformLocation(prog, 'u_scroll'), uVh = gl.getUniformLocation(prog, 'u_vh'), uMouse = gl.getUniformLocation(prog, 'u_mouse'), uHole = gl.getUniformLocation(prog, 'u_hole'); let smx = -9999, smy = -9999, holeR = 0;
-    const reduced = this.reduced(); let visible = true, raf = 0, timer = 0, cleanup = null, cssW = 0, cssH = 0; const t0 = performance.now();
+    const reduced = this.reduced(); let visible = true, raf = 0, timer = 0, cleanup = null, cssW = 0, cssH = 0, started = false; const t0 = performance.now();
+    const view = this.view || (this.view = { sy: 0, w: 0, h: 0 });
+    if (!this.viewOn) { this.viewOn = true; addEventListener('scroll', () => { view.sy = window.scrollY || 0; }, { passive: true }); addEventListener('resize', () => { view.w = window.innerWidth; view.h = window.innerHeight; }); }
     let low = false, lastT = 0, frames = 0, late = 0, wait = 5000, probeAt = 0;
     const mode = (l, t) => { low = l; frames = 0; late = 0; lastT = 0; if (l) { probeAt = t + wait; wait = Math.min(wait * 2, 60000); } canvas.setAttribute('data-v5-fps', l ? '30' : '60'); };
     const pace = (t) => { if (low) { if (t >= probeAt) mode(false, t); return; } const d = lastT ? t - lastT : 0; lastT = t; if (!d || d > 250) return; frames++; if (d > 25) late++; if (frames < 90) return; if (late > 18) mode(true, t); else { frames = 0; late = 0; } };
     const schedule = () => { if (low) timer = setTimeout(() => { timer = 0; raf = requestAnimationFrame(loop); }, 26); else raf = requestAnimationFrame(loop); };
-    const measure = () => { const r = canvas.getBoundingClientRect(); cssW = r.width; cssH = r.height; };
     const resize = () => { const k = 3 / 3.5; const W = Math.max(2, Math.round(cssW * k)), H = Math.max(2, Math.round(cssH * k)); if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; gl.viewport(0, 0, W, H); } gl.uniform1f(uPx, 3); };
-    const draw = () => { resize(); const tm = (performance.now() - t0) / 1000 + 40; gl.uniform1f(uScroll, window.scrollY || 0); gl.uniform1f(uVh, cssH || 1);
+    const draw = () => { resize(); const tm = (performance.now() - t0) / 1000 + 40; gl.uniform1f(uScroll, view.sy); gl.uniform1f(uVh, cssH || 1);
       if (isGlobal) { const m = this.mouse || { x: -9999, y: -9999, t: 0 }, now = performance.now(), kk = canvas.width / Math.max(1, cssW); if (smx < -5000) { smx = m.x; smy = m.y; } smx += (m.x - smx) * 0.22; smy += (m.y - smy) * 0.22; const target = (m.x > -1000 && now - m.t < 1600) ? (now - (this.pulseT || 0) < 380 ? 240 : 130) : 0; holeR += (target - holeR) * 0.12; gl.uniform2f(uMouse, smx * kk, (cssH - smy) * kk); gl.uniform1f(uHole, holeR * kk); } else { gl.uniform2f(uMouse, -9999, -9999); gl.uniform1f(uHole, 0); } if (isGlobal) this.movePointsGlobal(tm, canvas); else this.movePoints(tm, canvas, cfg, wScale, isHero); gl.uniform1f(uTime, tm); gl.uniform2f(uRes, canvas.width, canvas.height); gl.drawArrays(gl.TRIANGLES, 0, 3); };
     const loop = (t) => { raf = 0; if (!canvas.isConnected) { if (cleanup) cleanup(); if (this.streams) this.streams.delete(canvas); return; } if (!visible) return; if (t) pace(t); draw(); if (!reduced) schedule(); };
-    measure(); resize(); loop();
-    const ro = new ResizeObserver((en) => { const b = en[0].contentRect; cssW = b.width; cssH = b.height; resize(); draw(); }); ro.observe(canvas);
+    /* the loop starts on the observer's first report, after layout */
+    const ro = new ResizeObserver((en) => { const b = en[0].contentRect; cssW = b.width; cssH = b.height; if (!started) { started = true; view.sy = window.scrollY || 0; view.w = window.innerWidth; view.h = window.innerHeight; resize(); loop(); } else { resize(); draw(); } }); ro.observe(canvas);
     const io = new IntersectionObserver((en) => { visible = en[0].isIntersecting; if (visible && !raf && !timer) loop(); }); if (!isGlobal) io.observe(canvas);
     cleanup = () => { cancelAnimationFrame(raf); raf = 0; clearTimeout(timer); timer = 0; ro.disconnect(); io.disconnect(); try { const ext = gl.getExtension('WEBGL_lose_context'); if (ext) ext.loseContext(); } catch (e) {} };
     return { cleanup, setColors };
