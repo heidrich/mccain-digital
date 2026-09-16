@@ -14,7 +14,9 @@
  *
  * NOT YET HERE (stage 2): the mega menu, modal, search, AI console and dock,
  * the language switch, the contact and ask forms. Their controls do nothing;
- * the forms are held so none of them pretends to send.
+ * the forms are held so none of them pretends to send. The closed mega menu
+ * panel is not rendered at all (content-visibility:hidden until it carries
+ * data-v5-open) - stage 2 sets that attribute before it fades the panel in.
  */
 (function () {
   "use strict";
@@ -23,6 +25,62 @@
   if (!Logic || !dataEl) return;
   var DATA = JSON.parse(dataEl.textContent);
   var html = document.documentElement;
+
+  /* WHAT THE BROWSER RENDERS DECIDES WHAT RUNS.
+   *
+   * The sections below the first screen carry content-visibility (data-cv): the
+   * browser skips them until they come near and says so with
+   * contentvisibilityautostatechange - once for every deferred block after the
+   * first layout, then on every change. That costs no observer target and no
+   * measuring. Work that reads layout inside a skipped block (sampling a button
+   * for its pixel face, the process rail, the notes' avoid list) would force the
+   * browser to lay the block out anyway, so it waits for this signal instead.
+   *
+   * The listener sits here, at the top of a deferred script, and the first
+   * layout can still come first on a slow connection. So mount() also asks
+   * checkVisibility() for every block that has not reported yet. Where either
+   * API is missing, nothing counts as skipped and everything runs as it did. */
+  var cvLive = typeof CSS !== "undefined" && CSS.supports && CSS.supports("content-visibility", "auto") &&
+    "oncontentvisibilityautostatechange" in html && typeof html.checkVisibility === "function";
+  var shown = new WeakMap(); // [data-cv] block -> true while rendered, false while skipped
+  var waiting = []; // [element, fn]: run fn once the element's blocks are rendered
+  var watchers = []; // { io, el, on, away }: observer targets inside deferred blocks
+  var page = null;
+
+  function isSkipped(el) {
+    if (!cvLive) return false;
+    for (var n = el.closest("[data-cv]"); n; n = n.parentElement && n.parentElement.closest("[data-cv]")) {
+      if (shown.get(n) !== true) return true;
+    }
+    return false;
+  }
+  function whenShown(el, fn) {
+    if (isSkipped(el)) waiting.push([el, fn]);
+    else fn();
+  }
+  function region(block, isShown) {
+    shown.set(block, isShown);
+    if (isShown) {
+      for (var i = waiting.length - 1; i >= 0; i--) {
+        var w = waiting[i];
+        if (block.contains(w[0]) && !isSkipped(w[0])) { waiting.splice(i, 1); w[1](); }
+      }
+    }
+    for (var j = 0; j < watchers.length; j++) {
+      var o = watchers[j];
+      if (!block.contains(o.el)) continue;
+      var want = isShown && !isSkipped(o.el);
+      if (want === o.on) continue;
+      o.on = want;
+      if (want) o.io.observe(o.el);
+      else {
+        o.io.unobserve(o.el);
+        if (o.away) o.away();
+      }
+    }
+    if (page) page.onRegion(block, isShown);
+  }
+  if (cvLive) document.addEventListener("contentvisibilityautostatechange", function (e) { region(e.target, !e.skipped); }, true);
 
   function bind(scope, key, value) {
     var els = scope.querySelectorAll('[data-dyn*="' + key + '"]');
@@ -64,6 +122,139 @@
     }
     closeModal() {}
     setHover(id) { this.state.hover = id; }
+    isSkipped(el) { return isSkipped(el); }
+
+    /* An IntersectionObserver target inside a skipped block makes the browser
+     * compute that block's style anyway (measured: the stack diagram's 14 logo
+     * masks loaded at 125 ms for no other reason). So such a target is handed
+     * to its observer while its block is rendered and taken back when not.
+     * Leaving an observer's range always reports "not intersecting" before the
+     * block is skipped: Chrome renders a block from 150 % of the viewport
+     * height away and skips it from there (measured 16.9.2026 at 420, 900 and
+     * 915 px tall), and no page observer reaches further than 160 px.
+     * `away` answers for the observer while it is not observing: a target in
+     * a skipped block is certainly out of view. */
+    watchShown(io, el, away) {
+      if (!cvLive || !el.closest("[data-cv]")) { io.observe(el); return; }
+      var o = { io: io, el: el, on: !isSkipped(el), away: away };
+      watchers.push(o);
+      if (o.on) io.observe(el);
+      else if (away) away();
+    }
+    unwatch(io, el) {
+      io.unobserve(el);
+      for (var i = watchers.length - 1; i >= 0; i--) if (watchers[i].io === io && watchers[i].el === el) watchers.splice(i, 1);
+    }
+
+    /* A deferred block was rendered or skipped (see the top of this file). */
+    onRegion(block, isShown) {
+      if (isShown) {
+        this.ptStale = true; // the notes' avoid list holds rendered blocks only
+        if (block.querySelector("[data-process-steps]")) this.updateProcess();
+        if (this.dgStale && this.dgRedo && this.dgEl && block.contains(this.dgEl)) this.dgRedo();
+      }
+      var q = block.querySelector("[data-demo-q]");
+      if (!q) return;
+      if (!isShown) {
+        clearTimeout(this.demoT);
+        this.demoWait = true;
+      } else if (this.demoWait && !isSkipped(q)) this.startDemo();
+    }
+
+    /* The rail reads the layout of a section far down the page on every scroll
+     * frame. While that section is skipped there is nothing to show, and the
+     * read would lay it out anyway. */
+    updateProcess() {
+      var wrap = this.rootEl && this.rootEl.querySelector("[data-process-steps]");
+      if (wrap && isSkipped(wrap)) return;
+      super.updateProcess();
+    }
+
+    /* The typing demo writes two characters every 16 ms. Out of sight that is
+     * only cost, so it runs while its block is rendered and stops when not.
+     * The copied logic polls every 800 ms until its elements exist - a React
+     * render could add them later. This markup is static: no element now means
+     * none ever, and the start page has none. */
+    startDemo() {
+      var q = this.rootEl && this.rootEl.querySelector("[data-demo-q]");
+      if (!q) return;
+      this.demoWait = isSkipped(q);
+      if (this.demoWait) { clearTimeout(this.demoT); return; }
+      super.startDemo();
+    }
+
+    /* PIXEL HOVER EFFECTS LOAD WHEN SOMEBODY CAN USE THEM.
+     *
+     * pixel-engine.js is 42 KB to parse (16 KB on the wire) for effects that
+     * exist only under a mouse - on a touch screen it returns before doing
+     * anything. So it is not in the page head. It loads on the first real mouse
+     * movement (a visitor who moves the mouse is about to hover something) or
+     * ten seconds after load on a hover device, whichever comes first, and never
+     * on touch or with reduced motion. Each button and image is then wired once
+     * its block is rendered: sampling a face measures the element, and
+     * measuring inside a skipped block lays that block out for nobody. */
+    armPixels() {
+      if (this.reduced() || !window.matchMedia || !matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+      var onMove = (e) => {
+        if (e.pointerType !== "mouse" && e.pointerType !== "pen") return;
+        window.removeEventListener("pointermove", onMove);
+        this.loadPixels();
+      };
+      window.addEventListener("pointermove", onMove, { passive: true });
+      var later = () => setTimeout(() => {
+        if (window.requestIdleCallback) window.requestIdleCallback(() => this.loadPixels(), { timeout: 2000 });
+        else this.loadPixels();
+      }, 10000);
+      if (document.readyState === "complete") later();
+      else window.addEventListener("load", later, { once: true });
+    }
+
+    /* THE STREAM NOTES EXIST ON A WIDE SCREEN WITH A MOUSE, FROM SECOND TEN.
+     * Owner: no notes on phones, at any size. The 112 labels ship inside an
+     * inert <template> (see v5build), so a phone never styles, lays out or
+     * counts them. Where the page logic's own gate holds - the same media
+     * query - they are put in place ten seconds after load, when the notes
+     * start, or later if the window grows into the gate. */
+    armNotes() {
+      var layer = this.rootEl.querySelector("[data-pt-layer]");
+      var tpl = layer && layer.querySelector("template[data-v5-pt]");
+      if (!tpl || this.reduced() || !window.matchMedia) return;
+      var gate = matchMedia("(min-width:1280px) and (pointer:fine)");
+      var put = () => {
+        if (!gate.matches || !tpl.isConnected) return;
+        gate.removeEventListener("change", put);
+        layer.appendChild(tpl.content);
+        tpl.remove();
+        this.ptStale = true;
+      };
+      var later = () => setTimeout(() => {
+        gate.addEventListener("change", put);
+        put();
+      }, 10000);
+      if (document.readyState === "complete") later();
+      else window.addEventListener("load", later, { once: true });
+    }
+
+    loadPixels() {
+      if (this.pxState) return;
+      this.pxState = "loading";
+      var s = document.createElement("script");
+      s.src = "/pixel-engine.js";
+      s.async = true;
+      s.onload = () => { this.pxState = "ready"; this.wirePixels(); };
+      s.onerror = () => { this.pxState = "failed"; };
+      document.head.appendChild(s);
+    }
+
+    wirePixels() {
+      var els = this.rootEl.querySelectorAll("[data-px], [data-px-img]");
+      for (var i = 0; i < els.length; i++) {
+        let el = els[i];
+        /* initPixels() takes a root and asks it for matches. This root answers
+         * with the one element, so the page's own wiring stays in charge. */
+        whenShown(el, () => this.initPixels({ querySelectorAll: (sel) => (el.matches(sel) ? [el] : []) }));
+      }
+    }
 
     setState(patch, cb) {
       if (typeof patch === "function") patch = patch(this.state);
@@ -161,6 +352,15 @@
     }
 
     mount() {
+      page = this;
+      /* Blocks that reported before this script ran are known; ask the rest. */
+      if (cvLive) {
+        var blocks = document.querySelectorAll("[data-cv]");
+        for (var b = 0; b < blocks.length; b++) {
+          if (shown.has(blocks[b])) continue;
+          shown.set(blocks[b], Array.prototype.some.call(blocks[b].children, (c) => c.checkVisibility({ contentVisibilityAuto: true })));
+        }
+      }
       var H = this.handlers();
       document.addEventListener("click", (e) => {
         var el = e.target.closest && e.target.closest("[data-on]");
@@ -194,6 +394,8 @@
         if (r === "gradRef") this.gradRef(refs[i]);
         else if (r === "dg.ref") this.dgRef(refs[i]);
       }
+      this.armPixels();
+      this.armNotes();
     }
   }
 

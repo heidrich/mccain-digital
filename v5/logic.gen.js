@@ -26,7 +26,7 @@ class V5Logic {
       const run = () => nums.forEach((n) => this.countTo(n));
       run(); e.target._loop = setInterval(run, 7000);
     }), { rootMargin: '0px 0px -8% 0px' });
-    const scan = () => { document.querySelectorAll('[data-fx]').forEach((el) => { if (el._fx) return; el._fx = 1; el.setAttribute('data-off', ''); this.fxIo.observe(el); }); };
+    const scan = () => { document.querySelectorAll('[data-fx]').forEach((el) => { if (el._fx) return; el._fx = 1; el.setAttribute('data-off', ''); this.watchShown(this.fxIo, el); }); };
     scan(); setTimeout(scan, 900); setTimeout(scan, 2500);
   }
 
@@ -42,9 +42,9 @@ class V5Logic {
     if (this.dgIo) this.dgIo.disconnect(); if (this.dgRo) this.dgRo.disconnect();
     this.dgIo = new IntersectionObserver((es) => { const vis = es[0] && es[0].isIntersecting; const lay = el.querySelector('[data-dgflow]'); const setP = (p) => { if (!lay || !lay.getAnimations) return; lay.getAnimations({ subtree: true }).forEach((an) => { try { p ? an.pause() : an.play(); } catch (e) {} }); };
       this.dgVisible = vis;
-      if (vis) { this.dgAutoStart(); this.dgPulseStart(); setP(false); } else { this.dgAutoStop(); this.dgPulseStop(); setP(true); } }, { rootMargin: '-10% 0px' });
-    this.dgIo.observe(el);
-    const redo = () => { cancelAnimationFrame(this.dgRaf); this.dgRaf = requestAnimationFrame(() => this.dgPaths()); };
+      if (vis) { if (this.dgStale) redo(); this.dgAutoStart(); this.dgPulseStart(); setP(false); } else { this.dgAutoStop(); this.dgPulseStop(); setP(true); } }, { rootMargin: '-10% 0px' });
+    this.watchShown(this.dgIo, el);
+    const redo = () => { if (this.isSkipped(el)) { this.dgStale = true; return; } this.dgStale = false; cancelAnimationFrame(this.dgRaf); this.dgRaf = requestAnimationFrame(() => this.dgPaths()); }; this.dgRedo = redo;
     setTimeout(redo, 120); setTimeout(redo, 900);
     if (typeof ResizeObserver === 'function') { if (this.dgRo) this.dgRo.disconnect(); this.dgRo = new ResizeObserver(redo); this.dgRo.observe(el); }
   };
@@ -162,7 +162,7 @@ class V5Logic {
     // only a full console (with its own transcript) may hide the dock – a plain ask block must not
     const el = root.querySelector('[data-console-full]');
     if (!el) { if (this.state.aiVisible) this.setState({ aiVisible: false }); }
-    else { this.consoleIo = new IntersectionObserver((es) => { const vis = es[0].isIntersecting; if (vis !== this.state.aiVisible) this.setState({ aiVisible: vis }); }, { rootMargin: '120px 0px' }); this.consoleIo.observe(el); }
+    else { this.consoleIo = new IntersectionObserver((es) => { const vis = es[0].isIntersecting; if (vis !== this.state.aiVisible) this.setState({ aiVisible: vis }); }, { rootMargin: '120px 0px' }); this.watchShown(this.consoleIo, el, () => { if (this.state.aiVisible) this.setState({ aiVisible: false }); }); }
     // the dock only appears once the hero (with its own input) has scrolled away
     const hero = root.querySelector('[data-screen-label="Hero A"]'); if (hero) { this.heroIo = new IntersectionObserver((es) => { const vis = es[0].isIntersecting; if (vis !== this.state.heroVisible) this.setState({ heroVisible: vis }); }, { rootMargin: '-64px 0px 0px 0px' }); this.heroIo.observe(hero); }
   }
@@ -186,7 +186,7 @@ class V5Logic {
   initFlow(root) {
     const fl = root.querySelectorAll('[data-flow]:not([data-fl])'); if (!fl.length) return;
     if (!this.flowIo) this.flowIo = new IntersectionObserver((en) => en.forEach((e) => { e.target.querySelectorAll('[data-anim]').forEach((a) => { a.style.animationPlayState = e.isIntersecting ? 'running' : 'paused'; }); }), { rootMargin: '160px 0px' });
-    fl.forEach((el) => { el.setAttribute('data-fl', '1'); this.flowIo.observe(el); });
+    fl.forEach((el) => { el.setAttribute('data-fl', '1'); this.watchShown(this.flowIo, el); });
   }
 
   initPixels(root) {
@@ -203,9 +203,9 @@ class V5Logic {
     const root = this.rootEl; if (!root) return;
     this.initFlow(root); this.initPixels(root); this.watchConsole(root);
     const els = root.querySelectorAll('[data-reveal]:not([data-rv])'); if (!els.length) return;
-    if (!this.io) this.io = new IntersectionObserver((entries) => { entries.forEach((e) => { if (e.isIntersecting) { const el = e.target; el.style.opacity = '1'; el.style.transform = 'none'; this.io.unobserve(el); if (el.hasAttribute('data-count-group')) this.runCounters(el); } }); }, { threshold: 0.08, rootMargin: '0px 0px -10% 0px' });
+    if (!this.io) this.io = new IntersectionObserver((entries) => { entries.forEach((e) => { if (e.isIntersecting) { const el = e.target; el.style.opacity = '1'; el.style.transform = 'none'; this.unwatch(this.io, el); if (el.hasAttribute('data-count-group')) this.runCounters(el); } }); }, { threshold: 0.08, rootMargin: '0px 0px -10% 0px' });
     const reduced = this.reduced();
-    els.forEach((el) => { el.setAttribute('data-rv', '1'); if (reduced) return; const d = parseFloat(el.getAttribute('data-reveal')) || 0; const isHead = !!el.querySelector(':scope > h2, :scope > h3, :scope > div > h2'); const isTile = !!el.querySelector(':scope > article'); const dist = isTile ? 34 : isHead ? 18 : 26; const dur = isTile ? 0.9 : 0.7; el.style.opacity = '0'; el.style.transform = 'translateY(' + dist + 'px)'; el.style.transition = 'opacity ' + (dur * 0.8).toFixed(2) + 's cubic-bezier(.2,.8,.2,1) ' + d + 's, transform ' + dur + 's cubic-bezier(.16,1,.3,1) ' + d + 's'; this.io.observe(el); });
+    els.forEach((el) => { el.setAttribute('data-rv', '1'); if (reduced) return; const d = parseFloat(el.getAttribute('data-reveal')) || 0; const isHead = !!el.querySelector(':scope > h2, :scope > h3, :scope > div > h2'); const isTile = !!el.querySelector(':scope > article'); const dist = isTile ? 34 : isHead ? 18 : 26; const dur = isTile ? 0.9 : 0.7; el.style.opacity = '0'; el.style.transform = 'translateY(' + dist + 'px)'; el.style.transition = 'opacity ' + (dur * 0.8).toFixed(2) + 's cubic-bezier(.2,.8,.2,1) ' + d + 's, transform ' + dur + 's cubic-bezier(.16,1,.3,1) ' + d + 's'; this.watchShown(this.io, el); });
   }
 
   runCounters(group) {
@@ -238,12 +238,13 @@ class V5Logic {
     if (!this.ptLate || (this.ptGate && !this.ptGate.matches)) return;
     if (!canvas._ptRO && window.ResizeObserver) {
       canvas._ptRO = new ResizeObserver(() => { canvas._ptDirty = 1; });
-      canvas._ptRO.observe(document.body);
+      canvas._ptRO.observe(root);
     }
-    if (!canvas._pool || canvas._ptDirty || (tm - (canvas._ptT || 0)) > 30) {
+    if (!canvas._pool || canvas._ptDirty || this.ptStale || (tm - (canvas._ptT || 0)) > 30) {
+      this.ptStale = false;
       const layer = root.querySelector('[data-pt-layer]'); if (!layer) return;
       const sy0 = window.scrollY || 0, avoid = [];
-      root.querySelectorAll('[data-avoid], [data-hero-copy], h1, h2, h3, h4, p, li, button, a, img, svg, form, footer').forEach((a) => { if (a.closest('header, [data-pt-layer], [role="dialog"]')) return; const c = a.getBoundingClientRect(); if (c.width < 24 || c.height < 10) return; avoid.push({ left: c.left - 12, right: c.right + 12, top: c.top + sy0 - 22, bottom: c.bottom + sy0 + 10 }); });
+      root.querySelectorAll('[data-avoid], [data-hero-copy], h1, h2, h3, h4, p, li, button, a, img, svg, form, footer').forEach((a) => { if (a.closest('header, [data-pt-layer], [role="dialog"]') || this.isSkipped(a)) return; const c = a.getBoundingClientRect(); if (c.width < 24 || c.height < 10) return; avoid.push({ left: c.left - 12, right: c.right + 12, top: c.top + sy0 - 22, bottom: c.bottom + sy0 + 10 }); });
       const prev = canvas._pool ? canvas._pool.els : [];
       const els = Array.from(layer.querySelectorAll('[data-pt]')).map((el, i) => { const o = prev[i] && prev[i].el === el ? prev[i] : { off: 0, on: false, x: 0, y: 0 }; return { el, i, off: o.off, on: o.on, x: o.x, y: o.y, w: el.offsetWidth || 120, h: el.offsetHeight || 26 }; });
       canvas._pool = { els, avoid, span: Math.max(window.innerHeight * 2, document.documentElement.scrollHeight) + 240 }; canvas._ptT = tm; canvas._ptDirty = 0;
@@ -325,16 +326,27 @@ class V5Logic {
     const setColors = () => { const G = V5Logic.GRAD; [G[0], G[1], G[2], this.accent(), G[3], G[4]].forEach((hex, i) => { const c = this.hexRgb(hex); gl.uniform3f(gl.getUniformLocation(prog, 'u_c' + i), c[0] / 255, c[1] / 255, c[2] / 255); }); };
     setColors();
     const cfg = (canvas.getAttribute('data-cfg') || '0.57,0.45,0,0').split(',').map(Number); gl.uniform4f(gl.getUniformLocation(prog, 'u_cfg'), cfg[0], cfg[1], cfg[2], cfg[3]); const wScale = +(canvas.getAttribute('data-w') || 1); gl.uniform1f(gl.getUniformLocation(prog, 'u_w'), wScale); const isHero = canvas.hasAttribute('data-hero'), isGlobal = canvas.hasAttribute('data-global'); gl.uniform1f(gl.getUniformLocation(prog, 'u_mode'), isGlobal ? 1 : 0); const uScroll = gl.getUniformLocation(prog, 'u_scroll'), uVh = gl.getUniformLocation(prog, 'u_vh'), uMouse = gl.getUniformLocation(prog, 'u_mouse'), uHole = gl.getUniformLocation(prog, 'u_hole'); let smx = -9999, smy = -9999, holeR = 0;
-    const reduced = this.reduced(); let visible = true, raf = 0, cleanup = null; const t0 = performance.now();
-    const resize = () => { const r = canvas.getBoundingClientRect(); const k = 3 / 3.5; const W = Math.max(2, Math.round(r.width * k)), H = Math.max(2, Math.round(r.height * k)); if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; gl.viewport(0, 0, W, H); } gl.uniform1f(uPx, 3); };
-    const draw = () => { resize(); const tm = (performance.now() - t0) / 1000 + 40; gl.uniform1f(uScroll, window.scrollY || 0); gl.uniform1f(uVh, canvas.clientHeight || 1);
-      if (isGlobal) { const m = this.mouse || { x: -9999, y: -9999, t: 0 }, now = performance.now(), kk = canvas.width / Math.max(1, canvas.clientWidth); if (smx < -5000) { smx = m.x; smy = m.y; } smx += (m.x - smx) * 0.22; smy += (m.y - smy) * 0.22; const target = (m.x > -1000 && now - m.t < 1600) ? (now - (this.pulseT || 0) < 380 ? 240 : 130) : 0; holeR += (target - holeR) * 0.12; gl.uniform2f(uMouse, smx * kk, (canvas.clientHeight - smy) * kk); gl.uniform1f(uHole, holeR * kk); } else { gl.uniform2f(uMouse, -9999, -9999); gl.uniform1f(uHole, 0); } if (isGlobal) this.movePointsGlobal(tm, canvas); else this.movePoints(tm, canvas, cfg, wScale, isHero); gl.uniform1f(uTime, tm); gl.uniform2f(uRes, canvas.width, canvas.height); gl.drawArrays(gl.TRIANGLES, 0, 3); };
-    const loop = () => { raf = 0; if (!canvas.isConnected) { if (cleanup) cleanup(); if (this.streams) this.streams.delete(canvas); return; } if (!visible) return; draw(); if (!reduced) raf = requestAnimationFrame(loop); };
-    resize(); loop();
-    const ro = new ResizeObserver(() => { resize(); draw(); }); ro.observe(canvas);
-    const io = new IntersectionObserver((en) => { visible = en[0].isIntersecting; if (visible && !raf) loop(); }); io.observe(canvas);
-    cleanup = () => { cancelAnimationFrame(raf); raf = 0; ro.disconnect(); io.disconnect(); try { const ext = gl.getExtension('WEBGL_lose_context'); if (ext) ext.loseContext(); } catch (e) {} };
+    const reduced = this.reduced(); let visible = true, raf = 0, timer = 0, cleanup = null, cssW = 0, cssH = 0; const t0 = performance.now();
+    let low = false, lastT = 0, frames = 0, late = 0, wait = 5000, probeAt = 0;
+    const mode = (l, t) => { low = l; frames = 0; late = 0; lastT = 0; if (l) { probeAt = t + wait; wait = Math.min(wait * 2, 60000); } canvas.setAttribute('data-v5-fps', l ? '30' : '60'); };
+    const pace = (t) => { if (low) { if (t >= probeAt) mode(false, t); return; } const d = lastT ? t - lastT : 0; lastT = t; if (!d || d > 250) return; frames++; if (d > 25) late++; if (frames < 90) return; if (late > 18) mode(true, t); else { frames = 0; late = 0; } };
+    const schedule = () => { if (low) timer = setTimeout(() => { timer = 0; raf = requestAnimationFrame(loop); }, 26); else raf = requestAnimationFrame(loop); };
+    const measure = () => { const r = canvas.getBoundingClientRect(); cssW = r.width; cssH = r.height; };
+    const resize = () => { const k = 3 / 3.5; const W = Math.max(2, Math.round(cssW * k)), H = Math.max(2, Math.round(cssH * k)); if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; gl.viewport(0, 0, W, H); } gl.uniform1f(uPx, 3); };
+    const draw = () => { resize(); const tm = (performance.now() - t0) / 1000 + 40; gl.uniform1f(uScroll, window.scrollY || 0); gl.uniform1f(uVh, cssH || 1);
+      if (isGlobal) { const m = this.mouse || { x: -9999, y: -9999, t: 0 }, now = performance.now(), kk = canvas.width / Math.max(1, cssW); if (smx < -5000) { smx = m.x; smy = m.y; } smx += (m.x - smx) * 0.22; smy += (m.y - smy) * 0.22; const target = (m.x > -1000 && now - m.t < 1600) ? (now - (this.pulseT || 0) < 380 ? 240 : 130) : 0; holeR += (target - holeR) * 0.12; gl.uniform2f(uMouse, smx * kk, (cssH - smy) * kk); gl.uniform1f(uHole, holeR * kk); } else { gl.uniform2f(uMouse, -9999, -9999); gl.uniform1f(uHole, 0); } if (isGlobal) this.movePointsGlobal(tm, canvas); else this.movePoints(tm, canvas, cfg, wScale, isHero); gl.uniform1f(uTime, tm); gl.uniform2f(uRes, canvas.width, canvas.height); gl.drawArrays(gl.TRIANGLES, 0, 3); };
+    const loop = (t) => { raf = 0; if (!canvas.isConnected) { if (cleanup) cleanup(); if (this.streams) this.streams.delete(canvas); return; } if (!visible) return; if (t) pace(t); draw(); if (!reduced) schedule(); };
+    measure(); resize(); loop();
+    const ro = new ResizeObserver((en) => { const b = en[0].contentRect; cssW = b.width; cssH = b.height; resize(); draw(); }); ro.observe(canvas);
+    const io = new IntersectionObserver((en) => { visible = en[0].isIntersecting; if (visible && !raf && !timer) loop(); }); if (!isGlobal) io.observe(canvas);
+    cleanup = () => { cancelAnimationFrame(raf); raf = 0; clearTimeout(timer); timer = 0; ro.disconnect(); io.disconnect(); try { const ext = gl.getExtension('WEBGL_lose_context'); if (ext) ext.loseContext(); } catch (e) {} };
     return { cleanup, setColors };
   }
+
+  isSkipped() { return false; }
+
+  watchShown(io, el) { io.observe(el); }
+
+  unwatch(io, el) { io.unobserve(el); }
 }
 window.V5Logic = V5Logic;

@@ -57,7 +57,21 @@ const cut = (s, a, b, from = 0) => {
 const once = (s, find, repl) => {
   const n = s.split(find).length - 1;
   if (n !== 1) throw new Error(`v5build: expected "${find}" once, found ${n}`);
-  return s.replace(find, repl);
+  return s.replace(find, () => repl); // a function, so "$" in repl stays literal
+};
+const VOID_TAGS = new Set(["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"]);
+/* Where the element opening at `at` ends. The markup is this build's own
+ * output, so tags are balanced; attribute values are read whole, quotes and all. */
+const elementEnd = (s, at) => {
+  const re = /<(\/?)([a-zA-Z][\w-]*)(?:[^>"']|"[^"]*"|'[^']*')*>/g;
+  re.lastIndex = at;
+  let depth = 0;
+  for (let m; (m = re.exec(s)); ) {
+    if (VOID_TAGS.has(m[2].toLowerCase())) continue;
+    depth += m[1] ? -1 : 1;
+    if (depth === 0) return re.lastIndex;
+  }
+  throw new Error(`v5build: no end for the element at ${at}`);
 };
 
 const head = cut(src, "<head>", "</head>").inner;
@@ -365,7 +379,59 @@ const heroHtml =
     )
     .join("") +
   `</span>`;
-const html = merged.html.slice(0, h1Inner) + heroHtml + merged.html.slice(h1Close);
+let html = merged.html.slice(0, h1Inner) + heroHtml + merged.html.slice(h1Close);
+
+/* ONE MARK LOADS FIRST. The export gives every brand mark fetchpriority="high",
+ * and there are five: the header's, which is the LCP candidate and preloaded in
+ * the head, and four that nobody sees at load - the AI console, the stack
+ * diagram, the footer and the consent note (shown at 7 s). Those four load
+ * lazily, when their block is rendered. */
+const preloadMark = (head.match(/<link rel="preload" as="image" href="([^"]+)"/) || [])[1];
+let marks = 0;
+html = html.replace(/<img src="(\/brand\/mark-[^"]+\.svg)"[^>]*>/g, (tag, src) => {
+  if (!tag.includes(' fetchpriority="high"')) return tag;
+  if (marks++ === 0) {
+    if (src !== preloadMark) throw new Error(`v5build: the first mark is ${src}, the head preloads ${preloadMark}`);
+    return tag;
+  }
+  return tag.replace(' fetchpriority="high"', ' loading="lazy" decoding="async"');
+});
+if (marks < 2) throw new Error(`v5build: expected the header mark and further marks, found ${marks}`);
+
+/* THE CLOSED MEGA MENU IS NOT RENDERED. It is one panel of ~320 nodes at
+ * opacity 0 that the browser styled and laid out on every load, and its two
+ * images loaded although no one can see them (they sit inside the viewport,
+ * so loading="lazy" alone would not hold them). content-visibility:hidden
+ * skips the panel's content until stage 2 sets data-v5-open; with that, lazy
+ * images inside it wait too. */
+/* The panel is the one with a computed height; the caret above it shares its opacity. */
+const PANEL = /<div [^>]*data-dyn="[^"]*height:panelHpx[^"]*opacity:panelOp/g;
+const panels = [...html.matchAll(PANEL)];
+if (panels.length !== 1) throw new Error(`v5build: expected one mega menu panel (data-dyn height:panelHpx...opacity:panelOp), found ${panels.length}`);
+const panelAt = panels[0].index;
+const panelEnd = elementEnd(html, panelAt);
+let panelImgs = 0;
+const panelHtml = html.slice(panelAt, panelEnd).replace(/<img (?![^>]*\bloading=)/g, () => (panelImgs++, '<img loading="lazy" decoding="async" '));
+if (!panelImgs) throw new Error("v5build: the mega menu panel holds no image - check the lazy step");
+html = html.slice(0, panelAt) + panelHtml + html.slice(panelEnd);
+const panelCss = `#dc-root [data-dyn*="height:panelHpx"]:not([data-v5-open]){content-visibility:hidden}`;
+
+/* THE STREAM NOTES SHIP INERT. Owner: no notes on phones, at any size - they
+ * cannot be hovered and are not looked at. The 112 labels are 336 elements,
+ * 13 % of the page's DOM, that every device parsed, styled and counted and a
+ * phone then hid with display:none. Inside a <template> they are a fragment
+ * nobody renders; home.js (armNotes) puts them in place on a wide screen with
+ * a mouse, ten seconds after load, when the notes start moving. */
+const layerTag = /<div [^>]*data-pt-layer[^>]*>/g;
+const layers = [...html.matchAll(layerTag)];
+if (layers.length !== 1) throw new Error(`v5build: expected one stream notes layer, found ${layers.length}`);
+const layerOpenEnd = layers[0].index + layers[0][0].length;
+const layerEnd = elementEnd(html, layers[0].index);
+const layerInner = html.slice(layerOpenEnd, layerEnd - "</div>".length);
+if (!html.slice(0, layerEnd).endsWith("</div>") || (layerInner.match(/<span data-pt[ >]/g) || []).length < 20) {
+  throw new Error("v5build: the stream notes layer does not look like 112 labels any more");
+}
+html = html.slice(0, layerOpenEnd) + `<template data-v5-pt>${layerInner}</template>` + html.slice(layerEnd - "</div>".length);
 
 /* Cycle: the first swap at 13.5 s (7 s wait + one 6.5 s interval, as the
  * logic did), then every 6.5 s: v1, v2, v3, v0. */
@@ -418,8 +484,113 @@ pos.forEach(([p, name], k) => {
 });
 const missing = KEEP.filter((k) => !bodies.has(k));
 if (missing.length) throw new Error("v5build: methods not found: " + missing.join(", "));
-const genCode = [...bodies.values()].join("\n\n  ");
-if (/\bReact\./.test(genCode)) throw new Error("v5build: a copied method still uses React");
+const copied = [...bodies.values()].join("\n\n  ");
+if (/\bReact\./.test(copied)) throw new Error("v5build: a copied method still uses React");
+
+/* ------------------------------------------------ v5 changes to the copied logic */
+/* Anchored and counted: if an export rewrites one of these lines, the build
+ * stops instead of shipping the old behaviour. What the page instance adds
+ * (isSkipped, ptStale) comes from v5/home.js; see the top of that file. */
+const V5_PATCHES = [
+  /* The stack diagram measured its nodes 120 ms and 900 ms after start and on
+   * its first ResizeObserver callback - inside a section that is skipped at
+   * that point, so the browser had to lay it out. The paths are now built when
+   * the diagram's block is rendered: the browser does that 1,5 screens ahead,
+   * so the lines are there before the diagram arrives (home.js calls dgRedo
+   * when the block comes in; the visibility callback below is the fallback). */
+  {
+    find: "const redo = () => { cancelAnimationFrame(this.dgRaf); this.dgRaf = requestAnimationFrame(() => this.dgPaths()); };",
+    repl: "const redo = () => { if (this.isSkipped(el)) { this.dgStale = true; return; } this.dgStale = false; cancelAnimationFrame(this.dgRaf); this.dgRaf = requestAnimationFrame(() => this.dgPaths()); }; this.dgRedo = redo;",
+  },
+  {
+    find: "if (vis) { this.dgAutoStart(); this.dgPulseStart(); setP(false); }",
+    repl: "if (vis) { if (this.dgStale) redo(); this.dgAutoStart(); this.dgPulseStart(); setP(false); }",
+  },
+  /* AN OBSERVED ELEMENT IS A RENDERED ELEMENT. An IntersectionObserver target
+   * inside a skipped content-visibility block makes the browser compute that
+   * block's style anyway - measured: with only these observe() calls held
+   * back, the 14 stack logo masks stopped loading at 125 ms. Reveal, fx, flow,
+   * console and diagram targets now go through watchShown() (home.js), which
+   * observes them while their block is rendered and lets go when it is not.
+   * The hero observer stays direct: the hero is never deferred.
+   * The third argument is what the observer would report for a target that is
+   * far away. Only the console needs it: its state starts as "visible", and an
+   * observer that is not yet observing never says otherwise (stage 2's dock
+   * would stay hidden after the hero until the reader neared the console). */
+  { find: "this.io.observe(el)", repl: "this.watchShown(this.io, el)" },
+  { find: "this.io.unobserve(el)", repl: "this.unwatch(this.io, el)" },
+  { find: "this.fxIo.observe(el)", repl: "this.watchShown(this.fxIo, el)" },
+  { find: "this.flowIo.observe(el)", repl: "this.watchShown(this.flowIo, el)" },
+  {
+    find: "this.consoleIo.observe(el)",
+    repl: "this.watchShown(this.consoleIo, el, () => { if (this.state.aiVisible) this.setState({ aiVisible: false }); })",
+  },
+  { find: "this.dgIo.observe(el)", repl: "this.watchShown(this.dgIo, el)" },
+  /* The notes' avoid list measured every heading, paragraph and link on the
+   * page when the notes started (load + 10 s): a 53-61 ms task at 4x CPU, the
+   * only long task after five seconds, because it laid out every skipped
+   * section. It now skips what is not rendered and is rebuilt when a block
+   * comes in (home.js sets ptStale). */
+  {
+    find: "if (!canvas._pool || canvas._ptDirty || (tm - (canvas._ptT || 0)) > 30) {",
+    repl: "if (!canvas._pool || canvas._ptDirty || this.ptStale || (tm - (canvas._ptT || 0)) > 30) {\n      this.ptStale = false;",
+  },
+  {
+    find: `.forEach((a) => { if (a.closest('header, [data-pt-layer], [role="dialog"]')) return;`,
+    repl: `.forEach((a) => { if (a.closest('header, [data-pt-layer], [role="dialog"]') || this.isSkipped(a)) return;`,
+  },
+  /* THE STREAM LOOP.
+   * 1. No layout reads per frame. resize() called getBoundingClientRect() and
+   *    the draw read clientWidth/clientHeight three times, every frame; when
+   *    anything had dirtied the layout that frame, each read forced it. The
+   *    size now comes from the ResizeObserver the loop already had.
+   * 2. Adaptive frame rate. 60 fps where the machine keeps up; where more than
+   *    a fifth of 90 frames arrive late (> 25 ms), it draws at 30 fps. Whether
+   *    60 would hold again cannot be read from 30 fps frames - they are all on
+   *    time by construction - so it is tried: after 5 s at 30 the loop probes
+   *    60 for 90 frames, and every failed probe doubles the wait (10, 20, 40,
+   *    then every 60 s). A fast machine that stuttered while the page loaded
+   *    is back at 60 after one probe; a slow one tries less and less often.
+   *    Throttled frames are scheduled with a timer, not skipped inside
+   *    requestAnimationFrame, so the browser is not woken for frames nobody
+   *    draws. data-v5-fps says which mode is on (absent: never switched).
+   * 3. No IntersectionObserver on the global canvas: it is position:fixed and
+   *    fills the viewport, so it is always "intersecting", and a hidden tab
+   *    already stops requestAnimationFrame. */
+  {
+    find: "const reduced = this.reduced(); let visible = true, raf = 0, cleanup = null; const t0 = performance.now();",
+    repl:
+      "const reduced = this.reduced(); let visible = true, raf = 0, timer = 0, cleanup = null, cssW = 0, cssH = 0; const t0 = performance.now();\n" +
+      "    let low = false, lastT = 0, frames = 0, late = 0, wait = 5000, probeAt = 0;\n" +
+      "    const mode = (l, t) => { low = l; frames = 0; late = 0; lastT = 0; if (l) { probeAt = t + wait; wait = Math.min(wait * 2, 60000); } canvas.setAttribute('data-v5-fps', l ? '30' : '60'); };\n" +
+      "    const pace = (t) => { if (low) { if (t >= probeAt) mode(false, t); return; } const d = lastT ? t - lastT : 0; lastT = t; if (!d || d > 250) return; frames++; if (d > 25) late++; if (frames < 90) return; if (late > 18) mode(true, t); else { frames = 0; late = 0; } };\n" +
+      "    const schedule = () => { if (low) timer = setTimeout(() => { timer = 0; raf = requestAnimationFrame(loop); }, 26); else raf = requestAnimationFrame(loop); };",
+  },
+  {
+    find: "const resize = () => { const r = canvas.getBoundingClientRect(); const k = 3 / 3.5; const W = Math.max(2, Math.round(r.width * k)), H = Math.max(2, Math.round(r.height * k));",
+    repl:
+      "const measure = () => { const r = canvas.getBoundingClientRect(); cssW = r.width; cssH = r.height; };\n" +
+      "    const resize = () => { const k = 3 / 3.5; const W = Math.max(2, Math.round(cssW * k)), H = Math.max(2, Math.round(cssH * k));",
+  },
+  { find: "gl.uniform1f(uVh, canvas.clientHeight || 1);", repl: "gl.uniform1f(uVh, cssH || 1);" },
+  { find: "kk = canvas.width / Math.max(1, canvas.clientWidth);", repl: "kk = canvas.width / Math.max(1, cssW);" },
+  { find: "(canvas.clientHeight - smy) * kk", repl: "(cssH - smy) * kk" },
+  {
+    find: "const loop = () => { raf = 0; if (!canvas.isConnected) { if (cleanup) cleanup(); if (this.streams) this.streams.delete(canvas); return; } if (!visible) return; draw(); if (!reduced) raf = requestAnimationFrame(loop); };",
+    repl: "const loop = (t) => { raf = 0; if (!canvas.isConnected) { if (cleanup) cleanup(); if (this.streams) this.streams.delete(canvas); return; } if (!visible) return; if (t) pace(t); draw(); if (!reduced) schedule(); };",
+  },
+  { find: "resize(); loop();", repl: "measure(); resize(); loop();" },
+  {
+    find: "const ro = new ResizeObserver(() => { resize(); draw(); }); ro.observe(canvas);",
+    repl: "const ro = new ResizeObserver((en) => { const b = en[0].contentRect; cssW = b.width; cssH = b.height; resize(); draw(); }); ro.observe(canvas);",
+  },
+  { find: "if (visible && !raf) loop(); }); io.observe(canvas);", repl: "if (visible && !raf && !timer) loop(); }); if (!isGlobal) io.observe(canvas);" },
+  { find: "cleanup = () => { cancelAnimationFrame(raf); raf = 0; ro.disconnect();", repl: "cleanup = () => { cancelAnimationFrame(raf); raf = 0; clearTimeout(timer); timer = 0; ro.disconnect();" },
+];
+let genCode = copied;
+for (const p of V5_PATCHES) genCode = once(genCode, p.find, p.repl);
+/* The page instance in home.js answers these; the defaults keep the class usable on its own. */
+genCode += "\n\n  isSkipped() { return false; }\n\n  watchShown(io, el) { io.observe(el); }\n\n  unwatch(io, el) { io.unobserve(el); }";
 const statics = [...new Set([...genCode.matchAll(/Component\.([A-Z_]+)/g)].map((m) => m[1]))];
 const staticSrc = statics.map((name) => {
   const i = logicSrc.indexOf(`static ${name} =`);
@@ -456,16 +627,22 @@ const services = (() => {
 })();
 if (!services.length || services.some((id) => !pages[id])) throw new Error("v5build: service ids do not match PAGES: " + services);
 
+/* pixel-engine.js is loaded by home.js when a mouse shows up (see armPixels).
+ * The preview is noindex whatever the site says, and says it once: the head
+ * already carries the site's robots tag, and two of them are two answers. */
 const outHead = head
   .replace(/<script>window\.__resources=[^<]*<\/script>/, "")
   .replace(/<script src="\/support\.js" defer><\/script>/, "")
+  .replace(/<script src="\/pixel-engine\.js" defer><\/script>/, "")
   .replace(/<style>x-dc\{display:none!important\}<\/style>/g, "")
+  .replace(/\s*<meta name="robots"[^>]*>/g, "")
   .replace("</title>", '</title>\n  <meta name="robots" content="noindex">');
+if (outHead.includes("pixel-engine.js")) throw new Error("v5build: the head still loads pixel-engine.js - home.js loads it on demand");
 const json = (o) => JSON.stringify(o).replace(/</g, "\\u003c");
 const page = `<!DOCTYPE html>
 <html lang="de">
 <head>${outHead}
-<style id="v5-css">${merged.css}\n${heroCss}\n${stateCss}</style>
+<style id="v5-css">${merged.css}\n${heroCss}\n${stateCss}\n${panelCss}</style>
 <script src="/v5/logic.gen.js" defer></script>
 <script src="/v5/home.js" defer></script>
 </head>

@@ -18,9 +18,10 @@
  *
  * WHAT IT DOES NOT TOUCH
  * The pixel stream (owner, 13.9.: "der pixel strom muss laufen, alles andere
- * muss pausieren, wenn nicht in sicht"). It is driven by requestAnimationFrame
- * inside pixel-engine.js, not by CSS, so restricting this to CSS animations
- * exempts it by construction rather than by a name check that could go stale.
+ * muss pausieren, wenn nicht in sicht"). It is a WebGL canvas driven by
+ * requestAnimationFrame in the page logic (startGradient), not by CSS, so
+ * restricting this to CSS animations exempts it by construction rather than by
+ * a name check that could go stale.
  *
  * And it never pauses anything a reader can see: an element counts as visible
  * with a generous margin around the viewport, so a section is already moving
@@ -62,9 +63,32 @@
  * split is read from the animation's own iteration count, not from a list of
  * names that would rot at the next export.
  *
- * The pixel stream is unaffected either way - it is requestAnimationFrame
- * inside pixel-engine.js, not a CSS animation, so the hero is alive from the
- * first frame while the decoration waits.
+ * The pixel stream is unaffected either way - it is requestAnimationFrame in
+ * the page logic, not a CSS animation, so the hero is alive from the first
+ * frame while the decoration waits.
+ *
+ * ---------------------------------------------------------------------------
+ * 16.9.2026, THIRD PASS: WATCH THE SECTION, NOT THE THING THAT MOVES.
+ *
+ * The observer cost is IntersectionObserverController::computeIntersections,
+ * which Lighthouse books as "Other" - measured on v5, desktop, 4x CPU, 12 s:
+ * 508 ms of 1.340 ms Other. It scales with the number of observed TARGETS, and
+ * this file was the biggest client: 76 of the page's 132 targets, every one of
+ * them an element that is itself animating, so its box never holds still.
+ *
+ * An animation does not need its own observer to know whether it can be seen;
+ * its section does. Each animated element is now filed under its container -
+ * the nearest deferred block ([data-cv]) or labelled section - and only the
+ * containers are observed: a dozen still boxes instead of 76 moving ones. The
+ * margin is unchanged, so a section still starts moving before it arrives. A
+ * tall section keeps all of its loops going while any part of it is near,
+ * which is the price, and a small one: sections that are far away are also
+ * skipped by content-visibility, where nothing is painted at all.
+ *
+ * The rescan on DOM changes now ignores mutations that add no element. A
+ * typing animation rewrites text every 16 ms, and each of those used to
+ * restart the debounce and end in a full document.getAnimations() walk. A
+ * deferred section being rendered is a rescan reason of its own (see below).
  */
 (function () {
   "use strict";
@@ -83,8 +107,22 @@
   var HOLD_MS = 6000;
   var released = false;
 
-  var watched = new WeakSet();
-  var visible = new WeakSet();
+  var watched = new WeakSet(); // animated elements already filed
+  var boxOf = new WeakMap(); // animated element -> its observed container
+  var members = new WeakMap(); // container -> Set of animated elements
+  var known = new WeakSet(); // containers the observer has reported at least once
+  var visible = new WeakSet(); // containers near the viewport
+
+  /* The block an animation lives in. `closest` includes the element itself, so
+   * a labelled overlay that animates is its own container. */
+  function containerOf(el) {
+    return el.closest("[data-cv], [data-screen-label]") || el.parentElement || el;
+  }
+
+  function seen(el) {
+    var box = boxOf.get(el);
+    return !!box && visible.has(box);
+  }
 
   /* A loop is decoration; a one-shot is an entrance the page needs in order to
    * be visible at all. getTiming().iterations is the only honest source for
@@ -102,14 +140,18 @@
   var io = new IntersectionObserver(
     function (entries) {
       for (var i = 0; i < entries.length; i++) {
-        var el = entries[i].target;
-        if (entries[i].isIntersecting) {
-          visible.add(el);
-          play(el);
-        } else {
-          visible.delete(el);
-          pause(el);
-        }
+        var box = entries[i].target;
+        var on = entries[i].isIntersecting;
+        known.add(box);
+        if (on) visible.add(box);
+        else visible.delete(box);
+        var set = members.get(box);
+        if (!set) continue;
+        set.forEach(function (el) {
+          if (!el.isConnected) set.delete(el);
+          else if (on) play(el);
+          else pause(el);
+        });
       }
     },
     { rootMargin: MARGIN }
@@ -156,12 +198,36 @@
       var an = list[i];
       if (!an.animationName || an.playState !== "paused" || an.__mbDone) continue;
       var el = an.effect && an.effect.target;
-      if (el && visible.has(el)) an.play();
+      if (el && seen(el)) an.play();
     }
   }
   function armRelease() { setTimeout(release, HOLD_MS); }
   if (document.readyState === "complete") armRelease();
   else window.addEventListener("load", armRelease, { once: true });
+
+  /* File an animated element under its container and observe the container
+   * the first time it is needed. An element that joins a container the
+   * observer has already reported gets no callback of its own, so the
+   * container's last answer is applied to it here. */
+  function file(el, an) {
+    watched.add(el);
+    var box = containerOf(el);
+    boxOf.set(el, box);
+    var set = members.get(box);
+    if (!set) {
+      set = new Set();
+      members.set(box, set);
+      io.observe(box);
+    }
+    set.add(el);
+    if (an.playState !== "running") return;
+    /* Held HERE, synchronously, not in the observer callback. observe()
+     * answers after the next layout, and by then the animation has already
+     * run, been styled and been composited - the cost this file exists to
+     * avoid. */
+    if (!released && loops(an)) an.pause();
+    else if (known.has(box) && !visible.has(box)) an.pause();
+  }
 
   function scan() {
     var list = document.getAnimations();
@@ -171,16 +237,10 @@
       var el = an.effect && an.effect.target;
       if (!el || el.nodeType !== 1 || el.closest("[data-motion-keep]")) continue;
       if (!watched.has(el)) {
-        watched.add(el);
-        /* Held HERE, synchronously, not in the observer callback. observe()
-         * answers after the next layout, and by then the animation has already
-         * run, been styled and been composited - the cost this file exists to
-         * avoid. */
-        if (!released && loops(an) && an.playState === "running") an.pause();
-        io.observe(el);
+        file(el, an);
       } else if (!released && loops(an) && an.playState === "running") {
         an.pause();
-      } else if (!visible.has(el) && an.playState === "running") {
+      } else if (!seen(el) && an.playState === "running") {
         /* A re-render restarted the animation on an element that is still out
          * of view; the observer will not fire again for it. */
         an.pause();
@@ -198,20 +258,40 @@
         if (an.playState === "running") an.pause();
       } else {
         var el = an.effect && an.effect.target;
-        if (an.playState === "paused" && el && visible.has(el)) an.play();
+        if (an.playState === "paused" && el && seen(el) && (released || !loops(an))) an.play();
       }
     }
   });
 
   /* React replaces this whole tree when it hydrates and again on every state
    * change, so a single scan at load would cover almost nothing. Debounced,
-   * because the mega menu alone rewrites hundreds of nodes at a time. */
+   * because the mega menu alone rewrites hundreds of nodes at a time. Only a
+   * mutation that adds an element can bring a new CSS animation; text changes
+   * cannot. */
   var t = 0;
   function soon() {
     clearTimeout(t);
     t = setTimeout(scan, 250);
   }
-  new MutationObserver(soon).observe(document.documentElement, { childList: true, subtree: true });
+  new MutationObserver(function (records) {
+    for (var i = 0; i < records.length; i++) {
+      var added = records[i].addedNodes;
+      for (var j = 0; j < added.length; j++) {
+        if (added[j].nodeType === 1) {
+          soon();
+          return;
+        }
+      }
+    }
+  }).observe(document.documentElement, { childList: true, subtree: true });
+
+  /* A deferred section (content-visibility) gets its CSS animations only when
+   * the browser renders it, and that adds no element - so a render is a reason
+   * to look again, too. Without this, a section scrolled into range after load
+   * ran its loops unheld and never paused. */
+  document.addEventListener("contentvisibilityautostatechange", function (e) {
+    if (!e.skipped) soon();
+  }, true);
 
   scan();
   window.addEventListener("load", soon);
