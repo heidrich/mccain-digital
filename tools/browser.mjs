@@ -38,10 +38,15 @@ function chromeCache() {
 
 /* chrome-win64, not chrome-win. The short name is the folder playwright used
  * to ship and costs a "executable doesn't exist" that reads like a missing
- * install rather than a wrong path. */
+ * install rather than a wrong path. The Mac had the same trap: newer playwright
+ * builds ship "Google Chrome for Testing.app" instead of "Chromium.app", and
+ * with only the old name listed this reported "no chromium found" beside two
+ * complete installs (chromium-1217, chromium-1223). */
 const BINARIES = [
   ["chrome-win64", "chrome.exe"],
   ["chrome-win", "chrome.exe"],
+  ["chrome-mac-arm64", "Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"],
+  ["chrome-mac", "Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"],
   ["chrome-mac", "Chromium.app/Contents/MacOS/Chromium"],
   ["chrome-mac-arm64", "Chromium.app/Contents/MacOS/Chromium"],
   ["chrome-linux", "chrome"],

@@ -981,10 +981,22 @@ function calmConsent(template, name) {
  *    getBoundingClientRect() on every h1..p, li, button, a, img, svg, form and
  *    footer in the document. A page's layout does not change every two
  *    seconds. It changes when the viewport changes or when the document grows,
- *    and a ResizeObserver on <body> says exactly when that happened - so the
- *    scan is now event-driven instead of timed. The 30 s fallback is insurance
- *    against a layout change that alters no box we watch; it is 6x Lighthouse's
- *    quiet threshold, so it can never cost us TTI.
+ *    and a ResizeObserver on the component root says exactly when that
+ *    happened - so the scan is now event-driven instead of timed. The 30 s
+ *    fallback is insurance against a layout change that alters no box we
+ *    watch; it is 6x Lighthouse's quiet threshold, so it can never cost us TTI.
+ *
+ *    NOT ON <body> (corrected 16.9.2026). The first version observed <body>,
+ *    and the page sets `html,body{height:100%}`: body is always exactly one
+ *    viewport tall, so the observer fired once at start and never again.
+ *    Since the sections are deferred (content-visibility, below) the page
+ *    changes height every time one of them is rendered for the first time -
+ *    measured on the start page, 16 changes from 16.523 down to 12.477 px on
+ *    one scroll through - and the avoid list kept the positions of the first
+ *    scan for up to 30 s. The labels then faded out in the wrong places and
+ *    drifted across the contact band's text, which is marked data-avoid as a
+ *    whole (owner, 16.9.). The root element (`min-height:100vh`, height from
+ *    its content) reported all 16 changes in the same run, <body> one.
  *
  * 2. START LATE.  Owner: "kann man denn die notes defern, das die erst nach 10
  *    sec auftauchen". Nothing about a drifting decoration needs to exist while
@@ -1042,7 +1054,7 @@ const PT_POLL_FROM = `    if (!canvas._pool || (tm - (canvas._ptT || 0)) > 2) {
 
 const PT_POLL_TO = `    if (!canvas._ptRO && window.ResizeObserver) {
       canvas._ptRO = new ResizeObserver(() => { canvas._ptDirty = 1; });
-      canvas._ptRO.observe(document.body);
+      canvas._ptRO.observe(root);
     }
     if (!canvas._pool || canvas._ptDirty || (tm - (canvas._ptT || 0)) > 30) {
 `;
@@ -1313,6 +1325,26 @@ function laterConsent(script, name) {
  * 900 px guess for one it has never rendered. Measured: total page height is
  * identical with and without, which is the check that matters - a wrong guess
  * shows up as a scrollbar that changes length while you read.
+ *
+ * A DARK BAND KEEPS ITS GROUND OUTSIDE THE CONTAINMENT (added 16.9.2026).
+ *
+ * The dark bands - on the start page KI-Konsole, Studio, FAQ, News, Kontakt
+ * and the footer - paint their ground as their first child: an empty
+ * aria-hidden layer at z-index:-2, one step below the pixel stream's fixed
+ * canvas at -1. That order only holds while both sit in the same stacking
+ * context. content-visibility applies paint containment, and paint containment
+ * makes the marked element a stacking context of its own, so the whole band,
+ * ground included, was painted above the canvas: the stream vanished behind
+ * every dark band, on the React page and in v5 alike (owner, 16.9.).
+ *
+ * For those bands the mark moves one level down, onto the content wrapper
+ * right after the layer. The ground stays in the page's stacking context and
+ * the content - the part that costs layout - is still skipped. Measured on the
+ * start page at 1440, 1920 and 412 px, full page with the stream hidden, mark
+ * on the band vs. mark on the wrapper: nothing clipped, the only differing
+ * pixels are sub-pixel text edges. A negative layer that is NOT empty stops
+ * the build instead, because there is no wrapper to move the mark to and
+ * marking the band would bring the bug back without a word.
  */
 const CV_CSS =
   "<style>[data-cv]{content-visibility:auto;contain-intrinsic-size:auto 900px}</style>";
@@ -1322,17 +1354,46 @@ const CV_EAGER = 2; /* hero + the section under it */
  * every attribute rather than only the ones that happen to be written first. */
 const SECTION_TAG = /<([a-z]+)((?:[^>"']|"[^"]*"|'[^']*')*)>/g;
 const CV_MIN_FIXED = 4; /* nav, notice, dock, menu, modal - four is the floor */
+/* The first child of a section, read from the text right after its opening tag. */
+const FIRST_CHILD = /^\s*<([a-z]+)((?:[^>"']|"[^"]*"|'[^']*')*)>/;
+/* ...and the same child when it is empty, followed by the tag of its sibling. */
+const EMPTY_THEN_SIBLING = /^\s*<([a-z]+)(?:[^>"']|"[^"]*"|'[^']*')*>\s*<\/\1>\s*<([a-z]+)[\s>]/;
+const NEGATIVE_Z = /z-index\s*:\s*-\s*\d/;
 
 function deferSections(template, name) {
-  let inFlow = 0, marked = 0, fixed = 0;
-  const out = template.replace(SECTION_TAG, (whole, tag, attrs) => {
+  let inFlow = 0, marked = 0, fixed = 0, layered = 0;
+  let wrapperAt = -1; /* offset of the content wrapper that takes a band's mark */
+  const out = template.replace(SECTION_TAG, (whole, tag, attrs, offset, src) => {
+    if (offset === wrapperAt) {
+      wrapperAt = -1;
+      return `<${tag} data-cv=""${attrs}>`;
+    }
     if (!/\sdata-screen-label="/.test(attrs)) return whole;
     if (/position\s*:\s*(fixed|sticky)/.test(attrs)) { fixed++; return whole; }
     inFlow++;
     if (inFlow <= CV_EAGER) return whole;
     marked++;
-    return `<${tag} data-cv=""${attrs}>`;
+    const rest = src.slice(offset + whole.length, offset + whole.length + 2000);
+    const first = FIRST_CHILD.exec(rest);
+    if (!first || !/\saria-hidden="true"/.test(first[2]) || !NEGATIVE_Z.test(first[2])) {
+      return `<${tag} data-cv=""${attrs}>`;
+    }
+    const layer = EMPTY_THEN_SIBLING.exec(rest);
+    if (!layer) {
+      throw new Error(
+        `prerender: a band in ${name} has a background layer below the stream ` +
+          `that is not an empty element followed by its content - there is no ` +
+          `wrapper to take content-visibility, and marking the band would paint ` +
+          `its ground over the pixel stream. Layer: ${first[0].trim().slice(0, 160)}`
+      );
+    }
+    wrapperAt = offset + whole.length + layer[0].length - layer[2].length - 2;
+    layered++;
+    return whole;
   });
+  if (wrapperAt !== -1) {
+    throw new Error(`prerender: section deferral in ${name} lost a band's content wrapper at ${wrapperAt}.`);
+  }
   if (marked === 0 || fixed < CV_MIN_FIXED) {
     throw new Error(
       `prerender: section deferral looks wrong in ${name} - ${marked} marked, ` +
@@ -1340,7 +1401,7 @@ function deferSections(template, name) {
         `The export changed data-screen-label or how the overlays are positioned.`
     );
   }
-  return { template: out, marked, eager: Math.min(inFlow, CV_EAGER), fixed };
+  return { template: out, marked, layered, eager: Math.min(inFlow, CV_EAGER), fixed };
 }
 
 /* NO PAGE HAD A <main>.
@@ -1903,6 +1964,8 @@ ${script}
       `  ${Math.round(prerendered.length / 1024)} KB rendered` +
       `  ${helmet.stripped} helmet meta dropped` +
       (tiles ? `  ${tiles} tile roles fixed` : "") +
+      `  ${cv.marked} deferred` +
+      (cv.layered ? ` (${cv.layered} on the content, ground stays under the stream)` : "") +
       (anchors.fixed ? `  ${anchors.fixed} anchors → /` : "") +
       (icons.icons ? "  [icon gallery fixed]" : "") +
       (meta.titleTrimmed ? `  [title → ${meta.titleLen} chars]` : "") +

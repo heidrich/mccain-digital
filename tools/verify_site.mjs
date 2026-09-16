@@ -300,8 +300,27 @@ for (const { path: p, interactive, pixels, modals } of LIVE_PAGES) {
     for (const svg of document.querySelectorAll('svg[viewBox="0 0 64 64"]')) {
       logoAnim += svg.getAnimations({ subtree: true }).filter((a) => a.playState === "running").length;
     }
+    /* NOTHING UNDER THE STREAM MAY SIT INSIDE A DEFERRED ELEMENT.
+     *
+     * content-visibility makes its element a stacking context, so a layer on a
+     * negative z-index inside it is painted above the pixel stream's canvas
+     * (z-index:-1) instead of below it - the dark bands hid the stream this way
+     * until 16.9.2026. tools/prerender.mjs moves the mark past such a layer;
+     * asked here because a new export can add a layer somewhere it does not
+     * look. Computed styles, so it holds whatever wrote the z-index. */
+    const underStream = [];
+    for (const el of document.querySelectorAll("*")) {
+      if (getComputedStyle(el).contentVisibility !== "auto") continue;
+      for (const d of el.querySelectorAll("*")) {
+        if (parseInt(getComputedStyle(d).zIndex, 10) < 0) {
+          underStream.push(el.getAttribute("data-screen-label") || el.parentElement.getAttribute("data-screen-label") || el.tagName.toLowerCase());
+          break;
+        }
+      }
+    }
 
     return {
+      underStream,
       mains: document.querySelectorAll("main").length,
       hasFooterInside: !!m && !!m.querySelector("footer"),
       hasSkipTarget: !!m && !!document.getElementById("inhalt") && m.contains(document.getElementById("inhalt")),
@@ -336,6 +355,7 @@ for (const { path: p, interactive, pixels, modals } of LIVE_PAGES) {
   console.log(`    ${ok(!dupeList.length)} one title/canonical/description/og:url after hydration${dupeList.length ? ": " + dupeList.map(([k, n]) => `${n}× ${k}`).join(", ") : ""}`);
   console.log(`    ${ok(marks.mains === 1 && !marks.hasFooterInside && marks.hasSkipTarget && marks.banner === 1)} one <main> around the content, one banner (${marks.mains} main, ${marks.banner} banner)`);
   console.log(`    ${ok(marks.logoAnim === 0)} brand mark static (${marks.logos} marks, ${marks.logoAnim} running animations)`);
+  console.log(`    ${ok(!marks.underStream.length)} no background layer over the stream${marks.underStream.length ? ": " + marks.underStream.join(", ") : ""}`);
   console.log(`    ${ok(true)} robots: "${robots}"${rb.headerSaysNo ? " + X-Robots-Tag" : ""}`);
   /* A CSP violation is a console error, and console errors already fail this
    * gate - so the policy being WRONG is caught above. This asks the other
@@ -366,6 +386,9 @@ for (const { path: p, interactive, pixels, modals } of LIVE_PAGES) {
   if (!marks.hasSkipTarget) fail(`${p}: the skip link's target is not inside <main>`);
   if (marks.banner !== 1) fail(`${p}: ${marks.banner} banner landmarks - a <header> outside <main> that is not the masthead`);
   if (marks.logoAnim) fail(`${p}: the brand mark is running ${marks.logoAnim} animations - the static patch missed (see MARK_FROM in prerender.mjs)`);
+  for (const band of marks.underStream) {
+    fail(`${p}: "${band}" is deferred with a background layer inside - its ground paints over the pixel stream (see deferSections in prerender.mjs)`);
+  }
   for (const [k, n] of dupeList)
     fail(`${p}: ${n} <${k}> after hydration - the helmet is shipping a second set of meta tags`);
   if (pixels && !pixelOk) fail(`${p}: the pixel engine is not running`);
