@@ -1,3 +1,89 @@
+# Uebergabe — Stand 17. September 2026
+
+## ▶ STAND 17.9. — ALLE 21 SEITEN UNTER /v5/, EIN BINDER STATT REACT — ZUERST LESEN
+
+**Owner-Auftrag:** „ok bitte restliche seite auf html bauen." Ergebnis: alle 21
+Seiten der Routentabelle liegen als v5-Seiten unter `v5/<route>/`
+(`index.html`, `logic.gen.js`, `index.md`). Ansehen:
+<http://127.0.0.1:8898/v5/> und von dort klicken — die Vorschau verlinkt sich
+selbst unter `/v5/`. Design und Bau-Lehren:
+`docs/plans/2026-09-17-v5-alle-seiten-design.md`.
+
+**Der Bauweg (warum nicht wie die Startseite bisher):** Die Widgets der
+Unterseiten (Preisrechner, Vergleichsschieber, Tabs, Auto-Zyklen, Suche,
+Mega-Menü, DE/EN, Dock) haben keinen aufzählbaren Zustandsraum; 20
+handgeschriebene `apply()`-Fassungen wären ein zweiter Nachbau des Designs.
+Die Vorlagensprache des Exports ist aber klein (`{{ pfad }}`, `sc-for`,
+`sc-if`, `onClick="{{ fn }}"`, alle Werte aus `renderVals()`). Deshalb ersetzt
+**`v5/runtime.js`** React: Die Vorlage liegt inert in jeder Seite, jeder
+Knoten trägt `data-dc-tpl`, der Binder übernimmt beim Start alle Knoten ohne
+zu schreiben und schreibt nach jedem `setState` nur, was sich geändert hat;
+fehlende Knoten (Suche, Menü, Rechner-Optionen) entstehen aus der Vorlage. Die
+Klasse jeder Seite läuft ganz (`logic.gen.js`, mit den v5-Patches aus
+`V5_PATCHES`), `React` ist ein Shim. Die Startseite läuft auf demselben
+Binder; `v5/home.js` ist weg.
+
+**Gemessen (17.9., lokal):**
+
+- `node tools/v5probe.mjs --all`: 21/21 Seiten auf Desktop und Telefon ohne
+  Konsolenfehler; Mega-Menü per Hover, Suche per Cmd/Ctrl+K, EN/DE, FAQ,
+  Formular (Anfrage an Web3Forms abgefangen, Erfolgszustand gezeigt), Consent
+  nach 7 s, Mobilmenü — alles funktioniert. Beim Start schreibt der Binder
+  nichts (MutationObserver: nur Reveal, Akzent, Canvas-Größe des Exports).
+  Kosten je Zustandswechsel 1–3 ms, /marke/ 4 ms (Desktop, ungedrosselt).
+- Startseite, Telefon-Preset, CPU ×4, alt (f3de0e9) → neu: LCP 272 → 284 ms,
+  **TBT 29 → 21 ms**, TTI 318 → 403 ms, CLS 0 → 0, Hauptthread in 12 s 2.856 →
+  2.973 ms. Vor der Teilung des Starts in drei Tasks lag TBT bei 96 ms
+  (Start 72–116 ms in einem Task: Vorlage kompilieren ~20, Knoten übernehmen
+  ~40, Mount ~12 ms). HTML roh 268 → 399 KB, gzip 38 → 60 KB (inert Vorlage,
+  Ids, deep-Inhalt); Skripte gzip: runtime 15 KB, logic 55 KB.
+- Höhen: 150 `data-cv`-Blöcke auf 21 Seiten gemessen (`v5-heights.json` nach
+  Routen). `cv-audit --mobile` meldet auf `/` 95 px „Drift" — das ist der
+  Schriftwechsel, den cv-audit vor `fonts.ready` misst (eigene Messung nach
+  `fonts.ready`: −1 px); auf `/leistungen/websites/` 49 px, das ist das
+  Rennen-Demo, das beim Scrollen „fertig geladen" einblendet (Export-Verhalten).
+- `verify_site` grün, `markdown-check --all` 21/21, `v5dev-check` ALL OK auf
+  `/` und `/kontakt/`.
+
+**PSI vom Owner steht aus** (mobil, jede Seite). Erwartung nach den lokalen
+Zahlen: 100 hält; falls TBT auffällt, sind die nächsten Hebel (a)
+`logic.gen.js` mit esbuild minifizieren (171 → ~90 KB, die Werkstatt zeigt dann
+eine `.src.js`), (b) die Knotenübernahme in Stücke teilen (heute ein Task
+~40 ms bei 4×).
+
+**Was der Build jetzt tut** (`tools/v5build.mjs`, alle Kommandos in README):
+`node tools/v5build.mjs` baut alle Seiten, `--route /x/` einzelne, `--root`
+schreibt später in die Wurzel ohne `/v5`-Präfix. Nur noch 8 Breiten-Renders,
+keine Zustandsvarianten; `deep` (`content.json`) wird mitgerendert; Hover-
+und Focus-Regeln für jeden Vorlagenknoten; Patches mit `all`/`some` und
+Methodenbezug. Nach Text- oder Layoutänderung: `v5heights.mjs` (alle Seiten,
+auf ruhiger Maschine) → `v5build.mjs`.
+
+**Werkstatt auf jeder Seite:** Schalter und `?werkstatt` überall; neue Karte
+„Vorlage" (Bindungen des gewählten Knotens aus `window.__v5.describe(el)`);
+`map.json` auf `runtime.js` umgestellt. `files.logic.url` in `map.json` ist
+noch statisch `/v5/logic.gen.js` (nur als Flag genutzt; code.js baut die URL
+je Seite selbst).
+
+**Offen / nächste Schritte (Reihenfolge Owner):**
+
+1. **PSI mobil je Seite** durch den Owner; danach ggf. Minify/Chunking (oben).
+2. **Umschalten auf die Wurzel (`--root`) und React raus.** Achtung
+   Reihenfolge: `prerender.mjs` bleibt die erste Baustufe (der Build rendert
+   die Export-Komponenten serverseitig mit React), liefert die React-Seiten
+   aber heute in die Wurzel. Vor dem Umschalten muss prerender in ein
+   Zwischenverzeichnis schreiben (z. B. `_dcbuild/react/`) und `v5build` von
+   dort lesen; dann `--root`, `vercel.json`-Header/CSP prüfen (der
+   Formular-Sender ist per Hash erlaubt, unverändert übernommen), `sitemap`,
+   `llms.txt` auf die `.md`-Zwillinge. Erst dann Vendor-React löschen.
+3. **Textrunde** (alle Texte, inkl. `WERKSTATT_BAND`, `v5/dev/texte.js`,
+   `map.json`), Kathi gegenlesen, EN.
+4. **KI-Dock Stufe 2** (Werkstatt als zweiter Eintrag), `window.claude` gibt es
+   live nicht — der Dock antwortet aus `localAnswer`.
+5. Weiter offen aus dem 16.9.: WebGL-Entscheidung (A/C), `messen.md` ungeteilt.
+
+---
+
 # Uebergabe — Stand 16. September 2026
 
 ## ▶ STAND 16.9. ABENDS — ZUERST LESEN

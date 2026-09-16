@@ -1,4 +1,4 @@
-/* The deferred blocks of the v5 start page (data-cv) and how they are named.
+/* The deferred blocks of every v5 page (data-cv) and how they are named.
  *
  * WHY A KEY. content-visibility:auto skips a block until it comes near, and
  * until then the browser lays out a placeholder of `contain-intrinsic-size`.

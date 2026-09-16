@@ -1,18 +1,18 @@
 {
   "files": {
-    "home": {
-      "name": "home.js",
-      "url": "/v5/home.js",
+    "runtime": {
+      "name": "runtime.js",
+      "url": "/v5/runtime.js",
       "lang": "js",
-      "what": "Bindet das bereits fertig gerenderte HTML ohne React an: Event-Delegation, State-Updates auf einzelne Knoten, die Loader für Pixel-Effekte und Stream-Notizen.",
-      "why": "Ein React-Rerender der ganzen Seite kostete 15 volle Durchläufe in 30 s bei 64–84 ms je Durchlauf (tools/reactprof.mjs, 4x CPU); home.js schreibt stattdessen gezielt in den DOM."
+      "what": "Bindet die mitgelieferte, unsichtbare Vorlage (<template id=\"dc-template\">) an das schon fertig gerenderte HTML: merkt sich für jeden Ausdruck den aktuellen Wert und schreibt nach einer Zustandsänderung nur, was sich geändert hat.",
+      "why": "Ein React-Rerender der ganzen Seite kostete 15 volle Durchläufe in 30 s bei 64–84 ms je Durchlauf (tools/reactprof.mjs, 4x CPU); der Binder kostet dafür rund 1–2 ms."
     },
     "logic": {
       "name": "logic.gen.js",
       "url": "/v5/logic.gen.js",
       "lang": "js",
-      "what": "Die für die Startseite kopierten Methoden der früheren React-Komponente: Strom, Zähler, Prozessleiste, Integrations-Diagramm, Demo, Scroll-Ziele.",
-      "why": "tools/v5build.mjs kopiert diese Methoden wörtlich aus derselben Klasse in index.html, damit Vorlage und Startseite nie auseinanderlaufen. Generiert, nicht von Hand editieren."
+      "what": "Die ganze Komponentenklasse dieser Seite: alle Methoden von componentDidMount bis renderVals, wörtlich aus der Entwurfsdatei kopiert und vom Build an einzelnen Stellen gepatcht.",
+      "why": "tools/v5build.mjs kopiert diese Klasse unverändert in jede v5/<route>/-Seite, damit Vorlage und Seite nie auseinanderlaufen. Generiert, nicht von Hand editieren."
     },
     "motion": {
       "name": "motion-budget.js",
@@ -30,13 +30,13 @@
     "build": {
       "name": "tools/v5build.mjs (Bauzeit, nicht ausgeliefert)",
       "lang": "js",
-      "what": "Rendert die frühere React-Komponente 32-mal (8 Breiten × 4 Zustände) serverseitig und führt die Ergebnisse zu statischem HTML und CSS zusammen.",
+      "what": "Rendert die frühere React-Komponente achtmal, einmal je Breite, serverseitig und führt die Ergebnisse zu statischem HTML und CSS zusammen; Zustandsvarianten entfallen, Menü, Formular und Rechner entstehen zur Laufzeit aus der Vorlage.",
       "why": "Die Komponente hatte keine Teilbäume zum Memoisieren; sie in echtes HTML zu zerlegen war der einzige Weg, die Rerender-Kosten loszuwerden."
     }
   },
   "entries": [
     {
-      "match": "canvas[data-ref=\"gradRef\"]",
+      "match": "canvas[data-global]",
       "title": "Der Strom",
       "file": "logic",
       "symbol": "startGradient",
@@ -48,13 +48,29 @@
       "why": "Die Zeichenschleife liest pro Bild keine Layout-Werte mehr (vorher erzwang scrollY/clientWidth pro Frame einen Reflow, gemessen 52 ms) und schaltet bei 90 Bildern mit mehr als 18 verspäteten selbst auf 30 Bilder/s."
     },
     {
+      "match": "[data-dc-tpl]",
+      "title": "Vorlagenknoten",
+      "file": "runtime",
+      "symbol": "bindEl",
+      "what": "Jedes Element, das aus der Vorlage stammt, trägt seine Vorlagen-Id als data-dc-tpl; bindEl() findet darüber beim Start den passenden Knoten im schon gerenderten HTML und merkt sich seine Bindungen.",
+      "why": "Ohne diese Id müsste der Binder raten, welcher DOM-Knoten zu welchem Vorlagenteil gehört; mit ihr findet er nach jeder Zustandsänderung jeden Knoten sicher wieder, auch in Listen und bedingten Blöcken."
+    },
+    {
+      "match": ".sc-interp",
+      "title": "Text-Interpolation",
+      "file": "runtime",
+      "symbol": "updateRec",
+      "what": "Der Platzhalter-Knoten für einen {{ }}-Ausdruck im Text; updateRec() ersetzt seinen Inhalt nur, wenn sich der berechnete Wert seit dem letzten Durchlauf geändert hat.",
+      "why": "Bei rund 500–700 Ausdrücken je Seite ist genau dieser Vergleich mit dem gemerkten Wert der Grund, warum ein Zustandswechsel nur 1–2 ms statt 64–84 ms kostet."
+    },
+    {
       "match": "[data-cv]",
       "title": "Aufgeschobener Abschnitt",
-      "file": "home",
+      "file": "runtime",
       "symbol": "region",
       "also": [
-        { "file": "home", "symbol": "whenShown" },
-        { "file": "home", "symbol": "isSkipped" },
+        { "file": "runtime", "symbol": "whenShown" },
+        { "file": "runtime", "symbol": "isSkipped" },
         { "file": "build", "section": "THE DEFERRED BLOCKS GET A NAME AND THEIR MEASURED HEIGHT" }
       ],
       "what": "Meldet, ob dieser Abschnitt gerade vom Browser übersprungen oder gerendert wird, und gibt wartende Beobachter frei.",
@@ -66,7 +82,7 @@
       "file": "logic",
       "symbol": "initReveal",
       "what": "Blendet einen Block ein, sobald er zu 8 % im Bild ist, und stößt dabei bei Bedarf seine Zähler an.",
-      "why": "Beobachtet wird nur, solange der Block gerendert ist (watchShown in home.js): ein Beobachter-Ziel in einem übersprungenen Block zwingt den Browser sonst, ihn trotzdem zu layouten."
+      "why": "Beobachtet wird nur, solange der Block gerendert ist (watchShown in runtime.js): ein Beobachter-Ziel in einem übersprungenen Block zwingt den Browser sonst, ihn trotzdem zu layouten."
     },
     {
       "match": "[data-fx], [data-fxnum]",
@@ -93,10 +109,10 @@
       "file": "logic",
       "symbol": "updateProcess",
       "also": [
-        { "file": "home", "symbol": "onRegion" }
+        { "file": "runtime", "symbol": "onRegion" }
       ],
       "what": "Füllt die Fortschrittsleiste des Ablaufs nach Scrollposition und markiert den erreichten Schritt.",
-      "why": "Die Funktion liest bei jedem Scroll-Frame das Layout eines fernen Abschnitts; home.js überspringt das, solange der Abschnitt per content-visibility übersprungen ist, und stößt es stattdessen an, sobald er gerendert wird (onRegion)."
+      "why": "Die Funktion liest bei jedem Scroll-Frame das Layout eines fernen Abschnitts; runtime.js überspringt das, solange der Abschnitt per content-visibility übersprungen ist, und stößt es stattdessen an, sobald er gerendert wird (onRegion)."
     },
     {
       "match": "[data-dgflow], [data-dgnode]",
@@ -127,13 +143,29 @@
       "why": "Ein gemeinsamer IntersectionObserver für den Container steuert alle seine Animationen zusammen, statt für jedes einzelne animierte Element einen eigenen Beobachter zu betreiben."
     },
     {
+      "match": "[data-v5-panel]",
+      "title": "Mega-Menü-Panel",
+      "file": "runtime",
+      "symbol": "pass",
+      "what": "Setzt data-v5-open auf das Panel, noch bevor der Binder nach einer Zustandsänderung die Seite abgleicht.",
+      "why": "Das geschlossene Panel steht per content-visibility:hidden außerhalb des Layouts; data-v5-open muss vor componentDidUpdate gesetzt sein, damit measurePanel() eine echte Höhe liest statt die eines verborgenen Elements."
+    },
+    {
+      "match": "[data-v5-static]",
+      "title": "Statische Insel",
+      "file": "build",
+      "symbol": "assemble",
+      "what": "Markiert einen Vorlagenblock, den der Binder nie anfasst, etwa die Hero-Headline oder die Stream-Notizen im <template>.",
+      "why": "Ein Block ohne eigenen State braucht keine Bindungen; assemble() setzt das Attribut beim Bauen, damit der Binder ihn beim Start überspringt statt ihn sinnlos zu verdrahten."
+    },
+    {
       "match": "[data-px], [data-px-img]",
       "title": "Pixel-Hover-Effekt",
-      "file": "home",
+      "file": "runtime",
       "symbol": "armPixels",
       "also": [
-        { "file": "home", "symbol": "loadPixels" },
-        { "file": "home", "symbol": "wirePixels" },
+        { "file": "runtime", "symbol": "loadPixels" },
+        { "file": "runtime", "symbol": "wirePixels" },
         { "file": "logic", "symbol": "initPixels" }
       ],
       "what": "Lädt den Pixelraster-Effekt über Buttons und Bildern nach und verdrahtet ihn mit dem jeweiligen Element.",
@@ -142,7 +174,7 @@
     {
       "match": "[data-pt-layer]",
       "title": "Die Stream-Notizen",
-      "file": "home",
+      "file": "runtime",
       "symbol": "armNotes",
       "also": [
         { "file": "logic", "symbol": "movePointsGlobal" },
@@ -150,36 +182,6 @@
       ],
       "what": "Setzt die vorbeiziehenden Code-Notizen erst ein, wenn zehn Sekunden lang ein breiter Bildschirm mit Maus da war.",
       "why": "Die 112 Labels sind 336 Elemente, 13 % des DOM der Seite; auf dem Handy gibt es sie nie, deshalb liegen sie bis dahin reglos in einem <template>, das kein Gerät rendert, stylt oder zählt."
-    },
-    {
-      "match": "[data-on]",
-      "title": "Klick-Weiterleitung",
-      "file": "home",
-      "symbol": "mount",
-      "also": [
-        { "file": "home", "symbol": "handlerName" }
-      ],
-      "what": "Ein einziger Klick-Listener am document sucht über data-on das nächste passende Element und ruft dessen Handler auf.",
-      "why": "Event-Delegation statt eines eigenen Listeners pro Button erspart hunderte Listener auf einer Seite mit weit über hundert klickbaren data-on-Elementen."
-    },
-    {
-      "match": "[data-dyn]",
-      "title": "Berechneter Stil",
-      "file": "home",
-      "symbol": "bind",
-      "what": "Schreibt einen einzelnen State-Wert (Farbe, Transform, Höhe …) auf genau die Elemente, deren Stil davon abhängt.",
-      "why": "data-dyn hält fest, welche der früher von React inline gesetzten Stil-Eigenschaften an einem State-Feld hängen; bind() ersetzt so den vollständigen Rerender durch ein gezieltes style.setProperty."
-    },
-    {
-      "match": "[data-v5-when], [data-v5-unless]",
-      "title": "Zustandsabhängiges Element",
-      "file": "home",
-      "symbol": "setState",
-      "also": [
-        { "file": "home", "symbol": "apply" }
-      ],
-      "what": "Blendet ein Element ein oder aus, das nur in einem bestimmten Zustand existiert, etwa das offene Mobilmenü oder den Consent-Hinweis.",
-      "why": "setState() ruft apply() auf, das die passenden data-v5-*-Flags per toggleAttribute auf <html> setzt; je ein CSS-Regelpaar pro Zustand blendet den Rest aus, statt Knoten aus dem DOM zu entfernen und wieder einzufügen."
     },
     {
       "match": "[data-screen-label]",
@@ -222,47 +224,13 @@
     {
       "match": "[data-v5-dev-switch]",
       "title": "Werkstatt-Schalter",
-      "file": "home",
+      "file": "runtime",
       "symbol": "armDevMode",
       "also": [
-        { "file": "home", "symbol": "loadDev" }
+        { "file": "runtime", "symbol": "loadDev" }
       ],
       "what": "Zeigt den Schalter zu dieser Werkstatt erst, wenn wirklich jemand da ist: 15 Sekunden nach dem Laden oder bei der ersten echten Aktion.",
       "why": "Vor dem ersten Aufruf kostet die Werkstatt keinen Knoten, keinen Request, keinen Stil; Lighthouse und automatisierte Messungen lösen keines der Ereignisse aus und sehen den Schalter deshalb nie."
-    },
-    {
-      "match": "[data-on~=\"click:l.onClick\"]",
-      "title": "Ziel auf der Seite",
-      "file": "logic",
-      "symbol": "go",
-      "also": [
-        { "file": "logic", "symbol": "goHandler" },
-        { "file": "home", "symbol": "handlers" }
-      ],
-      "what": "Scrollt sanft zu einem Anker dieser Seite oder öffnet die Zielseite, wenn der Anker hier (noch) nicht existiert.",
-      "why": "go() sucht erst per ID, dann über eine Alias-Liste und weicht erst auf eine externe Seite aus, wenn nichts davon trifft – so bleibt ein einziger Handler für Navigation, Footer und Mobilmenü zuständig."
-    },
-    {
-      "match": "[data-on~=\"click:f.toggle\"]",
-      "title": "FAQ aufklappen",
-      "file": "home",
-      "symbol": "handlers",
-      "also": [
-        { "file": "home", "symbol": "apply" }
-      ],
-      "what": "Öffnet eine FAQ-Antwort und schließt die zuvor offene, wenn eine andere Frage angeklickt wird.",
-      "why": "apply() schreibt bei jeder Änderung nur Höhe, Pfeil-Drehung und Icon-Farben der betroffenen Zeile per data-dyn, statt die ganze FAQ-Liste neu aufzubauen."
-    },
-    {
-      "match": "[data-v5-when=\"consent\"]",
-      "title": "Datenschutz-Hinweis",
-      "file": "home",
-      "symbol": "handlers",
-      "also": [
-        { "file": "home", "symbol": "apply" }
-      ],
-      "what": "Zeigt den Consent-Hinweis sieben Sekunden nach dem Laden, wenn noch keine Einwilligung gespeichert ist, und blendet ihn nach dem Annehmen sanft aus.",
-      "why": "Die Einwilligung wird in localStorage gemerkt; ist der Speicher blockiert, kommt der Hinweis bei jedem Besuch einfach wieder, statt die Seite abstürzen zu lassen."
     }
   ]
 }

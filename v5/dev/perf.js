@@ -199,7 +199,7 @@ export function mountPerf(W) {
     ctx.strokeStyle = "#635BFF"; ctx.lineWidth = 2; ctx.beginPath();
     fpsHist.forEach((v, i) => { const x = (i / 39) * spark.width, y = spark.height - 4 - (Math.min(v, 120) / 120) * (spark.height - 8); if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); });
     ctx.stroke();
-    const canvas = document.querySelector("canvas[data-ref='gradRef']");
+    const canvas = document.querySelector("canvas[data-global]");
     clear(streamKv);
     if (canvas) {
       const mode = canvas.getAttribute("data-v5-fps");

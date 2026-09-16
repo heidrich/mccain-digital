@@ -45,6 +45,7 @@ Bis zum 16.9.2026 stand dieser Inhalt zusammen mit den anderen `Rendern`-Themen 
 - **Platzhalter-Markup gehört in ein inertes template, nie in einen lebendigen Custom-Element-Teilbaum** — sonst rendert der Browser eine unsichtbare Zweitkopie der Seite ([→](#28-platzhalter-markup-gehört-in-ein-inertes-template-nie-in-einen-lebendigen-custom-element-teilbaum))
 - **scheduler.yield() und Long Animation Frames verbessern INP, nicht die Hauptthread-Summe** — Yielding verteilt Arbeit um, spart keine ([→](#29-scheduleryield-und-long-animation-frames-verbessern-inp-nicht-die-hauptthread-summe))
 - **Nach jedem neuen dauerhaften Effekt explizit gegenmessen** — Sorge vor Regression durch Median-Frame-Zeit und Long-Task-Zahl ersetzen ([→](#30-nach-jedem-neuen-dauerhaften-effekt-explizit-gegenmessen))
+- **Den Skript-Start in Tasks unter 50 ms teilen, mit einem Yield ohne Frame-Wartezeit** — MessageChannel statt setTimeout(0); TBT 96 → 21 ms ([→](#34-den-skript-start-in-tasks-unter-50-ms-teilen-mit-einem-yield-ohne-frame-wartezeit))
 
 **DOM-Größe**
 - **Initial unsichtbare Elemente als template auslagern statt live zu rendern** — senkt die aktive DOM-Größe ohne Einsatzbereitschaft zu verlieren ([→](#31-initial-unsichtbare-elemente-als-template-auslagern-statt-live-zu-rendern))
@@ -313,6 +314,13 @@ Verwandter, aber eigener Befund (nicht Gegenstand dieser Datei, siehe [react-nex
 **Woran man es erkennt:** Ein Audit oder eine Doku zitiert noch die alten Richtwerte ~800/1.400 bzw. 1.500 DOM-Knoten, 60 Breite, 32 Tiefe.
 **Fix:** Diese alten Zahlen nicht mehr verwenden. Stattdessen mit `scripts/mainthread.mjs` gezielt nach Layout-Events über 40 ms mit mehr als 100 betroffenen Layout-Objekten bzw. Style-Recalcs mit mehr als 300 betroffenen Elementen suchen — das sind die tatsächlich bewerteten Schwellen.
 **Beleg:** [Lighthouse dom-size-insight.js](https://github.com/GoogleChrome/lighthouse/blob/main/core/audits/insights/dom-size-insight.js), [DevTools-Frontend DOMSize.ts](https://github.com/ChromeDevTools/devtools-frontend/blob/main/front_end/models/trace/insights/DOMSize.ts) („These thresholds were selected to maximize the number of long (>40ms) events above the threshold while maximizing the number of short (<40ms) events below the threshold.") · Sicherheit: dokumentiert
+**Gilt für:** allgemein
+
+### 34. Den Skript-Start in Tasks unter 50 ms teilen, mit einem Yield ohne Frame-Wartezeit
+**Warum:** Total Blocking Time zählt von jedem Task nur den Teil über 50 ms. Ein Start, der Vorlage kompiliert, 1.600 Knoten übernimmt und die Seite mountet, kostet in einem Task 72–116 ms bei 4× CPU und damit 22–66 ms TBT; dieselbe Arbeit in drei Tasks kostet nichts, weil keiner die Linie reißt. `setTimeout(fn, 0)` ist dafür das falsche Werkzeug: es wird auf ≥ 1 ms geklemmt und landet oft hinter dem nächsten Paint, also einen Frame später. Ein `MessageChannel`-Ereignis läuft als nächster Task ohne Frame-Wartezeit; `scheduler.yield()` ebenso, wo es existiert.
+**Woran man es erkennt:** `scripts/lcp-window.mjs --cpu 4` zeigt eine Long Task kurz nach DOMContentLoaded von 100+ ms, deren Anteil der eigene Start ist (mit `performance.mark` je Phase belegen); TBT liegt spürbar über dem, was Style/Layout allein erklären.
+**Fix:** Startphasen trennen (Parsen/Kompilieren → Binden/Übernehmen → Mount), zwischen den Phasen mit `MessageChannel` (Fallback `setTimeout`) yielden, und die Lücke absichern: Zustandsänderungen, die vor dem Mount eintreffen, werden gesammelt und vom ersten Durchlauf angewendet; Blöcke, die vorher rendern, werden nachgeholt. Jede Phase mit `performance.mark` versehen, damit die Werkstatt und die Messskripte sie ausweisen.
+**Beleg:** mccain-digital `v5/runtime.js` (17.9.2026), Startseite Telefon 4× CPU: Start in einem Task 72–116 ms (kompilieren ~20, übernehmen ~40, Mount ~12 ms), TBT 96 ms; in drei Tasks Long Tasks 67 + 54 ms, **TBT 21 ms**; LCP unverändert (284 ms), CLS 0. · Sicherheit: gemessen
 **Gilt für:** allgemein
 
 ## Offene Fragen

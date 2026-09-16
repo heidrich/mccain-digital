@@ -93,7 +93,8 @@ cosmetic. `tools/prerender.mjs` documents each of these where it makes them:
 
 Eighteen of those routes come from the export's own `sitemap.xml`. Three —
 `/news/`, `/news/md-recall/`, `/marke/` — are not in it and were read off the
-design rather than invented; `tools/prerender.mjs` says how.
+design rather than invented; `tools/pages.mjs` (the route table both builds
+read) says how.
 
 Old URLs 301 to their new route: `/kontakt.html`, `/brand-guide.html`, the four
 `/services/*.html` and the four `/legal/*.html`.
@@ -205,47 +206,70 @@ server, writes the page, copies the assets, and writes `sitemap.xml` and the
 page index in `llms.txt` from the same route table — so those cannot drift from
 what exists.
 
-### v5, the static start page
+### v5, the whole site without React at runtime
 
-`v5/` is built from the rendered root `index.html`, so it follows a
-`prerender.mjs` run whenever the design export changed:
+`v5/` holds every one of the 21 pages, built from the rendered root pages
+(`index.html`, `kontakt/index.html`, …), so it follows a `prerender.mjs` run
+whenever the design export changed:
 
 ```bash
 python prodserve.py 8898 --dev      # must be running
-node tools/v5build.mjs              # writes v5/index.html, v5/logic.gen.js, v5/index.md
+node tools/v5build.mjs              # writes v5/<route>/index.html, logic.gen.js, index.md for all pages
+node tools/v5build.mjs --route /preise/ --route /kontakt/     # some pages
+node tools/v5build.mjs --root       # the switchover: site root, no /v5 prefix in links
 ```
 
+How it works (design: `docs/plans/2026-09-17-v5-alle-seiten-design.md`): each
+component is rendered with react-dom/server at eight widths and merged into one
+markup with media queries; the page's own class ships whole as
+`logic.gen.js`; the export's template ships inert in the page; and
+`v5/runtime.js`, one hand-written file for all pages, binds template and
+prerendered DOM and writes only what a state change alters (~1-2 ms per change
+instead of a 64-84 ms React re-render). Everything the export can do works:
+mega menu, search (Cmd/Ctrl+K), DE/EN, forms, FAQ, consent, mobile menu, the
+pages' own widgets. The preview links to itself under `/v5/`; the canonical
+URLs stay the production ones.
+
 The deferred sections (`data-cv`) carry a measured placeholder height per
-viewport width (`tools/v5-heights.json`, keys from `tools/v5cv.mjs`). After any
-change to copy or layout, measure again before building:
+viewport width and per page (`tools/v5-heights.json`, keys from
+`tools/v5cv.mjs`). After any change to copy or layout, measure again before
+building, on an otherwise idle machine:
 
 ```bash
-python prodserve.py 8897            # the built page with production headers
-node tools/v5heights.mjs            # rewrites tools/v5-heights.json
+python prodserve.py 8897            # the built pages with production headers
+node tools/v5heights.mjs            # all built routes; --route /x/ for one
 node tools/v5build.mjs
 ```
 
 `v5build.mjs` names every block it could not find in the file; the skill's
 `cv-audit.mjs` reports a page-height drift above 24 px when the numbers have
-gone stale. Hand-written in `v5/`: `home.js` and the workshop under `v5/dev/`.
+gone stale. Hand-written in `v5/`: `runtime.js` and the workshop under
+`v5/dev/`.
 
-The build also writes `v5/index.md`, the page as Markdown for crawlers and
-language models (converter in `tools/markdown.mjs`, announced with
-`<link rel="alternate" type="text/markdown">`, served as `text/markdown` by
-`vercel.json` and `prodserve.py`). `node tools/markdown-check.mjs` reads the
-twin back from the served page and checks its shape.
+Every page also gets its Markdown twin (`v5/<route>/index.md`), the page as
+Markdown for crawlers and language models (converter in `tools/markdown.mjs`,
+announced with `<link rel="alternate" type="text/markdown">`, served as
+`text/markdown` by `vercel.json` and `prodserve.py`).
+
+Checks, all against the running servers:
+
+```bash
+node tools/v5probe.mjs --all        # every page: no console errors, nothing written at start, menu, search, EN/DE, FAQ, form (intercepted), consent, mobile menu
+node tools/markdown-check.mjs --all # every twin: served as text/markdown, words and headings
+node tools/v5dev-check.mjs --route /kontakt/   # the workshop on one page
+```
 
 #### The workshop (Dev-Modus)
 
-`v5/dev/` is the page shown from the inside: DOM tree, the element's HTML and
-the CSS rules that apply, the source files with jumps from element to function
-(`map.json`, hand-maintained), the numbers of the visit (LCP, layout shifts,
-long tasks, waterfall, frame rate, skipped blocks, device), knobs, and how
-Google and language models read the page. Native ES modules, no build step;
-texts live in `texte.js`. Nothing of it exists before the visitor's first
-click, key, wheel or touch, and the switch appears ten seconds after that
-(`armDevMode` in `home.js`); `?werkstatt` opens it at once. The rule is
-checked, not trusted:
+`v5/dev/` is the page shown from the inside, on every page: DOM tree, the
+element's HTML, its template bindings and the CSS rules that apply, the source
+files with jumps from element to function (`map.json`, hand-maintained), the
+numbers of the visit (LCP, layout shifts, long tasks, waterfall, frame rate,
+skipped blocks, device), knobs, and how Google and language models read the
+page. Native ES modules, no build step; texts live in `texte.js`. Nothing of
+it exists before the visitor's first click, key, wheel or touch, and the switch
+appears ten seconds after that (`armDevMode` in `runtime.js`); `?werkstatt`
+opens it at once. The rule is checked, not trusted:
 
 ```bash
 python prodserve.py 8897            # or 8898 --dev

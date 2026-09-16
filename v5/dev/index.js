@@ -1,6 +1,6 @@
-/* The workshop: the start page shown from the inside.
+/* The workshop: any v5 page shown from the inside.
  *
- * Loaded by home.js (loadDev) when the visitor presses the switch, never
+ * Loaded by runtime.js (loadDev) when the visitor presses the switch, never
  * before. This module builds the drawer and the layer, mounts the views and
  * takes the switch over. Closing removes every node, listener, observer and
  * style the workshop added and puts the page back the way it was; the module

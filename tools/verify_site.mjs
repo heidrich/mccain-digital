@@ -24,6 +24,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright-core";
 import { findChrome } from "./browser.mjs";
+import { PAGES } from "./pages.mjs";
 
 const SITE = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const CONFIG = JSON.parse(fs.readFileSync(path.join(SITE, "site.config.json"), "utf8"));
@@ -499,12 +500,16 @@ if (WANT_NOINDEX && BASE.startsWith("http") && !BASE.includes("127.0.0.1")) {
 }
 
 /* The Markdown twin is what a language model reads instead of the HTML. It is
- * written by tools/v5build.mjs next to the page and must come back as
- * text/markdown: a twin that 404s, or arrives as text/plain because a host
- * rule is missing, is invisible to the model and to the workshop's crawler
- * view alike, and nothing on the page would look different. */
+ * written by tools/v5build.mjs next to every route in tools/pages.mjs's PAGES
+ * and must come back as text/markdown: a twin that 404s, or arrives as
+ * text/plain because a host rule is missing, is invisible to the model and to
+ * the workshop's crawler view alike, and nothing on the page would look
+ * different. Checked for all 21 routes, not just the start page - v5build.mjs
+ * writes one twin per route, and a single route regressing would look exactly
+ * like this section passing if only "/" were asked. */
 console.log("\n  markdown twins");
-for (const p of ["/v5/index.md"]) {
+for (const { route } of PAGES) {
+  const p = `/v5${route}index.md`;
   let status = 0, type = "", head = "";
   try {
     const res = await fetch(BASE + p);

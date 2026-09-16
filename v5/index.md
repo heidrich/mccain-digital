@@ -1,4 +1,4 @@
-# KI-Tools, die auf Ihren Daten laufen.
+# KI-Tools, die auf Ihren Daten laufen. AI tools that run on your data.
 
 > Digital Product Studio aus Bayern: KI auf Ihren Daten, Web-Apps, Websites und Individualsoftware. Antwort in 24 Stunden, Festpreis in 48.
 
@@ -276,7 +276,7 @@ Studio
 
 Seit 2016 als unabhängiges Studio. Die Personen, die Ihr Angebot schreiben, bauen das Produkt – und sind auch im dritten Jahr noch erreichbar.
 
-[Mehr über das Studio](https://mccain-digital.com/studio/)
+[Mehr über das Studio](https://mccain-digital.com/v5/studio/)
 
 ![Das Studio in Oberostendorf](https://mccain-digital.com/img/studio-wide-1200x457.webp) Oberostendorf · Bayern · hover: Pixel
 
@@ -318,7 +318,7 @@ Was kostet das?
 
 Kein offener Stundenzähler: Nach dem ersten Gespräch bekommen Sie eine Zahl. Damit Sie vorher wissen, wovon wir reden, hier die Spannen, in denen sich unsere Projekte bewegen.
 
-[Größenordnung im Rechner prüfen](https://mccain-digital.com/preise/) Leistung wählen, Umfang anklicken – die Spanne steht sofort da.
+[Größenordnung im Rechner prüfen](https://mccain-digital.com/v5/preise/) Leistung wählen, Umfang anklicken – die Spanne steht sofort da.
 
 Website 3–6 Wochen · ab niedrig fünfstellig Handgeschrieben für Tempo und Suche, Lighthouse 100, SEO und llms.txt inklusive. Echte Screens in Woche eins. Websites ansehen
 
@@ -374,7 +374,7 @@ Starten Sie hier mit der Konfiguration.
 
 Leistung wählen, Umfang anklicken – Größenordnung, Dauer und Betrieb stehen in zwei Minuten da. Als PDF zum Mitnehmen, ohne Gespräch.
 
-[Zum Konfigurator](https://mccain-digital.com/preise/#rechner)
+[Zum Konfigurator](https://mccain-digital.com/v5/preise/#rechner)
 
 Fragen & Antworten
 
@@ -386,7 +386,7 @@ Kosten, Dauer, Zuständigkeiten – und wann wir die falsche Wahl sind.
 
 Ja. Im Konfigurator wählen Sie Leistung und Umfang und sehen sofort Größenordnung, Dauer und Betriebskosten – dieselbe Rechnung, die wir intern anstellen. Am Ende nehmen Sie die Zusammenfassung als PDF mit oder schicken sie uns direkt.
 
-[Konfigurator öffnen](https://mccain-digital.com/preise/#rechner)
+[Konfigurator öffnen](https://mccain-digital.com/v5/preise/#rechner)
 
 **Was kostet ein Projekt?**
 
@@ -422,7 +422,7 @@ Wenn Sie bis Montag zwanzig Leute brauchen – wir sind zwei. Wenn Sie das güns
 
 Vollständiger Quellcode, Dokumentation und Patch Notes gehören zur Lieferung – nicht zum Zusatzpaket. Zusammen mit md-recall steigt Ihr Team sofort ein, statt sich durch fremden Code zu arbeiten.
 
-[md-recall ansehen](https://mccain-digital.com/md-recall/)
+[md-recall ansehen](https://mccain-digital.com/v5/md-recall/)
 
 git
 
@@ -448,9 +448,9 @@ News
 
 Produkt-Updates, Notizen aus der Technik, Nachrichten aus dem Studio.
 
-[Alle Beiträge](https://mccain-digital.com/news/)
+[Alle Beiträge](https://mccain-digital.com/v5/news/)
 
-[Produkt 11. Sep 2026 4 Min recall heißt jetzt md-recall – und ist frei für alle Neuer Name, keine Seat-Grenze, direkt von hier erreichbar. Der Anstoß kam aus der Community.](https://mccain-digital.com/news/md-recall/) [Technik 2. Sep 2026 7 Min Warum der Index im Repository liegt Ein Gedächtnis neben dem Code überlebt Maschinenwechsel, Branches und Reviews.](https://mccain-digital.com/news/) [Studio 18. Aug 2026 3 Min Zwei Personen, ein Kalender Ab Herbst nur noch zwei Projekte gleichzeitig. Was das für Anfragen bedeutet.](https://mccain-digital.com/news/)
+[Produkt 11. Sep 2026 4 Min recall heißt jetzt md-recall – und ist frei für alle Neuer Name, keine Seat-Grenze, direkt von hier erreichbar. Der Anstoß kam aus der Community.](https://mccain-digital.com/v5/news/md-recall/) [Technik 2. Sep 2026 7 Min Warum der Index im Repository liegt Ein Gedächtnis neben dem Code überlebt Maschinenwechsel, Branches und Reviews.](https://mccain-digital.com/v5/news/) [Studio 18. Aug 2026 3 Min Zwei Personen, ein Kalender Ab Herbst nur noch zwei Projekte gleichzeitig. Was das für Anfragen bedeutet.](https://mccain-digital.com/v5/news/)
 
 Kontakt
 
@@ -464,6 +464,6 @@ Holderweg 1 · 86869 Oberostendorf · Bayern
 
 Mo–Fr · 9:00–18:00 Uhr (MEZ)
 
-[Schon ein Projekt im Kopf? Im Konfigurator sehen Sie Größenordnung und Dauer sofort – und schicken die Aufstellung direkt an uns.](https://mccain-digital.com/preise/#rechner)
+[Schon ein Projekt im Kopf? Im Konfigurator sehen Sie Größenordnung und Dauer sofort – und schicken die Aufstellung direkt an uns.](https://mccain-digital.com/v5/preise/#rechner)
 
 Ihre Angaben werden nur zur Beantwortung Ihrer Anfrage verwendet.

@@ -46,7 +46,7 @@ export function mountElement(W) {
     upBtn.disabled = !target.parentElement || target.parentElement === document.documentElement;
     hint.hidden = true;
     clear(body);
-    body.append(pathBar(target), htmlCard(target), cssCard(target), computedCard(target), boxCard(target), a11yCard(target), codeCard(target), editCard(target));
+    body.append(pathBar(target), htmlCard(target), templateCard(target), cssCard(target), computedCard(target), boxCard(target), a11yCard(target), codeCard(target), editCard(target));
   }
 
   /* ---- path */
@@ -84,6 +84,26 @@ export function mountElement(W) {
     const code = renderCode(prettyHtml(target), "html", { small: "inline" });
     const size = target.outerHTML.length;
     return card({ eyebrow: T.element.html, title: shortLabel(target, 3), body: [code.el, h("p.wk-hint", `${size.toLocaleString("de-DE")} Zeichen HTML · ${target.getElementsByTagName("*").length.toLocaleString("de-DE")} Nachfahren`)], why: T.element.htmlWhy, attrs: { "data-section": "html" } });
+  }
+
+  /* ---- template: the binder's own record for this node (window.__v5.describe) */
+  function bindingList(pairs) {
+    const decl = h("div.wk-decl");
+    for (const [name, expr] of pairs) { decl.appendChild(h("span.p", name + ":")); decl.appendChild(h("span.v", mono(expr))); }
+    return decl;
+  }
+  function templateCard(target) {
+    const api = window.__v5;
+    const d = api && typeof api.describe === "function" ? api.describe(target) : null;
+    if (!d) return card({ eyebrow: T.element.template, body: note(T.element.templateNone), why: T.element.templateWhy, attrs: { "data-section": "template" } });
+    const rows = [
+      [T.element.templateTid, mono(d.tid)],
+      [T.element.templateAttrs, d.dyn.length ? bindingList(d.dyn.map((a) => [a.name, a.expr])) : note(T.element.templateNoDyn)],
+      [T.element.templateStyle, d.style.length ? bindingList(d.style.map((s) => [s.prop, s.expr])) : note(T.element.templateNoStyle)],
+      [T.element.templateEvents, d.events.length ? bindingList(d.events.map((e) => [e.type, e.expr])) : note(T.element.templateNoEvents)],
+      [T.element.templateRef, d.ref ? mono(d.ref) : null],
+    ];
+    return card({ eyebrow: T.element.template, body: kv(rows), why: T.element.templateWhy, attrs: { "data-section": "template" } });
   }
 
   /* ---- css */

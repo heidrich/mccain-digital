@@ -1,9 +1,13 @@
 /* Does the workshop (v5/dev/) keep its promise: nothing about it exists before
  * the visitor has done something real, and everything about it works once
- * they ask for it.
+ * they ask for it. Runs against any of the 21 routes tools/pages.mjs builds
+ * under v5/<route>/, not just the start page - the switch, the ten-second
+ * rule and the workshop itself all come from v5/runtime.js, which is shared
+ * by every route.
  *
- *   python3 prodserve.py 8897           # the built page, production headers
- *   node tools/v5dev-check.mjs          # http://127.0.0.1:8897/v5/
+ *   python3 prodserve.py 8897                    # the built page, production headers
+ *   node tools/v5dev-check.mjs                   # http://127.0.0.1:8897/v5/
+ *   node tools/v5dev-check.mjs --route /kontakt/  # http://127.0.0.1:8897/v5/kontakt/
  *   node tools/v5dev-check.mjs --url http://127.0.0.1:8897/v5/ --out <dir> --quick
  *
  * WHY IT EXISTS
@@ -19,9 +23,18 @@
  * pointer has not yet decided to stay.
  *
  * Options:
- *   --url   <page>    default http://127.0.0.1:8897/v5/
+ *   --route <route>   default "/" - one of tools/pages.mjs's PAGES[i].route;
+ *                      the page URL becomes <base>/v5<route>
+ *   --base  <origin>  default http://127.0.0.1:8897
+ *   --url   <page>    overrides --route/--base outright, default <base>/v5<route>
  *   --out   <dir>     default <tmpdir>/v5dev-check  (screenshots land here)
  *   --quick           shortens phase 1's no-interaction wait (16 s -> 12 s)
+ *
+ * Only the start page ("/") carries the workshop's own invitation band
+ * (#werkstatt-band, its [data-v5-dev-open] button) - none of the five phases
+ * below depend on it, they all drive the switch itself
+ * ([data-v5-dev-switch], present on every route once armed) or open
+ * ?werkstatt directly, so the same phases run unchanged on any route.
  */
 import fs from "node:fs";
 import os from "node:os";
@@ -34,7 +47,9 @@ function flag(name, fallback) {
   const i = argv.indexOf(name);
   return i !== -1 && argv[i + 1] !== undefined ? argv[i + 1] : fallback;
 }
-const URL = flag("--url", "http://127.0.0.1:8897/v5/");
+const BASE = flag("--base", "http://127.0.0.1:8897").replace(/\/$/, "");
+const ROUTE = flag("--route", "/");
+const URL = flag("--url", `${BASE}/v5${ROUTE}`);
 const OUT = flag("--out", path.join(os.tmpdir(), "v5dev-check"));
 const QUICK = argv.includes("--quick");
 const WERKSTATT_URL = URL + (URL.includes("?") ? "&werkstatt" : "?werkstatt");

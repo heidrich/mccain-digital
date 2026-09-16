@@ -5,16 +5,28 @@
  *
  *   node tools/markdown-check.mjs
  *   node tools/markdown-check.mjs --url http://127.0.0.1:8897/v5/ --out v5/index.md
+ *   node tools/markdown-check.mjs --all [--base http://127.0.0.1:8897]
+ *
+ * --all is a different, lighter check: it fetches the already-built twin
+ * (/v5<route>index.md, plain HTTP - no browser, no HTML_TO_MARKDOWN) for
+ * every route in tools/pages.mjs's PAGES and reports words/headings/links per
+ * route. A twin that 404s is listed as "not built yet", not a failure - not
+ * every route need be built in every run. One that answers with anything
+ * else must come back as text/markdown with >= 120 words and >= 1 heading, or
+ * it fails. The default (no flags) behaviour - render one live page's HTML
+ * through HTML_TO_MARKDOWN via a real browser and check it in depth, down to
+ * the start page's own section phrases and FAQ count - is unchanged.
  *
  * The dev server (python prodserve.py 8897 --dev, per the owner) is assumed
  * to be running already - this script only reads from it, the way
  * tools/browser.mjs's requireServer() would, but requireServer() checks a
  * different hardcoded port (BASE, 8898) than the one the v5 build actually
  * serves from here, so it is not used; the check below is scoped to
- * whatever --url points at.
+ * whatever --url (or, for --all, --base) points at.
  */
 import { launch, open } from "./browser.mjs";
 import { HTML_TO_MARKDOWN } from "./markdown.mjs";
+import { PAGES } from "./pages.mjs";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -23,6 +35,8 @@ const flag = (name, fallback) => {
   const i = args.indexOf(`--${name}`);
   return i >= 0 && args[i + 1] !== undefined ? args[i + 1] : fallback;
 };
+const ALL = args.includes("--all");
+const BASE_ARG = flag("base", "http://127.0.0.1:8897").replace(/\/$/, "");
 const URL_ARG = flag("url", "http://127.0.0.1:8897/v5/");
 const OUT_ARG = flag("out", null);
 
@@ -33,6 +47,53 @@ async function reachable(url) {
   } catch (e) {
     return false;
   }
+}
+
+/* --all: one HTTP round trip per route against the twin the build already
+ * wrote, no browser involved - the in-depth single-page path below is what
+ * exercises HTML_TO_MARKDOWN itself. */
+if (ALL) {
+  console.log(`markdown-check --all: ${PAGES.length} route(s) at ${BASE_ARG}\n`);
+  let builtCount = 0;
+  let anyFail = false;
+  for (const { route } of PAGES) {
+    const mdUrl = `${BASE_ARG}/v5${route}index.md`;
+    let status = -1;
+    let type = "";
+    let text = "";
+    try {
+      const res = await fetch(mdUrl);
+      status = res.status;
+      type = res.headers.get("content-type") || "";
+      if (status === 200) text = await res.text();
+    } catch (e) {
+      status = -1;
+      type = e.message;
+    }
+    if (status === 404) {
+      console.log(`  not built yet   404  ${route}`);
+      continue;
+    }
+    builtCount++;
+    const words = (text.match(/\S+/g) || []).length;
+    const headings = (text.match(/^#{1,6} .+$/gm) || []).length;
+    const links = (text.match(/!?\[[^\]]*\]\([^)]+\)/g) || []).length;
+    const isMarkdown = type.startsWith("text/markdown");
+    const routeFails = [];
+    if (status !== 200) routeFails.push(`HTTP ${status}`);
+    if (!isMarkdown) routeFails.push(`content-type "${type || "none"}" (want text/markdown)`);
+    if (words < 120) routeFails.push(`${words} words (need >= 120)`);
+    if (headings < 1) routeFails.push(`${headings} headings (need >= 1)`);
+    const good = routeFails.length === 0;
+    if (!good) anyFail = true;
+    console.log(
+      `  ${good ? "ok  " : "FAIL"} ${route.padEnd(45)} words=${words} headings=${headings} links=${links}` +
+        (good ? "" : `  -> ${routeFails.join("; ")}`)
+    );
+  }
+  console.log(`\n${builtCount} of ${PAGES.length} route(s) built, ${PAGES.length - builtCount} not built yet`);
+  console.log(anyFail ? "\nFAILED" : "\nall checks passed.");
+  process.exit(anyFail ? 1 : 0);
 }
 
 if (!(await reachable(URL_ARG))) {

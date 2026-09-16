@@ -1,12 +1,13 @@
 # Fallstudien — html-performance
 
-> Teil des Skills [[html-performance]] · Stand 2026-09-16 · Belege: mccain-digital (HANDOFF, CHANGELOG, Commits), weitere Projekte des Owners, Recherche mit Quell-URLs
+> Teil des Skills [[html-performance]] · Stand 2026-09-17 · Belege: mccain-digital (HANDOFF, CHANGELOG, Commits), weitere Projekte des Owners, Recherche mit Quell-URLs
 > Neuer Eintrag: oben einfügen (newest first) — Überschrift `## <Datum> · <Projekt> · <was gemessen wurde>`, Zahlen immer vorher→nachher angeben, am Ende die betroffenen Regeln in den Nachbardateien verlinken.
 
 ## Kurzfassung
 
 | Datum | Projekt | Fall | Ergebnis (Zahlen) | Regel(n) |
 |---|---|---|---|---|
+| 2026-09-17 | mccain-digital | v5: alle 21 Seiten ohne React, ein Binder für die Vorlagensprache | 21/21 Seiten funktional (Menü, Suche, DE/EN, Formulare, Widgets); je Zustandswechsel 1–3 ms statt 64–84 ms; Startseite Telefon 4×: TBT 29→21 ms (96 vor Teilung des Starts), LCP 272→284 ms, CLS 0; 150 cv-Blöcke gemessen | [](react-nextjs.md#31-wenn-die-zustände-nicht-aufzählbar-sind-die-vorlagensprache-binden-nicht-das-framework-ausliefern), [](rendern-hauptthread.md#34-den-skript-start-in-tasks-unter-50-ms-teilen-mit-einem-yield-ohne-frame-wartezeit) |
 | 2026-09-16 nachts | mccain-digital | v5: Dev-Modus „Werkstatt“ ohne Kosten vor der ersten Aktion | 16 s ohne Aktion: 0 Knoten, 0 Anfragen; Schalter 10.086 ms nach Klick/Taste; Modul 15 Dateien erst beim Klick; verify_site und v5dev-check grün | [](laden-javascript.md#16-besucher-werkzeuge-erst-nach-echter-aktion-plus-verzögerung-laden-davor-null-bytes) |
 | 2026-09-16 abends | mccain-digital | v5: Platzhalterhöhen aus dem Build, Motion-Budget-Timer, WebGL-Gegenprobe | Drift beim ersten Scroll mobil +3.402→0 px, Desktop −3.095→−1 px; setTimeout(250) im Sweep 25→0; rAF-Aufschub für WebGL: FCP 2,4→2,2 s, TBT 0→2,2 s | [](rendern-hauptthread.md#2-contain-intrinsic-size-genau-setzen-und-die-auto-form-nutzen), [](rendern-hauptthread.md#6-auf-contentvisibilityautostatechange-hören-checkvisibility-nur-als-start-fallback), [](rendern-canvas-webgl.md#1-getcontext-ist-synchron-der-erste-paint-darf-nicht-auf-canvas-oder-webgl-warten), [](widerlegt.md#51-zwei-requestanimationframe-ticks-nach-dem-skript-start-garantieren-einen-gemalten-ersten-frame--webgl-danach-zu-starten-entlastet-fcp-und-score) |
 | 2026-09-16 | mccain-digital | v5-Optimierungsrunde + Chromium-Verifikation | "Other" 1.340→641ms, IO 508→97ms, PSI mobil 95→60→100 | [](rendern-hauptthread.md#4-content-visibility-erzeugt-einen-stacking-context-und-einen-containing-block), [](rendern-hauptthread.md#16-intersectionobserver-kosten-skalieren-mit-der-zielzahl-nicht-der-instanzzahl), lighthouse-psi.md#2-rechne-beim-psi-standard-mit-1000-ms-ruhefenster-nicht-5250-ms, widerlegt.md#3-object-pooling-verbessert-die-webgl-pixelstrom-performance |
@@ -34,6 +35,27 @@
 | ADR-040 | mccain-cms | Browser-Runtime-Tests für DOM-Effekte | 13/13 grün im neuen Harness | [[browser-verify]], messen.md |
 | alpha.164 / B7-B8 | mccain-cms | Zwei widerlegte Annahmen (GSAP, Reduced-Motion) | Subsystem entfernt, 33 Tests gestrichen | widerlegt.md#8-gsaps-scrolltriggerscroll-ist-der-korrekte-weg-zum-externen-scrubben, widerlegt.md#9-ein-automatisches-reduced-motion-system-schützt-ohne-kosten |
 | — | whatever-recall-internal | 3D-Preview: 0×-Verifikation überzeugte trotzdem nicht | Feature nicht auf Homepage ausgeliefert | (Produktentscheidung, keine Performance-Regel) |
+
+## 2026-09-17 · mccain-digital · v5: alle 21 Seiten ohne React, ein Binder für die Vorlagensprache
+
+**Ausgangslage:** Owner: „ok bitte restliche seite auf html bauen." Die Startseite lief seit dem 13.9. als v5 (Bauzeit-Render in 8 Breiten × 4 Zuständen, handgeschriebenes `home.js` mit `apply()`), die 20 Unterseiten noch als React-Seiten (eine Klassenkomponente je Seite, ~40 State-Felder, jeder Zustandswechsel ein voller Re-Render von 1.000–2.400 Knoten, 64–84 ms bei 4× CPU laut `tools/reactprof.mjs`).
+
+**Befund:** Die 21 Klassen teilen 74 Methoden (63 byte-identisch) und haben je 2–15 eigene Widgets (Preisrechner, Vergleichsschieber, Crawler-Tabs, Auto-Zyklen). Die Vorlagensprache des Exports ist klein und kein JavaScript: `{{ pfad }}`, `{{ a == b }}`, `<sc-for>`, `<sc-if>`, `onClick="{{ fn }}"`, `ref`; alle Werte kommen aus `renderVals()`. Der Startseiten-Weg (Zustände vorrendern, `apply()` von Hand) scheitert am nicht aufzählbaren Zustandsraum; Widgets von Hand wären ein zweiter Nachbau.
+
+**Maßnahme:** `v5/runtime.js` als Binder für die Vorlagensprache (Regel [react-nextjs 31](react-nextjs.md#31-wenn-die-zustände-nicht-aufzählbar-sind-die-vorlagensprache-binden-nicht-das-framework-ausliefern)): Vorlage inert im Dokument, `data-dc-tpl` am Knoten, Basislinie ohne Schreiben, nach `setState` nur Abweichungen, Knoten aus der Vorlage erzeugen/entfernen, Handler am Element, `React`-Shim, keine Schreibvorgänge in übersprungenen `content-visibility`-Blöcken (Nachholen beim Rendern). Build (`tools/v5build.mjs`) als Schleife über die Routentabelle, nur noch Breiten-Renders, ganze Klasse je Seite mit gezählten Patches. Start in drei Tasks geteilt (Regel [rendern-hauptthread 34](rendern-hauptthread.md#34-den-skript-start-in-tasks-unter-50-ms-teilen-mit-einem-yield-ohne-frame-wartezeit)).
+
+**Ergebnis (17.9.2026, lokal, :8897):**
+
+| | vorher | nachher |
+| --- | ---: | ---: |
+| Seiten ohne React zur Laufzeit | 1 | 21 |
+| Funktionsprüfung (`v5probe --all`, Desktop + Telefon) | – | 21/21, 0 Konsolenfehler, 0 Schreibvorgänge des Binders beim Start |
+| Kosten je Zustandswechsel | 64–84 ms (React, 4× CPU) | 1–3 ms (Desktop, ungedrosselt), 4 ms auf /marke/ |
+| Startseite Telefon 4×: TBT | 29 ms | 21 ms (96 ms mit dem Start in einem Task) |
+| Startseite Telefon 4×: LCP / CLS | 272 ms / 0 | 284 ms / 0 |
+| HTML Startseite roh / gzip | 268 / 38 KB | 399 / 60 KB (Vorlage, Ids, deep-Inhalt) |
+
+**Fallen:** Reacts Render hüllt die Vorlage in `div.sc-host` ohne Id (Binder muss darunter starten); die annotierte Vorlage ist DOM-serialisiert (`onclick`, nicht `onClick`); Tabellen-Tags sind als `sc-raw-*` verschlüsselt; Anker-Regexe brechen, wenn ein Attribut die Reihenfolge ändert (`<span data-pt` wurde `<span data-dc-tpl=… data-pt` — 112 Notizen wären auf jedem Telefon gerendert worden); dieselbe Schleife steht in zwei Methoden (`startGradient`, `startWave`), Patches müssen die Methode nennen; `<path d>` mit Array (Suchtreffer) wirft sechs Konsolenfehler je Suche; `cv-audit` misst vor `fonts.ready` und meldet den Schriftwechsel als Drift (95 px), nach `fonts.ready` −1 px.
 
 ## 2026-09-16 nachts · mccain-digital · v5: Dev-Modus „Werkstatt“ ohne Kosten vor der ersten Aktion
 

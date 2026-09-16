@@ -1,12 +1,12 @@
 /* Picking an element on the page, the way an inspector does it.
  *
  * While picking, the workshop listens on `window` in the capture phase, so it
- * sees every pointer event before the page's own handlers (home.js delegates
- * on `document`) and stops them there: a link does not navigate, a button
- * does not act, the text does not get selected. The page is not made inert -
- * an inert subtree disappears from hit testing (measured 16.9.2026:
- * elementsFromPoint returned only <html>), which is exactly what a picker
- * needs to keep. */
+ * sees every pointer event before the page's own handlers (runtime.js hangs
+ * each one directly on its element, see wire() there) and stops them there: a
+ * link does not navigate, a button does not act, the text does not get
+ * selected. The page is not made inert - an inert subtree disappears from
+ * hit testing (measured 16.9.2026: elementsFromPoint returned only <html>),
+ * which is exactly what a picker needs to keep. */
 import { isOwn, isTouch } from "./ui.js";
 
 export function createPicker(W, layer) {

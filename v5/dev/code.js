@@ -64,13 +64,17 @@ export function mountCode(W) {
   const sources = new Map();
   let logicPromise = null;
   let currentId = null, view = null, pending = null;
+  /* Every one of the 21 pages has its own logic.gen.js under its own route;
+   * #v5-data names both, so this file list works on every page, not only /. */
+  const V5_DATA = JSON.parse((document.getElementById("v5-data") || {}).textContent || "{}");
+  const logicUrl = (V5_DATA.prefix || "/v5") + (V5_DATA.route || "/") + "logic.gen.js";
 
   const files = [
     { id: "html-live", lang: "html", load: () => Promise.resolve(liveHtml()) },
     { id: "html", lang: "html", url: location.pathname },
     { id: "css", lang: "css", load: () => Promise.resolve(formatCss((document.getElementById("v5-css") || {}).textContent || "")) },
-    { id: "home", lang: "js", url: "/v5/home.js" },
-    { id: "logic", lang: "js", url: "/v5/logic.gen.js" },
+    { id: "runtime", lang: "js", url: "/v5/runtime.js" },
+    { id: "logic", lang: "js", url: logicUrl },
     { id: "motion", lang: "js", url: "/v5/dev/motion-budget.src.js" },
     { id: "shader-frag", lang: "glsl", load: () => logic().then((s) => shaderFrom(s, "fs") || "// Fragment-Shader nicht gefunden") },
     { id: "shader-vert", lang: "glsl", load: () => logic().then((s) => shaderFrom(s, "vs") || "// Vertex-Shader nicht gefunden") },
@@ -79,7 +83,7 @@ export function mountCode(W) {
   ].concat(DEV_FILES.map((f) => ({ id: "dev:" + f, lang: f.endsWith(".css") ? "css" : f.endsWith(".json") ? "json" : "js", url: "/v5/dev/" + f, group: "dev", name: "werkstatt/" + f })));
 
   function logic() {
-    if (!logicPromise) logicPromise = fetch("/v5/logic.gen.js").then((r) => r.text());
+    if (!logicPromise) logicPromise = fetch(logicUrl).then((r) => r.text());
     return logicPromise;
   }
   function textOf(file) {
@@ -195,7 +199,7 @@ export function mountCode(W) {
 
   return {
     el,
-    show() { if (!currentId) open("home"); },
+    show() { if (!currentId) open("runtime"); },
     dispose() { cache.clear(); sources.clear(); },
   };
 }

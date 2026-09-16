@@ -7,7 +7,7 @@
 import { T } from "./texte.js";
 import { h, clear, isOwn, pill, textPreview, shortLabel } from "./ui.js";
 
-const SHOW_ATTRS = ["id", "class", "data-cv", "data-screen-label", "role", "aria-label", "href", "src", "type", "name", "data-on", "data-ref", "for", "alt"];
+const SHOW_ATTRS = ["id", "class", "data-cv", "data-screen-label", "role", "aria-label", "href", "src", "type", "name", "data-dc-tpl", "for", "alt"];
 const PAGE_SIZE = 120;
 
 export function mountTree(W) {
