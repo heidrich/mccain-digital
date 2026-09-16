@@ -21,22 +21,119 @@ Juni, alte Ignore-Regel, siehe unten), die Entscheidung liegt beim Owner.
    `scrollY` in der Strom-Schleife. Die Schleife liest jetzt pro Frame gar kein
    Layout mehr (`this.view` aus Scroll- und Resize-Events, Start erst mit der
    ersten Meldung des ResizeObservers).
+5. **Owner-PageSpeed auf `ca40094`, mobil** (PSI, Lighthouse 13.4.1, Moto G Power,
+   erfasst 16.9.2026 12:30 MESZ). Das Desktop-Ergebnis wurde nicht übermittelt.
+
+   | Leistung | A11y | Best Practices | SEO | Agentic |
+   | ---: | ---: | ---: | ---: | ---: |
+   | **100** | 100 | 100 | 69 | 3/3 |
+
+   | FCP | LCP | TBT | CLS | Speed Index |
+   | ---: | ---: | ---: | ---: | ---: |
+   | 0,9 s | 1,6 s | 10 ms | 0,002 | 2,0 s |
+
+   SEO 69 kommt allein vom bewussten `noindex`, weil die Seite noch im Bau ist
+   (Owner-Bestätigung 16.9.).
+6. **Owner-Entscheidung: nur noch v5.** Die React-Seiten (21 Stück aus
+   `tools/prerender.mjs`) bekommen keine Fixes mehr und bleiben, wie sie sind, bis
+   alle anderen Seiten im v5-Stil nachgebaut sind. Dann fliegt React raus. Alles
+   Neue (Skill-Referenz, Dev-Modus, Messungen) bezieht sich auf `/v5/`.
 
 **Als nächstes:**
 
-- **Owner macht einen echten PageSpeed-Test auf `ca40094`.** Das Ergebnis abwarten
-  und die Zahlen hier eintragen.
-- **Danach, mit dem Owner abgestimmt: einen HTML-Performance-Skill bauen**, in dem
-  alle Lehren dieser Datei gesammelt werden (Methode, Fallen, Muster). Der Skill
-  soll bei jedem Projekt weiter wachsen.
+- **Skill `html-performance` ist gebaut (16.9. abends).** Alle Lehren dieser Datei,
+  aller 173 Commits, der anderen Repos und dreier Recherchen stecken darin:
+  `SKILL.md` (Bauregeln, Ablauf, Fehlerkatalog, Prüfliste), `references/`
+  (Bauanleitung, Messen, Lighthouse/PSI, Laden, Rendern, React/Next, Widerlegt,
+  Fallstudien), `scripts/` (neun Messwerkzeuge auf playwright-core plus
+  `prodserve.py`). **Quelle der Wahrheit ist `~/.claude/skills/html-performance/`
+  im Sync-Repo `heidrich/dotclaude`.** Eine Kopie liegt in diesem Repo unter
+  `.claude/skills/html-performance/`, damit das Projekt ihn auch ohne Sync trägt.
+  - **Am PC:** `cd ~/.claude && git pull` holt Skill, die Sonnet-Regel
+    (`rules/subagents.md`, `settings.json`) und die geänderten Skills
+    (`web-skills-suite`, `neue-webseite`, `browser-verify`). Danach einmal
+    `npm install` in `~/.claude/skills/html-performance/scripts/` (holt nur
+    playwright-core; Chromium aus dem ms-playwright-Cache oder `HP_CHROME`).
+  - **Kopie auffrischen** (nur nach Änderungen an der Quelle):
+    `rsync -a --delete --exclude node_modules --exclude package-lock.json
+    ~/.claude/skills/html-performance/ .claude/skills/html-performance/`
+  - **Pflege:** Neue Lehre → `references/fallstudien.md`, dann Regel in der
+    passenden Referenz; falsche Annahme → `widerlegt.md`; im Sync-Repo committen
+    und pushen. Bei jedem Webprojekt gilt die `bauanleitung.md` beim Bauen und
+    der Performance-Pass vor dem Push (globale CLAUDE.md, Abschnitt Qualität).
+  - **Offen am Skill:** `rendern.md` (~38k Tokens) und `laden.md` (~25k) in je
+    zwei bis drei Themendateien teilen, damit ein gezielter Read billig bleibt.
+- **Dev-Modus (Owner-Idee 16.9., nach dem Skill, noch nicht begonnen, nur v5).**
+  Zwei zuschaltbare Sichten auf die Seite, für Kunden ohne Technik-Hintergrund:
+  1. **Röntgen (Owner-Ergänzung 16.9.: „wirklich den DOM anzeigen und auch viel
+     Code, ggf. interaktiv“):** Eine Linse folgt dem Zeiger und zeigt statt des
+     Designs den Bauplan. Dazu eine echte Werkstatt-Leiste wie in den DevTools:
+     der komplette DOM-Baum (auf- und zuklappbar, Hover markiert auf der Seite,
+     Klick auf der Seite springt im Baum), der Quellcode des Elements mit den
+     zutreffenden CSS-Regeln (aus `document.styleSheets` per `matches()`), die
+     Quelldateien selbst (`home.js`, `logic.gen.js`, CSS, GLSL des Stroms) mit
+     Sprungmarken von Element zu Funktion (handgepflegte Karte für unseren Code),
+     und Live-Daten dieses Besuchs: LCP-Element markiert, Ressourcen-Wasserfall,
+     Layout-Shifts mit Quelle, lange Aufgaben, Frame-Rate des Stroms, welche
+     Sektionen der Browser gerade überspringt. Interaktiv: Text und HTML eines
+     Knotens ändern (mit Zurücksetzen), Design-Tokens live drehen.
+  2. **Crawler- und KI-Sicht:** Wie Google und Sprachmodelle die Seite lesen
+     (Title, Robots, Überschriften-Baum, Landmarken, JSON-LD, Markdown-Zwilling,
+     `llms.txt`), jeder Block mit „Warum das gut ist“. Braucht pro Seite eine
+     Markdown-Fassung aus dem Prerender (`/index.md` ist heute 404).
+  - **Schutzregel:** Der Schalter erscheint nach 15 s, frühestens aber nach der
+    ersten echten Nutzeraktion (der spätere Zeitpunkt). Lighthouse interagiert nie,
+    also bleibt PageSpeed unberührt. Vorher null Bytes, kein DOM-Eintrag. Das Modul
+    wird nachgeladen (CSP erlaubt `script-src 'self'`, `style-src 'unsafe-inline'`),
+    Overlay `inert`, Escape schließt.
+  - **Messlatte (Owner):** „wunderschön, GEHALTVOLL und nützlich für den Kunden.
+    Er soll sehen, wir wollen nicht einfach verkaufen, wir können auch was.“
+    Heißt: Designsystem der Seite, nicht DevTools-Optik. Erklärtexte nach dem
+    Muster „was, warum, wie“ (siehe Durchgang 12.9.), mit echten Messwerten aus dem
+    Browser des Besuchers statt Behauptungen. Erst die Liste der Stationen und die
+    Texte, dann der Bau.
 - **Weiterhin offen:**
   - nicht-composited Animationen, der Rest von `RunTask`
   - Canvas-Auflösung unter Software-GL
-  - React-Seiten ohne die v5-Fixes, die Startseite `/` rotiert dort noch per JS
-- **Merksatz für PageSpeed:** Es misst, bis die Seite ~5,25 s lang ohne lange
-  Aufgaben und ohne Netzverkehr war. Alles, was *nach* dem Laden neu erscheint,
-  kann in diesem Fenster zum LCP werden, sobald es größer ist als der bisherige
-  Kandidat. Späte Arbeit (Nachladen bei 7 s oder 10 s) verlängert das Fenster.
+  - die übrigen 20 Seiten im v5-Stil nachbauen (`v5build.mjs` baut heute genau
+    eine Seite), danach React entfernen (Owner 16.9.)
+  - **Neue Befunde der Skill-Messskripte (16.9. abends, nur gemessen, nichts
+    geändert):**
+    - Unter Software-GL (`--use-angle=swiftshader`, mobil) rückt der erste
+      Paint von 188 ms auf 2.216 ms (CPU 4×: 2.392 ms); `getContext("webgl")`
+      allein dauert 230–311 ms, die zugehörige Long Task 341–346 ms, dazu eine
+      zweite von 89–104 ms. Der Strom gehört hinter den ersten Paint
+      (Canvas erst nach dem ersten Frame starten, bis dahin CSS-Verlauf).
+      Relevant, falls PageSpeed ohne GPU misst.
+    - Platzhalterhöhen: Nach einem Scroll-Durchlauf ist die Seite am Desktop
+      3.095 px kürzer, mobil 3.402 px länger, weil jede `data-cv`-Sektion mit
+      `contain-intrinsic-size: auto 900px` startet (`#konfig-band` 981 → 245 px,
+      `div.s249` 1.806 → 2.274 px). Sprungmarken landen deshalb daneben.
+      Fix: gemessene Höhen pro Sektion und Breite in den Build.
+    - Beim Scrollen läuft ein `setTimeout(…, 250)` neunmal pro Sekunde
+      (Polling-Verdacht, `scripts/observers.mjs --sweep`), Ursache noch offen.
+- **Merksatz für PageSpeed (korrigiert 16.9. abends, Quelle: Lighthouse 13.4.1
+  `core/config/constants.js`, `lr-mobile-config.js`, eigene Läufe):** Der Trace
+  läuft, bis Load, FCP, Netzruhe (≤ 2 offene Requests) und CPU-Ruhe (keine Long
+  Task) je eine Ruhezeit lang gehalten haben. Im PageSpeed-Modus (`simulate`)
+  ist diese Ruhezeit **1 s**, die 5,25 s gelten nur bei echter Drosselung
+  (`devtools`). Lokal endete der Trace bei 2,4 s (simulate) bzw. 13,3 s
+  (devtools), beide vor der ersten Rotation bei 13,5 s; der alte Stand `902108a`
+  bekam lokal eine 100. PageSpeed hat den Kandidaten bei 20,5 s dennoch gesehen,
+  also lief sein Trace mindestens so lange. Warum, ist nicht reproduziert
+  (Kandidaten: Long Tasks des Stroms unter Software-GL, später erster Paint).
+  Die Regel bleibt: Nichts, was später erscheint, darf größer sein als der
+  LCP-Kandidat, und nach dem Laden darf keine Dauerlast entstehen.
+- **Präzisierung zum größten Einzelfund (Chromium-Quellcode, 16.9. abends):**
+  IO-Ziele in übersprungenen Blöcken erzwingen im eingeschwungenen Zustand kein
+  Layout (`IntersectionGeometry::GetTargetLayoutObject` steigt für gesperrte
+  Subtrees aus). Teuer ist die Startphase, bis die Nähe zum Viewport bestimmt
+  ist, und jedes Layout-Lesen (`getBoundingClientRect`, `offset*`) auf einem
+  Knoten im gesperrten Block erzwingt Style + Layout des Blocks
+  (`ScopedForcedUpdate`) und lädt dabei seine CSS-Bilder, weil Chromium
+  `mask-image`/`background-image` beim Style-Aufbau holt
+  (`CSSImageValue::CacheImage`). Die Abhilfe (erst beobachten und messen, wenn
+  der Block rendert) bleibt richtig: 28 → 11 Anfragen, 508 → 97 ms.
 
 **Werkzeug-Hinweise für diesen Mac:**
 

@@ -1,0 +1,9 @@
+{
+  "name": "html-performance-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Messskripte des Skills html-performance. Einmal pro Maschine: npm install (holt nur playwright-core, keinen Browser).",
+  "dependencies": {
+    "playwright-core": "^1.56.0"
+  }
+}
