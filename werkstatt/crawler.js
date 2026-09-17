@@ -26,8 +26,7 @@ function lengthPill(n, lo, hi) { return pill(`${n} ${T.crawler.chars} · ${n < l
 function pageEls(sel) { return Array.from(document.querySelectorAll(sel)).filter((e) => !isOwn(e)); }
 
 export function mountCrawler(W) {
-  const el = h("div");
-  el.appendChild(h("p.wk-note", { style: { margin: "2px 4px 12px" } }, T.crawler.intro));
+  const el = h("div.wk-cols");
 
   /* A station: a card with data-station/data-state that renders itself, sync or async. */
   function station(id, title, why, render) {
@@ -214,7 +213,7 @@ export function mountCrawler(W) {
     const text = (main.innerText || main.textContent || "").replace(/\s+/g, " ").trim();
     const words = text ? text.split(" ").length : 0;
     body.appendChild(h("div.wk-stat", h("div", h("b", words.toLocaleString("de-DE")), h("small", T.crawler.words)), h("div", h("b", String(Math.max(1, Math.round(words / 220)))), h("small", T.crawler.readMin)), h("div", h("b", fmtBytes(text.length)), h("small", "Text")), h("div", h("b", fmtBytes(document.documentElement.outerHTML.length)), h("small", "HTML"))));
-    body.appendChild(h("details.wk-why", { style: { borderTop: "0" } }, h("summary", T.crawler.show), h("pre.wk-pre", text.slice(0, 4000) + (text.length > 4000 ? " …" : ""))));
+    body.appendChild(h("details.wk-why", { style: { borderTop: "0" } }, h("summary", { hint: T.hints.showText }, T.crawler.show), h("pre.wk-pre", { tabindex: "0", "data-scrollhint": T.hints.codeScrollShort, hint: T.hints.codeScroll }, text.slice(0, 4000) + (text.length > 4000 ? " …" : ""))));
   });
 
   /* ---- fetched twins */
@@ -249,7 +248,7 @@ export function mountCrawler(W) {
     const here = urls.some((u) => { try { return new URL(u).pathname === location.pathname; } catch (e) { return false; } });
     body.appendChild(h("div.wk-stat", h("div", h("b", String(urls.length)), h("small", "Seiten")), h("div", { "data-tone": here ? "good" : "warn" }, h("b", here ? "ja" : "nein"), h("small", "diese Seite enthalten"))));
     if (!here) body.appendChild(h("p.wk-hint", T.crawler.sitemapNotIn));
-    body.appendChild(h("details.wk-why", { style: { borderTop: "0" } }, h("summary", T.crawler.show), h("ul.wk-list", ...urls.map((u) => h("li", h("span.wk-grow", mono(u.replace(/^https?:\/\/[^/]+/, ""))))))));
+    body.appendChild(h("details.wk-why", { style: { borderTop: "0" } }, h("summary", { hint: T.hints.showText }, T.crawler.show), h("ul.wk-list", ...urls.map((u) => h("li", h("span.wk-grow", mono(u.replace(/^https?:\/\/[^/]+/, ""))))))));
   });
 
   return { el, dispose() {} };

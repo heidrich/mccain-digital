@@ -35,6 +35,29 @@
  * below depend on it, they all drive the switch itself
  * ([data-v5-dev-switch], present on every route once armed) or open
  * ?werkstatt directly, so the same phases run unchanged on any route.
+ *
+ * KONSOLE (17.9.2026)
+ * The workshop stopped being a side drawer and became a console: docked to
+ * the bottom or the right (applyShape() in werkstatt/index.js), resized by a
+ * pointer- and keyboard-operable grip, with a third view ("Fragen") that
+ * asks Claude with the workshop's own facts. Phase 3 now also checks: the
+ * default dock and the grip's role/aria-valuenow; ArrowUp/Home/End on the
+ * grip (+40 px, the window's full height, 220 px); the two dock-to buttons
+ * swapping data-dock and setting --wk-w/scroll-padding-right; the "Fragen"
+ * form sending a question and getting a real answer even though this local
+ * server has no /api/ask (501/405 - the browser's own "Failed to load
+ * resource" console line for exactly that URL is expected and filtered out
+ * in watch(), see the comment there, not treated as a failure); and the
+ * glossary's .wk-term buttons opening and closing #v5-dev-pop. Phase 4 now
+ * also checks that closing drops scroll-padding-* and data-wk-resizing from
+ * <html> and restores --acc to whatever it was BEFORE the switch was ever
+ * clicked - not to "", because logic.src.js's own applyAccent() sets --acc
+ * on <html> on every route, independent of the workshop entirely (see the
+ * comment at strayInline below). Since the console now hides its own switch
+ * ([data-v5-dev-switch], CSS: [aria-expanded=true]{display:none}) while
+ * open and shows it again once closed, phases 3 and 4 check that directly
+ * too. Phase 5 checks that the dock-to buttons stay CSS-hidden below the
+ * 960 px dock breakpoint on the phone.
  */
 import fs from "node:fs";
 import os from "node:os";
@@ -82,9 +105,19 @@ function watch(page) {
   const t0 = Date.now();
   page.on("console", (m) => {
     const type = m.type();
-    if (type === "error" || type === "warning") {
-      consoleIssues.push({ label: currentPhase, t: Date.now() - t0, type, text: m.text() });
-    }
+    if (type !== "error" && type !== "warning") return;
+    const text = m.text();
+    /* Chromium logs this line itself whenever a request's response is not ok
+     * - including the workshop's own POST /api/ask, which this local server
+     * (prodserve.py, no POST route) always answers with 501/405. ask.js's
+     * catch already turns that into an answer from the workshop's own facts
+     * (see localAnswer() there), so this browser-generated line is not a
+     * failure the workshop caused and must not fail the run. Filtered by the
+     * exact failing URL, not by text alone, so a real broken request
+     * elsewhere still counts as a console error. */
+    const loc = m.location();
+    if (type === "error" && text.startsWith("Failed to load resource:") && loc && /\/api\/ask(?:[?#]|$)/.test(loc.url)) return;
+    consoleIssues.push({ label: currentPhase, t: Date.now() - t0, type, text });
   });
   page.on("pageerror", (e) => pageErrors.push({ label: currentPhase, t: Date.now() - t0, text: e.message }));
   page.on("requestfailed", (r) =>
@@ -154,6 +187,10 @@ let devOpened = false;
 
 try {
   let ctx1, page1;
+  /* --acc on <html> before the switch is ever clicked (Phase 3), read back
+   * by Phase 4's strayInline check - see the KONSOLE comment at the top and
+   * the comment beside strayInline for why this is not simply "". */
+  let accBefore = null;
 
   await runPhase("Phase 1: no dev bytes before any real interaction (desktop 1350x940)", async () => {
     ctx1 = await browser.newContext({ viewport: { width: 1350, height: 940 } });
@@ -199,6 +236,7 @@ try {
   });
 
   await runPhase("Phase 3: opening the workshop", async () => {
+    accBefore = await page1.evaluate(() => document.documentElement.style.getPropertyValue("--acc"));
     await page1.click("[data-v5-dev-switch]");
     const opened = await page1
       .waitForFunction(
@@ -221,6 +259,13 @@ try {
 
     await page1.screenshot({ path: path.join(OUT, "roentgen-element.png") });
 
+    /* The switch hides itself (CSS: [aria-expanded=true]{display:none}) the
+     * moment the console is open, and comes back once it's closed again
+     * (checked in phase 4) - no other check here may click or expect the
+     * switch's visibility while #v5-dev is on screen. */
+    const switchHiddenOpen = await page1.locator("[data-v5-dev-switch]").isVisible().catch(() => true);
+    check(!switchHiddenOpen, "[data-v5-dev-switch] is hidden (display:none) while the console is open");
+
     const TABS = ["element", "tree", "code", "perf", "knobs"];
     for (const tab of TABS) {
       await page1.click(`#v5-dev [role="tab"][data-tab="${tab}"]`);
@@ -231,6 +276,103 @@ try {
         .catch(() => false);
       check(visible, `tab "${tab}" shows its [role="tabpanel"][data-panel="${tab}"]`);
       await page1.screenshot({ path: path.join(OUT, `roentgen-${tab}.png`) });
+    }
+
+    /* ---- Konsole (17.9.2026): dock/grip baseline, grip keyboard, docking,
+     * "Fragen", glossary - see the KONSOLE paragraph at the top of the file. */
+    /* The free window is the default on a desktop (owner 17.9. evening);
+     * the grip belongs to the bottom and right docks, so dock to the bottom
+     * before the grip checks. */
+    check((await page1.locator('#v5-dev[data-dock="float"]').count()) > 0, '#v5-dev opens as the free window on a desktop (data-dock="float")');
+    check((await page1.locator('#v5-dev .wk-rs[data-edge="se"]').count()) > 0, 'the window has its corner handle (.wk-rs[data-edge="se"])');
+    await page1.click('#v5-dev [data-dock-to="bottom"]');
+    await page1.waitForTimeout(150);
+    check((await page1.locator('#v5-dev[data-dock="bottom"]').count()) > 0, 'clicking [data-dock-to="bottom"] docks #v5-dev to the bottom (data-dock="bottom")');
+    check((await page1.locator('#v5-dev .wk-grip[role="separator"]').count()) > 0, '.wk-grip carries role="separator"');
+    const leadAfterOpen = ((await page1.locator("#v5-dev .wk-lead").textContent().catch(() => "")) || "").trim();
+    check(leadAfterOpen.length > 0, `.wk-lead is not empty (got "${leadAfterOpen.slice(0, 60)}")`);
+    const statusAfterOpen = ((await page1.locator("#v5-dev .wk-status").textContent().catch(() => "")) || "").trim();
+    check(statusAfterOpen.length > 0, `.wk-status is not empty (got "${statusAfterOpen.slice(0, 60)}")`);
+
+    /* Grip keyboard: ArrowUp grows the bottom dock by 40px, Home is the
+     * window's full height, End is MIN_H (220) - see makeGrip() in
+     * werkstatt/index.js. */
+    const grip = page1.locator("#v5-dev .wk-grip");
+    await grip.focus();
+    const gripBefore = Number(await grip.getAttribute("aria-valuenow"));
+    await grip.press("ArrowUp");
+    await page1.waitForTimeout(100);
+    const gripAfterUp = Number(await grip.getAttribute("aria-valuenow"));
+    check(gripAfterUp === gripBefore + 40, `ArrowUp on the grip grows aria-valuenow by 40 (was ${gripBefore}, now ${gripAfterUp})`);
+    const wkH = await page1.evaluate(() => document.getElementById("v5-dev").style.getPropertyValue("--wk-h"));
+    check(wkH === `${gripAfterUp}px`, `ArrowUp updates --wk-h to match aria-valuenow (got "${wkH}", expected "${gripAfterUp}px")`);
+    await grip.press("Home");
+    await page1.waitForTimeout(100);
+    const innerH = await page1.evaluate(() => innerHeight);
+    const gripAfterHome = Number(await grip.getAttribute("aria-valuenow"));
+    check(gripAfterHome === innerH, `Home sets the grip to the window's full height (got ${gripAfterHome}, innerHeight ${innerH})`);
+    await grip.press("End");
+    await page1.waitForTimeout(100);
+    const gripAfterEnd = Number(await grip.getAttribute("aria-valuenow"));
+    check(gripAfterEnd === 220, `End sets the grip to MIN_H 220 (got ${gripAfterEnd})`);
+    /* Leave the console small: at full height it would cover the <h1> the
+     * pick check below clicks, and the picker would hit the console instead
+     * (17.9. evening, two failing checks for exactly that). */
+
+    /* Docking: the two dock-to buttons swap #v5-dev between the bottom sheet
+     * and the right-docked panel. */
+    await page1.click('#v5-dev [data-dock-to="right"]');
+    await page1.waitForTimeout(150);
+    check((await page1.locator('#v5-dev[data-dock="right"]').count()) > 0, 'clicking [data-dock-to="right"] switches #v5-dev to data-dock="right"');
+    const wkW = await page1.evaluate(() => document.getElementById("v5-dev").style.getPropertyValue("--wk-w"));
+    check(wkW !== "", `docking right sets --wk-w on #v5-dev (got "${wkW}")`);
+    const scrollPadRight = await page1.evaluate(() => document.documentElement.style.scrollPaddingRight);
+    check(scrollPadRight !== "", `docking right sets scroll-padding-right on <html> (got "${scrollPadRight}")`);
+    const dockToRightPressed = await page1.locator('#v5-dev [data-dock-to="right"]').getAttribute("aria-pressed");
+    check(dockToRightPressed === "true", `[data-dock-to="right"] carries aria-pressed="true" while docked right (got "${dockToRightPressed}")`);
+    await page1.click('#v5-dev [data-dock-to="bottom"]');
+    await page1.waitForTimeout(150);
+    check((await page1.locator('#v5-dev[data-dock="bottom"]').count()) > 0, 'clicking [data-dock-to="bottom"] switches #v5-dev back to data-dock="bottom"');
+
+    /* "Fragen": this local server has no /api/ask (501/405, see the
+     * console-filter comment in watch()), so the answer comes from the
+     * workshop's own facts (ask.js's catch -> localAnswer) - it must still
+     * arrive as a real message, not silently fail. */
+    await page1.click('[data-view-switch="ask"]');
+    await page1.waitForTimeout(150);
+    check((await page1.locator('#v5-dev[data-view="ask"]').count()) > 0, '#v5-dev switches to data-view="ask"');
+    const askFormVisible = await page1.locator("#v5-dev form.wk-askform").isVisible().catch(() => false);
+    check(askFormVisible, 'form.wk-askform is visible in the "Fragen" view');
+    await page1.locator("#v5-dev form.wk-askform input").fill("Was bedeutet LCP?");
+    await page1.click('#v5-dev [data-action="ask-send"]');
+    let askAnswer = "";
+    const askDeadline = Date.now() + 8000;
+    for (;;) {
+      askAnswer = ((await page1.locator('#v5-dev .wk-msg[data-role="assistant"] .wk-msg-text').first().textContent().catch(() => "")) || "").trim();
+      if (askAnswer.length > 20 || Date.now() > askDeadline) break;
+      await page1.waitForTimeout(200);
+    }
+    check(askAnswer.length > 20, `.wk-msg[data-role="assistant"] answers within 8s with more than 20 characters (got ${askAnswer.length})`);
+    await page1.click('[data-view-switch="roentgen"]');
+    await page1.waitForTimeout(150);
+
+    /* Glossary: at least one .wk-term on the element tab; the first click
+     * opens #v5-dev-pop, Escape closes only the pop (a second Escape would
+     * close #v5-dev itself, per onKeyDown in werkstatt/index.js). */
+    await page1.click('#v5-dev [role="tab"][data-tab="element"]');
+    await page1.waitForTimeout(150);
+    const termCount = await page1.locator('#v5-dev [data-panel="element"] .wk-term').count();
+    check(termCount > 0, '[data-panel="element"] has at least one .wk-term button');
+    if (termCount > 0) {
+      await page1.locator('#v5-dev [data-panel="element"] .wk-term').first().click();
+      await page1.waitForTimeout(150);
+      check((await page1.locator("#v5-dev-pop").count()) > 0, "clicking a .wk-term opens #v5-dev-pop");
+      await page1.keyboard.press("Escape");
+      await page1.waitForTimeout(150);
+      check((await page1.locator("#v5-dev-pop").count()) === 0, "Escape closes #v5-dev-pop");
+      check((await page1.locator("#v5-dev").count()) > 0, "…without closing #v5-dev itself");
+    } else {
+      check(false, "skipping the pop/Escape check - no .wk-term found on the element tab");
     }
 
     /* Knobs: one switch on, the hue turned, then the switch off again - the
@@ -262,6 +404,10 @@ try {
 
     const pickOff = await page1.evaluate(() => !document.documentElement.classList.contains("v5-dev-pick"));
     check(pickOff, "html.v5-dev-pick is removed again after picking an element");
+    if (!pickOff && h1Box) {
+      const under = await page1.evaluate(([x, y]) => { const el = document.elementFromPoint(x, y); return el ? el.tagName.toLowerCase() + (el.id ? "#" + el.id : "") + "." + Array.from(el.classList).slice(0, 2).join(".") : "nothing"; }, [h1Box.x + h1Box.width / 2, h1Box.y + h1Box.height / 2]);
+      console.log(`    diagnostic: under the pick click at (${Math.round(h1Box.x + h1Box.width / 2)}, ${Math.round(h1Box.y + h1Box.height / 2)}) is ${under}, scrollY ${await page1.evaluate(() => scrollY)}`);
+    }
     const selected = page1.locator('#v5-dev [data-panel="element"] [data-selected-path]');
     const selectedCount = await selected.count();
     check(selectedCount > 0, '[data-panel="element"] [data-selected-path] exists after picking the h1');
@@ -302,6 +448,11 @@ try {
       .catch(() => false);
     check(closed, "#v5-dev and #v5-dev-layer are removed within 1s of Escape");
 
+    /* The switch was hidden by CSS while #v5-dev was open (checked in phase
+     * 3) - it must be visible again now that the console is gone. */
+    const switchVisibleClosed = await page1.locator("[data-v5-dev-switch]").isVisible().catch(() => false);
+    check(switchVisibleClosed, "[data-v5-dev-switch] is visible again once the console has closed");
+
     const expanded = await page1.locator("[data-v5-dev-switch]").getAttribute("aria-expanded").catch(() => null);
     check(expanded === "false", `switch aria-expanded is "false" after closing (got "${expanded}")`);
 
@@ -315,7 +466,29 @@ try {
     const strayClass = await page1.evaluate(() => Array.from(document.documentElement.classList).find((c) => c.startsWith("v5-dev-")) || null);
     check(!strayClass, `html carries no class starting with "v5-dev-" after closing (found "${strayClass}")`);
     const strayInline = await page1.evaluate(() => ({ acc: document.documentElement.style.getPropertyValue("--acc"), knobs: document.querySelectorAll("[data-v5-dev-style]").length }));
-    check(strayInline.acc === "" && strayInline.knobs === 0, `closing undoes the knobs: no --acc left on <html>, no [data-v5-dev-style] nodes (acc "${strayInline.acc}", nodes ${strayInline.knobs})`);
+    /* --acc is not the workshop's to empty: logic.src.js's own applyAccent()
+     * sets --acc/--acc-soft/--acc-ring/--acc-text on <html> on EVERY route,
+     * from componentDidMount, entirely independent of the workshop. Asserting
+     * acc === "" would only ever pass by coincidence - because the accent
+     * knob's own undo (werkstatt/knobs.js) calls style.removeProperty() for
+     * each var, which wipes whatever was there, rather than restoring
+     * whatever was there before the knob touched it. The promise the module
+     * actually makes ("puts the page back the way it was") is checked
+     * against the value phase 3 captured before the switch was ever clicked. */
+    check(strayInline.acc === accBefore, `closing leaves --acc on <html> as it was before opening (was "${accBefore}", now "${strayInline.acc}")`);
+    check(strayInline.knobs === 0, `closing undoes the knobs: no [data-v5-dev-style] nodes left (found ${strayInline.knobs})`);
+
+    /* Since 17.9.2026 opening also writes scroll-padding-* and data-wk-resizing
+     * (applyShape()/makeGrip() in werkstatt/index.js) - closing must drop
+     * both, the same promise the leftover-node and stray-class checks above
+     * already make for everything else the workshop touches. */
+    const strayShape = await page1.evaluate(() => ({
+      scrollPaddingBottom: document.documentElement.style.scrollPaddingBottom,
+      scrollPaddingRight: document.documentElement.style.scrollPaddingRight,
+      resizing: document.documentElement.getAttribute("data-wk-resizing"),
+    }));
+    check(strayShape.scrollPaddingBottom === "" && strayShape.scrollPaddingRight === "", `closing leaves no scroll-padding-* inline style on <html> (bottom "${strayShape.scrollPaddingBottom}", right "${strayShape.scrollPaddingRight}")`);
+    check(strayShape.resizing === null, `closing leaves no data-wk-resizing on <html> (found "${strayShape.resizing}")`);
 
     const moduleRequestsBefore = devRequests.filter((r) => r.url.includes("/werkstatt/index.js")).length;
     await page1.click("[data-v5-dev-switch]");
@@ -364,6 +537,20 @@ try {
         check(false, "skipping the rest of phase 5 (crawler tap, escape) - #v5-dev never appeared on ?werkstatt");
         return;
       }
+
+      /* Below the 960 px dock breakpoint the console is always the bottom
+       * sheet and there is nothing to dock elsewhere, so the CSS
+       * (@media (max-width: 959.98px) { [data-dock-to]{display:none} })
+       * hides both dock-to buttons on the phone. */
+      check((await page3.locator('#v5-dev[data-dock="bottom"]').count()) > 0, '#v5-dev is docked to the bottom on the phone (data-dock="bottom")');
+      /* Both buttons must exist (hidden by CSS, not missing from the markup),
+       * otherwise isVisible() === false would pass for a button that is gone. */
+      const dockBtnCount = await page3.locator('#v5-dev [data-dock-to]').count();
+      check(dockBtnCount === 3, `the three [data-dock-to] buttons are in the markup on the phone too (found ${dockBtnCount})`);
+      const dockToBottomVisible = await page3.locator('#v5-dev [data-dock-to="bottom"]').isVisible().catch(() => true);
+      const dockToRightVisible = await page3.locator('#v5-dev [data-dock-to="right"]').isVisible().catch(() => true);
+      check(!dockToBottomVisible && !dockToRightVisible, `[data-dock-to] buttons are hidden below the 960px breakpoint (bottom visible: ${dockToBottomVisible}, right visible: ${dockToRightVisible})`);
+
       await page3.screenshot({ path: path.join(OUT, "phone-roentgen.png") });
       await page3.tap('[data-view-switch="crawler"]');
       await page3.waitForTimeout(400);

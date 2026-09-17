@@ -331,33 +331,104 @@ node tools/v5dev-check.mjs --route /kontakt/   # the workshop on one page
 
 #### The workshop (Dev-Modus)
 
-`werkstatt/` is the page shown from the inside, loaded as `<script
+`werkstatt/` is the page shown from the inside: a console loaded as `<script
 type="module" src="/werkstatt/index.js">` by `loadDev` in
-[`tools/runtime.js`](tools/runtime.js) when the visitor presses the switch,
-never before. Two views: Röntgen — the DOM tree, the element's HTML, its
-template bindings and the CSS rules that apply, the readable code (the
-route's own `logic.src.js` next to its minified `logic.gen.js`, plus
+[`tools/runtime.js`](tools/runtime.js), never before it opens. It docks three
+ways: as a free-floating window by default on a desktop (`data-dock="float"`,
+`?werkstatt=fenster`, 760×520px starting bottom-right with a 24px margin,
+dragged by its header or lead line, clamped to the viewport), bottom (full
+width, starting at 42% of the window height, 55% on a phone, where it is the
+only mode), or right (a 480px column) —
+buttons in the header (`data-dock-to`) switch between the three, except below
+960px where it is always bottom-docked with no switcher. A drag handle
+resizes bottom/right docking: `.wk-grip` (`role="separator"`), pointer drag, a
+second press within 400ms snaps to full size and back, arrow keys/Home/End
+move it (Shift = 120px), bounds are 220px up to the full window height
+(bottom) or 360px up to window width minus 80 (right). The floating window
+instead resizes from three handles (`.wk-rs`: right edge, bottom edge,
+corner; 360×240px at minimum, the window minus an 8px margin at most) and
+moves by its header; its keyboard control sits on the title (`tabindex="0"`
+in float mode): arrows move it 24px, Shift+arrows resize it, Home resets it,
+Enter snaps to full size and back — the footer's key row swaps to match
+(`T.keysFloat`). Shape and docking live in module memory for the session
+only — nothing goes to `localStorage`, because the workshop promises to
+store nothing. `scroll-padding-bottom` / `-right` on `<html>` keeps "Auf der
+Seite zeigen" from landing behind the open console while docked bottom or
+right (not applied floating), removed again on close. `?werkstatt=rechts`
+starts docked right, `?werkstatt=fenster` starts floating; `?werkstatt=fragen`
+/ `=google` opens straight on that view.
+
+Three views: **Röntgen** — the DOM tree, the element's HTML, its template
+bindings and the CSS rules that apply, the readable code (the route's own
+`logic.src.js` next to its minified `logic.gen.js`, plus
 `werkstatt/runtime.src.js` and `werkstatt/motion-budget.src.js`, with jumps
 from element to function via `map.json`, hand-maintained), the numbers of the
 visit (LCP, layout shifts, long tasks, waterfall, frame rate, skipped blocks,
-device), and knobs — and Google & KI, how crawlers and language models read
-the page. Native ES modules, no build step; texts live in `texte.js`. Escape,
-or the switch again, removes every node, listener, observer and style the
-workshop added; the module stays cached, so opening again costs no request.
+device), and knobs; **Google & KI**, how crawlers and language models read
+the page; and **Fragen**, questions answered from the visit's own facts
+(below). The header is one line — brand, the three views, a "Wählen" tab,
+tools, × — with a lead sentence per tab underneath (`.wk-lead`) and a status
+line in the footer (`.wk-status`: the last action, or a button's `data-hint`
+on hover/focus), above the key row and "Alles zurücksetzen". Layout responds
+to the console's own width through a container query (`container: wk / size`
+on `#v5-dev`): cards flow into two columns from 880px, three from 1360px; the
+Code tab gets a file-list sidebar and a full-width viewer sized to the
+console's own height (`cqh`), with a wrap toggle (`data-wrap`) that defaults
+to on in a narrow console.
 
-Nothing of it exists before the visitor's first click, key, wheel or touch,
-and the switch appears ten seconds after that (`armDevMode` in
-`tools/runtime.js`); `?werkstatt` opens it at once, and so does the band
-after "Arbeiten" on the start page (`data-v5-dev-open`). The rule is checked,
-not trusted:
+Native ES modules, no build step; texts live in `texte.js`. Explanations are
+a system, not one-offs (`werkstatt/ui.js`, `werkstatt/texte.js`): every "Warum
+das gut ist" always shows its first sentence, the rest folds under "mehr"; a
+25-term glossary (LCP, FCP, TTFB, CLS, TBT, main thread, `content-visibility`,
+CSP, canonical, JSON-LD, rich results, WCAG, DOM, crawler, screen reader,
+language model, token, template, binder, re-render, specificity, landmarks,
+Markdown, cache, Brotli) is reachable by clicking the first occurrence of any
+of those words anywhere in the workshop's own text (`rich()`, a dotted
+underline marks it); a three-step tour runs on the empty Element tab; every
+button carries a hint shown in the status line. All texts are provisional
+until the copy pass.
+
+**Fragen** sends Claude the visit's own facts — the page's header data, this
+visit's measurements (TTFB, FCP, LCP, CLS, long tasks, transfer, DOM node
+count), the selected element (path, HTML up to 500 characters, matching CSS
+rules, template, map hit), the crawler numbers, the Markdown twin (up to 8000
+characters) and the glossary — a card "Was Claude sieht" shows exactly that
+payload. Suggested-question chips, a history kept only for the open tab (the
+last 6 turns travel with each question), "Verlauf leeren". The endpoint is
+[`api/ask.mjs`](api/ask.mjs), a dependency-free Vercel Node function: POST,
+same-origin only, body capped at 48KB, the question at 600 characters, the
+history at 6 turns, 8 questions per minute per IP plus a daily cap (400 by
+default) per warm instance as a brake rather than a durable limit, then the
+Anthropic Messages API (`max_tokens` 450, model from `ASK_MODEL`, default
+`claude-sonnet-5`, 25s timeout). Nothing is logged or stored. Without a key
+the endpoint answers 503 and the workshop falls back to answering from the
+same facts itself, labelled "ohne Claude" / sender "Werkstatt" — the same
+path a fully offline dev server takes. **Owner action required:** set
+`ANTHROPIC_API_KEY` in the Vercel project's Production environment variables
+(optionally `ASK_MODEL`, `ASK_DAILY_MAX`); until then the live site answers
+503 and only the offline fallback runs.
+
+Nothing of the console exists before the visitor's first click, key, wheel or
+touch. A vertical flap at the left edge, centred, appears ten seconds after
+that (`showDevSwitch`/`armDevMode` in `tools/runtime.js`, class
+`.v5-dev-switch`, attribute `data-v5-dev-switch`, 38px wide on touch, z-index
+70); `?werkstatt` opens it at once, and so does the band after "Arbeiten" on
+the start page (`data-v5-dev-open`). The flap is not a toggle while the
+console is open — it hides itself
+(`.v5-dev-switch[aria-expanded="true"] { display: none }`) so it can never sit
+over the chat dock, which keeps the bottom-right corner to itself; closing
+goes through the × in the header or Escape, and the flap reappears and takes
+focus. The rule is checked, not trusted:
 
 ```bash
 python prodserve.py 8897            # or 8898 --dev
-node tools/v5dev-check.mjs          # five phases: nothing before the first
-                                     # action, the ten-second switch, tabs,
-                                     # picking, crawler view, Escape cleans up
-                                     # - screenshots in $TMPDIR/v5dev-check
+node tools/v5dev-check.mjs          # being extended for the console, the
+                                     # resize handle, docking, Fragen and the
+                                     # glossary
 ```
+
+Gates: `tools/verify_site.mjs` passes locally ("all checks passed");
+`tools/weigh.mjs` measures `runtime.js` at 25.6 KB raw / 8.8 KB Brotli.
 
 ### The gates
 

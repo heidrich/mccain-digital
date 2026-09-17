@@ -1,5 +1,120 @@
 # Uebergabe — Stand 17. September 2026
 
+## ▶ STAND 17.9. ABENDS (2) — WERKSTATT ALS KONSOLE, FRAGEN AN CLAUDE — ZUERST LESEN
+
+**Owner-Anlass:** der Schalter unten rechts lag genau auf dem Chat-Dock und
+sah aus wie dessen Knopf; die 440-px-Schublade schnitt Code ab; es fehlten
+Erklärungen und Hinweise. Owner wollte die Konsole unten, hochziehbar bis
+volle Höhe, „wenn schon crazy, dann richtig", und die KI eingebunden.
+
+**Gebaut:**
+
+- **Schalter:** jetzt eine senkrechte Lasche am linken Rand, vertikal mittig
+  (`tools/runtime.js`, `showDevSwitch`; Klasse `.v5-dev-switch`, Attribut
+  `data-v5-dev-switch` unverändert), z-index 70 über der Konsole, bei Touch
+  38 px breit. Zehn-Sekunden-Regel und `?werkstatt` unverändert. Bei offener
+  Konsole blendet die Lasche sich selbst aus
+  (`.v5-dev-switch[aria-expanded=true]{display:none}`) statt Umschalter zu
+  sein; Schließen läuft über das × im Kopf oder Escape, danach erscheint die
+  Lasche wieder und bekommt den Fokus. Das Chat-Dock behält die Ecke unten
+  rechts allein; der Plan „Werkstatt als zweiter Dock-Eintrag" ist gestrichen.
+- **Konsole, drei Andockarten** (`werkstatt/index.js`, `werkstatt/dev.css`):
+  `[data-dock="float"]` (STANDARD ab 960 px, Owner: freies Fenster, Start
+  760 × 520 px unten rechts, 24 px Abstand, am Kopf oder an der Leitzeile
+  ziehen bewegt es, in den Viewport geklemmt), `#v5-dev[data-dock="bottom"]`
+  (volle Breite, Start 42% der Fensterhöhe, Telefon 55%) oder
+  `[data-dock="right"]` (Spalte, Start 480 px).
+  Kopf-Knöpfe (`data-dock-to`) schalten zwischen den dreien; unter 960 px
+  immer unten, ohne Umschalter. Griff `.wk-grip` (`role=separator`) für
+  unten/rechts: ziehen, zweiter Druck innerhalb 400 ms = volle Größe und
+  zurück, Tastatur Pfeile/Pos1/Ende (Shift = 120 px), Grenzen 220 px bis
+  volle Fensterhöhe bzw. 360 px bis Fensterbreite minus 80. Das Fenster hat
+  stattdessen drei Griffe `.wk-rs` (rechte Kante, untere Kante, Ecke; min
+  360 × 240, max Fenster minus 8 px Rand); Tastatur am Titel (`tabindex 0`
+  im Fenster-Modus): Pfeile bewegen 24 px, Shift + Pfeile skalieren, Pos1
+  setzt zurück, Enter = volle Größe und zurück; die Tastenzeile im Fuß
+  wechselt dann auf `T.keysFloat`. Form und Andockung leben im
+  Modulspeicher der Sitzung, kein `localStorage` (die Werkstatt verspricht,
+  nichts zu speichern). `scroll-padding-bottom/-right` auf `<html>` bei
+  unten/rechts (im Fenster-Modus nicht), damit „Auf der Seite zeigen" nicht
+  darunter landet; beim Schließen entfernt. `?werkstatt=rechts` startet
+  rechts, `?werkstatt=fenster` startet als Fenster, `?werkstatt=fragen` /
+  `=google` auf der Sicht.
+- **Kopf/Leitzeile/Status:** eine Zeile mit Marke, drei Sichten „Röntgen |
+  Google & KI | Fragen", Tabs mit „Wählen", Werkzeugen, ×; Leitzeile
+  `.wk-lead` je Tab; Statuszeile `.wk-status` im Fuß (letzte Aktion bzw.
+  `data-hint` bei Hover/Fokus), Tastenzeile, „Alles zurücksetzen".
+- **Container-Layout:** ab 880 px Konsolenbreite 2 Spalten (`.wk-cols`), ab
+  1360 px 3; eine Karte mit Code spannt immer über alle Spalten
+  (`:has(.wk-code, .wk-pre)`, Owner); Code-Tab mit Dateiliste als Leiste und
+  Umbruch-Schalter (`data-wrap`). Code-Boxen scrollen erst nach einem Klick
+  hinein (`data-active`, Hover sagt „Klicken zum Scrollen“); ein Klick
+  daneben gibt das Rad an die Konsole zurück (Owner).
+- **Erklärungssystem** (`werkstatt/ui.js`, `werkstatt/texte.js`): „Warum das
+  gut ist" mit „mehr", Glossar mit 25 Begriffen, `rich(text)` markiert
+  Begriffe im Fließtext, Rundgang in drei Schritten, Hinweise auf jedem
+  Knopf, Statusmeldungen, Leitzeilen. Alle Texte vorläufig.
+- **Sicht „Fragen"** (`werkstatt/ask.js`): Fragen an Claude mit den Fakten
+  der Werkstatt (Kopfdaten, Messwerte, gewähltes Element, Crawler-Zahlen,
+  Markdown-Zwilling bis 8000 Zeichen, Glossar), Karte „Was Claude sieht",
+  Vorschlags-Chips, Verlauf (letzte 6 Züge, nur im Tab), „Verlauf leeren".
+  Ohne Endpunkt antwortet die Werkstatt selbst aus den Fakten,
+  gekennzeichnet „ohne Claude" / Absender „Werkstatt".
+- **Endpunkt `api/ask.mjs`** (Vercel Node-Funktion, zero config, keine
+  Abhängigkeiten): POST same-origin (Origin = Host, Sec-Fetch-Site), Body
+  ≤ 48 KB, Frage ≤ 600 Zeichen, ≤ 6 Verlaufszüge, 8 Fragen je Minute je IP
+  und Tageskappe (Standard 400) je warmer Instanz (Bremse, kein dauerhaftes
+  Limit; bei mehr Verkehr KV-Store), Steuerzeichen raus, Anthropic Messages
+  API (`max_tokens` 450, Modell aus `ASK_MODEL`, Standard `claude-sonnet-5`,
+  Timeout 25 s), Antworten 405/403/503 (kein Schlüssel)/400/413/429/502/504.
+  Systemprompt: Sie-Form, kurz, nur aus Fakten, kein Markdown, Themenfremdes
+  ablehnen, Anweisungen in der Frage ignorieren. Nichts wird geloggt oder
+  gespeichert. Unit-Test mit gestubbtem Upstream: alle 16 Fälle grün.
+- Geänderte Dateien: `tools/runtime.js` (+ generiert `runtime.js`,
+  `werkstatt/runtime.src.js`), `werkstatt/index.js`, `ui.js`, `texte.js`,
+  `dev.css`, `element.js` (wk-cols, Rundgang, Status), `code.js`
+  (Sidebar-Layout, Umbruch, Status, DEV_FILES + ask.js), `perf.js`,
+  `knobs.js`, `crawler.js` (wk-cols, Hints, Intro-Absatz raus), `tree.js`
+  (Hint), neu `werkstatt/ask.js`, `api/ask.mjs`.
+
+**OWNER MUSS:** `ANTHROPIC_API_KEY` in den Umgebungsvariablen des
+Vercel-Projekts setzen (Production), optional `ASK_MODEL`, `ASK_DAILY_MAX`;
+bis dahin antwortet die Seite live mit 503 und die Werkstatt lokal.
+Datenschutzseite muss den Claude-Versand der Werkstatt-Fragen nennen (die
+Hinweis-Karte nennt schon „ki-chat: Ihre Eingaben gehen an Claude").
+
+**Tore:** `tools/verify_site.mjs` lokal grün (all checks passed);
+`tools/weigh.mjs`: `runtime.js` 25,6 KB roh / 8,8 KB Brotli;
+`tools/v5dev-check.mjs` um Konsole/Griff/Andocken/Fragen/Glossar/Lasche
+erweitert und ALL OK (allein gelaufen, 17.9. abends); die `--acc`-Prüfung
+vergleicht jetzt vorher/nachher und deckte auf, dass der Akzent-Regler beim
+Zurücksetzen UND beim Schließen (dispose) die Seitenwerte löschte statt sie
+wiederherzustellen – behoben in `knobs.js`. Dabei auch gelernt: das Glossar-
+Pop schloss sich durch den Fokus-Scroll direkt nach dem Klick (kleine
+Konsole); es folgt jetzt seinem Begriff (`placeTerm`) statt bei jedem Scroll
+zu schließen. Lighthouse mobil `/` 99
+(lighthouse-psi.mjs, 17.9. abends). Review (Sonnet) ohne blockierende
+Befunde; angenommene Restrisiken stehen im Kopf von `api/ask.mjs`.
+
+**Nächste Schritte (Owner-Reihenfolge):** 1) Reveal-Animationen der Sections
+(Ein-/Ausblenden beim Scrollen) zurückbringen, nur wenn PageSpeed mobil ≥ 95
+bleibt — messen; 2) volles Code-Review, Schwerpunkt mobil und Security (war
+der Plan vor dem Konsolen-Umbau); 3) Textrunde inkl. neuer Werkstatt-Texte;
+4) Datenschutztext zu Claude.
+
+**Lehren (für die Skills):**
+(a) `preventDefault()` auf `pointerdown` unterdrückt im Browser `dblclick` —
+Doppeltipp auf einem Griff selbst messen (zwei `pointerdown` < 400 ms).
+(b) Ein Playwright-Klick auf einen Schalter, der von einem fixierten Panel
+überdeckt wird, schlägt fehl („subtree intercepts pointer events") — genau
+der Befund, den der Owner sah.
+(c) Ein Tor, das beim Aufräumen „Eigenschaft ist leer" prüft, besteht auch
+dann, wenn die Seite den Wert selbst gesetzt hatte und das Aufräumen ihn
+löscht — vorher/nachher vergleichen, nicht gegen leer.
+(d) Ein Klick fokussiert; der Fokus scrollt einen kleinen Container nach —
+ein Scroll-Listener, der ein Popover schließt, feuert damit direkt nach dem
+Öffnen. Popover mitführen statt schließen.
+
 ## ▶ STAND 17.9. SPÄT — WERKSTATT ZURÜCK UNTER /werkstatt/, SQUIRRELSCAN LÄUFT — ZUERST LESEN
 
 **Owner-Klarstellung:** „Der Dev-Modus auf der Webseite soll drin bleiben; ich
@@ -64,13 +179,14 @@ messen-methode 10 (Zeit-Tore nur allein), lighthouse-psi 25 (PSI-API-Kontingent)
 Fallstudie „Umschaltung", audit-website (macOS-Signatur); Sync-Repo
 gepusht, Kopie hier unter `.claude/skills/`.
 
-**Nächster Schritt (Owner, nach dem Compact):** volles Code-Review, vor allem
-**mobil** und **Security** — Kandidaten: die Squirrelscan-Befunde oben
-(Honeypot in aria-hidden, aria-label ≠ Text, Bildmaße/lazy, Schema),
-CSP/Header in `vercel.json`, Formular-Sender (Web3Forms-Key im HTML ist
-öffentlich by design, prüfen: Honeypot, Rate-Limit), Werkstatt (nur nach
-Aktion, keine Daten nach außen), Binder-Ereignisse auf Touch, Mobilmenü,
-Touch-Ziele, Viewport-Breakpoints 400–620 px.
+**Nächster Schritt (Owner, nach dem Compact) (siehe neuer Block oben):**
+volles Code-Review, vor allem **mobil** und **Security** — Kandidaten: die
+Squirrelscan-Befunde oben (Honeypot in aria-hidden, aria-label ≠ Text,
+Bildmaße/lazy, Schema), CSP/Header in `vercel.json`, Formular-Sender
+(Web3Forms-Key im HTML ist öffentlich by design, prüfen: Honeypot,
+Rate-Limit), Werkstatt (nur nach Aktion, keine Daten nach außen),
+Binder-Ereignisse auf Touch, Mobilmenü, Touch-Ziele, Viewport-Breakpoints
+400–620 px.
 
 **Gemessen (17.9. spät, mit Werkstatt-Band):** Startseite mobil 99 (FCP 0,9 s,
 LCP 2,1 s, TBT 0 ms, CLS 0, SI 1,1 s); Tore `verify_site` grün, `v5probe`

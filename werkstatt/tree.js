@@ -13,7 +13,7 @@ const PAGE_SIZE = 120;
 export function mountTree(W) {
   const el = h("div");
   const stats = h("p.wk-hint", { style: { margin: "0 0 8px" } });
-  const list = h("ul.wk-tree", { role: "tree", aria: { label: T.tree.title } });
+  const list = h("ul.wk-tree", { role: "tree", aria: { label: T.tree.title }, hint: T.hints.treeRow });
   el.append(stats, list);
   const rows = new Map(); // node -> { li, row, group, built, depth }
   let focused = null;

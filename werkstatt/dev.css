@@ -22,37 +22,89 @@
   --wk-shadow-card: 0 0 0 1px #E3E8EE, 0 1px 2px rgba(10, 37, 64, .04);
   --wk-sans: 'Instrument Sans', system-ui, -apple-system, sans-serif;
   --wk-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-  --wk-width: 440px;
   font: 400 13px/1.5 var(--wk-sans);
   color: var(--wk-navy);
   -webkit-font-smoothing: antialiased;
 }
 
-/* ------------------------------------------------------------ the drawer */
+/* ------------------------------------------------------------ the console
+ * Since 17.9.2026 a console, not a drawer: docked to the bottom (default,
+ * full width, the page stays visible above it) or to the right, sized by its
+ * grip up to the whole viewport. Below 960 px it is always the bottom sheet.
+ * The console is a size container, so every layout below follows the
+ * console's own width, whichever way it is docked. */
 #v5-dev {
   position: fixed;
-  top: 0; right: 0; bottom: 0;
-  width: min(var(--wk-width), 100vw);
   z-index: 90;
   display: flex;
   flex-direction: column;
   background: var(--wk-surface);
+  overscroll-behavior: contain;
+  container: wk / size;
+}
+#v5-dev[data-dock="bottom"] {
+  left: 0; right: 0; bottom: 0;
+  height: var(--wk-h, 42vh);
+  max-height: 100vh;
+  box-shadow: 0 -1px 0 var(--wk-line), 0 -30px 80px -40px rgba(10, 37, 64, .4);
+  animation: wkSlideUp .4s var(--wk-ease) both;
+}
+#v5-dev[data-dock="right"] {
+  top: 0; right: 0; bottom: 0;
+  width: var(--wk-w, 480px);
+  max-width: 100vw;
   box-shadow: -1px 0 0 var(--wk-line), -30px 0 80px -40px rgba(10, 37, 64, .35);
   animation: wkSlideIn .4s var(--wk-ease) both;
-  overscroll-behavior: contain;
 }
+#v5-dev[data-dock="float"] {
+  left: var(--wk-x, 24px); top: var(--wk-y, 24px);
+  width: var(--wk-w, 760px); height: var(--wk-h, 520px);
+  max-width: 100vw; max-height: 100vh;
+  border-radius: 16px;
+  overflow: clip;
+  box-shadow: 0 0 0 1px var(--wk-line), 0 30px 90px -30px rgba(10, 37, 64, .55);
+  animation: wkPopIn .3s var(--wk-ease) both;
+}
+#v5-dev[data-dock="float"] .wk-grip { display: none }
+#v5-dev[data-dock="float"] :is(.wk-head, .wk-lead) { cursor: grab }
+#v5-dev[data-dock="float"][data-resizing] :is(.wk-head, .wk-lead) { cursor: grabbing }
+#v5-dev[data-dock="float"] .wk-lead .wk-term { cursor: help }
+#v5-dev[data-dock="float"] .wk-head :is(button, [role="tab"]) { cursor: pointer }
+.wk-rs { display: none; position: absolute; z-index: 4; touch-action: none }
+#v5-dev[data-dock="float"] .wk-rs { display: block }
+.wk-rs[data-edge="e"] { top: 16px; right: 0; bottom: 16px; width: 8px; cursor: ew-resize }
+.wk-rs[data-edge="s"] { left: 16px; right: 16px; bottom: 0; height: 8px; cursor: ns-resize }
+.wk-rs[data-edge="se"] { right: 0; bottom: 0; width: 18px; height: 18px; cursor: nwse-resize }
+.wk-rs[data-edge="se"]::after { content: ''; position: absolute; right: 7px; bottom: 7px; width: 7px; height: 7px; border-right: 2px solid #C9D3E0; border-bottom: 2px solid #C9D3E0; border-radius: 0 0 2px 0 }
+#v5-dev[data-resizing] { animation: none }
 @keyframes wkSlideIn { from { transform: translateX(24px); opacity: 0 } to { transform: none; opacity: 1 } }
 @keyframes wkSlideUp { from { transform: translateY(24px); opacity: 0 } to { transform: none; opacity: 1 } }
 @media (max-width: 959.98px) {
-  #v5-dev {
-    top: auto; left: 0; right: 0;
-    width: auto;
-    height: min(62vh, 100vh - 56px);
-    border-radius: 16px 16px 0 0;
-    box-shadow: 0 -1px 0 var(--wk-line), 0 -30px 80px -40px rgba(10, 37, 64, .4);
-    animation-name: wkSlideUp;
-  }
+  #v5-dev[data-dock="bottom"] { border-radius: 16px 16px 0 0 }
+  #v5-dev [data-dock-to] { display: none }
 }
+html[data-wk-resizing] { user-select: none; -webkit-user-select: none }
+html[data-wk-resizing="bottom"] { cursor: row-resize }
+html[data-wk-resizing="right"] { cursor: col-resize }
+html[data-wk-resizing="move"] { cursor: grabbing }
+html[data-wk-resizing="e"] { cursor: ew-resize }
+html[data-wk-resizing="s"] { cursor: ns-resize }
+html[data-wk-resizing="se"] { cursor: nwse-resize }
+
+/* The grip: a handle on the console's free edge. Pointer drag, double-click
+ * for full size and back, arrow keys / Home / End with the keyboard. */
+.wk-grip {
+  position: absolute; z-index: 3;
+  display: flex; align-items: center; justify-content: center;
+  touch-action: none;
+}
+#v5-dev[data-dock="bottom"] .wk-grip { left: 0; right: 0; top: -7px; height: 16px; cursor: row-resize }
+#v5-dev[data-dock="right"] .wk-grip { top: 0; bottom: 0; left: -7px; width: 16px; cursor: col-resize }
+.wk-grip i { display: block; border-radius: 999px; background: #C9D3E0; transition: background .2s }
+#v5-dev[data-dock="bottom"] .wk-grip i { width: 56px; height: 4px }
+#v5-dev[data-dock="right"] .wk-grip i { width: 4px; height: 56px }
+.wk-grip:hover i, .wk-grip:focus-visible i, #v5-dev[data-resizing] .wk-grip i { background: var(--wk-indigo) }
+#v5-dev .wk-grip:focus-visible { outline: none }
 @media (prefers-reduced-motion: reduce) {
   #v5-dev, #v5-dev * { animation: none !important; transition: none !important }
 }
@@ -65,59 +117,53 @@
 #v5-dev p { margin: 0 }
 #v5-dev h2, #v5-dev h3, #v5-dev h4 { margin: 0; font-weight: 600; letter-spacing: -.01em }
 
+/* One row when the console is wide: brand, view switch, tabs, tools. In a
+ * narrow console (right dock, phone) the tabs wrap onto their own row. */
 .wk-head {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 4px 12px;
-  align-items: start;
-  padding: 14px 16px 10px;
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: 4px 10px;
+  padding: 8px 10px 0 14px;
   background: #fff;
   box-shadow: 0 1px 0 var(--wk-line);
+  position: relative; z-index: 2;
 }
-.wk-head .wk-eyebrow { grid-column: 1 }
-.wk-title { grid-column: 1; font-size: 17px; line-height: 1.25 }
+.wk-title { font: 500 11px/1 var(--wk-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--wk-indigo); padding: 4px 0 10px }
 /* Focus lands here on open for screen readers; a ring on a heading would only confuse the eye. */
 #v5-dev .wk-title:focus-visible { outline: none }
+.wk-views { display: inline-flex; background: #E9EEF5; border-radius: 999px; padding: 3px; margin-bottom: 6px }
+.wk-view-btn {
+  height: 26px; padding: 0 12px;
+  border-radius: 999px;
+  font-weight: 600; font-size: 12px;
+  color: var(--wk-slate);
+  transition: background .2s, color .2s, box-shadow .2s;
+  white-space: nowrap;
+}
+.wk-view-btn[aria-selected="true"] { background: #fff; color: var(--wk-navy); box-shadow: 0 1px 2px rgba(10, 37, 64, .1) }
+.wk-tabsbar { display: flex; align-items: flex-end; gap: 8px; flex: 1; min-width: 0; margin-left: 4px }
+.wk-tabsbar[hidden] { display: none }
+.wk-tabsbar .wk-btn { margin: 0 6px 5px 0; height: 26px; padding: 0 10px; font-size: 11.5px; flex: none }
+.wk-tools { display: inline-flex; align-items: center; gap: 2px; margin-left: auto; margin-bottom: 6px }
+.wk-tool { height: 26px; padding: 0 9px; border-radius: 7px; font: 500 11.5px/1 var(--wk-sans); color: var(--wk-slate); transition: background .2s, color .2s; white-space: nowrap }
+.wk-tool:hover { background: var(--wk-indigo-soft); color: var(--wk-navy) }
+.wk-tool[aria-pressed="true"] { background: var(--wk-navy); color: #fff }
 .wk-close {
-  grid-column: 2; grid-row: 1 / span 2;
-  width: 32px; height: 32px;
+  width: 28px; height: 28px; margin-left: 4px;
   display: inline-flex; align-items: center; justify-content: center;
-  border-radius: 8px;
+  border-radius: 7px;
   color: var(--wk-slate);
   font-size: 20px; line-height: 1;
   transition: background .2s, color .2s;
 }
 .wk-close:hover { background: var(--wk-indigo-soft); color: var(--wk-navy) }
-.wk-intro { grid-column: 1 / -1; color: var(--wk-slate); font-size: 12.5px; margin-top: 2px }
-
-.wk-views {
-  grid-column: 1 / -1;
-  display: inline-flex;
-  align-self: start;
-  justify-self: start;
-  background: #E9EEF5;
-  border-radius: 999px;
-  padding: 3px;
-  margin-top: 8px;
+@container wk (max-width: 879px) {
+  .wk-tabsbar { flex-basis: 100%; margin-left: 0; order: 9 }
 }
-.wk-view-btn {
-  height: 28px; padding: 0 14px;
-  border-radius: 999px;
-  font-weight: 600; font-size: 12.5px;
-  color: var(--wk-slate);
-  transition: background .2s, color .2s, box-shadow .2s;
-}
-.wk-view-btn[aria-selected="true"] { background: #fff; color: var(--wk-navy); box-shadow: 0 1px 2px rgba(10, 37, 64, .1) }
-
-.wk-tabsbar {
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  padding: 6px 12px 0;
-  background: #fff;
-  box-shadow: 0 1px 0 var(--wk-line);
-}
-.wk-tabsbar .wk-btn { margin-bottom: 5px; height: 28px; padding: 0 10px; font-size: 11.5px; flex: none }
+/* The lead: one line under the head that says what the current tab shows. */
+.wk-lead { padding: 7px 14px; font-size: 12.5px; line-height: 1.5; color: var(--wk-slate); background: #fff; box-shadow: 0 1px 0 var(--wk-line); position: relative; z-index: 1 }
+.wk-lead:empty { display: none }
+/* On a phone the lead keeps to two lines; the sheet has little height to give. */
+@container wk (max-width: 479px) { .wk-lead { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden } .wk-lead:empty { display: none } }
 .wk-tabs {
   display: flex;
   gap: 2px;
@@ -150,15 +196,22 @@
 .wk-panel[hidden] { display: none }
 .wk-view[hidden] { display: none }
 
+/* The foot is the console's status line: the last thing that happened, or,
+ * while a button is hovered or focused, what that button does. */
 .wk-foot {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 14px calc(8px + env(safe-area-inset-bottom));
   background: #fff;
   box-shadow: 0 -1px 0 var(--wk-line);
   font-size: 11.5px; color: var(--wk-mute);
 }
-.wk-foot > span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.wk-status { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--wk-slate) }
+.wk-status[data-hint] { color: var(--wk-navy) }
+.wk-keys { flex: none; font: 10.5px/1 var(--wk-mono); color: var(--wk-mute); white-space: nowrap }
+.wk-promise { flex: none; color: var(--wk-mute); white-space: nowrap }
 .wk-foot .wk-btn { flex: none }
+@container wk (max-width: 879px) { .wk-keys { display: none } }
+@container wk (max-width: 1099px) { .wk-promise { display: none } }
 
 /* ------------------------------------------------------------- building blocks */
 .wk-eyebrow {
@@ -179,15 +232,15 @@
 .wk-card-body { font-size: 12.5px; color: var(--wk-navy) }
 .wk-card-body > * + * { margin-top: 8px }
 .wk-why { margin-top: 10px; border-top: 1px solid var(--wk-line); padding-top: 8px }
-.wk-why summary {
+:is(.wk-why, .wk-why-more) summary {
   cursor: pointer; list-style: none;
   font-weight: 500; font-size: 12px;
   color: var(--wk-indigo-text);
   display: inline-flex; align-items: center; gap: 6px;
 }
-.wk-why summary::-webkit-details-marker { display: none }
-.wk-why summary::before { content: ''; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); transition: transform .2s var(--wk-ease) }
-.wk-why[open] summary::before { transform: rotate(45deg) }
+:is(.wk-why, .wk-why-more) summary::-webkit-details-marker { display: none }
+:is(.wk-why, .wk-why-more) summary::before { content: ''; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); transition: transform .2s var(--wk-ease) }
+:is(.wk-why, .wk-why-more)[open] summary::before { transform: rotate(45deg) }
 .wk-why p { margin-top: 6px; color: var(--wk-slate); font-size: 12.5px; line-height: 1.55 }
 .wk-note { color: var(--wk-slate); font-size: 12.5px }
 .wk-hint { color: var(--wk-mute); font-size: 11.5px }
@@ -498,3 +551,102 @@
 .wk-ph .wk-tag { left: 8px; top: 8px; position: absolute }
 html.v5-dev-pick #dc-root, html.v5-dev-pick #dc-root * { cursor: crosshair !important }
 html.v5-dev-pick { user-select: none }
+
+/* ------------------------------------------------- explanations (17.9.2026)
+ * "Warum das gut ist" keeps its first sentence visible; glossary terms are
+ * buttons with a dotted line, the card opens inside the console. */
+.wk-whybox { margin-top: 10px; border-top: 1px solid var(--wk-line); padding-top: 8px; font-size: 12.5px; line-height: 1.55; color: var(--wk-slate) }
+.wk-why-label { display: block; font: 500 10px/1 var(--wk-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--wk-indigo); margin-bottom: 5px }
+.wk-why-lead { margin: 0 }
+.wk-why-more { margin-top: 4px }
+.wk-why-more p { margin-top: 6px; color: var(--wk-slate); font-size: 12.5px; line-height: 1.55 }
+#v5-dev .wk-term { display: inline; font: inherit; color: inherit; padding: 0 0 1px; border-radius: 0; border-bottom: 1px dotted var(--wk-indigo); cursor: help; text-align: inherit }
+#v5-dev .wk-term:hover, #v5-dev .wk-term[aria-expanded="true"] { color: var(--wk-indigo-text); border-bottom-style: solid }
+.wk-pop {
+  position: absolute; z-index: 6;
+  width: min(360px, calc(100% - 24px));
+  background: var(--wk-navy); color: #fff;
+  border-radius: 12px; padding: 10px 12px;
+  font-size: 12.5px; line-height: 1.5;
+  box-shadow: 0 16px 40px -16px rgba(10, 37, 64, .6);
+  animation: wkPopIn .18s var(--wk-ease) both;
+}
+@keyframes wkPopIn { from { opacity: 0; transform: translateY(4px) } to { opacity: 1; transform: none } }
+.wk-pop strong { display: block; font: 500 10.5px/1 var(--wk-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--wk-orange); margin-bottom: 6px }
+.wk-pop p { margin: 0 }
+
+/* The tour: what the empty element tab shows until something is selected. */
+.wk-tour { background: #fff; border-radius: 16px; box-shadow: var(--wk-shadow-card); padding: 16px 18px; margin-bottom: 10px }
+.wk-tour ol { margin: 10px 0 0; padding: 0; list-style: none; display: grid; gap: 10px }
+.wk-tour li { display: grid; grid-template-columns: 26px 1fr; gap: 10px; font-size: 12.5px; line-height: 1.5; color: var(--wk-slate) }
+.wk-tour li b { width: 26px; height: 26px; border-radius: 50%; background: var(--wk-indigo-soft); color: var(--wk-indigo-text); font: 600 12px/26px var(--wk-mono); text-align: center }
+.wk-tour li strong { display: block; color: var(--wk-navy); font-size: 13px; margin-bottom: 2px }
+.wk-tour .wk-hint { margin-top: 10px }
+
+/* ---------------------------------------------- the wide console's layouts
+ * The cards flow into columns, the code tab gets its file list as a sidebar
+ * and the viewer the rest, the chat gets its facts beside it. */
+@container wk (min-width: 880px) {
+  .wk-body { padding: 14px 16px 24px }
+  .wk-cols { columns: 2; column-gap: 12px }
+  .wk-cols > * { break-inside: avoid }
+  .wk-cols > .wk-span, .wk-cols > .wk-path, .wk-cols > .wk-toolbar, .wk-cols > .wk-hint, .wk-cols > .wk-tour, .wk-cols > .wk-empty, .wk-cols > .wk-note { column-span: all }
+  /* A card with code never shares a column: the code gets the whole width (owner 17.9.). */
+  .wk-cols > :has(.wk-code, .wk-pre) { column-span: all }
+  .wk-codelayout { display: grid; grid-template-columns: minmax(230px, 300px) minmax(0, 1fr); gap: 12px; align-items: start }
+  .wk-codelayout > .wk-code-info { order: 2 }
+  .wk-codelayout > .wk-code-list { order: 1 }
+  .wk-code-list .wk-file { grid-template-columns: 1fr }
+  .wk-code-list .wk-file .wk-file-meta { grid-column: 1; grid-row: auto; text-align: left }
+  .wk-code { max-height: max(240px, calc(100cqh - 250px)) }
+  .wk-code-small { max-height: max(200px, calc(100cqh - 320px)) }
+  .wk-code-inline { max-height: max(160px, calc(100cqh - 360px)) }
+  .wk-asklayout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 340px); gap: 12px; align-items: start }
+  .wk-tour ol { grid-template-columns: repeat(3, 1fr) }
+}
+@container wk (min-width: 1360px) { .wk-cols { columns: 3 } }
+
+/* Long lines: a narrow console wraps them, a wide one scrolls; the wrap
+ * toggle in the code tab (data-wrap on the viewer) overrides either way. */
+.wk-code[data-wrap="on"] li { white-space: pre-wrap; overflow-wrap: anywhere }
+.wk-code[data-wrap="on"] ol { min-width: 0 }
+@container wk (max-width: 879px) {
+  .wk-code:not([data-wrap="off"]) li { white-space: pre-wrap; overflow-wrap: anywhere }
+  .wk-code:not([data-wrap="off"]) ol { min-width: 0 }
+}
+
+/* ------------------------------------------------------------------ Fragen */
+.wk-chat { display: flex; flex-direction: column; gap: 10px; min-width: 0 }
+.wk-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px }
+.wk-chip { height: 28px; padding: 0 12px; border-radius: 999px; background: #fff; box-shadow: 0 0 0 1px var(--wk-line); font-size: 12px; color: var(--wk-navy); white-space: nowrap; transition: box-shadow .2s, color .2s }
+.wk-chip:hover { box-shadow: 0 0 0 1px var(--wk-indigo); color: var(--wk-indigo-text) }
+.wk-msgs { display: grid; gap: 8px }
+.wk-msgs:empty { display: none }
+.wk-msg { max-width: 86%; padding: 9px 12px; border-radius: 14px; font-size: 13px; line-height: 1.5; animation: wkPopIn .25s var(--wk-ease) both }
+.wk-msg-text { white-space: pre-wrap; overflow-wrap: anywhere }
+.wk-msg[data-role="user"] { justify-self: end; background: var(--wk-navy); color: #fff; border-bottom-right-radius: 4px }
+.wk-msg[data-role="assistant"] { justify-self: start; background: #fff; box-shadow: var(--wk-shadow-card); border-bottom-left-radius: 4px }
+.wk-msg-meta { font: 500 10px/1 var(--wk-mono); letter-spacing: .08em; text-transform: uppercase; opacity: .7; margin-bottom: 5px }
+.wk-askform { display: flex; gap: 8px; position: sticky; bottom: 0; background: var(--wk-surface); padding: 6px 0 2px }
+.wk-askform .wk-input { height: 38px; font-size: 13.5px }
+.wk-askform .wk-btn { height: 38px }
+.wk-thinking { display: inline-flex; gap: 8px; align-items: center; color: var(--wk-slate); font-size: 12.5px; padding: 4px 2px }
+.wk-thinking::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(135deg, #FFB46B, #FF5A8C, #C05CFF, #5FC3FF); animation: wkPulse 1.2s ease-in-out infinite }
+
+/* -------------------------------------------- code scrolls once clicked into
+ * Every code box (.wk-code from tokens.js, .wk-pre in the crawler view) keeps
+ * its scrollbars until a click or focus lands inside; index.js sets
+ * data-active. Hovering an untouched box says so. */
+.wk-code, .wk-pre { overflow: hidden }
+.wk-pre { position: relative }
+.wk-code[data-active], .wk-pre[data-active] { overflow: auto }
+#v5-dev :is(.wk-code, .wk-pre):focus-visible { outline: 2px solid var(--wk-indigo); outline-offset: -2px; border-radius: 12px }
+:is(.wk-code, .wk-pre):not([data-active]):hover::after {
+  content: attr(data-scrollhint);
+  position: absolute; right: 10px; bottom: 8px;
+  font: 500 10px/1 var(--wk-mono); letter-spacing: .08em; text-transform: uppercase;
+  color: #C5D0F5; background: rgba(10, 31, 68, .88);
+  padding: 5px 9px; border-radius: 999px;
+  pointer-events: none;
+}
+.wk-pre:not([data-active]):hover::after { color: var(--wk-navy); background: rgba(255, 255, 255, .92); box-shadow: 0 0 0 1px var(--wk-line) }

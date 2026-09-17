@@ -243,6 +243,10 @@ Diese Klasse von Fehlern — ein Guard, der etwas falsch oder gar nicht prüft, 
 **Beleg:** mccain-digital, Commit `16dabe6` (2026-08-03); Herkunft `sweep.sh`/`probe.js`/`check_links.py`, `verify_site.mjs` (Pflicht vor jedem Push, 21 Seiten). · Sicherheit: dokumentiert
 **Gilt für:** allgemein
 
+### 27. Aufräum-Prüfungen vergleichen vorher mit nachher, nicht mit „leer“
+
+Ein Tor, das nach dem Schließen eines Werkzeugs prüft „Eigenschaft X ist leer“, besteht auch dann, wenn die Seite X selbst gesetzt hatte und das Aufräumen den Wert gelöscht statt wiederhergestellt hat. Genau das passierte in mccain-digital (17.9.2026): die Seite setzt `--acc` als Inline-Stil auf `<html>`, der Akzent-Regler der Werkstatt entfernte die Eigenschaft beim Zurücksetzen und beim Schließen, und das Tor `v5dev-check.mjs` meldete monatelang „ok“, weil `""` erwartet wurde. Regel: den Wert VOR dem Eingriff merken und danach auf Gleichheit prüfen; das Werkzeug selbst merkt sich beim ersten Eingriff, was es vorfand, und schreibt genau das zurück (`before`/`restore`), statt `removeProperty` aufzurufen. Die neue Prüfung schlug beim ersten Lauf fehl und deckte den Fehler auf — ein Tor, das nie rot war, hat noch nichts bewiesen (siehe Regel 24).
+
 ## Quellen
 
 - https://github.com/GoogleChrome/lighthouse/blob/main/core/lib/tracehouse/main-thread-tasks.js

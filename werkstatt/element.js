@@ -4,7 +4,7 @@
  * values, the box, what a screen reader gets, which function moves it, and a
  * way to change it and change it back. */
 import { T } from "./texte.js";
-import { h, clear, card, kv, pill, btn, mono, note, shortLabel, textPreview, revealOnPage, parseColor, contrast, isOwn, whyBox } from "./ui.js";
+import { h, clear, card, kv, pill, btn, mono, note, shortLabel, textPreview, revealOnPage, parseColor, contrast, isOwn, whyBox, rich } from "./ui.js";
 import { matchedRules, isColorValue } from "./cssrules.js";
 import { renderCode } from "./tokens.js";
 import { edits, editBus, replaceOuterHtml } from "./edits.js";
@@ -17,11 +17,11 @@ export function mountElement(W) {
   let mapPromise = null;
   let current = null;
 
-  const revealBtn = btn(T.element.reveal, () => current && (revealOnPage(current), W.layer.flash(current)), { "data-tone": "ghost", disabled: true });
-  const upBtn = btn("↑ Eltern", () => current && current.parentElement && !current.parentElement.matches("html") && W.select(current.parentElement), { "data-tone": "ghost", disabled: true });
+  const revealBtn = btn(T.element.reveal, () => current && (revealOnPage(current), W.layer.flash(current)), { "data-tone": "ghost", disabled: true, hint: T.hints.reveal });
+  const upBtn = btn("↑ Eltern", () => current && current.parentElement && !current.parentElement.matches("html") && W.select(current.parentElement), { "data-tone": "ghost", disabled: true, hint: T.hints.up });
   const toolbar = h("div.wk-toolbar", revealBtn, upBtn);
   const hint = h("p.wk-hint", { style: { margin: "-4px 0 10px" } }, matchMedia("(pointer: coarse)").matches ? T.pick.touchHint : T.pick.hint);
-  const body = h("div");
+  const body = h("div.wk-cols");
   el.append(toolbar, hint, body);
   empty();
 
@@ -35,7 +35,12 @@ export function mountElement(W) {
 
   function empty() {
     clear(body);
-    body.appendChild(h("div.wk-empty", h("strong", T.pick.none), T.pick.noneHint));
+    body.appendChild(h("section.wk-tour",
+      h("div.wk-eyebrow", T.pick.none),
+      h("h3.wk-card-title", T.tour.title),
+      h("ol", T.tour.steps.map((step, i) => h("li", h("b", String(i + 1)), h("div", h("strong", step[0]), rich(step[1]))))),
+      h("p.wk-hint", rich(T.tour.hint))
+    ));
     revealBtn.disabled = true; upBtn.disabled = true;
   }
 
@@ -46,7 +51,9 @@ export function mountElement(W) {
     upBtn.disabled = !target.parentElement || target.parentElement === document.documentElement;
     hint.hidden = true;
     clear(body);
-    body.append(pathBar(target), htmlCard(target), templateCard(target), cssCard(target), computedCard(target), boxCard(target), a11yCard(target), codeCard(target), editCard(target));
+    const rules = matchedRules(target);
+    body.append(pathBar(target), htmlCard(target), templateCard(target), cssCard(target, rules), computedCard(target), boxCard(target), a11yCard(target), codeCard(target, rules.length), editCard(target));
+    W.status(T.status.selected(shortLabel(target, 2), rules.length, null));
   }
 
   /* ---- path */
@@ -107,8 +114,7 @@ export function mountElement(W) {
   }
 
   /* ---- css */
-  function cssCard(target) {
-    const rules = matchedRules(target);
+  function cssCard(target, rules) {
     const list = h("div");
     if (!rules.length) list.appendChild(note(T.element.cssNone));
     for (const r of rules) {
@@ -227,7 +233,7 @@ export function mountElement(W) {
     if (!mapPromise) mapPromise = fetch("/werkstatt/map.json").then((r) => (r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status)))).catch(() => null);
     return mapPromise;
   }
-  function codeCard(target) {
+  function codeCard(target, rulesCount) {
     const box = h("div", note(T.code.loading));
     const c = card({ eyebrow: T.element.code, body: box, why: T.element.codeWhy, attrs: { "data-section": "code" } });
     loadMap().then((map) => {
@@ -235,30 +241,33 @@ export function mountElement(W) {
       clear(box);
       if (!map) { box.appendChild(note(T.code.failed)); return; }
       const hits = map.entries.filter((e) => { try { return !!target.closest(e.match); } catch (err) { return false; } });
-      if (!hits.length) { box.appendChild(note(T.element.codeNone)); return; }
-      for (const e of hits) {
-        const links = [];
-        const refs = [{ file: e.file, symbol: e.symbol, section: e.section, selector: e.selector }].concat(e.also || []);
-        for (const ref of refs) {
-          const f = map.files[ref.file];
-          if (!f) continue;
-          const label = ref.symbol ? `${f.name} · ${ref.symbol}()` : ref.section ? `${f.name} · „${ref.section}“` : ref.selector ? `${f.name} · ${ref.selector}` : f.name;
-          /* Every file in map.json's "files" is browsable in the Code tab
-           * except "build" (tools/v5build.mjs, build-time only - never
-           * shipped, so code.js has no source to fetch for it). Neither
-           * "logic" (one file per route, resolved through V5_DATA.route in
-           * code.js, not a fixed url here) nor "css" (inline <style>, no url
-           * either) carry a "url" in map.json, so the gate checks the file id
-           * itself rather than the presence of "url". */
-          if (ref.file !== "build") links.push(btn(label, () => W.showCode(ref.file, ref.symbol || ref.selector, ref.section), { "data-tone": "small" }));
-          else links.push(pill(label));
+      if (!hits.length) { box.appendChild(note(T.element.codeNone)); }
+      else {
+        for (const e of hits) {
+          const links = [];
+          const refs = [{ file: e.file, symbol: e.symbol, section: e.section, selector: e.selector }].concat(e.also || []);
+          for (const ref of refs) {
+            const f = map.files[ref.file];
+            if (!f) continue;
+            const label = ref.symbol ? `${f.name} · ${ref.symbol}()` : ref.section ? `${f.name} · „${ref.section}“` : ref.selector ? `${f.name} · ${ref.selector}` : f.name;
+            /* Every file in map.json's "files" is browsable in the Code tab
+             * except "build" (tools/v5build.mjs, build-time only - never
+             * shipped, so code.js has no source to fetch for it). Neither
+             * "logic" (one file per route, resolved through V5_DATA.route in
+             * code.js, not a fixed url here) nor "css" (inline <style>, no url
+             * either) carry a "url" in map.json, so the gate checks the file id
+             * itself rather than the presence of "url". */
+            if (ref.file !== "build") links.push(btn(label, () => W.showCode(ref.file, ref.symbol || ref.selector, ref.section), { "data-tone": "small", hint: T.hints.codeJump }));
+            else links.push(pill(label));
+          }
+          const hitEl = target.closest(e.match);
+          box.appendChild(h("div", { style: { padding: "8px 0", borderTop: box.children.length ? "1px solid var(--wk-line)" : "0" } },
+            h("div", { style: { display: "flex", gap: "8px", alignItems: "baseline", flexWrap: "wrap" } }, h("strong", e.title), hitEl !== target ? pill(`über ${shortLabel(hitEl, 1)}`) : null),
+            h("p.wk-note", e.what), e.why ? h("p.wk-hint", e.why) : null,
+            h("div.wk-toolbar", { style: { marginTop: "6px", marginBottom: "0" } }, links)));
         }
-        const hitEl = target.closest(e.match);
-        box.appendChild(h("div", { style: { padding: "8px 0", borderTop: box.children.length ? "1px solid var(--wk-line)" : "0" } },
-          h("div", { style: { display: "flex", gap: "8px", alignItems: "baseline", flexWrap: "wrap" } }, h("strong", e.title), hitEl !== target ? pill(`über ${shortLabel(hitEl, 1)}`) : null),
-          h("p.wk-note", e.what), e.why ? h("p.wk-hint", e.why) : null,
-          h("div.wk-toolbar", { style: { marginTop: "6px", marginBottom: "0" } }, links)));
       }
+      W.status(T.status.selected(shortLabel(target, 2), rulesCount, hits.length ? hits[0].title : null));
     });
     return c;
   }
@@ -284,8 +293,8 @@ export function mountElement(W) {
       ta.value = m === "text" ? target.textContent : target.outerHTML;
       for (const b of modes.children) b.setAttribute("aria-pressed", b.dataset.mode === m ? "true" : "false");
     };
-    if (textOnly) modes.appendChild(btn(T.element.editText, () => setMode("text"), { "data-tone": "ghost", "data-mode": "text" }));
-    modes.appendChild(btn(T.element.editHtml, () => setMode("html"), { "data-tone": "ghost", "data-mode": "html" }));
+    if (textOnly) modes.appendChild(btn(T.element.editText, () => setMode("text"), { "data-tone": "ghost", "data-mode": "text", hint: T.hints.editText }));
+    modes.appendChild(btn(T.element.editHtml, () => setMode("html"), { "data-tone": "ghost", "data-mode": "html", hint: T.hints.editHtml }));
     const mine = edits.forNode(target);
     const apply = btn(T.element.apply, () => {
       try {
@@ -306,8 +315,8 @@ export function mountElement(W) {
       } catch (err) {
         body.appendChild(note("Das ging nicht: " + err.message));
       }
-    });
-    const reset = btn(T.element.reset, () => { const restored = edits.undoNode(target); W.select(restored); }, { "data-tone": "ghost", disabled: !mine.length });
+    }, { hint: T.hints.apply });
+    const reset = btn(T.element.reset, () => { const restored = edits.undoNode(target); W.select(restored); }, { "data-tone": "ghost", disabled: !mine.length, hint: T.hints.reset });
     setMode(mode);
     body.append(modes, ta, h("div.wk-toolbar", { style: { marginTop: "8px", marginBottom: "0" } }, apply, reset, mine.length ? pill(`${mine.length}× ${T.element.edited}`, "warn") : null));
   }

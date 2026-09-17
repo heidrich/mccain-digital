@@ -1,6 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "trailingSlash": true,
+  "functions": {
+    "api/ask.mjs": {
+      "maxDuration": 30
+    }
+  },
   "redirects": [
     {
       "source": "/contact.html",

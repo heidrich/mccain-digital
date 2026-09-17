@@ -4,7 +4,10 @@ Allow: /
 # The Claude Design export the site is built FROM. It is in .vercelignore and
 # should never be reachable, but if a deploy ever leaks it, the export must not
 # compete with the page it produced - two copies of the same headline.
+# /api/ is the workshop's question endpoint (POST only, api/ask.mjs) - nothing
+# a crawler could read, so it is not offered either.
 Disallow: /mccain-design-system/
+Disallow: /api/
 
 # AI crawlers are explicitly welcome. /llms.txt is a structured summary of the
 # whole site, written for them rather than scraped out of the markup.
@@ -15,41 +18,51 @@ Disallow: /mccain-design-system/
 User-agent: GPTBot
 Allow: /
 Disallow: /mccain-design-system/
+Disallow: /api/
 
 User-agent: OAI-SearchBot
 Allow: /
 Disallow: /mccain-design-system/
+Disallow: /api/
 
 User-agent: ChatGPT-User
 Allow: /
 Disallow: /mccain-design-system/
+Disallow: /api/
 
 User-agent: ClaudeBot
 Allow: /
 Disallow: /mccain-design-system/
+Disallow: /api/
 
 User-agent: Claude-SearchBot
 Allow: /
 Disallow: /mccain-design-system/
+Disallow: /api/
 
 User-agent: anthropic-ai
 Allow: /
 Disallow: /mccain-design-system/
+Disallow: /api/
 
 User-agent: PerplexityBot
 Allow: /
 Disallow: /mccain-design-system/
+Disallow: /api/
 
 User-agent: Google-Extended
 Allow: /
 Disallow: /mccain-design-system/
+Disallow: /api/
 
 User-agent: Applebot-Extended
 Allow: /
 Disallow: /mccain-design-system/
+Disallow: /api/
 
 User-agent: CCBot
 Allow: /
 Disallow: /mccain-design-system/
+Disallow: /api/
 
 Sitemap: https://mccain-digital.com/sitemap.xml

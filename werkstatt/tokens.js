@@ -4,6 +4,7 @@
  * text and then cut at newlines, which keeps block comments and multi-line
  * strings intact across lines. */
 import { h } from "./ui.js";
+import { T } from "./texte.js";
 
 const JS_KW = new Set("break case catch class const continue debugger default delete do else export extends finally for function if import in instanceof let new return static super switch this throw try typeof var void while with yield await async of get set null undefined true false".split(" "));
 const GLSL_KW = new Set("attribute uniform varying precision mediump highp lowp float int vec2 vec3 vec4 mat2 mat3 mat4 void return if else for while break continue discard in out inout const bool sampler2D gl_Position gl_FragColor gl_FragCoord true false".split(" "));
@@ -137,7 +138,7 @@ export function toLines(tokens) {
 export function renderCode(text, lang, opts) {
   const o = Object.assign({ from: 1, max: 20000, mark: null }, opts || {});
   const lines = toLines(tokenize(text, lang));
-  const pre = h("pre.wk-code", { "data-lang": lang });
+  const pre = h("pre.wk-code", { "data-lang": lang, tabindex: "0", "data-scrollhint": T.hints.codeScrollShort, hint: T.hints.codeScroll });
   if (o.small) pre.classList.add(o.small === "inline" ? "wk-code-inline" : "wk-code-small");
   const ol = h("ol");
   const upto = Math.min(lines.length, o.from - 1 + o.max);

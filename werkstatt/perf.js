@@ -23,7 +23,7 @@ function shortName(url) {
 function tone(v, good, bad) { return v <= good ? "good" : v <= bad ? "warn" : "bad"; }
 
 export function mountPerf(W) {
-  const el = h("div");
+  const el = h("div.wk-cols");
   const observers = [];
   let lcp = null, shifts = [], longTasks = [];
   let timer = 0, raf = 0, frames = 0, lastTick = 0, fpsHist = [];
@@ -80,7 +80,7 @@ export function mountPerf(W) {
       const target = lcp.element && lcp.element.isConnected && !isOwn(lcp.element) ? lcp.element : null;
       timelineBody.appendChild(card({ eyebrow: T.perf.lcpEl, body: [
         kv([["Element", target ? mono(shortLabel(target, 2)) : mono("nicht mehr im Dokument")], ["Fläche", mono(`${fmtNum(lcp.size)} px²`)], ["Zeit", mono(fmtMs(lcp.startTime))], lcp.url ? ["Bild", mono(shortName(lcp.url))] : ["Art", "Text, kein Bild"]]),
-        target ? h("div.wk-toolbar", { style: { margin: "8px 0 0" } }, btn(T.element.reveal, () => { revealOnPage(target); W.layer.flash(target); }, { "data-tone": "small" }), btn("Als Element öffnen", () => W.select(target), { "data-tone": "small" })) : null,
+        target ? h("div.wk-toolbar", { style: { margin: "8px 0 0" } }, btn(T.element.reveal, () => { revealOnPage(target); W.layer.flash(target); }, { "data-tone": "small", hint: T.hints.reveal }), btn("Als Element öffnen", () => W.select(target), { "data-tone": "small", hint: T.hints.lcpOpen })) : null,
       ], why: T.perf.lcpWhy, attrs: { style: { margin: "8px 0 0", boxShadow: "inset 0 0 0 1px var(--wk-line)" } } }));
     }
   }

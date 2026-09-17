@@ -14,7 +14,7 @@ const FONT_RULE = "#dc-root,#dc-root *{font-family:system-ui,-apple-system,'Sego
 const BASE_HUE = 243;
 
 export function mountKnobs(W) {
-  const el = h("div");
+  const el = h("div.wk-cols");
   const styles = new Map(); // id -> <style>
   const entries = new Map(); // id -> history entry
 
@@ -49,19 +49,30 @@ export function mountKnobs(W) {
     swatches.replaceChildren(...Object.keys(vars).map((k) => { const s = h("span", { title: `${k}: ${vars[k]}`, style: { width: "22px", height: "22px", borderRadius: "6px", background: vars[k], boxShadow: "inset 0 0 0 1px rgba(10,37,64,.15)" } }); return s; }));
   }
   paintSwatches(accentFor(BASE_HUE));
+  /* The page sets these four variables itself as inline style on <html>
+   * (applyAccent in the page logic). The knob remembers what it found on
+   * the first move and puts exactly that back - until 17.9.2026 the undo
+   * removed the properties, which left <html> without the page's own values
+   * (the gate tools/v5dev-check.mjs now compares before and after). */
+  let before = null;
+  const restore = () => {
+    const root = document.documentElement.style;
+    for (const k of Object.keys(before || {})) { if (before[k]) root.setProperty(k, before[k]); else root.removeProperty(k); }
+  };
   hue.addEventListener("input", () => {
     const hh = Number(hue.value);
     hueVal.textContent = `${hh}°`;
     const vars = accentFor(hh);
     paintSwatches(vars);
     const root = document.documentElement.style;
-    if (hh === BASE_HUE) { for (const k of Object.keys(vars)) root.removeProperty(k); }
+    if (!before) { before = {}; for (const k of Object.keys(vars)) before[k] = root.getPropertyValue(k); }
+    if (hh === BASE_HUE) restore();
     else for (const k of Object.keys(vars)) root.setProperty(k, vars[k]);
     if (!entries.has("accent") && hh !== BASE_HUE) {
-      entries.set("accent", edits.record({ kind: "knob", label: T.knobs.accent, undo: () => { for (const k of Object.keys(vars)) document.documentElement.style.removeProperty(k); hue.value = String(BASE_HUE); hueVal.textContent = `${BASE_HUE}°`; paintSwatches(accentFor(BASE_HUE)); entries.delete("accent"); } }));
+      entries.set("accent", edits.record({ kind: "knob", label: T.knobs.accent, undo: () => { restore(); before = null; hue.value = String(BASE_HUE); hueVal.textContent = `${BASE_HUE}°`; paintSwatches(accentFor(BASE_HUE)); entries.delete("accent"); } }));
     }
   });
-  const accentReset = btn(T.knobs.reset, () => { const e = entries.get("accent"); if (e) { e.undo(); edits.remove(e); } sync(); }, { "data-tone": "small" });
+  const accentReset = btn(T.knobs.reset, () => { const e = entries.get("accent"); if (e) { e.undo(); edits.remove(e); } sync(); }, { "data-tone": "small", hint: T.hints.accentReset });
   el.appendChild(card({ eyebrow: T.knobs.title, title: T.knobs.accent, body: [
     h("div.wk-knob", h("label", { for: "v5-dev-hue" }, T.knobs.accentHue), hueVal, h("div.wk-hue", { aria: { hidden: "true" } }), hue),
     swatches,
@@ -94,8 +105,10 @@ export function mountKnobs(W) {
     el,
     dispose() {
       offEdits();
+      /* Undo through the registry, so index.js's undoAll() afterwards finds nothing of ours to fire twice. */
+      for (const e of Array.from(entries.values())) { try { e.undo(); } catch (err) { /* the rest still restores */ } edits.remove(e); }
       for (const id of Array.from(styles.keys())) dropStyle(id);
-      for (const k of Object.keys(accentFor(0))) document.documentElement.style.removeProperty(k);
+      restore(); before = null;   /* the page's own accent values come back, nothing is wiped */
       W.layer.setPlaceholders(false);
       entries.clear();
     },

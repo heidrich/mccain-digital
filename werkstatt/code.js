@@ -7,7 +7,7 @@ import { T } from "./texte.js";
 import { h, clear, card, btn, note, fmtBytes, isOwn, whyBox } from "./ui.js";
 import { renderCode } from "./tokens.js";
 
-const DEV_FILES = ["index.js", "ui.js", "texte.js", "dev.css", "highlight.js", "pick.js", "tree.js", "cssrules.js", "element.js", "tokens.js", "code.js", "perf.js", "knobs.js", "crawler.js", "edits.js", "map.json"];
+const DEV_FILES = ["index.js", "ui.js", "texte.js", "dev.css", "highlight.js", "pick.js", "tree.js", "cssrules.js", "element.js", "tokens.js", "code.js", "perf.js", "knobs.js", "crawler.js", "ask.js", "edits.js", "map.json"];
 
 function formatCss(css) {
   let out = "", depth = 0, paren = 0, quote = null;
@@ -59,8 +59,7 @@ function liveHtml() {
 }
 
 export function mountCode(W) {
-  const el = h("div");
-  const cache = new Map();
+  const el = h("div.wk-codelayout");
   const sources = new Map();
   let logicPromise = null;
   let currentId = null, view = null, pending = null;
@@ -102,7 +101,7 @@ export function mountCode(W) {
   }
 
   /* ---- chooser + viewer */
-  const select = h("select.wk-input", { aria: { label: "Datei" }, style: { height: "34px", font: "500 12px/1.4 var(--wk-mono)" } });
+  const select = h("select.wk-input", { aria: { label: "Datei" }, style: { height: "34px", font: "500 12px/1.4 var(--wk-mono)" }, hint: T.hints.file });
   for (const f of files) {
     if (f.group === "dev" && !select.querySelector("optgroup")) select.appendChild(h("optgroup", { label: T.code.files.dev.name }));
     const opt = h("option", { value: f.id }, meta(f).name);
@@ -113,11 +112,29 @@ export function mountCode(W) {
   const desc = h("p.wk-note");
   const why = h("div");
   const sizeEl = h("span.wk-count");
-  const search = h("input.wk-input", { type: "search", placeholder: T.code.search, aria: { label: T.code.search } });
+  const search = h("input.wk-input", { type: "search", placeholder: T.code.search, aria: { label: T.code.search }, hint: T.hints.search });
   const hits = h("span.wk-count");
-  const nextBtn = btn("↓", () => nextHit(), { "data-tone": "small", aria: { label: "nächster Treffer" } });
+  const nextBtn = btn("↓", () => nextHit(), { "data-tone": "small", aria: { label: "nächster Treffer" }, hint: T.hints.next });
+  let wrap = null;
+  const wrapBtn = btn("Umbruch", toggleWrap, { "data-tone": "small", "data-action": "wrap", aria: { pressed: "false" }, hint: T.hints.wrap });
+  function toggleWrap() {
+    if (wrap === null) {
+      const wrapped = !!(view && getComputedStyle(view.ol.firstElementChild).whiteSpace.includes("pre-wrap"));
+      wrap = wrapped ? "off" : "on";
+    } else {
+      wrap = wrap === "on" ? "off" : "on";
+    }
+    applyWrap();
+  }
+  function applyWrap() {
+    if (view && wrap) view.el.dataset.wrap = wrap;
+    /* Before the first click the container width decides (narrow wraps), so
+     * the pressed state is read from the viewer, not from the null state. */
+    const on = wrap ? wrap === "on" : !!(view && view.ol.firstElementChild && getComputedStyle(view.ol.firstElementChild).whiteSpace.includes("pre-wrap"));
+    wrapBtn.setAttribute("aria-pressed", on ? "true" : "false");
+  }
   const viewer = h("div");
-  const infoCard = card({ eyebrow: T.code.title, body: [select, title, desc, why, h("div.wk-search", search, hits, nextBtn), viewer, h("div", { style: { textAlign: "right", marginTop: "6px" } }, sizeEl)], why: T.code.why });
+  const infoCard = card({ eyebrow: T.code.title, body: [select, title, desc, why, h("div.wk-search", search, hits, nextBtn, wrapBtn), viewer, h("div", { style: { textAlign: "right", marginTop: "6px" } }, sizeEl)], why: T.code.why, attrs: { class: "wk-code-info" } });
   el.appendChild(infoCard);
 
   /* ---- the list with what/why for every file */
@@ -125,11 +142,11 @@ export function mountCode(W) {
   for (const f of files) {
     if (f.group === "dev") continue;
     const m = meta(f);
-    const row = h("button.wk-file", { type: "button", "data-file": f.id, onclick: () => open(f.id) }, h("span.wk-file-name", m.name), h("span.wk-file-meta", f.lang), h("span.wk-file-what", m.what));
+    const row = h("button.wk-file", { type: "button", "data-file": f.id, onclick: () => open(f.id), hint: T.hints.file }, h("span.wk-file-name", m.name), h("span.wk-file-meta", f.lang), h("span.wk-file-what", m.what));
     list.appendChild(row);
     textOf(f).then((t) => { row.querySelector(".wk-file-meta").textContent = `${f.lang} · ${fmtBytes(t.length)}`; }).catch(() => {});
   }
-  el.appendChild(card({ eyebrow: "Alle Dateien", body: list }));
+  el.appendChild(card({ eyebrow: "Alle Dateien", body: list, attrs: { class: "wk-code-list" } }));
 
   let hitLines = [], hitAt = -1, searchTimer = 0;
   search.addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(runSearch, 160); });
@@ -202,7 +219,9 @@ export function mountCode(W) {
       clear(viewer);
       view = renderCode(text, file.lang);
       viewer.appendChild(view.el);
+      applyWrap();
       sizeEl.textContent = `${view.count.toLocaleString("de-DE")} ${T.code.lines} · ${fmtBytes(text.length)}`;
+      W.status(T.status.file(m.name, view.count));
       hitLines = []; hits.textContent = ""; search.value = "";
       if (symbol) {
         const n = findLine(text, file.lang, symbol);
@@ -223,7 +242,7 @@ export function mountCode(W) {
     show() { if (!currentId) open("runtime"); },
     /* "Im Code" from the element panel, routed through W.showCode in index.js. */
     showCode(fileId, symbol, section) { open(fileId, symbol, section); },
-    dispose() { cache.clear(); sources.clear(); },
+    dispose() { sources.clear(); },
   };
 }
 
