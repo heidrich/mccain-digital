@@ -80,6 +80,18 @@ cosmetic. `tools/prerender.mjs` documents each of these where it makes them:
   `#faq`, `#stack`). Rewritten per page, only where the page cannot resolve them.
 - **asset paths are relative**, so anything a folder deep 404s.
 - **nine brand-guide icons** hand an array to a single `<path d>`.
+- **boolean attributes without a value are dropped** by the export's own
+  template compiler (`required`, `download`) — every form validated nothing
+  until 17.9.2026. `valueBooleans()` gives them their name as value before
+  support.js sees the template (52 on the 21 pages).
+- **static text has one language.** Bound text follows the DE/EN switch
+  through the binder (a skipped `content-visibility` block catches up when it
+  comes into view); plain markup text — the brand guide, the workshop band —
+  carries both as `<span data-lang="de">…</span><span data-lang="en">…</span>`
+  and `LANG_CSS` shows the one `html[lang]` names. `tools/markdown.mjs` leaves
+  the English half out of the twin. Touch targets are opt-in: `[data-touch]`
+  grows to 44 px on coarse pointers only (the DE/EN switch on every page, the
+  toggles on `/leistungen/websites/`).
 - **React and both typefaces load from CDNs** — see below, that one is legal.
 
 ## The 21 pages
@@ -404,7 +416,11 @@ Anthropic Messages API (`max_tokens` 450, model from `ASK_MODEL`, default
 `claude-sonnet-5`, 25s timeout). Nothing is logged or stored. Without a key
 the endpoint answers 503 and the workshop falls back to answering from the
 same facts itself, labelled "ohne Claude" / sender "Tools" — the same
-path a fully offline dev server takes. **Owner action required:** set
+path a fully offline dev server takes. The console speaks the page's
+language: `werkstatt/texte.en.js` mirrors `texte.js` key for key, `T` picks
+by `html[lang]` on every access, and an open console rebuilds itself on the
+switch; the endpoint answers in the language the client reports
+(`facts.page.lang`). **Owner action required:** set
 `ANTHROPIC_API_KEY` in the Vercel project's Production environment variables
 (optionally `ASK_MODEL`, `ASK_DAILY_MAX`); until then the live site answers
 503 and only the offline fallback runs.

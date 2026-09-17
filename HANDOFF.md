@@ -2,6 +2,18 @@
 
 ## ▶ STAND 18.9. FRÜH — FIX-WELLE: LOKALISIERUNG, RECHT, SCHEMA, A11Y, FEED — ZUERST LESEN
 
+**Letzter Stand vor dem Compact (Owner: „Sehr gute Arbeit“):** Commit
+`5013d8b` gepusht und live geprüft (Redirects 308, COOP, `news/feed.xml`,
+404-Landmarken, zweisprachiges Band, Brand 70 Paare, Rechtstexte mit
+Vercel/Anthropic, Telefon im Schema, `required` auf allen Formularen,
+`texte.en.js`). Sitemap-`lastmod` zeigt noch 2026-09-12: der Build las den
+letzten Commit der Artboards VOR diesem Commit – der nächste Build stempelt
+das aktuelle Datum. Arbeitsbaum sauber. **Als Nächstes kommt vom Owner eine
+größere Denkaufgabe:** eine abgespeckte CMS-Variante plus ein Backend für die
+Website mit eigenem Kundenbereich und Projektmanager („ein tolles Angebot für
+unsere Kunden“) – Brainstorming-Skill, erst Design, dann Plan; die offenen
+Punkte unten (API-Schlüssel, Seiten-Chat, Textrunde) bleiben daneben stehen.
+
 **Owner-Anlass:** „bitte alle fixen, auch die fehlenden Lokalisierungen; ich
 glaube bei Brand fehlt auch was; die Claude-API binden wir später an.“ Alle
 Befunde aus „STAND 17.9. NACHTS (2)“ sind abgearbeitet, bis auf die unten
