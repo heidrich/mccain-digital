@@ -53,3 +53,7 @@ Trace-*.json
 Trace-*.json.gz
 
 internal/lh-assets/
+
+# Secrets live in the Vercel project's environment, never in a file here.
+.env
+.env.*

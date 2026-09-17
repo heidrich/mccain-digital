@@ -6,6 +6,7 @@
 <title>News · McCain Digital</title>
   <meta name="robots" content="noindex, follow">
   <link rel="alternate" type="text/markdown" href="/news/index.md">
+  <link rel="alternate" type="application/atom+xml" href="/news/feed.xml" title="McCain Digital · News">
 <meta name="description" content="Produkt-Updates zu md-recall, Notizen aus der Technik und Nachrichten aus dem Studio. Kurz gehalten, ohne Ankündigungs-Prosa.">
 <link rel="canonical" href="https://mccain-digital.com/news/">
 <meta name="theme-color" content="#0A1F44">
@@ -104,7 +105,7 @@
      each on the v3 build, preloading moved median FCP from 349 ms to 485 ms:
      the two files compete with the document for the same connection, and the
      document is what paints. -->
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Start","item":"https://mccain-digital.com/"},{"@type":"ListItem","position":2,"name":"Rechtliches","item":"https://mccain-digital.com/news/"}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Start","item":"https://mccain-digital.com/"},{"@type":"ListItem","position":2,"name":"News","item":"https://mccain-digital.com/news/"}]}]}</script>
 
 
 <style>
@@ -223,6 +224,8 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
 @keyframes srch-bg{0%{opacity:0}100%{opacity:1}}
 @keyframes srch-row{0%{opacity:0;transform:translateX(-6px)}100%{opacity:1;transform:none}}
 @keyframes ai-grad{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+
+@media (pointer: coarse){[data-touch]{min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center}}
 </style>
 <link rel="preload" as="image" href="/brand/mark-34-c.svg" fetchpriority="high">
 <style>@media (max-width:1279px),(pointer:coarse){[data-pt-layer]{display:none!important}}</style>
@@ -233,6 +236,7 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
 @media (min-width:960px){[data-cv="cv-1"]{contain-intrinsic-size:auto 661px}}
 @media (min-width:1280px){[data-cv="cv-1"]{contain-intrinsic-size:auto 487px}}
 @media (min-width:1350px){[data-cv="cv-1"]{contain-intrinsic-size:auto 487px}}</style>
+<style>html:not([lang="en"]) [data-lang="en"],html[lang="en"] [data-lang="de"]{display:none!important}@media (pointer:coarse){[data-touch]{min-height:44px;min-width:44px}}</style>
 
 
 <script src="/motion-budget.js" defer></script>
@@ -289,8 +293,8 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
       </span>
       
       <div data-dc-tpl="45" role="group" aria-label="Sprache" class="s33 hw55">
-        <button data-dc-tpl="46" class="s34">DE</button>
-        <button data-dc-tpl="47" class="s35">EN</button>
+        <button data-dc-tpl="46" data-touch class="s34">DE</button>
+        <button data-dc-tpl="47" data-touch class="s35">EN</button>
       </div>
       
       
@@ -509,7 +513,7 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
           </div>
           <div data-dc-tpl="150" class="s106">
             <span data-dc-tpl="151" class="s60"><span class="sc-interp">Bis zum Angebot kostet Sie nichts.</span></span>
-            <a data-dc-tpl="152" href="/preise/" class="scp1 s107 h152"><span class="sc-interp">Zum Konfigurator</span><svg data-dc-tpl="153" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use data-dc-tpl="154" href="/brand/mccain-icons.svg#chevron-right"></use></svg></a>
+            <a data-dc-tpl="152" href="/preise/#rechner" class="scp1 s107 h152"><span class="sc-interp">Zum Konfigurator</span><svg data-dc-tpl="153" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use data-dc-tpl="154" href="/brand/mccain-icons.svg#chevron-right"></use></svg></a>
           </div>
         </div>
 
@@ -590,8 +594,8 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
       <div data-dc-tpl="241" class="s145"><span data-dc-tpl="242" class="s146"><img src="/brand/mark-30-c.svg" width="30" height="30" alt aria-hidden="true" loading="lazy" decoding="async" class="s23"><span data-dc-tpl="243" class="s147">mccain digital</span></span><span data-dc-tpl="244"><span class="sc-interp">© 2026 McCain Digital · Oberostendorf, Bayern</span></span></div>
       <div data-dc-tpl="245" class="s145"><span data-dc-tpl="246"><span class="sc-interp">Gebaut von den zwei Personen, die es anbieten.</span></span>
         <div data-dc-tpl="247" role="group" aria-label="Sprache" class="s148">
-          <button data-dc-tpl="248" class="s149">DE</button>
-          <button data-dc-tpl="249" class="s150">EN</button>
+          <button data-dc-tpl="248" data-touch class="s149">DE</button>
+          <button data-dc-tpl="249" data-touch class="s150">EN</button>
         </div>
       </div>
     </div>
@@ -606,18 +610,19 @@ if(picked.length){fd.append('Auswahl',picked.join(' \u00b7 '));}}catch(e){}
 fd.append('access_key','d3e1fa0a-cbe1-45cd-b823-c63eff37c66a');
 fd.append('subject','Kontaktformular mccain-digital.com');
 fd.append('from_name','mccain-digital.com');
-var btn=form.querySelector('[type="submit"]');if(btn){btn.disabled=true;}
+var en=document.documentElement.lang==='en';var btn=form.querySelector('[type="submit"]');var btnText=btn?btn.textContent:'';
+if(btn){btn.disabled=true;btn.setAttribute('aria-busy','true');btn.textContent=en?'Sending \u2026':'Wird gesendet \u2026';}
 fetch('https://api.web3forms.com/submit',{method:'POST',body:fd})
 .then(function(r){return r.json().catch(function(){return null;});})
 .then(function(j){if(!j||j.success!==true){throw new Error((j&&j.message)||'rejected');}
-if(btn){btn.disabled=false;}onSent();})
-.catch(function(){if(btn){btn.disabled=false;}
+if(btn){btn.disabled=false;btn.removeAttribute('aria-busy');btn.textContent=btnText;}onSent();})
+.catch(function(){if(btn){btn.disabled=false;btn.removeAttribute('aria-busy');btn.textContent=btnText;}
 var box=form.querySelector('.mcd-form-error');
 if(!box){box=document.createElement('p');box.className='mcd-form-error';
 box.setAttribute('role','alert');
 box.style.cssText='margin:12px 0 0;padding:12px 14px;border-radius:10px;border:1px solid #E3E8EE;border-left:3px solid #E5484D;background:#F6F9FC;color:#0A2540;font-size:14px;line-height:1.5';
 form.appendChild(box);}
-box.innerHTML='Das Formular konnte nicht gesendet werden. Bitte schreiben Sie uns direkt an <a href="mailto:info@mccain-digital.com" style="color:#4D47C7;text-decoration:underline">info@mccain-digital.com</a>.';});};})();</script>
+box.innerHTML=en?'The form could not be sent. Please write to us directly at <a href="mailto:info@mccain-digital.com" style="color:#4D47C7;text-decoration:underline">info@mccain-digital.com</a>.':'Das Formular konnte nicht gesendet werden. Bitte schreiben Sie uns direkt an <a href="mailto:info@mccain-digital.com" style="color:#4D47C7;text-decoration:underline">info@mccain-digital.com</a>.';});};})();</script>
 
 <template id="dc-template">
 
@@ -642,7 +647,7 @@ box.innerHTML='Das Formular konnte nicht gesendet werden. Bitte schreiben Sie un
       <span style="font-weight:600; letter-spacing:-.03em; font-size:18px; line-height:1; animation: word-in .55s cubic-bezier(.2,.8,.2,1) .42s both" data-dc-tpl="28">mccain digital</span>
     </a>
     <sc-if value="{{ isDesktop }}" data-dc-tpl="29">
-      <nav data-nav-list="" aria-label="Hauptnavigation" style="position:relative; display:flex; align-items:center; gap:4px; margin-left:8px" data-dc-tpl="30">
+      <nav data-nav-list="" aria-label="{{ ariaNav }}" style="position:relative; display:flex; align-items:center; gap:4px; margin-left:8px" data-dc-tpl="30">
         <span aria-hidden="true" style="position:absolute; top:50%; left: {{ indLeft }}px; width: {{ indW }}px; height:36px; margin-top:-18px; border-radius:8px; background: {{ indBg }}; opacity: {{ indOp }}; transition: left .35s cubic-bezier(.2,.8,.2,1), width .35s cubic-bezier(.2,.8,.2,1), opacity .2s; pointer-events:none" data-dc-tpl="31"></span>
         <sc-for list="{{ navItems }}" as="m" data-dc-tpl="32">
           <button data-nav-item="{{ m.id }}" onmouseenter="{{ m.open }}" onclick="{{ m.toggle }}" style="position:relative; display:flex; align-items:center; gap:3px; padding:8px 12px; border-radius:8px; font-size:15px; font-weight:500; white-space:nowrap; color: {{ m.fg }}; opacity: {{ m.opacity }}; transition: opacity .2s, color .2s" data-dc-tpl="33"><span aria-hidden="true" style="position:absolute; left:50%; bottom:1px; width:14px; height:2px; margin-left:-7px; border-radius:2px; background:var(--acc); opacity: {{ m.dotOp }}; transition: opacity .25s" data-dc-tpl="34"></span>{{ m.label }}<svg width="13" height="13" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="opacity:.55; transform: {{ m.chev }}; transition: transform .3s" data-dc-tpl="35"><use href="/brand/mccain-icons.svg#chevron-down" data-dc-tpl="36"></use></svg></button>
@@ -657,9 +662,9 @@ box.innerHTML='Das Formular konnte nicht gesendet werden. Bitte schreiben Sie un
         </button>
       </span>
       <sc-if value="{{ showLangInNav }}" data-dc-tpl="44">
-      <div role="group" aria-label="Sprache" style="display:flex; border:1px solid rgba(10,37,64,.14); border-radius:999px; padding:2px; font-size:12px; font-weight:600; letter-spacing:.02em" data-dc-tpl="45">
-        <button onclick="{{ setDe }}" style="padding:4px 9px; border-radius:999px; background: {{ deBg }}; color: {{ deFg }}; transition: background .25s, color .25s" data-dc-tpl="46">DE</button>
-        <button onclick="{{ setEn }}" style="padding:4px 9px; border-radius:999px; background: {{ enBg }}; color: {{ enFg }}; transition: background .25s, color .25s" data-dc-tpl="47">EN</button>
+      <div role="group" aria-label="{{ ariaLang }}" style="display:flex; border:1px solid rgba(10,37,64,.14); border-radius:999px; padding:2px; font-size:12px; font-weight:600; letter-spacing:.02em" data-dc-tpl="45">
+        <button onclick="{{ setDe }}" data-touch="" style="padding:4px 9px; border-radius:999px; background: {{ deBg }}; color: {{ deFg }}; transition: background .25s, color .25s" data-dc-tpl="46">DE</button>
+        <button onclick="{{ setEn }}" data-touch="" style="padding:4px 9px; border-radius:999px; background: {{ enBg }}; color: {{ enFg }}; transition: background .25s, color .25s" data-dc-tpl="47">EN</button>
       </div>
       </sc-if>
       <sc-if value="{{ isDesktop }}" data-dc-tpl="48">
@@ -779,7 +784,7 @@ box.innerHTML='Das Formular konnte nicht gesendet werden. Bitte schreiben Sie un
           </div>
           <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:13px 22px; background:#F6F9FC; border-top:1px solid rgba(10,37,64,.06); font-size:13px; margin-top:8px" data-dc-tpl="150">
             <span style="color:#5A6880" data-dc-tpl="151">{{ t.menus.pricingFoot }}</span>
-            <a href="/preise/" style="display:inline-flex; align-items:center; gap:4px; height:32px; padding:0 8px 0 14px; border-radius:8px; background:var(--acc); color:#fff; font-size:13px; font-weight:600" data-dc-tpl="152">{{ t.menus.pricingCta }}<svg width="14" height="14" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-dc-tpl="153"><use href="/brand/mccain-icons.svg#chevron-right" data-dc-tpl="154"></use></svg></a>
+            <a href="/preise/#rechner" style="display:inline-flex; align-items:center; gap:4px; height:32px; padding:0 8px 0 14px; border-radius:8px; background:var(--acc); color:#fff; font-size:13px; font-weight:600" data-dc-tpl="152">{{ t.menus.pricingCta }}<svg width="14" height="14" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-dc-tpl="153"><use href="/brand/mccain-icons.svg#chevron-right" data-dc-tpl="154"></use></svg></a>
           </div>
         </div>
 
@@ -824,7 +829,7 @@ box.innerHTML='Das Formular konnte nicht gesendet werden. Bitte schreiben Sie un
 </sc-if>
 <section id="inhalt" data-page-hero="" data-screen-label="Hero News" style="position:relative; background:transparent; overflow:hidden" data-dc-tpl="186">
   <div style="position:relative; max-width:1080px; margin:0 auto; padding:0 clamp(20px,4vw,40px); padding-top: clamp(112px,11vw,144px); padding-bottom: clamp(18px,2vw,28px)" data-dc-tpl="187">
-    <nav aria-label="Brotkrumen" style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:500; color:#5A6880; opacity:0; animation: fadeIn .6s ease .15s both" data-dc-tpl="188"><a href="/" style="color:#5A6880" data-dc-tpl="189">{{ pg.bc.home }}</a><span aria-hidden="true" data-dc-tpl="190">·</span><span style="color:#0A2540" data-dc-tpl="191">{{ pg.bc.here }}</span></nav>
+    <nav aria-label="{{ ariaBreadcrumb }}" style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:500; color:#5A6880; opacity:0; animation: fadeIn .6s ease .15s both" data-dc-tpl="188"><a href="/" style="color:#5A6880" data-dc-tpl="189">{{ pg.bc.home }}</a><span aria-hidden="true" data-dc-tpl="190">·</span><span style="color:#0A2540" data-dc-tpl="191">{{ pg.bc.here }}</span></nav>
     <div style="max-width:720px; margin-top:22px" data-dc-tpl="192">
       <div style="font-size:15px; font-weight:600; color:var(--acc-text)" data-dc-tpl="193">{{ pg.hero.eyebrow }}</div>
       <h1 style="font-size: clamp(32px,3.6vw,46px); line-height:1.08; letter-spacing:-.04em; font-weight:700; color:#0A2540; margin-top:10px; text-wrap:balance" data-dc-tpl="194">{{ pg.hero.t1 }}</h1>
@@ -872,9 +877,9 @@ box.innerHTML='Das Formular konnte nicht gesendet werden. Bitte schreiben Sie un
     <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:16px; margin-top:48px; padding-top:24px; border-top:1px solid rgba(255,255,255,.1); font-size:13px; color:#8DA2E0" data-dc-tpl="240">
       <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap" data-dc-tpl="241"><span style="display:flex; align-items:center; gap:11px; color:#fff" data-dc-tpl="242">{{ logoFootEl }}<span style="font-weight:600; letter-spacing:-.03em; font-size: clamp(17px,1.25vw,19px); line-height:1; color:#fff; animation: word-in .62s cubic-bezier(.2,.8,.2,1) .5s both" data-dc-tpl="243">mccain digital</span></span><span data-dc-tpl="244">{{ t.footer.copy }}</span></div>
       <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap" data-dc-tpl="245"><span data-dc-tpl="246">{{ t.footer.tagline }}</span>
-        <div role="group" aria-label="Sprache" style="display:flex; border:1px solid rgba(255,255,255,.18); border-radius:999px; padding:2px; font-size:12px; font-weight:600" data-dc-tpl="247">
-          <button onclick="{{ setDe }}" style="padding:4px 9px; border-radius:999px; background: {{ deBgFoot }}; color: {{ deFgFoot }}" data-dc-tpl="248">DE</button>
-          <button onclick="{{ setEn }}" style="padding:4px 9px; border-radius:999px; background: {{ enBgFoot }}; color: {{ enFgFoot }}" data-dc-tpl="249">EN</button>
+        <div role="group" aria-label="{{ ariaLang }}" style="display:flex; border:1px solid rgba(255,255,255,.18); border-radius:999px; padding:2px; font-size:12px; font-weight:600" data-dc-tpl="247">
+          <button onclick="{{ setDe }}" data-touch="" style="padding:4px 9px; border-radius:999px; background: {{ deBgFoot }}; color: {{ deFgFoot }}" data-dc-tpl="248">DE</button>
+          <button onclick="{{ setEn }}" data-touch="" style="padding:4px 9px; border-radius:999px; background: {{ enBgFoot }}; color: {{ enFgFoot }}" data-dc-tpl="249">EN</button>
         </div>
       </div>
     </div>
@@ -905,7 +910,7 @@ box.innerHTML='Das Formular konnte nicht gesendet werden. Bitte schreiben Sie un
 <sc-if value="{{ dockShow }}" data-dc-tpl="267">
 <div data-screen-label="Chat-Dock" style="position:fixed; right: {{ dockRight }}; left: {{ dockLeft }}; bottom: {{ dockBottom }}; z-index:60; display:flex; flex-direction:column; align-items:flex-end; gap:10px" data-dc-tpl="268">
   <sc-if value="{{ dockOpen }}" data-dc-tpl="269">
-    <div role="dialog" aria-label="{{ t.ai.modeAsk }}" onpointerdown="{{ clearDockGlow }}" onfocuscapture="{{ clearDockGlow }}" style="width: {{ dockW }}; background: {{ dockBg }}; background-size: {{ dockBgSize }}; color:#EEF1FA; border: {{ dockBorder }}; border-radius:14px; box-shadow: {{ dockShadow }}; overflow:hidden; animation: {{ dockAnim }}" data-dc-tpl="270">
+    <div role="dialog" aria-modal="false" aria-label="{{ t.ai.modeAsk }}" onpointerdown="{{ clearDockGlow }}" onfocuscapture="{{ clearDockGlow }}" style="width: {{ dockW }}; background: {{ dockBg }}; background-size: {{ dockBgSize }}; color:#EEF1FA; border: {{ dockBorder }}; border-radius:14px; box-shadow: {{ dockShadow }}; overflow:hidden; animation: {{ dockAnim }}" data-dc-tpl="270">
       <div style="display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1px solid rgba(255,255,255,.08)" data-dc-tpl="271">{{ logoChatEl }}<span style="font-weight:600; font-size:14px" data-dc-tpl="272">{{ t.ai.modeAsk }}</span><span style="margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:11px; color:#8DA2E0" data-dc-tpl="273">{{ t.ai.model }}</span><button onclick="{{ toggleDock }}" aria-label="{{ t.common.close }}" style="width:30px; height:30px; border-radius:8px; display:grid; place-items:center; color:#C5D0F5; transition: background .2s" data-dc-tpl="274"><svg width="16" height="16" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true" data-dc-tpl="275"><use href="/brand/mccain-icons.svg#x" data-dc-tpl="276"></use></svg></button></div>
       <div ref="{{ dockListRef }}" style="height:min(320px, 45vh); overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:12px" data-dc-tpl="277">
         <div style="display:flex; gap:10px; align-items:flex-start" data-dc-tpl="278"><p style="font-size:13.5px; line-height:1.55; color:#C5D0F5" data-dc-tpl="279">{{ aiIntro }}</p></div>

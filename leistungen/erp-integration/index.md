@@ -74,7 +74,7 @@ für ein System mit dokumentierter API
 
 für ein Altsystem ohne Schnittstelle
 
-[Größenordnung im Rechner ansehen](https://mccain-digital.com/preise/)
+[Größenordnung im Rechner ansehen](https://mccain-digital.com/preise/#rechner)
 
 Adapter hinter einem klaren Interface – der Weg ist austauschbar
 

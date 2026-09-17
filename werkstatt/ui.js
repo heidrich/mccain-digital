@@ -152,9 +152,11 @@ export function fmtNum(n, digits) {
  * the console. Acronyms match exactly, German nouns also with a plural or
  * case ending ("Crawlers", "Screenreadern"). Only prose goes through rich(),
  * never code: code is shown as text and stays text. */
-let termRe = null;
+let termRe = null, termLang = null; /* per language: T switches with html[lang] */
 function termRegex() {
-  if (termRe) return termRe;
+  const lang = document.documentElement.lang || "de";
+  if (termRe && termLang === lang) return termRe;
+  termLang = lang;
   const keys = Object.keys(T.glossar || {}).sort((a, b) => b.length - a.length);
   if (!keys.length) { termRe = /$^/g; return termRe; }
   const alts = keys.map((k) => {

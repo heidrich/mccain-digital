@@ -78,6 +78,7 @@ export const PAGES = [
     src: "McCain Digital News md-recall.dc.html",
     out: "news/md-recall/index.html",
     route: "/news/md-recall/",
+    date: "2026-09-11", /* published; feeds the Atom feed (tools/v5build.mjs) */
     prio: "0.5",
     freq: "monthly",
     meta: {

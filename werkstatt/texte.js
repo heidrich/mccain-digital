@@ -6,7 +6,9 @@
  * site's own: "Sie", short sentences, a technical term followed by what it
  * means for the reader, numbers only where the page really produces them
  * (those are filled in by the modules, never written here). */
-export const T = {
+import { T_EN } from "./texte.en.js";
+
+const T_DE = {
   brand: "Tools",
   title: "Diese Seite von innen",
   views: { roentgen: "Röntgen", crawler: "Google & KI" },
@@ -386,6 +388,8 @@ export const T = {
     factPage: "Seite",
     factSelected: "Gewähltes Element",
     factPerf: "Messwerte",
+    factLongTasks: "lange Aufgaben",
+    factHeadings: "Überschriften",
     factCrawler: "Für Crawler",
     factText: "Seitentext",
     factTextVal: (n) => `Markdown-Zwilling, ${n.toLocaleString("de-DE")} Zeichen`,
@@ -403,3 +407,18 @@ export const T = {
     },
   },
 };
+
+/* The console speaks the page's language. The page's logic writes html[lang]
+ * on the DE/EN switch (and restores it from localStorage "mcd.lang" on load);
+ * T reads whichever dictionary that names at the moment of access, so every
+ * module keeps writing T.ask.title and gets the right words - index.js
+ * rebuilds the open console when the attribute changes. texte.en.js mirrors
+ * this file key for key (checked by scratchpad/tools-en-check.mjs). */
+const pick = () => (document.documentElement.lang === "en" ? T_EN : T_DE);
+export const T = new Proxy({}, {
+  get: (_, k) => pick()[k],
+  has: (_, k) => k in pick(),
+  set: (_, k) => { throw new Error(`T is read-only (tried to set ${String(k)}); edit texte.js / texte.en.js`); },
+  ownKeys: () => Reflect.ownKeys(pick()),
+  getOwnPropertyDescriptor: (_, k) => { const d = Reflect.getOwnPropertyDescriptor(pick(), k); return d ? Object.assign(d, { configurable: true }) : undefined; },
+});

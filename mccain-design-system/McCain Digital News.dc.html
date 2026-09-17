@@ -28,7 +28,7 @@
 <meta name="twitter:title" content="Impressum, Datenschutz, AGB, Widerruf · McCain Digital">
 <meta name="twitter:description" content="Rechtliche Angaben von McCain Digital: Impressum, Datenschutzerklärung, Allgemeine Geschäftsbedingungen und Widerrufsbelehrung.">
 <meta name="twitter:image" content="https://mccain-digital.com/brand/mccain-og-rechtliches.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Start","item":"https://mccain-digital.com/"},{"@type":"ListItem","position":2,"name":"Rechtliches","item":"https://mccain-digital.com/rechtliches/"}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Start","item":"https://mccain-digital.com/"},{"@type":"ListItem","position":2,"name":"News","item":"https://mccain-digital.com/news/"}]}]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -103,6 +103,8 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
 @keyframes srch-bg{0%{opacity:0}100%{opacity:1}}
 @keyframes srch-row{0%{opacity:0;transform:translateX(-6px)}100%{opacity:1;transform:none}}
 @keyframes ai-grad{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+
+@media (pointer: coarse){[data-touch]{min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center}}
 </style>
 </helmet>
 <div ref="{{ rootRef }}" id="top" style="min-height:100vh; background:transparent; color:#0A2540; font-family:'Instrument Sans',system-ui,sans-serif; overflow-x:clip; position:relative">
@@ -126,7 +128,7 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
       <span style="font-weight:600; letter-spacing:-.03em; font-size:18px; line-height:1; animation: word-in .55s cubic-bezier(.2,.8,.2,1) .42s both">mccain digital</span>
     </a>
     <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
-      <nav data-nav-list aria-label="Hauptnavigation" style="position:relative; display:flex; align-items:center; gap:4px; margin-left:8px">
+      <nav data-nav-list aria-label="{{ ariaNav }}" style="position:relative; display:flex; align-items:center; gap:4px; margin-left:8px">
         <span aria-hidden="true" style="position:absolute; top:50%; left: {{ indLeft }}px; width: {{ indW }}px; height:36px; margin-top:-18px; border-radius:8px; background: {{ indBg }}; opacity: {{ indOp }}; transition: left .35s cubic-bezier(.2,.8,.2,1), width .35s cubic-bezier(.2,.8,.2,1), opacity .2s; pointer-events:none"></span>
         <sc-for list="{{ navItems }}" as="m" hint-placeholder-count="6">
           <button data-nav-item="{{ m.id }}" onMouseEnter="{{ m.open }}" onClick="{{ m.toggle }}" style="position:relative; display:flex; align-items:center; gap:3px; padding:8px 12px; border-radius:8px; font-size:15px; font-weight:500; white-space:nowrap; color: {{ m.fg }}; opacity: {{ m.opacity }}; transition: opacity .2s, color .2s"><span aria-hidden="true" style="position:absolute; left:50%; bottom:1px; width:14px; height:2px; margin-left:-7px; border-radius:2px; background:var(--acc); opacity: {{ m.dotOp }}; transition: opacity .25s"></span>{{ m.label }}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="opacity:.55; transform: {{ m.chev }}; transition: transform .3s"><use href="brand/mccain-icons.svg#chevron-down"></use></svg></button>
@@ -141,9 +143,9 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
         </button>
       </span>
       <sc-if value="{{ showLangInNav }}" hint-placeholder-val="{{ true }}">
-      <div role="group" aria-label="Sprache" style="display:flex; border:1px solid rgba(10,37,64,.14); border-radius:999px; padding:2px; font-size:12px; font-weight:600; letter-spacing:.02em">
-        <button onClick="{{ setDe }}" style="padding:4px 9px; border-radius:999px; background: {{ deBg }}; color: {{ deFg }}; transition: background .25s, color .25s">DE</button>
-        <button onClick="{{ setEn }}" style="padding:4px 9px; border-radius:999px; background: {{ enBg }}; color: {{ enFg }}; transition: background .25s, color .25s">EN</button>
+      <div role="group" aria-label="{{ ariaLang }}" style="display:flex; border:1px solid rgba(10,37,64,.14); border-radius:999px; padding:2px; font-size:12px; font-weight:600; letter-spacing:.02em">
+        <button onClick="{{ setDe }}" data-touch style="padding:4px 9px; border-radius:999px; background: {{ deBg }}; color: {{ deFg }}; transition: background .25s, color .25s">DE</button>
+        <button onClick="{{ setEn }}" data-touch style="padding:4px 9px; border-radius:999px; background: {{ enBg }}; color: {{ enFg }}; transition: background .25s, color .25s">EN</button>
       </div>
       </sc-if>
       <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
@@ -263,7 +265,7 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
           </div>
           <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:13px 22px; background:#F6F9FC; border-top:1px solid rgba(10,37,64,.06); font-size:13px; margin-top:8px">
             <span style="color:#5A6880">{{ t.menus.pricingFoot }}</span>
-            <a href="McCain Digital Preise.dc.html" style="display:inline-flex; align-items:center; gap:4px; height:32px; padding:0 8px 0 14px; border-radius:8px; background:var(--acc); color:#fff; font-size:13px; font-weight:600" style-hover="background:#0A2540">{{ t.menus.pricingCta }}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="brand/mccain-icons.svg#chevron-right"></use></svg></a>
+            <a href="McCain Digital Preise.dc.html#rechner" style="display:inline-flex; align-items:center; gap:4px; height:32px; padding:0 8px 0 14px; border-radius:8px; background:var(--acc); color:#fff; font-size:13px; font-weight:600" style-hover="background:#0A2540">{{ t.menus.pricingCta }}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="brand/mccain-icons.svg#chevron-right"></use></svg></a>
           </div>
         </div>
 
@@ -308,7 +310,7 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
 </sc-if>
 <section id="inhalt" data-page-hero data-screen-label="Hero News" style="position:relative; background:transparent; overflow:hidden">
   <div style="position:relative; max-width:1080px; margin:0 auto; padding:0 clamp(20px,4vw,40px); padding-top: clamp(112px,11vw,144px); padding-bottom: clamp(18px,2vw,28px)">
-    <nav aria-label="Brotkrumen" style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:500; color:#5A6880; opacity:0; animation: fadeIn .6s ease .15s both"><a href="McCain Digital v2.dc.html" style="color:#5A6880" style-hover="color:#0A2540">{{ pg.bc.home }}</a><span aria-hidden="true">·</span><span style="color:#0A2540">{{ pg.bc.here }}</span></nav>
+    <nav aria-label="{{ ariaBreadcrumb }}" style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:500; color:#5A6880; opacity:0; animation: fadeIn .6s ease .15s both"><a href="McCain Digital v2.dc.html" style="color:#5A6880" style-hover="color:#0A2540">{{ pg.bc.home }}</a><span aria-hidden="true">·</span><span style="color:#0A2540">{{ pg.bc.here }}</span></nav>
     <div style="max-width:720px; margin-top:22px">
       <div style="font-size:15px; font-weight:600; color:var(--acc-text)">{{ pg.hero.eyebrow }}</div>
       <h1 style="font-size: clamp(32px,3.6vw,46px); line-height:1.08; letter-spacing:-.04em; font-weight:700; color:#0A2540; margin-top:10px; text-wrap:balance">{{ pg.hero.t1 }}</h1>
@@ -356,9 +358,9 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
     <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:16px; margin-top:48px; padding-top:24px; border-top:1px solid rgba(255,255,255,.1); font-size:13px; color:#8DA2E0">
       <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap"><span style="display:flex; align-items:center; gap:11px; color:#fff">{{ logoFootEl }}<span style="font-weight:600; letter-spacing:-.03em; font-size: clamp(17px,1.25vw,19px); line-height:1; color:#fff; animation: word-in .62s cubic-bezier(.2,.8,.2,1) .5s both">mccain digital</span></span><span>{{ t.footer.copy }}</span></div>
       <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap"><span>{{ t.footer.tagline }}</span>
-        <div role="group" aria-label="Sprache" style="display:flex; border:1px solid rgba(255,255,255,.18); border-radius:999px; padding:2px; font-size:12px; font-weight:600">
-          <button onClick="{{ setDe }}" style="padding:4px 9px; border-radius:999px; background: {{ deBgFoot }}; color: {{ deFgFoot }}">DE</button>
-          <button onClick="{{ setEn }}" style="padding:4px 9px; border-radius:999px; background: {{ enBgFoot }}; color: {{ enFgFoot }}">EN</button>
+        <div role="group" aria-label="{{ ariaLang }}" style="display:flex; border:1px solid rgba(255,255,255,.18); border-radius:999px; padding:2px; font-size:12px; font-weight:600">
+          <button onClick="{{ setDe }}" data-touch style="padding:4px 9px; border-radius:999px; background: {{ deBgFoot }}; color: {{ deFgFoot }}">DE</button>
+          <button onClick="{{ setEn }}" data-touch style="padding:4px 9px; border-radius:999px; background: {{ enBgFoot }}; color: {{ enFgFoot }}">EN</button>
         </div>
       </div>
     </div>
@@ -389,7 +391,7 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
 <sc-if value="{{ dockShow }}" hint-placeholder-val="{{ false }}">
 <div data-screen-label="Chat-Dock" style="position:fixed; right: {{ dockRight }}; left: {{ dockLeft }}; bottom: {{ dockBottom }}; z-index:60; display:flex; flex-direction:column; align-items:flex-end; gap:10px">
   <sc-if value="{{ dockOpen }}" hint-placeholder-val="{{ false }}">
-    <div role="dialog" aria-label="{{ t.ai.modeAsk }}" onPointerDown="{{ clearDockGlow }}" onFocusCapture="{{ clearDockGlow }}" style="width: {{ dockW }}; background: {{ dockBg }}; background-size: {{ dockBgSize }}; color:#EEF1FA; border: {{ dockBorder }}; border-radius:14px; box-shadow: {{ dockShadow }}; overflow:hidden; animation: {{ dockAnim }}">
+    <div role="dialog" aria-modal="false" aria-label="{{ t.ai.modeAsk }}" onPointerDown="{{ clearDockGlow }}" onFocusCapture="{{ clearDockGlow }}" style="width: {{ dockW }}; background: {{ dockBg }}; background-size: {{ dockBgSize }}; color:#EEF1FA; border: {{ dockBorder }}; border-radius:14px; box-shadow: {{ dockShadow }}; overflow:hidden; animation: {{ dockAnim }}">
       <div style="display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1px solid rgba(255,255,255,.08)">{{ logoChatEl }}<span style="font-weight:600; font-size:14px">{{ t.ai.modeAsk }}</span><span style="margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:11px; color:#8DA2E0">{{ t.ai.model }}</span><button onClick="{{ toggleDock }}" aria-label="{{ t.common.close }}" style="width:30px; height:30px; border-radius:8px; display:grid; place-items:center; color:#C5D0F5; transition: background .2s" style-hover="background:rgba(255,255,255,.08); color:#fff"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><use href="brand/mccain-icons.svg#x"></use></svg></button></div>
       <div ref="{{ dockListRef }}" style="height:min(320px, 45vh); overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:12px">
         <div style="display:flex; gap:10px; align-items:flex-start"><p style="font-size:13.5px; line-height:1.55; color:#C5D0F5">{{ aiIntro }}</p></div>
@@ -940,7 +942,7 @@ class Component extends DCLogic {
       { title: t.nav.studio, links: [{ label: t.footer.team, onClick: () => { window.location.href = Component.PAGES.studio; } }, { label: t.footer.faq, onClick: this.goHandler('faq') }, { label: t.footer.contact, onClick: () => { window.location.href = Component.PAGES.contact; } }, { label: t.footer.imprint, onClick: () => { window.location.href = Component.PAGES.legal; } }] },
       { title: t.nav.process, links: steps.map((s) => ({ label: s.n + ' · ' + s.title, onClick: this.goHandler('process') })) },
       { title: t.nav.resources, links: resItems.map((r) => ({ label: r.title, onClick: r.onClick || (() => window.open(r.href, '_blank', 'noopener')) })) },
-      { title: t.nav.pricing, links: [{ label: t.menus.configurator, onClick: () => { window.location.href = Component.PAGES.pricing + '#rechner'; } }, { label: t.menus.pricingTitle, onClick: () => { window.location.href = Component.PAGES.pricing; } }, { label: t.menus.pricingCta, onClick: () => { window.location.href = Component.PAGES.contact; } }] }
+      { title: t.nav.pricing, links: [{ label: t.menus.configurator, onClick: () => { window.location.href = Component.PAGES.pricing + '#rechner'; } }, { label: t.menus.pricingTitle, onClick: () => { window.location.href = Component.PAGES.pricing; } }, { label: t.menus.pricingCta, onClick: () => { window.location.href = Component.PAGES.pricing + '#rechner'; } }] }
     ];
     const emptyDeep = { stats: [], useCases: [], caps: [], steps: [], faqs: [], stack: [] };
     let modal = { title: '', items: [], facts: [], stats: [], deep: emptyDeep, hasDeep: false, gradA: '', gradB: '', url: '' };
@@ -965,7 +967,7 @@ class Component extends DCLogic {
     const de = S.lang === 'de';
     const menuOpen = !!S.menu;
     return {
-      pg: this.pageVals(S, t, x), logoFootEl: this.mark(30, 'color', 'in'), logoNavEl: this.mark(34, 'color', S.navLoop ? 'loop' : 'in'), logoChatEl: this.mark(26, 'color', 'in'), logoChatSEl: this.mark(22, 'color', 'static'), logoWaitEl: this.mark(24, 'white', 'loop'), logoDockEl: (S.aiPhase === 'thinking' || S.aiPhase === 'typing' || !S.dockOpen) ? this.mark(26, 'color', 'loop') : this.mark(26, 'color', 'in'), search: this.searchVals().search, cs: this.consentVals(), rootRef: this.rootRef, gradRef: this.gradRef, waveRef: this.waveRef, brandLabel: S.lang === 'de' ? 'Marke & Downloads' : 'Brand & downloads', logoNav: this.tileFree(34, 'color', 'in'), logoWait: this.tileFree(24, 'white', 'loop'), logoChat: this.tileFree(26, 'color', 'in'), logoChatS: this.tileFree(22, 'color', 'static'), logoDock: S.aiPhase === 'thinking' || S.aiPhase === 'typing' ? this.tileFree(26, 'color', 'loop') : this.tileFree(26, 'color', 'in'), dockHint: S.dockHint && !S.dockOpen, dockHintKicker: S.lang === 'de' ? 'Live · Claude' : 'Live · Claude', dockHintText: S.lang === 'de' ? 'Diese Seite beantwortet Fragen zu Preisen, Ablauf und Technik – in Sekunden.' : 'This page answers questions about pricing, process and tech — in seconds.', dockShow: !S.aiVisible && !S.heroVisible && !S.modal && !S.mobileOpen && S.vw >= 600, dockOpen: S.dockOpen, toggleDock: this.toggleDock, dockSubmit: this.dockSubmit, dockInputRef: this.dockInputRef, dockListRef: this.dockListRef, dockLabel: S.dockOpen ? (S.lang === 'de' ? 'Schließen' : 'Close') : (S.lang === 'de' ? 'Die Seite fragen' : 'Ask the site'), aiTypingText: S.aiTypingText || '', aiListRef: this.aiListRef, aiInputRef: this.aiInputRef,
+      pg: this.pageVals(S, t, x), logoFootEl: this.mark(30, 'color', 'in'), logoNavEl: this.mark(34, 'color', S.navLoop ? 'loop' : 'in'), logoChatEl: this.mark(26, 'color', 'in'), logoChatSEl: this.mark(22, 'color', 'static'), logoWaitEl: this.mark(24, 'white', 'loop'), logoDockEl: (S.aiPhase === 'thinking' || S.aiPhase === 'typing' || !S.dockOpen) ? this.mark(26, 'color', 'loop') : this.mark(26, 'color', 'in'), search: this.searchVals().search, cs: this.consentVals(), rootRef: this.rootRef, gradRef: this.gradRef, waveRef: this.waveRef, brandLabel: S.lang === 'de' ? 'Marke & Downloads' : 'Brand & downloads', ariaNav: S.lang === 'de' ? 'Hauptnavigation' : 'Main navigation', ariaLang: S.lang === 'de' ? 'Sprache' : 'Language', ariaBreadcrumb: S.lang === 'de' ? 'Brotkrumen' : 'Breadcrumb', logoNav: this.tileFree(34, 'color', 'in'), logoWait: this.tileFree(24, 'white', 'loop'), logoChat: this.tileFree(26, 'color', 'in'), logoChatS: this.tileFree(22, 'color', 'static'), logoDock: S.aiPhase === 'thinking' || S.aiPhase === 'typing' ? this.tileFree(26, 'color', 'loop') : this.tileFree(26, 'color', 'in'), dockHint: S.dockHint && !S.dockOpen, dockHintKicker: S.lang === 'de' ? 'Live · Claude' : 'Live · Claude', dockHintText: S.lang === 'de' ? 'Diese Seite beantwortet Fragen zu Preisen, Ablauf und Technik – in Sekunden.' : 'This page answers questions about pricing, process and tech — in seconds.', dockShow: !S.aiVisible && !S.heroVisible && !S.modal && !S.mobileOpen && S.vw >= 600, dockOpen: S.dockOpen, toggleDock: this.toggleDock, dockSubmit: this.dockSubmit, dockInputRef: this.dockInputRef, dockListRef: this.dockListRef, dockLabel: S.dockOpen ? (S.lang === 'de' ? 'Schließen' : 'Close') : (S.lang === 'de' ? 'Die Seite fragen' : 'Ask the site'), aiTypingText: S.aiTypingText || '', aiListRef: this.aiListRef, aiInputRef: this.aiInputRef,
       dockAnim: S.dockGlow ? 'fadeUp .35s cubic-bezier(.2,.8,.2,1), ai-grad 3.4s linear infinite' : 'fadeUp .35s cubic-bezier(.2,.8,.2,1)', clearDockGlow: this.clearDockGlow,
       dockBg: S.dockGlow ? 'linear-gradient(#10285A,#10285A) padding-box, linear-gradient(90deg,#FFB46B,#FF5A8C,#C05CFF,#5FC3FF,#C05CFF,#FF5A8C,#FFB46B) border-box' : '#10285A',
       dockBgSize: S.dockGlow ? 'auto, 200% 100%' : 'auto',
@@ -1035,7 +1037,7 @@ class Component extends DCLogic {
   onPointerDown = (e) => { if (e.pointerType === 'touch') return; this.mouse = { x: e.clientX, y: e.clientY, t: performance.now() }; this.pulseT = performance.now(); };
   static COVER = 'article, button, a, input, textarea, select, label, header, [role="dialog"], [data-screen-label="Modal"], .pxbtn, [data-cover]';
   onClickPt = (e) => { const n = this.ptHot; if (!n || e.button !== 0 || this.state.modal || !this._pts) return; const p = this._pts[n.i]; if (!p) return; const top = document.elementFromPoint(e.clientX, e.clientY); if (top && top.closest(Component.COVER)) return; this.openModal(p.kind || 'service', p.to, { currentTarget: n.el }); };
-  onKey = (e) => { if (e.key === 'Escape') { if (this.state.modal) this.closeModal(); else if (this.state.mobileOpen) this.setState({ mobileOpen: false }); else if (this.state.menu) this.setState({ menu: null }); } };
+  onKey = (e) => { if (e.key === 'Escape') { if (this.state.modal) this.closeModal(); else if (this.state.dockOpen) this.setState({ dockOpen: false }); else if (this.state.mobileOpen) this.setState({ mobileOpen: false }); else if (this.state.menu) this.setState({ menu: null }); } };
   onScroll = () => { if (this.scrollRaf) return; this.scrollRaf = requestAnimationFrame(() => { this.scrollRaf = 0; if (!this.mounted) return; const sc = window.scrollY > 12; if (sc !== this.state.scrolled) this.setState({ scrolled: sc }); this.updateProcess(); const bar = this.rootEl && this.rootEl.querySelector('[data-progress]'); if (bar) { const d = document.documentElement; const max = Math.max(1, d.scrollHeight - window.innerHeight); bar.style.transform = 'scaleX(' + Math.min(1, window.scrollY / max).toFixed(4) + ')'; } }); };
 
   openModal(kind, id, e) {

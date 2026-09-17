@@ -247,6 +247,18 @@ Diese Klasse von Fehlern — ein Guard, der etwas falsch oder gar nicht prüft, 
 
 Ein Tor, das nach dem Schließen eines Werkzeugs prüft „Eigenschaft X ist leer“, besteht auch dann, wenn die Seite X selbst gesetzt hatte und das Aufräumen den Wert gelöscht statt wiederhergestellt hat. Genau das passierte in mccain-digital (17.9.2026): die Seite setzt `--acc` als Inline-Stil auf `<html>`, der Akzent-Regler der Werkstatt entfernte die Eigenschaft beim Zurücksetzen und beim Schließen, und das Tor `v5dev-check.mjs` meldete monatelang „ok“, weil `""` erwartet wurde. Regel: den Wert VOR dem Eingriff merken und danach auf Gleichheit prüfen; das Werkzeug selbst merkt sich beim ersten Eingriff, was es vorfand, und schreibt genau das zurück (`before`/`restore`), statt `removeProperty` aufzurufen. Die neue Prüfung schlug beim ersten Lauf fehl und deckte den Fehler auf — ein Tor, das nie rot war, hat noch nichts bewiesen (siehe Regel 24).
 
+### 28. Nach jedem Build, der Header oder CSP ändert, alle lokalen Server neu starten – sonst prüft das Tor eine Phantom-Regel
+
+Ein Mess-/Dev-Server, der `vercel.json` (oder eine andere Header-Quelle) nur beim Start liest, liefert nach einem Build mit neuer Inline-Script-Hash weiter die alte CSP. Das Tor meldet dann auf jeder Seite „1 console error“ (CSP-Verletzung) und ein Inline-Sender läuft nicht – obwohl Datei und Hash stimmen. Vor der Fehlersuche im Code: Hash in der Datei gegen den gelieferten Header vergleichen (`curl -sI` vs. `grep sha256- vercel.json`), dann beide Server neu starten. Gilt für alle Ports, nicht nur den Mess-Server.
+
+**Beleg:** mccain-digital 18.9.2026 früh: verify_site 24 Probleme, Ursache Dev-Server 8898 mit alter CSP; nach Neustart grün, kein Code geändert. · Sicherheit: gemessen
+
+### 29. Inhalt in `content-visibility`-Blöcken erst messen, wenn der Block im Bild ist
+
+Ein Binder, der Updates für ausgeblendete Blöcke zurückhält und beim Sichtbarwerden nachholt, lässt den DOM-Text dieser Blöcke bis dahin alt stehen (z. B. Sprache vor dem Umschalten). Eine Prüfung, die `innerText`/Textknoten der ganzen Seite liest, „findet“ dann Fehler, die kein Besucher sieht – und `innerText` skipped-Inhalts kann leer sein, was wie eine leere Sektion aussieht. Messen heißt: jeden Block per `scrollIntoView` ins Bild holen, `checkVisibility({contentVisibilityAuto:true})` abwarten, dann lesen; Screenshots ganzer Seiten (`fullPage`) zeigen skipped-Blöcke ebenfalls leer.
+
+**Beleg:** mccain-digital 18.9.2026: „94 deutsche Textstellen in EN“ schrumpften auf 2 (das statische Band), sobald blockweise im Bild gemessen wurde; die Brand-Seite wirkte im Full-Page-Screenshot leer, war es aber nicht. · Sicherheit: gemessen
+
 ## Quellen
 
 - https://github.com/GoogleChrome/lighthouse/blob/main/core/lib/tracehouse/main-thread-tasks.js

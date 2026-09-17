@@ -76,7 +76,7 @@ bis zum Proof of Value auf Ihren Unterlagen
 
 echte Fragen im Eval-Datensatz, nicht drei Beispiele
 
-[Größenordnung im Rechner ansehen](https://mccain-digital.com/preise/)
+[Größenordnung im Rechner ansehen](https://mccain-digital.com/preise/#rechner)
 
 Aufbereitung: Chunking, OCR, Tabellen, Metadaten, Versionen
 

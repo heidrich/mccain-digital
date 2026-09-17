@@ -896,7 +896,7 @@
     /* The motion budget (motion-budget.js) pauses animations whose box it has not
      * yet seen on screen; the tab's entrance and pulse must not wait for that. */
     b.setAttribute("data-motion-keep", "");
-    b.title = "Tools: diese Seite von innen";
+    b.title = doc.documentElement.lang === "en" ? "Tools: this page from the inside" : "Tools: diese Seite von innen";
     const label = doc.createElement("span");
     label.textContent = "Tools";
     b.appendChild(label);
@@ -917,7 +917,7 @@
       /* A dropped connection must not cost the workshop for the rest of the visit: the next click tries again. */
       devState = null;
       s.remove();
-      if (b) { b.setAttribute("data-state", "failed"); const l = b.querySelector("span"); if (l) l.textContent = "erneut versuchen"; }
+      if (b) { b.setAttribute("data-state", "failed"); const l = b.querySelector("span"); if (l) l.textContent = doc.documentElement.lang === "en" ? "try again" : "erneut versuchen"; }
     };
     doc.head.appendChild(s);
   }

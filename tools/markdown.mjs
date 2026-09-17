@@ -85,6 +85,7 @@ export const HTML_TO_MARKDOWN = String.raw`(root, meta) => {
         if (role === 'tooltip' || role === 'presentation') skip = true;
         else if (el.hasAttribute('data-pt-layer')) skip = true;
         else if (el.hasAttribute('data-v5-when')) skip = true;
+        else if (el.getAttribute('data-lang') === 'en') skip = true; /* bilingual markup: the twin is the German page */
       }
     }
     if (!skip && el.classList && el.classList.contains('sc-placeholder')) skip = true;

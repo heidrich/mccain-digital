@@ -609,18 +609,19 @@ if(picked.length){fd.append('Auswahl',picked.join(' \\u00b7 '));}}catch(e){}
 fd.append('access_key','${WEB3FORMS_KEY}');
 fd.append('subject','Kontaktformular mccain-digital.com');
 fd.append('from_name','mccain-digital.com');
-var btn=form.querySelector('[type="submit"]');if(btn){btn.disabled=true;}
+var en=document.documentElement.lang==='en';var btn=form.querySelector('[type="submit"]');var btnText=btn?btn.textContent:'';
+if(btn){btn.disabled=true;btn.setAttribute('aria-busy','true');btn.textContent=en?'Sending \\u2026':'Wird gesendet \\u2026';}
 fetch('https://api.web3forms.com/submit',{method:'POST',body:fd})
 .then(function(r){return r.json().catch(function(){return null;});})
 .then(function(j){if(!j||j.success!==true){throw new Error((j&&j.message)||'rejected');}
-if(btn){btn.disabled=false;}onSent();})
-.catch(function(){if(btn){btn.disabled=false;}
+if(btn){btn.disabled=false;btn.removeAttribute('aria-busy');btn.textContent=btnText;}onSent();})
+.catch(function(){if(btn){btn.disabled=false;btn.removeAttribute('aria-busy');btn.textContent=btnText;}
 var box=form.querySelector('.mcd-form-error');
 if(!box){box=document.createElement('p');box.className='mcd-form-error';
 box.setAttribute('role','alert');
 box.style.cssText='margin:12px 0 0;padding:12px 14px;border-radius:10px;border:1px solid #E3E8EE;border-left:3px solid #E5484D;background:#F6F9FC;color:#0A2540;font-size:14px;line-height:1.5';
 form.appendChild(box);}
-box.innerHTML='Das Formular konnte nicht gesendet werden. Bitte schreiben Sie uns direkt an <a href="mailto:info@mccain-digital.com" style="color:#4D47C7;text-decoration:underline">info@mccain-digital.com</a>.';});};})();</script>`;
+box.innerHTML=en?'The form could not be sent. Please write to us directly at <a href="mailto:info@mccain-digital.com" style="color:#4D47C7;text-decoration:underline">info@mccain-digital.com</a>.':'Das Formular konnte nicht gesendet werden. Bitte schreiben Sie uns direkt an <a href="mailto:info@mccain-digital.com" style="color:#4D47C7;text-decoration:underline">info@mccain-digital.com</a>.';});};})();</script>`;
 
 /* The brand guide's icon gallery hands an ARRAY of sub-paths to a single
  * <path d>, so the runtime stringifies it with commas and Blink rejects it:
@@ -1326,6 +1327,21 @@ function laterConsent(script, name) {
 const CV_CSS =
   "<style>[data-cv]{content-visibility:auto;contain-intrinsic-size:auto 900px}</style>";
 
+/* Bilingual markup. Text the export writes as plain HTML (the brand guide) and
+ * the workshop band the v5 build adds carry both languages as
+ * <span data-lang="de"> / <span data-lang="en"> pairs; html[lang], which the
+ * page's logic sets on the language switch, shows one of them - no binder
+ * needed, so it works in a skipped block and before any script runs. The
+ * markdown twin skips the English half (tools/markdown.mjs).
+ * Touch targets: on coarse pointers every control marked data-touch (the DE/EN
+ * switch on every page, the comparison toggles on /leistungen/websites/, the
+ * breadcrumb link; 35 x 23 px as drawn) grows to the 44 px WCAG asks for; the
+ * desktop keeps the drawn size. Opt-in on purpose: the demo widgets' chip rows
+ * are role="group" too and would burst (review 18.9.2026). */
+const LANG_CSS =
+  '<style>html:not([lang="en"]) [data-lang="en"],html[lang="en"] [data-lang="de"]{display:none!important}' +
+  '@media (pointer:coarse){[data-touch]{min-height:44px;min-width:44px}}</style>';
+
 const CV_EAGER = 2; /* hero + the section under it */
 /* The WHOLE opening tag, quoted values included, so the position test sees
  * every attribute rather than only the ones that happen to be written first. */
@@ -1878,7 +1894,7 @@ for (const page of PAGES) {
     ? head + `
 <link rel="preload" as="image" href="${firstMark[0]}" fetchpriority="high">`
     : head;
-  const headOut = headWithMark + "\n" + PT_MOBILE_CSS + "\n" + CV_CSS;
+  const headOut = headWithMark + "\n" + PT_MOBILE_CSS + "\n" + CV_CSS + "\n" + LANG_CSS;
   assertClean(head + prerendered + templateLocal + script, page.out);
   assertNoExportLinks(head + prerendered + templateLocal + script, page.out);
 

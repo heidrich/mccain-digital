@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="de">
+  <title>McCain Digital · News</title>
+  <id>https://mccain-digital.com/news/</id>
+  <link href="https://mccain-digital.com/news/"/>
+  <link rel="self" href="https://mccain-digital.com/news/feed.xml"/>
+  <updated>2026-09-11T00:00:00Z</updated>
+  <author><name>McCain Digital</name></author>
+  <entry>
+    <title>recall heißt jetzt md-recall · News · McCain Digital</title>
+    <id>https://mccain-digital.com/news/md-recall/</id>
+    <link href="https://mccain-digital.com/news/md-recall/"/>
+    <published>2026-09-11T00:00:00Z</published>
+    <updated>2026-09-11T00:00:00Z</updated>
+    <summary>Der Name ist kürzer, die Lizenz einfacher: md-recall läuft ab sofort ohne Seat-Grenze und ist direkt von mccain-digital.com aus erreichbar.</summary>
+  </entry>
+</feed>

@@ -661,10 +661,16 @@ function assemble(P, merged, heights) {
     id: "werkstatt-band",
     label: "Tools-Hinweis",
     eyebrow: "Tools",
-    title: "Sehen Sie selbst, wie diese Seite gebaut ist.",
-    text: "Ein Klick öffnet die Tools: der echte Aufbau der Seite, der Code, der sie bewegt, die Zeiten, die Ihr Browser gerade gemessen hat, und wie Google und Sprachmodelle sie lesen. Nichts wird gespeichert oder gesendet.",
-    cta: "Tools öffnen",
+    /* Both languages, shown by html[lang] through LANG_CSS (tools/prerender.mjs):
+     * the band is a static island, the binder never touches it. */
+    title: { de: "Sehen Sie selbst, wie diese Seite gebaut ist.", en: "See for yourself how this page is built." },
+    text: {
+      de: "Ein Klick öffnet die Tools: der echte Aufbau der Seite, der Code, der sie bewegt, die Zeiten, die Ihr Browser gerade gemessen hat, und wie Google und Sprachmodelle sie lesen. Nichts wird gespeichert; gesendet wird nur, was Sie im Tab „Fragen“ fragen.",
+      en: "One click opens the Tools: how this page is really built, the code that moves it, the timings your browser has just measured, and how Google and language models read it. Nothing is stored; the only thing sent is what you ask in the “Ask” tab.",
+    },
+    cta: { de: "Tools öffnen", en: "Open the Tools" },
   };
+  const both = (v) => typeof v === "string" ? v : `<span data-lang="de">${v.de}</span><span data-lang="en">${v.en}</span>`;
   const work = html.match(/<section [^>]*id="work"[^>]*>/);
   if (work) {
     const open = html.match(/<section [^>]*id="konfig-band"[^>]*>/);
@@ -673,7 +679,7 @@ function assemble(P, merged, heights) {
     let band = html.slice(open.index, end);
     const spans = [...band.matchAll(/<span class="sc-interp">[^<]*<\/span>/g)];
     if (spans.length !== 4) throw new Error(`v5build: ${route}: the Konfigurator band has ${spans.length} text spans, expected 4 (eyebrow, title, text, cta)`);
-    const texts = [WERKSTATT_BAND.eyebrow, WERKSTATT_BAND.title, WERKSTATT_BAND.text, WERKSTATT_BAND.cta];
+    const texts = [WERKSTATT_BAND.eyebrow, WERKSTATT_BAND.title, WERKSTATT_BAND.text, WERKSTATT_BAND.cta].map(both);
     let k = 0;
     band = band.replace(/<span class="sc-interp">[^<]*<\/span>/g, () => `<span class="sc-interp">${texts[k++]}</span>`);
     band = once(band, 'id="konfig-band"', `id="${WERKSTATT_BAND.id}" data-v5-static`);
@@ -735,7 +741,7 @@ function assemble(P, merged, heights) {
     .replace(/<script src="\/pixel-engine\.js" defer><\/script>/, "")
     .replace(/<style>x-dc\{display:none!important\}<\/style>/g, "")
     .replace(/\s*<meta name="robots"[^>]*>/g, "")
-    .replace("</title>", `</title>\n  <meta name="robots" content="${ROBOTS}">\n  <link rel="alternate" type="text/markdown" href="${route}index.md">`)
+    .replace("</title>", `</title>\n  <meta name="robots" content="${ROBOTS}">\n  <link rel="alternate" type="text/markdown" href="${route}index.md">${route.startsWith("/news/") ? `\n  <link rel="alternate" type="application/atom+xml" href="/news/feed.xml" title="McCain Digital · News">` : ""}`)
     .replace(CV_STYLE, CV_STYLE + (cvHeightsCss ? `\n<style id="v5-cv-heights">${cvHeightsCss}</style>` : ""));
   if (/<(?:script|link)[^>]*(?:src|href)="[^"]*(?:_dcbuild\/|\/vendor\/|support\.js|pixel-engine\.js)/.test(outHead)) throw new Error(`v5build: ${route}: the head still loads React's runtime`);
   const headOut = outHead;
@@ -833,7 +839,7 @@ try {
       const hashes = [...out.pageHtml.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(
         (m) => `'sha256-${crypto.createHash("sha256").update(m[1], "utf8").digest("base64")}'`
       );
-      summary.push({ route: page.route, prio: page.prio, freq: page.freq, title: headMeta.title, hashes, warns: out.warns });
+      summary.push({ route: page.route, src: page.src, date: page.date || null, prio: page.prio, freq: page.freq, title: headMeta.title, description: headMeta.description, hashes, warns: out.warns });
       console.log(`${page.route}  html ${(out.pageHtml.length / 1024).toFixed(0)} KB (css ${(merged.css.length / 1024).toFixed(0)}, template ${(merged.tpl.length / 1024).toFixed(0)}), logic ${(out.gen.length / 1024).toFixed(0)} KB, ${merged.styles} styles / ${merged.rules} rules, ${out.cvKeys.length} deferred blocks (${out.cvNote}), md ${twin.words} words / ${twin.headings} headings${out.notes.length ? "; " + out.notes.join(", ") : ""}`);
       if (out.warns.length) console.log("  warnings:\n    " + out.warns.join("\n    "));
     } catch (e) {
@@ -873,12 +879,21 @@ if (ONLY.length || failed || summary.length !== PAGES.length) {
   console.log("  partial build: sitemap.xml, llms.txt and the CSP in vercel.json are left as they are");
 } else {
   const today = new Date().toISOString().slice(0, 10);
+  /* lastmod is the day the page's SOURCE last changed (git, the artboard),
+   * not the build day: a stamp that moves on every build tells a crawler
+   * nothing (Squirrelscan "sitemap-lastmod-churn", 17.9.2026). Outside a
+   * checkout, or for a file git has never seen, it falls back to today. */
+  const lastmodOf = (p) => {
+    const r = spawnSync("git", ["log", "-1", "--format=%cs", "--", path.join("mccain-design-system", p.src)], { cwd: SITE, encoding: "utf8" });
+    const d = (r.stdout || "").trim();
+    return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : today;
+  };
   const sitemap =
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
     summary
       .map(
         (p) =>
-          `  <url>\n    <loc>${ORIGIN}${p.route}</loc>\n    <lastmod>${today}</lastmod>\n` +
+          `  <url>\n    <loc>${ORIGIN}${p.route}</loc>\n    <lastmod>${lastmodOf(p)}</lastmod>\n` +
           `    <changefreq>${p.freq}</changefreq>\n    <priority>${p.prio}</priority>\n  </url>`
       )
       .join("\n") +
@@ -891,6 +906,21 @@ if (ONLY.length || failed || summary.length !== PAGES.length) {
   const llmsHead = fs.readFileSync(path.join(EXPORT_DIR, "llms.txt"), "utf8").trimEnd();
   const llmsIndex = summary.map((p) => `- [${p.title}](${ORIGIN}${p.route}index.md): Seite ${ORIGIN}${p.route}`).join("\n");
   fs.writeFileSync(path.join(SITE, "llms.txt"), `${llmsHead}\n\n## Alle Seiten\n\n${llmsIndex}\n`, "utf8");
+
+  /* news/feed.xml: an Atom feed of the dated pages under /news/ (`date` in
+   * tools/pages.mjs). Announced by <link rel="alternate"> in the head of the
+   * news pages (see outHead above). One entry today; the file is what a
+   * reader subscribes to before there are more. */
+  const posts = summary.filter((p) => p.date && p.route.startsWith("/news/")).sort((a, b) => b.date.localeCompare(a.date));
+  if (posts.length) {
+    const feed =
+      `<?xml version="1.0" encoding="UTF-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="de">\n` +
+      `  <title>McCain Digital · News</title>\n  <id>${ORIGIN}/news/</id>\n  <link href="${ORIGIN}/news/"/>\n  <link rel="self" href="${ORIGIN}/news/feed.xml"/>\n` +
+      `  <updated>${posts[0].date}T00:00:00Z</updated>\n  <author><name>McCain Digital</name></author>\n` +
+      posts.map((p) => `  <entry>\n    <title>${escT(p.title)}</title>\n    <id>${ORIGIN}${p.route}</id>\n    <link href="${ORIGIN}${p.route}"/>\n    <published>${p.date}T00:00:00Z</published>\n    <updated>${p.date}T00:00:00Z</updated>\n    <summary>${escT(p.description || "")}</summary>\n  </entry>`).join("\n") +
+      `\n</feed>\n`;
+    fs.writeFileSync(path.join(SITE, "news", "feed.xml"), feed, "utf8");
+  }
 
   /* THE CSP HASHES ARE READ OFF WHAT WAS ACTUALLY WRITTEN, NOT OFF A LIST. A
    * policy maintained beside the code goes stale the first time somebody adds

@@ -154,7 +154,7 @@ für eine erste Anbindung mit zwei bis drei Werkzeugen
 
 Daten, die über unsere Infrastruktur laufen
 
-[Größenordnung im Rechner ansehen](https://mccain-digital.com/preise/)
+[Größenordnung im Rechner ansehen](https://mccain-digital.com/preise/#rechner)
 
 MCP-Server mit dokumentierten Werkzeugen und Schemata
 

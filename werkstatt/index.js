@@ -511,6 +511,18 @@ function toggle() { if (W.root) close(); else loadCss().then(open); }
 /* Boot: take the switch over and open, because the visitor just pressed it.
  * The band's button (data-v5-dev-open) keeps working after the module is here. */
 switchBtn = document.querySelector("[data-v5-dev-switch]");
+/* The console speaks the page's language (T picks by html[lang], texte.js).
+ * When the visitor switches while the console is open it is rebuilt in the
+ * new language on the same view and dock; the tab's title follows as well. */
+const langWatch = new MutationObserver(() => {
+  if (switchBtn) switchBtn.title = `${T.brand}: ${T.title}`;
+  if (!W.root) return;
+  const view = W.view;
+  close();
+  open();
+  if (view && view !== "roentgen") setView(view);
+});
+langWatch.observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
 if (switchBtn) {
   switchBtn.addEventListener("click", toggle);
   switchBtn.setAttribute("data-state", "ready");

@@ -162,8 +162,8 @@ export function mountAsk(W) {
     const rows = [
       [T.ask.factPage, h("span", p.title)],
       [T.ask.factSelected, sel ? mono(sel) : pill(T.ask.noSelection)],
-      [T.ask.factPerf, mono(`FCP ${v.fcp || "–"} · LCP ${v.lcp || "–"} · CLS ${v.cls} · ${v.longTasks} lange Aufgaben`)],
-      [T.ask.factCrawler, mono(`${p.h1} h1 · ${p.headings} Überschriften${p.jsonld.length ? " · " + p.jsonld.join(", ") : ""}`)],
+      [T.ask.factPerf, mono(`FCP ${v.fcp || "–"} · LCP ${v.lcp || "–"} · CLS ${v.cls} · ${v.longTasks} ${T.ask.factLongTasks}`)],
+      [T.ask.factCrawler, mono(`${p.h1} h1 · ${p.headings} ${T.ask.factHeadings}${p.jsonld.length ? " · " + p.jsonld.join(", ") : ""}`)],
       [T.ask.factText, h("span", T.ask.factTextVal(0))],
       [T.ask.factDevice, mono(`${v.viewport} · ${v.pointer}`)],
     ];
@@ -215,13 +215,19 @@ export function mountAsk(W) {
   /* Without a model: the facts still answer the questions the chips ask. */
   function localAnswer(q, f) {
     const s = q.toLowerCase(), L = T.ask.local, v = f.visit;
+    /* Keyword sets per page language: "fast" is a German word too ("fast fertig") and
+     * "load" sits inside "Download", so the English set only runs on an English page. */
+    const en = document.documentElement.lang === "en";
+    const K = en
+      ? { term: /what is|what does|mean|explain/, fast: /\b(?:fast|loads?|loading|speed|performance|pagespeed|lighthouse)\b/, slow: /\bslow/, elem: /element|selected|picked|node/, crawl: /google|crawler|search engine|index|seo|bot|language model|llm/ }
+      : { term: /bedeut|was ist|was heißt|erklär|wofür/, fast: /schnell|lädt|laden|ladezeit|performance|pagespeed|lighthouse/, slow: /langsam/, elem: /element|gewählt|ausgewählt|markiert|knoten/, crawl: /google|crawler|suchmaschine|index|seo|bot|sprachmodell|llm/ };
     const term = Object.keys(T.glossar).find((k) => new RegExp("(^|[^\\p{L}])" + k.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?![\\p{L}])", "u").test(s));
     const measured = { LCP: v.lcp, FCP: v.fcp, TTFB: v.ttfb, CLS: v.cls, TBT: v.longTasks ? L.longSome(v.longTasks) : L.longNone };
-    if (term && /bedeut|was ist|was heißt|erklär|wofür/.test(s)) return L.term(term, T.glossar[term], measured[term] || null);
-    if (/schnell|lädt|laden|ladezeit|performance|pagespeed|lighthouse/.test(s)) return L.fast(v.fcp || "–", v.lcp || "–", v.longTasks ? L.longSome(v.longTasks) : L.longNone);
-    if (/langsam/.test(s)) return L.slower;
-    if (/element|gewählt|ausgewählt|markiert|knoten/.test(s)) return f.selected ? L.element(f.selected.label, f.selected.ruleCount, f.selected.code.length ? f.selected.code[0].title : null) : L.noElement;
-    if (/google|crawler|suchmaschine|index|seo|bot|sprachmodell|llm/.test(s)) return L.crawler(f.page.title, f.page.h1, f.page.headings, f.page.jsonld.join(", "));
+    if (term && K.term.test(s)) return L.term(term, T.glossar[term], measured[term] || null);
+    if (K.fast.test(s)) return L.fast(v.fcp || "–", v.lcp || "–", v.longTasks ? L.longSome(v.longTasks) : L.longNone);
+    if (K.slow.test(s)) return L.slower;
+    if (K.elem.test(s)) return f.selected ? L.element(f.selected.label, f.selected.ruleCount, f.selected.code.length ? f.selected.code[0].title : null) : L.noElement;
+    if (K.crawl.test(s)) return L.crawler(f.page.title, f.page.h1, f.page.headings, f.page.jsonld.join(", "));
     if (term) return L.term(term, T.glossar[term], measured[term] || null);
     return L.fallback;
   }

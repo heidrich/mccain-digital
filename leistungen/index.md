@@ -35,7 +35,7 @@ Inklusive der Fälle, in denen die andere Option gewinnt. Das steht dort so, wei
 
 [WordPress WordPress oder handgeschrieben? Sieben Unterschiede in Ladezeit, Pflege, Sicherheit und Kosten über drei Jahre – und vier Fälle, in denen WordPress richtig ist. Vergleich lesen](https://mccain-digital.com/vergleich/wordpress-oder-handgeschrieben/) [KI ChatGPT-Abo oder eigenes RAG? Ab wann sich ein eigenes System rechnet, wo der Kipppunkt liegt – und wann das Abo völlig reicht. Vergleich lesen](https://mccain-digital.com/vergleich/chatgpt-oder-eigenes-rag/)
 
-[md-recall Unser Projektgedächtnis – zum Download](https://mccain-digital.com/md-recall/) [Preise & Rechner Größenordnungen statt Preisanfrage](https://mccain-digital.com/preise/) [Studio & Arbeitsweise Zwei Gründer, sechs Prinzipien](https://mccain-digital.com/studio/)
+[md-recall Unser Projektgedächtnis – zum Download](https://mccain-digital.com/md-recall/) [Preise & Rechner Größenordnungen statt Preisanfrage](https://mccain-digital.com/preise/#rechner) [Studio & Arbeitsweise Zwei Gründer, sechs Prinzipien](https://mccain-digital.com/studio/)
 
 Übergabe
 

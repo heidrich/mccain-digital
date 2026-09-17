@@ -76,7 +76,7 @@ bis zum klickbaren Prototyp auf dem echten Stack
 
 typisch bis zum MVP in Produktion
 
-[Größenordnung im Rechner ansehen](https://mccain-digital.com/preise/)
+[Größenordnung im Rechner ansehen](https://mccain-digital.com/preise/#rechner)
 
 Repository mit Historie, Dokumentation und Patch Notes
 

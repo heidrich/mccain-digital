@@ -86,7 +86,7 @@ Unser eigenes Produkt – gebaut, weil KI-Sitzungen bei jedem Start den Kontext 
 
 Den Fall ansehen
 
-[md-recall.de](https://md-recall.de/)
+[md-recall](https://mccain-digital.com/md-recall/)
 
 Vorher
 
@@ -238,7 +238,7 @@ Tools
 
 Sehen Sie selbst, wie diese Seite gebaut ist.
 
-Ein Klick öffnet die Tools: der echte Aufbau der Seite, der Code, der sie bewegt, die Zeiten, die Ihr Browser gerade gemessen hat, und wie Google und Sprachmodelle sie lesen. Nichts wird gespeichert oder gesendet.
+Ein Klick öffnet die Tools: der echte Aufbau der Seite, der Code, der sie bewegt, die Zeiten, die Ihr Browser gerade gemessen hat, und wie Google und Sprachmodelle sie lesen. Nichts wird gespeichert; gesendet wird nur, was Sie im Tab „Fragen“ fragen.
 
 Stimmen
 
@@ -318,7 +318,7 @@ Was kostet das?
 
 Kein offener Stundenzähler: Nach dem ersten Gespräch bekommen Sie eine Zahl. Damit Sie vorher wissen, wovon wir reden, hier die Spannen, in denen sich unsere Projekte bewegen.
 
-[Größenordnung im Rechner prüfen](https://mccain-digital.com/preise/) Leistung wählen, Umfang anklicken – die Spanne steht sofort da.
+[Größenordnung im Rechner prüfen](https://mccain-digital.com/preise/#rechner) Leistung wählen, Umfang anklicken – die Spanne steht sofort da.
 
 Website 3–6 Wochen · ab niedrig fünfstellig Handgeschrieben für Tempo und Suche, Lighthouse 100, SEO und llms.txt inklusive. Echte Screens in Woche eins. Websites ansehen
 
@@ -458,7 +458,7 @@ Kontakt
 
 Eine Antwort innerhalb von 24 Stunden, ein Festpreis innerhalb von 48 – von einer der zwei Personen, die es bauen würden.
 
-[info@mccain-digital.com](mailto:info@mccain-digital.com)
+[info@mccain-digital.com](mailto:info@mccain-digital.com) [Telefon · +49 170 59 222 03](tel:+491705922203)
 
 Holderweg 1 · 86869 Oberostendorf · Bayern
 

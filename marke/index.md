@@ -1,4 +1,4 @@
-# mccain digital brand
+# mccain digital Marke
 
 > Das Zeichen von McCain Digital: Konstruktion, Fassungen, Farbe, Typografie, Icons und Bewegung – mit jeder Markendatei zum Herunterladen.
 
@@ -7,9 +7,9 @@ Sprache: de
 
 01
 
-## Construction
+## Konstruktion
 
-Four numbers, and anyone on the team can reproduce the mark. No letter, no figure — a rule on a grid.
+Vier Zahlen, und jede Person im Team kann die Bildmarke reproduzieren. Kein Buchstabe, keine Ziffer – eine Regel auf einem Raster.
 
 128 px
 
@@ -23,63 +23,63 @@ Four numbers, and anyone on the team can reproduce the mark. No letter, no figur
 
 16 px
 
-Below 40 px the rule drops the distant dust so the tile stays crisp; below 16 px the plate stands alone. Clear space all around: a quarter of the edge — nothing touches the plate, not even the wordmark. Smallest tile: 16 px on screen, 6 mm in print.
+Unter 40 px lässt die Regel den entfernten Staub weg, damit die Kachel scharf bleibt; unter 16 px steht die Platte allein. Schutzzone ringsum: ein Viertel der Kante – nichts berührt die Platte, nicht einmal die Wortmarke. Kleinste Kachel: 16 px am Bildschirm, 6 mm im Druck.
 
 02
 
-## Versions
+## Versionen
 
-The default is the free mark without a plate — lighter, and exactly right on the website, in documents and on social. The plate stays where a ground is needed: app icon, favicon, avatar.
+Standard ist die freie Bildmarke ohne Platte – leichter und genau richtig für die Website, für Dokumente und für Social Media. Die Platte bleibt dort, wo ein Untergrund gebraucht wird: App-Icon, Favicon, Avatar.
 
-Dark
+Dunkel
 
-Navy plate, gradient. The primary version.
+Navy-Platte, Verlauf. Die primäre Version.
 
-Light
+Hell
 
-White plate with a hairline, for dark grounds and paper.
+Weiße Platte mit Haarlinie, für dunkle Flächen und Papier.
 
-Single colour
+Einfarbig
 
-White on indigo. One ink, embroidery, stamps.
+Weiß auf Indigo. Eine Farbe, für Stickerei und Stempel.
 
-Inverted
+Invertiert
 
-Navy on white when only one dark colour is left.
-
-mccain digital
+Navy auf Weiß, wenn nur eine dunkle Farbe bleibt.
 
 mccain digital
 
-The lockup in four sizes: tile 24/28/32/46, word 15/17/21/33. The gap between tile and word is always half the tile edge.
+mccain digital
 
-### Without a plate
+Die Logo-Kombination in vier Größen: Kachel 24/28/32/46, Wort 15/17/21/33. Der Abstand zwischen Kachel und Wort beträgt immer die halbe Kachelkante.
 
-On the website and anywhere the dark plate would sit too heavy, the mark stands free: colour on light, white on dark, single-colour indigo or navy. No frame, no ground — the dust then needs a quiet surface.
+### Ohne Platte
 
-![Colour](https://mccain-digital.com/brand/mccain-mark-free-color.svg)
+Auf der Website und überall dort, wo die dunkle Platte zu schwer wirken würde, steht die Bildmarke frei: Farbe auf Hell, Weiß auf Dunkel, einfarbig Indigo oder Navy. Kein Rahmen, kein Untergrund – der Staub braucht dann eine ruhige Fläche.
 
-Colour
+![Farbe](https://mccain-digital.com/brand/mccain-mark-free-color.svg)
 
-The default on white and paper — the website, documents.
+Farbe
 
-![White](https://mccain-digital.com/brand/mccain-mark-free-white.svg)
+Der Standard auf Weiß und Papier – die Website, Dokumente.
 
-White
+![Weiß](https://mccain-digital.com/brand/mccain-mark-free-white.svg)
 
-On navy and other dark grounds.
+Weiß
+
+Auf Navy und anderen dunklen Flächen.
 
 ![Indigo](https://mccain-digital.com/brand/mccain-mark-free-indigo.svg)
 
 Indigo
 
-Single colour in the accent — buttons, chips, small spots.
+Einfarbig im Akzentton – Buttons, Chips, kleine Flächen.
 
 ![Navy](https://mccain-digital.com/brand/mccain-mark-free-navy.svg)
 
 Navy
 
-Single dark colour — one-ink print, stamps.
+Einfarbig dunkel – Einfarbdruck, Stempel.
 
 mccain digital
 
@@ -89,76 +89,76 @@ mccain digital
 
 mccain digital
 
-Without the plate the mark runs slightly larger than the tile: 34/28/24 instead of 28/24/20 beside the same word — the dust does not count as area. The gap to the word stays half the mark edge.
+Ohne Platte läuft die Bildmarke etwas größer als die Kachel: 34/28/24 statt 28/24/20 neben demselben Wort – der Staub zählt nicht als Fläche. Der Abstand zum Wort bleibt die halbe Kante der Bildmarke.
 
 03
 
-## Wordmark
+## Wortmarke
 
-Instrument Sans 600, −0.03 em, always lowercase — “mccain digital”, never “McCain Digital” in the logo. Two versions: the quiet one as default, the gradient one for places where the brand stands alone.
-
-mccain digital
-
-Default
-
-Navy on light, white on navy. Navigation, footer, documents, signature.
+Instrument Sans 600, −0.03 em, immer kleingeschrieben – „mccain digital“, nie „McCain Digital“ im Logo. Zwei Versionen: die ruhige als Standard, die mit Verlauf für Stellen, an denen die Marke für sich allein steht.
 
 mccain digital
 
-With gradient
+Standard
 
-“digital” carries the gradient of the mark. Title slides, social, large surfaces — never below 24 px.
+Navy auf Hell, Weiß auf Navy. Navigation, Footer, Dokumente, Signatur.
 
 mccain digital
 
-On navy
+Mit Verlauf
 
-White, same metrics. The gradient version works on navy just as well.
+„digital“ trägt den Verlauf der Bildmarke. Titelfolien, Social Media, große Flächen – nie unter 24 px.
 
-Type and mark stay together. The SVG wordmarks carry live text and need Instrument Sans. For anything that cannot load a font, the browser renders PNGs here with the loaded font — 160 px word size, transparent or on a plate.
+mccain digital
 
-Lockup light · PNG
+Auf Navy
 
-Lockup dark · PNG
+Weiß, gleiche Maße. Die Verlaufsversion funktioniert auf Navy genauso gut.
 
-Lockup dark, white mark · PNG
+Schrift und Bildmarke gehören zusammen. Die SVG-Wortmarken enthalten echten Text und benötigen Instrument Sans. Für alles, was keine Schriftart laden kann, rendert der Browser hier PNGs mit der geladenen Schrift – 160 px Wortgröße, transparent oder auf einer Platte.
 
-Lockup with gradient · PNG
+Logo-Kombination hell · PNG
 
-Wordmark light · PNG
+Logo-Kombination dunkel · PNG
 
-Wordmark dark · PNG
+Logo-Kombination dunkel, weiße Bildmarke · PNG
 
-Wordmark with gradient · PNG
+Logo-Kombination mit Verlauf · PNG
 
-- Type Instrument Sans 600, tracking −0.03 em, line height 1.
-- Casing always lowercase: mccain digital. In body copy McCain Digital stays capitalised.
-- Spacing to the tile: half the tile edge. Smallest wordmark 14 px.
-- Gradient only on “digital”, only from 24 px up, never in body copy.
+Wortmarke hell · PNG
+
+Wortmarke dunkel · PNG
+
+Wortmarke mit Verlauf · PNG
+
+- Schrift Instrument Sans 600, Laufweite −0,03 em, Zeilenhöhe 1.
+- Schreibweise immer klein geschrieben: mccain digital. Im Fließtext bleibt McCain Digital großgeschrieben.
+- Abstand zur Kachel: die halbe Kachelkante. Kleinste Wortmarke 14 px.
+- Verlauf nur bei „digital“, erst ab 24 px, nie im Fließtext.
 
 04
 
-## Colour
+## Farbe
 
-Navy carries, indigo points. The four gradient colours belong to the stream and the mark — they never appear alone as a surface.
+Navy trägt, Indigo zeigt. Die vier Verlaufsfarben gehören dem Stream und der Bildmarke – sie erscheinen nie allein als Fläche.
 
-- Navy #0A2540 rgb(10, 37, 64) Text, headings
-- Plate #0A1F44 rgb(10, 31, 68) Plate, dark surfaces, footer
-- Indigo #635BFF rgb(99, 91, 255) Accent: buttons, links, active
-- Indigo Text #4D47C7 rgb(77, 71, 199) Indigo as type on light
-- Orange #FFB46B rgb(255, 180, 107) Gradient 1
-- Pink #FF5A8C rgb(255, 90, 140) Gradient 2
-- Violet #C05CFF rgb(192, 92, 255) Gradient 3
-- Sky #5FC3FF rgb(95, 195, 255) Gradient 4
-- Paper #F6F9FC rgb(246, 249, 252) Surfaces, cards
+- Navy #0A2540 rgb(10, 37, 64) Text, Überschriften
+- Plate #0A1F44 rgb(10, 31, 68) Platte, dunkle Flächen, Footer
+- Indigo #635BFF rgb(99, 91, 255) Akzent: Buttons, Links, aktive Zustände
+- Indigo Text #4D47C7 rgb(77, 71, 199) Indigo als Schriftfarbe auf Hell
+- Orange #FFB46B rgb(255, 180, 107) Verlauf 1
+- Pink #FF5A8C rgb(255, 90, 140) Verlauf 2
+- Violet #C05CFF rgb(192, 92, 255) Verlauf 3
+- Sky #5FC3FF rgb(95, 195, 255) Verlauf 4
+- Paper #F6F9FC rgb(246, 249, 252) Flächen, Karten
 
 linear-gradient(90deg, #FFB46B, #FF5A8C 33%, #C05CFF 66%, #5FC3FF)
 
 05
 
-## Typography
+## Typografie
 
-Two families, two jobs. Instrument Sans speaks, JetBrains Mono measures.
+Zwei Schriftfamilien, zwei Aufgaben. Instrument Sans spricht, JetBrains Mono misst.
 
 Aa Gg 0123
 
@@ -166,7 +166,7 @@ Instrument Sans
 
 400 · 500 · 600 · 700 · Google Fonts
 
-Headings 600–700 at −0.03 to −0.04 em, body copy 400 at 1.55 line height. Buttons 600. The wordmark.
+Überschriften 600–700 bei −0.03 bis −0.04 em, Fließtext 400 bei 1.55 Zeilenhöhe. Buttons 600. Die Wortmarke.
 
 0.25 ms · 4×100
 
@@ -174,29 +174,29 @@ JetBrains Mono
 
 400 · 500 · Google Fonts
 
-Eyebrows in caps at .1–.12 em tracking, numbers, labels, code, data nodes. Never for body copy.
+Eyebrows in Versalien bei .1–.12 em Laufweite, Zahlen, Labels, Code, Datenknoten. Nie für Fließtext.
 
-Display · 48–72 · 700 · −.04em Data becomes product.
+Display · 48–72 · 700 · −.04em Daten werden Produkt.
 
-H2 · 30–48 · 700 · −.03em What we build
+H2 · 30–48 · 700 · −.03em Was wir bauen
 
-H3 · 22–27 · 600 · −.025em AI that runs on your data
+H3 · 22–27 · 600 · −.025em KI, die auf Ihren Daten läuft
 
-Lead · 18 · 400 · 1.6 One sentence that carries the page.
+Lead · 18 · 400 · 1.6 Ein Satz, der die Seite trägt.
 
-Body · 15 · 400 · 1.55 Body copy in slate #425466, never below 13 px.
+Body · 15 · 400 · 1.55 Fließtext in Schiefergrau #425466, nie unter 13 px.
 
-Button · 15 · 600 Start a project →
+Button · 15 · 600 Projekt anfragen →
 
 06
 
 ## Icons
 
-Thin lines, 1.75 stroke on a 24 grid, round caps — Lucide style. Colour comes from the text (currentColor); indigo only in the active state. The one exception is the pixel: an AI state may carry a single gradient pixel, nothing else.
+Dünne Linien, 1.75 Strichstärke auf einem 24er-Raster, runde Kappen – im Lucide-Stil. Die Farbe kommt vom Text (currentColor); Indigo nur im aktiven Zustand. Die einzige Ausnahme ist der Pixel: Ein KI-Zustand darf einen einzelnen Verlaufspixel tragen, sonst nichts.
 
-One source. All icons live as a sprite in [mccain-icons.svg](https://mccain-digital.com/brand/mccain-icons.svg), each as <symbol id="…">. The website pulls its icons from here — change an icon once and it changes everywhere. New icons go into the file and into this list, nowhere else.
+Eine Quelle. Alle Icons leben als Sprite in [mccain-icons.svg](https://mccain-digital.com/brand/mccain-icons.svg), jeweils als <symbol id="…">. Die Website bezieht ihre Icons von hier – ein Icon einmal ändern, und es ändert sich überall. Neue Icons kommen in die Datei und in diese Liste, sonst nirgendwo.
 
-Usage
+Verwendung
 
 <svg width="18" height="18" aria-hidden="true">
  <use href="/brand/mccain-icons.svg#arrow-right"></use>
@@ -227,35 +227,35 @@ commit
 
 gauge
 
-See AI tools Download Icons in buttons: 18 px, 1.75 stroke, 10 px gap. The pixel marks the AI state.
+KI-Tools ansehen Download Icons in Buttons: 18 px, 1.75 Strichstärke, 10 px Abstand. Der Pixel markiert den KI-Zustand.
 
 07
 
-## Motion
+## Bewegung
 
-Three states, and the mark gets no more. One curve for everything: cubic-bezier(.2, .8, .2, 1). No spring, no bounce. Anyone with reduced motion enabled sees the finished mark.
+Drei Zustände, mehr bekommt die Bildmarke nicht. Eine Kurve für alles: cubic-bezier(.2, .8, .2, 1). Keine Feder, kein Abprallen. Wer reduzierte Bewegung aktiviert hat, sieht die fertige Bildmarke.
 
-Arriving 1.6 s
+Erscheinen 1.6 s
 
-The plate scales up from 88 %. The block densifies from right to left, the porous edge settles last, the dust flies in from afar and lands softly.
+Die Platte skaliert von 88 % hoch. Der Block verdichtet sich von rechts nach links, die poröse Kante setzt sich zuletzt, der Staub fliegt aus der Ferne ein und landet sanft.
 
-Waiting 3 s · loop
+Warten 3 s · loop
 
-Two lanes of dust drift in, settle, hold, fade — each pixel on its own beat. The edge breathes, the block shimmers. No spinner.
+Zwei Staubspuren treiben herein, setzen sich, halten, verblassen – jedes Pixel im eigenen Takt. Die Kante atmet, der Block schimmert. Kein Spinner.
 
 mccain digital
 
-Signing in 1.9 s
+Anmeldung 1.9 s
 
-The mark assembles, the dust carries on to the right, the word wipes in behind it. The word comes after the mark, never before.
+Die Bildmarke setzt sich zusammen, der Staub zieht weiter nach rechts, das Wort wischt dahinter ein. Das Wort kommt immer nach der Bildmarke, nie davor.
 
 08
 
-## Applications
+## Anwendungen
 
-mccain digital Services Work Studio Enquire
+mccain digital Leistungen Arbeiten Studio Anfragen
 
-Avatar · round
+Avatar · rund
 
 App-Icon · 1024
 
@@ -263,28 +263,28 @@ mccain digital
 
 Favicon · 16
 
-Start a project Button with mark
+Projekt starten Button mit Bildmarke
 
 09
 
-## Stationery
+## Geschäftsausstattung
 
-Business card, letterhead, email signature, presentation. Every template is a file below; the signature comes as HTML to paste in.
+Visitenkarte, Briefbogen, E-Mail-Signatur, Präsentation. Jede Vorlage ist eine Datei weiter unten; die Signatur kommt als HTML zum Einfügen.
 
-![Business card, front](https://mccain-digital.com/brand/mccain-visitenkarte-vorne.svg)![Business card, back](https://mccain-digital.com/brand/mccain-visitenkarte-hinten.svg) Business card · 85 × 55 mm · navy front, white back
+![Business card, front](https://mccain-digital.com/brand/mccain-visitenkarte-vorne.svg)![Business card, back](https://mccain-digital.com/brand/mccain-visitenkarte-hinten.svg) Visitenkarte · 85 × 55 mm · Vorderseite Navy, Rückseite Weiß
 
-![Letterhead A4](https://mccain-digital.com/brand/mccain-briefbogen.svg) Letterhead · A4 · lockup 44 top left, mono footer
+![Letterhead A4](https://mccain-digital.com/brand/mccain-briefbogen.svg) Briefbogen · A4 · Logo-Kombination 44 oben links, Mono-Fußzeile
 
-|  | First Last Role · mccain digital +49 000 0000000 · vorname@mccain-digital.com mccain-digital.com |
+|  | Vorname Nachname Rolle · mccain digital +49 000 0000000 · vorname@mccain-digital.com mccain-digital.com |
 | --- | --- |
 
-Email signature · HTML table, system-font fallback, 48 px image Open presentation template 7 slides: title, agenda, chapter, text + image, quote, numbers, end · 1920 × 1080 →
+E-Mail-Signatur · HTML-Tabelle, Systemschrift als Fallback, 48-px-Bild Präsentationsvorlage öffnen 7 Folien: Titel, Agenda, Kapitel, Text + Bild, Zitat, Zahlen, Abschluss · 1920 × 1080 →
 
 10
 
-## Social
+## Social Media
 
-OG card, story, LinkedIn banner, X header, square post — each in dark and light. The mark sits large, the wordmark with gradient, one line of mono at the foot.
+OG-Karte, Story, LinkedIn-Banner, X-Header, quadratischer Post – jeweils in Dunkel und Hell. Die Bildmarke sitzt groß, die Wortmarke mit Verlauf, eine Zeile Mono am Fuß.
 
 ![OG card](https://mccain-digital.com/brand/mccain-og-dark.svg) OG card · 1200 × 630
 
@@ -298,9 +298,9 @@ OG card, story, LinkedIn banner, X header, square post — each in dark and ligh
 
 11
 
-## In code
+## Im Code
 
-The brand as tokens, the lockup as three lines of HTML, the motion as keyframes. To compute the rule yourself: the function lives in Mark, method tile().
+Die Marke als Tokens, die Logo-Kombination als drei Zeilen HTML, die Bewegung als Keyframes. Um die Regel selbst zu berechnen: Die Funktion lebt in Bildmarke, Methode tile().
 
 Tokens
 
@@ -316,7 +316,7 @@ Tokens
  --mc-ease: cubic-bezier(.2, .8, .2, 1);
 }
 
-Lockup
+Logo-Kombination
 
 <a class="mc-lockup" href="/" aria-label="mccain digital">
  <img src="/brand/mccain-mark-dark.svg"
@@ -329,7 +329,7 @@ Lockup
  font: 600 17px/1 "Instrument Sans", sans-serif;
  letter-spacing:-.03em; color:var(--mc-navy); }
 
-Motion
+Bewegung
 
 @keyframes tile-in {
  from { opacity:0; transform:scale(.88) }
@@ -348,17 +348,17 @@ Motion
 
 12
 
-## Not like this
+## So nicht
 
-- Do not rotate or mirror The data comes from the left, the product stands on the right. Rotated, the mark tells a different story.
-- Not without a ground The dust needs a quiet ground. On photos or patterns it disappears.
-- No other colours The gradient is orange, pink, violet, sky. No team or campaign colours.
-- No shadow, no outline The plate is flat. No drop shadow, no gloss, no frame.
-- Do not stretch Always proportional. The plate is square, the wordmark is never letterspaced.
-- Do not animate in body copy The three states belong to the lockup — once per page, on load.
+- Nicht drehen oder spiegeln Die Daten kommen von links, das Produkt steht rechts. Gedreht erzählt die Bildmarke eine andere Geschichte.
+- Nicht ohne Fläche Der Staub braucht eine ruhige Fläche. Auf Fotos oder Mustern verschwindet er.
+- Keine anderen Farben Der Verlauf ist Orange, Pink, Violet, Sky. Keine Team- oder Kampagnenfarben.
+- Kein Schatten, keine Kontur Die Platte ist flach. Kein Schlagschatten, kein Glanz, kein Rahmen.
+- Nicht verzerren Immer proportional. Die Platte ist quadratisch, die Wortmarke wird nie gesperrt gesetzt.
+- Nicht im Fließtext animieren Die drei Zustände gehören zur Logo-Kombination – einmal pro Seite, beim Laden.
 
 13
 
-## Files
+## Dateien
 
-All files, every version on its own. SVG for vector, PNG for anything that cannot load a font. The SVGs with a wordmark carry live text — convert them to paths before sending them outside.
+Alle Dateien, jede Version für sich. SVG für Vektorgrafiken, PNG für alles, was keine Schriftart laden kann. Die SVGs mit Wortmarke enthalten echten Text – vor der Weitergabe nach außen in Pfade umwandeln.

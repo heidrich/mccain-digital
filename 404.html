@@ -7,7 +7,12 @@
      that failed to load - so it depends on nothing: no React, no support.js, no
      content.json, no build step. Two vendored fonts and a link home.
 
-     It is also the one page the build does not overwrite. -->
+     It is also the one page the build does not overwrite.
+
+     Landmarks (17.9.2026, accessibility pass): a skip link, a <header> with the
+     wordmark and the primary routes, a <footer> with the legal links - the same
+     shape as every built page, so a screen reader is not lost on the one page
+     that is reached by mistake. Still no script, still no site stylesheet. -->
 <html lang="de">
 <head>
 <meta charset="utf-8">
@@ -34,7 +39,18 @@ body{margin:0;min-height:100vh;display:flex;flex-direction:column;
   font-family:'Instrument Sans',system-ui,-apple-system,sans-serif;color:var(--ink);
   -webkit-font-smoothing:antialiased;background:
     radial-gradient(1200px 600px at 50% -10%,var(--wash),transparent 70%),#fff}
+.skip{position:absolute;left:12px;top:-60px;padding:10px 14px;border-radius:8px;background:var(--ink);color:#fff;font-weight:600;text-decoration:none;z-index:9}
+.skip:focus{top:12px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 24px;border-bottom:1px solid var(--line)}
+header.top .brand{display:inline-flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font-weight:700;letter-spacing:-.01em}
+header.top .brand img{width:28px;height:28px}
+header.top nav{display:flex;flex-wrap:wrap;gap:4px 18px}
+header.top nav a,footer.bottom a{font-size:14px;color:var(--slate);text-decoration:none;min-height:44px;display:inline-flex;align-items:center}
+header.top nav a:hover,footer.bottom a:hover{color:var(--acc-text)}
 main{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 24px}
+footer.bottom{display:flex;flex-wrap:wrap;gap:4px 20px;justify-content:center;padding:10px 24px 22px;border-top:1px solid var(--line)}
+@media (max-width:600px){header.top nav{display:none}}
+@media print{header.top,footer.bottom,.row,nav.more,.skip{display:none}body{background:#fff}}
 .card{width:100%;max-width:640px;text-align:center}
 .code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;font-weight:500;
   letter-spacing:.14em;text-transform:uppercase;color:var(--acc-text)}
@@ -55,7 +71,17 @@ nav.more a:hover{color:var(--acc-text)}
 </style>
 </head>
 <body>
-<main>
+<a class="skip" href="#main">Zum Inhalt springen</a>
+<header class="top">
+  <a class="brand" href="/"><img src="/brand/mccain-mark-free-color.svg" width="28" height="28" alt="">mccain digital</a>
+  <nav aria-label="Hauptnavigation">
+    <a href="/leistungen/">Leistungen</a>
+    <a href="/preise/">Preise</a>
+    <a href="/studio/">Studio</a>
+    <a href="/kontakt/">Kontakt</a>
+  </nav>
+</header>
+<main id="main">
   <div class="card">
     <div class="code">Fehler 404</div>
     <h1>Diese Seite gibt es nicht.</h1>
@@ -75,5 +101,11 @@ nav.more a:hover{color:var(--acc-text)}
     </nav>
   </div>
 </main>
+<footer class="bottom">
+  <a href="/rechtliches/#impressum">Impressum</a>
+  <a href="/rechtliches/#datenschutz">Datenschutz</a>
+  <a href="/marke/">Marke</a>
+  <a href="/news/feed.xml">News-Feed</a>
+</footer>
 </body>
 </html>

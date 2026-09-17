@@ -21,7 +21,7 @@ Budgetrahmen
 
 Zeitrahmen
 
-Ihre Angaben gehen nur an uns zwei. Keine Weitergabe, kein Newsletter.
+Ihre Angaben gehen nur an uns zwei. Kein Verkauf, keine Werbung, kein Newsletter. Zustellung über Web3Forms. [Datenschutzerklärung](https://mccain-digital.com/rechtliches/#datenschutz)
 
 Was danach passiert
 
@@ -51,7 +51,7 @@ In der ersten Woche gibt es etwas zu sehen – Prototyp, Screens oder ein lauff�
 
 Direkt
 
-[info@mccain-digital.com](mailto:info@mccain-digital.com)
+[info@mccain-digital.com](mailto:info@mccain-digital.com) [Telefon · +49 170 59 222 03](tel:+491705922203)
 
 Holderweg 1 · 86869 Oberostendorf · Bayern
 
