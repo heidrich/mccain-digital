@@ -57,7 +57,7 @@ function loadCss() {
     let link = document.getElementById("v5-dev-css");
     if (link && link.sheet) { resolve(); return; }
     if (!link) {
-      link = h("link", { id: "v5-dev-css", rel: "stylesheet", href: "/v5/dev/dev.css" });
+      link = h("link", { id: "v5-dev-css", rel: "stylesheet", href: "/werkstatt/dev.css" });
       document.head.appendChild(link);
     }
     link.addEventListener("load", () => resolve(), { once: true });

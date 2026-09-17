@@ -40,7 +40,7 @@ function formatGlsl(src) {
   return out.replace(/\n{3,}/g, "\n\n").trim() + "\n";
 }
 
-/* The shader sources live in logic.gen.js as concatenated string literals. */
+/* The shader sources live in the page logic as concatenated string literals. */
 function shaderFrom(logic, name) {
   const at = logic.indexOf(`const ${name} = `);
   if (at < 0) return null;
@@ -53,7 +53,7 @@ function shaderFrom(logic, name) {
 
 function liveHtml() {
   const clone = document.documentElement.cloneNode(true);
-  clone.querySelectorAll("#v5-dev, #v5-dev-layer, [data-v5-dev-switch], #v5-dev-css, #v5-dev-switch-css, [data-v5-dev-style], script[src='/v5/dev/index.js']").forEach((n) => n.remove());
+  clone.querySelectorAll("#v5-dev, #v5-dev-layer, [data-v5-dev-switch], #v5-dev-css, #v5-dev-switch-css, [data-v5-dev-style], script[src='/werkstatt/index.js']").forEach((n) => n.remove());
   clone.classList.remove("v5-dev-pick");
   return "<!DOCTYPE html>\n" + clone.outerHTML;
 }
@@ -64,23 +64,24 @@ export function mountCode(W) {
   const sources = new Map();
   let logicPromise = null;
   let currentId = null, view = null, pending = null;
-  /* Every one of the 21 pages has its own logic.gen.js under its own route;
+  /* Every one of the 21 pages has its own logic under its own route - shown
+   * here as logic.src.js, the readable edition of the minified logic.gen.js;
    * #v5-data names both, so this file list works on every page, not only /. */
   const V5_DATA = JSON.parse((document.getElementById("v5-data") || {}).textContent || "{}");
-  const logicUrl = (V5_DATA.route || "/") + "logic.gen.js";
+  const logicUrl = (V5_DATA.route || "/") + "logic.src.js";
 
   const files = [
     { id: "html-live", lang: "html", load: () => Promise.resolve(liveHtml()) },
     { id: "html", lang: "html", url: location.pathname },
     { id: "css", lang: "css", load: () => Promise.resolve(formatCss((document.getElementById("v5-css") || {}).textContent || "")) },
-    { id: "runtime", lang: "js", url: "/v5/runtime.js" },
+    { id: "runtime", lang: "js", url: "/werkstatt/runtime.src.js" },
     { id: "logic", lang: "js", url: logicUrl },
-    { id: "motion", lang: "js", url: "/v5/dev/motion-budget.src.js" },
+    { id: "motion", lang: "js", url: "/werkstatt/motion-budget.src.js" },
     { id: "shader-frag", lang: "glsl", load: () => logic().then((s) => shaderFrom(s, "fs") || "// Fragment-Shader nicht gefunden") },
     { id: "shader-vert", lang: "glsl", load: () => logic().then((s) => shaderFrom(s, "vs") || "// Vertex-Shader nicht gefunden") },
     { id: "heights", lang: "css", load: () => Promise.resolve(formatCss((document.getElementById("v5-cv-heights") || {}).textContent || "/* keine gemessenen Höhen */")) },
-    { id: "map", lang: "json", url: "/v5/dev/map.json" },
-  ].concat(DEV_FILES.map((f) => ({ id: "dev:" + f, lang: f.endsWith(".css") ? "css" : f.endsWith(".json") ? "json" : "js", url: "/v5/dev/" + f, group: "dev", name: "werkstatt/" + f })));
+    { id: "map", lang: "json", url: "/werkstatt/map.json" },
+  ].concat(DEV_FILES.map((f) => ({ id: "dev:" + f, lang: f.endsWith(".css") ? "css" : f.endsWith(".json") ? "json" : "js", url: "/werkstatt/" + f, group: "dev", name: "werkstatt/" + f })));
 
   function logic() {
     if (!logicPromise) logicPromise = fetch(logicUrl).then((r) => r.text());

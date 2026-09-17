@@ -191,6 +191,12 @@ marke/                                  GENERATED   brand guide and downloads
 404.html                the ONLY hand-written page — it must work when the
                         runtime does not, so it depends on nothing
 
+werkstatt/              HAND-WRITTEN   the workshop (Dev-Modus), loaded as
+                        /werkstatt/index.js; runtime.src.js and
+                        motion-budget.src.js beside it are GENERATED copies of
+                        tools/runtime.js and tools/motion-budget.js for its
+                        own Code tab, not additional sources
+
 site.config.json        the noindex switch, read by the build and the gate
 runtime.js              GENERATED   the binder every one of the 21 pages loads,
                         minified from the hand-written tools/runtime.js
@@ -207,9 +213,10 @@ vercel.json             redirects, edge cache, security headers, CSP hashes, X-R
 
 mccain-design-system/   the Claude Design export the site is BUILT FROM
 tools/                  the two-stage builder, the gates, the vendored React
-                        build tool (tools/vendor-build/), and tools/runtime.js
-                        — the binder's hand-written source, the only
-                        hand-written file under tools/
+                        build tool (tools/vendor-build/), and the two
+                        hand-written sources it builds from: tools/runtime.js
+                        (the binder) and tools/motion-budget.js (see
+                        werkstatt/ above)
 _dcbuild/               build scratch — React's first render of every page and
                         the React/font files the build needs offline. Gitignored
                         and in .vercelignore, never deployed, safe to delete
@@ -221,9 +228,6 @@ archive/site-v3/        the site the 2026 relaunch replaced.
 archive/site-react/     the React edition of the v4 design, live 12.–17.9.2026
                         until the v5 build replaced it (its last commit, 7612481).
 archive/site-v3-tools/  the generators the v4 import made obsolete.
-archive/werkstatt/      the Dev-Modus ("Werkstatt") shown on every page until
-                        17.9.2026, removed at the owner's call; never deployed,
-                        see its own README.
 internal/               audit findings, design notes, the parked export zip.
 HANDOFF.md              the working notes — start here, it opens with a
                         READ-THIS-FIRST block
@@ -265,8 +269,10 @@ at this stage.
 the pages that ship. Each component is rendered again, at eight widths, and the
 renders are merged node by node into one markup with media queries; the
 component's own class ships minified as `<route>logic.gen.js` (esbuild, target
-`esnext`, no syntax lowering, a one-line banner comment); the export's template
-ships inert in the page; and
+`esnext`, no syntax lowering, a one-line banner comment), with a readable
+`<route>logic.src.js` beside it — the same code unminified, loaded only by the
+workshop's Code tab, never by the page; the export's template ships inert in
+the page; and
 [`tools/runtime.js`](tools/runtime.js) — one hand-written binder, shipped
 minified the same way as `/runtime.js` and shared by all 21 pages — binds
 template and delivered DOM and writes only what a state change alters (~1-2 ms
@@ -287,8 +293,8 @@ node tools/v5build.mjs --route /preise/ --route /kontakt/      # only these — 
 HTML page next to it. The CSP carries no `'unsafe-eval'`: `support.js` used to
 compile the component with `new Function`, the binder does not, and nothing
 that ships (`runtime.js`, `logic.gen.js`, `pixel-engine.js`, `image-slot.js`,
-`motion-budget.js`) evaluates code — the only inline script left is the
-contact-form sender, and its hash is what `v5build.mjs` writes into
+`motion-budget.js`, `werkstatt/`) evaluates code — the only inline script left
+is the contact-form sender, and its hash is what `v5build.mjs` writes into
 `script-src`.
 
 The deferred sections (`data-cv`) carry a measured placeholder height per
@@ -304,9 +310,11 @@ node tools/v5build.mjs
 
 `v5build.mjs` names every block it could not find in the file; the skill's
 `cv-audit.mjs` reports a page-height drift above 24 px when the numbers have
-gone stale. `tools/runtime.js` is hand-written; everything `v5build.mjs`
-derives from it and from the export — `runtime.js` at the root, every
-`logic.gen.js` — is generated.
+gone stale. `tools/runtime.js` and `tools/motion-budget.js` are hand-written;
+everything `v5build.mjs` derives from them and from the export — `runtime.js`
+and `motion-budget.js` at the root, every `logic.gen.js` and `logic.src.js`,
+and `werkstatt/runtime.src.js` / `werkstatt/motion-budget.src.js` — is
+generated. Everything else under `werkstatt/` is hand-written.
 
 Every page also gets its Markdown twin (`<route>index.md`), the page as
 Markdown for crawlers and language models (converter in `tools/markdown.mjs`,
@@ -318,6 +326,37 @@ Checks, all against the running servers:
 ```bash
 node tools/v5probe.mjs --all        # every page: no console errors, nothing written at start, menu, search, EN/DE, FAQ, form (intercepted), consent, mobile menu
 node tools/markdown-check.mjs --all # every twin: served as text/markdown, words and headings
+node tools/v5dev-check.mjs --route /kontakt/   # the workshop on one page
+```
+
+#### The workshop (Dev-Modus)
+
+`werkstatt/` is the page shown from the inside, loaded as `<script
+type="module" src="/werkstatt/index.js">` by `loadDev` in
+[`tools/runtime.js`](tools/runtime.js) when the visitor presses the switch,
+never before. Two views: Röntgen — the DOM tree, the element's HTML, its
+template bindings and the CSS rules that apply, the readable code (the
+route's own `logic.src.js` next to its minified `logic.gen.js`, plus
+`werkstatt/runtime.src.js` and `werkstatt/motion-budget.src.js`, with jumps
+from element to function via `map.json`, hand-maintained), the numbers of the
+visit (LCP, layout shifts, long tasks, waterfall, frame rate, skipped blocks,
+device), and knobs — and Google & KI, how crawlers and language models read
+the page. Native ES modules, no build step; texts live in `texte.js`. Escape,
+or the switch again, removes every node, listener, observer and style the
+workshop added; the module stays cached, so opening again costs no request.
+
+Nothing of it exists before the visitor's first click, key, wheel or touch,
+and the switch appears ten seconds after that (`armDevMode` in
+`tools/runtime.js`); `?werkstatt` opens it at once, and so does the band
+after "Arbeiten" on the start page (`data-v5-dev-open`). The rule is checked,
+not trusted:
+
+```bash
+python prodserve.py 8897            # or 8898 --dev
+node tools/v5dev-check.mjs          # five phases: nothing before the first
+                                     # action, the ten-second switch, tabs,
+                                     # picking, crawler view, Escape cleans up
+                                     # - screenshots in $TMPDIR/v5dev-check
 ```
 
 ### The gates

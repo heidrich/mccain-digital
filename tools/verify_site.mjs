@@ -747,7 +747,6 @@ const MUST_404 = [
   "/v5/runtime.js",
   "/tools/runtime.js",
   "/v5/dev/index.js",
-  "/archive/werkstatt/index.js",
 ];
 if (BASE.startsWith("http") && !BASE.includes("127.0.0.1")) {
   console.log("\n  must not be reachable");

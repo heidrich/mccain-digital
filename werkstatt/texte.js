@@ -102,12 +102,12 @@ export const T = {
       runtime: {
         name: "runtime.js",
         what: "Das Verhalten jeder v5-Seite ohne React: Es bindet die mitgelieferte Vorlage ans schon fertig gerenderte HTML und schreibt nach jeder Zustandsänderung nur, was sich wirklich geändert hat.",
-        why: "React rendert bei jeder Zustandsänderung die ganze Seite neu: 15 volle Durchläufe in 30 s bei 64–84 ms je Durchlauf (tools/reactprof.mjs, 4x CPU). Der Binder kostet dafür rund 1–2 ms.",
+        why: "React renderte bei jeder Zustandsänderung die ganze Seite neu: 15 volle Durchläufe in 30 s bei 64–84 ms je Durchlauf (gemessen 16.9.2026 mit Reacts Profiling-Build, 4x CPU). Der Binder kostet dafür rund 1–2 ms. Ausgeliefert wird die verdichtete Fassung; hier lesen Sie die kommentierte Quelle.",
       },
       logic: {
         name: "logic.gen.js",
         what: "Die Funktionen der Seite: der Strom im Hintergrund, Zähler, das Prozess-Rail, die Datenfluss-Grafik.",
-        why: "Sie stammen aus der Entwurfsdatei und werden beim Bauen wörtlich kopiert. Der Entwurf bleibt die einzige Quelle.",
+        why: "Sie stammen aus der Entwurfsdatei und werden beim Bauen wörtlich kopiert; der Entwurf bleibt die einzige Quelle. Ausgeliefert wird die verdichtete Fassung, hier lesen Sie die Quelle.",
       },
       motion: {
         name: "motion-budget.js",

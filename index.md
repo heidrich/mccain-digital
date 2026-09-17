@@ -234,6 +234,12 @@ CLS 0 TBT 0 ms llms.txt JSON-LD Agentic 3/3
 
 Kundenreferenzen werden erst nach schriftlicher Freigabe veröffentlicht. Nichts auf dieser Seite ist erfunden.
 
+Werkstatt
+
+Sehen Sie selbst, wie diese Seite gebaut ist.
+
+Ein Klick öffnet die Werkstatt: der echte Aufbau der Seite, der Code, der sie bewegt, die Zeiten, die Ihr Browser gerade gemessen hat, und wie Google und Sprachmodelle sie lesen. Nichts wird gespeichert oder gesendet.
+
 Stimmen
 
 ## Was Kunden sagen – sobald sie es dürfen.

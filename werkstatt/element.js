@@ -224,7 +224,7 @@ export function mountElement(W) {
 
   /* ---- in the code */
   function loadMap() {
-    if (!mapPromise) mapPromise = fetch("/v5/dev/map.json").then((r) => (r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status)))).catch(() => null);
+    if (!mapPromise) mapPromise = fetch("/werkstatt/map.json").then((r) => (r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status)))).catch(() => null);
     return mapPromise;
   }
   function codeCard(target) {

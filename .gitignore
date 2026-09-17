@@ -30,9 +30,9 @@ __pycache__/
 # Screenshots are a look, not a record - regenerate with tools/shots.mjs
 internal/shots/
 
-# Lighthouse reports: half a megabyte each, regenerable in a minute with
-# `python tools/lighthouse_audit.py`. The numbers that matter are written
-# down in HANDOFF.md instead.
+# Lighthouse reports: half a megabyte each, regenerable in a minute with the
+# skill's `lighthouse-psi.mjs` (~/.claude/skills/html-performance/scripts/).
+# The numbers that matter are written down in HANDOFF.md instead.
 internal/lighthouse/
 
 # The v4 export's canvas scratch: 119 unreferenced files, 23 MB, and most of it

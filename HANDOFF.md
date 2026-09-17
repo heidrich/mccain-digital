@@ -1,5 +1,66 @@
 # Uebergabe — Stand 17. September 2026
 
+## ▶ STAND 17.9. SPÄT — WERKSTATT ZURÜCK UNTER /werkstatt/, SQUIRRELSCAN LÄUFT — ZUERST LESEN
+
+**Owner-Klarstellung:** „Der Dev-Modus auf der Webseite soll drin bleiben; ich
+hab gemeint, die Seite soll nicht mehr auf einer Dev-Umgebung laufen, sondern
+auf Vercel. … es sollte nur der v5 raus, und die HTML-Seite jetzt vernünftig
+aufgesetzt und den Ordner/Repo aufräumen." Der Block „NACHTS" darunter hatte
+die Werkstatt irrtümlich entfernt; das ist zurückgenommen.
+
+**Stand:**
+
+- **Werkstatt liegt unter `werkstatt/`** (deployt), geladen als
+  `/werkstatt/index.js`; Schalter zehn Sekunden nach der ersten Aktion, Band
+  nach „Arbeiten", `?werkstatt`. `tools/v5dev-check.mjs` ist wieder da.
+  Es bleibt beim Release-Stand sonst: kein `v5/`, `/runtime.js` und
+  `logic.gen.js` minifiziert. **Neu:** der Build schreibt je Route eine
+  lesbare `logic.src.js` neben die minifizierte Datei und kopiert
+  `tools/runtime.js` / `tools/motion-budget.js` als `werkstatt/*.src.js`;
+  nur die Werkstatt lädt sie (Code-Tab), Besucher zahlen nichts dafür.
+- **Aufgeräumt:** `assets-src/` (7 Bilder vom Juni) liegt unter
+  `internal/assets-src/`, dem dafür vorgesehenen, ignorierten Ort;
+  `archive/werkstatt/` gibt es nicht mehr. Eine statische Sichtung von
+  `tools/` (was noch läuft, was Altes voraussetzt, was das Skill-Skript
+  ersetzt) steht als Entscheidungsliste weiter unten bzw. im Chat vom 17.9.
+- **Squirrelscan läuft** (v0.0.96; Binary vom Owner ad hoc signiert). Erster
+  Audit der Live-Seite (23 Seiten gecrawlt, `-C surface`): Gesamtnote 48/F,
+  2.389 bestanden, 291 Warnungen, 59 Fehler. Triage:
+  - *Bis zum Go-live erwartet, kein Handlungsbedarf jetzt:* noindex-Konflikte
+    (Schema + noindex, robots erlaubt + noindex), Sitemap zeigt auf
+    mccain-digital.com (4xx, „andere Domain"), Titel-/Robots-Warnungen dazu.
+  - *Echt und im Build behebbar (nächstes Arbeitspaket):* Honeypot-Feld
+    `company` in `aria-hidden` ohne Label/Namen (auf allen Formularseiten);
+    4–6 Knöpfe, deren `aria-label` nicht mit dem sichtbaren Text beginnt
+    (individualsoftware, Startseite „KI-Tools"); Bilder ohne width/height
+    (3–8), oberhalb der Falz lazy (2–3), unterhalb ohne lazy (bis 27);
+    Organisation in JSON-LD ohne `@id` (Vergleichsseiten), Article-Schema
+    ohne Pflichtfelder, ein JSON-LD mit Syntaxfehler (prüfen!); 3 tote
+    externe Links; Tabelle ohne `<th>`; ein generischer Linktext; 2
+    Kontrast-Kandidaten; `enterkeyhint` fehlt; 2 CSS-Dateien unminifiziert;
+    Slug-Abweichung bei 3 Seiten.
+  - *Entscheidung Owner/Textrunde:* Datenschutz als eigene Seite (heute Anker
+    auf /rechtliches/), Auftragsverarbeiter-Hinweis, Veröffentlichungsdaten,
+    Adresse im LocalBusiness-Schema, AGENTS.md, „HTML zu schwer für einen
+    Agenten-Fetch" (die inert mitgelieferte Vorlage verdoppelt das HTML; die
+    Antwort dafür ist der Markdown-Zwilling).
+  Rohdaten: `squirrel audit https://mccain-digital.vercel.app -C surface
+  --refresh --format llm` (Projektdatei `squirrel.toml` liegt im Scratchpad,
+  nicht im Repo; bei Bedarf `squirrel init -n mccain-digital` im Repo und
+  `.squirrel/` ignorieren).
+
+**Aufgeräumt in `tools/`** (statische Sichtung, Sonnet): gelöscht
+`animcensus`, `count`, `cvtest`, `iocount`, `mainthread`, `quiet`,
+`lighthouse_audit.py` (Skill-Skripte ersetzen sie) und `patch_export.py`
+(nicht mehr lauffähig); behalten `deadcode` (Coverage), `whoruns`
+(Spätfenster), `shots`, `pxcheck`, `seo_audit` (Kommentar korrigiert).
+`.gitignore` verweist für `internal/lighthouse/` jetzt auf `lighthouse-psi.mjs`.
+
+**Gemessen (17.9. spät, mit Werkstatt-Band):** Startseite mobil 99 (FCP 0,9 s,
+LCP 2,1 s, TBT 0 ms, CLS 0, SI 1,1 s); Tore `verify_site` grün, `v5probe`
+21/21, `markdown-check` 21/21, `v5dev-check` `/` und `/kontakt/` ALL OK,
+`pxcheck` 5/5.
+
 ## ▶ STAND 17.9. NACHTS — RELEASE: KEIN `v5/` MEHR, DEV-MODUS RAUS, SKRIPTE MINIFIZIERT — ZUERST LESEN
 
 **Owner-Aufträge (17.9. spät):** „die html ist jetzt die main und wird so

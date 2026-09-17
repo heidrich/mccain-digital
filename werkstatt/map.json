@@ -2,7 +2,7 @@
   "files": {
     "runtime": {
       "name": "runtime.js",
-      "url": "/v5/runtime.js",
+      "url": "/werkstatt/runtime.src.js",
       "lang": "js",
       "what": "Bindet die mitgelieferte, unsichtbare Vorlage (<template id=\"dc-template\">) an das schon fertig gerenderte HTML: merkt sich für jeden Ausdruck den aktuellen Wert und schreibt nach einer Zustandsänderung nur, was sich geändert hat.",
       "why": "Ein React-Rerender der ganzen Seite kostete 15 volle Durchläufe in 30 s bei 64–84 ms je Durchlauf (gemessen 16.9.2026 mit Reacts Profiling-Build bei 4x CPU); der Binder kostet dafür rund 1–2 ms."
@@ -11,11 +11,11 @@
       "name": "logic.gen.js",
       "lang": "js",
       "what": "Die ganze Komponentenklasse dieser Seite: alle Methoden von componentDidMount bis renderVals, wörtlich aus der Entwurfsdatei kopiert und vom Build an einzelnen Stellen gepatcht.",
-      "why": "tools/v5build.mjs kopiert diese Klasse unverändert in jede <route>logic.gen.js, damit Vorlage und Seite nie auseinanderlaufen. Generiert, nicht von Hand editieren. Kein statisches url hier - jede Seite hat ihre eigene Datei unter ihrer eigenen Route; code.js löst sie über V5_DATA.route auf."
+      "why": "tools/v5build.mjs kopiert diese Klasse in jede <route>logic.gen.js (minifiziert für die Auslieferung) und daneben als lesbare logic.src.js, die hier gezeigt wird, damit Vorlage und Seite nie auseinanderlaufen. Generiert, nicht von Hand editieren. Kein statisches url hier - jede Seite hat ihre eigene Datei unter ihrer eigenen Route; code.js löst sie über V5_DATA.route auf."
     },
     "motion": {
       "name": "motion-budget.js",
-      "url": "/v5/dev/motion-budget.src.js",
+      "url": "/werkstatt/motion-budget.src.js",
       "lang": "js",
       "what": "Pausiert CSS-Animationen, die gerade niemand sieht, und hält Endlos-Schleifen sechs Sekunden nach dem Laden zurück.",
       "why": "Gemessen 13.9.2026: 25 laufende CSS-Animationen oben im Dokument, nur 5 davon im Bild; das vollständige Abschalten aller Animationen sparte LCP 3.650→2.759 ms und TBT 793→530 ms."

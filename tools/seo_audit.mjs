@@ -9,11 +9,13 @@
  * links with an accessible name, structured data that parses and matches the
  * page, and internal linking that actually reaches everything.
  *
- * It reads the page AFTER hydration, because that is the page: a check against
- * the raw HTML would measure the prerendered copy and miss whatever React
- * changes. Both matter, so the crawler view is asked separately - `raw` below
- * is the same page with JavaScript switched off, which is what a crawler that
- * does not execute scripts reads.
+ * It reads the page after the binder has run (tools/runtime.js), because that
+ * is the page a visitor gets: #dc-root ships finished from the build, the
+ * binder only writes what a state change alters, so raw HTML and live DOM
+ * agree - this check reads the live DOM so a regression in either shows.
+ * The crawler view is still asked separately: `raw` below is the same page
+ * with JavaScript switched off, which is what a crawler that does not
+ * execute scripts reads.
  *
  * Nothing here fails the build. It prints findings and a summary; which of them
  * are worth fixing is a judgement, and a gate that makes that judgement for you
