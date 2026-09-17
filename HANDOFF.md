@@ -1,5 +1,21 @@
 # Uebergabe — Stand 17. September 2026
 
+## ▶ STAND 18.9. NACHT — CMS-DESIGN ABGESCHLOSSEN: md-cms, SITE-KIT KOMMT IN DIESE BAUKETTE
+
+Die angekündigte Denkaufgabe ist erledigt. Design und Build-Plan des neuen
+CMS liegen im Repo `mccain-cms` (`docs/plans/2026-09-18-md-cms-design.md`,
+`…-build-plan.md`, gepusht); das alte CMS liegt dort unter `legacy/`. Für
+DIESES Repo relevant (Build-Plan Phase 1, Site-Kit `@mccain/site-kit`):
+`cms/manifest.json` und `cms/labels.json` aus den Artboards, Anwender-Schritt
+in `tools/prerender.mjs` (Überschreibungen je Datenpfad wie `PG.hero.title`
+vor dem Rendern, `media://` → `img/cms/`, Menü-Hook `window.__wcmsMenu`, SEO
+über `page.meta`), `/wcms-preview.js` nur bei `?wcms-preview=1` im Frame mit
+`frame-ancestors 'self' <cms-origin>`, Tracking-Loader plus Consent-Banner
+(PageSpeed-Tor misst mit IDs), GitHub Action `wcms-publish.yml`. Ohne
+`WCMS_SNAPSHOT` muss der Build byteidentisch bleiben. Gemessen 18.9.: der
+komplette Build dauert 2:34 min und ändert nur `sitemap.xml` (lastmod).
+Owner-Vorgabe: token-sparsam arbeiten, Wochenlimit nie über 50 %.
+
 ## ▶ STAND 18.9. FRÜH — FIX-WELLE: LOKALISIERUNG, RECHT, SCHEMA, A11Y, FEED — ZUERST LESEN
 
 **Letzter Stand vor dem Compact (Owner: „Sehr gute Arbeit“):** Commit
