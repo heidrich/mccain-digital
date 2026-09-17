@@ -94,8 +94,12 @@ wiederherzustellen – behoben in `knobs.js`. Dabei auch gelernt: das Glossar-
 Pop schloss sich durch den Fokus-Scroll direkt nach dem Klick (kleine
 Konsole); es folgt jetzt seinem Begriff (`placeTerm`) statt bei jedem Scroll
 zu schließen. Lighthouse mobil `/` 99
-(lighthouse-psi.mjs, 17.9. abends). Review (Sonnet) ohne blockierende
-Befunde; angenommene Restrisiken stehen im Kopf von `api/ask.mjs`.
+(lighthouse-psi.mjs, 17.9. abends). Zwei Reviews (Sonnet) ohne blockierende
+Befunde, Sollte-Punkte umgesetzt; angenommene Restrisiken stehen im Kopf
+von `api/ask.mjs`. Live geprüft nach dem Push (9e8d0ce, 73a511c):
+`verify_site` gegen Produktion grün, Fenster ist Standard, die Frage geht
+als POST an `/api/ask/`, bekommt ohne Schlüssel 503 und die Werkstatt
+antwortet aus den Fakten (Absender „Werkstatt“).
 
 **Nächste Schritte (Owner-Reihenfolge):** 1) Reveal-Animationen der Sections
 (Ein-/Ausblenden beim Scrollen) zurückbringen, nur wenn PageSpeed mobil ≥ 95
