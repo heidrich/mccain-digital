@@ -69,7 +69,7 @@ class Handler(SimpleHTTPRequestHandler):
     dev = False
 
     def guess_type(self, path):
-        # The Markdown twins (v5/index.md) are read by language models and by
+        # The Markdown twins (index.md next to each page) are read by language models and by
         # the workshop's crawler view. vercel.json sends them as
         # text/markdown; charset=utf-8 - the same here, so a wrong charset
         # cannot hide behind the local server.
@@ -87,7 +87,16 @@ class Handler(SimpleHTTPRequestHandler):
         # exact "a wrong CSP kills it silently" shape, aimed at our own build.
         # Vercel never sees this folder either: it is not deployed, and
         # verify_site asserts it answers 404.
-        if not path.startswith("/mccain-design-system/"):
+        #
+        # NOR ON THE BUILD SCRATCH. Since 17.9.2026 the CSP hashes come from
+        # the pages that ship, which carry no React. The staging documents
+        # under /_dcbuild/ (tools/prerender.mjs, tools/v5build.mjs) still
+        # render with React: an inline window.__resources map plus support.js.
+        # Under the site's CSP that inline script is unhashed and support.js
+        # falls back to unpkg, which the policy blocks - the build dies on the
+        # first page. Not deployed either (.vercelignore), verify_site asserts
+        # the 404.
+        if not (path.startswith("/mccain-design-system/") or path.startswith("/_dcbuild/")):
             for key, value in SECURITY_HEADERS:
                 self.send_header(key, value)
         if self.dev:

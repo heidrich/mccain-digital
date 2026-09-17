@@ -32,8 +32,9 @@ the root is **generated**: all 21 pages are built out of the Claude Design
 export in [`mccain-design-system/`](mccain-design-system/), which is never
 itself served.
 
-Every `index.html` under the root is build output. **Editing one by hand is
-lost work** — change the export and run the build.
+Every `index.html`, `logic.gen.js` and `index.md` under the root is build
+output. **Editing one by hand is lost work** — change the export and run the
+build.
 
 ### Why there is a build at all
 
@@ -43,22 +44,26 @@ not run JavaScript reads a few dozen words of decoration — no headline, no
 title, no prose. Rendered, the 21 pages carry **33,498 words**. Meta tags alone
 would have been cosmetic.
 
-So the build renders each component in a real browser and ships **both copies**:
+So the build renders each component — at build time, not in the visitor's
+browser — and ships the result as plain HTML with a small hand-written binder
+instead of React. A shipped page carries:
 
 | in the page | what it is for |
 |---|---|
-| `<div id="dc-prerender">` | the settled markup — what a crawler reads and what paints first |
-| `<x-dc></x-dc>` | the empty mount point `support.js` replaces with `#dc-root` |
-| `<template id="dc-template">` | the component template, **inert**, handed to `support.js` by a shim |
+| `<div id="dc-root">` | the finished markup the build wrote — what a crawler reads and what paints first, there is nothing behind it to render |
+| `<template id="dc-template">` | the component template, **inert**, the binder's own source for what to do when state changes |
+| `<script type="application/json" id="v5-data">` | route, props, and which template nodes carry hover/focus styles |
+| `<script src="<route>logic.gen.js" defer>` | the page's own component class, copied whole from the export |
+| `<script src="/v5/runtime.js" defer>` | the binder: the one hand-written file all 21 pages share |
 
-A `MutationObserver` removes the prerendered copy once React has actually
-rendered — and leaves it in place if React never arrives, so a visitor without
-JavaScript keeps a readable page.
-
-Two mistakes in that design each shipped a page that looked perfect and was
-completely dead. Both are written up at the top of
-[`tools/prerender.mjs`](tools/prerender.mjs). Read that file before changing the
-build.
+There is no `<x-dc>`, no `MutationObserver`, no hydration and no second copy of
+the page. The runtime never rebuilds the tree; it binds the template to the
+delivered DOM once and, from then on, writes only what a state change actually
+altered. Read the header comments of
+[`tools/prerender.mjs`](tools/prerender.mjs) and
+[`tools/v5build.mjs`](tools/v5build.mjs) before changing the build — they carry
+the history of what this used to be (a scrape, then a React hydration step)
+and why each of those was replaced.
 
 ### What the build fixes in the export
 
@@ -107,7 +112,7 @@ headers:
 |     |     |
 | --- | --- |
 | Pages | **21** |
-| Third-party hosts | **0** — React and both typefaces are vendored |
+| Third-party hosts | **0** — nothing loads from a CDN |
 | Console errors / warnings | **0** on every page |
 | Failed requests | **0** on every page |
 | Words of rendered text | **33,498** across the 21 pages |
@@ -121,18 +126,25 @@ the previous site and is an open item in `HANDOFF.md`.
 
 ### Why React and the fonts are in the repository
 
-Not a preference — **GDPR**. Loading a font or a script from a CDN sends the
+Not a preference — **GDPR**, and it still applies to the half of this that
+visitors actually receive. Loading a font or a script from a CDN sends the
 visitor's IP address to that CDN's operator. LG München I, 3 O 17493/20
 (20 January 2022) awarded damages for exactly that with Google Fonts, and the
-reasoning applies to unpkg.com in the same way. So:
+reasoning applied to unpkg.com in the same way while the export still loaded
+React from there.
 
-- React 18.3.1 UMD lives in [`vendor/`](vendor/) and is injected through
-  `support.js`'s own `window.__resources` hook — no patching of third-party code,
-  and the SRI hashes still match because the bytes are identical.
-- Instrument Sans and JetBrains Mono live in [`fonts/`](fonts/), subset to
+- **Instrument Sans and JetBrains Mono** live in [`fonts/`](fonts/), subset to
   `latin` and `latin-ext`, named after what they are rather than after Google's
-  URL hash. (Two of them once differed only in capitalisation and silently
-  overwrote each other on NTFS — see `tools/vendor_assets.py`.)
+  URL hash, and are shipped to every visitor. (Two of them once differed only
+  in capitalisation and silently overwrote each other on NTFS — see
+  `tools/vendor_assets.py`.)
+- **React is no longer shipped at all.** Since the switch to plain HTML, it is
+  a build tool: the three UMD builds live in
+  [`tools/vendor-build/`](tools/vendor-build/) (see its own README) and are
+  copied into `_dcbuild/` while `tools/prerender.mjs` and `tools/v5build.mjs`
+  run. Nothing under `_dcbuild/` is deployed — it is gitignored and in
+  `.vercelignore` — and the root no longer has a `support.js` or a `vendor/`
+  to serve in the first place.
 
 ---
 
@@ -141,37 +153,54 @@ reasoning applies to unpkg.com in the same way. So:
 [`pixel-engine.js`](pixel-engine.js) exposes `window.PixelFX`: one 2-D canvas
 physics core feeding the effects over headlines, buttons and tiles. It is
 presentation only and `aria-hidden` — every word on the page is real,
-selectable, crawlable DOM underneath. Touch devices and
-`prefers-reduced-motion` get the effect-free page.
+selectable, crawlable DOM underneath.
+
+It is also 42 KB the binder does not load until somebody can use it: `armPixels`
+in [`v5/runtime.js`](v5/runtime.js) requests `pixel-engine.js` on the first real
+mouse or pen movement, or automatically ten seconds after load on a device that
+has a mouse at all — never on a touch device and never with
+`prefers-reduced-motion`.
 
 ---
 
 ## Project structure
 
+Every route is three GENERATED files, not one: `index.html` (the markup and its
+inline `<style>`), `logic.gen.js` (the page's component class), `index.md` (the
+Markdown twin). All three come out of the same build run and are never edited
+by hand.
+
 ```text
-index.html              GENERATED   the start page
-leistungen/             GENERATED   overview + 4 services + 4 technology pages
-vergleich/              GENERATED   the two comparison pages
+index.html logic.gen.js index.md        GENERATED   the start page
+leistungen/…                            GENERATED   overview + 4 services + 4 technology pages, each the same 3 files
+vergleich/…                             GENERATED   the two comparison pages
 md-recall/ preise/ studio/ kontakt/ rechtliches/ styleguide/   GENERATED
-news/ news/md-recall/   GENERATED   index and first article
-marke/                  GENERATED   brand guide and downloads
+news/ news/md-recall/                   GENERATED   index and first article
+marke/                                  GENERATED   brand guide and downloads
 404.html                the ONLY hand-written page — it must work when the
                         runtime does not, so it depends on nothing
 
+v5/runtime.js           HAND-WRITTEN   the binder every one of the 21 pages loads
+v5/dev/                 HAND-WRITTEN   the workshop (Dev-Modus), see below
+
 site.config.json        the noindex switch, read by the build and the gate
-support.js              the Claude Design runtime (third party, minified only)
-pixel-engine.js         the canvas pixel-physics engine
+motion-budget.js        GENERATED   how much motion this visit gets, per page
+pixel-engine.js         the canvas pixel-physics engine, loaded lazily by the binder
 image-slot.js           the canvas image-slot component (10 empty slots on
                         /md-recall/ are waiting for screenshots)
 content.json            every word of copy, de + en
-vendor/                 React 18.3.1 UMD
 fonts/ img/ team/ brand/
 robots.txt · sitemap.xml · llms.txt · og-image.png      all GENERATED but robots
-vercel.json             redirects, edge cache, security headers, X-Robots-Tag
-.vercelignore           what must NOT be published — archive/, internal/, tools/
+vercel.json             redirects, edge cache, security headers, CSP hashes, X-Robots-Tag —
+                        the CSP and the page list are rewritten by the build
+.vercelignore           what must NOT be published — archive/, internal/, tools/, _dcbuild/
 
 mccain-design-system/   the Claude Design export the site is BUILT FROM
-tools/                  the builder and the gates
+tools/                  the two-stage builder, the vendored React build tool
+                        (tools/vendor-build/), and the gates
+_dcbuild/               build scratch — React's first render of every page and
+                        the React/font files the build needs offline. Gitignored
+                        and in .vercelignore, never deployed, safe to delete
 
 archive/old3/           the site the v4 import replaced (September 2026).
 archive/site-apache/    the site that was live on Apache until the Vercel move.
@@ -183,52 +212,65 @@ HANDOFF.md              the working notes — start here, it opens with a
                         READ-THIS-FIRST block
 ```
 
-Nothing under `archive/`, `internal/`, `tools/` or `mccain-design-system/` is
-deployed. That is not a promise, it is a test: `tools/verify_site.mjs` asks the
-live host for those paths and fails unless they are 404.
+Nothing under `archive/`, `internal/`, `tools/`, `mccain-design-system/` or
+`_dcbuild/` is deployed. For the first four that is not a promise, it is a
+test: `tools/verify_site.mjs` asks the live host for representative paths under
+each and fails unless they answer 404.
 
 ---
 
 ## Build and check
 
-Order matters. The dev server has to be running, because the build renders the
-component through it.
+Order matters, and it is two build stages now, not one. The dev server has to
+be running for the first stage, because it renders each component through it.
 
 ```bash
 python prodserve.py 8898 --dev      # must be running
 python tools/vendor_assets.py       # React + the typefaces into the repo
-node  tools/prerender.mjs           # ALL 21 pages, sitemap.xml, llms.txt, og-image
+node  tools/prerender.mjs           # stage 1: every artboard, into _dcbuild/react/
+node  tools/v5build.mjs             # stage 2: every page to the site root, then sitemap.xml, llms.txt, the CSP
 node  tools/verify_site.mjs         # REQUIRED before every push
 ```
 
-`prerender.mjs` is the whole build now. It renders each artboard through the dev
-server, writes the page, copies the assets, and writes `sitemap.xml` and the
-page index in `llms.txt` from the same route table — so those cannot drift from
-what exists.
+(The tool names still say `v5` and the runtime lives under `v5/` — that is the
+working name this build carried while it shipped from `/v5/` as a preview next
+to the React site. The prefix is gone, the names are not.)
 
-### v5, the whole site without React at runtime
+**Stage 1, `tools/prerender.mjs`:** renders each artboard with
+`react-dom/server` in a staging document — patched exactly as a browser would
+patch it — and writes the result to `_dcbuild/react/<route>/index.html`, a
+build intermediate: gitignored, in `.vercelignore`, never deployed. It also
+copies assets, derives the images, and builds `og-image.png` and
+`motion-budget.js`. It always builds all 21 routes; there is no `--route` flag
+at this stage.
 
-`v5/` holds every one of the 21 pages, built from the rendered root pages
-(`index.html`, `kontakt/index.html`, …), so it follows a `prerender.mjs` run
-whenever the design export changed:
+**Stage 2, `tools/v5build.mjs`:** reads those React renders and turns them into
+the pages that ship. Each component is rendered again, at eight widths, and the
+renders are merged node by node into one markup with media queries; the
+component's own class ships whole as `<route>logic.gen.js`; the export's
+template ships inert in the page; and
+[`v5/runtime.js`](v5/runtime.js) — one hand-written binder shared by all 21
+pages — binds template and delivered DOM and writes only what a state change
+alters (~1-2 ms per change instead of a 64-84 ms React re-render). Everything
+the export can do still works: mega menu, search (Cmd/Ctrl+K), DE/EN, forms,
+FAQ, consent, mobile menu, the pages' own widgets.
+
+Only a full run — no `--route` — writes `sitemap.xml`, `llms.txt` and the CSP
+hashes in `vercel.json`, all derived from what the run actually built, so they
+cannot drift from the pages:
 
 ```bash
-python prodserve.py 8898 --dev      # must be running
-node tools/v5build.mjs              # writes v5/<route>/index.html, logic.gen.js, index.md for all pages
-node tools/v5build.mjs --route /preise/ --route /kontakt/     # some pages
-node tools/v5build.mjs --root       # the switchover: site root, no /v5 prefix in links
+node tools/v5build.mjs                                        # every route
+node tools/v5build.mjs --route /preise/ --route /kontakt/      # only these — sitemap/llms/CSP are left as they are
 ```
 
-How it works (design: `docs/plans/2026-09-17-v5-alle-seiten-design.md`): each
-component is rendered with react-dom/server at eight widths and merged into one
-markup with media queries; the page's own class ships whole as
-`logic.gen.js`; the export's template ships inert in the page; and
-`v5/runtime.js`, one hand-written file for all pages, binds template and
-prerendered DOM and writes only what a state change alters (~1-2 ms per change
-instead of a 64-84 ms React re-render). Everything the export can do works:
-mega menu, search (Cmd/Ctrl+K), DE/EN, forms, FAQ, consent, mobile menu, the
-pages' own widgets. The preview links to itself under `/v5/`; the canonical
-URLs stay the production ones.
+`llms.txt` links each page's Markdown twin (`<route>index.md`) and names the
+HTML page next to it. The CSP carries no `'unsafe-eval'`: `support.js` used to
+compile the component with `new Function`, the binder does not, and nothing
+that ships (`runtime.js`, `logic.gen.js`, `pixel-engine.js`, `image-slot.js`,
+`motion-budget.js`, `v5/dev/`) evaluates code — the only inline script left is
+the contact-form sender, and its hash is what `v5build.mjs` writes into
+`script-src`.
 
 The deferred sections (`data-cv`) carry a measured placeholder height per
 viewport width and per page (`tools/v5-heights.json`, keys from
@@ -243,10 +285,10 @@ node tools/v5build.mjs
 
 `v5build.mjs` names every block it could not find in the file; the skill's
 `cv-audit.mjs` reports a page-height drift above 24 px when the numbers have
-gone stale. Hand-written in `v5/`: `runtime.js` and the workshop under
-`v5/dev/`.
+gone stale. Hand-written under `v5/`: `runtime.js` and the workshop in
+`v5/dev/` — nothing else in that folder is generated.
 
-Every page also gets its Markdown twin (`v5/<route>/index.md`), the page as
+Every page also gets its Markdown twin (`<route>index.md`), the page as
 Markdown for crawlers and language models (converter in `tools/markdown.mjs`,
 announced with `<link rel="alternate" type="text/markdown">`, served as
 `text/markdown` by `vercel.json` and `prodserve.py`).
@@ -280,7 +322,7 @@ node tools/v5dev-check.mjs          # five phases, screenshots in $TMPDIR/v5dev-
 
 |     |     |
 | --- | --- |
-| `verify_site.mjs` | **clicks.** All 21 pages: hydration, the inert template, the mega menu, a modal, the pixel engine, the console, `noindex`, that every route is reachable from `/`, that the forms are wired, and what must stay 404. Takes a URL to run against production. |
+| `verify_site.mjs` | **clicks.** Drives a real browser through every page: `#dc-root` filled in the server's own response, the inert template, the binder booted (`window.__v5`, the `v5:mount` mark, every template node adopted), no React and no request to `/support.js`, `/vendor/` or `/_dcbuild/`, the CSP without `'unsafe-eval'`, the pixel engine only after a real mouse move, the console, `noindex`, the Markdown twin next to every page, the mega menu, the search and a dialog on `/`, both contact forms against an intercepted Web3Forms, that every route is reachable from `/`, and what must stay 404. Takes a URL to run against production. |
 | `console_audit.mjs` | every console message, grouped by shape |
 | `requests_audit.mjs` | every request, counted — a duplicate is the finding |
 | `weigh.mjs` | what the shipped bytes actually consist of |

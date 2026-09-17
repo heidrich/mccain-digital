@@ -24,24 +24,24 @@
 
 ## Alle Seiten
 
-- [McCain Digital · Software, die in Produktion geht](https://mccain-digital.com/)
-- [Leistungen, Technologien & Vergleiche im Überblick](https://mccain-digital.com/leistungen/)
-- [KI & Automatisierung entwickeln lassen · McCain Digital](https://mccain-digital.com/leistungen/ki-automatisierung/)
-- [Web-App entwickeln lassen · React & Next.js · McCain Digital](https://mccain-digital.com/leistungen/web-apps/)
-- [Website erstellen lassen · Lighthouse 100 · McCain Digital](https://mccain-digital.com/leistungen/websites/)
-- [Individualsoftware & ERP-Integration · McCain Digital](https://mccain-digital.com/leistungen/individualsoftware/)
-- [Next.js-Entwicklung für skalierende Produkte](https://mccain-digital.com/leistungen/nextjs-entwicklung/)
-- [MCP-Server entwickeln lassen · ERP & CRM für Claude](https://mccain-digital.com/leistungen/mcp-server-entwickeln/)
-- [RAG auf eigenen Daten – mit Quellenangabe · McCain Digital](https://mccain-digital.com/leistungen/rag-beratung/)
-- [ERP-Integration: SAP, Business Central, Altsysteme](https://mccain-digital.com/leistungen/erp-integration/)
-- [WordPress oder handgeschrieben? Ehrlicher Vergleich](https://mccain-digital.com/vergleich/wordpress-oder-handgeschrieben/)
-- [ChatGPT-Abo oder eigener KI-Assistent? · McCain Digital](https://mccain-digital.com/vergleich/chatgpt-oder-eigenes-rag/)
-- [md-recall · Projektgedächtnis am Commit · Download](https://mccain-digital.com/md-recall/)
-- [Preise: Was kostet Website, Web-App oder KI?](https://mccain-digital.com/preise/)
-- [Studio: zwei Gründer aus Bayern, seit 2016 · McCain Digital](https://mccain-digital.com/studio/)
-- [Kontakt · Antwort in 24 Stunden · McCain Digital](https://mccain-digital.com/kontakt/)
-- [Impressum, Datenschutz, AGB, Widerruf · McCain Digital](https://mccain-digital.com/rechtliches/)
-- [Styleguide · Farben, Typografie, Komponenten](https://mccain-digital.com/styleguide/)
-- [News · McCain Digital](https://mccain-digital.com/news/)
-- [recall heißt jetzt md-recall · News · McCain Digital](https://mccain-digital.com/news/md-recall/)
-- [Marke & Downloads · McCain Digital](https://mccain-digital.com/marke/)
+- [McCain Digital · Software, die in Produktion geht](https://mccain-digital.com/index.md): Seite https://mccain-digital.com/
+- [Leistungen, Technologien & Vergleiche im Überblick](https://mccain-digital.com/leistungen/index.md): Seite https://mccain-digital.com/leistungen/
+- [KI & Automatisierung entwickeln lassen · McCain Digital](https://mccain-digital.com/leistungen/ki-automatisierung/index.md): Seite https://mccain-digital.com/leistungen/ki-automatisierung/
+- [Web-App entwickeln lassen · React & Next.js · McCain Digital](https://mccain-digital.com/leistungen/web-apps/index.md): Seite https://mccain-digital.com/leistungen/web-apps/
+- [Website erstellen lassen · Lighthouse 100 · McCain Digital](https://mccain-digital.com/leistungen/websites/index.md): Seite https://mccain-digital.com/leistungen/websites/
+- [Individualsoftware & ERP-Integration · McCain Digital](https://mccain-digital.com/leistungen/individualsoftware/index.md): Seite https://mccain-digital.com/leistungen/individualsoftware/
+- [Next.js-Entwicklung für skalierende Produkte](https://mccain-digital.com/leistungen/nextjs-entwicklung/index.md): Seite https://mccain-digital.com/leistungen/nextjs-entwicklung/
+- [MCP-Server entwickeln lassen · ERP & CRM für Claude](https://mccain-digital.com/leistungen/mcp-server-entwickeln/index.md): Seite https://mccain-digital.com/leistungen/mcp-server-entwickeln/
+- [RAG auf eigenen Daten – mit Quellenangabe · McCain Digital](https://mccain-digital.com/leistungen/rag-beratung/index.md): Seite https://mccain-digital.com/leistungen/rag-beratung/
+- [ERP-Integration: SAP, Business Central, Altsysteme](https://mccain-digital.com/leistungen/erp-integration/index.md): Seite https://mccain-digital.com/leistungen/erp-integration/
+- [WordPress oder handgeschrieben? Ehrlicher Vergleich](https://mccain-digital.com/vergleich/wordpress-oder-handgeschrieben/index.md): Seite https://mccain-digital.com/vergleich/wordpress-oder-handgeschrieben/
+- [ChatGPT-Abo oder eigener KI-Assistent? · McCain Digital](https://mccain-digital.com/vergleich/chatgpt-oder-eigenes-rag/index.md): Seite https://mccain-digital.com/vergleich/chatgpt-oder-eigenes-rag/
+- [md-recall · Projektgedächtnis am Commit · Download](https://mccain-digital.com/md-recall/index.md): Seite https://mccain-digital.com/md-recall/
+- [Preise: Was kostet Website, Web-App oder KI?](https://mccain-digital.com/preise/index.md): Seite https://mccain-digital.com/preise/
+- [Studio: zwei Gründer aus Bayern, seit 2016 · McCain Digital](https://mccain-digital.com/studio/index.md): Seite https://mccain-digital.com/studio/
+- [Kontakt · Antwort in 24 Stunden · McCain Digital](https://mccain-digital.com/kontakt/index.md): Seite https://mccain-digital.com/kontakt/
+- [Impressum, Datenschutz, AGB, Widerruf · McCain Digital](https://mccain-digital.com/rechtliches/index.md): Seite https://mccain-digital.com/rechtliches/
+- [Styleguide · Farben, Typografie, Komponenten](https://mccain-digital.com/styleguide/index.md): Seite https://mccain-digital.com/styleguide/
+- [News · McCain Digital](https://mccain-digital.com/news/index.md): Seite https://mccain-digital.com/news/
+- [recall heißt jetzt md-recall · News · McCain Digital](https://mccain-digital.com/news/md-recall/index.md): Seite https://mccain-digital.com/news/md-recall/
+- [Marke & Downloads · McCain Digital](https://mccain-digital.com/marke/index.md): Seite https://mccain-digital.com/marke/

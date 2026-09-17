@@ -1,5 +1,109 @@
 # Uebergabe — Stand 17. September 2026
 
+## ▶ STAND 17.9. ABENDS — UMGESCHALTET: DIE v5-SEITEN SIND DIE SEITE, REACT IST RAUS — ZUERST LESEN
+
+**Owner-Auftrag:** „dann bitte deine offenen Punkte abarbeiten und auch alles
+pushen." Ergebnis: alle 21 Seiten der Routentabelle liegen als v5-Seiten in
+der **Wurzel** (`index.html`, `<route>/index.html`, `<route>/logic.gen.js`,
+`<route>/index.md`); die Vorschau `v5/<route>/` und der Präfix-Modus sind weg,
+unter `/v5/` bleiben nur `runtime.js` und die Werkstatt `v5/dev/`. React wird
+nicht mehr ausgeliefert: kein `support.js`, kein `vendor/` an der Wurzel, die
+CSP ohne `'unsafe-eval'`. Begründung und Details:
+`docs/plans/2026-09-17-v5-alle-seiten-design.md`, Abschnitt „Umschaltung auf
+die Wurzel"; Änderungsliste in `CHANGELOG.md` „2026-09-17 (2)".
+
+**Die Baukette (README „Build and check"):**
+
+```bash
+python3 prodserve.py 8898 --dev     # muss laufen (Bauen)
+node tools/prerender.mjs            # Stufe 1: React-Seiten nach _dcbuild/react/ (Zwischenprodukt, gitignored)
+node tools/v5build.mjs              # Stufe 2: alle Seiten in die Wurzel, danach sitemap.xml, llms.txt, CSP in vercel.json
+node tools/v5build.mjs --route /x/  # einzelne Seiten (Sitemap/llms/CSP bleiben unangetastet)
+python3 prodserve.py 8897           # Messen; NACH einem Build neu starten, er liest vercel.json nur beim Start
+node tools/verify_site.mjs          # Pflicht vor jedem Push
+node tools/v5probe.mjs --all · node tools/markdown-check.mjs --all · node tools/v5dev-check.mjs [--route /x/]
+```
+
+Reihenfolge ist Pflicht: `prerender.mjs` leert `_dcbuild/` und schreibt
+dorthin auch `support.js` (gepatcht, minifiziert) und die React-UMDs aus
+`tools/vendor-build/`; die Staging-Dokumente beider Stufen laden React von
+dort. `prodserve.py` nimmt `/_dcbuild/` wie den Export von den Site-Headern
+aus, sonst blockt die CSP der ausgelieferten Seiten das Staging (so starb der
+erste Lauf: „support.js never booted the staging document").
+
+**Was sich für Besucher und Crawler ändert:** nichts Sichtbares. Canonical,
+`og:url`, Sitemap-URLs waren schon die Produktions-URLs. Neu: `<link
+rel="alternate" type="text/markdown" href="<route>index.md">` zeigt auf den
+Zwilling neben der Seite, `llms.txt` verlinkt je Seite den Zwilling und nennt
+die HTML-Seite daneben, das robots-Meta folgt `site.config.json`
+(`noindex, follow`, unverändert bis zum Go-live).
+
+**Live-Stand:** Push auf `main` deployt automatisch nach
+<https://mccain-digital.vercel.app> (der Stand 7612481 mit `/v5/` war dort
+innerhalb von Minuten). `mccain-digital.com` zeigt auf Vercel, aber ohne
+zugewiesenes Deployment (`DEPLOYMENT_NOT_FOUND`, 17.9. abends) — die
+Domain-Zuordnung im Vercel-Projekt ist Owner-Sache (siehe `site.config.json`,
+Go-live-Reihenfolge).
+
+**PSI je Seite:** Die PSI-API ohne Schlüssel gab am 17.9. für jede Anfrage 429
+„Queries per day" (anonymes Kontingent erschöpft), echte PSI-Zahlen also nur
+über die Web-Oberfläche. Ersatz lokal: `lighthouse-psi.mjs` des Skills
+(PSI-Einstellungen, Lighthouse 13 per npx), Zahlen unten.
+
+**Gemessen (17.9. abends, lokal gegen 8897, ruhige Maschine):**
+
+| Seite (mobil, Lighthouse 13.4.1 mit PSI-Einstellungen, simulate, CPU 1,2×, lokal 8897) | Leistung | FCP | LCP | TBT | CLS | SI |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `/` | 99 | 0,9 s | 2,25 s | 0 ms | 0 | 1,1 s |
+| `/leistungen/ki-automatisierung/` | 99 | 0,9 s | 2,25 s | 0 ms | 0 | 1,1 s |
+| `/marke/` | 96 | 0,9 s | 2,7 s | 1 ms | 0 | 1,4 s |
+| `/kontakt/` | 99 | 0,8 s | 2,26 s | 0 ms | 0 | 0,9 s |
+| `/` Desktop | 100 | 0,26 s | 0,5 s | 0 ms | 0 | 0,4 s |
+
+LCP-Element mobil ist die Marke im Header (`header img`, vorgeladen), auf
+/marke/ der Vorspann-Absatz; beobachtete (nicht simulierte) FCP/LCP lagen bei
+75–119 ms. Die simulierten 2,25 s sind Lanterns Rechnung für 4G/Moto G, der
+echte PSI-Wert vom 16.9. auf demselben Aufbau war 1,6 s. Funktionstore:
+`verify_site` „all checks passed" (21 Seiten, Kern-Interaktion, beide
+Formulare, 21 Zwillinge, Erreichbarkeit), `v5probe --all` 21/21 sauber (ein
+Durchlauf meldete /md-recall/ wegen eines Server-Neustarts während des Laufs,
+Wiederholung sauber), `markdown-check --all` 21/21, `v5dev-check` auf `/` und
+`/kontakt/` ALL OK, `pxcheck` 5/5, `check_links` ohne Befund. `v5dev-check`
+nur auf ruhiger Maschine laufen lassen: mit einem zweiten Browser-Tor
+parallel scheiterte zweimal genau der Tastendruck-Fall („switch appears at
+all"), allein und in vier Einzelversuchen kam der Schalter jedes Mal nach
+10,0–10,1 s.
+
+**Nebenbei behoben:** Werkstatt-Knopf „Im Code" warf `W.showCode is not a
+function`, wenn der Code-Tab noch nie offen war (Methode jetzt fest in
+`index.js`, mountet den Tab); „Im Code" springt auch zu Abschnittsverweisen
+(`findSection` in `code.js`); `map.json` nennt für die Logik keine feste URL
+mehr (jede Route hat ihre eigene); `markdown-check.mjs` schreibt ohne `--out`
+nichts (der frühere Default hätte den echten Zwilling überschrieben);
+`verify_site` verlangt jetzt wirklich > 100 Wörter je Seite (die alte
+400-Wörter-Marke stand als FAIL im Log, ohne je zu scheitern); llms.txt-Titel
+sind entschärft (`Marke & Downloads` statt `&amp;`).
+
+**Offen / nächste Schritte (Reihenfolge Owner):**
+
+1. **PSI mobil je Seite** durch den Owner auf
+   <https://mccain-digital.vercel.app/…> (Web-Oberfläche), Erwartung nach den
+   lokalen Zahlen: 100 hält. Falls TBT auffällt: `logic.gen.js` mit esbuild
+   minifizieren, die Knotenübernahme in Stücke teilen.
+2. **Textrunde** (alle Texte, inkl. `WERKSTATT_BAND` in `tools/v5build.mjs`,
+   `v5/dev/texte.js`, `map.json`, `llms.txt`-Kopf im Export), Kathi
+   gegenlesen, EN.
+3. **KI-Dock Stufe 2** (Werkstatt als zweiter Eintrag; `window.claude` gibt es
+   live nicht, der Dock antwortet aus `localAnswer`).
+4. **WebGL-Entscheidung (A/C)** aus dem 16.9., unverändert offen.
+5. **Go-live** nach `site.config.json`: noindex aus, `X-Robots-Tag` raus,
+   bauen, `verify_site`, Domain im Vercel-Projekt, DNS, `domain_check.mjs`.
+   `squirrel` (Squirrelscan) ist auf dem Mac nicht installiert; der
+   Nach-Deploy-Audit der globalen Regeln steht deshalb aus.
+6. Skill: `messen.md` ist in drei Themendateien geteilt (`messen-methode.md`
+   26 Regeln, `messen-lighthouse-fenster.md` 12, `messen-hauptthread-observer.md`
+   20; 366 Links geprüft, 0 tot), Commit im Sync-Repo, Kopie im Repo.
+
 ## ▶ STAND 17.9. — ALLE 21 SEITEN UNTER /v5/, EIN BINDER STATT REACT — ZUERST LESEN
 
 **Owner-Auftrag:** „ok bitte restliche seite auf html bauen." Ergebnis: alle 21

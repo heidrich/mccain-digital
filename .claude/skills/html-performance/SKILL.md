@@ -124,10 +124,10 @@ PageSpeed Insights misst mit Lighthouse-Lightrider-Einstellungen: `simulate`, Mo
 | Falsche Erwartung, PSI schließe das Messfenster nach ~5,25 s — widerlegte Annahme aus HANDOFF.md. | Die 5250-ms-Ruhefenster gelten nur für throttlingMethod≠simulate; PSI bleibt immer bei simulate mit… | n/a — 35-s-Obergrenze statt 5,25 s im Kopf behalten. Details: widerlegt.md. | [Lighthouse/PSI](references/lighthouse-psi.md#2-rechne-beim-psi-standard-mit-1000-ms-ruhefenster-nicht-5250-ms) |
 | Long Task nach der 5-s-Marke im mainthread.mjs/lcp-window.mjs-Report. | TTI braucht 5 s ohne Long Task und ≤2 Requests; eine späte Long Task setzt diesen Timer zurück und… | Fix siehe laden-javascript.md (Regel 4) und rendern-hauptthread.md (Regel 22) — deferred Code ereignisgetrieben statt gebündelt initialisieren. | [Lighthouse/PSI](references/lighthouse-psi.md#3-rechne-damit-dass-eine-späte-aufgabe-das-tti-fenster-neu-startet) |
 | Lokaler Trace endet bei simulate ~2,4 s, bei devtools ~13,3 s — beide vor/knapp vor der 13,5-s-Rotation; kein… | Der 95→60-Fall (rotierende Headline, PSI-LCP 20,5 s) reproduzierte sich in keiner von sechs lokalen… | Nicht als 'kein Bug' werten; vier Kandidaten (VM-Timing, Near-Miss devtools, echte lr-Config fehlt,… | [Lighthouse/PSI](references/lighthouse-psi.md#4-verlass-dich-bei-einer-psi-regression-nicht-auf-einen-stillen-lokalen-lauf) |
-| Zehn Stunden Summenanalyse fanden den Engpass nicht; erst 250-ms-Scheiben zeigten eine einzelne 466-von-510-m… | Eine Summe zeigt nur DASS der Hauptthread beschäftigt war, nie WANN welche Phase dominiert. | node scripts/mainthread.mjs <url> --slices | [Messen](references/messen.md#1-miss-in-250-ms-zeitscheiben-nicht-in-summen-über-den-ganzen-lauf) |
-| Hover auf Lab-Seite maß „nichts Messbares"; Scroll auf echter Seite maß 50 ms Median, 65% Frames > 20 ms. | Eine Messung gilt strikt nur für die konkrete Seite und Geste, mit der gemessen wurde. | Auf der echten Ziel-URL mit der echten Geste messen (--scroll bei scripts/fps.mjs), Instrument vorh… | [Messen](references/messen.md#2-miss-exakt-die-seite-und-die-geste-mit-der-ausgeliefert-wird) |
-| Score blieb über drei Shipping-Stände bei 68-71, während Hauptthread-Zeit stetig von 4.210 auf 3.910 ms sank. | Ein einzelnes Vorher/Nachher-Delta vermischt Ursachen; der Score allein kann eine stetige Verbesser… | Vor einem Fix die theoretische Obergrenze messen (Feature abschalten); Ursachen über kontrollierte… | [Messen](references/messen.md#5-kontrollierte-zwischenzustände-und-die-theoretische-obergrenze-messen-nicht-nur-ein-vorhernachher) |
-| Verzeichnis-Routen liefen unkomprimiert, weil Route erst nach der Kompressionsprüfung auf index.html aufgelös… | Ein unkomprimierter Server macht eine Seite bis zu 6,8x zu schwer. | python3 scripts/prodserve.py <ordner> 8897 (ohne --dev), Header aus vercel.json spiegeln. | [Messen](references/messen.md#6-gegen-einen-produktionsnahen-server-messen-nie-gegen-den-blanken-dev-server) |
+| Zehn Stunden Summenanalyse fanden den Engpass nicht; erst 250-ms-Scheiben zeigten eine einzelne 466-von-510-m… | Eine Summe zeigt nur DASS der Hauptthread beschäftigt war, nie WANN welche Phase dominiert. | node scripts/mainthread.mjs <url> --slices | [Messen](references/messen-methode.md#1-miss-in-250-ms-zeitscheiben-nicht-in-summen-über-den-ganzen-lauf) |
+| Hover auf Lab-Seite maß „nichts Messbares"; Scroll auf echter Seite maß 50 ms Median, 65% Frames > 20 ms. | Eine Messung gilt strikt nur für die konkrete Seite und Geste, mit der gemessen wurde. | Auf der echten Ziel-URL mit der echten Geste messen (--scroll bei scripts/fps.mjs), Instrument vorh… | [Messen](references/messen-methode.md#2-miss-exakt-die-seite-und-die-geste-mit-der-ausgeliefert-wird) |
+| Score blieb über drei Shipping-Stände bei 68-71, während Hauptthread-Zeit stetig von 4.210 auf 3.910 ms sank. | Ein einzelnes Vorher/Nachher-Delta vermischt Ursachen; der Score allein kann eine stetige Verbesser… | Vor einem Fix die theoretische Obergrenze messen (Feature abschalten); Ursachen über kontrollierte… | [Messen](references/messen-methode.md#5-kontrollierte-zwischenzustände-und-die-theoretische-obergrenze-messen-nicht-nur-ein-vorhernachher) |
+| Verzeichnis-Routen liefen unkomprimiert, weil Route erst nach der Kompressionsprüfung auf index.html aufgelös… | Ein unkomprimierter Server macht eine Seite bis zu 6,8x zu schwer. | python3 scripts/prodserve.py <ordner> 8897 (ohne --dev), Header aus vercel.json spiegeln. | [Messen](references/messen-methode.md#6-gegen-einen-produktionsnahen-server-messen-nie-gegen-den-blanken-dev-server) |
 | Niedriger Performance-Score trotz SSR, unklar ob Bibliothek oder Hydration schuld ist | Die React-Bibliothek kostet 1 Punkt, ein falsches Hydrationsverfahren 21 | Drei Varianten isoliert messen: nur HTML, Bibliothek ungebootet, wie ausgeliefert | [React/Next](references/react-nextjs.md#1-bibliothekskosten-und-hydrationskosten-getrennt-messen-die-bibliothek-kostet-1-punkt-falsche-hydration-21) |
 | React-Fehler #418/#425/#423, Rückfall auf volles Client-Rendering | Ein DOM-Snapshot nach Laufzeit ist kein React-Server-Rendering | renderToString() zur Bauzeit statt Headless-Browser-Snapshot, dann hydrateRoot | [React/Next](references/react-nextjs.md#2-ein-nachträglicher-headless-browser-dom-abzug-ist-kein-ssr--hydrateroot-schlägt-daran-zwangsläufig-fehl) |
 | CLS-Regression trotz 'pixelidentischem' finalem Rendering; Nav-Layout springt kurz beim Stylesheet-Swap. | Glaube: preload→onload-CSS-Swap vermeidet render-blocking ohne Nachteil — Realität: FOUC-Reflow bei… | Layoutrelevantes CSS render-blocking oder inline lassen, async-Swap nur für nicht-layoutrelevante S… | [Widerlegt](references/widerlegt.md#1-async-css-swap-per-preload-und-onload-ist-eine-sichere-optimierung) |
@@ -152,7 +152,7 @@ Skript-Bibliothek in `scripts/` (Node 22, `playwright-core`, ein vorhandenes Chr
 | `fps.mjs` | Hält die Seite ihre Bildrate unter CPU-Last und ohne GPU, drosselt sie sich selbst? | `node scripts/fps.mjs <url> --for 8 --cpu 1,4 --software-gl` |
 | `prodserve.py` | Lokaler Server mit Produktionsheadern (gzip, Cache, CSP aus `vercel.json`) | `python3 scripts/prodserve.py <ordner> 8897 [--headers vercel.json]` |
 
-Dazu: PageSpeed Insights (Feld- und Labdaten), Chrome DevTools Performance-Panel (Insights „Forced reflow“, „LCP breakdown“), `squirrel audit <url> -C surface --refresh --format llm` nach dem Deploy ([[audit-website]]). Wie man die Ergebnisse liest: `references/messen.md`.
+Dazu: PageSpeed Insights (Feld- und Labdaten), Chrome DevTools Performance-Panel (Insights „Forced reflow“, „LCP breakdown“), `squirrel audit <url> -C surface --refresh --format llm` nach dem Deploy ([[audit-website]]). Wie man die Ergebnisse liest: `references/messen-methode.md`, `references/messen-lighthouse-fenster.md`, `references/messen-hauptthread-observer.md`.
 
 ## Vor jedem Push
 
@@ -181,7 +181,9 @@ Dazu: PageSpeed Insights (Feld- und Labdaten), Chrome DevTools Performance-Panel
 | Datei | Inhalt |
 | --- | --- |
 | `references/bauanleitung.md` | **Verbindlich für neue Seiten:** so bauen wir HTML mit Animationen für PageSpeed 100, Schritt für Schritt mit Code |
-| `references/messen.md` | Richtig messen und lesen: Werkzeuge, Modi, Trace-Fenster, Messhygiene, Prozess |
+| `references/messen-methode.md` | Messen 1/3: Grundmethode, produktionsnah messen, ruhige Maschine, Fehlerkanäle/Wächter-Zuverlässigkeit, Prozess |
+| `references/messen-lighthouse-fenster.md` | Messen 2/3: Lighthouse-CLI/PSI/DevTools, observed vs. simuliert, Messfenster, TTI/TBT |
+| `references/messen-hauptthread-observer.md` | Messen 3/3: Hauptthread lesen, Beobachter, content-visibility messen, fps/Software-GL, Mobile-Emulation |
 | `references/lighthouse-psi.md` | Wie Lighthouse 13 und PSI bewerten: Metriken, Gewichte, Insights, CrUX, PSI lokal nachstellen |
 | `references/laden-kritischer-pfad.md` | Laden 1/3: LCP-Pfad, kritisches CSS, Fonts, Bilder |
 | `references/laden-javascript.md` | Laden 2/3: JavaScript-Ladereihenfolge, Nachladen, Bibliotheken, Resource Hints |
@@ -198,7 +200,9 @@ Dazu: PageSpeed Insights (Feld- und Labdaten), Chrome DevTools Performance-Panel
 Jede Referenzdatei beginnt mit einer `## Kurzfassung`, die alle Regeln als Liste mit Ankern zeigt (1–2k Tokens). Erst dort nachsehen, dann gezielt eine Regel lesen.
 
 - [bauanleitung.md](references/bauanleitung.md#kurzfassung) — 20 Bauregeln, 10 Abschnitte
-- [messen.md](references/messen.md#kurzfassung) — 58 Regeln
+- [messen-methode.md](references/messen-methode.md#kurzfassung) — 26 Regeln
+- [messen-lighthouse-fenster.md](references/messen-lighthouse-fenster.md#kurzfassung) — 12 Regeln
+- [messen-hauptthread-observer.md](references/messen-hauptthread-observer.md#kurzfassung) — 20 Regeln
 - [lighthouse-psi.md](references/lighthouse-psi.md#kurzfassung) — 24 Regeln
 - [laden-kritischer-pfad.md](references/laden-kritischer-pfad.md#kurzfassung) — 29 Regeln
 - [laden-javascript.md](references/laden-javascript.md#kurzfassung) — 16 Regeln
@@ -213,7 +217,7 @@ Jede Referenzdatei beginnt mit einer `## Kurzfassung`, die alle Regeln als Liste
 ## Pflege (der Skill wächst)
 
 1. Nach jeder Performance-Runde: Fall mit Datum, Projekt, Vorher/Nachher-Zahlen und Werkzeug in `references/fallstudien.md` eintragen (neueste zuerst).
-2. Gilt die Lehre über das Projekt hinaus, wird sie eine Regel in der passenden `laden-*`- oder `rendern-*`-Datei, in `messen.md` oder `lighthouse-psi.md` (Form: Regel · Warum · Woran man es erkennt · Fix · Beleg · Gilt für) und eine Zeile im Fehlerkatalog oben.
+2. Gilt die Lehre über das Projekt hinaus, wird sie eine Regel in der passenden `laden-*`-, `rendern-*`- oder `messen-*`-Datei oder in `lighthouse-psi.md` (Form: Regel · Warum · Woran man es erkennt · Fix · Beleg · Gilt für) und eine Zeile im Fehlerkatalog oben.
 3. Stellt sich eine Annahme als falsch heraus, kommt sie in `widerlegt.md`, mit Herkunft und Beleg. Vermutungen werden als „vermutet“ markiert, bis sie gemessen sind.
 4. Braucht die Runde ein neues Messwerkzeug, wird es generisch (URL, `--for`, `--cpu`, `--mobile`, `--json`, `--help`) in `scripts/` abgelegt und gegen zwei verschiedene Seiten getestet.
 5. Lighthouse-Version und Chrome-Version der Messung notieren; Schwellen und Insights ändern sich mit Major-Versionen (Stand hier: Lighthouse 13.4.1, Chrome 148).

@@ -47,9 +47,9 @@ KEEP_SUBSETS = ("latin", "latin-ext")
 
 VENDOR = [
     ("https://unpkg.com/react@18.3.1/umd/react.production.min.js",
-     "vendor/react-18.3.1.production.min.js"),
+     "tools/vendor-build/react-18.3.1.production.min.js"),
     ("https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js",
-     "vendor/react-dom-18.3.1.production.min.js"),
+     "tools/vendor-build/react-dom-18.3.1.production.min.js"),
 ]
 
 
@@ -72,7 +72,7 @@ def write(relpath, data):
 
 
 def main():
-    print("react (UMD production builds, the two support.js expects):")
+    print("react (UMD production builds, tools/prerender.mjs's build-time renderer expects):")
     for url, dest in VENDOR:
         write(dest, get(url, binary=True))
 

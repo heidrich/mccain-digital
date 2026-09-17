@@ -239,7 +239,7 @@ export const T = {
     jsonld: "Strukturierte Daten",
     jsonldWhy: "JSON-LD nach schema.org sagt in Maschinensprache, wer hier spricht und was angeboten wird. Google zeigt daraus Rich Results, etwa aufklappbare Fragen. Ein Sprachmodell bekommt Fakten statt Fließtext.",
     markdown: "Markdown-Zwilling",
-    markdownWhy: "Dieselbe Seite als reiner Text mit Gliederung, unter /v5/index.md. Ein Sprachmodell liest sie ohne HTML-Rauschen, mit einem Zehntel der Tokens. Der Zwilling wird beim Bauen erzeugt, nie von Hand.",
+    markdownWhy: "Dieselbe Seite als reiner Text mit Gliederung - der Zwilling liegt als index.md neben jeder Seite. Ein Sprachmodell liest sie ohne HTML-Rauschen, mit einem Zehntel der Tokens. Der Zwilling wird beim Bauen erzeugt, nie von Hand.",
     markdownMissing: "Noch kein Markdown-Zwilling unter dieser Adresse.",
     llms: "llms.txt",
     llmsWhy: "Ein Vorschlag von llmstxt.org: eine Datei, die Sprachmodellen sagt, was diese Site ist und welche Seiten sich lohnen. Sie liegt unter /llms.txt.",

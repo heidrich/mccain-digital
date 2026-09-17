@@ -1,6 +1,6 @@
 /* The markdown twin of the built start page - the same pattern
  * docs.anthropic.com uses (every page also answers as .md): a crawler or an
- * LLM that fetches v5/index.md gets the page's words without downloading
+ * LLM that fetches index.md gets the page's words without downloading
  * ~2,400 DOM nodes of layout markup and re-deriving what's prose.
  *
  * WHY A STRING, NOT A REAL FUNCTION

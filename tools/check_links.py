@@ -28,10 +28,10 @@ ids = {}
 problems = []
 
 # The component template ships as inert <template id="dc-template"> content: the
-# browser never resolves anything inside it, support.js interpolates the {{ }}
-# expressions before React renders them, and nothing in there is a request. A
-# text scan cannot tell that apart from a real href, so it is cut out before the
-# scan rather than explained away in eight findings per run.
+# browser never resolves anything inside it, v5/runtime.js interpolates the {{ }}
+# expressions before it clones the result into #dc-root, and nothing in there is
+# a request. A text scan cannot tell that apart from a real href, so it is cut
+# out before the scan rather than explained away in eight findings per run.
 #
 # Comments are stripped FIRST, and that order is the whole point: the banner at
 # the top of the generated page explains the structure and contains the literal
@@ -59,8 +59,8 @@ def servable(path):
     """Only the markup a browser actually resolves.
 
     Everything removed here is present in the file and inert: comments, the
-    template support.js interpolates later, script bodies, and markup quoted as
-    documentation. What is left is what a link can actually point at.
+    template v5/runtime.js interpolates later, script bodies, and markup quoted
+    as documentation. What is left is what a link can actually point at.
     """
     s = io.open(path, encoding="utf-8").read()
     s = COMMENT.sub("", s)

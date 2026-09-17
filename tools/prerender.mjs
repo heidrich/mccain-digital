@@ -51,8 +51,18 @@
  * through support.js's own window.__resources hook (no patching, and the SRI
  * hashes still match because the bytes are identical) and both typefaces from
  * fonts/. See tools/vendor_assets.py for the legal reason that is not optional.
+ *
+ * WHAT CHANGED ON 17.9.2026
+ * The pages this file renders are no longer the site. They are the FIRST STAGE
+ * of the build: React's first render of every artboard, written to
+ * _dcbuild/react/<route>/index.html and read from there by tools/v5build.mjs,
+ * which turns them into the pages that ship - plain HTML, one binder
+ * (v5/runtime.js), no React at runtime. Everything that describes the deployed
+ * site (sitemap.xml, llms.txt, the CSP hashes in vercel.json) is written by
+ * v5build.mjs from what it writes, so this file no longer touches any of it.
+ * React's runtime (support.js and the two UMD builds) lives in _dcbuild/ as
+ * well: the staging documents load it from there, and nothing ships it.
  */
-import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -62,6 +72,10 @@ import { NOT_PUBLISHED, ORIGIN, PAGES } from "./pages.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SITE = path.dirname(HERE);
+/* Build scratch, in .gitignore and .vercelignore. The React pages this file
+ * writes go to react/ in here; tools/v5build.mjs reads them from there. */
+const SSR_DIR = path.join(SITE, "_dcbuild");
+const REACT_DIR = path.join(SSR_DIR, "react");
 const BASE = "http://127.0.0.1:8898";
 const EXPORT_DIR = path.join(SITE, "mccain-design-system");
 const EXPORT_URL = `${BASE}/mccain-design-system`;
@@ -86,9 +100,11 @@ const EXPORT_URL = `${BASE}/mccain-design-system`;
 const MINIFY = new Set(["pixel-engine.js", "support.js", "image-slot.js"]);
 
 /* Copied so the site root is self-contained and a deploy never has to reach
- * into mccain-design-system/, which is .vercelignore'd. */
+ * into mccain-design-system/, which is .vercelignore'd. support.js is the one
+ * exception: it is React's runtime, needed only by the staging documents of
+ * this build and of v5build.mjs, so it goes to _dcbuild/ and never ships. */
 const ASSETS = {
-  "support.js": "support.js",
+  "support.js": "_dcbuild/support.js",
   "pixel-engine.js": "pixel-engine.js",
   "image-slot.js": "image-slot.js",
   "content.json": "content.json",
@@ -97,11 +113,15 @@ const ASSETS = {
   brand: "brand",
 };
 
+/* The two UMD builds support.js asks unpkg for, served from the build scratch
+ * instead (copied there from tools/vendor-build/ below). Build-time only: the
+ * pages that ship load neither. */
+const VENDOR_REACT = ["react-18.3.1.production.min.js", "react-dom-18.3.1.production.min.js"];
 const RESOURCE_MAP = {
   "https://unpkg.com/react@18.3.1/umd/react.production.min.js":
-    "/vendor/react-18.3.1.production.min.js",
+    "/_dcbuild/vendor/react-18.3.1.production.min.js",
   "https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js":
-    "/vendor/react-dom-18.3.1.production.min.js",
+    "/_dcbuild/vendor/react-dom-18.3.1.production.min.js",
 };
 
 /* IMAGES THE PAGES SHOW SMALLER, OR AT A DIFFERENT SHAPE, THAN THEY ARE.
@@ -1532,12 +1552,19 @@ function assertMoustachesAreInert(doc, what) {
 /* THE ASSETS ARE WRITTEN BEFORE THE BROWSER STARTS, AND THAT ORDER IS LOAD-BEARING.
  *
  * ssrRender() below renders each page in a staging document that pulls
- * /support.js off the site root - so the runtime it renders against has to be
+ * /_dcbuild/support.js - so the runtime it renders against has to be
  * THIS build's, patched by patchRuntime(). Copied afterwards, as it was until
  * the build-time render existed, every page would be rendered against the
  * PREVIOUS build's runtime and the mismatch would only show as a hydration
  * error, on a page that still looks fine. */
+fs.rmSync(SSR_DIR, { recursive: true, force: true });
+fs.mkdirSync(path.join(SSR_DIR, "vendor"), { recursive: true });
 for (const [from, to] of Object.entries(ASSETS)) copy(from, to);
+for (const f of VENDOR_REACT) {
+  const src = path.join(HERE, "vendor-build", f);
+  if (!fs.existsSync(src)) throw new Error(`prerender: tools/vendor-build/${f} is missing - see tools/vendor-build/README.md`);
+  fs.copyFileSync(src, path.join(SSR_DIR, "vendor", f));
+}
 
 /* OUR OWN RUNTIME, NOT THE EXPORT'S - see tools/motion-budget.js for what it
  * does and the numbers that justify it. Minified through the same step as the
@@ -1587,13 +1614,10 @@ const { browser, context } = await launch(1440, 900);
  * at the end. It is served rather than injected because the CSP this build
  * writes has no 'unsafe-inline' - addScriptTag({path}) would be blocked, and the
  * failure would read as "renderToString is not a function". */
-const SSR_DIR = path.join(SITE, "_dcbuild");
 const SSR_UMD = path.join(HERE, "vendor-build", "react-dom-server-legacy-18.3.1.js");
 if (!fs.existsSync(SSR_UMD)) {
   throw new Error(`prerender: ${path.relative(SITE, SSR_UMD)} is missing - see tools/vendor-build/README.md`);
 }
-fs.rmSync(SSR_DIR, { recursive: true, force: true });
-fs.mkdirSync(SSR_DIR, { recursive: true });
 fs.copyFileSync(SSR_UMD, path.join(SSR_DIR, "rds.js"));
 
 async function ssrRender({ head, template, script }, name) {
@@ -1601,7 +1625,7 @@ async function ssrRender({ head, template, script }, name) {
 <html lang="de">
 <head>
 ${head}
-<script src="/support.js" defer></script>
+<script src="/_dcbuild/support.js" defer></script>
 </head>
 <body>
 <x-dc></x-dc>
@@ -1817,11 +1841,12 @@ for (const page of PAGES) {
   assertNoExportLinks(head + prerendered + templateLocal + script, page.out);
 
   const html = `<!DOCTYPE html>
-<!-- GENERATED - do not edit by hand.
+<!-- GENERATED, BUILD STAGE ONE - never deployed, do not edit by hand.
 
      Source:  mccain-design-system/${page.src}   (Claude Design export)
      Route:   ${page.route}
      Build:   node tools/prerender.mjs   (needs: python prodserve.py 8898 --dev)
+     Next:    node tools/v5build.mjs reads this file and writes the page that ships
 
      #dc-root holds React's own first render, written by react-dom/server at
      build time. It is what a crawler reads, what paints first, AND what React
@@ -1835,7 +1860,7 @@ for (const page of PAGES) {
 <head>
 ${headOut}
 <script src="/pixel-engine.js" defer></script>
-<script src="/support.js" defer></script>
+<script src="/_dcbuild/support.js" defer></script>
 <script src="/motion-budget.js" defer></script>
 </head>
 <body>
@@ -1851,21 +1876,12 @@ ${script}
 
   assertMoustachesAreInert(html, page.out);
 
-  const outFile = path.join(SITE, page.out);
+  const outFile = path.join(REACT_DIR, page.out);
   fs.mkdirSync(path.dirname(outFile), { recursive: true });
   fs.writeFileSync(outFile, html, "utf8");
 
-  /* Only <script> with NO attributes: the component script is type="text/x-dc"
-   * and the JSON-LD is application/ld+json, and the browser executes neither,
-   * so neither needs a hash. Anything the build starts writing later lands
-   * here on its own. */
-  const inlineHashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(
-    (m) => `'sha256-${crypto.createHash("sha256").update(m[1], "utf8").digest("base64")}'`
-  );
-
   built.push({
     ...page,
-    inlineHashes,
     title: meta.title,
     words: snap.words,
     els: snap.els,
@@ -1965,7 +1981,9 @@ for (const [svg, out] of ogJobs) {
 }
 
 await browser.close();
-fs.rmSync(SSR_DIR, { recursive: true, force: true });
+/* The staging document goes; the rendered pages, support.js, the UMDs and
+ * rds.js stay in _dcbuild/ for tools/v5build.mjs. */
+fs.rmSync(path.join(SSR_DIR, "stage.html"), { force: true });
 
 /* ------------------------------------------------------------------- assets */
 
@@ -2029,101 +2047,11 @@ function copy(from, to) {
 }
 
 
-/* ---------------------------------------------------------------------- CSP */
-/* THE HASHES ARE READ OFF WHAT WAS ACTUALLY WRITTEN, NOT OFF A LIST.
- *
- * A Content-Security-Policy that is maintained next to the code it describes
- * goes stale the first time somebody adds a script, and the failure is silent
- * in the worst direction: the page loads, looks perfect, and one behaviour is
- * gone. So the policy is derived from the built files - every inline <script>
- * with no attributes, hashed - and the union is written into vercel.json.
- * Adding a fifth inline script updates the policy in the same build.
- *
- * Two things the export forces, both checked rather than assumed:
- *
- *   'unsafe-eval' - support.js compiles the component through
- *     `new Function("DCLogic", "StreamableLogic", "React", src)`. There is no
- *     version of this policy without it while the runtime works that way.
- *     Note what it does NOT cost: an injected <script> still needs a hash, an
- *     injected src= still needs to be same-origin, javascript: URLs are still
- *     refused. The component script itself is type="text/x-dc", so the browser
- *     never executes it and it needs no hash.
- *
- *   img-src data: - image-slot.js and pixel-engine.js both produce images
- *     through toDataURL. Measured, not guessed: grepped for it before writing
- *     the line, because "no data: URIs in the markup" is not the same question.
- *
- * style-src keeps 'unsafe-inline' because the export styles everything with
- * inline style attributes; hashing is not available for those, and taking it
- * away would render the site as unstyled text.
- *
- * frame-ancestors is here as well as X-Frame-Options, which is the one header
- * this policy can genuinely replace. */
-const cspHashes = [...new Set(built.flatMap((p) => p.inlineHashes))].sort();
-const CSP = [
-  "default-src 'self'",
-  "base-uri 'none'",
-  "object-src 'none'",
-  "frame-ancestors 'self'",
-  "form-action 'self'",
-  "img-src 'self' data:",
-  "font-src 'self'",
-  "style-src 'self' 'unsafe-inline'",
-  `script-src 'self' 'unsafe-eval' ${cspHashes.join(" ")}`,
-  "connect-src 'self' https://api.web3forms.com",
-  "upgrade-insecure-requests",
-].join("; ");
-
-const vercelPath = path.join(SITE, "vercel.json");
-const vercelJson = JSON.parse(fs.readFileSync(vercelPath, "utf8"));
-const cspHeader = vercelJson.headers
-  .flatMap((h) => h.headers)
-  .find((h) => h.key === "Content-Security-Policy");
-if (!cspHeader) {
-  throw new Error(
-    "prerender: vercel.json has no Content-Security-Policy header to fill in. " +
-      "Add one with any placeholder value - the build owns the value, not the entry."
-  );
-}
-const cspChanged = cspHeader.value !== CSP;
-if (cspChanged) {
-  cspHeader.value = CSP;
-  fs.writeFileSync(vercelPath, JSON.stringify(vercelJson, null, 2) + "\n", "utf8");
-}
-console.log(
-  `\n  CSP: ${cspHashes.length} inline script hash(es)${cspChanged ? " - vercel.json updated" : " - vercel.json already current"}`
-);
-
-/* ------------------------------------------------------------------ sitemap */
-/* Written from PAGES, never maintained beside it: a sitemap that disagrees with
- * what is on disk is worse than none. */
-const today = new Date().toISOString().slice(0, 10);
-const sitemap =
-  `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
-  built
-    .map(
-      (p) =>
-        `  <url>\n    <loc>${ORIGIN}${p.route}</loc>\n    <lastmod>${today}</lastmod>\n` +
-        `    <changefreq>${p.freq}</changefreq>\n    <priority>${p.prio}</priority>\n  </url>`
-    )
-    .join("\n") +
-  `\n</urlset>\n`;
-fs.writeFileSync(path.join(SITE, "sitemap.xml"), sitemap, "utf8");
-
-/* ----------------------------------------------------------------- llms.txt */
-/* The prose half is authored in the export and copied as it is. The page index
- * underneath it is generated from PAGES and the titles the pages actually
- * carry - the old llms.txt still listed /legal/imprint.html months after that
- * page stopped existing, which is exactly what an AI crawler then repeats. */
-const llmsHead = fs.readFileSync(path.join(EXPORT_DIR, "llms.txt"), "utf8").trimEnd();
-const llmsIndex = built
-  .map((p) => `- [${p.title}](${ORIGIN}${p.route})`)
-  .join("\n");
-fs.writeFileSync(
-  path.join(SITE, "llms.txt"),
-  `${llmsHead}\n\n## Alle Seiten\n\n${llmsIndex}\n`,
-  "utf8"
-);
+/* ------------------------------------------- sitemap, llms.txt, CSP: not here */
+/* Until 17.9.2026 this file wrote sitemap.xml and llms.txt from PAGES and the
+ * CSP hashes into vercel.json from the inline scripts of the pages above.
+ * Those pages no longer ship, so all three moved to tools/v5build.mjs, which
+ * derives them from the pages that do. */
 
 /* --------------------------------------------------------------------- done */
 

@@ -1,14 +1,21 @@
 /* Every page of the site as plain HTML + CSS + its own logic - no React at runtime.
  *
  *   python prodserve.py 8898 --dev      # must be running
- *   node tools/v5build.mjs              # writes v5/<route>/ for all 21 pages
+ *   node tools/v5build.mjs              # every page of tools/pages.mjs, to the site root
  *   node tools/v5build.mjs --route /kontakt/ --route /preise/     # some pages
- *   node tools/v5build.mjs --root       # the switchover: write to the site root, no /v5 prefix
+ *
+ * INPUT: the React pages tools/prerender.mjs writes to _dcbuild/react/ (run it
+ * first). OUTPUT: <route>/index.html, logic.gen.js and index.md at the site
+ * root for every route, plus - after a full build - sitemap.xml, llms.txt and
+ * the CSP hashes in vercel.json, all derived from what was written. Until
+ * 17.9.2026 the pages went to v5/<route>/ as a preview beside the React site;
+ * the React site is gone, this is the site.
  *
  * WHY
  * The built pages are React class components with ~40 state fields on their
- * root: every state change re-renders all ~1,000-2,400 nodes (tools/reactprof.mjs:
- * 15 full re-renders in 30 s, 64-84 ms each at 4x CPU). Nothing there can be
+ * root: every state change re-renders all ~1,000-2,400 nodes (measured
+ * 16.9.2026 with React's profiling build, 4x CPU: 15 full re-renders in 30 s,
+ * 64-84 ms each; the profiling tool left with React). Nothing there can be
  * memoised or split, because there are no subtrees. So the pages are not
  * tuned, they are taken apart: the markup React would write becomes the HTML,
  * its inline styles become classes, and the behaviour is the page's own class,
@@ -47,25 +54,34 @@
  * See docs/plans/2026-09-17-v5-alle-seiten-design.md.
  */
 import { spawnSync } from "node:child_process";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { BASE, launch, open, requireServer } from "./browser.mjs";
-import { PAGES } from "./pages.mjs";
+import { ORIGIN, PAGES } from "./pages.mjs";
 import { HEIGHTS_FILE, cvKey } from "./v5cv.mjs";
 import { HTML_TO_MARKDOWN } from "./markdown.mjs";
 
 const SITE = path.join(import.meta.dirname, "..");
 const STAGE_DIR = path.join(SITE, "_dcbuild");
+/* Stage one of the build: React's first render of every artboard, written by
+ * tools/prerender.mjs. Never deployed (_dcbuild/ is in .vercelignore). */
+const REACT_DIR = path.join(STAGE_DIR, "react");
+const EXPORT_DIR = path.join(SITE, "mccain-design-system");
 const argv = process.argv.slice(2);
-const ROOT_MODE = argv.includes("--root");
 const ONLY = argv.flatMap((a, i) => (a === "--route" ? [argv[i + 1]] : []));
 for (const r of ONLY) if (!PAGES.some((p) => p.route === r)) throw new Error(`v5build: --route ${r} is not in tools/pages.mjs`);
-/* The preview lives under /v5/ and links to itself; the switchover build writes
- * to the root and leaves the links as the export wrote them. */
-const PREFIX = ROOT_MODE ? "" : "/v5";
-const OUT_BASE = ROOT_MODE ? SITE : path.join(SITE, "v5");
-const ROUTES = PAGES.map((p) => p.route);
+const unknown = argv.filter((a, i) => a !== "--route" && argv[i - 1] !== "--route");
+if (unknown.length) throw new Error(`v5build: unknown option ${unknown.join(" ")} - the build writes to the site root; --route /x/ builds single pages`);
+/* One switch for the whole site, see site.config.json: every page carries it
+ * as <meta name=robots>, vercel.json as a header for everything else, and
+ * tools/verify_site.mjs fails if the two disagree. */
+const CONFIG = JSON.parse(fs.readFileSync(path.join(SITE, "site.config.json"), "utf8"));
+const ROBOTS = CONFIG.noindex ? "noindex, follow" : "index, follow, max-image-preview:large, max-snippet:-1";
 
+/* Title and description come out of the head as HTML text; llms.txt and the
+ * twin's front matter are plain text ("Marke & Downloads", not "&amp;"). */
+const unesc = (s) => s.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
 const cut = (s, a, b, from = 0) => {
   const i = s.indexOf(a, from);
   const j = s.indexOf(b, i + a.length);
@@ -263,20 +279,6 @@ function patchLogic(src, name) {
   return out;
 }
 
-/* Root-relative links to pages of this site get the preview prefix - in the
- * markup as href, in the logic as string literals (static PAGES, GOTO). */
-const routeAlt = ROUTES.filter((r) => r !== "/").map((r) => r.replace(/[/-]/g, "\\$&")).join("|");
-const HREF_RE = new RegExp(`href="(${routeAlt}|/)([#?][^"]*)?"`, "g");
-const LIT_RE = new RegExp(`'(${routeAlt})((?:#|\\?)[^']*)?'`, "g");
-function prefixLinks(html) {
-  if (!PREFIX) return html;
-  return html.replace(HREF_RE, (m, route, tail) => `href="${PREFIX}${route}${tail || ""}"`);
-}
-function prefixLiterals(js) {
-  if (!PREFIX) return js;
-  return js.replace(LIT_RE, (m, route, tail) => `'${PREFIX}${route}${tail || ""}'`);
-}
-
 /* ------------------------------------------------------------- staging */
 fs.mkdirSync(STAGE_DIR, { recursive: true });
 fs.copyFileSync(path.join(import.meta.dirname, "vendor-build", "react-dom-server-legacy-18.3.1.js"), path.join(STAGE_DIR, "rds.js"));
@@ -288,7 +290,9 @@ const SHIM =
 const DEEP = JSON.parse(fs.readFileSync(path.join(SITE, "content.json"), "utf8"));
 
 function readPage(page) {
-  const src = fs.readFileSync(path.join(SITE, page.out), "utf8");
+  const file = path.join(REACT_DIR, page.out);
+  if (!fs.existsSync(file)) throw new Error(`v5build: ${path.relative(SITE, file)} is missing - run: node tools/prerender.mjs`);
+  const src = fs.readFileSync(file, "utf8");
   const head = cut(src, "<head>", "</head>").inner;
   const TPL = cut(src, '<template id="dc-template">', "</template>").inner;
   if (TPL.includes("<template")) throw new Error(`v5build: ${page.route}: nested <template> in the page template`);
@@ -714,39 +718,37 @@ function assemble(P, merged, heights) {
     if (stale.length) warns.push(`v5-heights.json names blocks that are not on the page: ${stale.join(", ")} - run: node tools/v5heights.mjs --route ${route}`);
   } else if (cvKeys.length) { warns.push(`no measured heights for ${route}, 900px placeholders - run: node tools/v5heights.mjs --route ${route}`); process.exitCode = 1; }
 
-  html = prefixLinks(html);
-
   /* The head: the export's, minus React's runtime and its resources. The
-   * preview is noindex whatever the site says, and says it once. The Markdown
-   * twin is announced the way feeds are: a typed alternate. */
+   * robots meta follows site.config.json and is said once. The Markdown twin
+   * is announced the way feeds are: a typed alternate. */
   const outHead = head
     .replace(/<script>window\.__resources=[^<]*<\/script>/, "")
-    .replace(/<script src="\/support\.js" defer><\/script>/, "")
+    .replace(/<script src="\/_dcbuild\/support\.js" defer><\/script>/, "")
     .replace(/<script src="\/pixel-engine\.js" defer><\/script>/, "")
     .replace(/<style>x-dc\{display:none!important\}<\/style>/g, "")
     .replace(/\s*<meta name="robots"[^>]*>/g, "")
-    .replace("</title>", `</title>\n  <meta name="robots" content="noindex">\n  <link rel="alternate" type="text/markdown" href="${PREFIX}${route}index.md">`)
+    .replace("</title>", `</title>\n  <meta name="robots" content="${ROBOTS}">\n  <link rel="alternate" type="text/markdown" href="${route}index.md">`)
     .replace(CV_STYLE, CV_STYLE + (cvHeightsCss ? `\n<style id="v5-cv-heights">${cvHeightsCss}</style>` : ""));
-  if (/<script src="\/(pixel-engine|support)\.js"/.test(outHead)) throw new Error(`v5build: ${route}: the head still loads React's runtime`);
-  const headOut = prefixLinks(outHead);
+  if (/<(?:script|link)[^>]*(?:src|href)="[^"]*(?:_dcbuild\/|\/vendor\/|support\.js|pixel-engine\.js)/.test(outHead)) throw new Error(`v5build: ${route}: the head still loads React's runtime`);
+  const headOut = outHead;
 
   /* The page's class, whole, with the v5 patches, as a function the runtime
    * calls with its base class and the React shim - no eval at runtime. */
-  const logic = prefixLiterals(patchLogic(logicSrc, route));
+  const logic = patchLogic(logicSrc, route);
   if (!/class Component extends DCLogic \{/.test(logic)) throw new Error(`v5build: ${route}: the logic is not "class Component extends DCLogic"`);
   const gen =
     `/* GENERATED by tools/v5build.mjs from the page logic in ${page.out} - do not edit.\n` +
     ` * The export's component class, whole, with the v5 patches (see V5_PATCHES in the build). */\n` +
     `window.__v5Logic = function (DCLogic, StreamableLogic, React) {\n${logic}\n;return Component;\n};\n`;
 
-  const data = { route, prefix: PREFIX, props: P.props, hover: merged.hover, focus: merged.focus };
+  const data = { route, props: P.props, hover: merged.hover, focus: merged.focus };
   const ld = merged.faq.length ? `<script type="application/ld+json">${json({ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: merged.faq })}</script>\n` : "";
   const pageHtml = `<!DOCTYPE html>
 <html lang="de">
 <head>${headOut}
 <style id="v5-css">${merged.css}\n${heroCss}\n${panelCss}</style>
-<script src="${PREFIX}${route}logic.gen.js" defer></script>
-<script src="${PREFIX}/runtime.js" defer></script>
+<script src="${route}logic.gen.js" defer></script>
+<script src="/v5/runtime.js" defer></script>
 </head>
 <body>
 <div id="dc-root">${html}</div>
@@ -786,8 +788,8 @@ try {
        * and canonical as its front matter (tools/markdown.mjs; checked by
        * tools/markdown-check.mjs). */
       const headMeta = {
-        title: (out.headOut.match(/<title>([^<]*)<\/title>/) || [])[1] || "",
-        description: (out.headOut.match(/<meta name="description" content="([^"]*)"/) || [])[1] || "",
+        title: unesc((out.headOut.match(/<title>([^<]*)<\/title>/) || [])[1] || ""),
+        description: unesc((out.headOut.match(/<meta name="description" content="([^"]*)"/) || [])[1] || ""),
         canonical: (out.headOut.match(/<link rel="canonical" href="([^"]*)"/) || [])[1] || "",
         lang: "de",
       };
@@ -800,7 +802,7 @@ try {
         out.warns.push(`index.md looks thin: ${twin ? `${twin.words} words, ${twin.headings} headings` : "no result"} - check tools/markdown.mjs against the page`);
         process.exitCode = 1;
       }
-      const dir = path.join(OUT_BASE, page.route.slice(1));
+      const dir = path.join(SITE, page.route.slice(1));
       fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(path.join(dir, "index.html"), out.pageHtml, "utf8");
       const genFile = path.join(dir, "logic.gen.js");
@@ -809,7 +811,13 @@ try {
       const check = spawnSync(process.execPath, ["--check", genFile], { encoding: "utf8" });
       if (check.status !== 0) throw new Error(`v5build: ${page.route}: logic.gen.js does not parse\n` + check.stderr.split("\n").slice(0, 4).join("\n"));
       fs.writeFileSync(path.join(dir, "index.md"), twin.markdown, "utf8");
-      summary.push({ route: page.route, warns: out.warns });
+      /* For the sitemap, llms.txt and the CSP below. Only <script> with NO
+       * attributes is hashed: #v5-data is application/json and the FAQ is
+       * ld+json, the browser executes neither. */
+      const hashes = [...out.pageHtml.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(
+        (m) => `'sha256-${crypto.createHash("sha256").update(m[1], "utf8").digest("base64")}'`
+      );
+      summary.push({ route: page.route, prio: page.prio, freq: page.freq, title: headMeta.title, hashes, warns: out.warns });
       console.log(`${page.route}  html ${(out.pageHtml.length / 1024).toFixed(0)} KB (css ${(merged.css.length / 1024).toFixed(0)}, template ${(merged.tpl.length / 1024).toFixed(0)}), logic ${(out.gen.length / 1024).toFixed(0)} KB, ${merged.styles} styles / ${merged.rules} rules, ${out.cvKeys.length} deferred blocks (${out.cvNote}), md ${twin.words} words / ${twin.headings} headings${out.notes.length ? "; " + out.notes.join(", ") : ""}`);
       if (out.warns.length) console.log("  warnings:\n    " + out.warns.join("\n    "));
     } catch (e) {
@@ -827,4 +835,70 @@ try {
  * deployed root file is the minified build of tools/motion-budget.js. */
 fs.mkdirSync(path.join(SITE, "v5", "dev"), { recursive: true });
 fs.copyFileSync(path.join(import.meta.dirname, "motion-budget.js"), path.join(SITE, "v5", "dev", "motion-budget.src.js"));
-console.log(`\n${summary.length} page(s) written to ${path.relative(SITE, OUT_BASE) || "."}${PREFIX ? ` (links prefixed ${PREFIX})` : " (root build, no prefix)"}${failed ? `, ${failed} FAILED` : ""}`);
+console.log(`\n${summary.length} page(s) written to the site root${failed ? `, ${failed} FAILED` : ""}`);
+
+/* ------------------------------------------- sitemap, llms.txt, CSP hashes */
+/* Written from what was just built, never maintained beside it - and only
+ * after a FULL build without failures: a partial run must not shrink the
+ * sitemap to the pages it happened to rebuild. Moved here from prerender.mjs
+ * on 17.9.2026, when its pages stopped being the site. */
+if (ONLY.length || failed || summary.length !== PAGES.length) {
+  console.log("  partial build: sitemap.xml, llms.txt and the CSP in vercel.json are left as they are");
+} else {
+  const today = new Date().toISOString().slice(0, 10);
+  const sitemap =
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+    summary
+      .map(
+        (p) =>
+          `  <url>\n    <loc>${ORIGIN}${p.route}</loc>\n    <lastmod>${today}</lastmod>\n` +
+          `    <changefreq>${p.freq}</changefreq>\n    <priority>${p.prio}</priority>\n  </url>`
+      )
+      .join("\n") +
+    `\n</urlset>\n`;
+  fs.writeFileSync(path.join(SITE, "sitemap.xml"), sitemap, "utf8");
+
+  /* llms.txt: the prose half is authored in the export and copied as it is.
+   * The page index underneath links the Markdown twin of every page, which is
+   * what a language model should fetch, and names the HTML page beside it. */
+  const llmsHead = fs.readFileSync(path.join(EXPORT_DIR, "llms.txt"), "utf8").trimEnd();
+  const llmsIndex = summary.map((p) => `- [${p.title}](${ORIGIN}${p.route}index.md): Seite ${ORIGIN}${p.route}`).join("\n");
+  fs.writeFileSync(path.join(SITE, "llms.txt"), `${llmsHead}\n\n## Alle Seiten\n\n${llmsIndex}\n`, "utf8");
+
+  /* THE CSP HASHES ARE READ OFF WHAT WAS ACTUALLY WRITTEN, NOT OFF A LIST. A
+   * policy maintained beside the code goes stale the first time somebody adds
+   * a script, and the failure is silent in the worst direction: the page loads,
+   * looks perfect, and one behaviour is gone. The only inline script today is
+   * the contact-delivery runtime on the pages with a form.
+   *
+   * No 'unsafe-eval' any more: support.js compiled the component through
+   * new Function(); the binder does not, the class ships as a plain script
+   * (logic.gen.js), and none of runtime.js, logic.gen.js, pixel-engine.js,
+   * image-slot.js, motion-budget.js or v5/dev/ evaluates code (grepped
+   * 17.9.2026). img-src data: stays for pixel-engine.js and image-slot.js
+   * (toDataURL); style-src 'unsafe-inline' for style#v5-css. */
+  const hashes = [...new Set(summary.flatMap((p) => p.hashes))].sort();
+  const CSP = [
+    "default-src 'self'",
+    "base-uri 'none'",
+    "object-src 'none'",
+    "frame-ancestors 'self'",
+    "form-action 'self'",
+    "img-src 'self' data:",
+    "font-src 'self'",
+    "style-src 'self' 'unsafe-inline'",
+    `script-src 'self' ${hashes.join(" ")}`,
+    "connect-src 'self' https://api.web3forms.com",
+    "upgrade-insecure-requests",
+  ].join("; ");
+  const vercelPath = path.join(SITE, "vercel.json");
+  const vercelJson = JSON.parse(fs.readFileSync(vercelPath, "utf8"));
+  const cspHeader = vercelJson.headers.flatMap((h) => h.headers).find((h) => h.key === "Content-Security-Policy");
+  if (!cspHeader) throw new Error("v5build: vercel.json has no Content-Security-Policy header to fill in - add one with any placeholder value, the build owns the value");
+  const cspChanged = cspHeader.value !== CSP;
+  if (cspChanged) {
+    cspHeader.value = CSP;
+    fs.writeFileSync(vercelPath, JSON.stringify(vercelJson, null, 2) + "\n", "utf8");
+  }
+  console.log(`  sitemap.xml and llms.txt: ${summary.length} routes · CSP: ${hashes.length} inline script hash(es)${cspChanged ? " - vercel.json updated" : " - vercel.json already current"}`);
+}

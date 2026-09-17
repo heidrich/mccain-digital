@@ -65,7 +65,7 @@ for (const file of ["index.html", "brand-guide.html"]) {
 
 /* The same question for the standalone assets a visitor downloads. */
 console.log("\nstandalone assets");
-for (const f of ["support.js", "pixel-engine.js", "content.json", "fonts/fonts.css"]) {
+for (const f of ["v5/runtime.js", "logic.gen.js", "pixel-engine.js", "content.json", "fonts/fonts.css"]) {
   const p = path.join(SITE, f);
   if (!fs.existsSync(p)) continue;
   const s = fs.readFileSync(p, "utf8");

@@ -1,14 +1,14 @@
-/* Measure the real height of every deferred block (data-cv) on every built v5
+/* Measure the real height of every deferred block (data-cv) on every built
  * page, at each sample width, and write tools/v5-heights.json for v5build.mjs.
  *
  *   python3 prodserve.py 8897           # the built pages, production headers
  *   node tools/v5heights.mjs            # measures every route that is built, merges into tools/v5-heights.json
  *   node tools/v5heights.mjs --route /kontakt/ --route /preise/   # only these routes
- *   node tools/v5build.mjs              # bakes the heights into v5/<route>/index.html
+ *   node tools/v5build.mjs              # bakes the heights into <route>/index.html
  *
  * Options:
- *   --base <url>     where the v5 build is served, default http://127.0.0.1:8897
- *                     (env MCD_V5_BASE). The page measured is <base>/v5<route>.
+ *   --base <url>     where the build is served, default http://127.0.0.1:8897
+ *                     (env MCD_V5_BASE). The page measured is <base><route>.
  *   --route <route>  repeatable; measure only these routes (must be a route in
  *                     tools/pages.mjs) instead of every route in that table.
  * The old --url flag (one page, always the start page) is gone now that this
@@ -17,7 +17,7 @@
  * WHICH ROUTES GET MEASURED. tools/v5build.mjs is being generalised from the
  * start page to all 21 routes, one at a time
  * (docs/plans/2026-09-17-v5-alle-seiten-design.md) - so at any point during
- * that work most routes do not exist under <base>/v5<route> yet. A route whose
+ * that work most routes do not exist under <base><route> yet. A route whose
  * page does not answer HTTP 200 is not a failure, it is simply not built yet:
  * it is left out of the measurement and named once at the end ("not built
  * yet: ..."), same as every other route that was not asked for via --route.
@@ -162,7 +162,7 @@ try {
 
 async function isBuilt(route) {
   try {
-    const r = await fetch(`${BASE}/v5${route}`, { method: "HEAD" });
+    const r = await fetch(`${BASE}${route}`, { method: "HEAD" });
     return r.status === 200;
   } catch {
     return false;
@@ -173,7 +173,7 @@ const browser = await chromium.launch({ executablePath, headless: true });
 const notBuilt = [];
 const measuredRoutes = [];
 for (const route of candidateRoutes) {
-  const url = `${BASE}/v5${route}`;
+  const url = `${BASE}${route}`;
   if (!(await isBuilt(route))) { notBuilt.push(route); continue; }
   console.log(`\n## ${route}  (${url})`);
   const blocks = {};

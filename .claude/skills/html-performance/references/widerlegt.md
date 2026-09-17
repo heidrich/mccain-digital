@@ -157,14 +157,14 @@ Diese Datei sammelt Annahmen, die im Projekt gemessen oder aus Quellcode/Spec wi
 **Herkunft:** Eigene Projekt-Annahme; ein lokal gemessener Wert "mobil 41" wurde als reale Performance interpretiert.
 **Warum falsch:** Messfehler: `prodserve.py` komprimierte Verzeichnis-Routen (`/`) nicht. Vercel komprimiert in Produktion tatsächlich — die Live-Seite war nie so langsam wie lokal gemessen.
 **Beleg:** Score `/` vs. `/index.html`: 45 vs. 63, FCP 5.171 vs. 1.272 ms, Bytegrößen 907 KB vs. 134 KB (HANDOFF.md, "⚠ ZUERST: mobil 41 war eine Fehlmessung", Zeilen 908-922) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Jede Zahl des Projekts vor dem 12.9. abends gilt als zu pessimistisch. Immer mit echten Produktions-Headern messen (Grundsatz 8, SKILL.md). [messen.md](messen.md).
+**Was stattdessen gilt:** Jede Zahl des Projekts vor dem 12.9. abends gilt als zu pessimistisch. Immer mit echten Produktions-Headern messen (Grundsatz 8, SKILL.md). [messen-methode.md](messen-methode.md#6-gegen-einen-produktionsnahen-server-messen-nie-gegen-den-blanken-dev-server).
 
 ### 12. „Die Schriftart wird in Produktion zweimal heruntergeladen“
 
 **Herkunft:** Eigene Projekt-Annahme, "94KB Mehrkosten" durch doppelten Font-Download.
 **Warum falsch:** Artefakt der lokalen Dev-Umgebung: `prodserve --dev` sendet `Cache-Control: no-store`. Gegen echte Produktion ist der zweite Font-Fetch `transferSize` 0 in 1 ms, weil `vercel.json` `woff2` als `immutable` cached.
 **Beleg:** Commit 25304a7 (2026-09-02): "the font downloaded twice, 94KB is an artefact of prodserve --dev sending no-store." · Sicherheit: gemessen.
-**Was stattdessen gilt:** Kein Messen gegen einen `no-store`-Dev-Server (SKILL.md, "Was NICHT tun"). [messen.md](messen.md).
+**Was stattdessen gilt:** Kein Messen gegen einen `no-store`-Dev-Server (SKILL.md, "Was NICHT tun"). [messen-methode.md](messen-methode.md#7-no-store-nur-zum-ansehen-nie-zum-messen).
 
 ### 13. „Das LCP-Element ist automatisch ein wirksamer Hebel für LCP“
 
@@ -178,7 +178,7 @@ Diese Datei sammelt Annahmen, die im Projekt gemessen oder aus Quellcode/Spec wi
 **Herkunft:** Auf der Startseite selbst behauptete Aussage aus einem früheren Build (v3).
 **Warum falsch:** Gemessen liegt die Startseite bei Performance 68, gebunden an 1.493 ms Skriptauswertung für ~2.140 React-Elemente plus 364 ms Layout. Die Zahl 100 stammt vom v3-Build und ist für den aktuellen Build nicht belegt.
 **Beleg:** Tabelle: Startseite Perf 68 (FCP 349 ms, LCP 1398 ms, TBT 663 ms) gegen vier Unterseiten bei Perf 100 (FCP 200-400 ms, LCP 300-700 ms, TBT 0 ms) (HANDOFF.md, Zeile ~1244-1251, Owner-Entscheidung Punkt 3, Zeile ~1428-1433) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Eine im Markup behauptete Kennzahl verfällt mit jedem Rebuild; nur die zuletzt gemessene Zahl zählt. [messen.md](messen.md).
+**Was stattdessen gilt:** Eine im Markup behauptete Kennzahl verfällt mit jedem Rebuild; nur die zuletzt gemessene Zahl zählt. [messen-methode.md](messen-methode.md#25-veröffentlichte-performance-zahlen-laufend-gegen-echte-messwerte-verifizieren).
 
 ### 15. „hydrateRoot statt createRoot behebt die Hydration-Lücke automatisch“
 
@@ -234,7 +234,7 @@ Diese Datei sammelt Annahmen, die im Projekt gemessen oder aus Quellcode/Spec wi
 **Herkunft:** Eigene naive Auswertungsregel für V8-Coverage-Daten.
 **Warum falsch:** V8-Coverage-Bereiche sind verschachtelt, äußerster zuerst; die naive Regel meldet dadurch 0 % tot für JEDE Datei.
 **Beleg:** "V8-Abdeckung: Bereiche sind verschachtelt, äußerster zuerst. 'count>0 = benutzt' meldet 0 % tot für jede Datei." (HANDOFF.md, "STAND 13.9. 03:30", Zeile 408-409) · Sicherheit: gemessen.
-**Was stattdessen gilt:** V8-Coverage-Ranges verschachtelt auswerten (innerste Range gewinnt), nicht naiv auf `count > 0` prüfen. [messen.md](messen.md).
+**Was stattdessen gilt:** V8-Coverage-Ranges verschachtelt auswerten (innerste Range gewinnt), nicht naiv auf `count > 0` prüfen. [messen-hauptthread-observer.md](messen-hauptthread-observer.md#4-v8-coverage-bereiche-sind-verschachtelt-ein-naives-count0-meldet-0--tot-für-jede-datei).
 
 ### 23. „naturalWidth und naturalHeight entsprechen rohen Bitmap-Pixel-Maßen“
 
@@ -255,7 +255,7 @@ Diese Datei sammelt Annahmen, die im Projekt gemessen oder aus Quellcode/Spec wi
 **Herkunft:** Eigene Messung der Einstellung cell/block 1.1/1.0 per Hover-Sweep auf einer isolierten Lab-Seite ("kostet nichts Messbares", p90 16,7 ms).
 **Warum falsch:** Diese Schlussfolgerung kam von einem Hover-Sweep auf einer isolierten Lab-Seite, nicht von einem Scroll der echten Homepage — der Interaktion, die der Owner tatsächlich spürte.
 **Beleg:** Echte Seite per Scroll: 50,0 ms Median, 65 % Frames >20 ms, 9 Long Tasks/530 ms; korrigierte Einstellung (3.0/2.0): 16,7 ms Median, 0 % >20 ms, 0 Long Tasks (Commits 4b3e71d und 465f8f9, 2026-08-31; HANDOFF.md, Zeile 3101-3125) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Immer gegen die tatsächliche Interaktion auf der echten Seite messen, nie ausschließlich auf einer isolierten Testseite. [messen.md](messen.md).
+**Was stattdessen gilt:** Immer gegen die tatsächliche Interaktion auf der echten Seite messen, nie ausschließlich auf einer isolierten Testseite. [messen-methode.md](messen-methode.md#2-miss-exakt-die-seite-und-die-geste-mit-der-ausgeliefert-wird).
 
 ### 26. „Neu bauen ist schneller als vorhandene Engine-Mechanik wiederverwenden“
 
@@ -290,14 +290,14 @@ Diese Datei sammelt Annahmen, die im Projekt gemessen oder aus Quellcode/Spec wi
 **Herkunft:** Eigene Einschätzung anhand der reinen Änderungsrate.
 **Warum falsch:** Real, aber mit nur 63 ms kumulierter Kostenzeit in 5,7 s Messfenster vernachlässigbar.
 **Beleg:** "Die 1.000 DOM-Änderungen/s: real, aber 63 ms in 5,7 s." (HANDOFF.md, "STAND 13.9. NACHTS", Zeile 560) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Eine hohe Ereignisrate ist erst dann relevant, wenn ihre kumulierte Kostenzeit gemessen groß ist. [messen.md](messen.md).
+**Was stattdessen gilt:** Eine hohe Ereignisrate ist erst dann relevant, wenn ihre kumulierte Kostenzeit gemessen groß ist. [messen-methode.md](messen-methode.md).
 
 ### 31. „460 KB rohe Marken-Bytes sind ein relevantes Transfer-Problem“
 
 **Herkunft:** Eigene Einschätzung zu den Bytes auf `/marke/` (460 KB roh, 913 von 3.161 DOM-Knoten).
 **Warum falsch:** Nach gzip nur 13.938 B — der Byteeffekt ist praktisch null; problematisch ist ausschließlich die Knotenzahl, nicht das Transfervolumen.
 **Beleg:** "Die Marken-Bytes auf /marke/: 460 KB roh, 13.938 B gzip." / "Nach gzip nur 13.938 B – Knoteneffekt ja, Byteeffekt nein." (HANDOFF.md, "STAND 13.9. 03:30", Zeile 548-550, "STAND 13.9. NACHTS", Zeile 561) · Sicherheit: gemessen.
-**Was stattdessen gilt:** Rohbytes vor der gzip-Messung sagen wenig über realen Transfer aus; immer die komprimierte Größe prüfen. [messen.md](messen.md).
+**Was stattdessen gilt:** Rohbytes vor der gzip-Messung sagen wenig über realen Transfer aus; immer die komprimierte Größe prüfen. [messen-methode.md](messen-methode.md#9-anfragegröße-aus-requestsizes-lesen-und-sichtbarkeit-korrekt-prüfen).
 
 ### 32. „Der Vorlagen-Umweg Parse-Serialisieren-Parse ist teuer“
 
@@ -388,14 +388,14 @@ Diese Datei sammelt Annahmen, die im Projekt gemessen oder aus Quellcode/Spec wi
 **Herkunft:** Eigene Trace-Auswertung während der Pixelstrom-Optimierungsrunde ("half the Other").
 **Warum falsch:** Die Trace-Summary zeigte "Style & Layout 1.389 ms" neben "Script 1.076 ms" und legte damit Script als Hauptverdächtigen nahe. Die Zerlegung derselben Messung in 250-ms-Fenster zeigte, dass Script Evaluation im tatsächlich voll ausgelasteten Fenster (1,0-1,9 s) nur 1 ms betrug — die reale Ursache war Layout von 2.408 Knoten.
 **Beleg:** Commit 099cc88 (2026-09-13, "docs: handoff - the timeline showed what the totals hid"), Ursache bestätigt in Commit e97dfb0 · Sicherheit: gemessen.
-**Was stattdessen gilt:** Eine aggregierte Kategorie-Summe im Trace vor dem Vertrauen in 250-ms-Fenster zerlegen, um zu sehen, wann die Kosten wirklich anfallen, nicht nur wie viel insgesamt. [messen.md](messen.md).
+**Was stattdessen gilt:** Eine aggregierte Kategorie-Summe im Trace vor dem Vertrauen in 250-ms-Fenster zerlegen, um zu sehen, wann die Kosten wirklich anfallen, nicht nur wie viel insgesamt. [messen-methode.md](messen-methode.md#1-miss-in-250-ms-zeitscheiben-nicht-in-summen-über-den-ganzen-lauf).
 
 ### 45. „Das periodische Nachbau-Polling der Stream-Notes verursachte den wiederkehrenden Long Task“
 
 **Herkunft:** Eigene Verdächtigung zur Ursache eines alle 6,5 s wiederkehrenden Long Tasks, der das TTI-Fenster nur knapp offenhielt.
 **Warum falsch:** Das 2-Sekunden-Polling der Notes-Vermeidungsliste wurde auf einen `ResizeObserver` umgestellt — Layout-Reads über 22 s fielen von 4.010 auf 1.823, aber der 6,5-s-Long-Task blieb davon vollständig unberührt. Die tatsächliche Ursache war ein unabhängiges `setInterval`, am selben Tag in einem separaten Fix gefunden.
 **Beleg:** Commit 2713c58 (2026-09-13, "perf: the stream notes start late, on a mouse, and stop polling the layout"); echte Ursache behoben in Commit 55d2a32 · Sicherheit: gemessen.
-**Was stattdessen gilt:** Nach dem Beheben eines plausiblen Verdächtigen den Zielwert erneut messen, bevor die Ursache als gefunden gilt — ein unveränderter Messwert nach einem Fix beweist, dass der Verdächtige unschuldig war. [messen.md](messen.md).
+**Was stattdessen gilt:** Nach dem Beheben eines plausiblen Verdächtigen den Zielwert erneut messen, bevor die Ursache als gefunden gilt — ein unveränderter Messwert nach einem Fix beweist, dass der Verdächtige unschuldig war. [messen-methode.md](messen-methode.md).
 
 ### 46. „defer auf dem Pixel-Engine-Script behebt das Parser-Blocking ohne Nebenwirkungen“
 
@@ -409,28 +409,28 @@ Diese Datei sammelt Annahmen, die im Projekt gemessen oder aus Quellcode/Spec wi
 **Herkunft:** Eigene Projekt-Annahme; zwei Tage Performance-Arbeit wurden gegen `mccain-digital.vercel.app` gemessen und als "live" dokumentiert.
 **Warum falsch:** `mccain-digital.com` zeigte zu keinem Zeitpunkt auf Vercel und lief weiterhin über nginx auf SiteGround — das Vercel-Projekt trägt ausschließlich seine eigenen `*.vercel.app`-Domains. Die gemessene URL wird von keinem echten Besucher aufgerufen.
 **Beleg:** Commit 3d568d1 (2026-09-11, "fix(docs): the canonical domain was never serving this repository") · Sicherheit: dokumentiert.
-**Was stattdessen gilt:** Vor jeder Messreihe die tatsächlich vom Domain-Registrar/DNS bediente Produktions-URL verifizieren, nicht die Deployment-Plattform-URL als Live-Stellvertreter annehmen. [messen.md](messen.md).
+**Was stattdessen gilt:** Vor jeder Messreihe die tatsächlich vom Domain-Registrar/DNS bediente Produktions-URL verifizieren, nicht die Deployment-Plattform-URL als Live-Stellvertreter annehmen. [messen-methode.md](messen-methode.md).
 
 ### 48. „'0 page errors' vom Lade-Gate bedeutet, die Seite hat keine Konsolenfehler“
 
 **Herkunft:** Eigene Interpretation des Build-Gates `verify_site.mjs`, das durchgehend "0 page errors" meldete.
 **Warum falsch:** Das `pageerror`-Event feuert nur bei unabgefangenen Exceptions; `console.error`-Aufrufe und die eigenen Markup-Parsing-Beschwerden des Browsers erreichen dieses Event nie. Die Startseite hatte tatsächlich 70, der Brand-Guide 37 Konsolen-/SVG-Fehler, während das Gate durchgehend "0 page errors" meldete.
 **Beleg:** Commit 4ca2a26 (2026-09-11, "fix(build): deliver the template inert - seventy console errors, gone") · Sicherheit: gemessen.
-**Was stattdessen gilt:** Ein Fehler-Gate muss den `console`-Kanal (inkl. `console.error`) UND `pageerror` getrennt prüfen — ein grünes `pageerror`-Ergebnis allein ist kein Beweis für eine fehlerfreie Seite. [messen.md](messen.md).
+**Was stattdessen gilt:** Ein Fehler-Gate muss den `console`-Kanal (inkl. `console.error`) UND `pageerror` getrennt prüfen — ein grünes `pageerror`-Ergebnis allein ist kein Beweis für eine fehlerfreie Seite. [messen-methode.md](messen-methode.md#13-console-und-pageerror-sind-getrennte-fehlerkanäle).
 
 ### 49. „Wenn eine Drittanbieter-URL als Objekt-Schlüssel im Code auftaucht, wird dieser Origin auch tatsächlich geladen“
 
 **Herkunft:** Eigener Build-Guard, der den Quelltext nach Drittanbieter-URLs durchsuchte, um externe Requests zu verhindern.
 **Warum falsch:** `window.__resources` nutzt die unpkg-URLs bewusst als Schlüssel, gerade damit sie abgefangen und NIE tatsächlich angefragt werden — der Guard schlug auf die bloße Textpräsenz der URL an, nicht auf einen echten Netzwerk-Request.
 **Beleg:** Commit 3b38a46 (2026-09-11, "fix(prerender): keep the mount point - the snapshot shipped a dead page"): Guard wurde umgeschrieben, um einen tatsächlich geladenen Origin zu erkennen statt eine bloße Erwähnung im Quelltext · Sicherheit: dokumentiert.
-**Was stattdessen gilt:** Guards, die Drittanbieter-Requests verhindern sollen, gegen echte Netzwerkaktivität prüfen, nicht gegen die reine Textpräsenz einer URL im Quellcode. [messen.md](messen.md).
+**Was stattdessen gilt:** Guards, die Drittanbieter-Requests verhindern sollen, gegen echte Netzwerkaktivität prüfen, nicht gegen die reine Textpräsenz einer URL im Quellcode. [messen-methode.md](messen-methode.md).
 
 ### 50. „Ein grünes Ergebnis von check_links.py bedeutet, es gibt keine kaputten Links oder doppelten IDs“
 
 **Herkunft:** Eigenes Test-Tool zur Link-/ID-Prüfung, lief durchgehend grün.
 **Warum falsch:** Zwei Prüfungen matchten den falschen Text: eine erkannte einen Dokumentationskommentar, der `<template id="dc-template">` nur beschrieb, als das echte Tag und übersprang dadurch das tatsächliche, nachgelagerte Markup; eine andere hielt escapte Beispiel-Markup in der Brand-Guide-Prosa für eine echte doppelte ID.
 **Beleg:** Commit b99e912 (2026-09-11, "chore(repo): one archive folder, one internal folder, and a test that they stay unreachable"): Fix entfernt Kommentare aus dem Suchraum vor dem Pattern-Match und dekodiert escapte Entities wie ein Browser · Sicherheit: gemessen.
-**Was stattdessen gilt:** Ein textbasierter Prüf-Test muss Kommentare/Dokumentation aus seinem Suchraum ausschließen und Markup so dekodieren, wie ein Browser es täte — sonst kann er grün melden, während er den falschen Text prüft. [messen.md](messen.md).
+**Was stattdessen gilt:** Ein textbasierter Prüf-Test muss Kommentare/Dokumentation aus seinem Suchraum ausschließen und Markup so dekodieren, wie ein Browser es täte — sonst kann er grün melden, während er den falschen Text prüft. [messen-methode.md](messen-methode.md#20-kommentare-vor-einer-text--und-regex-prüfung-entfernen).
 
 ### 51. „Zwei requestAnimationFrame-Ticks nach dem Skript-Start garantieren einen gemalten ersten Frame – WebGL danach zu starten entlastet FCP und Score“
 
@@ -460,7 +460,7 @@ Diese Datei sammelt Annahmen, die im Projekt gemessen oder aus Quellcode/Spec wi
 **Herkunft:** Eigene Recherche-Annahme zur Zusammensetzung von "Other" im main-thread-work-breakdown.
 **Warum zu grob:** Die 7 Gruppen und ihre Trace-Event-Zuordnung sind bestätigt. "Other" besteht laut Quellcode explizit aus genau 3 benannten Scheduler-Loop-Events (`MessageLoop::RunTask`, `TaskQueueManager::ProcessTaskFromWorkQueue`, `ThreadControllerImpl::DoWork`) plus einer generischen Fallback-Regel: jedes nicht gemappte Trace-Event erbt die Gruppe seines Parent-Tasks, nur ein ungemapptes Event OHNE gemappten Vorfahren landet in "Other". Die konkrete Nennung von "IntersectionObserver" als Beispiel dafür ließ sich in keiner offiziellen Lighthouse-Quelle verifizieren.
 **Beleg:** Quellcode: github.com/GoogleChrome/lighthouse/blob/main/core/lib/tracehouse/task-groups.js · Sicherheit: dokumentiert.
-**Was stattdessen gilt:** "Other" = RunTask-Self-Time + ungemappte Events ohne gemappten Vorfahren; ob eine konkrete `IntersectionObserver`-Berechnung darunter fällt, ist von Fall zu Fall über den Trace zu prüfen, nicht pauschal anzunehmen (siehe Offen). [messen.md](messen.md).
+**Was stattdessen gilt:** "Other" = RunTask-Self-Time + ungemappte Events ohne gemappten Vorfahren; ob eine konkrete `IntersectionObserver`-Berechnung darunter fällt, ist von Fall zu Fall über den Trace zu prüfen, nicht pauschal anzunehmen (siehe Offen). [messen-hauptthread-observer.md](messen-hauptthread-observer.md#2-intersectionobserver-kosten-stecken-oft-in-other-und-skalieren-mit-zielen-nicht-instanzen).
 
 ### 4. „PSI/Lighthouse liefert für WebGL immer einen null-Kontext“
 

@@ -1,14 +1,14 @@
 /* Does the workshop (v5/dev/) keep its promise: nothing about it exists before
  * the visitor has done something real, and everything about it works once
  * they ask for it. Runs against any of the 21 routes tools/pages.mjs builds
- * under v5/<route>/, not just the start page - the switch, the ten-second
+ * under <route>/, not just the start page - the switch, the ten-second
  * rule and the workshop itself all come from v5/runtime.js, which is shared
  * by every route.
  *
  *   python3 prodserve.py 8897                    # the built page, production headers
- *   node tools/v5dev-check.mjs                   # http://127.0.0.1:8897/v5/
- *   node tools/v5dev-check.mjs --route /kontakt/  # http://127.0.0.1:8897/v5/kontakt/
- *   node tools/v5dev-check.mjs --url http://127.0.0.1:8897/v5/ --out <dir> --quick
+ *   node tools/v5dev-check.mjs                   # http://127.0.0.1:8897/
+ *   node tools/v5dev-check.mjs --route /kontakt/  # http://127.0.0.1:8897/kontakt/
+ *   node tools/v5dev-check.mjs --url http://127.0.0.1:8897/ --out <dir> --quick
  *
  * WHY IT EXISTS
  * The protection rule ("no DOM node, no request to /v5/dev/, until ten seconds
@@ -24,9 +24,9 @@
  *
  * Options:
  *   --route <route>   default "/" - one of tools/pages.mjs's PAGES[i].route;
- *                      the page URL becomes <base>/v5<route>
+ *                      the page URL becomes <base><route>
  *   --base  <origin>  default http://127.0.0.1:8897
- *   --url   <page>    overrides --route/--base outright, default <base>/v5<route>
+ *   --url   <page>    overrides --route/--base outright, default <base><route>
  *   --out   <dir>     default <tmpdir>/v5dev-check  (screenshots land here)
  *   --quick           shortens phase 1's no-interaction wait (16 s -> 12 s)
  *
@@ -49,7 +49,7 @@ function flag(name, fallback) {
 }
 const BASE = flag("--base", "http://127.0.0.1:8897").replace(/\/$/, "");
 const ROUTE = flag("--route", "/");
-const URL = flag("--url", `${BASE}/v5${ROUTE}`);
+const URL = flag("--url", `${BASE}${ROUTE}`);
 const OUT = flag("--out", path.join(os.tmpdir(), "v5dev-check"));
 const QUICK = argv.includes("--quick");
 const WERKSTATT_URL = URL + (URL.includes("?") ? "&werkstatt" : "?werkstatt");

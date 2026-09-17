@@ -1,4 +1,4 @@
-/* Drive a built v5 page through what every page can do, and report what broke.
+/* Drive a built page through what every page can do, and report what broke.
  *
  *   python prodserve.py 8898 --dev
  *   node tools/v5probe.mjs /kontakt/            # one route
@@ -42,7 +42,7 @@ const INIT = `(() => {
 
 async function probe(browser, route) {
   const out = { route, errors: [], notes: [] };
-  const url = `${BASE}/v5${route}`;
+  const url = `${BASE}${route}`;
   const head = await fetch(url).then((r) => r.status).catch(() => 0);
   if (head !== 200) { out.notes.push(`not built (${head})`); return out; }
 

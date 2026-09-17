@@ -67,7 +67,7 @@ export function mountCode(W) {
   /* Every one of the 21 pages has its own logic.gen.js under its own route;
    * #v5-data names both, so this file list works on every page, not only /. */
   const V5_DATA = JSON.parse((document.getElementById("v5-data") || {}).textContent || "{}");
-  const logicUrl = (V5_DATA.prefix || "/v5") + (V5_DATA.route || "/") + "logic.gen.js";
+  const logicUrl = (V5_DATA.route || "/") + "logic.gen.js";
 
   const files = [
     { id: "html-live", lang: "html", load: () => Promise.resolve(liveHtml()) },
@@ -168,7 +168,23 @@ export function mountCode(W) {
     return i >= 0 ? i + 1 : null;
   }
 
-  function open(id, symbol) {
+  /* A section reference (map.json's "section") names a comment heading, not a
+   * declaration - this codebase's convention is "/* SECTION NAME." or "/* SECTION
+   * NAME" opening the comment, sometimes running straight into prose on the same
+   * line (see tools/v5build.mjs). Preferring that shape over a bare substring
+   * match keeps a heading like "one headline" from landing on an unrelated
+   * mention of the same words elsewhere in the file. */
+  function findSection(text, section) {
+    if (!section) return null;
+    const lines = text.split("\n");
+    const esc = section.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const header = new RegExp("/\\*\\s*" + esc + "\\b");
+    let i = lines.findIndex((l) => header.test(l));
+    if (i < 0) i = lines.findIndex((l) => l.includes(section));
+    return i >= 0 ? i + 1 : null;
+  }
+
+  function open(id, symbol, section) {
     const file = files.find((f) => f.id === id);
     if (!file) return;
     currentId = id;
@@ -191,15 +207,21 @@ export function mountCode(W) {
         const n = findLine(text, file.lang, symbol);
         if (n) requestAnimationFrame(() => scrollToLine(n, true));
         else { search.value = symbol; runSearch(); }
+      } else if (section) {
+        const n = findSection(text, section);
+        if (n) requestAnimationFrame(() => scrollToLine(n, true));
+        else { search.value = section; runSearch(); }
       }
     }).catch((err) => { if (pending === token) { clear(viewer); viewer.appendChild(note(`${T.code.failed}: ${err.message}`)); } });
   }
 
-  W.showCode = (fileId, symbol) => { W.setTab("code"); open(fileId, symbol); };
+
 
   return {
     el,
     show() { if (!currentId) open("runtime"); },
+    /* "Im Code" from the element panel, routed through W.showCode in index.js. */
+    showCode(fileId, symbol, section) { open(fileId, symbol, section); },
     dispose() { cache.clear(); sources.clear(); },
   };
 }

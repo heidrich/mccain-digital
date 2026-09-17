@@ -1,14 +1,14 @@
-/* Runs HTML_TO_MARKDOWN against the already-built, already-served v5 page
+/* Runs HTML_TO_MARKDOWN against the already-built, already-served page
  * and checks the result the way a crawler would read it: structurally (does
  * it even parse as clean markdown) and, printed to the terminal, by eye
  * (does it read like the page).
  *
  *   node tools/markdown-check.mjs
- *   node tools/markdown-check.mjs --url http://127.0.0.1:8897/v5/ --out v5/index.md
+ *   node tools/markdown-check.mjs --url http://127.0.0.1:8897/kontakt/ --out "$TMPDIR/kontakt.md"
  *   node tools/markdown-check.mjs --all [--base http://127.0.0.1:8897]
  *
  * --all is a different, lighter check: it fetches the already-built twin
- * (/v5<route>index.md, plain HTTP - no browser, no HTML_TO_MARKDOWN) for
+ * (<route>index.md, plain HTTP - no browser, no HTML_TO_MARKDOWN) for
  * every route in tools/pages.mjs's PAGES and reports words/headings/links per
  * route. A twin that 404s is listed as "not built yet", not a failure - not
  * every route need be built in every run. One that answers with anything
@@ -37,7 +37,10 @@ const flag = (name, fallback) => {
 };
 const ALL = args.includes("--all");
 const BASE_ARG = flag("base", "http://127.0.0.1:8897").replace(/\/$/, "");
-const URL_ARG = flag("url", "http://127.0.0.1:8897/v5/");
+const URL_ARG = flag("url", "http://127.0.0.1:8897/");
+/* No default: without --out nothing is written. The built twins live next to
+ * the pages, and a default of index.md would overwrite the real one when the
+ * script is run from the repository root. */
 const OUT_ARG = flag("out", null);
 
 async function reachable(url) {
@@ -57,7 +60,7 @@ if (ALL) {
   let builtCount = 0;
   let anyFail = false;
   for (const { route } of PAGES) {
-    const mdUrl = `${BASE_ARG}/v5${route}index.md`;
+    const mdUrl = `${BASE_ARG}${route}index.md`;
     let status = -1;
     let type = "";
     let text = "";

@@ -243,7 +243,14 @@ export function mountElement(W) {
           const f = map.files[ref.file];
           if (!f) continue;
           const label = ref.symbol ? `${f.name} · ${ref.symbol}()` : ref.section ? `${f.name} · „${ref.section}“` : ref.selector ? `${f.name} · ${ref.selector}` : f.name;
-          if (f.url || ref.file === "css") links.push(btn(label, () => W.showCode(ref.file, ref.symbol || ref.selector), { "data-tone": "small" }));
+          /* Every file in map.json's "files" is browsable in the Code tab
+           * except "build" (tools/v5build.mjs, build-time only - never
+           * shipped, so code.js has no source to fetch for it). Neither
+           * "logic" (one file per route, resolved through V5_DATA.route in
+           * code.js, not a fixed url here) nor "css" (inline <style>, no url
+           * either) carry a "url" in map.json, so the gate checks the file id
+           * itself rather than the presence of "url". */
+          if (ref.file !== "build") links.push(btn(label, () => W.showCode(ref.file, ref.symbol || ref.selector, ref.section), { "data-tone": "small" }));
           else links.push(pill(label));
         }
         const hitEl = target.closest(e.match);

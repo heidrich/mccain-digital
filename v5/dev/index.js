@@ -40,7 +40,11 @@ const W = {
   hover(el) { W.layer.setHover(el && !isOwn(el) ? el : null); },
   setTab(id) { if (roentgenTabs) roentgenTabs.select(id); },
   setView(id) { setView(id); },
-  showCode: null,
+  /* "Im Code" from the element panel. The Code part mounts when its tab is
+   * first shown (setTab → mountPart), so this works before the tab was ever
+   * visited and again after close and reopen - until 17.9.2026 the method
+   * only existed once the tab had been opened, and the button threw. */
+  showCode(fileId, symbol, section) { W.setTab("code"); if (parts.code) parts.code.showCode(fileId, symbol, section); },
   close,
 };
 
@@ -161,7 +165,7 @@ function close() {
   edits.undoAll();
   W.layer.dispose();
   W.root.remove();
-  W.root = null; W.layer = null; W.picker = null; W.selected = null; W.showCode = null;
+  W.root = null; W.layer = null; W.picker = null; W.selected = null;
   parts = {}; mounted = {}; viewEls = {}; roentgenTabs = null;
   W.bus.clear();
   document.documentElement.classList.remove("v5-dev-pick");
