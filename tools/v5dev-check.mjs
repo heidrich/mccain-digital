@@ -108,7 +108,7 @@ function watch(page) {
     if (type !== "error" && type !== "warning") return;
     const text = m.text();
     /* Chromium logs this line itself whenever a request's response is not ok
-     * - including the workshop's own POST /api/ask, which this local server
+     * - including the workshop's own POST /api/ask/, which this local server
      * (prodserve.py, no POST route) always answers with 501/405. ask.js's
      * catch already turns that into an answer from the workshop's own facts
      * (see localAnswer() there), so this browser-generated line is not a
@@ -116,7 +116,7 @@ function watch(page) {
      * exact failing URL, not by text alone, so a real broken request
      * elsewhere still counts as a console error. */
     const loc = m.location();
-    if (type === "error" && text.startsWith("Failed to load resource:") && loc && /\/api\/ask(?:[?#]|$)/.test(loc.url)) return;
+    if (type === "error" && text.startsWith("Failed to load resource:") && loc && /\/api\/ask\/?(?:[?#]|$)/.test(loc.url)) return;
     consoleIssues.push({ label: currentPhase, t: Date.now() - t0, type, text });
   });
   page.on("pageerror", (e) => pageErrors.push({ label: currentPhase, t: Date.now() - t0, text: e.message }));

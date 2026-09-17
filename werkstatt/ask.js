@@ -1,7 +1,7 @@
 /* The "Fragen" view: Claude answers questions about this page, with the
  * workshop's own facts as its only knowledge.
  *
- * What goes out with a question (POST /api/ask, same origin, see
+ * What goes out with a question (POST /api/ask/, same origin, see
  * api/ask.mjs): the question, the last turns of this conversation, and the
  * facts this module collects right now - the page's head data, the timings
  * this visit measured, the selected element, what crawlers find, the
@@ -15,7 +15,9 @@ import { h, card, btn, note, pill, clear, kv, mono, shortLabel, textPreview, fmt
 import { matchedRules } from "./cssrules.js";
 import { editBus } from "./edits.js";
 
-const ENDPOINT = "/api/ask";
+/* With a trailing slash: vercel.json has trailingSlash: true, and Vercel answers
+ * /api/ask with a 308 to /api/ask/ - one round trip saved per question. */
+const ENDPOINT = "/api/ask/";
 const MAX_Q = 600, MAX_MD = 8000, MAX_HTML = 500, TIMEOUT_MS = 30000;
 
 export function mountAsk(W) {

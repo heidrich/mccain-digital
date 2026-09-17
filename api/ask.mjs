@@ -1,4 +1,6 @@
-/* POST /api/ask - the workshop's "Fragen" view asks Claude about the page.
+/* POST /api/ask/ - the workshop's "Fragen" view asks Claude about the page.
+ * (The site has trailingSlash: true, so /api/ask is a 308 to /api/ask/; the
+ * client calls the slash form directly.)
  *
  * A Vercel Node function (zero config: every file under api/ is one). The
  * body comes from werkstatt/ask.js: { q, history, facts }. The facts are the

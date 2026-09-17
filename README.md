@@ -395,7 +395,7 @@ rules, template, map hit), the crawler numbers, the Markdown twin (up to 8000
 characters) and the glossary — a card "Was Claude sieht" shows exactly that
 payload. Suggested-question chips, a history kept only for the open tab (the
 last 6 turns travel with each question), "Verlauf leeren". The endpoint is
-[`api/ask.mjs`](api/ask.mjs), a dependency-free Vercel Node function: POST,
+[`api/ask.mjs`](api/ask.mjs), a dependency-free Vercel Node function at `/api/ask/` (the site's `trailingSlash: true` sends `/api/ask` there with a 308): POST,
 same-origin only, body capped at 48KB, the question at 600 characters, the
 history at 6 turns, 8 questions per minute per IP plus a daily cap (400 by
 default) per warm instance as a brake rather than a durable limit, then the

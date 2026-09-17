@@ -60,7 +60,8 @@ volle Höhe, „wenn schon crazy, dann richtig", und die KI eingebunden.
   Vorschlags-Chips, Verlauf (letzte 6 Züge, nur im Tab), „Verlauf leeren".
   Ohne Endpunkt antwortet die Werkstatt selbst aus den Fakten,
   gekennzeichnet „ohne Claude" / Absender „Werkstatt".
-- **Endpunkt `api/ask.mjs`** (Vercel Node-Funktion, zero config, keine
+- **Endpunkt `api/ask.mjs`** (Pfad `/api/ask/` mit Schrägstrich: `trailingSlash: true`
+  leitet `/api/ask` per 308 dorthin um, live geprüft; Vercel Node-Funktion, zero config, keine
   Abhängigkeiten): POST same-origin (Origin = Host, Sec-Fetch-Site), Body
   ≤ 48 KB, Frage ≤ 600 Zeichen, ≤ 6 Verlaufszüge, 8 Fragen je Minute je IP
   und Tageskappe (Standard 400) je warmer Instanz (Bremse, kein dauerhaftes
