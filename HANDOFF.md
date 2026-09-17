@@ -2,6 +2,15 @@
 
 ## ▶ STAND 17.9. ABENDS (2) — WERKSTATT ALS KONSOLE, FRAGEN AN CLAUDE — ZUERST LESEN
 
+**Letzter Stand vor dem Compact (Owner: „bin schon sehr sehr zufrieden“):**
+alles gepusht und live (zuletzt die 7-Sekunden-Lasche mit Puls), Arbeitsbaum
+sauber. Offen in dieser Reihenfolge: 1) Owner setzt `ANTHROPIC_API_KEY` in
+Vercel; 2) Reveal-Animationen: der Mechanismus läuft (42 Blöcke blenden
+beim Hereinscrollen einmal ein), Owner wurde gefragt, ob er das Ausblenden
+beim Verlassen meint oder ob bei ihm „Bewegung reduzieren“ an ist — Antwort
+steht aus; 3) volles Code-Review mobil/Security; 4) Textrunde inkl.
+Werkstatt-Texte und Datenschutztext zu Claude.
+
 **Owner-Anlass:** der Schalter unten rechts lag genau auf dem Chat-Dock und
 sah aus wie dessen Knopf; die 440-px-Schublade schnitt Code ab; es fehlten
 Erklärungen und Hinweise. Owner wollte die Konsole unten, hochziehbar bis
