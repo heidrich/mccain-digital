@@ -282,6 +282,19 @@ html[data-wk-resizing="se"] { cursor: nwse-resize }
 .wk-btn[data-tone="small"]:hover { background: var(--wk-indigo-soft) }
 .wk-btn[aria-pressed="true"] { background: var(--wk-navy); color: #fff; box-shadow: none }
 .wk-btn[disabled] { opacity: .5; cursor: default }
+/* The opening beat on "Wählen": a masked ring 3 px outside the button in the brand
+ * gradient, four beats once the console is up (owner 17.9., like the tab); index.js
+ * drops data-pulse at animationend or when picking starts. */
+.wk-btn[data-pulse] { position: relative }
+.wk-btn[data-pulse]::after {
+  content: ""; position: absolute; inset: -3px; padding: 3px; border-radius: 11px;
+  background: linear-gradient(135deg, var(--wk-orange), var(--wk-pink), var(--wk-violet), var(--wk-sky));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude;
+  opacity: 0; pointer-events: none;
+  animation: wk-pulse 1.25s ease-in-out .3s 4;
+}
+@keyframes wk-pulse { 0%, 100% { opacity: 0 } 50% { opacity: 1 } }
 .wk-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px }
 
 .wk-mono { font: 11.5px/1.5 var(--wk-mono); color: var(--wk-navy); background: var(--wk-surface); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere }
@@ -628,8 +641,17 @@ html.v5-dev-pick { user-select: none }
 .wk-msg[data-role="assistant"] { justify-self: start; background: #fff; box-shadow: var(--wk-shadow-card); border-bottom-left-radius: 4px }
 .wk-msg-meta { font: 500 10px/1 var(--wk-mono); letter-spacing: .08em; text-transform: uppercase; opacity: .7; margin-bottom: 5px }
 .wk-askform { display: flex; gap: 8px; position: sticky; bottom: 0; background: var(--wk-surface); padding: 6px 0 2px }
-.wk-askform .wk-input { height: 38px; font-size: 13.5px }
+.wk-askform .wk-input { font-size: 13.5px }
 .wk-askform .wk-btn { height: 38px }
+/* The question field wears the page's AI signature: the running gradient border of the
+ * hero, section and dock inputs (streamBorder in the page CSS), same stops, same 7 s. */
+.wk-stream { flex: 1; min-width: 0; display: flex; height: 38px; padding: 1.5px; border-radius: 9px; background: linear-gradient(90deg, var(--wk-orange), var(--wk-pink), var(--wk-violet), var(--wk-sky), var(--wk-orange)); background-size: 300% 100%; animation: wk-stream 7s linear infinite }
+/* Focus sits on the wrapper, drawn like every other focus ring in the console, so the
+ * gradient stays whole; the id beats #v5-dev :focus-visible on the input itself. */
+.wk-stream:focus-within { outline: 2px solid var(--wk-indigo); outline-offset: 2px }
+#v5-dev .wk-stream .wk-input { height: auto; border: 0; border-radius: 7.5px; padding: 0 12px }
+#v5-dev .wk-stream .wk-input:focus-visible { outline: none; box-shadow: none; border-radius: 7.5px }
+@keyframes wk-stream { to { background-position: 300% 0 } }
 .wk-thinking { display: inline-flex; gap: 8px; align-items: center; color: var(--wk-slate); font-size: 12.5px; padding: 4px 2px }
 .wk-thinking::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(135deg, #FFB46B, #FF5A8C, #C05CFF, #5FC3FF); animation: wkPulse 1.2s ease-in-out infinite }
 

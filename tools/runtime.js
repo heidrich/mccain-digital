@@ -845,7 +845,7 @@
    * press, a key, the wheel, a touch (owner, 16.9.2026); moving the mouse is
    * not an action, Lighthouse never does any of these, and the measuring
    * scripts scroll with scrollTo, which fires none of them. The band's button
-   * (data-v5-dev-open) is the invitation and opens at once. `?werkstatt` in
+   * (data-v5-dev-open) is the invitation and opens at once. `?tools` (alias `?werkstatt`) in
    * the URL opens it at once, for showing it. */
   function armDevMode() {
     const EVENTS = ["pointerdown", "keydown", "wheel", "touchstart"];
@@ -859,7 +859,7 @@
       showDevSwitch();
       loadDev();
     });
-    if (/[?&]werkstatt(=|&|$)/.test(location.search)) { disarm(); showDevSwitch(); loadDev(); }
+    if (/[?&](?:tools|werkstatt)(=|&|$)/.test(location.search)) { disarm(); showDevSwitch(); loadDev(); }
   }
   function showDevSwitch() {
     if (doc.querySelector("[data-v5-dev-switch]")) return;
@@ -896,9 +896,9 @@
     /* The motion budget (motion-budget.js) pauses animations whose box it has not
      * yet seen on screen; the tab's entrance and pulse must not wait for that. */
     b.setAttribute("data-motion-keep", "");
-    b.title = "Werkstatt: diese Seite von innen";
+    b.title = "Tools: diese Seite von innen";
     const label = doc.createElement("span");
-    label.textContent = "Werkstatt";
+    label.textContent = "Tools";
     b.appendChild(label);
     b.addEventListener("click", loadDev);
     doc.body.appendChild(b);

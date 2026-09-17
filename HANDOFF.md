@@ -1,5 +1,163 @@
 # Uebergabe — Stand 17. September 2026
 
+## ▶ STAND 17.9. NACHTS (2) — „TOOLS“ STATT „WERKSTATT“, PULS AUF „WÄHLEN“, LÜCKEN-ANALYSE VOR GO-LIVE — ZUERST LESEN
+
+**Owner-Anlass (nach dem Compact):** 1) „Wählen“ soll bei offener Konsole
+wie die Lasche pulsieren; 2) die Eingabe im Tab „Fragen“ bekommt den
+animierten Verlaufsrand wie alle KI-Eingaben der Seite; 3) Reveal-Animationen
+„passen so“ (Mechanismus bleibt: einmaliges Einblenden beim Hereinscrollen,
+bei „Bewegung reduzieren“ aus); 4) die Konsole heißt sichtbar „Tools“;
+5) Frage: wechseln Tools, KI-Konsole und Chat mit DE/EN wirklich die Sprache?
+6) Analyse: was fehlt der Seite noch (Texte und Bilder ausgenommen)?
+
+**Gebaut** (Details in CHANGELOG „2026-09-17 (7)“): Puls auf „Wählen“
+(`data-pulse`, `::after`-Ring, vier Schläge, weg bei `animationend` oder
+Wählen-Start), `span.wk-stream` um die Frage-Eingabe mit dem
+`streamBorder`-Muster der Seite (7 s endlos, Fokusring auf dem Wrapper),
+`#v5-dev[data-motion-keep]` gegen das Motion-Budget, sichtbare Umbenennung
+in Lasche, Titel, Band, Texten, Systemprompt, Karte; URL `?tools` mit Alias
+`?werkstatt`. Intern bleibt `werkstatt/` (der Ordner `tools/` gehört den
+Bauskripten), ebenso `wk-`, `#v5-dev`, `#werkstatt-band`.
+
+**Tore:** `v5dev-check` (allein, `?tools`) ALL OK; `verify_site` lokal alle
+Prüfungen bestanden; Playwright-Rauchtest für Puls, Verlaufsrand, Fokus,
+Namen, Alias grün (Scratchpad `wk/tools-smoke.mjs`, `wk/ask-shot.mjs`).
+
+**Antwort zur Sprache (Playwright gegen 8898, Startseite, EN gewählt):**
+
+- Der Umschalter (Kopf, `role="group"` „Sprache“) existiert, setzt
+  `<html lang>` und merkt sich `mcd.lang`. Es wechseln: Navigation, Hero,
+  Hero-Eingabe, Dock-Pille „Ask the site“, Dock-Panel (Placeholder „Your
+  question …“, Vorschläge, Knöpfe), Ablauf-Karten, Studio-Kacheln, die
+  lokalen Chat-Antworten (`localAnswer(q, lang)`) und der Systemprompt.
+- Es bleiben **94 sichtbare deutsche Textstellen** in EN auf der Startseite:
+  FAQ 11, Sektion KI-Konsole 10 (inkl. Placeholder „Ihre Frage …“),
+  Integrationen 10, Preise 8, Studio 7, Stimmen 7, Übergabe 6, News 6,
+  Arbeiten 6, Ablauf 6, Zahlen 4, Kontakt 4, Footer 4, Tools-Band 2,
+  Konfigurator-Band 2, Stack 1. `aria-label`s „Hauptnavigation“, „Sprache“,
+  „Menü“ bleiben deutsch. Kein `hreflang`, keine `/en/`-URLs – Google sieht
+  nur Deutsch. Liste: Scratchpad `wk/lang-probe2.out`.
+- **Tools sind einsprachig deutsch** (`werkstatt/texte.js`, ~400 Strings,
+  Sie-Form; Systemprompt in `api/ask.mjs` deutsch). Weg, falls EN kommen
+  soll: `texte.js` auf `{de, en}` je Schlüssel, `T` als Proxy auf
+  `document.documentElement.lang`, `ask.js` schickt `facts.lang`, der
+  Systemprompt antwortet in der Seitensprache. Das ist eine Textrunde plus
+  ein kleiner Umbau, kein Nachmittag. Alternative: EN erst anbieten, wenn die
+  Seite selbst durchgehend übersetzt ist (Umschalter bis dahin verstecken).
+  Owner-Entscheidung.
+- **Der Chat der Seite erreicht Claude nicht.** `logic.src.js` `ask()`
+  (Sektion KI-Konsole und Dock, auf allen Seiten mit Chat) ruft
+  `window.claude.complete()` – das gibt es nur in Claude-Artifacts, in jedem
+  echten Browser ist `window.claude` `undefined`; also läuft immer
+  `localAnswer()` (vier Textbausteine plus Fallback), still, ohne Hinweis.
+  Consent-Dialog („Ihre Eingaben gehen an Claude“) und Kicker „Live ·
+  Claude“ behaupten das Gegenteil. Der einzige echte Weg zu Claude ist
+  `POST /api/ask/` der Tools. **Fix (hoch, vor Go-live):** den Seiten-Chat
+  über `/api/ask/` fahren – `api/ask.mjs` bekommt einen Modus `site` mit dem
+  Wissen aus `systemPrompt(mode, lang)` serverseitig (Preise, Dauer, Team,
+  Hosting; Sprache aus dem Request), der Client behält `localAnswer()` als
+  Fallback bei 503/Netzfehler und sagt dann „ohne Claude“ wie die Tools.
+  Oder die Texte ehrlich machen („Antworten aus der Wissensbasis dieser
+  Seite“). Beides setzt den Owner-Schlüssel in Vercel voraus.
+
+**Lücken-Analyse vor Go-live** (vier Sonnet-Agenten lesend: Inhalt/Struktur,
+SEO, Recht/Security, A11y/Mobil; dazu Squirrelscan frisch: 48/F, 23 Seiten,
+59 Fehler / 291 Warnungen; `noindex`, vercel.app-Domain, Texte und Bilder
+ausgeklammert; „bekannt“ = stand schon in „STAND 17.9. SPÄT“):
+
+*Hoch – vor Go-live:*
+
+1. Seiten-Chat ohne Claude (oben). Alle 11 `logic.src.js` mit Chat betroffen.
+2. Datenschutz (`rechtliches/logic.src.js` 292–303): nennt **SiteGround** als
+   Hoster (live ist Vercel, USA – Auftragsverarbeitung/SCC nennen); kein
+   Abschnitt zu **Anthropic/Claude** (Consent-Dialog verweist darauf;
+   bekannt); Web3Forms steht drin, aber die Kontaktseite wirbt „Keine
+   Weitergabe“ (`kontakt/index.html:575`, Widerspruch); kein
+   Datenschutz-Link direkt am Formular; Datenschutz ist keine eigene Seite,
+   nur Anker in `/rechtliches/` (bekannt, Owner-Entscheidung).
+3. Impressum: USt-IdNr „beantragt“ (nachtragen, sobald erteilt); §5 DDG nennt
+   nur Kathrin, §18 MStV Christian – Rechtsform (GbR?) mit Steuerberater
+   abgleichen.
+4. Strukturierte Daten (Build, `tools/v5build.mjs`/Head-Daten): BreadcrumbList
+   auf `/marke/`, `/news/`, `/news/md-recall/` trägt als zweites Segment
+   „Rechtliches“ (Copy-Paste, Zeile 107 je Seite); Organization ohne `logo`
+   (dadurch schlägt `Article.publisher.logo` auf beiden Vergleichen fehl),
+   ohne `telephone`, `streetAddress`, `postalCode`, `addressLocality` – alle
+   Daten stehen im Impressum, keine Textrunde nötig; `sameAs`/`priceRange`
+   fehlen; Article auf beiden Vergleichsseiten ohne `datePublished`/`image`
+   (bekannt), `author` ohne `@id` (bekannt); `/news/md-recall/` ohne
+   Article-Schema und ohne `<time datetime>`.
+5. Toter externer Link `https://md-recall.de` (DNS ENOTFOUND) auf der
+   Startseite, `index.html:670` und `:1646` – Domain anbinden oder Link
+   vorerst auf `/md-recall/` biegen.
+6. Honeypot `company`: fokussierbar in `aria-hidden`, ohne Namen/Label, auf
+   allen Formularseiten (bekannt) – per CSS aus dem Fokuspfad statt
+   `aria-hidden`; Prüfung ist nur clientseitig (`if (fd.get('company'))
+   return`), Web3Forms-Key öffentlich (für ein Studio-Formular vertretbar,
+   bei Spam serverseitige Stufe).
+7. Telefonnummer nur im Impressum, obwohl Kontaktseite „Telefon oder Video“
+   bewirbt – auf Kontaktseite/Footer ergänzen.
+
+*Mittel:*
+
+- `/index.html` und `/<route>/index.html` liefern live 200 ohne Redirect
+  (nur Canonical fängt es) – Redirect-Regel in `vercel.json`.
+- `og:image`: `/news/` nutzt das globale `og-image.png`, `/styleguide/`
+  teilt `mccain-og-marke.png` mit `/marke/`.
+- Gleiche Linktexte, verschiedene Ziele („zur Leistung“ ×4, „zum
+  Konfigurator“ ×2, „mccain-digital.com“ ×2).
+- Security-Header: `style-src 'unsafe-inline'` (Umstellung teuer wegen
+  Inline-Styles), kein COOP/COEP/CORP (mindestens
+  `Cross-Origin-Opener-Policy: same-origin`), kein CSP-`report-to`;
+  `api/ask.mjs` Rate-Limit nur je warmer Instanz (bekannt, im Kopf
+  dokumentiert); Body-Limit erst nach dem Parsen.
+- AGB/Widerruf richten sich an Verbraucher (whatever-recall-Abo,
+  Muster-Widerrufsformular) – BFSG-Frage nicht pauschal mit „B2B“ abtun.
+- EN: Umschalter ohne `hreflang`/URLs, teilübersetzt (oben).
+- Kein RSS/Atom für `/news/` (bei zwei Beiträgen nicht dringend).
+- Kontrast: Squirrel zählt „sehr helle Textfarbe“ 109–118 Instanzen je
+  Seite – systematisch prüfen, nicht punktuell.
+
+*Niedrig:*
+
+- `/vergleich/` ohne Hub (404), Leistungs-Unterseiten ohne sichtbare
+  Breadcrumbs, kein Newsletter (für zwei Personen B2B nicht nötig),
+  Sitemap-`lastmod` überall Build-Datum, `/news/`-Titel 21 Zeichen,
+  `/marke/` 19 Inline-SVGs teils ohne Maße und lazy uneinheitlich (bekannt),
+  Tabelle ohne `th` (bekannt), `enterkeyhint` fehlt (bekannt),
+  `aria-label` ≠ Text (bekannt), `.gitignore` ohne `.env*`, kein AGENTS.md
+  (Entscheidung), drei Seiten nur aus Nav/Footer verlinkt, ~100k Token HTML
+  je Seite (Antwort ist der Markdown-Zwilling, bekannt).
+- Info: der im HANDOFF vermerkte JSON-LD-Syntaxfehler ist nicht mehr
+  reproduzierbar – alle 21 Seiten parsen.
+
+*Vorhanden und in Ordnung (damit niemand falsche Lücken sucht):* FAQ
+(Start + Preise, FAQPage), Ablauf `#process`, Team über `/studio/`,
+Referenzen bewusst als ehrliche Platzhalter, Kontaktformular mit Pflicht-
+feldern/Honeypot/Erfolg/Fehler/Mailto-Fallback, 404 mit Rückwegen und echtem
+404-Status, keine Orphans, Impressum-Pflichtfelder (bis auf USt-IdNr),
+Datenschutz sonst vollständig (Verantwortlicher, Rechtsgrundlagen,
+Betroffenenrechte, BayLDA), AGB 14 Abschnitte + Widerruf, keine
+Analytics/Tracker, Fonts selbst gehostet, localStorage nur `mcd.lang`/
+`mcd.consent`, Tools ohne localStorage, `api/ask.mjs` Same-Origin/Bereinigung/
+Limits/no-store, keine Secrets im Repo, `npm audit` 0, alle 21 Seiten mit
+title/description/canonical/og/twitter (1200×630), Favicons, Zwillinge,
+llms.txt, Sitemap = Routen, robots je Crawler, `/kontakt` → 308 → `/kontakt/`,
+HSTS preload, nosniff, Referrer-Policy, XFO, Permissions-Policy, Brotli,
+immutable-Caching für Assets.
+
+*A11y/Mobil:* der vierte Agent (Playwright gegen live, 8 Routen × 2 Viewports)
+lief beim Push noch; sein Bericht folgt im nächsten Docs-Commit.
+
+**Nächste Schritte (Vorschlag in Owner-Reihenfolge):** 1) `ANTHROPIC_API_KEY`
+in Vercel; 2) Seiten-Chat auf `/api/ask/` (hoch); 3) Fakten-Korrekturen in
+Datenschutz/Impressum jetzt (Vercel statt SiteGround, Anthropic, Web3Forms-
+Aussage, Telefon), Formulierungen in der Textrunde; 4) Schema-Fixes im Build
+(Breadcrumb-Labels, Organization-Felder, Article-Pflichtfelder, News-Article,
+`<time>`); 5) Redirect `*/index.html`; 6) Honeypot und die bekannten
+A11y-Punkte; 7) EN-Entscheidung; 8) volles Code-Review mobil/Security
+(steht weiter aus); 9) Textrunde inkl. Tools-Texte.
+
 ## ▶ STAND 17.9. ABENDS (2) — WERKSTATT ALS KONSOLE, FRAGEN AN CLAUDE — ZUERST LESEN
 
 **Letzter Stand vor dem Compact (Owner: „bin schon sehr sehr zufrieden“):**

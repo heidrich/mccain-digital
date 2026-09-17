@@ -28,7 +28,7 @@ export function mountAsk(W) {
   const input = h("input.wk-input", { type: "text", maxlength: String(MAX_Q), placeholder: T.ask.placeholder, autocomplete: "off", enterkeyhint: "send", aria: { label: T.ask.title } });
   const sendBtn = btn(T.ask.send, () => send(input.value), { hint: T.ask.sendHint, "data-action": "ask-send" });
   const clearBtn = btn(T.ask.clear, () => { history.length = 0; clear(msgs); input.focus(); }, { "data-tone": "small", hint: T.ask.clearHint });
-  const form = h("form.wk-askform", { onsubmit: (e) => { e.preventDefault(); send(input.value); } }, input, sendBtn);
+  const form = h("form.wk-askform", { onsubmit: (e) => { e.preventDefault(); send(input.value); } }, h("span.wk-stream", input), sendBtn);
   chat.append(card({ eyebrow: T.ask.view, title: T.ask.title, body: [note(T.ask.privacy), chips] }), msgs, form, h("div.wk-toolbar", { style: { justifyContent: "flex-end", margin: "0" } }, clearBtn));
   const factsBody = h("div");
   const factsCard = card({ eyebrow: T.ask.facts, body: factsBody, why: T.ask.factsWhy, attrs: { "data-section": "facts" } });

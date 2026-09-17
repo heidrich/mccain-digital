@@ -36,13 +36,13 @@ const defaultH = () => Math.round(innerHeight * (innerWidth < BREAK ? 0.55 : 0.4
 
 /* The console's shape for this page visit: module state, so it survives
  * close and reopen but never a reload. The workshop promises to store
- * nothing, and localStorage would be storing. `?werkstatt=rechts` starts
- * docked right, `?werkstatt=fragen` / `=google` on that view (for showing). */
+ * nothing, and localStorage would be storing. `?tools=rechts` (the older `?werkstatt=` still works) starts
+ * docked right, `?tools=fragen` / `=google` on that view (for showing). */
 let dockPref = null, sizeBottom = null, sizeRight = DEFAULT_W;
 let floatX = null, floatY = null, floatW = FLOAT_W, floatH = FLOAT_H;
 let firstView = "roentgen";
 {
-  const m = /[?&]werkstatt=([^&#]*)/.exec(location.search);
+  const m = /[?&](?:tools|werkstatt)=([^&#]*)/.exec(location.search);
   const arg = m ? decodeURIComponent(m[1]).toLowerCase() : "";
   if (/rechts|right/.test(arg)) dockPref = "right";
   else if (/unten|bottom/.test(arg)) dockPref = "bottom";
@@ -346,9 +346,14 @@ function open() {
   const body = h("div.wk-body");
   for (const it of items) { panels[it.id] = panel(it.id, []); panels[it.id].hidden = true; }
   /* Picking is possible from every Röntgen tab, so its button sits beside the tabs. */
+  /* On opening, the button beats four times in the brand gradient like the tab
+   * did (owner 17.9.); the ring goes at animationend or as soon as picking starts. */
   const pickBtn = btn(T.pick.start, () => W.picker.toggle(), { "data-action": "pick", aria: { pressed: "false" }, hint: T.hints.pick });
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) pickBtn.setAttribute("data-pulse", "");
+  pickBtn.addEventListener("animationend", (e) => { if (e.pseudoElement === "::after") pickBtn.removeAttribute("data-pulse"); });
   W.bus.on("pick", (on) => {
     pickBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    if (on) pickBtn.removeAttribute("data-pulse");
     pickBtn.textContent = on ? T.pick.stop : T.pick.start;
     W.status(on ? T.status.picking : T.status.pickStopped);
   });
@@ -380,7 +385,9 @@ function open() {
   editBus.on("change", (n) => { resetBtn.disabled = n === 0; resetBtn.textContent = n ? `${T.resetAll} (${n})` : T.resetAll; W.status(T.status.edits(n)); });
 
   grip = makeGrip();
-  W.root = h("aside", { id: "v5-dev", role: "dialog", "data-view": "roentgen", aria: { label: T.brand } }, grip, head, leadEl, roentgen, crawler, ask, foot, floatHandles);
+  /* data-motion-keep: the page's motion budget (motion-budget.js) pauses loops it
+   * has not seen on screen; the console is opened by hand and always on screen. */
+  W.root = h("aside", { id: "v5-dev", role: "dialog", "data-view": "roentgen", "data-motion-keep": "", aria: { label: T.brand } }, grip, head, leadEl, roentgen, crawler, ask, foot, floatHandles);
   document.body.appendChild(W.root);
   applyShape();
   onResize = () => applyShape();

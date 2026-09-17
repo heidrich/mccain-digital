@@ -256,7 +256,7 @@ export function mountPerf(W) {
       h("div", { "data-tone": all - own > 1500 ? "warn" : "good" }, h("b", fmtNum(all - own)), h("small", "Elemente der Seite")),
       h("div", h("b", String(depth)), h("small", "Ebenen tief")),
       h("div", h("b", fmtNum(tpl)), h("small", "in Vorlagen (inert)")),
-      h("div", h("b", fmtNum(own)), h("small", "Werkstatt"))));
+      h("div", h("b", fmtNum(own)), h("small", "Tools"))));
   }
 
   const devBody = h("div");

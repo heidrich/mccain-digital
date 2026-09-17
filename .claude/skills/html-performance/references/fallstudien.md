@@ -439,6 +439,7 @@ Am selben Tag außerdem drei vertiefende Messungen für diesen Skill: **Lighthou
 - Die relevanten Zahlen sitzen selten dort, wo man zuerst sucht: fillRect-Anzahl statt Rauschberechnung, HTML-Kommentare statt JS-Engine-Kommentare, der WebGL-Datenstrom statt eines 34px-Logos — Profiling schlägt Intuition praktisch immer.
 - Dieselbe Lektion wird von unterschiedlichen Projekten unabhängig neu gelernt und danach bewusst projektübergreifend übertragen: der Custom-Image-Loader-Fund aus meza-website wurde explizit als Regel auf neue-webseite/mccain-cms/company-portal übertragen — ein Beleg dafür, dass genau dafür dieser Skill existiert.
 - Methodik-Fallen häufen sich in "Nachtsitzungen": Messungen während laufender Animationen (getComputedStyle liefert Zwischenwerte/calc()-Strings), zu kurzes Warten, und "es lief doch, ich habs ja gemessen"-Aussagen ohne echten Beweis wiederholen sich wortgleich über mehrere Projekte und Monate hinweg.
+- Prototyp-Reste aus Claude-Artifacts sehen im Browser fertig aus: `window.claude.complete()` gibt es nur dort, im echten Browser ist `window.claude` `undefined`, der Fallback antwortet still mit Textbausteinen, während Consent-Text und Kicker „Live · Claude“ das Gegenteil behaupten (mccain-digital, Seiten-Chat, gefunden 17.9. nachts, Wochen nach dem Bau, erst durch eine gezielte Frage des Owners). Ein Rauchtest für eine KI-Funktion prüft im echten Browser, welchen Endpunkt der Aufruf tatsächlich trifft (Network-Log, `typeof window.claude`), nicht nur, dass eine Antwort erscheint.
 
 ## Quellen
 

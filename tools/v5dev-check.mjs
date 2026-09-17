@@ -34,7 +34,7 @@
  * (#werkstatt-band, its [data-v5-dev-open] button) - none of the five phases
  * below depend on it, they all drive the switch itself
  * ([data-v5-dev-switch], present on every route once armed) or open
- * ?werkstatt directly, so the same phases run unchanged on any route.
+ * ?tools directly, so the same phases run unchanged on any route.
  *
  * KONSOLE (17.9.2026)
  * The workshop stopped being a side drawer and became a console: docked to
@@ -75,7 +75,7 @@ const ROUTE = flag("--route", "/");
 const URL = flag("--url", `${BASE}${ROUTE}`);
 const OUT = flag("--out", path.join(os.tmpdir(), "v5dev-check"));
 const QUICK = argv.includes("--quick");
-const WERKSTATT_URL = URL + (URL.includes("?") ? "&werkstatt" : "?werkstatt");
+const TOOLS_URL = URL + (URL.includes("?") ? "&tools" : "?tools");
 
 fs.mkdirSync(OUT, { recursive: true });
 
@@ -510,7 +510,7 @@ try {
     }
   });
 
-  await runPhase("Phase 5: phone, ?werkstatt opens immediately", async () => {
+  await runPhase("Phase 5: phone, ?tools opens immediately", async () => {
     const ctx3 = await browser.newContext({
       viewport: { width: 412, height: 915 },
       deviceScaleFactor: 1.75,
@@ -520,7 +520,7 @@ try {
     try {
       const page3 = await ctx3.newPage();
       watch(page3);
-      await page3.goto(WERKSTATT_URL, { waitUntil: "load" });
+      await page3.goto(TOOLS_URL, { waitUntil: "load" });
       const visible = await page3
         .waitForFunction(
           () => {
@@ -533,9 +533,9 @@ try {
         )
         .then(() => true)
         .catch(() => false);
-      check(visible, `#v5-dev is visible within 8s of loading ${WERKSTATT_URL}`);
+      check(visible, `#v5-dev is visible within 8s of loading ${TOOLS_URL}`);
       if (!visible) {
-        check(false, "skipping the rest of phase 5 (crawler tap, escape) - #v5-dev never appeared on ?werkstatt");
+        check(false, "skipping the rest of phase 5 (crawler tap, escape) - #v5-dev never appeared on ?tools");
         return;
       }
 

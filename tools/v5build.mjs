@@ -659,11 +659,11 @@ function assemble(P, merged, heights) {
    * provisional; the text pass at the end edits WERKSTATT_BAND. */
   const WERKSTATT_BAND = {
     id: "werkstatt-band",
-    label: "Werkstatt-Hinweis",
-    eyebrow: "Werkstatt",
+    label: "Tools-Hinweis",
+    eyebrow: "Tools",
     title: "Sehen Sie selbst, wie diese Seite gebaut ist.",
-    text: "Ein Klick öffnet die Werkstatt: der echte Aufbau der Seite, der Code, der sie bewegt, die Zeiten, die Ihr Browser gerade gemessen hat, und wie Google und Sprachmodelle sie lesen. Nichts wird gespeichert oder gesendet.",
-    cta: "Werkstatt öffnen",
+    text: "Ein Klick öffnet die Tools: der echte Aufbau der Seite, der Code, der sie bewegt, die Zeiten, die Ihr Browser gerade gemessen hat, und wie Google und Sprachmodelle sie lesen. Nichts wird gespeichert oder gesendet.",
+    cta: "Tools öffnen",
   };
   const work = html.match(/<section [^>]*id="work"[^>]*>/);
   if (work) {

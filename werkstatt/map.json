@@ -222,14 +222,14 @@
     },
     {
       "match": "[data-v5-dev-switch]",
-      "title": "Werkstatt-Schalter",
+      "title": "Tools-Schalter",
       "file": "runtime",
       "symbol": "armDevMode",
       "also": [
         { "file": "runtime", "symbol": "loadDev" }
       ],
-      "what": "Zeigt den Schalter zu dieser Werkstatt erst, wenn wirklich jemand da ist: 15 Sekunden nach dem Laden oder bei der ersten echten Aktion.",
-      "why": "Vor dem ersten Aufruf kostet die Werkstatt keinen Knoten, keinen Request, keinen Stil; Lighthouse und automatisierte Messungen lösen keines der Ereignisse aus und sehen den Schalter deshalb nie."
+      "what": "Zeigt die Lasche zu diesen Tools erst, wenn wirklich jemand da ist: sieben Sekunden nach der ersten echten Aktion (Zeiger, Taste, Rad oder Berührung); danach pulsiert sie fünf Sekunden im Markenverlauf.",
+      "why": "Vor dem ersten Aufruf kosten die Tools keinen Knoten, keinen Request, keinen Stil; Lighthouse und automatisierte Messungen lösen keines der Ereignisse aus und sehen den Schalter deshalb nie."
     }
   ]
 }

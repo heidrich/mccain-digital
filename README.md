@@ -191,7 +191,8 @@ marke/                                  GENERATED   brand guide and downloads
 404.html                the ONLY hand-written page — it must work when the
                         runtime does not, so it depends on nothing
 
-werkstatt/              HAND-WRITTEN   the workshop (Dev-Modus), loaded as
+werkstatt/              HAND-WRITTEN   the workshop (Dev-Modus, shown to visitors
+                        as „Tools“ since 17.9.2026), loaded as
                         /werkstatt/index.js; runtime.src.js and
                         motion-budget.src.js beside it are GENERATED copies of
                         tools/runtime.js and tools/motion-budget.js for its
@@ -335,7 +336,7 @@ node tools/v5dev-check.mjs --route /kontakt/   # the workshop on one page
 type="module" src="/werkstatt/index.js">` by `loadDev` in
 [`tools/runtime.js`](tools/runtime.js), never before it opens. It docks three
 ways: as a free-floating window by default on a desktop (`data-dock="float"`,
-`?werkstatt=fenster`, 760×520px starting bottom-right with a 24px margin,
+`?tools=fenster`, 760×520px starting bottom-right with a 24px margin,
 dragged by its header or lead line, clamped to the viewport), bottom (full
 width, starting at 42% of the window height, 55% on a phone, where it is the
 only mode), or right (a 480px column) —
@@ -354,9 +355,9 @@ Enter snaps to full size and back — the footer's key row swaps to match
 only — nothing goes to `localStorage`, because the workshop promises to
 store nothing. `scroll-padding-bottom` / `-right` on `<html>` keeps "Auf der
 Seite zeigen" from landing behind the open console while docked bottom or
-right (not applied floating), removed again on close. `?werkstatt=rechts`
-starts docked right, `?werkstatt=fenster` starts floating; `?werkstatt=fragen`
-/ `=google` opens straight on that view.
+right (not applied floating), removed again on close. `?tools=rechts`
+starts docked right, `?tools=fenster` starts floating; `?tools=fragen`
+/ `=google` opens straight on that view (`?werkstatt=` is still accepted).
 
 Three views: **Röntgen** — the DOM tree, the element's HTML, its template
 bindings and the CSS rules that apply, the readable code (the route's own
@@ -402,7 +403,7 @@ default) per warm instance as a brake rather than a durable limit, then the
 Anthropic Messages API (`max_tokens` 450, model from `ASK_MODEL`, default
 `claude-sonnet-5`, 25s timeout). Nothing is logged or stored. Without a key
 the endpoint answers 503 and the workshop falls back to answering from the
-same facts itself, labelled "ohne Claude" / sender "Werkstatt" — the same
+same facts itself, labelled "ohne Claude" / sender "Tools" — the same
 path a fully offline dev server takes. **Owner action required:** set
 `ANTHROPIC_API_KEY` in the Vercel project's Production environment variables
 (optionally `ASK_MODEL`, `ASK_DAILY_MAX`); until then the live site answers
@@ -412,7 +413,7 @@ Nothing of the console exists before the visitor's first click, key, wheel or
 touch. A vertical flap at the left edge, centred, appears seven seconds after
 that (`showDevSwitch`/`armDevMode` in `tools/runtime.js`, class
 `.v5-dev-switch`, attribute `data-v5-dev-switch`, 38px wide on touch, z-index
-70); `?werkstatt` opens it at once, and so does the band after "Arbeiten" on
+70); `?tools` opens it at once, and so does the band after "Arbeiten" on
 the start page (`data-v5-dev-open`). The flap is not a toggle while the
 console is open — it hides itself
 (`.v5-dev-switch[aria-expanded="true"] { display: none }`) so it can never sit
