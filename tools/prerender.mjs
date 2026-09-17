@@ -209,6 +209,48 @@ function rewriteLinks(s) {
   return out;
 }
 
+/* ------------------------------------------------------ boolean attributes */
+/* support.js compiles the <x-dc> template itself, and its attribute parser
+ * only keeps attributes WITH a value: a bare `required` on an input or a bare
+ * `download` on a link is dropped on the floor, while `autoComplete="name"`
+ * beside it comes through. The export writes them bare (17.9.2026: 37 inputs,
+ * 17 textareas, one download link), so every built form validated nothing -
+ * an empty form passed checkValidity() and went to Web3Forms. Found by the
+ * accessibility pass against the live site, 17.9.2026.
+ * Giving each one the attribute's own name as its value (`required="required"`)
+ * is the fix HTML has always allowed and React renders back as the bare form;
+ * done here, before the template reaches support.js, so the next export needs
+ * no hand edit. The scanner respects quotes, so a word inside a class or style
+ * value is never touched. */
+const BOOLEAN_ATTRS = new Set(["required", "disabled", "checked", "readonly", "multiple", "selected", "autofocus", "novalidate", "formnovalidate", "hidden", "inert", "open", "download", "muted", "autoplay", "loop", "controls", "playsinline", "reversed", "allowfullscreen", "default"]);
+let valuedBooleans = 0;
+function valueBooleans(s) {
+  let out = "", i = 0;
+  const tagStart = /<[a-zA-Z][a-zA-Z0-9-]*/g;
+  let m;
+  while ((m = tagStart.exec(s))) {
+    /* End of this tag: the first `>` outside quotes. */
+    let j = m.index + m[0].length, q = null;
+    for (; j < s.length; j++) {
+      const c = s[j];
+      if (q) { if (c === q) q = null; }
+      else if (c === '"' || c === "'") q = c;
+      else if (c === ">") break;
+    }
+    if (j >= s.length) break;
+    const body = s.slice(m.index + m[0].length, j);
+    const fixed = body.replace(/(\s)([a-zA-Z][-a-zA-Z0-9_:]*)(\s*=\s*(?:"[^"]*"|'[^']*'|\{[^}]*\}|[^\s"'>]+))?(?=[\s/]|$)/g, (all, ws, name, value) => {
+      if (value !== undefined || !BOOLEAN_ATTRS.has(name.toLowerCase())) return all;
+      valuedBooleans++;
+      return `${ws}${name}="${name.toLowerCase()}"`;
+    });
+    out += s.slice(i, m.index + m[0].length) + fixed;
+    i = j;
+    tagStart.lastIndex = j;
+  }
+  return out + s.slice(i);
+}
+
 /* The two artboards the brand guide links by name are design studies, not
  * pages. They keep their words and lose the link that would 404. */
 function unwrapDeadLinks(s) {
@@ -1789,7 +1831,7 @@ for (const page of PAGES) {
   const openTag = /<x-dc(?:\s[^>]*)?>/.exec(src);
   const closeAt = src.lastIndexOf("</x-dc>");
   if (!openTag || closeAt < 0) throw new Error(`prerender: no <x-dc> block in ${page.src}`);
-  const template = src.slice(openTag.index + openTag[0].length, closeAt);
+  const template = valueBooleans(src.slice(openTag.index + openTag[0].length, closeAt));
 
   const scriptTag = /<script[^>]*data-dc-script[^>]*>[\s\S]*?<\/script>/.exec(src);
   if (!scriptTag) throw new Error(`prerender: no <script data-dc-script> in ${page.src}`);
@@ -2059,6 +2101,6 @@ const totalWords = built.reduce((n, p) => n + p.words, 0);
 const totalForms = built.reduce((n, p) => n + p.forms, 0);
 console.log(
   `\n  ${built.length} pages · ${totalWords.toLocaleString("de-DE")} words of rendered text · ` +
-    `${totalForms} forms wired to Web3Forms · ${fixedCanonicals} canonical(s) corrected · robots: ${ROBOTS}`
+    `${totalForms} forms wired to Web3Forms · ${fixedCanonicals} canonical(s) corrected · ${valuedBooleans} bare boolean attribute(s) valued · robots: ${ROBOTS}`
 );
 if (CONFIG.noindex) console.log("  site.config.json says noindex - every page carries it.");

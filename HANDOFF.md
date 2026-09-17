@@ -146,15 +146,54 @@ llms.txt, Sitemap = Routen, robots je Crawler, `/kontakt` → 308 → `/kontakt/
 HSTS preload, nosniff, Referrer-Policy, XFO, Permissions-Policy, Brotli,
 immutable-Caching für Assets.
 
-*A11y/Mobil:* der vierte Agent (Playwright gegen live, 8 Routen × 2 Viewports)
-lief beim Push noch; sein Bericht folgt im nächsten Docs-Commit.
+*A11y/Mobil/UX (vierter Agent, Playwright gegen live, 8 Routen × 2
+Viewports, Skript im Scratchpad `a11y/audit.mjs`):*
+
+- **Hoch:** Kontaktformular-Felder haben im gebauten DOM kein `required`
+  (Name, E-Mail, Nachricht), `checkValidity()` des leeren Formulars ist
+  `true` – selbst nachgemessen live. Ursache: die Template-Engine der
+  Export-Laufzeit (`support.js`, in prerender die Stufe React-Quelle →
+  DOM) verwirft wertlose Boolean-Attribute; im Quell-Template
+  (`archive/site-react/**/index.html`, versioniert) steht `required`
+  bar. **Behoben 17.9. nachts** in der Baukette: `valueBooleans()` in
+  `tools/prerender.mjs` gibt wertlosen Boolean-Attributen im
+  `<x-dc>`-Template ihren Namen als Wert, bevor support.js kompiliert (37
+  Inputs, 17 Textareas `required`, ein `download` auf `/md-recall/`); die
+  Export-Artboards bleiben unverändert, der nächste Export bricht nichts.
+  Achtung: `archive/site-react/` ist Archiv, nicht Quelle – Quelle ist
+  `mccain-design-system/*.dc.html` (siehe `tools/pages.mjs`). Zusätzlich
+  fehlt eine serverseitige Pflichtfeldprüfung (Web3Forms nimmt alles).
+- **Hoch:** Erfolgsmeldung nach dem Senden ohne `role="status"`/`aria-live`
+  (Fehlerbox hat `role="alert"`); Chat-Dock (`role="dialog"`) schließt nicht
+  mit Escape (`onKey` in `logic.src.js:825` kennt `dockOpen` nicht), keine
+  Fokusfalle, kein `aria-modal`.
+- **Mittel:** 404-Seite ohne `header`/`footer`/Skip-Link (alle anderen
+  haben es); „Zur Leistung“ ×4 auf `/preise/` mit vier Zielen; Touch-Ziele
+  < 44 px auf jeder Seite mobil (DE/EN 35×23, Breadcrumb „Start“ 30×16,
+  3G/5G 40×30, Vorlage/Crawler/Mensch-Toggles), 37–93 je Route; Chat-Dock
+  erscheint unter 600 px Sichtbreite gar nicht (bewusst? Owner); Submit
+  wird beim Senden deaktiviert ohne sichtbaren Ladehinweis; die
+  automatische Kontrastmessung ist auf dieser Seite methodisch nicht
+  belastbar (Hintergründe über Verlaufs-Ebenen statt `background-color`,
+  Stichproben widerlegt) – vor Go-live mit axe-core Pixel-Sampling
+  wiederholen.
+- **Niedrig:** „Zum Konfigurator“ mit zwei Zielen (`/preise/` vs.
+  `/preise/#rechner`) auf allen Seiten; Schrift < 12 px (8–15 Stellen je
+  Seite, PERF/A11Y/BP/SEO-Badges 9,5 px); 404 ohne `@media print`.
+- In Ordnung: genau ein `main`/`h1`/`header`/`footer`, Skip-Link
+  funktional, Hierarchie ohne Sprünge, `:focus-visible` überall sichtbar,
+  keine ungültigen `aria-*`, keine Knöpfe/Links ohne Namen, keine Bilder
+  ohne `alt`, kein horizontales Scrollen bei 390 px, Dock überlappt keine
+  Footer-Links, „Bewegung reduzieren“ stoppt alle 9 Animationen, 404 mit
+  echtem Status und Rückwegen, Viewport-Meta korrekt.
 
 **Nächste Schritte (Vorschlag in Owner-Reihenfolge):** 1) `ANTHROPIC_API_KEY`
 in Vercel; 2) Seiten-Chat auf `/api/ask/` (hoch); 3) Fakten-Korrekturen in
 Datenschutz/Impressum jetzt (Vercel statt SiteGround, Anthropic, Web3Forms-
 Aussage, Telefon), Formulierungen in der Textrunde; 4) Schema-Fixes im Build
 (Breadcrumb-Labels, Organization-Felder, Article-Pflichtfelder, News-Article,
-`<time>`); 5) Redirect `*/index.html`; 6) Honeypot und die bekannten
+`<time>`); 5) Redirect `*/index.html`; 6) Honeypot, Erfolgsmeldung `role="status"`,
+Dock-Escape/`aria-modal`, 404-Layout, Touch-Ziele und die bekannten
 A11y-Punkte; 7) EN-Entscheidung; 8) volles Code-Review mobil/Security
 (steht weiter aus); 9) Textrunde inkl. Tools-Texte.
 
