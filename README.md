@@ -409,7 +409,7 @@ path a fully offline dev server takes. **Owner action required:** set
 503 and only the offline fallback runs.
 
 Nothing of the console exists before the visitor's first click, key, wheel or
-touch. A vertical flap at the left edge, centred, appears ten seconds after
+touch. A vertical flap at the left edge, centred, appears seven seconds after
 that (`showDevSwitch`/`armDevMode` in `tools/runtime.js`, class
 `.v5-dev-switch`, attribute `data-v5-dev-switch`, 38px wide on touch, z-index
 70); `?werkstatt` opens it at once, and so does the band after "Arbeiten" on

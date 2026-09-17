@@ -1,7 +1,7 @@
 /* Does the workshop (/werkstatt/) keep its promise: nothing about it exists before
  * the visitor has done something real, and everything about it works once
  * they ask for it. Runs against any of the 21 routes tools/pages.mjs builds
- * under <route>/, not just the start page - the switch, the ten-second
+ * under <route>/, not just the start page - the switch, the seven-second
  * rule and the workshop itself all come from v5/runtime.js, which is shared
  * by every route.
  *
@@ -11,7 +11,7 @@
  *   node tools/v5dev-check.mjs --url http://127.0.0.1:8897/ --out <dir> --quick
  *
  * WHY IT EXISTS
- * The protection rule ("no DOM node, no request to /werkstatt/, until ten seconds
+ * The protection rule ("no DOM node, no request to /werkstatt/, until seven seconds
  * after the visitor's first click, key, wheel or touch" - owner, 16.9.2026) is
  * a promise to PageSpeed that no Lighthouse run ever checks - Lighthouse never
  * clicks, types, scrolls with a wheel or touches anything, so a page that
@@ -140,20 +140,21 @@ async function runPhase(title, fn) {
 }
 
 /* The browser's own clock (performance.now), not this script's - the two drift
- * apart under load, and a 10.0-12.5 s window is tight enough that the
+ * apart under load, and a 7.0-9.5 s window is tight enough that the
  * difference matters. Self-contained on purpose: page.evaluate ships the
  * function's source to the browser and runs it there, so it cannot close over
  * anything defined on the Node side. */
 const NOW = () => performance.now();
 
-/* Interact at `act`, then watch the switch: it must stay away for 8.5 s and
- * arrive between 10 s and 12.5 s after the action, measured on the page's clock. */
+/* Interact at `act`, then watch the switch: it must stay away for 5.5 s and
+ * arrive between 7 s and 9.5 s after the action, measured on the page's clock
+ * (owner 17.9.: seven seconds instead of ten). */
 async function expectSwitchTenSecondsAfter(page, label, act) {
   const t0 = await page.evaluate(NOW);
   await act();
-  await page.waitForTimeout(8500);
+  await page.waitForTimeout(5500);
   const early = await page.locator("[data-v5-dev-switch]").count();
-  check(early === 0, `${label}: no switch 8.5 s after the action (found ${early})`);
+  check(early === 0, `${label}: no switch 5.5 s after the action (found ${early})`);
   let appearedAt = null;
   const deadline = Date.now() + 6000;
   for (;;) {
@@ -163,7 +164,7 @@ async function expectSwitchTenSecondsAfter(page, label, act) {
     await page.waitForTimeout(100);
   }
   check(appearedAt !== null, `${label}: switch appears at all after the action`);
-  if (appearedAt !== null) check(appearedAt >= 10000 && appearedAt <= 12500, `${label}: switch appears 10.0-12.5 s after the action (got ${appearedAt.toFixed(0)} ms)`);
+  if (appearedAt !== null) check(appearedAt >= 7000 && appearedAt <= 9500, `${label}: switch appears 7.0-9.5 s after the action (got ${appearedAt.toFixed(0)} ms)`);
   return appearedAt !== null;
 }
 
@@ -214,7 +215,7 @@ try {
     check(devRequests.length === 0, `no request to /werkstatt/ after ${waitMs}ms with zero real interaction (saw ${devRequests.length})`);
   });
 
-  await runPhase("Phase 2a: same tab, a key press starts the ten seconds", async () => {
+  await runPhase("Phase 2a: same tab, a key press starts the seven seconds", async () => {
     const ok = await expectSwitchTenSecondsAfter(page1, "key", () => page1.keyboard.press("Shift"));
     if (ok) {
       const handle = await page1.locator("[data-v5-dev-switch]").first();
@@ -225,7 +226,7 @@ try {
     }
   });
 
-  await runPhase("Phase 2b: second tab, an early pointer press starts the ten seconds", async () => {
+  await runPhase("Phase 2b: second tab, an early pointer press starts the seven seconds", async () => {
     const page2 = await ctx1.newPage();
     watch(page2);
     await page2.goto(URL, { waitUntil: "load" });

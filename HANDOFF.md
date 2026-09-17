@@ -12,7 +12,10 @@ volle Höhe, „wenn schon crazy, dann richtig", und die KI eingebunden.
 - **Schalter:** jetzt eine senkrechte Lasche am linken Rand, vertikal mittig
   (`tools/runtime.js`, `showDevSwitch`; Klasse `.v5-dev-switch`, Attribut
   `data-v5-dev-switch` unverändert), z-index 70 über der Konsole, bei Touch
-  38 px breit. Zehn-Sekunden-Regel und `?werkstatt` unverändert. Bei offener
+  38 px breit. Erscheint SIEBEN Sekunden nach der ersten Aktion (Owner 17.9.,
+  vorher zehn) und pulsiert dann fünf Sekunden mit dem Markenverlauf als
+  3-px-Ring (maskiertes ::after, vier Pulse à 1,25 s, bei „Bewegung
+  reduzieren“ aus); `?werkstatt` unverändert. Bei offener
   Konsole blendet die Lasche sich selbst aus
   (`.v5-dev-switch[aria-expanded=true]{display:none}`) statt Umschalter zu
   sein; Schließen läuft über das × im Kopf oder Escape, danach erscheint die

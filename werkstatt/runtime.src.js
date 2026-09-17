@@ -33,7 +33,7 @@
  *   are skipped by the browser until they come near; work that would read
  *   their layout waits for the browser's own signal (see "region").
  * - pixel-engine.js on demand, the stream notes from second ten on a wide
- *   screen with a mouse, and the workshop switch (/werkstatt/) ten seconds
+ *   screen with a mouse, and the workshop switch (/werkstatt/) seven seconds
  *   after the visitor's first real action.
  *
  * THIS IS THE SOURCE. What ships is /runtime.js at the site root, the
@@ -840,7 +840,8 @@
 
   /* THE WORKSHOP COMES LATE, AND ONLY FOR SOMEONE WHO IS HERE. Before it is
    * asked for it costs nothing: no node, no request, no style. Its switch
-   * appears ten seconds after the visitor's first real action - a pointer
+   * appears seven seconds after the visitor's first real action (owner
+   * 17.9.: 7 s, and it pulses with the brand gradient for 5 s) - a pointer
    * press, a key, the wheel, a touch (owner, 16.9.2026); moving the mouse is
    * not an action, Lighthouse never does any of these, and the measuring
    * scripts scroll with scrollTo, which fires none of them. The band's button
@@ -850,7 +851,7 @@
     const EVENTS = ["pointerdown", "keydown", "wheel", "touchstart"];
     let armed = true;
     const disarm = () => { armed = false; for (const ev of EVENTS) window.removeEventListener(ev, onAct, true); };
-    const onAct = () => { disarm(); setTimeout(showDevSwitch, 10000); };
+    const onAct = () => { disarm(); setTimeout(showDevSwitch, 7000); };
     for (const ev of EVENTS) window.addEventListener(ev, onAct, { capture: true, passive: true });
     doc.addEventListener("click", (e) => {
       if (!e.target.closest || !e.target.closest("[data-v5-dev-open]")) return;
@@ -872,6 +873,9 @@
     css.textContent =
       ".v5-dev-switch{position:fixed;left:0;top:50%;z-index:70;display:flex;flex-direction:column;align-items:center;gap:9px;width:32px;padding:12px 0 11px;border-radius:0 10px 10px 0;background:#0A2540;color:#fff;font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;box-shadow:0 0 0 1.5px rgba(255,255,255,.75),10px 0 30px -12px rgba(10,37,64,.5);cursor:pointer;transform:translateY(-50%);animation:v5DevIn .5s cubic-bezier(.2,.8,.2,1) both;transition:background .2s,transform .2s}" +
       ".v5-dev-switch::before{content:'';width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#FFB46B,#FF5A8C,#C05CFF,#5FC3FF)}" +
+      /* The gradient ring: a masked pseudo 3 px outside the tab, pulsing four times over five seconds after the slide-in, then gone. */
+      ".v5-dev-switch::after{content:'';position:absolute;inset:-3px;padding:3px;border-radius:0 13px 13px 0;background:linear-gradient(135deg,#FFB46B,#FF5A8C,#C05CFF,#5FC3FF);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;opacity:0;pointer-events:none;animation:v5DevPulse 1.25s ease-in-out .5s 4}" +
+      "@keyframes v5DevPulse{0%,100%{opacity:0}50%{opacity:1}}" +
       ".v5-dev-switch>span{writing-mode:vertical-rl;transform:rotate(180deg)}" +
       ".v5-dev-switch:hover{background:#0A1F44;transform:translateY(-50%) translateX(2px)}" +
       ".v5-dev-switch:focus-visible{outline:2px solid #635BFF;outline-offset:3px}" +
@@ -880,7 +884,7 @@
       ".v5-dev-switch[data-state=failed]{background:#425466}" +
       "@keyframes v5DevIn{from{opacity:0;transform:translateY(-50%) translateX(-100%)}to{opacity:1;transform:translateY(-50%)}}" +
       "@media (pointer:coarse){.v5-dev-switch{width:38px}}" +
-      "@media (prefers-reduced-motion:reduce){.v5-dev-switch{animation:none;transition:none}}";
+      "@media (prefers-reduced-motion:reduce){.v5-dev-switch{animation:none;transition:none}.v5-dev-switch::after{animation:none}}";
     doc.head.appendChild(css);
     const b = doc.createElement("button");
     b.type = "button";
@@ -889,6 +893,9 @@
     b.setAttribute("data-state", "idle");
     b.setAttribute("aria-haspopup", "dialog");
     b.setAttribute("aria-expanded", "false");
+    /* The motion budget (motion-budget.js) pauses animations whose box it has not
+     * yet seen on screen; the tab's entrance and pulse must not wait for that. */
+    b.setAttribute("data-motion-keep", "");
     b.title = "Werkstatt: diese Seite von innen";
     const label = doc.createElement("span");
     label.textContent = "Werkstatt";

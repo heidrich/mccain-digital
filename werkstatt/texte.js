@@ -136,7 +136,7 @@ export const T = {
       dev: {
         name: "Die Werkstatt selbst",
         what: "Der Code, der gerade läuft, damit Sie das hier lesen können.",
-        why: "Er kommt zehn Sekunden nach Ihrer ersten Aktion auf der Seite. Davor kostet er die Seite kein Byte, und Messwerkzeuge, die nie klicken, sehen ihn nie.",
+        why: "Er kommt sieben Sekunden nach Ihrer ersten Aktion auf der Seite. Davor kostet er die Seite kein Byte, und Messwerkzeuge, die nie klicken, sehen ihn nie.",
       },
     },
   },
