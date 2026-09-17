@@ -74,6 +74,14 @@ parallel scheiterte zweimal genau der Tastendruck-Fall („switch appears at
 all"), allein und in vier Einzelversuchen kam der Schalter jedes Mal nach
 10,0–10,1 s.
 
+**Owner 17.9. spät: „die html ist jetzt die main und wird so bleiben."** Die
+React-Ausgabe liegt als Archiv unter `archive/site-react/` (aus `7612481`,
+README dort), der GitHub-Zweig `v5-preview` ist gelöscht (lokaler Tag
+`archive/v5-preview` hält `0d3f091`), auf Vercel läuft seit `5331bc1` nur die
+HTML-Seite. Der Ordner `v5/` heißt weiter so (Binder `runtime.js`, Werkstatt
+`dev/`); ob er umbenannt werden soll, ist eine Owner-Frage (siehe Antwort vom
+17.9. spät).
+
 **Nebenbei behoben:** Werkstatt-Knopf „Im Code" warf `W.showCode is not a
 function`, wenn der Code-Tab noch nie offen war (Methode jetzt fest in
 `index.js`, mountet den Tab); „Im Code" springt auch zu Abschnittsverweisen

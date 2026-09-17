@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<!-- Hand-written on purpose, and the only page in the repository that is.
+
+     Every other page is a rendered Claude Design component: ~700 KB of markup,
+     React, and the pixel engine. A 404 is the one page that must work when
+     something is already wrong - a bad path, a half-finished deploy, a runtime
+     that failed to load - so it depends on nothing: no React, no support.js, no
+     content.json, no build step. Two vendored fonts and a link home.
+
+     It is also the one page the build does not overwrite. -->
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seite nicht gefunden — McCain Digital</title>
+<meta name="description" content="Diese Seite gibt es nicht (mehr). Zurück zur Startseite von McCain Digital.">
+<meta name="robots" content="noindex, follow">
+<meta name="theme-color" content="#635BFF">
+<link rel="icon" href="/brand/mccain-favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/brand/apple-touch-icon-180.png">
+<link rel="preload" href="/fonts/instrument-sans-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+/* Every value here is a token out of mccain-design-system/tokens/colors.css,
+   copied rather than referenced because this page loads no stylesheet of the
+   site's own - that is the point of it. Names kept short, values not touched:
+   --mc-indigo, --mc-indigo-text, --mc-indigo-soft, --mc-indigo-ring,
+   --mc-navy, --mc-slate, --mc-line. */
+:root{--acc:#635BFF;--acc-text:#4D47C7;--ink:#0A2540;--slate:#425466;
+  --line:#E3E8EE;--ring:rgba(99,91,255,.28);--wash:rgba(99,91,255,.10)}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;background:#fff;color-scheme:light}
+body{margin:0;min-height:100vh;display:flex;flex-direction:column;
+  font-family:'Instrument Sans',system-ui,-apple-system,sans-serif;color:var(--ink);
+  -webkit-font-smoothing:antialiased;background:
+    radial-gradient(1200px 600px at 50% -10%,var(--wash),transparent 70%),#fff}
+main{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 24px}
+.card{width:100%;max-width:640px;text-align:center}
+.code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;font-weight:500;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--acc-text)}
+h1{margin:14px 0 0;font-size:clamp(30px,6vw,46px);line-height:1.1;letter-spacing:-.022em}
+p{margin:16px auto 0;max-width:46ch;font-size:17px;line-height:1.6;color:var(--slate)}
+.row{margin-top:30px;display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+a.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:10px;
+  font-size:15px;font-weight:600;text-decoration:none;transition:transform .15s,background .15s}
+a.primary{background:var(--acc);color:#fff}
+a.primary:hover{background:var(--ink);transform:translateY(-1px)}
+a.ghost{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+a.ghost:hover{box-shadow:inset 0 0 0 1px var(--ring);transform:translateY(-1px)}
+nav.more{margin-top:34px;padding-top:22px;border-top:1px solid var(--line);
+  display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:center}
+nav.more a{font-size:14px;color:var(--slate);text-decoration:none}
+nav.more a:hover{color:var(--acc-text)}
+@media (prefers-reduced-motion:reduce){a.btn{transition:none}a.btn:hover{transform:none}}
+</style>
+</head>
+<body>
+<main>
+  <div class="card">
+    <div class="code">Fehler 404</div>
+    <h1>Diese Seite gibt es nicht.</h1>
+    <p>Der Link ist alt, hat einen Tippfehler, oder die Seite ist umgezogen.
+       Von hier kommen Sie überall hin.</p>
+    <div class="row">
+      <a class="btn primary" href="/">Zur Startseite</a>
+      <a class="btn ghost" href="/kontakt/">Kontakt aufnehmen</a>
+    </div>
+    <nav class="more">
+      <a href="/leistungen/">Leistungen</a>
+      <a href="/preise/">Preise</a>
+      <a href="/md-recall/">md-recall</a>
+      <a href="/studio/">Studio</a>
+      <a href="/news/">News</a>
+      <a href="/rechtliches/">Rechtliches</a>
+    </nav>
+  </div>
+</main>
+</body>
+</html>

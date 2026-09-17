@@ -206,6 +206,8 @@ archive/old3/           the site the v4 import replaced (September 2026).
 archive/site-apache/    the site that was live on Apache until the Vercel move.
                         SOURCE OF RECORD for the reviewed legal wording.
 archive/site-v3/        the site the 2026 relaunch replaced.
+archive/site-react/     the React edition of the v4 design, live 12.–17.9.2026
+                        until the v5 build replaced it (its last commit, 7612481).
 archive/site-v3-tools/  the generators the v4 import made obsolete.
 internal/               audit findings, design notes, the parked export zip.
 HANDOFF.md              the working notes — start here, it opens with a

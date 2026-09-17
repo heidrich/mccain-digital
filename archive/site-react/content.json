@@ -1,0 +1,1557 @@
+{
+  "ai": {
+    "stats": [
+      {
+        "v": {
+          "de": "2–4 Wo.",
+          "en": "2–4 wk"
+        },
+        "l": {
+          "de": "bis zum lauffähigen Proof of Value",
+          "en": "to a working proof of value"
+        }
+      },
+      {
+        "v": "48 h",
+        "l": {
+          "de": "bis zum Festpreis",
+          "en": "to a fixed quote"
+        }
+      },
+      {
+        "v": "100 %",
+        "l": {
+          "de": "self-hostbar – Ihre Schlüssel, Ihre Daten",
+          "en": "self-hostable — your keys, your data"
+        }
+      }
+    ],
+    "useCases": [
+      {
+        "tag": {
+          "de": "Support-Teams",
+          "en": "Support teams"
+        },
+        "title": {
+          "de": "Ein Support-Bot, der aus Ihren eigenen Dokumenten antwortet",
+          "en": "A support bot that answers from your own docs"
+        },
+        "out": {
+          "de": "80 % der Tickets beantworten sich selbst – rund um die Uhr.",
+          "en": "The same 80% of tickets answer themselves, around the clock."
+        }
+      },
+      {
+        "tag": {
+          "de": "E-Commerce / Handel",
+          "en": "E-commerce / Retail"
+        },
+        "title": {
+          "de": "Auto-Triage für das überlaufende Postfach",
+          "en": "Auto-triage for an overflowing inbox"
+        },
+        "out": {
+          "de": "Das Postfach sortiert sich selbst – Antworten in Minuten statt Stunden.",
+          "en": "The inbox sorts itself — replies in minutes, not hours."
+        }
+      },
+      {
+        "tag": {
+          "de": "Recht / Legal",
+          "en": "Law / Legal"
+        },
+        "title": {
+          "de": "Vertrags- und Aktensuche mit Quellenangabe",
+          "en": "Contract & case search with citations"
+        },
+        "out": {
+          "de": "Recherche in Sekunden – jede Antwort nachvollziehbar.",
+          "en": "Research in seconds — and every answer is traceable."
+        }
+      },
+      {
+        "tag": {
+          "de": "Operations / HR",
+          "en": "Operations / HR"
+        },
+        "title": {
+          "de": "Ein Wissensassistent über Wiki und Laufwerke",
+          "en": "A knowledge assistant over your wiki & drive"
+        },
+        "out": {
+          "de": "Mitarbeitende finden Antworten selbst, statt das Team zu fragen.",
+          "en": "People self-serve answers instead of pinging the team."
+        }
+      },
+      {
+        "tag": {
+          "de": "Versicherung / Finanzen",
+          "en": "Insurance / Finance"
+        },
+        "title": {
+          "de": "Dokumentenextraktion direkt in Ihr System",
+          "en": "Document extraction into your system"
+        },
+        "out": {
+          "de": "Manuelle Dateneingabe verschwindet – der Audit-Trail bleibt sauber.",
+          "en": "Manual data entry disappears — the audit trail stays clean."
+        }
+      },
+      {
+        "tag": {
+          "de": "Agenturen / Beratungen",
+          "en": "Agencies / Consultancies"
+        },
+        "title": {
+          "de": "Ihre Werkzeuge, angebunden an Claude oder ChatGPT",
+          "en": "Your tools, wired into Claude or ChatGPT"
+        },
+        "out": {
+          "de": "Firmenwissen in Klartext abfragen – sicher, mit Auth und Audit-Log.",
+          "en": "Query company knowledge in plain language — safely, with auth and audit logs."
+        }
+      },
+      {
+        "tag": {
+          "de": "Vertrieb",
+          "en": "Sales"
+        },
+        "title": {
+          "de": "Follow-ups, die sich selbst schreiben",
+          "en": "Follow-ups that write themselves"
+        },
+        "out": {
+          "de": "Kein warmer Lead wird kalt, weil eine E-Mail fehlt.",
+          "en": "No warm lead goes cold waiting for an email."
+        }
+      }
+    ],
+    "caps": [
+      {
+        "title": {
+          "de": "RAG über Ihre eigenen Daten",
+          "en": "RAG over your own data"
+        },
+        "text": {
+          "de": "Retrieval mit Quellenangaben aus Dokumenten, Code, Tickets oder Datenbank. Vektorsuche (pgvector, Qdrant), Re-Ranking und ein Konfidenzpfad, der „Ich weiß es nicht“ sagen kann.",
+          "en": "Retrieval grounded in your documents, code, tickets or database — with citations. Vector search (pgvector, Qdrant), re-ranking and a confidence path that can say “I don’t know”."
+        }
+      },
+      {
+        "title": {
+          "de": "Autonome Mehrschritt-Agenten",
+          "en": "Autonomous, multi-step agents"
+        },
+        "text": {
+          "de": "Workflows, die planen, Ihre echten APIs über Tools aufrufen und die eigene Arbeit prüfen – mit Leitplanken, Retries und menschlicher Freigabe, wo es zählt.",
+          "en": "Workflows that plan, call your real APIs through tools and check their own work — with guardrails, retries and a human in the loop where it matters."
+        }
+      },
+      {
+        "title": {
+          "de": "MCP-Tool-Server & Integrationen",
+          "en": "MCP tool servers & integrations"
+        },
+        "text": {
+          "de": "Model-Context-Protocol-Server und Function Calling in CRM, ERP, interne APIs und Datenbanken – mit Auth, Rate-Limits und Audit-Log.",
+          "en": "Model Context Protocol servers and function calling into your CRM, ERP, internal APIs and databases — with auth, rate limits and audit logging."
+        }
+      },
+      {
+        "title": {
+          "de": "Automatisierung, die sich rechnet",
+          "en": "Automation that pays for itself"
+        },
+        "text": {
+          "de": "Triage, Dateneingabe, Zusammenfassen, Routing, Entwürfe – in Pipelines (n8n, eigene Loops, geplante Jobs), die im Hintergrund laufen und jede Woche Stunden zurückgeben.",
+          "en": "Triage, data entry, summarising, routing, drafting — handed to pipelines (n8n, custom loops, scheduled jobs) that give real hours back every week."
+        }
+      },
+      {
+        "title": {
+          "de": "Lokale & On-Premise-KI",
+          "en": "Local & on-premise AI"
+        },
+        "text": {
+          "de": "Offene Modelle (Llama, Mistral, Qwen) auf Ihrer eigenen Hardware installiert und konfiguriert. Ihre Daten verlassen das Gebäude nicht.",
+          "en": "Open-weight models (Llama, Mistral, Qwen) installed and configured on your own hardware. Your data never leaves the building."
+        }
+      },
+      {
+        "title": {
+          "de": "KI-Bild- & Content-Generierung",
+          "en": "AI image & content generation"
+        },
+        "text": {
+          "de": "Markenkonforme Visuals auf Abruf – als wiederholbare Pipeline, nicht als Einzelstück.",
+          "en": "On-brand visuals on demand — set up as a repeatable pipeline, not a one-off."
+        }
+      },
+      {
+        "title": {
+          "de": "KI-Schulung für Teams",
+          "en": "Company & team AI training"
+        },
+        "text": {
+          "de": "Praxis-Workshops für Führung und Belegschaft – an den Werkzeugen und Abläufen, die bei Ihnen zählen, nicht an Theorie.",
+          "en": "Hands-on workshops for leadership and staff — on the tools and workflows that move your needle, not generic theory."
+        }
+      }
+    ],
+    "steps": [
+      {
+        "title": {
+          "de": "Wo KI sich wirklich auszahlt",
+          "en": "Map where AI actually pays off"
+        },
+        "text": {
+          "de": "Ein Arbeitstermin zu Ihren Abläufen: Wir finden den Hebel – und die Stellen, an denen KI nicht hilft. Sie bekommen einen Bauplan, kein Buzzword-Deck.",
+          "en": "A working session on your workflows: the highest-leverage spot — and the spots where AI doesn’t help. You get a build plan, not a buzzword deck."
+        }
+      },
+      {
+        "title": {
+          "de": "Proof of Value – 2–4 Wochen",
+          "en": "Proof of value — 2–4 weeks"
+        },
+        "text": {
+          "de": "Ein Workflow, Ihre echten Daten, lauffähig. Sie beurteilen Trefferqualität, Genauigkeit, Tempo und Kosten, bevor Sie sich festlegen.",
+          "en": "One workflow, your real data, running. You judge retrieval quality, accuracy, speed and cost before committing."
+        }
+      },
+      {
+        "title": {
+          "de": "Produktionsreif machen",
+          "en": "Productionise"
+        },
+        "text": {
+          "de": "Leitplanken, Evals, Monitoring, Auth und eine Oberfläche, die Ihr Team nutzt. Gehärtet gegen Halluzination, Kosten, Latenz und Drift.",
+          "en": "Guardrails, evals, monitoring, auth and a UI your team uses. Hardened against hallucination, cost, latency and drift."
+        }
+      },
+      {
+        "title": {
+          "de": "Liefern & übergeben",
+          "en": "Ship & hand over"
+        },
+        "text": {
+          "de": "Dokumentiert, Ihr Eigentum, kein Lock-in. Self-hosted oder Cloud – Ihre Entscheidung. Plus 30 Tage Support nach dem Launch.",
+          "en": "Documented, yours to keep, no lock-in. Self-hosted or cloud — your call. Plus 30 days of support after launch."
+        }
+      }
+    ],
+    "faqs": [
+      {
+        "q": {
+          "de": "Kann die KI self-hosted laufen, ohne Daten an Dritte zu senden?",
+          "en": "Can the AI run self-hosted, without sending our data to a third party?"
+        },
+        "a": {
+          "de": "Ja. Offene Modelle auf Ihrer Infrastruktur, wenn Datenresidenz zählt – oder API-Modelle mit strikter No-Retention-Konfiguration. md-recall, unser eigenes Produkt, ist vollständig self-hosted: Das ist der Standard, für den wir bauen.",
+          "en": "Yes. Open-weight models on your own infrastructure when data residency matters, or API models with a strict no-retention configuration. md-recall, our own product, is fully self-hosted — that is the default we build for."
+        }
+      },
+      {
+        "q": {
+          "de": "Wie verhindern Sie Halluzinationen?",
+          "en": "How do you stop the AI from hallucinating?"
+        },
+        "a": {
+          "de": "Jede Antwort wird per Retrieval in Ihren Daten verankert und zitiert die Quelle. Dazu Schema-Validierung und ein Konfidenzpfad: Das System sagt „Ich weiß es nicht“, statt zu erfinden – und Agenten prüfen ihre Arbeit, bevor sie sie abgeben.",
+          "en": "Every answer is grounded in your real data with retrieval and cites the source. Add structured output schemas, validation and a confidence path: the system says “I don’t know” instead of inventing, and agents check their own work before handing it back."
+        }
+      },
+      {
+        "q": {
+          "de": "Was kostet ein KI-Projekt, und wie lange dauert es?",
+          "en": "What does an AI project cost, and how long does it take?"
+        },
+        "a": {
+          "de": "Ein fokussierter Proof of Value dauert typischerweise 2–4 Wochen, ein Produktivsystem 4–10. Nach dem ersten Gespräch gibt es innerhalb von 48 Stunden einen Festpreis – kein offener Stundenzähler.",
+          "en": "A focused proof of value is typically 2–4 weeks, a production system 4–10. After a first conversation you get a fixed quote within 48 hours — no open-ended hourly meter."
+        }
+      },
+      {
+        "q": {
+          "de": "Wir nutzen schon ChatGPT – warum ein Studio?",
+          "en": "We already use ChatGPT — why hire a studio?"
+        },
+        "a": {
+          "de": "Ein Chatfenster ist kein Produkt. Der Wert entsteht, wenn Modelle in Ihre Systeme greifen – Daten, Werkzeuge, Auth, Workflow – zuverlässig, mit Leitplanken und Monitoring. Diese Integration ist die Arbeit.",
+          "en": "A chat window is not a product. The value is in wiring models into your systems — data, tools, auth, workflow — reliably, with guardrails and monitoring. That integration is the work."
+        }
+      },
+      {
+        "q": {
+          "de": "Welches Modell setzen Sie ein?",
+          "en": "Which model do you use?"
+        },
+        "a": {
+          "de": "Das, das für Ihre Aufgabe gewinnt: Frontier-APIs, wo Qualität entscheidet, offene Gewichte, wo Datenresidenz oder Kosten entscheiden. Die Architektur hält das Modell austauschbar – ein besseres im nächsten Jahr ist eine Konfigurationsänderung, kein Rewrite.",
+          "en": "Whichever wins for your job: frontier APIs where quality decides, open weights where data residency or cost decides. The architecture keeps the model swappable — a better one next year is a config change, not a rewrite."
+        }
+      }
+    ],
+    "stack": [
+      "Claude",
+      "GPT",
+      "MCP",
+      "n8n",
+      "pgvector",
+      "Llama",
+      "Mistral",
+      "Qwen",
+      "Ollama",
+      "Qdrant",
+      "LangChain",
+      "LlamaIndex",
+      "Python",
+      "TypeScript",
+      "FastAPI",
+      "Next.js",
+      "Postgres"
+    ]
+  },
+  "apps": {
+    "stats": [
+      {
+        "v": {
+          "de": "7 Tage",
+          "en": "7 days"
+        },
+        "l": {
+          "de": "bis zum klickbaren Prototyp",
+          "en": "to a clickable prototype"
+        }
+      },
+      {
+        "v": "48 h",
+        "l": {
+          "de": "bis zum Festpreis",
+          "en": "to a fixed quote"
+        }
+      },
+      {
+        "v": {
+          "de": "Wöchentlich",
+          "en": "Weekly"
+        },
+        "l": {
+          "de": "Demos – nie ein Big Reveal am Ende",
+          "en": "demos — never a big reveal"
+        }
+      }
+    ],
+    "useCases": [
+      {
+        "tag": {
+          "de": "SaaS / Start-up",
+          "en": "SaaS / Startup"
+        },
+        "title": {
+          "de": "Ein Abo-Produkt mit Abrechnung, die funktioniert",
+          "en": "A subscription product with billing that works"
+        },
+        "out": {
+          "de": "Sie können am ersten Tag Geld nehmen, nicht in Phase zwei.",
+          "en": "You can take payment on day one, not in phase two."
+        },
+        "points": {
+          "de": [
+            "Stripe oder Paddle angebunden – Pläne, Trials, Upgrades, Steuersätze",
+            "Rollen und Team-Konten ab dem ersten Entwurf, nicht als Nachbau",
+            "Webhooks abgesichert: fehlgeschlagene Zahlungen landen nicht im Nichts",
+            "Kündigungen und Downgrades ohne Datenverlust"
+          ],
+          "en": [
+            "Stripe or Paddle wired in — plans, trials, upgrades, tax rates",
+            "Roles and team accounts from the first draft, not retrofitted",
+            "Webhooks made safe: a failed payment never disappears",
+            "Cancellations and downgrades without losing data"
+          ]
+        },
+        "hint": {
+          "de": "Abrechnung",
+          "en": "Billing"
+        }
+      },
+      {
+        "tag": {
+          "de": "Marktplatz / Plattform",
+          "en": "Marketplace / Platform"
+        },
+        "title": {
+          "de": "Zweiseitige Plattform mit Echtzeit-Status",
+          "en": "Two-sided platform with real-time state"
+        },
+        "out": {
+          "de": "Bleibt bei 10× so vielen Zeilen schnell – die Indizes waren zuerst da.",
+          "en": "It stays fast at 10× the rows, because the indexes were there first."
+        },
+        "points": {
+          "de": [
+            "Zustand in Echtzeit über WebSockets, nicht über Neuladen",
+            "Zwei Nutzerseiten mit getrennten Rechten und Ansichten",
+            "Indizes und Abfragen vor dem ersten Datensatz geplant",
+            "Auszahlungen und Provisionen nachvollziehbar protokolliert"
+          ],
+          "en": [
+            "Real-time state over WebSockets, not page reloads",
+            "Two user sides with separate permissions and views",
+            "Indexes and queries planned before the first record",
+            "Payouts and commissions logged so they can be traced"
+          ]
+        },
+        "hint": {
+          "de": "Echtzeit",
+          "en": "Real-time"
+        }
+      },
+      {
+        "tag": {
+          "de": "Gründerinnen & Gründer",
+          "en": "Any founder"
+        },
+        "title": {
+          "de": "Ein MVP, das den Kontakt mit Nutzern überlebt",
+          "en": "An MVP that survives contact with users"
+        },
+        "out": {
+          "de": "Kein Wegwerf-Build, keine zweite erste Version.",
+          "en": "No throwaway build, no second first version."
+        },
+        "points": {
+          "de": [
+            "Klickbarer Prototyp in Woche eins – vor der ersten Zeile Backend",
+            "Nur die Funktionen, die Ihre Annahme prüfen",
+            "Analytik eingebaut: Sie sehen, was benutzt wird",
+            "Die Codebasis trägt Version zwei, ohne Neuanfang"
+          ],
+          "en": [
+            "Clickable prototype in week one — before the first line of backend",
+            "Only the features that test your assumption",
+            "Analytics built in: you see what gets used",
+            "The codebase carries version two without starting over"
+          ]
+        },
+        "hint": {
+          "de": "MVP",
+          "en": "MVP"
+        }
+      },
+      {
+        "tag": "Scale-up",
+        "title": {
+          "de": "Die Rettung einer Codebasis, die niemand anfassen will",
+          "en": "The rescue of a codebase nobody wants to touch"
+        },
+        "out": {
+          "de": "Es wird wieder geliefert – ohne Neustart auf der leeren Seite.",
+          "en": "Shipping resumes without a blank-page restart."
+        },
+        "points": {
+          "de": [
+            "Bestandsaufnahme mit Risiken, Kosten und Reihenfolge – vor dem Angebot",
+            "Tests um die Stellen, die niemand anfassen will",
+            "Schrittweise Ablösung im Betrieb, kein Stillstand für Monate",
+            "Übergabe an Ihr Team mit Dokumentation, die jemand liest"
+          ],
+          "en": [
+            "An audit with risks, cost and order of work — before the quote",
+            "Tests around the parts nobody wants to touch",
+            "Step-by-step replacement while it stays live, no months of freeze",
+            "Handover with documentation someone actually reads"
+          ]
+        },
+        "hint": {
+          "de": "Übernahme",
+          "en": "Takeover"
+        }
+      },
+      {
+        "tag": "Ops / Growth",
+        "title": {
+          "de": "Ein Performance-Durchgang, der in den Zahlen sichtbar wird",
+          "en": "A performance pass that shows up in the numbers"
+        },
+        "out": {
+          "de": "Grüne Vitals, gehalten – erzwungen von der Pipeline, nicht vom guten Willen.",
+          "en": "Green vitals, held — enforced by the pipeline, not by goodwill."
+        },
+        "points": {
+          "de": [
+            "Messung an echten Nutzerdaten, nicht am Laborwert",
+            "Lighthouse-Budget in der CI – der Build bricht bei Rückschritt",
+            "Bilder, Schriften und Bundles auf Größe geprüft",
+            "Ein Bericht mit Vorher und Nachher, den Sie weitergeben können"
+          ],
+          "en": [
+            "Measured on real user data, not a lab score",
+            "Lighthouse budget in CI — the build fails on regression",
+            "Images, fonts and bundles checked for weight",
+            "A before-and-after report you can pass on"
+          ]
+        },
+        "hint": {
+          "de": "Performance",
+          "en": "Performance"
+        }
+      }
+    ],
+    "caps": [
+      {
+        "title": {
+          "de": "Ein moderner, typisierter Stack",
+          "en": "A modern, typed stack"
+        },
+        "text": {
+          "de": "React und Next.js mit TypeScript von Ende zu Ende, Server Components, App Router, typisierte Datenschicht mit Prisma oder Drizzle auf PostgreSQL. Langweilig mit Absicht: großer Talentpool, lange Unterstützung.",
+          "en": "React and Next.js with TypeScript end to end, server components, the App Router, a typed data layer with Prisma or Drizzle on PostgreSQL. Boring on purpose: a huge talent pool, long support."
+        }
+      },
+      {
+        "title": {
+          "de": "Core Web Vitals, grün ab Tag eins",
+          "en": "Core Web Vitals, green from day one"
+        },
+        "text": {
+          "de": "Performance ist eine Architekturentscheidung: kleine Bundles, indizierte Abfragen statt N+1, Caching – und ein Lighthouse-Budget in der CI, das eine Regression den Build kostet.",
+          "en": "Performance is an architecture decision: small bundles, indexed queries instead of N+1 loops, caching — and a Lighthouse budget in CI so a regression fails the build."
+        }
+      },
+      {
+        "title": {
+          "de": "Architektur, die skaliert",
+          "en": "Architecture that scales"
+        },
+        "text": {
+          "de": "Saubere Datenschicht, typisierte APIs (tRPC oder REST), echte Auth und Rollen – so gebaut, dass MVP und skalierte App dieselbe Codebasis sind.",
+          "en": "A clean data layer, typed APIs (tRPC or REST), real auth and roles — designed so the MVP and the scaled app are the same codebase."
+        }
+      },
+      {
+        "title": {
+          "de": "Echtzeit & Integrationen",
+          "en": "Real-time & integrations"
+        },
+        "text": {
+          "de": "Live-Updates über Websockets, Stripe für Zahlungen und Abos, OAuth, Magic Links, SSO – Webhooks, Retries und Idempotenz inklusive, damit Integrationen nicht um 2 Uhr nachts klingeln.",
+          "en": "Live updates over websockets, Stripe for payments and subscriptions, OAuth, magic links, SSO — webhooks, retries and idempotency handled, so integrations don’t page you at 2am."
+        }
+      }
+    ],
+    "steps": [
+      {
+        "title": {
+          "de": "Das Eigentliche scopen",
+          "en": "Scope the real thing"
+        },
+        "text": {
+          "de": "Ein Arbeitstermin zum Produkt: Kernflüsse, Datenmodell, was MVP ist und was später kommt. Sie bekommen einen Bauplan und einen Festpreis in 48 Stunden.",
+          "en": "A working session on the product: core flows, data model, what’s MVP and what’s later. You get a build plan and a fixed quote within 48 hours."
+        }
+      },
+      {
+        "title": {
+          "de": "Klickbarer Prototyp – 7 Tage",
+          "en": "Clickable prototype — 7 days"
+        },
+        "text": {
+          "de": "Innerhalb einer Woche ein echtes, klickbares Frontend auf dem eigentlichen Stack: die Kernscreens, um Gefühl und Richtung zu beurteilen.",
+          "en": "Within a week a real, clickable front end on the actual stack: the key screens and flows, to judge feel and direction."
+        }
+      },
+      {
+        "title": {
+          "de": "Bauen, mit wöchentlichen Demos",
+          "en": "Build, with weekly demos"
+        },
+        "text": {
+          "de": "Datenschicht, APIs, Auth, Integrationen – offen gebaut, jede Woche eine funktionierende Demo. Getestet (Vitest, Playwright) und Vitals-budgetiert in der CI.",
+          "en": "Data layer, APIs, auth, integrations — built in the open with a working demo every week. Tested (Vitest, Playwright) and vitals-budgeted in CI."
+        }
+      },
+      {
+        "title": {
+          "de": "Lighthouse-grün liefern & übergeben",
+          "en": "Ship Lighthouse-green & hand over"
+        },
+        "text": {
+          "de": "Gestartet, dokumentiert, Ihr Eigentum, kein Lock-in – mit grünen Vitals. Self-hosted oder Cloud. Plus 30 Tage Support.",
+          "en": "Launched, documented, yours to keep, no lock-in — with the vitals green. Self-hosted or cloud. Plus 30 days of support."
+        }
+      }
+    ],
+    "faqs": [
+      {
+        "q": {
+          "de": "Auf welchem Stack bauen Sie – und warum genau dem?",
+          "en": "What stack do you build on, and why that one?"
+        },
+        "a": {
+          "de": "React und Next.js mit TypeScript auf PostgreSQL. Bewusst langweilig: In zwei Jahren finden Sie jemanden, der den Stack kennt und den Code ohne Archäologie liest.",
+          "en": "React and Next.js with TypeScript, on PostgreSQL. Deliberately boring: in two years you can hire someone who already knows this stack and can read the code without an archaeology phase."
+        }
+      },
+      {
+        "q": {
+          "de": "Wie bleibt es schnell, wenn es wächst?",
+          "en": "How do you keep it fast as it grows?"
+        },
+        "a": {
+          "de": "Kleine Bundles durch Server Components und Streaming, indizierte Abfragen und Caching statt N+1-Schleifen. Dann ein Lighthouse-Budget in der CI – die Regression scheitert im Build, nicht beim Launch.",
+          "en": "Small bundles through server components and streaming, indexed queries and caching instead of N+1 loops. Then a Lighthouse budget in CI — a regression fails the build instead of the launch."
+        }
+      },
+      {
+        "q": {
+          "de": "Übernehmen Sie eine bestehende oder Legacy-App?",
+          "en": "Can you take over an existing or legacy app?"
+        },
+        "a": {
+          "de": "Ja – und wir fangen nicht mit „Neu schreiben“ an. Erst lesen, Tests um die wichtigen Teile, dokumentieren, dann das reparieren, was wehtut. Ein Rewrite ist eine Entscheidung mit Belegen, nicht am ersten Tag.",
+          "en": "Yes, and we won’t open with “let’s rewrite it”. First we read it, get tests around the parts that matter and document what’s there. Then we fix what hurts. A rewrite is a decision you make with evidence, not on day one."
+        }
+      },
+      {
+        "q": {
+          "de": "Was kostet eine Web-App, und wie lange dauert sie?",
+          "en": "What does a web app cost, and how long does it take?"
+        },
+        "a": {
+          "de": "Ein MVP typischerweise 6–12 Wochen, etwas Klickbares in Woche eins. Nach dem ersten Gespräch ein Festpreis in 48 Stunden. Wenn Sie ehrlicherweise keine eigene App brauchen, sagen wir auch das.",
+          "en": "An MVP is typically 6–12 weeks; you see something clickable in week one. After a first conversation you get a fixed quote within 48 hours. If you don’t need a custom app for this, you get that answer too."
+        }
+      },
+      {
+        "q": {
+          "de": "Wem gehört der Code?",
+          "en": "Who owns the code?"
+        },
+        "a": {
+          "de": "Ihnen. Vollständiger Quellcode in Ihrem Repository, dokumentiert, kein Lock-in, keine Lizenz pro Nutzer. Die Übergabe ist so geschrieben, dass Ihr Team ohne uns weitermachen kann.",
+          "en": "You do. Full source in your repository, documented, no lock-in and no per-seat licence. The handover is written so your own team can pick it up without us in the room."
+        }
+      }
+    ],
+    "stack": [
+      "React",
+      "Next.js",
+      "TypeScript",
+      "Node.js",
+      "PostgreSQL",
+      "Prisma",
+      "tRPC",
+      "Tailwind",
+      "Vercel",
+      "Supabase",
+      "Redis",
+      "Stripe",
+      "Playwright",
+      "Vitest",
+      "Docker"
+    ]
+  },
+  "web": {
+    "stats": [
+      {
+        "v": {
+          "de": "3–6 Wo.",
+          "en": "3–6 wk"
+        },
+        "l": {
+          "de": "vom Briefing bis live",
+          "en": "from brief to live"
+        }
+      },
+      {
+        "v": "4×100",
+        "l": {
+          "de": "Lighthouse – gemessen, nicht behauptet",
+          "en": "Lighthouse — measured, not claimed"
+        }
+      },
+      {
+        "v": "0",
+        "l": {
+          "de": "Page-Builder, Themes, Plugins",
+          "en": "page builders, themes, plugins"
+        }
+      }
+    ],
+    "useCases": [
+      {
+        "tag": {
+          "de": "B2B / Industrie",
+          "en": "B2B / Industry"
+        },
+        "title": {
+          "de": "Eine Unternehmensseite, die senior wirkt",
+          "en": "A corporate site that reads as senior"
+        },
+        "out": {
+          "de": "Sie wirken nicht länger kleiner, als Sie sind.",
+          "en": "You stop looking smaller than you are."
+        },
+        "points": {
+          "de": [
+            "Referenzen, Zahlen und Zertifikate oben statt im Untermenü",
+            "Typografie und Raster auf dem Niveau der Großen, ohne Template-Optik",
+            "Ansprechpartner mit Gesicht und Durchwahl statt info@-Formular",
+            "Unter einer Sekunde geladen – auch im Werks-WLAN"
+          ],
+          "en": [
+            "References, numbers and certificates up top, not buried in a submenu",
+            "Type and grid at the level of the big players, without template looks",
+            "A named contact with a face and a direct line, not an info@ form",
+            "Loads in under a second — even on factory Wi-Fi"
+          ]
+        },
+        "hint": {
+          "de": "Vertrauen",
+          "en": "Trust"
+        }
+      },
+      {
+        "tag": {
+          "de": "Beratung / Dienstleistung",
+          "en": "Professional services"
+        },
+        "title": {
+          "de": "Eine Seite, die vor dem Anruf antwortet",
+          "en": "A site that answers before the call"
+        },
+        "out": {
+          "de": "Weniger, bessere Gespräche – die, die Ihre Zeit wert sind.",
+          "en": "Fewer, better conversations — the ones worth your time."
+        },
+        "points": {
+          "de": [
+            "Leistungen mit Umfang und Größenordnung, nicht nur Schlagworte",
+            "Eine FAQ, die die drei teuersten Rückfragen vorwegnimmt",
+            "Terminbuchung direkt auf der Seite statt Mail-Pingpong",
+            "Fallbeispiele mit Ergebnis, nicht mit Logo-Wand"
+          ],
+          "en": [
+            "Services with scope and ballpark, not just buzzwords",
+            "An FAQ that pre-empts the three most expensive questions",
+            "Booking right on the page instead of email ping-pong",
+            "Case examples with an outcome, not a wall of logos"
+          ]
+        },
+        "hint": {
+          "de": "Vorqualifizierung",
+          "en": "Pre-qualifying"
+        }
+      },
+      {
+        "tag": {
+          "de": "Produkt / Launch",
+          "en": "Product / Launch"
+        },
+        "title": {
+          "de": "Eine Landingpage, die konvertiert statt Preise zu gewinnen",
+          "en": "A landing page built to convert, not to win awards"
+        },
+        "out": {
+          "de": "Ladezeit unter einer Sekunde – und eine Zahl, auf die Sie zeigen können.",
+          "en": "Sub-second loads, and a number you can point at."
+        },
+        "points": {
+          "de": [
+            "Ein Ziel pro Seite, ein Button, keine konkurrierenden Wege",
+            "Der sichtbare Bereich steht in unter einer Sekunde, auch auf 4G",
+            "Für A/B-Tests gebaut: Varianten ohne Neubau",
+            "Messbar ohne Cookie-Banner-Zwang, serverseitig ausgewertet"
+          ],
+          "en": [
+            "One goal per page, one button, no competing paths",
+            "The visible area is there in under a second, even on 4G",
+            "Built for A/B tests: variants without a rebuild",
+            "Measurable without forcing a cookie banner, evaluated server-side"
+          ]
+        },
+        "hint": {
+          "de": "Conversion",
+          "en": "Conversion"
+        }
+      },
+      {
+        "tag": {
+          "de": "Jede Seite",
+          "en": "Any site"
+        },
+        "title": {
+          "de": "Ein Relaunch, der den Score repariert, nicht die Farbe",
+          "en": "A rebuild that fixes the score, not the paint"
+        },
+        "out": {
+          "de": "Perfektes Lighthouse – die Zahl, nicht das Gefühl.",
+          "en": "Perfect Lighthouse — the number, not the vibe."
+        },
+        "points": {
+          "de": [
+            "Audit zuerst: was ist kaputt, was ist nur langsam",
+            "Weiterleitungen sauber gemappt – keine verlorenen Rankings",
+            "Bilder, Schriften und Skripte neu bemessen statt nur komprimiert",
+            "Vorher/nachher messbar: Lighthouse und echte Nutzerdaten"
+          ],
+          "en": [
+            "Audit first: what is broken and what is merely slow",
+            "Redirects mapped cleanly — no rankings lost on the way",
+            "Images, fonts and scripts re-sized, not just compressed",
+            "Before and after in numbers: Lighthouse plus real user data"
+          ]
+        },
+        "hint": {
+          "de": "Relaunch",
+          "en": "Rebuild"
+        }
+      },
+      {
+        "tag": {
+          "de": "Marketing-Teams",
+          "en": "Marketing teams"
+        },
+        "title": {
+          "de": "Ein CMS, das Ihr Team wirklich benutzt",
+          "en": "A CMS your team can actually use"
+        },
+        "out": {
+          "de": "Sie ändern es selbst – ohne Ticket.",
+          "en": "You edit it yourself, without filing a ticket."
+        },
+        "points": {
+          "de": [
+            "Felder statt Freitext-Chaos: jede Seite hat eine Struktur",
+            "Vorschau vor dem Veröffentlichen, Rückgängig inklusive",
+            "Rollen für Redaktion, Freigabe und Technik getrennt",
+            "Rebuild läuft automatisch – niemand muss deployen"
+          ],
+          "en": [
+            "Fields instead of free-text chaos: every page has a structure",
+            "Preview before publishing, with undo included",
+            "Separate roles for editing, approval and engineering",
+            "Rebuilds run automatically — nobody has to deploy"
+          ]
+        },
+        "hint": {
+          "de": "Redaktion",
+          "en": "Editing"
+        }
+      }
+    ],
+    "caps": [
+      {
+        "title": {
+          "de": "Lighthouse 100, Core Web Vitals grün",
+          "en": "Lighthouse 100, Core Web Vitals green"
+        },
+        "text": {
+          "de": "Ladezeit unter einer Sekunde, kein Layout-Shift, nichts Render-Blockierendes. Schlankes HTML, kritisches CSS inline, Bilder in modernen Formaten und exakt bemessen.",
+          "en": "Sub-second loads, no layout shift, no render-blocking junk. Lean HTML, critical CSS inlined, images in modern formats and sized exactly right."
+        }
+      },
+      {
+        "title": {
+          "de": "SEO ab Tag eins",
+          "en": "SEO from day one"
+        },
+        "text": {
+          "de": "Semantisches HTML, JSON-LD, echte Sitemap, saubere Meta- und Open-Graph-Daten – plus llms.txt, damit KI-Suche und agentische Browser Sie ebenfalls lesen.",
+          "en": "Semantic HTML, JSON-LD, a real sitemap, clean meta and Open Graph — plus llms.txt so AI search and agentic browsers can read you too."
+        }
+      },
+      {
+        "title": {
+          "de": "Design, das in einer Sekunde Vertrauen schafft",
+          "en": "Design that earns trust in a second"
+        },
+        "text": {
+          "de": "Individuell, nie Template. Typografie, Rhythmus und Bewegung wirken hochwertig und bewusst – auf dem Handy wie auf dem 32-Zoll-Monitor.",
+          "en": "Custom, never a template. Type, rhythm and motion feel premium and deliberate — the same on a phone as on a 32-inch monitor."
+        }
+      },
+      {
+        "title": {
+          "de": "Ein CMS, das Sie selbst bedienen",
+          "en": "A CMS you can edit yourself"
+        },
+        "text": {
+          "de": "Headless-CMS mit sauberem Admin und automatischen Rebuilds – oder rein statisch mit der gelegentlichen Änderung per E-Mail. Ihre Entscheidung, Ihr Eigentum.",
+          "en": "A headless CMS with a clean admin and automatic rebuilds — or pure static with the occasional email edit. Your call, yours to keep."
+        }
+      }
+    ],
+    "steps": [
+      {
+        "title": {
+          "de": "Botschaft & Struktur",
+          "en": "Message & structure"
+        },
+        "text": {
+          "de": "Ein Arbeitstermin: Mit wem sprechen Sie, was sollen die Leute tun? Wir planen die Seiten, die ihren Platz verdienen – und streichen die anderen.",
+          "en": "A working session on who you’re talking to and what you need them to do. We map the pages that earn their place — and cut the ones that don’t."
+        }
+      },
+      {
+        "title": {
+          "de": "Die erste Sekunde gestalten",
+          "en": "Design the first second"
+        },
+        "text": {
+          "de": "Ein eigenes Design für Ihre Marke – Schrift, Farbe, Rhythmus, Bewegung. Echte Screens statt Vorlage, iteriert, bis der erste Eindruck stimmt.",
+          "en": "A custom design built to your brand — type, colour, rhythm, motion. Real screens, not a stock template, iterated until the first impression is right."
+        }
+      },
+      {
+        "title": {
+          "de": "Schlank bauen, 100 erreichen",
+          "en": "Build lean, score 100"
+        },
+        "text": {
+          "de": "Handgeschrieben für Tempo und Suche: semantisches HTML, JSON-LD, optimierte Bilder, CMS bei Bedarf. Lighthouse wird während des Baus gemessen, nicht am Ende.",
+          "en": "Hand-coded for speed and search: semantic HTML, JSON-LD, optimised images, a CMS if you want one. We measure on Lighthouse as we go, not at the end."
+        }
+      },
+      {
+        "title": {
+          "de": "Live & übergeben",
+          "en": "Ship & hand over"
+        },
+        "text": {
+          "de": "Live auf Vercel oder Cloudflare, dokumentiert, Ihr Eigentum. Sie pflegen es selbst oder schicken uns die gelegentliche Änderung. Plus 30 Tage Support.",
+          "en": "Live on Vercel or Cloudflare, documented, yours to keep. You edit it yourself or send us the odd change. Plus 30 days of support."
+        }
+      }
+    ],
+    "faqs": [
+      {
+        "q": {
+          "de": "Wie garantieren Sie Tempo und den perfekten Lighthouse-Score?",
+          "en": "How do you guarantee the speed and the perfect Lighthouse score?"
+        },
+        "a": {
+          "de": "Indem wir während des Baus messen, nicht am Ende. Schlankes HTML, kritisches CSS inline, exakt bemessene Bilder. Der Beweis ist unsere eigene Seite: 100 auf allen vier Achsen – mit laufender Canvas-Engine.",
+          "en": "By measuring during the build instead of at the end. Lean HTML, critical CSS inlined, images sized exactly right. The proof is our own site: 100 on all four — with a canvas engine running."
+        }
+      },
+      {
+        "q": {
+          "de": "Bekommen wir ein CMS, um die Seite selbst zu pflegen?",
+          "en": "Do we get a CMS so we can edit the site ourselves?"
+        },
+        "a": {
+          "de": "Wenn Sie eins wollen, ja – Headless-CMS mit sauberem Admin und automatischen Rebuilds. Rein statisch mit Änderungen per E-Mail ist günstiger und schneller. Wir sagen Ihnen, was Ihre Seite wirklich braucht.",
+          "en": "If you want one, yes — a headless CMS with a clean admin and automatic rebuilds. Pure static with the occasional email edit is cheaper and faster. We’ll tell you which one your site actually needs."
+        }
+      },
+      {
+        "q": {
+          "de": "Ist SEO inklusive – oder eine eigene Rechnung?",
+          "en": "Is SEO included, or is that a separate bill?"
+        },
+        "a": {
+          "de": "Inklusive. Semantische Struktur, JSON-LD, Sitemap, saubere Meta-Daten und crawlbarer DOM-Text gehören zum Bau, nicht zum Upsell. Dazu llms.txt, damit KI-Suche Sie so klar liest wie Google.",
+          "en": "Included. Semantic structure, JSON-LD, sitemap, clean meta and crawlable DOM text are part of building the page, not an upsell. Plus llms.txt so AI search reads you as clearly as Google does."
+        }
+      },
+      {
+        "q": {
+          "de": "Was kostet eine Website, und wie lange dauert sie?",
+          "en": "What does a website cost, and how long does it take?"
+        },
+        "a": {
+          "de": "Typischerweise 3–6 Wochen vom Briefing bis live, echte Screens in Woche eins. Festpreis in 48 Stunden – eine echte Zahl. Eine kleine Seite beginnt im niedrigen fünfstelligen Bereich.",
+          "en": "Typically 3–6 weeks from brief to live; real screens in the first week. A fixed quote within 48 hours — a real number. A small site starts in the low five figures."
+        }
+      },
+      {
+        "q": {
+          "de": "Warum kein WordPress?",
+          "en": "Why not WordPress?"
+        },
+        "a": {
+          "de": "Weil das, was WordPress bequem macht, es auch langsam macht: Themes, Plugins, Datenbankabfragen für Inhalte, die sich nie ändern. Für eine Marketing-Seite ist handgeschrieben und statisch schneller, sicherer und günstiger im Betrieb.",
+          "en": "Because most of what makes WordPress convenient also makes it slow: themes, plugins and a database query for content that never changes. For a marketing site, hand-written and static is faster, safer and cheaper to run."
+        }
+      }
+    ],
+    "stack": [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "Astro",
+      "Next.js",
+      "Tailwind",
+      "Sanity",
+      "Headless CMS",
+      "Vercel",
+      "Cloudflare",
+      "JSON-LD",
+      "llms.txt",
+      "Lighthouse",
+      "WebP / AVIF"
+    ]
+  },
+  "software": {
+    "stats": [
+      {
+        "v": {
+          "de": "8–14 Wo.",
+          "en": "8–14 wk"
+        },
+        "l": {
+          "de": "typisch, vom Briefing bis live",
+          "en": "typical, brief to live"
+        }
+      },
+      {
+        "v": "48 h",
+        "l": {
+          "de": "bis zum Festpreis",
+          "en": "to a fixed quote"
+        }
+      },
+      {
+        "v": "0",
+        "l": {
+          "de": "Lizenzen pro Nutzer – der Code gehört Ihnen",
+          "en": "per-seat licences — the code is yours"
+        }
+      }
+    ],
+    "useCases": [
+      {
+        "tag": "Operations",
+        "title": {
+          "de": "Ein Ops-Dashboard mit den Zahlen von heute",
+          "en": "An ops dashboard with today’s numbers"
+        },
+        "out": {
+          "de": "Kein CSV mehr, das montags herumgeschickt wird.",
+          "en": "No more stale CSV emailed round on Mondays."
+        },
+        "points": {
+          "de": [
+            "Kennzahlen direkt aus ERP, Datenbank und Maschinendaten, stündlich aktualisiert",
+            "Rollen getrennt: Werk sieht die eigene Linie, die Leitung alles",
+            "Grenzwerte mit Alarm per Mail oder Teams, bevor jemand nachfragt",
+            "Export nach Excel bleibt – für die Runden, die das weiter brauchen"
+          ],
+          "en": [
+            "Metrics straight from the ERP, database and machine data, refreshed hourly",
+            "Roles kept apart: a plant sees its own line, management sees all of it",
+            "Thresholds that alert by email or Teams before anyone has to ask",
+            "Excel export stays — for the meetings that still need it"
+          ]
+        },
+        "hint": {
+          "de": "Kennzahlen",
+          "en": "Metrics"
+        }
+      },
+      {
+        "tag": {
+          "de": "Back-Office",
+          "en": "Back office"
+        },
+        "title": {
+          "de": "Das interne Tool, das die Tabelle ersetzt",
+          "en": "The internal tool that replaces the spreadsheet"
+        },
+        "out": {
+          "de": "Eine Version der Wahrheit – und ein Audit-Trail.",
+          "en": "One version of the truth, and an audit trail."
+        },
+        "points": {
+          "de": [
+            "Eingaben validiert, statt auf Disziplin in Zellen zu hoffen",
+            "Jede Änderung protokolliert: wer, wann, was – nachträglich prüfbar",
+            "Rechte pro Feld, nicht pro Datei im Netzlaufwerk",
+            "Migration der bestehenden Tabelle inklusive, mit Altdaten"
+          ],
+          "en": [
+            "Input validated instead of relying on discipline in cells",
+            "Every change logged: who, when, what — auditable after the fact",
+            "Permissions per field, not per file on a shared drive",
+            "Migration of the existing spreadsheet included, historic data and all"
+          ]
+        },
+        "hint": {
+          "de": "Nachvollziehbar",
+          "en": "Traceable"
+        }
+      },
+      {
+        "tag": {
+          "de": "Außendienst / Service",
+          "en": "Field / Service"
+        },
+        "title": {
+          "de": "Ein Werkzeug, das fern vom Schreibtisch funktioniert",
+          "en": "A tool that works away from the desk"
+        },
+        "out": {
+          "de": "Papierkram vor Ort erledigt, nicht abends nachgetippt.",
+          "en": "Paperwork done on site, not re-typed that evening."
+        },
+        "points": {
+          "de": [
+            "Offline nutzbar: erfassen ohne Netz, synchronisieren, sobald es geht",
+            "Für Handschuhe und Sonnenlicht gebaut – große Ziele, hoher Kontrast",
+            "Fotos, Unterschrift und Standort direkt am Vorgang",
+            "Läuft im Browser, keine App-Store-Freigabe nötig"
+          ],
+          "en": [
+            "Works offline: capture without a signal, sync when there is one",
+            "Built for gloves and sunlight — large targets, high contrast",
+            "Photos, signature and location attached to the job itself",
+            "Runs in the browser, no app-store review needed"
+          ]
+        },
+        "hint": {
+          "de": "Offline-fähig",
+          "en": "Offline-ready"
+        }
+      },
+      {
+        "tag": "ERP / CRM",
+        "title": {
+          "de": "Eine Integration zwischen zwei Inseln",
+          "en": "An integration between two islands"
+        },
+        "out": {
+          "de": "Ihre Werkzeuge teilen Daten, statt jedes für sich zu leben.",
+          "en": "Your tools start sharing data instead of each living alone."
+        },
+        "points": {
+          "de": [
+            "SAP, Legacy-SOAP oder CSV-Drop – wir nehmen, was da ist",
+            "Fehlerfälle geplant: Wiederholungen, Warteschlange, keine stillen Verluste",
+            "Feldzuordnung dokumentiert, damit sie ohne uns änderbar bleibt",
+            "Testlauf gegen echte Daten, bevor irgendetwas schreibt"
+          ],
+          "en": [
+            "SAP, legacy SOAP or a CSV drop — we take what is there",
+            "Failure paths planned: retries, a queue, no silent losses",
+            "Field mapping documented so it stays changeable without us",
+            "A dry run against real data before anything writes"
+          ]
+        },
+        "hint": {
+          "de": "Schnittstelle",
+          "en": "Integration"
+        }
+      },
+      {
+        "tag": {
+          "de": "Finanzen / Verwaltung",
+          "en": "Finance / Admin"
+        },
+        "title": {
+          "de": "Der manuelle Prozess, übergeben an einen Zeitplan",
+          "en": "The manual process, handed to a schedule"
+        },
+        "out": {
+          "de": "Jede Woche Stunden zurück – und es vergisst nie.",
+          "en": "Hours back every week, and it never forgets."
+        },
+        "points": {
+          "de": [
+            "Der Ablauf wird zuerst aufgezeichnet, dann automatisiert – nicht umgekehrt",
+            "Zeitplan mit Protokoll: jeder Lauf ist sichtbar und wiederholbar",
+            "Freigabe bleibt bei Menschen, wo Geld oder Recht im Spiel ist",
+            "Rechnet sich meist im ersten Quartal, gemessen an Ihren Stunden"
+          ],
+          "en": [
+            "The process is recorded first and automated second, not the other way round",
+            "A schedule with a log: every run visible and repeatable",
+            "Approval stays with people wherever money or law is involved",
+            "Usually pays for itself in the first quarter, measured in your hours"
+          ]
+        },
+        "hint": {
+          "de": "Automatisierung",
+          "en": "Automation"
+        }
+      }
+    ],
+    "caps": [
+      {
+        "title": {
+          "de": "Dashboards & interne Tools",
+          "en": "Dashboards & internal tools"
+        },
+        "text": {
+          "de": "Admin-Panels, Ops-Dashboards und Back-Office-Werkzeuge – schnell, rollenbasiert, für den echten Ablauf gebaut. Echtzeitzahlen aus Ihrer eigenen Datenbank.",
+          "en": "Admin panels, ops dashboards and back-office tools — fast, role-aware and built for the actual workflow. Real-time numbers from your own database."
+        },
+        "icon": "layers",
+        "lead": {
+          "de": "Ein Bildschirm, auf dem steht, was heute wirklich los ist – aus Ihren Systemen, nicht aus einer Kopie.",
+          "en": "One screen that shows what is actually happening today — from your systems, not from a copy."
+        },
+        "bullets": {
+          "de": [
+            "Rollen und Rechte pro Ansicht, vom Werk bis zur Geschäftsführung",
+            "Zahlen live aus Datenbank und ERP, kein nächtlicher Export",
+            "Filter, Suche und Export, die auch bei 500.000 Zeilen antworten",
+            "In der Halle auf dem Tablet so bedienbar wie am Schreibtisch"
+          ],
+          "en": [
+            "Roles and permissions per view, from the shop floor to the board",
+            "Numbers live from the database and ERP, no nightly export",
+            "Filter, search and export that still respond at 500,000 rows",
+            "As usable on a tablet in the hall as on a desktop"
+          ]
+        },
+        "meta": {
+          "de": [
+            {
+              "k": "Typisch",
+              "v": "4–8 Wochen"
+            },
+            {
+              "k": "Daten",
+              "v": "live, aus der Quelle"
+            },
+            {
+              "k": "Betrieb",
+              "v": "Cloud oder On-Premise"
+            }
+          ],
+          "en": [
+            {
+              "k": "Typical",
+              "v": "4–8 weeks"
+            },
+            {
+              "k": "Data",
+              "v": "live, from the source"
+            },
+            {
+              "k": "Hosting",
+              "v": "cloud or on-premise"
+            }
+          ]
+        },
+        "stack": [
+          "React",
+          "TypeScript",
+          "PostgreSQL",
+          "Redis",
+          "Docker"
+        ]
+      },
+      {
+        "title": {
+          "de": "Integrationen, die Ihren Stack sprechen",
+          "en": "Integrations that speak your stack"
+        },
+        "text": {
+          "de": "ERP, CRM, REST und SOAP, OpenAPI-Spezifikationen und die Altsysteme, die niemand anfassen will. Wo es keine saubere API gibt, bauen wir einen Adapter gegen Datenbank oder Export.",
+          "en": "ERP, CRM, REST and SOAP APIs, OpenAPI specs and the legacy systems nobody wants to touch. Where there’s no clean API we build an adapter against the database or the export."
+        },
+        "icon": "terminal",
+        "lead": {
+          "de": "Zwei Systeme, die bisher nichts voneinander wussten, tauschen ab dann verlässlich Daten aus.",
+          "en": "Two systems that knew nothing about each other start exchanging data reliably."
+        },
+        "bullets": {
+          "de": [
+            "REST, SOAP, OData, OpenAPI – oder ein Adapter direkt auf der Datenbank",
+            "Idempotent geschrieben: ein doppelter Aufruf erzeugt keinen zweiten Auftrag",
+            "Wiederholungen, Warteschlange und Alarm, wenn eine Seite ausfällt",
+            "Jeder Datenfluss protokolliert und im Nachhinein prüfbar"
+          ],
+          "en": [
+            "REST, SOAP, OData, OpenAPI — or an adapter straight onto the database",
+            "Written idempotently: a duplicate call never creates a second order",
+            "Retries, a queue and an alert when one side goes down",
+            "Every data flow logged and auditable after the fact"
+          ]
+        },
+        "meta": {
+          "de": [
+            {
+              "k": "Typisch",
+              "v": "2–10 Tage je System"
+            },
+            {
+              "k": "Auth",
+              "v": "OAuth, API-Key, mTLS"
+            },
+            {
+              "k": "Betrieb",
+              "v": "mit Monitoring"
+            }
+          ],
+          "en": [
+            {
+              "k": "Typical",
+              "v": "2–10 days per system"
+            },
+            {
+              "k": "Auth",
+              "v": "OAuth, API key, mTLS"
+            },
+            {
+              "k": "Running",
+              "v": "with monitoring"
+            }
+          ]
+        },
+        "stack": [
+          "REST",
+          "SOAP",
+          "OpenAPI",
+          "Webhooks",
+          "MCP"
+        ]
+      },
+      {
+        "title": {
+          "de": "Den manuellen Prozess automatisieren",
+          "en": "Automate the manual process"
+        },
+        "text": {
+          "de": "Copy-Paste zwischen Systemen, nächtliche Abstimmung, der handgebaute Bericht – übergeben an geplante Jobs und Pipelines. Wo es passt, nimmt KI die Fleißarbeit ab.",
+          "en": "The copy-paste between systems, the nightly reconciliation, the report someone rebuilds by hand — handed to scheduled jobs and pipelines. Where it fits, AI removes the busywork too."
+        },
+        "icon": "zap",
+        "lead": {
+          "de": "Erst wird der Ablauf aufgezeichnet, wie er wirklich läuft. Dann übernimmt ihn ein Zeitplan.",
+          "en": "First the process gets recorded as it actually runs. Then a schedule takes it over."
+        },
+        "bullets": {
+          "de": [
+            "Geplante Jobs statt Erinnerungen im Kalender",
+            "Freigaben bleiben bei Menschen, wo Geld oder Recht im Spiel ist",
+            "KI übernimmt Einordnen, Auslesen und Vorformulieren – mit Prüfschritt",
+            "Jeder Lauf sichtbar: was lief, was fehlte, was wiederholt wurde"
+          ],
+          "en": [
+            "Scheduled jobs instead of reminders in a calendar",
+            "Approvals stay with people wherever money or law is involved",
+            "AI handles sorting, extracting and drafting — with a review step",
+            "Every run visible: what ran, what was missing, what was retried"
+          ]
+        },
+        "meta": {
+          "de": [
+            {
+              "k": "Typisch",
+              "v": "1–4 Wochen"
+            },
+            {
+              "k": "Läuft",
+              "v": "stündlich bis nächtlich"
+            },
+            {
+              "k": "Ersparnis",
+              "v": "in Stunden gemessen"
+            }
+          ],
+          "en": [
+            {
+              "k": "Typical",
+              "v": "1–4 weeks"
+            },
+            {
+              "k": "Runs",
+              "v": "hourly to nightly"
+            },
+            {
+              "k": "Saving",
+              "v": "measured in hours"
+            }
+          ]
+        },
+        "stack": [
+          "Python",
+          "Cron",
+          "Queues",
+          "LLM-API",
+          "Audit-Log"
+        ]
+      },
+      {
+        "title": {
+          "de": "Gebaut, um zu bleiben",
+          "en": "Built to last"
+        },
+        "text": {
+          "de": "Dokumentiert, getestet, Ihr Eigentum – Quellcode in Ihrem Repository, kein Lock-in, keine Lizenz pro Nutzer. Eine Übergabe, die Ihr eigenes Team aufnehmen kann.",
+          "en": "Documented, tested and yours to keep — full source in your repository, no lock-in and no per-seat licence. A handover your own team can pick up."
+        },
+        "icon": "shield",
+        "lead": {
+          "de": "Am Ende steht nicht nur eine laufende Anwendung, sondern etwas, das Ihr Team weiterführen kann.",
+          "en": "At the end there is not just a running application, but something your team can carry on."
+        },
+        "bullets": {
+          "de": [
+            "Quellcode in Ihrem Repository, ab dem ersten Commit",
+            "Tests für alles, was Geld oder Bestände berührt",
+            "Dokumentation für Betrieb, Deployment und Notfall",
+            "Keine Lizenz pro Nutzer, kein Vendor-Lock-in"
+          ],
+          "en": [
+            "Source code in your repository from the first commit",
+            "Tests for everything that touches money or stock",
+            "Documentation for operations, deployment and emergencies",
+            "No per-seat licence, no vendor lock-in"
+          ]
+        },
+        "meta": {
+          "de": [
+            {
+              "k": "Eigentum",
+              "v": "vollständig bei Ihnen"
+            },
+            {
+              "k": "Übergabe",
+              "v": "Workshop und Doku"
+            },
+            {
+              "k": "Betreuung",
+              "v": "optional, monatlich"
+            }
+          ],
+          "en": [
+            {
+              "k": "Ownership",
+              "v": "entirely yours"
+            },
+            {
+              "k": "Handover",
+              "v": "workshop and docs"
+            },
+            {
+              "k": "Support",
+              "v": "optional, monthly"
+            }
+          ]
+        },
+        "stack": [
+          "Git",
+          "CI/CD",
+          "Docker",
+          "Terraform",
+          "Tests"
+        ]
+      }
+    ],
+    "steps": [
+      {
+        "title": {
+          "de": "Den echten Prozess entdecken",
+          "en": "Discover the real process"
+        },
+        "text": {
+          "de": "Wir sitzen bei den Menschen, die die Arbeit machen, und erfassen, wie sie wirklich läuft – Systeme, Übergaben, manuelle Schritte. Ein Bauplan aus der Realität, nicht aus dem Organigramm.",
+          "en": "We sit with the people who do the work and map how it really runs — systems, handoffs, manual steps. A build plan grounded in reality, not in an org chart."
+        }
+      },
+      {
+        "title": {
+          "de": "Prototyp",
+          "en": "Prototype"
+        },
+        "text": {
+          "de": "Ein klickbarer Prototyp des Kernflusses, bevor wir den vollen Bau beginnen – Kurskorrektur an etwas Sichtbarem, nicht an einer 40-seitigen Spezifikation.",
+          "en": "A clickable prototype of the core flow before we commit to the full build — you correct course on something you can click, not on a 40-page spec."
+        }
+      },
+      {
+        "title": {
+          "de": "Bauen, mit wöchentlichen Demos",
+          "en": "Build, with weekly demos"
+        },
+        "text": {
+          "de": "Gebaut gegen Ihre echten Daten und Integrationen, jede Woche funktionierende Software. Kein Big-Bang am Ende – Sie steuern durchgehend mit.",
+          "en": "Built against your real data and integrations, working software every week. No big-bang reveal at the end — you steer the whole way."
+        }
+      },
+      {
+        "title": {
+          "de": "Liefern & übergeben",
+          "en": "Ship & hand over"
+        },
+        "text": {
+          "de": "Deployt, wo Ihre Daten liegen – Cloud oder On-Premise – mit dokumentierter Architektur, Quellcode in Ihrem Repository und sauberer Übergabe. Plus 30 Tage Support.",
+          "en": "Deployed where your data lives — cloud or on-prem — with documented architecture, the source in your repository and a proper handover. Plus 30 days of support."
+        }
+      }
+    ],
+    "faqs": [
+      {
+        "q": {
+          "de": "Integrieren Sie unser ERP, CRM und unsere Altsysteme?",
+          "en": "Can you integrate with our existing ERP, CRM and legacy systems?"
+        },
+        "a": {
+          "de": "Ja – das ist der Großteil der Arbeit. ERP, CRM, REST und SOAP, OpenAPI und die Altsysteme, die niemand anfassen will. Ohne saubere API bauen wir einen Adapter gegen Datenbank oder Export.",
+          "en": "Yes — that’s most of the work. ERP, CRM, REST and SOAP, OpenAPI specs and the legacy systems nobody wants to touch. Where there’s no clean API we build an adapter against the database or the export."
+        }
+      },
+      {
+        "q": {
+          "de": "On-Premise oder Cloud – was müssen wir wählen?",
+          "en": "On-prem or cloud — which do we have to choose?"
+        },
+        "a": {
+          "de": "Was Ihre Daten verlangen. On-Premise, wenn Residenz oder Richtlinien es fordern, Cloud, wenn nicht. Eine Entscheidung, die wir mit Ihnen treffen – die Architektur ändert sich nicht.",
+          "en": "Whichever your data demands. On-prem when residency or policy requires it, cloud when it doesn’t. A decision we make with you — and the architecture doesn’t change either way."
+        }
+      },
+      {
+        "q": {
+          "de": "Wem gehört der Code – Ihnen oder uns?",
+          "en": "Who owns the code — you or us?"
+        },
+        "a": {
+          "de": "Ihnen. Vollständiger Quellcode in Ihrem Repository, dokumentiert, kein Lock-in, keine Lizenz pro Nutzer. Software, die Sie nicht verlassen können, gehört Ihnen nicht.",
+          "en": "You do. Full source in your repository, documented, no vendor lock-in and no per-seat licence. Software you can’t leave isn’t software you own."
+        }
+      },
+      {
+        "q": {
+          "de": "Was kostet es, und wie lange dauert es?",
+          "en": "What does it cost, and how long does it take?"
+        },
+        "a": {
+          "de": "Interne Software typischerweise 8–14 Wochen, ein klickbarer Prototyp des Kernflusses deutlich früher. Festpreis in 48 Stunden. Wenn ein Standardprodukt Ihnen besser dient, sagen wir das.",
+          "en": "Internal software is typically 8–14 weeks, with a clickable prototype of the core flow long before that. A fixed quote within 48 hours. If an off-the-shelf product would serve you better, we’ll say so."
+        }
+      },
+      {
+        "q": {
+          "de": "Was passiert, wenn Sie nicht mehr verfügbar sind?",
+          "en": "What happens when you’re not available anymore?"
+        },
+        "a": {
+          "de": "Genau deshalb dokumentieren und testen wir beim Bauen und wählen einen unaufgeregten Stack: Ihre eigene IT kann ihn besetzen. In der Praxis sind wir seit 2016 da – aber davon sollten Sie nie abhängen, und das tun Sie nicht.",
+          "en": "That’s exactly why we document and test as we build, and why the stack is deliberately unexciting: your own IT can staff it. In practice we’ve been here since 2016 — but you should never depend on that, and you don’t."
+        }
+      }
+    ],
+    "stack": [
+      "TypeScript",
+      "Node.js",
+      "Python",
+      "React",
+      "Next.js",
+      "PostgreSQL",
+      "REST",
+      "GraphQL",
+      "OpenAPI",
+      "Docker",
+      "Azure / AWS",
+      "SSO / OAuth",
+      "RBAC",
+      "Audit-Logging"
+    ]
+  }
+}

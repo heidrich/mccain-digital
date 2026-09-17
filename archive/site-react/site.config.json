@@ -1,0 +1,28 @@
+{
+  "_comment": [
+    "One switch, read by every generator and asserted by tools/verify_site.mjs.",
+    "",
+    "noindex: true keeps the whole site out of the search index while the",
+    "relaunch is unfinished - subpages missing, the hero client-logo row not",
+    "cleared with the clients, the legal wording still English on a German-first",
+    "site. It is emitted as <meta name=robots> by every generator AND as an",
+    "X-Robots-Tag header in vercel.json, because a header also covers files no",
+    "generator touches.",
+    "",
+    "GOING LIVE IS TWO THINGS, AND THE ORDER MATTERS.",
+    "",
+    "mccain-digital.com does NOT point at Vercel (measured 11.9.2026: nginx,",
+    "SiteGround, the English v2 site from June, indexable). So going live means",
+    "moving the domain AND turning this off - and the domain must move LAST:",
+    "pointing an indexed domain at a noindex site asks Google to remove it.",
+    "",
+    "  1. noindex -> false here",
+    "  2. remove the X-Robots-Tag line from vercel.json",
+    "  3. rebuild, then node tools/verify_site.mjs  (it fails if 1 and 2 disagree)",
+    "  4. add mccain-digital.com to the Vercel project, then move the DNS",
+    "  5. node tools/domain_check.mjs  - it passes only once the domain serves",
+    "     this build"
+  ],
+  "noindex": true,
+  "origin": "https://mccain-digital.com"
+}

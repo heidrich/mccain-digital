@@ -721,6 +721,8 @@ const MUST_404 = [
   "/archive/old3/services/ai-tools.html",
   "/archive/site-apache/upload/index.html",
   "/archive/site-v3/index.html",
+  "/archive/site-react/index.html",
+  "/archive/site-react/support.js",
   "/old/upload/index.html",
   "/old 2/index.html",
   "/internal/TODO.md",
