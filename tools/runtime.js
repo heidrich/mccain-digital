@@ -32,9 +32,12 @@
  * - The content-visibility gate: sections below the first screen (data-cv)
  *   are skipped by the browser until they come near; work that would read
  *   their layout waits for the browser's own signal (see "region").
- * - pixel-engine.js on demand, the stream notes from second ten on a wide
- *   screen with a mouse, and the workshop switch (v5/dev/) ten seconds after
- *   the visitor's first real action.
+ * - pixel-engine.js on demand, and the stream notes from second ten on a wide
+ *   screen with a mouse.
+ *
+ * THIS IS THE SOURCE. What ships is /runtime.js at the site root, the
+ * minified build of this file, written by tools/v5build.mjs the way
+ * motion-budget.js is - the commented source stays the source of record.
  * See docs/plans/2026-09-17-v5-alle-seiten-design.md. */
 (function () {
   "use strict";
@@ -834,72 +837,6 @@
   }
   function afterLoad(fn) { if (doc.readyState === "complete") fn(); else window.addEventListener("load", fn, { once: true }); }
 
-  /* THE WORKSHOP COMES LATE, AND ONLY FOR SOMEONE WHO IS HERE. Before it is
-   * asked for it costs nothing: no node, no request, no style. Its switch
-   * appears ten seconds after the visitor's first real action - a pointer
-   * press, a key, the wheel, a touch (owner, 16.9.2026); moving the mouse is
-   * not an action, Lighthouse never does any of these, and the measuring
-   * scripts scroll with scrollTo, which fires none of them. The band's button
-   * (data-v5-dev-open) is the invitation and opens at once. `?werkstatt` in
-   * the URL opens it at once, for showing it. */
-  function armDevMode() {
-    const EVENTS = ["pointerdown", "keydown", "wheel", "touchstart"];
-    let armed = true;
-    const disarm = () => { armed = false; for (const ev of EVENTS) window.removeEventListener(ev, onAct, true); };
-    const onAct = () => { disarm(); setTimeout(showDevSwitch, 10000); };
-    for (const ev of EVENTS) window.addEventListener(ev, onAct, { capture: true, passive: true });
-    doc.addEventListener("click", (e) => {
-      if (!e.target.closest || !e.target.closest("[data-v5-dev-open]")) return;
-      if (armed) disarm();
-      showDevSwitch();
-      loadDev();
-    });
-    if (/[?&]werkstatt(=|&|$)/.test(location.search)) { disarm(); showDevSwitch(); loadDev(); }
-  }
-  function showDevSwitch() {
-    if (doc.querySelector("[data-v5-dev-switch]")) return;
-    const css = doc.createElement("style");
-    css.id = "v5-dev-switch-css";
-    css.textContent =
-      ".v5-dev-switch{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:70;display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 14px 0 12px;border-radius:999px;background:#0A2540;color:#fff;font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;box-shadow:0 0 0 1px rgba(10,37,64,.08),0 10px 30px -12px rgba(10,37,64,.5);cursor:pointer;animation:v5DevIn .5s cubic-bezier(.2,.8,.2,1) both;transition:background .2s,transform .2s}" +
-      ".v5-dev-switch::before{content:'';width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#FFB46B,#FF5A8C,#C05CFF,#5FC3FF)}" +
-      ".v5-dev-switch:hover{background:#0A1F44;transform:translateY(-1px)}" +
-      ".v5-dev-switch:focus-visible{outline:2px solid #635BFF;outline-offset:3px}" +
-      ".v5-dev-switch[data-state=loading]{opacity:.7;cursor:progress}" +
-      ".v5-dev-switch[data-state=failed]{background:#425466}" +
-      "@keyframes v5DevIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}" +
-      "@media (prefers-reduced-motion:reduce){.v5-dev-switch{animation:none;transition:none}}";
-    doc.head.appendChild(css);
-    const b = doc.createElement("button");
-    b.type = "button";
-    b.className = "v5-dev-switch";
-    b.setAttribute("data-v5-dev-switch", "");
-    b.setAttribute("data-state", "idle");
-    b.setAttribute("aria-haspopup", "dialog");
-    b.setAttribute("aria-expanded", "false");
-    b.textContent = "Werkstatt";
-    b.addEventListener("click", loadDev);
-    doc.body.appendChild(b);
-  }
-  let devState = null;
-  function loadDev() {
-    if (devState) return;
-    devState = "loading";
-    const b = doc.querySelector("[data-v5-dev-switch]");
-    if (b) b.setAttribute("data-state", "loading");
-    const s = doc.createElement("script");
-    s.type = "module";
-    s.src = "/v5/dev/index.js";
-    s.onload = () => { devState = "ready"; };
-    s.onerror = () => {
-      /* A dropped connection must not cost the workshop for the rest of the visit: the next click tries again. */
-      devState = null;
-      s.remove();
-      if (b) { b.setAttribute("data-state", "failed"); b.textContent = "Werkstatt · erneut versuchen"; }
-    };
-    doc.head.appendChild(s);
-  }
-
   /* ------------------------------------------------------------------ boot */
   const mark = (n) => { try { performance.mark("v5:" + n); } catch (e) { /* no timing API */ } };
   /* The next task, without waiting for a frame: setTimeout(0) is clamped and
@@ -952,8 +889,8 @@
     schedule();
     armPixels();
     armNotes();
-    armDevMode();
-    /* For the workshop (v5/dev/): the page's logic and the template node behind an element. */
+    /* For the gates (tools/verify_site.mjs, tools/v5probe.mjs): the page's
+     * logic, the binder's counts, and the template node behind an element. */
     window.__v5 = {
       logic,
       stats,

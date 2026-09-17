@@ -1,5 +1,69 @@
 # Uebergabe — Stand 17. September 2026
 
+## ▶ STAND 17.9. NACHTS — RELEASE: KEIN `v5/` MEHR, DEV-MODUS RAUS, SKRIPTE MINIFIZIERT — ZUERST LESEN
+
+**Owner-Aufträge (17.9. spät):** „die html ist jetzt die main und wird so
+bleiben" · „schiebe die react seite im ordner ins archiv" · „mach die seite
+mal release fertig, und weg vom dev modus, damit die auf der vercel seite
+vernünftig rennt" · Squirrelscan installieren.
+
+**Was jetzt gilt:**
+
+- **Kein Ordner `v5/` mehr.** Der Binder ist `tools/runtime.js` (Quelle,
+  kommentiert) und wird vom Build minifiziert als `/runtime.js` an die Wurzel
+  geschrieben, genau wie `tools/motion-budget.js` → `/motion-budget.js`.
+  Jede Seite lädt `<route>logic.gen.js` (jetzt minifiziert) und `/runtime.js`.
+  Die Werkzeuge heißen weiter `v5build`, `v5probe`, `v5heights`, `v5cv`:
+  „v5" ist der Name dieser Bau-Generation, kein Pfad.
+- **Dev-Modus „Werkstatt" ist von der Seite genommen.** Kein Schalter nach
+  zehn Sekunden, kein Band nach „Arbeiten", kein `?werkstatt`, kein Modul
+  unter `/v5/dev/`. Der Code liegt unter `archive/werkstatt/` (README dort);
+  `tools/v5dev-check.mjs` ist gelöscht. `window.__v5` (logic, stats, bound,
+  describe) bleibt im Binder, die Tore brauchen es. Damit ist auch „KI-Dock
+  Stufe 2 mit Werkstatt-Eintrag" hinfällig.
+- **React-Ausgabe archiviert** unter `archive/site-react/` (aus `7612481`),
+  GitHub-Zweig `v5-preview` gelöscht (lokaler Tag `archive/v5-preview`).
+- **Minifizierung** (esbuild, `target: "esnext"`, kein Syntax-Lowering, damit
+  Class Fields Class Fields bleiben): `runtime.js` 47 → 23 KB roh, 15 → 7,9 KB
+  Brotli; `logic.gen.js` der Startseite 170 → 143 KB roh, 43,8 KB Brotli (der
+  Rest sind Texte, Icon-Pfade und Shader als Strings, die kein Minifier
+  kürzt).
+- **`noindex` bleibt.** Die Seite läuft auf der vercel.app-Adresse, die
+  Canonicals zeigen auf mccain-digital.com (dort kein Deployment zugewiesen),
+  die Texte sind vor der Textrunde. Indexieren ist der Go-live-Schritt aus
+  `site.config.json`.
+- **Höhen:** Ohne das Band haben sich die `data-cv`-Schlüssel der Startseite
+  verschoben; `v5heights --route /` neu gemessen (15/15 Blöcke, 17.9.).
+  Merke: nach jeder Änderung an der Blockfolge einer Seite Höhen neu messen,
+  der Build sagt es („deferred blocks WITHOUT measured height").
+
+**Squirrelscan:** installiert nach `~/.local/bin/squirrel` (v0.0.96,
+Installer des Herstellers). macOS bricht den Start mit SIGKILL ab, weil die
+Code-Signatur der Hersteller-Binary ungültig ist (`codesign --verify`: „code
+or signature have been modified"; der Release von GitHub ist byte-identisch,
+also der Build selbst). Abhilfe ist ein lokales Ad-hoc-Signieren, das der
+Sicherheitsfilter der Claude-Sitzung verweigert hat; der Owner führt es
+selbst aus: `codesign -s - --force ~/.squirrel/releases/0.0.96/squirrel`.
+Danach: `squirrel audit https://mccain-digital.vercel.app -C surface --refresh
+--format llm`. Alternative ohne Binary: app.squirrelscan.com.
+
+**Gemessen (17.9. nachts, lokal, ruhige Maschine):**
+
+| Seite (Lighthouse 13.4.1, PSI-Einstellungen, simulate, lokal 8897) | Leistung | FCP | LCP | TBT | CLS | SI |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `/` mobil | 99 | 0,9 s | 2,1 s | 9 ms | 0 | 1,1 s |
+| `/kontakt/` mobil | 99 | 0,8 s | 2,26 s | 0 ms | 0 | 0,9 s |
+| `/` Desktop | 100 | 0,26 s | 0,48 s | 0 ms | 0 | 0,36 s |
+
+Bytes (Brotli, `weigh.mjs`): `runtime.js` 7,9 KB, `logic.gen.js` der Startseite
+43,8 KB, `pixel-engine.js` 14,4 KB. Tore: `verify_site` „all checks passed",
+`v5probe --all` 21/21, `markdown-check --all` 21/21, `pxcheck` 5/5.
+
+**Offen (Reihenfolge Owner):** PSI je Seite über die Web-Oberfläche ·
+Squirrelscan-Audit nach dem Signieren · Textrunde (auch `llms.txt`-Kopf im
+Export), Kathi, EN · WebGL A/C · Go-live (noindex aus, Header raus, Domain im
+Vercel-Projekt, DNS, `domain_check`).
+
 ## ▶ STAND 17.9. ABENDS — UMGESCHALTET: DIE v5-SEITEN SIND DIE SEITE, REACT IST RAUS — ZUERST LESEN
 
 **Owner-Auftrag:** „dann bitte deine offenen Punkte abarbeiten und auch alles

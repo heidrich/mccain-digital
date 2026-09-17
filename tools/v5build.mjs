@@ -19,7 +19,7 @@
  * memoised or split, because there are no subtrees. So the pages are not
  * tuned, they are taken apart: the markup React would write becomes the HTML,
  * its inline styles become classes, and the behaviour is the page's own class,
- * copied whole, driving the DOM through a small binder (v5/runtime.js) that
+ * copied whole, driving the DOM through a small binder (tools/runtime.js) that
  * understands the export's template language instead of React.
  *
  * HOW - and why React still runs, but only here
@@ -55,6 +55,7 @@
  */
 import { spawnSync } from "node:child_process";
 import crypto from "node:crypto";
+import * as esbuild from "esbuild";
 import fs from "node:fs";
 import path from "node:path";
 import { BASE, launch, open, requireServer } from "./browser.mjs";
@@ -79,6 +80,13 @@ if (unknown.length) throw new Error(`v5build: unknown option ${unknown.join(" ")
 const CONFIG = JSON.parse(fs.readFileSync(path.join(SITE, "site.config.json"), "utf8"));
 const ROBOTS = CONFIG.noindex ? "noindex, follow" : "index, follow, max-image-preview:large, max-snippet:-1";
 
+/* One minifier for everything this build ships as JavaScript. No syntax is
+ * lowered (esnext), only whitespace, names and comments go; a one-line
+ * banner says where the source is. */
+function minify(code, banner) {
+  const out = esbuild.transformSync(code, { loader: "js", minify: true, legalComments: "none", target: "esnext" });
+  return `/* ${banner} */\n${out.code}`;
+}
 /* Title and description come out of the head as HTML text; llms.txt and the
  * twin's front matter are plain text ("Marke & Downloads", not "&amp;"). */
 const unesc = (s) => s.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
@@ -116,7 +124,7 @@ const json = (o) => JSON.stringify(o).replace(/</g, "\\u003c");
  * stops instead of shipping the old behaviour. `all` must match exactly once
  * on every page; `some` only where the feature exists (the stack diagram is on
  * two pages, the hero rotation on one). What the runtime adds (isSkipped,
- * watchShown, ptStale, view) is on the DCLogic base in v5/runtime.js. */
+ * watchShown, ptStale, view) is on the DCLogic base in tools/runtime.js. */
 const V5_PATCHES = [
   /* The stack diagram measured its nodes 120 ms and 900 ms after start and on
    * its first ResizeObserver callback - inside a section that is skipped at
@@ -640,47 +648,6 @@ function assemble(P, merged, heights) {
     }
   }
 
-  /* THE INVITATION TO THE WORKSHOP (start page). Owner, 16.9. nachts: a switch
-   * alone invites nobody, and the bottom-right corner belongs to the AI dock of
-   * stage 2. So the page gets a small band right after "Arbeiten" (whose last
-   * card is this very site): the Konfigurator band's own markup, cloned, so it
-   * wears the same classes whatever number the export gives them, with a button
-   * that opens the workshop at once (runtime.js listens for data-v5-dev-open).
-   * The clone is static for the runtime and carries no template ids, or the
-   * binder would take it for the band it was cloned from. The texts are
-   * provisional; the text pass at the end edits WERKSTATT_BAND. */
-  const WERKSTATT_BAND = {
-    id: "werkstatt-band",
-    label: "Werkstatt-Hinweis",
-    eyebrow: "Werkstatt",
-    title: "Sehen Sie selbst, wie diese Seite gebaut ist.",
-    text: "Ein Klick öffnet die Werkstatt: der echte Aufbau der Seite, der Code, der sie bewegt, die Zeiten, die Ihr Browser gerade gemessen hat, und wie Google und Sprachmodelle sie lesen. Nichts wird gespeichert oder gesendet.",
-    cta: "Werkstatt öffnen",
-  };
-  const work = html.match(/<section [^>]*id="work"[^>]*>/);
-  if (work) {
-    const open = html.match(/<section [^>]*id="konfig-band"[^>]*>/);
-    if (!open) throw new Error(`v5build: ${route}: no section#konfig-band to clone for the workshop band`);
-    const end = elementEnd(html, open.index);
-    let band = html.slice(open.index, end);
-    const spans = [...band.matchAll(/<span class="sc-interp">[^<]*<\/span>/g)];
-    if (spans.length !== 4) throw new Error(`v5build: ${route}: the Konfigurator band has ${spans.length} text spans, expected 4 (eyebrow, title, text, cta)`);
-    const texts = [WERKSTATT_BAND.eyebrow, WERKSTATT_BAND.title, WERKSTATT_BAND.text, WERKSTATT_BAND.cta];
-    let k = 0;
-    band = band.replace(/<span class="sc-interp">[^<]*<\/span>/g, () => `<span class="sc-interp">${texts[k++]}</span>`);
-    band = once(band, 'id="konfig-band"', `id="${WERKSTATT_BAND.id}" data-v5-static`);
-    band = once(band, 'data-screen-label="Konfigurator-Hinweis"', `data-screen-label="${WERKSTATT_BAND.label}"`);
-    band = band.replace(/ data-dc-tpl="\d+"/g, "");
-    const cta = band.match(/<a href="[^"]*" data-px class="([^"]*)">/);
-    if (!cta) throw new Error(`v5build: ${route}: the Konfigurator band's CTA link is not where it was`);
-    band = once(band, cta[0], `<button type="button" data-v5-dev-open data-px class="${cta[1]}">`);
-    if (band.split("</a>").length !== 2) throw new Error(`v5build: ${route}: expected exactly one </a> in the Konfigurator band`);
-    band = band.replace("</a>", "</button>");
-    const workEnd = elementEnd(html, work.index);
-    html = html.slice(0, workEnd) + "\n" + band + html.slice(workEnd);
-    notes.push("workshop band");
-  }
-
   /* THE DEFERRED BLOCKS GET A NAME AND THEIR MEASURED HEIGHT.
    * prerender.mjs marks the blocks below the first screen with data-cv="" and
    * one placeholder for all of them (contain-intrinsic-size:auto 900px). One
@@ -748,7 +715,7 @@ function assemble(P, merged, heights) {
 <head>${headOut}
 <style id="v5-css">${merged.css}\n${heroCss}\n${panelCss}</style>
 <script src="${route}logic.gen.js" defer></script>
-<script src="/v5/runtime.js" defer></script>
+<script src="/runtime.js" defer></script>
 </head>
 <body>
 <div id="dc-root">${html}</div>
@@ -805,8 +772,13 @@ try {
       const dir = path.join(SITE, page.route.slice(1));
       fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(path.join(dir, "index.html"), out.pageHtml, "utf8");
+      /* Minified for the wire (release 17.9.2026): the class is 150-190 KB
+       * as the export wrote it, most of it names and comments nobody reads
+       * on a phone. No syntax lowering (target esnext) - the code runs in
+       * browsers as written, and lowering class fields would change what
+       * `this.state` means in the constructor. */
       const genFile = path.join(dir, "logic.gen.js");
-      fs.writeFileSync(genFile, out.gen, "utf8");
+      fs.writeFileSync(genFile, minify(out.gen, `GENERATED by tools/v5build.mjs from the page logic in ${page.out} - do not edit`), "utf8");
       /* A generated file that does not parse fails the whole page silently in the browser. */
       const check = spawnSync(process.execPath, ["--check", genFile], { encoding: "utf8" });
       if (check.status !== 0) throw new Error(`v5build: ${page.route}: logic.gen.js does not parse\n` + check.stderr.split("\n").slice(0, 4).join("\n"));
@@ -831,10 +803,18 @@ try {
 } finally {
   await browser.close();
 }
-/* The workshop (v5/dev/) shows motion-budget.js as readable source; the
- * deployed root file is the minified build of tools/motion-budget.js. */
-fs.mkdirSync(path.join(SITE, "v5", "dev"), { recursive: true });
-fs.copyFileSync(path.join(import.meta.dirname, "motion-budget.js"), path.join(SITE, "v5", "dev", "motion-budget.src.js"));
+/* THE BINDER SHIPS MINIFIED. tools/runtime.js is the commented source of
+ * record; /runtime.js at the site root is its build, the same arrangement
+ * as tools/motion-budget.js → /motion-budget.js in prerender.mjs. */
+{
+  const src = path.join(import.meta.dirname, "runtime.js");
+  if (!fs.existsSync(src)) throw new Error("v5build: tools/runtime.js is missing");
+  const built = minify(fs.readFileSync(src, "utf8"), "GENERATED by tools/v5build.mjs from tools/runtime.js - edit the source, not this file");
+  fs.writeFileSync(path.join(SITE, "runtime.js"), built, "utf8");
+  const check = spawnSync(process.execPath, ["--check", path.join(SITE, "runtime.js")], { encoding: "utf8" });
+  if (check.status !== 0) throw new Error("v5build: the minified runtime.js does not parse\n" + check.stderr.split("\n").slice(0, 4).join("\n"));
+  console.log(`runtime.js  ${(fs.statSync(src).size / 1024).toFixed(0)} KB source → ${(built.length / 1024).toFixed(0)} KB minified`);
+}
 console.log(`\n${summary.length} page(s) written to the site root${failed ? `, ${failed} FAILED` : ""}`);
 
 /* ------------------------------------------- sitemap, llms.txt, CSP hashes */
@@ -874,7 +854,7 @@ if (ONLY.length || failed || summary.length !== PAGES.length) {
    * No 'unsafe-eval' any more: support.js compiled the component through
    * new Function(); the binder does not, the class ships as a plain script
    * (logic.gen.js), and none of runtime.js, logic.gen.js, pixel-engine.js,
-   * image-slot.js, motion-budget.js or v5/dev/ evaluates code (grepped
+   * image-slot.js or motion-budget.js evaluates code (grepped
    * 17.9.2026). img-src data: stays for pixel-engine.js and image-slot.js
    * (toDataURL); style-src 'unsafe-inline' for style#v5-css. */
   const hashes = [...new Set(summary.flatMap((p) => p.hashes))].sort();

@@ -57,7 +57,7 @@
  * of the build: React's first render of every artboard, written to
  * _dcbuild/react/<route>/index.html and read from there by tools/v5build.mjs,
  * which turns them into the pages that ship - plain HTML, one binder
- * (v5/runtime.js), no React at runtime. Everything that describes the deployed
+ * (tools/runtime.js, shipped minified as /runtime.js), no React at runtime. Everything that describes the deployed
  * site (sitemap.xml, llms.txt, the CSP hashes in vercel.json) is written by
  * v5build.mjs from what it writes, so this file no longer touches any of it.
  * React's runtime (support.js and the two UMD builds) lives in _dcbuild/ as

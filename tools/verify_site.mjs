@@ -22,7 +22,7 @@
  * THIRD ROUND, 17.9.2026: React is gone. tools/v5build.mjs now renders every
  * page of tools/pages.mjs's PAGES ONCE, at build time, straight into the site
  * root (<route>/index.html, logic.gen.js, index.md); the page ships plain HTML
- * and CSS plus its own logic class, and v5/runtime.js binds that markup to the
+ * and CSS plus its own logic class, and tools/runtime.js binds that markup to the
  * class instead of a framework re-rendering it. There is no hydrateRoot to
  * watch any more, no <x-dc> live template, no window.ReactDOM, no
  * /support.js or /vendor/ at the root. So this gate now watches what replaced
@@ -49,7 +49,7 @@ const BASE = (process.argv[2] || process.env.MCD_BASE || "http://127.0.0.1:8898"
 
 /* All 21 routes of tools/pages.mjs's PAGES. Every one of them is built the
  * same way (tools/v5build.mjs) and bound by the same runtime
- * (v5/runtime.js), so there is no page here that only has to load - each one
+ * (tools/runtime.js), so there is no page here that only has to load - each one
  * gets the full page check below.
  *
  * Kept as a second, hand-written list rather than an import from PAGES: this
@@ -108,7 +108,7 @@ const context = await browser.newContext({ viewport: { width: 1440, height: 900 
 
 /* DID THE RUNTIME BOOT?
  *
- * v5/runtime.js splits its start into three tasks (compile the template, bind
+ * tools/runtime.js splits its start into three tasks (compile the template, bind
  * the live DOM, mount) so that no single one blocks the main thread for long -
  * see "THE START IS THREE TASKS, NOT ONE" in runtime.js. That means
  * window.__v5 is not there the instant the page loads; this polls for it and
@@ -153,7 +153,7 @@ async function load(url, { scroll = false } = {}) {
      * paint, so the sweep is part of the measurement, not a nicety. It is
      * also the reason the pixel-engine check below is safe to run before this:
      * window.scrollTo fires no pointer event, so it cannot arm the engine by
-     * accident (see armPixels in v5/runtime.js). */
+     * accident (see armPixels in tools/runtime.js). */
     await page.evaluate(async () => {
       const step = window.innerHeight;
       for (let y = 0; y < document.body.scrollHeight; y += step) {
@@ -268,7 +268,7 @@ for (const p of LIVE_PAGES) {
   });
 
   /* PIXEL HOVER EFFECTS LOAD ON A REAL MOUSE MOVE, AND NOT BEFORE. armPixels()
-   * in v5/runtime.js arms a pointermove listener and only then appends
+   * in tools/runtime.js arms a pointermove listener and only then appends
    * <script src="/pixel-engine.js"> - 42 KB nobody on a touch screen or with
    * reduced motion ever needs to parse. Checked before AND after a real move,
    * so a page that loads it eagerly and one that never loads it are both
@@ -418,7 +418,7 @@ for (const p of LIVE_PAGES) {
   if (rawEls <= 20) fail(`${p}: #dc-root has ${rawEls} element(s) in the server's own HTML - the build did not write the page, or it is not being served`);
   if (rawHasXdc) fail(`${p}: the server HTML still contains <x-dc> - the old React stage shipped instead of the build`);
   if (!booted || !boot.mounted) fail(`${p}: window.__v5 never appeared - the runtime did not boot`);
-  if (boot.mark === 0) fail(`${p}: no performance mark "v5:mount" - see boot()/mount() in v5/runtime.js`);
+  if (boot.mark === 0) fail(`${p}: no performance mark "v5:mount" - see boot()/mount() in tools/runtime.js`);
   if (boot.mounted && !boot.adopted) fail(`${p}: window.__v5.stats.adopted is 0 - the binder found nothing to bind to`);
   if (boot.missing > 0) fail(`${p}: ${boot.missing} template node(s) the binder expected but did not find in the DOM (e.g. ${boot.missingSample.join(", ")})`);
   if (boot.scHosts !== 1) fail(`${p}: ${boot.scHosts} copies of the page's root in #dc-root, expected 1`);
@@ -428,7 +428,7 @@ for (const p of LIVE_PAGES) {
   if (boot.hasReact) fail(`${p}: window.React is defined - something is loading React again`);
   if (boot.h1 !== 1) fail(`${p}: ${boot.h1} h1 elements`);
   if (pixelsBefore) fail(`${p}: /pixel-engine.js was requested before any mouse movement`);
-  if (!pixelsAfter) fail(`${p}: /pixel-engine.js was never requested after a real mouse move - see armPixels in v5/runtime.js`);
+  if (!pixelsAfter) fail(`${p}: /pixel-engine.js was never requested after a real mouse move - see armPixels in tools/runtime.js`);
   if (boot.alternate !== p + "index.md") fail(`${p}: the markdown alternate link points at "${boot.alternate}", expected "${p}index.md"`);
   if (!csp) fail(`${p}: no Content-Security-Policy header`);
   if (/unsafe-eval/.test(csp)) fail(`${p}: the CSP still allows 'unsafe-eval' - nothing in the v5 build should need it any more`);
@@ -452,7 +452,7 @@ for (const p of LIVE_PAGES) {
 }
 
 /* THE INTERACTIVE CORE, ONCE. Every route shares the same header, search
- * overlay and binder (v5/runtime.js); tools/v5probe.mjs re-proves all of it
+ * overlay and binder (tools/runtime.js); tools/v5probe.mjs re-proves all of it
  * per route - mega menu, search, language, FAQ, consent, mobile menu - as its
  * own, more thorough pass. This gate only needs one belastbaren Kern before a
  * push: that hovering the nav opens the mega menu, that Cmd/Ctrl+K opens the
@@ -744,6 +744,10 @@ const MUST_404 = [
   "/v5/index.html",
   "/v5/index.md",
   "/v5/logic.gen.js",
+  "/v5/runtime.js",
+  "/tools/runtime.js",
+  "/v5/dev/index.js",
+  "/archive/werkstatt/index.js",
 ];
 if (BASE.startsWith("http") && !BASE.includes("127.0.0.1")) {
   console.log("\n  must not be reachable");

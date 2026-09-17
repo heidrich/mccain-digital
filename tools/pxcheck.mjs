@@ -1,7 +1,7 @@
 /* initPixels bails on `if (!PX) return` without a word. Prove it did not.
  *
- * v5/runtime.js loads pixel-engine.js on demand (armPixels/loadPixels in
- * v5/runtime.js): only once a real mouse moves, or ten seconds after load on
+ * tools/runtime.js loads pixel-engine.js on demand (armPixels/loadPixels in
+ * tools/runtime.js): only once a real mouse moves, or ten seconds after load on
  * a hover-capable, non-touch device otherwise. A page that never sees a mouse
  * move must still not load it eagerly - the promise this check proves is the
  * first one, the one a real desktop visitor triggers immediately: move the

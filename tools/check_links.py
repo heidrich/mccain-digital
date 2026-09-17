@@ -28,7 +28,7 @@ ids = {}
 problems = []
 
 # The component template ships as inert <template id="dc-template"> content: the
-# browser never resolves anything inside it, v5/runtime.js interpolates the {{ }}
+# browser never resolves anything inside it, tools/runtime.js interpolates the {{ }}
 # expressions before it clones the result into #dc-root, and nothing in there is
 # a request. A text scan cannot tell that apart from a real href, so it is cut
 # out before the scan rather than explained away in eight findings per run.
@@ -59,7 +59,7 @@ def servable(path):
     """Only the markup a browser actually resolves.
 
     Everything removed here is present in the file and inert: comments, the
-    template v5/runtime.js interpolates later, script bodies, and markup quoted
+    template tools/runtime.js interpolates later, script bodies, and markup quoted
     as documentation. What is left is what a link can actually point at.
     """
     s = io.open(path, encoding="utf-8").read()
