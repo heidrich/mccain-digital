@@ -56,6 +56,22 @@ die Werkstatt irrtümlich entfernt; das ist zurückgenommen.
 (Spätfenster), `shots`, `pxcheck`, `seo_audit` (Kommentar korrigiert).
 `.gitignore` verweist für `internal/lighthouse/` jetzt auf `lighthouse-psi.mjs`.
 
+**Owner 17.9. spät:** „wir haben unser eigenes tolles System gebaut … wichtig,
+wir müssen nur immer schön das Gelernte in die Skills packen." Erledigt für
+den 17.9.: Skill-Regeln laden-javascript 17 (Minify ohne Lowering),
+laden-auslieferung 20 (CSP aus dem Build, kein unsafe-eval),
+messen-methode 10 (Zeit-Tore nur allein), lighthouse-psi 25 (PSI-API-Kontingent),
+Fallstudie „Umschaltung", audit-website (macOS-Signatur); Sync-Repo
+gepusht, Kopie hier unter `.claude/skills/`.
+
+**Nächster Schritt (Owner, nach dem Compact):** volles Code-Review, vor allem
+**mobil** und **Security** — Kandidaten: die Squirrelscan-Befunde oben
+(Honeypot in aria-hidden, aria-label ≠ Text, Bildmaße/lazy, Schema),
+CSP/Header in `vercel.json`, Formular-Sender (Web3Forms-Key im HTML ist
+öffentlich by design, prüfen: Honeypot, Rate-Limit), Werkstatt (nur nach
+Aktion, keine Daten nach außen), Binder-Ereignisse auf Touch, Mobilmenü,
+Touch-Ziele, Viewport-Breakpoints 400–620 px.
+
 **Gemessen (17.9. spät, mit Werkstatt-Band):** Startseite mobil 99 (FCP 0,9 s,
 LCP 2,1 s, TBT 0 ms, CLS 0, SI 1,1 s); Tore `verify_site` grün, `v5probe`
 21/21, `markdown-check` 21/21, `v5dev-check` `/` und `/kontakt/` ALL OK,

@@ -1,6 +1,6 @@
 # Messen: Grundmethode und Messumgebung — html-performance
 
-> Teil des Skills [[html-performance]] · Stand 2026-09-16 · Belege: mccain-digital (HANDOFF, CHANGELOG, Commits), weitere Projekte des Owners, Recherche mit Quell-URLs
+> Teil des Skills [[html-performance]] · Stand 2026-09-17 · Belege: mccain-digital (HANDOFF, CHANGELOG, Commits), weitere Projekte des Owners, Recherche mit Quell-URLs
 
 Dieses Kapitel behandelt die Grundmethode des Messens: Zeitachse statt Summe, Vorher/Nachher mit kontrollierten Zwischenzuständen, produktionsnahes Messen (Server, Cache, Kompression, Anfragegröße/Sichtbarkeit), eine ruhige Maschine mit deterministischen Läufen, die Zuverlässigkeit der eigenen Mess-Wächter (Fehlerkanäle, verwaiste Selektoren, abgelöste Muster, Kommentare im Suchraum) und der Prozess, der das Messen zum Teil des Gates macht. Lighthouse-/PSI-spezifisches Scoring, Drosselungsarten und Messfenster stehen in [messen-lighthouse-fenster.md](messen-lighthouse-fenster.md); Hauptthread-Lesen, Beobachter, `content-visibility`, fps/Software-GL und Mobile-Emulation in [messen-hauptthread-observer.md](messen-hauptthread-observer.md). Wie Befunde behoben werden: die `laden-*`- und `rendern-*`-Referenzen ([laden-kritischer-pfad.md](laden-kritischer-pfad.md), [laden-javascript.md](laden-javascript.md), [laden-auslieferung.md](laden-auslieferung.md), [rendern-hauptthread.md](rendern-hauptthread.md), [rendern-animationen.md](rendern-animationen.md), [rendern-canvas-webgl.md](rendern-canvas-webgl.md)); wie Lighthouse daraus einen Score errechnet: [lighthouse-psi.md](lighthouse-psi.md). Jede Regel nennt das Skript, das sie prüfbar macht.
 
@@ -121,6 +121,9 @@ Bis zum 17.9.2026 stand dieser Inhalt zusammen mit den anderen `Messen`-Themen i
 **Fix:** Vor jeder Messreihe `ps`/Aktivitätsanzeige prüfen und andere Browser-/Node-Prozesse beenden; bei einem `NO_FCP` oder ungewöhnlich hohem `observedFirstContentfulPaint` zuerst Maschinenlast als Ursache ausschließen, bevor am Code gesucht wird.
 **Beleg:** mccain-digital, 16.9.2026, `.../lh/old-mobile-simulate.json` + `old-extended-diag.json` (siehe auch `scratchpad/swgl_fcp.mjs`-Messung am selben Tag mit 17 parallelen Chrome-Prozessen). · Sicherheit: gemessen
 **Gilt für:** allgemein
+
+**Auch Funktionstore mit Zeitregeln scheitern unter paralleler Browserlast.** Ein Tor, das prüft, ob ein Schalter genau 10,0–12,5 s nach der ersten Aktion erscheint, scheiterte zweimal, während ein zweites Playwright-Tor parallel lief (Chrome-Helfer bei 45 % + 39 % CPU); allein und in acht Einzelversuchen kam der Schalter jedes Mal nach 10,0–10,1 s. Zeitabhängige Tore nacheinander laufen lassen, nie neben Lighthouse oder einem zweiten Browser.
+**Beleg:** mccain-digital, 17.9.2026, `tools/v5dev-check.mjs` gegen ein parallel laufendes zweites Playwright-Tor. · Sicherheit: gemessen
 
 ### 11. Treiber von Messlogik trennen, und die Version pinnen
 **Warum:** Ein Mess-/Test-Werkzeug, das auf einer Zielumgebung zuverlässig hängt (kein Timeout, kein Fehler), ist als Gate wertlos, egal wie gut seine Messlogik ist. Zwei Maschinen, die mit unterschiedlichen Browser-Treiber-Versionen gegen dieselben Gates messen, liefern keine validen Vorher/Nachher-Vergleiche.

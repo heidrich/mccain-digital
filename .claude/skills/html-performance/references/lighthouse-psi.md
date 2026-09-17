@@ -1,6 +1,6 @@
 # Wie Lighthouse und PageSpeed Insights bewerten — html-performance
 
-> Teil des Skills [[html-performance]] · Stand 2026-09-16 · Belege: mccain-digital (HANDOFF, CHANGELOG, Commits), weitere Projekte des Owners, Recherche mit Quell-URLs
+> Teil des Skills [[html-performance]] · Stand 2026-09-17 · Belege: mccain-digital (HANDOFF, CHANGELOG, Commits), weitere Projekte des Owners, Recherche mit Quell-URLs
 
 Bezug: Lighthouse 13.4.1 (main-Branch/npm latest, Stand 2026-09-16). Insights, Schwellen und Konfigurationswerte ändern sich mit Major-Versionen — Version bei jeder Neubewertung gegenprüfen. Wie man misst und Ergebnisse liest: [messen-methode.md](messen-methode.md), [messen-lighthouse-fenster.md](messen-lighthouse-fenster.md), [messen-hauptthread-observer.md](messen-hauptthread-observer.md). Wie man Ursachen behebt: [laden-kritischer-pfad.md](laden-kritischer-pfad.md), [laden-javascript.md](laden-javascript.md), [laden-auslieferung.md](laden-auslieferung.md) (Laden) und [rendern-hauptthread.md](rendern-hauptthread.md), [rendern-animationen.md](rendern-animationen.md), [rendern-canvas-webgl.md](rendern-canvas-webgl.md) (Laufzeit). Datierte Fälle mit vollem Zahlenverlauf: [fallstudien.md](fallstudien.md). Widerlegte Annahmen im Detail: [widerlegt.md](widerlegt.md).
 
@@ -30,6 +30,7 @@ Bezug: Lighthouse 13.4.1 (main-Branch/npm latest, Stand 2026-09-16). Insights, S
 - **Kopiere lr-mobile-config.js/lr-desktop-config.js 1:1, statt Presets zu raten** ([→](#22-kopiere-lr-mobile-configjslr-desktop-configjs-11-statt-presets-zu-raten))
 - **Zieh bei einem Ausreißer den JSON-Report, bevor du debuggst** — kann ein Throttling-Artefakt der Testmaschine sein ([→](#23-zieh-bei-einem-ausreißer-den-json-report-bevor-du-debuggst))
 - **Erkenne Skript-Kosten-Attribution auf die Dokument-URL, keine Mehrfachanfrage** — dieselbe URL kann als Attributions-Label mehrfach erscheinen, ohne echte Mehrfachanfrage zu sein ([→](#24-erkenne-skript-kosten-attribution-auf-die-dokument-url-keine-mehrfachanfrage))
+- **Die PSI-API ohne eigenen Schlüssel hat kein verlässliches Kontingent** — das geteilte, anonyme Tageskontingent kann schon vor der eigenen ersten Anfrage erschöpft sein ([→](#25-die-psi-api-ohne-eigenen-schlüssel-hat-kein-verlässliches-kontingent))
 
 ## Inhalt
 
@@ -288,6 +289,13 @@ Wie nah ein lokaler Lauf an die echte PSI-Zahl herankommt — und wo die Grenze 
 **Woran man es erkennt:** Eine Zeile, die die eigene Dokument-URL mehrfach listet (z. B. "6× angefragt"), obwohl das Netzwerk-Panel nur einen einzigen Dokument-Request zeigt.
 **Fix:** Gegen die tatsächliche Netzwerkaktivität gegenprüfen (DevTools-Netzwerk-Tab oder eigenes Skript), bevor eine wiederholt gelistete URL als doppelte Anfrage gemeldet wird.
 **Beleg:** Owner-Projekt: Attributionsspalte zeigte die Dokument-URL scheinbar 6×, das echte Netzwerk-Log zeigte 1 Dokument-Request von 25 Requests insgesamt (Commit 80beb85, 2026-09-13). Ausführlicher Fall mit Zahlen: [widerlegt.md](widerlegt.md#35-eine-ressource-wird-laut-lighthouse-tabelle-sechsmal-aufgerufen). Sicherheit: gemessen
+**Gilt für:** allgemein
+
+### 25. Die PSI-API ohne eigenen Schlüssel hat kein verlässliches Kontingent
+**Warum:** Die PageSpeed-Insights-API läuft ohne eigenen API-Key über ein geteiltes, anonymes Tageskontingent (Ursache für das HTTP-429 in Regel 21). An einem stark genutzten Tag ist dieses Kontingent bereits erschöpft, bevor die eigene erste Anfrage überhaupt zählt — nicht erst nach mehreren eigenen Läufen.
+**Woran man es erkennt:** Jede Anfrage gegen die PSI-API liefert HTTP 429 mit der Fehlermeldung "Quota exceeded for quota metric ... Queries per day", unabhängig von der eigenen Anfragezahl.
+**Fix:** Für verlässliche PSI-Zahlen die Web-Oberfläche (pagespeed.web.dev) verwenden oder einen eigenen API-Key beantragen. Ohne beides lokal mit `scripts/lighthouse-psi.mjs` messen (repliziert die PSI-Lightrider-Einstellungen, Regel 22) — kein Ersatz für die echte PSI-Zahl, aber der nächstbeste, selbst kontrollierbare Wert.
+**Beleg:** mccain-digital, 17.9.2026: jede PSI-API-Anfrage für das anonyme Projekt lieferte 429 "Quota exceeded ... Queries per day"; lokal mit `scripts/lighthouse-psi.mjs` (PSI-Einstellungen) auf der umgestellten Seite 99/99/96/99 mobil und 100 Desktop gemessen. · Sicherheit: gemessen
 **Gilt für:** allgemein
 
 ## Offene Fragen

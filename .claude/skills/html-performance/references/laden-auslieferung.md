@@ -1,6 +1,6 @@
 # Laden: Caching, Auslieferung, Build — html-performance
 
-> Teil des Skills [[html-performance]] · Stand 2026-09-16 · Belege: mccain-digital (HANDOFF, CHANGELOG, Commits), weitere Projekte des Owners, Recherche mit Quell-URLs
+> Teil des Skills [[html-performance]] · Stand 2026-09-17 · Belege: mccain-digital (HANDOFF, CHANGELOG, Commits), weitere Projekte des Owners, Recherche mit Quell-URLs
 
 Scope: alles zwischen Build und Browser — Cache-Header und `immutable`, Content-Hashes, bfcache, Kompression (Brotli, Zstd), Speculation Rules, sowie Build-Pipeline-Effekte wie Minifizierung, doppelte Auslieferung, Bild-Encoding und Self-Hosting von Laufzeit-Bibliotheken. LCP-Pfad, kritisches CSS, Fonts und Bilder stehen in [laden-kritischer-pfad.md](laden-kritischer-pfad.md), JavaScript-Ladereihenfolge und Nachladen in [laden-javascript.md](laden-javascript.md). Laufzeitverhalten nach dem ersten Render: [rendern-hauptthread.md](rendern-hauptthread.md), [rendern-animationen.md](rendern-animationen.md), [rendern-canvas-webgl.md](rendern-canvas-webgl.md); Lighthouse/PSI-Scoring in [lighthouse-psi.md](lighthouse-psi.md), Mess-Methodik in [messen-methode.md](messen-methode.md), [messen-lighthouse-fenster.md](messen-lighthouse-fenster.md) und [messen-hauptthread-observer.md](messen-hauptthread-observer.md), der Framework-Delta in [react-nextjs.md](react-nextjs.md).
 
@@ -30,6 +30,7 @@ Bis zum 16.9.2026 stand dieser Inhalt zusammen mit den anderen `Laden`-Themen in
 - **Sitemap- und llms.txt-Generierung vom Performance-Build trennen** — sitemap.xml/llms.txt beeinflussen die Ladezeit der Seite selbst nicht ([→](#17-sitemap--und-llmstxt-generierung-vom-performance-build-trennen))
 - **Drittanbieter-Laufzeit-Bibliotheken selbst hosten, nicht nur Fonts** — dieselbe Origin-Logik wie bei Fonts gilt auch für CDN-geladene JS-Libraries wie React ([→](#18-drittanbieter-laufzeit-bibliotheken-selbst-hosten-nicht-nur-fonts))
 - **Ein Preload für ein großes Skript kann den FCP verschlechtern statt verbessern** — der Preload konkurriert mit dem Dokument selbst um Priorität — vorher/nachher messen ([→](#19-ein-preload-für-ein-großes-skript-kann-den-fcp-verschlechtern-statt-verbessern))
+- **Die CSP aus den gebauten Seiten ableiten, nicht pflegen — und `'unsafe-eval'` streichen, sobald nichts mehr evaluiert** — von Hand gepflegte CSP veraltet beim ersten neuen Inline-Skript still; Mess-Server nach Header-Änderung neu starten ([→](#20-die-csp-aus-den-gebauten-seiten-ableiten-nicht-pflegen--und-unsafe-eval-streichen-sobald-nichts-mehr-evaluiert))
 
 ## Inhalt
 
@@ -173,6 +174,13 @@ Bis zum 16.9.2026 stand dieser Inhalt zusammen mit den anderen `Laden`-Themen in
 **Woran man es erkennt:** FCP vor und nach dem Hinzufügen eines Skript-Preloads vergleichen, nicht nur die Bytegröße des Preloads betrachten.
 **Fix:** Preload für ein großes Skript nur nach einer Vorher/Nachher-FCP-Messung einsetzen und beibehalten, nie aus reiner Vorsicht oder Hoffnung auf Wirkung.
 **Beleg:** mccain-digital: React-Preload für die Startseite getestet, Median-FCP 349 ms → 485 ms (schlechter) — Preload wieder entfernt (Commit 5448b74, 2026-09-11). · Sicherheit: gemessen
+**Gilt für:** allgemein
+
+### 20. Die CSP aus den gebauten Seiten ableiten, nicht pflegen — und `'unsafe-eval'` streichen, sobald nichts mehr evaluiert
+**Warum:** Eine von Hand gepflegte Content-Security-Policy veraltet beim ersten neuen Inline-Skript und fällt still aus — die Seite lädt weiter, nur ein Verhalten fehlt, ohne dass ein Build-Fehler es anzeigt. Der Build kennt dieselbe Information zuverlässiger: er kann jedes tatsächlich ausgeführte Inline-`<script>` hashen (ohne Attribute; `type="application/json"`/`ld+json` führt der Browser nie aus, muss also nicht gehasht werden) und die resultierende Regel direkt in die Host-Konfiguration schreiben.
+**Woran man es erkennt:** Eine CSP-Regel in der Host-Konfiguration, die von Hand statt vom Build gepflegt wird, oder `'unsafe-eval'` in der Regel, ohne dass im ausgelieferten Code noch etwas `eval`/`new Function` braucht.
+**Fix:** Die CSP-Hash-Liste bei jedem Build aus den tatsächlich ausgelieferten Seiten neu ableiten (jedes ausgeführte Inline-`<script>` hashen), nicht von Hand pflegen. `'unsafe-eval'` erst streichen, nachdem per grep über alle ausgelieferten Skripte belegt ist, dass nichts mehr `eval`/`new Function` braucht. Nach einem Build, der Header ändert, den lokalen Mess-Server neu starten — er liest die Konfiguration nur beim eigenen Start, ein laufender Server prüft sonst gegen die alte Regel. Staging-/Zwischendokumente des Builds, die noch eine ältere Laufzeit laden, vom Site-Header ausnehmen.
+**Beleg:** mccain-digital, 17.9.2026: Build hasht jedes ausgeführte Inline-Skript und schreibt die CSP-Regel automatisch in die Host-Konfiguration; `'unsafe-eval'` war nur wegen `new Function` der (inzwischen abgelösten) Framework-Laufzeit nötig und nach Grep-Beleg (0 verbleibende `eval`/`new Function`-Aufrufe) gestrichen; ein nicht neu gestarteter lokaler Mess-Server prüfte noch gegen die alte Regel und erzeugte 21 Fehlalarme. · Sicherheit: gemessen
 **Gilt für:** allgemein
 
 ## Offene Fragen

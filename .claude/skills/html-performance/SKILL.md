@@ -203,16 +203,16 @@ Jede Referenzdatei beginnt mit einer `## Kurzfassung`, die alle Regeln als Liste
 - [messen-methode.md](references/messen-methode.md#kurzfassung) — 26 Regeln
 - [messen-lighthouse-fenster.md](references/messen-lighthouse-fenster.md#kurzfassung) — 12 Regeln
 - [messen-hauptthread-observer.md](references/messen-hauptthread-observer.md#kurzfassung) — 20 Regeln
-- [lighthouse-psi.md](references/lighthouse-psi.md#kurzfassung) — 24 Regeln
+- [lighthouse-psi.md](references/lighthouse-psi.md#kurzfassung) — 25 Regeln
 - [laden-kritischer-pfad.md](references/laden-kritischer-pfad.md#kurzfassung) — 29 Regeln
-- [laden-javascript.md](references/laden-javascript.md#kurzfassung) — 16 Regeln
-- [laden-auslieferung.md](references/laden-auslieferung.md#kurzfassung) — 19 Regeln
+- [laden-javascript.md](references/laden-javascript.md#kurzfassung) — 17 Regeln
+- [laden-auslieferung.md](references/laden-auslieferung.md#kurzfassung) — 20 Regeln
 - [rendern-hauptthread.md](references/rendern-hauptthread.md#kurzfassung) — 33 Regeln
 - [rendern-animationen.md](references/rendern-animationen.md#kurzfassung) — 16 Regeln
 - [rendern-canvas-webgl.md](references/rendern-canvas-webgl.md#kurzfassung) — 25 Regeln
 - [react-nextjs.md](references/react-nextjs.md#kurzfassung) — 30 Regeln
 - [widerlegt.md](references/widerlegt.md#kurzfassung) — 60 Regeln
-- [fallstudien.md](references/fallstudien.md#kurzfassung) — 25 datierte Fälle, neueste zuerst
+- [fallstudien.md](references/fallstudien.md#kurzfassung) — 26 datierte Fälle, neueste zuerst
 
 ## Pflege (der Skill wächst)
 

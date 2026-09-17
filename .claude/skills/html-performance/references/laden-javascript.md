@@ -1,6 +1,6 @@
 # Laden: JavaScript-Ladereihenfolge und Nachladen — html-performance
 
-> Teil des Skills [[html-performance]] · Stand 2026-09-16 · Belege: mccain-digital (HANDOFF, CHANGELOG, Commits), weitere Projekte des Owners, Recherche mit Quell-URLs
+> Teil des Skills [[html-performance]] · Stand 2026-09-17 · Belege: mccain-digital (HANDOFF, CHANGELOG, Commits), weitere Projekte des Owners, Recherche mit Quell-URLs
 
 Scope: wie JavaScript geladen und nachgeladen wird — `defer`/`async`/`type=module`, dynamisches `import()` bei Absicht oder im Leerlauf (mit `requestIdleCallback`-Fallback für Safari), Notausgänge für choreografierte Reveals, schwere Bibliotheken und Embeds, Consent-gegatete Skripte, JS-Splitting nur zusammen mit Deferring, Bundle-Budget, Coverage-Fallstricke vor dem Löschen von Code, Resource Hints. LCP-Pfad, kritisches CSS, Fonts und Bilder stehen in [laden-kritischer-pfad.md](laden-kritischer-pfad.md), Caching, Auslieferung und Build-Pipeline in [laden-auslieferung.md](laden-auslieferung.md). Laufzeitverhalten nach dem ersten Render: [rendern-hauptthread.md](rendern-hauptthread.md), [rendern-animationen.md](rendern-animationen.md), [rendern-canvas-webgl.md](rendern-canvas-webgl.md); Lighthouse/PSI-Scoring in [lighthouse-psi.md](lighthouse-psi.md), Mess-Methodik in [messen-methode.md](messen-methode.md), [messen-lighthouse-fenster.md](messen-lighthouse-fenster.md) und [messen-hauptthread-observer.md](messen-hauptthread-observer.md), der Framework-Delta in [react-nextjs.md](react-nextjs.md).
 
@@ -25,6 +25,7 @@ Bis zum 16.9.2026 stand dieser Inhalt zusammen mit den anderen `Laden`-Themen in
 - **Vor dem Löschen von scheinbar ungenutztem JS: unreached ist nicht dasselbe wie tot** — eine Coverage-Messung zeigt "unerreicht in dieser Aufnahme", nicht "tot" — 63 % Beispielquote ([→](#14-vor-dem-löschen-von-scheinbar-ungenutztem-js-unreached-ist-nicht-dasselbe-wie-tot))
 - **Resource Hints (preconnect/dns-prefetch/Early Hints) nur für wirklich bald gebrauchte Origins** — preconnect nur für bald wirklich gebrauchte Origins, sonst dns-prefetch oder nichts ([→](#15-resource-hints-preconnectdns-prefetchearly-hints-nur-für-wirklich-bald-gebrauchte-origins))
 - **Besucher-Werkzeuge erst nach echter Aktion plus Verzögerung laden, davor null Bytes** — Dev-Modus, Chat, Feedback: Schalter erst Sekunden nach pointerdown/keydown/wheel/touchstart, Modul erst beim Klick; Lighthouse löst nichts davon aus ([→](#16-besucher-werkzeuge-erst-nach-echter-aktion-plus-verzögerung-laden-davor-null-bytes))
+- **Minifizieren ohne Syntax-Lowering, wenn der Code Class Fields nutzt** — `target: esnext` statt `es2019`, sonst ändert Syntax-Lowering die Define-/Set-Semantik von Klassenfeldern ([→](#17-minifizieren-ohne-syntax-lowering-wenn-der-code-class-fields-nutzt))
 
 ## Inhalt
 
@@ -145,6 +146,13 @@ Bis zum 16.9.2026 stand dieser Inhalt zusammen mit den anderen `Laden`-Themen in
 **Fix:** Auf `window` in der Capture-Phase auf `pointerdown`, `keydown`, `wheel` und `touchstart` hören (`{capture:true, passive:true}`), beim ersten Treffer alle vier abhängen und einen Timer starten (10 s haben sich bewährt); erst der Timer setzt den Schalter (Button plus eigenes kleines `<style>`), erst der Klick lädt das Modul (`<script type="module">` oder `import()`). Mausbewegung zählt nicht. Die Regel ist ein Versprechen, das kein Lighthouse-Lauf prüft, also gehört ein eigenes Skript dazu: N Sekunden ohne Aktion (mit `scrollTo` und Mausbewegung) → kein Knoten, keine Anfrage; Aktion → nichts nach 8,5 s, Schalter zwischen 10 und 12,5 s.
 **Beleg:** mccain-digital v5, 16.9.2026, `tools/v5dev-check.mjs`: 16 s nach load mit `scrollTo` und zwei `mouse.move` null Werkstatt-Knoten und null Anfragen an `/v5/dev/`; Taste bzw. Klick → Schalter nach 10.086 ms, keiner bei 8.500 ms; das Modul (15 Dateien, ~190 KB unkomprimiert) lädt erst beim Klick. · Sicherheit: gemessen
 **Gilt für:** allgemein
+
+### 17. Minifizieren ohne Syntax-Lowering, wenn der Code Class Fields nutzt
+**Warum:** Ein Minifizierer mit gesetztem `target` wie `es2019` übersetzt moderne Syntax wie Klassenfeld-Deklarationen (`state = {…}` als Feld im Klassenkörper) in äquivalent gemeinte, aber semantisch andere Konstruktor-Zuweisungen — das ändert, was `this.state` zum Zeitpunkt des Konstruktors bedeutet (Define- statt Set-Semantik: eine Zuweisung im Klassenkörper definiert die Eigenschaft direkt auf der Instanz, eine ins Konstruktor verschobene Zuweisung kann dagegen über einen geerbten Setter laufen). `target: "esnext"` lässt die Syntax unverändert und minifiziert nur, was die Bedeutung nicht ändert: Whitespace, Bezeichnernamen, Kommentare.
+**Woran man es erkennt:** Ein Minifikat verhält sich subtil anders als seine Quelle (z. B. ein Klassenfeld, das nach der Minifizierung nicht mehr denselben Initialwert trägt oder einen anderen Zeitpunkt der Zuweisung hat), obwohl derselbe Minifizierer nur mit einem anderen `target` lief.
+**Fix:** Beim Minifizieren von Code mit modernen Klassenfeldern `target: "esnext"` setzen, nie ein älteres `target` wie `es2019`/`es2020`, das Syntax-Lowering auslöst. Die Quelle bleibt kommentiert im Repo; das Minifikat trägt eine Banner-Zeile mit Verweis auf die Quelldatei. Projekte mit einer eigenen Code-Ansicht als Transparenz-Werkzeug liefern zusätzlich eine lesbare `.src.js` neben dem Minifikat aus, die ausschließlich dieses Werkzeug lädt.
+**Beleg:** mccain-digital, 17.9.2026, `esbuild --target=esnext`: Binder `v5/runtime.js` 47 → 23 KB roh (Brotli 15 → 7,9 KB); Seitenlogik 170 → 143 KB roh (43,8 KB Brotli — der Rest sind Texte, Icon-Pfade und Shader als Strings, die kein Minifier kürzt). · Sicherheit: gemessen
+**Gilt für:** allgemein, insbesondere Code mit Klassenfeldern (React-Klassenkomponenten, TypeScript-Klassen mit Property-Initializern)
 
 ## Offene Fragen
 
