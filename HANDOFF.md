@@ -12,10 +12,11 @@ gilt für jeden Host außer `mccain-digital.com`; `mccain-digital.vercel.app`
 zeigt weiter die ganze Seite. Go-live-Schritte (Coming-soon-Teile entfernen)
 stehen in `site.config.json`. Commits `a1e2e7c`, `a1fd733`.
 
-Offen: `lighthouse-psi.mjs` (Skill html-performance) findet unter Windows
-`npx` nicht (`spawnSync npx ENOENT`, Zeile 81/96 — braucht `npx.cmd` mit
-`shell: true`). PSI-API-Tageskontingent war erschöpft; Owner: für die
-Coming-soon-Seite reicht es so.
+`lighthouse-psi.mjs` (Skill html-performance) lief unter Windows nicht
+(`spawnSync npx ENOENT`) — behoben. Lighthouse startet jetzt, bricht auf
+diesem PC aber mit `FAILED_DOCUMENT_REQUEST` (`ERR_ABORTED`) ab, auch gegen
+127.0.0.1 — bekanntes Maschinenproblem, nicht verfolgt. Owner: Coming soon
+muss nicht gemessen werden.
 
 ## ▶ STAND 18.9. NACHT — CMS-DESIGN ABGESCHLOSSEN: md-cms, SITE-KIT KOMMT IN DIESE BAUKETTE
 
