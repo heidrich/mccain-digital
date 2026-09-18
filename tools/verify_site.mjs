@@ -85,7 +85,15 @@ const LIVE_PAGES = [
  * description/canonical checks: it is not a page that can be canonical to
  * anything, and demanding that of it would be a failing test asking for the
  * wrong thing. */
-const FLAT_PAGES = [{ path: "/404.html", indexable: false }];
+/* /coming-soon/ (18.9.2026) is what mccain-digital.com shows until the site
+ * goes live - vercel.json redirects every page request on that host to it. It
+ * is the one page that is indexable while the rest is not, so it is exempt from
+ * the noindex switch: `robots: "index"` asserts the opposite of the switch. On
+ * the vercel.app host the X-Robots-Tag header still keeps it out. */
+const FLAT_PAGES = [
+  { path: "/404.html", indexable: false },
+  { path: "/coming-soon/", robots: "index" },
+];
 
 /* Which routes must carry a contact form that is actually wired. The build
  * puts one on every page; these are the two a visitor is sent to. */
@@ -583,7 +591,7 @@ for (const p of LIVE_PAGES) {
   }
 }
 
-for (const { path: p, indexable = true, form = false } of FLAT_PAGES) {
+for (const { path: p, indexable = true, form = false, robots: robotsWant } of FLAT_PAGES) {
   const url = BASE + p;
   const { page, errs, noise, hosts, bad, headers } = await load(url);
   const info = await page.evaluate(() => ({
@@ -604,7 +612,9 @@ for (const { path: p, indexable = true, form = false } of FLAT_PAGES) {
     })),
   }));
   const robots = await robotsOf(page);
-  checkRobots(p, robots, headers);
+  if (robotsWant === "index") {
+    if (/noindex/i.test(robots)) fail(`${p}: must stay indexable, the page says "${robots}"`);
+  } else checkRobots(p, robots, headers);
   const ext = foreign(hosts, url);
   const good =
     info.title && info.h1 === 1 && !ext.length && !bad.length && !errs.length &&

@@ -21,7 +21,15 @@
     "  3. rebuild, then node tools/verify_site.mjs  (it fails if 1 and 2 disagree)",
     "  4. assign mccain-digital.com to this Vercel project (DNS is already at Vercel)",
     "  5. node tools/domain_check.mjs  - it passes only once the domain serves",
-    "     this build"
+    "     this build",
+    "",
+    "COMING SOON (18.9.2026): the domain is assigned early and shows",
+    "/coming-soon/ - the two host redirects at the top of vercel.json send every",
+    "page on mccain-digital.com there, and the X-Robots-Tag rule is 'missing'",
+    "that host so the coming-soon page can be indexed. Going live therefore also",
+    "means: delete both host redirects, delete coming-soon/, remove its entry",
+    "from FLAT_PAGES in tools/verify_site.mjs, and make the X-Robots-Tag rule",
+    "unconditional again until step 2 removes it."
   ],
   "noindex": true,
   "origin": "https://mccain-digital.com"

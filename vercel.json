@@ -8,6 +8,18 @@
   },
   "redirects": [
     {
+      "source": "/",
+      "has": [{ "type": "host", "value": "mccain-digital.com" }],
+      "destination": "/coming-soon/",
+      "permanent": false
+    },
+    {
+      "source": "/:path((?!coming-soon/|rechtliches/|robots\\.txt$|.*\\.(?:css|js|mjs|json|woff2|webp|avif|jpe?g|png|svg|ico|gif)$).+)",
+      "has": [{ "type": "host", "value": "mccain-digital.com" }],
+      "destination": "/coming-soon/",
+      "permanent": false
+    },
+    {
       "source": "/:path*/index.html",
       "destination": "/:path*/",
       "permanent": true
@@ -150,7 +162,13 @@
         {
           "key": "Content-Security-Policy",
           "value": "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data:; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-fLTa4swNKAK8Mq3ajRtNpy9JknIZid7hIXp5tfgqdzg='; connect-src 'self' https://api.web3forms.com; upgrade-insecure-requests"
-        },
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "missing": [{ "type": "host", "value": "mccain-digital.com" }],
+      "headers": [
         {
           "key": "X-Robots-Tag",
           "value": "noindex, follow"
