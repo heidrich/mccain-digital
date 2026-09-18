@@ -74,11 +74,21 @@ function writeConfig(dir, desktop) {
   return file;
 }
 
+/* Unter Windows sind lighthouse und npx .cmd-Shims: spawnSync ohne Shell findet
+ * sie nicht (ENOENT, gemessen 18.9.2026), und Node startet .cmd seit
+ * CVE-2024-27980 nur noch mit shell:true. Dann müssen Argumente mit Leerzeichen
+ * selbst gequotet werden - die Shell trennt sonst an ihnen. */
+const WIN = process.platform === "win32";
+const quote = (a) => (/[\s"]/.test(a) ? `"${a.replace(/"/g, '\\"')}"` : a);
+function run(cmd, args, opts) {
+  return WIN ? spawnSync(cmd, args.map(quote), { ...opts, shell: true }) : spawnSync(cmd, args, opts);
+}
+
 /* lighthouse auf PATH bevorzugen; sonst npx mit gepinntem Major (Audit-IDs wie
  * lcp-breakdown-insight sollen sich nicht unter uns wegändern). */
 function resolveLighthouseCmd() {
-  const probe = spawnSync("lighthouse", ["--version"], { stdio: "ignore" });
-  return probe.error ? { cmd: "npx", pre: ["--yes", "lighthouse@13"] } : { cmd: "lighthouse", pre: [] };
+  const probe = run("lighthouse", ["--version"], { stdio: "ignore" });
+  return probe.error || probe.status !== 0 ? { cmd: "npx", pre: ["--yes", "lighthouse@13"] } : { cmd: "lighthouse", pre: [] };
 }
 
 function runOnce(url, { cmd, pre }, { cfgFile, outFile, desktop, method, keep }, env) {
@@ -93,7 +103,7 @@ function runOnce(url, { cmd, pre }, { cfgFile, outFile, desktop, method, keep },
   ];
   if (method === "devtools") argv.push("--throttling-method=devtools");
   if (keep) argv.push("--save-assets");
-  const res = spawnSync(cmd, argv, { env, encoding: "utf8", timeout: 180000, killSignal: "SIGKILL", maxBuffer: 64 * 1024 * 1024 });
+  const res = run(cmd, argv, { env, encoding: "utf8", timeout: 180000, killSignal: "SIGKILL", maxBuffer: 64 * 1024 * 1024 });
   if (!fs.existsSync(outFile)) {
     const tail = (res.stderr || res.error?.message || "kein Output").trim().split("\n").slice(-5).join("\n");
     return { report: null, error: { code: res.signal === "SIGKILL" ? "TIMEOUT" : "NO_OUTPUT", message: tail } };
