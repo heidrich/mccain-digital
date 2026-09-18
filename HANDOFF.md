@@ -1,5 +1,22 @@
 # Uebergabe — Stand 17. September 2026
 
+## ▶ STAND 18.9. ABENDS — mccain-digital.com ZEIGT COMING SOON (live, gemessen)
+
+Owner: Texte und Bilder nicht final, Go-live später (Textrunde am Wochenende).
+Bis dahin: Domain dem Projekt zugewiesen, `mccain-digital.com` → 307 →
+`/coming-soon/` (von Hand geschrieben wie `404.html`, indexierbar, ohne
+Skript). `www` → 308 → Apex, **in `vercel.json`** (die Dashboard-Umleitung
+griff nicht). Auf `.com` erreichbar: `/coming-soon/`, `/rechtliches/`,
+`robots.txt`, Dateien; alles andere → Coming soon. `X-Robots-Tag: noindex`
+gilt für jeden Host außer `mccain-digital.com`; `mccain-digital.vercel.app`
+zeigt weiter die ganze Seite. Go-live-Schritte (Coming-soon-Teile entfernen)
+stehen in `site.config.json`. Commits `a1e2e7c`, `a1fd733`.
+
+Offen: `lighthouse-psi.mjs` (Skill html-performance) findet unter Windows
+`npx` nicht (`spawnSync npx ENOENT`, Zeile 81/96 — braucht `npx.cmd` mit
+`shell: true`). PSI-API-Tageskontingent war erschöpft; Owner: für die
+Coming-soon-Seite reicht es so.
+
 ## ▶ STAND 18.9. NACHT — CMS-DESIGN ABGESCHLOSSEN: md-cms, SITE-KIT KOMMT IN DIESE BAUKETTE
 
 Die angekündigte Denkaufgabe ist erledigt. Design und Build-Plan des neuen
