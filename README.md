@@ -7,11 +7,12 @@ Germany (AI tools, web apps, websites and custom software).
 
 🔗 **Deployment:** [mccain-digital.vercel.app](https://mccain-digital.vercel.app)
 
-> **`mccain-digital.com` does not serve this repository.** Measured 11.9.2026:
-> the domain still points at SiteGround's nginx and serves the English v2 site
-> from June, indexable, with the contact and service pages 404. The Vercel
-> project carries only its own `*.vercel.app` domains. `node
-> tools/domain_check.mjs` compares the two and fails while they differ.
+> **`mccain-digital.com` does not serve this repository yet.** Measured
+> 18.9.2026: the domain's DNS is at Vercel (`ns1/ns2.vercel-dns.com`), the apex
+> answers 404 from Vercel because no project is assigned to it, and this Vercel
+> project still carries only its own `*.vercel.app` domains. Google sees that
+> 404 now. `node tools/domain_check.mjs` compares the two and fails while they
+> differ.
 >
 > Switching the domain is an owner decision and is **not** just a DNS change:
 > this build is `noindex`, and pointing an indexed domain at a noindex site asks
