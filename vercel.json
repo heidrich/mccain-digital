@@ -8,6 +8,12 @@
   },
   "redirects": [
     {
+      "source": "/:path(.*)",
+      "has": [{ "type": "host", "value": "www.mccain-digital.com" }],
+      "destination": "https://mccain-digital.com/:path",
+      "permanent": true
+    },
+    {
       "source": "/",
       "has": [{ "type": "host", "value": "mccain-digital.com" }],
       "destination": "/coming-soon/",
