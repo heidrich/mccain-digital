@@ -38,6 +38,8 @@ export const PAGES = [
   { src: "McCain Digital Vergleich WordPress.dc.html", out: "vergleich/wordpress-oder-handgeschrieben/index.html", route: "/vergleich/wordpress-oder-handgeschrieben/", prio: "0.7", freq: "monthly" },
   { src: "McCain Digital Vergleich RAG.dc.html", out: "vergleich/chatgpt-oder-eigenes-rag/index.html", route: "/vergleich/chatgpt-oder-eigenes-rag/", prio: "0.7", freq: "monthly" },
   { src: "McCain Digital md-recall.dc.html", out: "md-recall/index.html", route: "/md-recall/", prio: "0.8", freq: "monthly" },
+  { src: "McCain Digital md-cms.dc.html", out: "md-cms/index.html", route: "/md-cms/", prio: "0.7", freq: "monthly" },
+  { src: "McCain Digital md-portal.dc.html", out: "md-portal/index.html", route: "/md-portal/", prio: "0.7", freq: "monthly" },
   { src: "McCain Digital Preise.dc.html", out: "preise/index.html", route: "/preise/", prio: "0.6", freq: "monthly" },
   { src: "McCain Digital Studio.dc.html", out: "studio/index.html", route: "/studio/", prio: "0.6", freq: "monthly" },
   { src: "McCain Digital Kontakt.dc.html", out: "kontakt/index.html", route: "/kontakt/", prio: "0.6", freq: "monthly" },

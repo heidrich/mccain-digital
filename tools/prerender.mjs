@@ -1193,10 +1193,12 @@ const PXE_TAG = /<script src="\.{0,2}\/?pixel-engine\.js"><\/script>/g;
  * and is right. The export is Claude Design's output and comes back with the
  * next export, so the correction lives here, counted: every page renders the
  * same component template, so each find must occur exactly once per page, or
- * the export changed and this list needs a look. */
-const EXPORT_FIXES = [
-  { find: 'line-height:1.3">{{ l }}</div>', repl: 'line-height:1.3">{{ l.k }}</div>' },
-];
+ * the export changed and this list needs a look.
+ *
+ * 19.9.2026: that one is fixed in the artboards themselves - the raw artboard
+ * view (which the owner now watches live) never saw this correction and kept
+ * showing "[object Object]". The list stays for the next slip of this kind. */
+const EXPORT_FIXES = [];
 
 function fixExportTemplate(template, name) {
   let out = template;

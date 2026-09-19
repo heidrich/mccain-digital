@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Brotkrumen – fünf Varianten</title>
+<link rel="icon" href="/brand/mccain-favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/mccain-design-system/tokens/colors.css">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/mccain-design-system/tokens/typography.css">
+<style>
+  /* Interne Vorschlagsseite (19.9.2026). Nachbau der echten Kopfzeile; nur Tokens. */
+  *,*::before,*::after{box-sizing:border-box}
+  html{color-scheme:light;scroll-behavior:smooth}
+  body{margin:0;background:var(--mc-white);color:var(--mc-navy);font-family:var(--font-sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  h1,h2,p{margin:0}
+  .wrap{max-width:1440px;margin:0 auto;padding:0 clamp(20px,4vw,48px)}
+
+  /* ---------- Kopfzeile (Nachbau) ---------- */
+  .hdr{position:fixed;top:0;left:0;right:0;z-index:80;background:color-mix(in srgb,var(--mc-white) 92%,transparent);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);transition:box-shadow .3s}
+  .hdr.scrolled{box-shadow:0 1px 0 var(--mc-line),0 10px 30px -18px color-mix(in srgb,var(--mc-navy) 18%,transparent)}
+  .hdr-in{position:relative;height:72px;display:flex;align-items:center;gap:18px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;letter-spacing:-.02em;white-space:nowrap}
+  .logo img{width:30px;height:30px}
+  .nav{display:flex;align-items:center;gap:4px;margin-left:8px;transition:opacity .25s,transform .3s cubic-bezier(.2,.8,.2,1)}
+  .nav a{display:flex;align-items:center;gap:3px;padding:8px 12px;border-radius:8px;font-weight:500;color:var(--mc-navy);white-space:nowrap}
+  .nav a:hover{background:var(--mc-surface)}
+  .nav a.cur{font-weight:600}
+  .nav .dot{width:6px;height:6px;margin:0 2px 0 4px;border-radius:50%;background:var(--mc-dark-accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--mc-dark-accent) 25%,transparent)}
+  .chev{opacity:.55;font-size:11px}
+  .right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .search{display:flex;align-items:center;gap:8px;height:38px;padding:0 14px;border-radius:999px;box-shadow:inset 0 0 0 1.5px var(--mc-violet);color:var(--mc-slate)}
+  .lang{display:flex;padding:3px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--mc-line);font-size:13px;font-weight:700}
+  .lang span{padding:5px 10px;border-radius:999px}.lang span:first-child{background:var(--mc-navy);color:var(--mc-white)}
+  .user{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--mc-line)}
+  .cta{height:40px;padding:0 16px 0 20px;border-radius:8px;background:var(--mc-navy);color:var(--mc-white);font-weight:700;display:flex;align-items:center;gap:6px}
+
+  /* ---------- Seite ---------- */
+  .hero{padding:150px 0 110px;text-align:center}
+  .hero .bc{display:inline-flex;gap:8px;font-size:14px;color:var(--mc-slate)}.hero .bc b{color:var(--mc-navy)}
+  .hero .eb{margin-top:26px;color:var(--mc-orange-ink);font-weight:600}
+  .hero h1{margin-top:10px;font-size:clamp(40px,5vw,72px);line-height:1.05;letter-spacing:-.035em}
+  .sec{padding:110px 0}
+  .sec.dark{background:var(--mc-plate);color:var(--mc-dark-text)}
+  .sec .eb{font-weight:600;color:var(--mc-action-text)}.sec.dark .eb{color:var(--mc-dark-accent)}
+  .sec h2{margin-top:10px;font-size:clamp(30px,3.4vw,48px);line-height:1.1;letter-spacing:-.03em}
+  .sec.dark h2{color:var(--mc-white)}
+  .sec p{margin-top:18px;max-width:62ch;color:var(--mc-slate)}.sec.dark p{color:var(--mc-dark-text-2)}
+  .cards{margin-top:40px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:18px}
+  .card{height:160px;border-radius:14px;background:var(--mc-surface);box-shadow:inset 0 0 0 1px var(--mc-line)}
+  .sec.dark .card{background:color-mix(in srgb,var(--mc-white) 6%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--mc-white) 12%,transparent)}
+
+  /* ---------- Brotkrumen: gemeinsame Teile ---------- */
+  .trail{display:flex;align-items:center;gap:8px;font-size:13px;line-height:1.2;white-space:nowrap}
+  .trail .sep{opacity:.5}
+  .trail .start{font-weight:600}
+  .bar{display:block;height:2px;border-radius:2px;overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--mc-stream);transform-origin:0 50%;transform:scaleX(var(--p,0))}
+  .crumb{position:fixed;left:0;right:0;z-index:81;pointer-events:none;opacity:0;transition:opacity .25s,transform .3s cubic-bezier(.2,.8,.2,1)}
+  .show .crumb{opacity:1}
+  .crumb .pill{pointer-events:auto;display:inline-flex;flex-direction:column;gap:8px}
+  [data-v]:not(.on){display:none}
+
+  /* V1 Navy-Pille (Owner-Entwurf) */
+  .v1{top:84px;transform:translateY(-6px)}.show .v1{transform:none}
+  .v1 .pill{padding:9px 16px 10px;border-radius:13px;background:var(--mc-navy);color:var(--mc-white);box-shadow:0 0 0 2px var(--mc-white),0 0 0 3px color-mix(in srgb,var(--mc-navy) 8%,transparent),0 16px 34px -18px color-mix(in srgb,var(--mc-navy) 55%,transparent)}
+  .v1 .sep{color:var(--mc-dark-muted);opacity:1}.v1 .bar{background:color-mix(in srgb,var(--mc-white) 85%,transparent)}
+
+  /* V2 Auf der Kante: die Pille sitzt auf der Unterkante der Kopfzeile */
+  .v2{top:56px;transform:translateY(-4px)}.show .v2{transform:none}
+  .v2 .pill{flex-direction:row;align-items:center;gap:12px;padding:8px 14px;border-radius:999px;background:var(--mc-navy);color:var(--mc-white);box-shadow:0 0 0 2px var(--mc-white),0 12px 28px -16px color-mix(in srgb,var(--mc-navy) 60%,transparent)}
+  .v2 .sep{color:var(--mc-dark-muted);opacity:1}
+  .v2 .ring{width:18px;height:18px;border-radius:50%;background:conic-gradient(var(--mc-dark-accent) calc(var(--p) * 360deg),color-mix(in srgb,var(--mc-white) 22%,transparent) 0);-webkit-mask:radial-gradient(circle,transparent 5px,var(--mc-navy) 5.5px);mask:radial-gradient(circle,transparent 5px,var(--mc-navy) 5.5px)}
+
+  /* V3 Angedockte Lasche: gleicher Glasgrund wie die Kopfzeile */
+  .v3{top:72px}
+  .v3 .wrap{overflow:hidden;padding-bottom:40px}
+  .v3 .pill{padding:9px 16px 11px;border-radius:0 0 13px 13px;background:color-mix(in srgb,var(--mc-white) 92%,transparent);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);box-shadow:inset 1px 0 0 var(--mc-line),inset -1px 0 0 var(--mc-line),inset 0 -1px 0 var(--mc-line),0 14px 30px -20px color-mix(in srgb,var(--mc-navy) 35%,transparent);color:var(--mc-navy);transform:translateY(-110%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+  .show .v3 .pill{transform:none}
+  .v3 .bar{background:var(--mc-line)}
+
+  /* V4 Smart Header: beim Runterscrollen weichen die Menüpunkte den Brotkrumen */
+  .hdr .inbar{position:absolute;left:0;right:0;top:0;height:72px;display:flex;align-items:center;pointer-events:none;opacity:0;transform:translateY(10px);transition:opacity .25s,transform .3s cubic-bezier(.2,.8,.2,1)}
+  .hdr .inbar .trail{font-size:14px;color:var(--mc-slate)}.hdr .inbar .start{color:var(--mc-navy)}.hdr .inbar .here{color:var(--mc-navy);font-weight:600}
+  .hdr .edge{position:absolute;left:0;right:0;bottom:-1px;height:2px;opacity:0;transition:opacity .3s}
+  body.m4.crumbing .nav{opacity:0;transform:translateY(-10px);pointer-events:none}
+  body.m4.crumbing .hdr .inbar{opacity:1;transform:none;pointer-events:auto}
+  body.m4.show .hdr .edge,body.m5.show .hdr .edge{opacity:1}
+
+  /* V5 Zweite Zeile: die Kopfzeile wächst um eine schmale Leiste */
+  .hdr .row2{height:0;overflow:hidden;transition:height .3s cubic-bezier(.2,.8,.2,1)}
+  body.m5.show .hdr .row2{height:36px}
+  .hdr .row2 .wrap{height:36px;display:flex;align-items:center;gap:16px}
+  .hdr .row2 .trail{color:var(--mc-slate)}.hdr .row2 .start{color:var(--mc-navy)}.hdr .row2 .here{color:var(--mc-navy);font-weight:600}
+  .hdr .row2 .top{margin-left:auto;font-size:13px;font-weight:600;color:var(--mc-action-text)}
+
+  /* ---------- Umschalter (nur Demo) ---------- */
+  .switch{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:200;display:flex;gap:4px;padding:5px;border-radius:14px;background:var(--mc-night-2,var(--mc-plate));box-shadow:0 18px 40px -16px color-mix(in srgb,var(--mc-navy) 60%,transparent);max-width:calc(100vw - 24px);overflow-x:auto}
+  .switch button{padding:9px 14px;border-radius:10px;color:var(--mc-dark-text-2);font-size:13.5px;font-weight:600;white-space:nowrap}
+  .switch button[aria-pressed=true]{background:var(--mc-dark-accent);color:var(--mc-dark-accent-text)}
+  .note{position:fixed;right:18px;bottom:78px;z-index:200;width:min(380px,calc(100vw - 36px));padding:16px 18px;border-radius:14px;background:var(--mc-white);box-shadow:0 0 0 1px var(--mc-line),0 20px 44px -20px color-mix(in srgb,var(--mc-navy) 45%,transparent);font-size:13.5px;line-height:1.55;color:var(--mc-slate)}
+  .note b{display:block;margin-bottom:4px;font-size:15px;color:var(--mc-navy)}
+  .note .pc{margin-top:8px}.note .pc span{display:block}
+  .note .rec{margin-top:10px;padding-top:10px;border-top:1px solid var(--mc-line);color:var(--mc-navy);font-weight:600}
+  @media (max-width:1179px){.nav,.inbar{display:none!important}}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body class="m1">
+
+<header class="hdr" id="hdr">
+  <div class="wrap hdr-in">
+    <a class="logo" href="#"><img src="/brand/mccain-mark-free-color.svg" alt="">mccain digital</a>
+    <nav class="nav" aria-label="Hauptmenü">
+      <a class="cur" href="#">Leistungen<span class="dot" aria-hidden="true"></span><span class="chev">⌄</span></a>
+      <a href="#">Arbeiten <span class="chev">⌄</span></a><a href="#">Studio <span class="chev">⌄</span></a><a href="#">Ablauf <span class="chev">⌄</span></a>
+      <a href="#">Ressourcen <span class="chev">⌄</span></a><a href="#">Software <span class="chev">⌄</span></a><a href="#">Preise <span class="chev">⌄</span></a>
+    </nav>
+    <div class="inbar" data-v="4" aria-hidden="true">
+      <div class="trail" id="inTrail"><a class="start" href="#">Start</a><span class="sep">›</span><a href="#">Leistungen</a><span class="sep">›</span><span class="here">Websites &amp; Landingpages</span><span class="sep">·</span><span class="sec-name">Handwerk</span></div>
+    </div>
+    <div class="right">
+      <span class="search">⌕ Suche</span>
+      <span class="lang"><span>DE</span><span>EN</span></span>
+      <span class="user" aria-hidden="true">◯</span>
+      <a class="cta" href="#">Kontakt ›</a>
+    </div>
+  </div>
+  <div class="row2" data-v="5">
+    <div class="wrap">
+      <div class="trail"><a class="start" href="#">Start</a><span class="sep">›</span><a href="#">Leistungen</a><span class="sep">›</span><span class="here">Websites &amp; Landingpages</span><span class="sep">·</span><span class="sec-name">Handwerk</span></div>
+      <a class="top" href="#">Nach oben ↑</a>
+    </div>
+  </div>
+  <span class="edge bar" aria-hidden="true"><i></i></span>
+</header>
+
+<div class="crumb v1" data-v="1" aria-hidden="true"><div class="wrap"><div class="pill">
+  <div class="trail"><a class="start" href="#">Start</a><span class="sep">›</span><a href="#">Leistungen</a><span class="sep">›</span><span>Websites &amp; Landingpages</span><span class="sep">·</span><span class="sec-name">Handwerk</span></div>
+  <span class="bar"><i></i></span></div></div></div>
+
+<div class="crumb v2" data-v="2" aria-hidden="true"><div class="wrap"><div class="pill">
+  <span class="ring" aria-hidden="true"></span>
+  <div class="trail"><a class="start" href="#">Start</a><span class="sep">›</span><a href="#">Leistungen</a><span class="sep">›</span><span>Websites &amp; Landingpages</span><span class="sep">·</span><span class="sec-name">Handwerk</span></div>
+</div></div></div>
+
+<div class="crumb v3" data-v="3" aria-hidden="true"><div class="wrap"><div class="pill">
+  <div class="trail"><a class="start" href="#">Start</a><span class="sep">›</span><a href="#">Leistungen</a><span class="sep">›</span><b style="font-weight:600">Websites &amp; Landingpages</b><span class="sep">·</span><span class="sec-name">Handwerk</span></div>
+  <span class="bar"><i></i></span></div></div></div>
+
+<main>
+  <section class="hero" id="top"><div class="wrap">
+    <nav class="bc" id="heroBc" aria-label="Brotkrumen"><a href="#">Start</a>›<a href="#">Leistungen</a>›<b>Websites &amp; Landingpages</b></nav>
+    <div class="eb">Leistung · Websites &amp; Landingpages</div>
+    <h1>Die erste Sekunde entscheidet.</h1>
+  </div></section>
+  <section class="sec"><div class="wrap"><div class="eb">Handwerk</div><h2>Was eine schnelle Seite ausmacht.</h2><p>Scrollen Sie: die Brotkrumen erscheinen, sobald die im Hero aus dem Bild sind. Der Abschnittsname und die Fortschrittslinie laufen mit.</p><div class="cards"><div class="card"></div><div class="card"></div><div class="card"></div></div></div></section>
+  <section class="sec dark"><div class="wrap"><div class="eb">Vergleich</div><h2>Auf dunklem Grund.</h2><p>Hier zeigt sich, wie die Variante auf den Navy-Flächen wirkt – Kontakt, Fußzeile und die dunklen Kacheln sind genauso.</p><div class="cards"><div class="card"></div><div class="card"></div></div></div></section>
+  <section class="sec"><div class="wrap"><div class="eb">Ablauf</div><h2>Vier Schritte bis live.</h2><p>Heller Abschnitt mit Karten direkt unter der Kopfzeile – hier sieht man, was die Variante vom Inhalt verdeckt.</p><div class="cards"><div class="card"></div><div class="card"></div><div class="card"></div><div class="card"></div></div></div></section>
+  <section class="sec dark"><div class="wrap"><div class="eb">Kontakt</div><h2>Erzählen Sie uns von Ihrem Vorhaben.</h2><p>Der dunkle Kontaktbereich am Seitenende.</p><div class="cards"><div class="card"></div></div></div></section>
+  <section class="sec"><div class="wrap"><div class="eb">Fragen</div><h2>Was Kunden vorher fragen.</h2><p>Letzter Abschnitt – die Fortschrittslinie ist hier fast voll.</p><div style="height:50vh"></div></div></section>
+</main>
+
+<div class="note" id="note" aria-live="polite"></div>
+<div class="switch" role="group" aria-label="Variante wählen">
+  <button data-set="1">1 · Navy-Pille</button><button data-set="2">2 · Auf der Kante</button><button data-set="3">3 · Lasche</button><button data-set="4">4 · Im Header</button><button data-set="5">5 · Zweite Zeile</button>
+</div>
+
+<script src="app.js" defer></script>
+</body>
+</html>

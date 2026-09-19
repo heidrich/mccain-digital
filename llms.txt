@@ -37,6 +37,8 @@
 - [WordPress oder handgeschrieben? Ehrlicher Vergleich](https://mccain-digital.com/vergleich/wordpress-oder-handgeschrieben/index.md): Seite https://mccain-digital.com/vergleich/wordpress-oder-handgeschrieben/
 - [ChatGPT-Abo oder eigener KI-Assistent? · McCain Digital](https://mccain-digital.com/vergleich/chatgpt-oder-eigenes-rag/index.md): Seite https://mccain-digital.com/vergleich/chatgpt-oder-eigenes-rag/
 - [md-recall · Projektgedächtnis am Commit · Download](https://mccain-digital.com/md-recall/index.md): Seite https://mccain-digital.com/md-recall/
+- [md-cms · Das CMS für Websites, die wir bauen](https://mccain-digital.com/md-cms/index.md): Seite https://mccain-digital.com/md-cms/
+- [md-portal · Ihr Projekt bei McCain Digital](https://mccain-digital.com/md-portal/index.md): Seite https://mccain-digital.com/md-portal/
 - [Preise: Was kostet Website, Web-App oder KI?](https://mccain-digital.com/preise/index.md): Seite https://mccain-digital.com/preise/
 - [Studio: zwei Gründer aus Bayern, seit 2016 · McCain Digital](https://mccain-digital.com/studio/index.md): Seite https://mccain-digital.com/studio/
 - [Kontakt · Antwort in 24 Stunden · McCain Digital](https://mccain-digital.com/kontakt/index.md): Seite https://mccain-digital.com/kontakt/

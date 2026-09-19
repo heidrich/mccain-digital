@@ -127,11 +127,11 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
       {{ logoNavEl }}
       <span style="font-weight:600; letter-spacing:-.03em; font-size:18px; line-height:1; animation: word-in .55s cubic-bezier(.2,.8,.2,1) .42s both">mccain digital</span>
     </a>
-    <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
-      <nav data-nav-list aria-label="{{ ariaNav }}" style="position:relative; display:flex; align-items:center; gap:4px; margin-left:8px">
+    <sc-if value="{{ navFull }}" hint-placeholder-val="{{ true }}">
+      <nav data-nav-list aria-label="{{ ariaNav }}" style="position:relative; display:flex; align-items:center; gap: {{ navGap }}; margin-left: {{ navMl }}">
         <span aria-hidden="true" style="position:absolute; top:50%; left: {{ indLeft }}px; width: {{ indW }}px; height:36px; margin-top:-18px; border-radius:8px; background: {{ indBg }}; opacity: {{ indOp }}; transition: left .35s cubic-bezier(.2,.8,.2,1), width .35s cubic-bezier(.2,.8,.2,1), opacity .2s; pointer-events:none"></span>
         <sc-for list="{{ navItems }}" as="m" hint-placeholder-count="6">
-          <button data-nav-item="{{ m.id }}" onMouseEnter="{{ m.open }}" onClick="{{ m.toggle }}" style="position:relative; display:flex; align-items:center; gap:3px; padding:8px 12px; border-radius:8px; font-size:15px; font-weight:500; white-space:nowrap; color: {{ m.fg }}; opacity: {{ m.opacity }}; transition: opacity .2s, color .2s"><span aria-hidden="true" style="position:absolute; left:50%; bottom:1px; width:14px; height:2px; margin-left:-7px; border-radius:2px; background:var(--acc); opacity: {{ m.dotOp }}; transition: opacity .25s"></span>{{ m.label }}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="opacity:.55; transform: {{ m.chev }}; transition: transform .3s"><use href="brand/mccain-icons.svg#chevron-down"></use></svg></button>
+          <button data-nav-item="{{ m.id }}" onMouseEnter="{{ m.open }}" onClick="{{ m.toggle }}" style="position:relative; display:flex; align-items:center; gap:3px; padding: {{ navItemPad }}; border-radius:8px; font-size:15px; font-weight: {{ m.fw }}; white-space:nowrap; color: {{ m.fg }}; opacity: {{ m.opacity }}; transition: opacity .2s, color .2s">{{ m.label }}<sc-if value="{{ m.cur }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="flex:none; width:6px; height:6px; margin:0 2px 0 4px; border-radius:50%; background:var(--mc-dark-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--mc-dark-accent) 25%, transparent)"></span></sc-if><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="opacity:.55; transform: {{ m.chev }}; transition: transform .3s"><use href="brand/mccain-icons.svg#chevron-down"></use></svg></button>
         </sc-for>
       </nav>
     </sc-if>
@@ -148,17 +148,20 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
         <button onClick="{{ setEn }}" data-touch style="padding:4px 9px; border-radius:999px; background: {{ enBg }}; color: {{ enFg }}; transition: background .25s, color .25s">EN</button>
       </div>
       </sc-if>
+      <sc-if value="{{ navFull }}" hint-placeholder-val="{{ true }}">
+        <button data-nav-item="login" onMouseEnter="{{ loginOpen }}" onClick="{{ loginToggle }}" aria-label="{{ t.nav.login }}" aria-haspopup="true" style="flex:none; width:36px; height:36px; border-radius:50%; display:grid; place-items:center; color:var(--mc-navy); background: {{ loginBg }}; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mc-navy) 16%, transparent); transition: background .2s" style-hover="background:var(--mc-surface)">{{ loginIcon }}</button>
+      </sc-if>
       <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
         <button data-px onClick="{{ goContact }}" style="display:inline-flex; align-items:center; white-space:nowrap; gap:4px; height:40px; padding:0 12px 0 16px; border-radius:6px; background:var(--acc); color:var(--mc-white); font-size:14px; font-weight:600; transition: background .2s" style-hover="background:var(--mc-navy)">{{ t.nav.contact }}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="brand/mccain-icons.svg#chevron-right"></use></svg></button>
       </sc-if>
-      <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{ navCompact }}" hint-placeholder-val="{{ false }}">
         <button onClick="{{ toggleMobile }}" aria-label="{{ t.nav.menu }}" style="width:42px; height:42px; border-radius:50%; display:grid; place-items:center; color:var(--mc-navy); border:1px solid color-mix(in srgb, var(--mc-navy) 14%, transparent)">
           <sc-if value="{{ mobileOpen }}" hint-placeholder-val="{{ false }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><use href="brand/mccain-icons.svg#x"></use></svg></sc-if>
           <sc-if value="{{ mobileClosed }}" hint-placeholder-val="{{ true }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path></svg></sc-if>
         </button>
       </sc-if>
     </div>
-    <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+    <sc-if value="{{ navFull }}" hint-placeholder-val="{{ true }}">
       <div aria-hidden="true" style="position:absolute; top: {{ caretTop }}px; left: {{ caretLeft }}px; width:14px; height:14px; background:var(--mc-white); transform: rotate(45deg); border-radius:3px; opacity: {{ panelOp }}; transition: left .35s cubic-bezier(.2,.8,.2,1), opacity .2s; pointer-events:none; z-index:2"></div>
       <div onMouseEnter="{{ panelEnter }}" style="position:absolute; top: {{ panelTop }}px; left: {{ panelLeft }}px; width: {{ panelW }}px; height: {{ panelH }}px; background:var(--mc-white); border-radius:12px; box-shadow: 0 30px 90px -20px color-mix(in srgb, var(--mc-navy) 30%, transparent), 0 2px 10px color-mix(in srgb, var(--mc-navy) 8%, transparent), 0 0 0 1px color-mix(in srgb, var(--mc-navy) 5%, transparent); opacity: {{ panelOp }}; transform: {{ panelTf }}; pointer-events: {{ panelPe }}; transition: {{ panelTransition }}; overflow:hidden; transform-origin: 50% 0; z-index:1">
 
@@ -167,7 +170,7 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
             <sc-for list="{{ services }}" as="s" hint-placeholder-count="4">
               <a href="{{ s.page }}" aria-current="{{ s.current }}" style="display:flex; gap:14px; align-items:flex-start; padding:12px; border-radius:8px; transition: background .2s; color:var(--mc-navy); background: {{ s.curBg }}" style-hover="background:var(--mc-surface)">
                 <span style="flex:none; width:36px; height:36px; border-radius:9px; background: {{ s.iconBg }}; color:var(--mc-white); display:grid; place-items:center; box-shadow: inset 0 1px 0 color-mix(in srgb, var(--mc-white) 35%, transparent), 0 8px 18px -8px {{ s.iconGlow }}">{{ s.iconSm }}</span>
-                <span style="display:block; min-width:0"><span style="display:block; font-size:15px; font-weight:600; color:var(--mc-navy)">{{ s.title }}</span><span style="display:block; font-size:13px; line-height:1.45; color:var(--mc-text-grey); margin-top:3px">{{ s.menu }}</span></span>
+                <span style="display:block; min-width:0"><span style="display:flex; align-items:center; flex-wrap:wrap; gap:6px 8px; font-size:15px; font-weight:600; color:var(--mc-navy)">{{ s.title }}<sc-if value="{{ s.isHere }}" hint-placeholder-val="{{ false }}"><span style="font-size:10.5px; font-weight:600; color:var(--mc-white); background:var(--mc-navy); padding:2px 8px; border-radius:999px; white-space:nowrap">{{ t.menus.here }}</span></sc-if></span><span style="display:block; font-size:13px; line-height:1.45; color:var(--mc-text-grey); margin-top:3px">{{ s.menu }}</span></span>
               </a>
             </sc-for>
             <button onClick="{{ goAi }}" style="grid-column:3; grid-row:1 / span 2; position:relative; overflow:hidden; border-radius:10px; padding:16px; text-align:left; color:var(--mc-white); background:var(--mc-plate); display:flex; flex-direction:column; justify-content:flex-end; gap:6px; min-height:190px; transition: transform .3s" style-hover="transform: translateY(-2px)">
@@ -246,6 +249,38 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
               </a>
             </sc-for>
           </div>
+        </div>
+
+        <div data-menu-content="software" style="position:absolute; top:0; left:0; width:600px; opacity: {{ mv.software.op }}; transform: {{ mv.software.tf }}; pointer-events: {{ mv.software.pe }}; transition: opacity .25s, transform .35s cubic-bezier(.2,.8,.2,1)">
+          <div style="display:grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap:2px 12px; padding:14px">
+            <sc-for list="{{ swItems }}" as="p" hint-placeholder-count="3">
+              <a href="{{ p.href }}" aria-current="{{ p.current }}" style="display:flex; gap:14px; align-items:flex-start; padding:12px; border-radius:8px; transition: background .2s; color:var(--mc-navy); background: {{ p.curBg }}" style-hover="background:var(--mc-surface)">
+                <span style="flex:none; width:36px; height:36px; border-radius:9px; overflow:hidden; background: {{ p.tileBg }}; color:var(--mc-white); display:grid; place-items:center">{{ p.mark }}</span>
+                <span style="display:block; min-width:0"><span style="display:flex; align-items:center; flex-wrap:wrap; gap:6px 8px; font-size:15px; font-weight:600; color:var(--mc-navy)">{{ p.title }}<span style="font-size:11px; font-weight:600; color: {{ p.statusFg }}; background: {{ p.statusBg }}; padding:2px 8px; border-radius:999px; white-space:nowrap">{{ p.status }}</span><sc-if value="{{ p.isHere }}" hint-placeholder-val="{{ false }}"><span style="font-size:10.5px; font-weight:600; color:var(--mc-white); background:var(--mc-navy); padding:2px 8px; border-radius:999px; white-space:nowrap">{{ t.menus.here }}</span></sc-if></span><span style="display:block; font-size:13px; line-height:1.45; color:var(--mc-text-grey); margin-top:3px">{{ p.menu }}</span></span>
+              </a>
+            </sc-for>
+            <div aria-disabled="true" style="display:flex; gap:14px; align-items:flex-start; padding:12px; border-radius:8px; opacity:.62">
+              <span style="flex:none; width:36px; height:36px; border-radius:9px; background:var(--mc-navy); color:var(--mc-white); display:grid; place-items:center">{{ sw360.icon }}</span>
+              <span style="display:block; min-width:0"><span style="display:flex; align-items:center; gap:8px; font-size:15px; font-weight:600; color:var(--mc-navy)">{{ sw360.title }}<span style="font-size:11px; font-weight:600; color:var(--mc-text-grey); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mc-navy) 14%, transparent); padding:1px 7px; border-radius:999px">{{ t.menus.soon }}</span></span><span style="display:block; font-size:13px; line-height:1.45; color:var(--mc-text-grey); margin-top:3px">{{ sw360.menu }}</span></span>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:13px 22px; background:var(--mc-surface); border-top:1px solid color-mix(in srgb, var(--mc-navy) 6%, transparent); font-size:13px">
+            <span style="color:var(--mc-text-grey)">{{ t.menus.swFoot }}</span>
+            <a href="McCain Digital Studio.dc.html#produkte" style="font-weight:600; color:var(--mc-navy); white-space:nowrap">{{ t.menus.swFootLink }} ›</a>
+          </div>
+        </div>
+
+        <div data-menu-content="login" style="position:absolute; top:0; left:0; width:320px; opacity: {{ mv.login.op }}; transform: {{ mv.login.tf }}; pointer-events: {{ mv.login.pe }}; transition: opacity .25s, transform .35s cubic-bezier(.2,.8,.2,1)">
+          <div style="display:grid; gap:2px; padding:10px">
+            <div style="font-size:12px; font-weight:600; color:var(--mc-text-grey); padding:6px 10px 4px">{{ t.menus.loginTitle }}</div>
+            <sc-for list="{{ loginItems }}" as="l" hint-placeholder-count="2">
+              <a href="{{ l.href }}" style="display:flex; gap:12px; align-items:flex-start; padding:11px 10px; border-radius:8px; color:var(--mc-navy); text-decoration:none; transition: background .2s" style-hover="background:var(--mc-surface)">
+                <span style="flex:none; width:32px; height:32px; border-radius:8px; background:var(--mc-navy); color:var(--mc-white); display:grid; place-items:center">{{ l.icon }}</span>
+                <span style="display:block; min-width:0"><span style="display:flex; align-items:center; gap:6px; font-size:14px; font-weight:600; color:var(--mc-navy)">{{ l.name }}<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="opacity:.5"><use href="brand/mccain-icons.svg#external-link"></use></svg></span><span style="display:block; font-size:12.5px; line-height:1.4; color:var(--mc-text-grey); margin-top:2px">{{ l.desc }}</span><span style="display:block; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--mc-text-grey); margin-top:3px">{{ l.domain }}</span></span>
+              </a>
+            </sc-for>
+          </div>
+          <div style="padding:11px 20px; background:var(--mc-surface); border-top:1px solid color-mix(in srgb, var(--mc-navy) 6%, transparent); font-size:12.5px; color:var(--mc-text-grey)">{{ t.menus.loginNote }}</div>
         </div>
 
         <div data-menu-content="pricing" style="position:absolute; top:0; left:0; width:480px; opacity: {{ mv.pricing.op }}; transform: {{ mv.pricing.tf }}; pointer-events: {{ mv.pricing.pe }}; transition: opacity .25s, transform .35s cubic-bezier(.2,.8,.2,1)">
@@ -439,7 +474,7 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
       <sc-for list="{{ footerCols }}" as="col" hint-placeholder-count="5">
         <div>
           <div style="font-size:14px; font-weight:600; color:var(--mc-white); margin-bottom:12px">{{ col.title }}</div>
-          <sc-for list="{{ col.links }}" as="l" hint-placeholder-count="4"><a href="{{ l.href }}" target="{{ l.target }}" rel="noopener" aria-current="{{ l.current }}" onClick="{{ l.onClick }}" style="display:flex; align-items:center; gap:8px; font-size:14px; color: {{ l.fg }}; font-weight: {{ l.fw }}; padding:5px 0; transition: color .2s" style-hover="color:var(--mc-white)"><span aria-hidden="true" style="flex:none; width:5px; height:5px; border-radius:50%; background:var(--mc-dark-accent); opacity: {{ l.dotOp }}; transition: opacity .25s"></span>{{ l.label }}</a></sc-for>
+          <sc-for list="{{ col.links }}" as="l" hint-placeholder-count="4"><a href="{{ l.href }}" target="{{ l.target }}" rel="noopener" aria-current="{{ l.current }}" onClick="{{ l.onClick }}" style="position:relative; display:flex; align-items:center; font-size:14px; color: {{ l.fg }}; font-weight: {{ l.fw }}; padding:5px 0; transition: color .2s" style-hover="color:var(--mc-white)"><sc-if value="{{ l.on }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:absolute; left:-14px; top:50%; width:6px; height:6px; margin-top:-3px; border-radius:50%; background:var(--mc-dark-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--mc-dark-accent) 25%, transparent)"></span></sc-if>{{ l.label }}</a></sc-for>
         </div>
       </sc-for>
     </div>
@@ -542,89 +577,56 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
           </div>
           <div style="display:flex; flex-wrap:wrap; gap:18px 36px; margin-top:32px"><sc-for list="{{ modal.stats }}" as="s" hint-placeholder-count="3"><div><div style="font-size: clamp(21px,1.67vw,24px); font-weight:700; letter-spacing:-.03em; color:var(--mc-navy); line-height:1">{{ s.v }}</div><div style="font-size:13px; color:var(--mc-text-grey); margin-top:6px; max-width:20ch; line-height:1.4">{{ s.l }}</div></div></sc-for></div>
         </div>
-        <ul style="list-style:none; padding:0; margin-top: clamp(0px,2vw,44px); display:grid; gap:14px; align-content:start; opacity: {{ modalOp }}; transform: {{ modalRise }}; transition: opacity .5s cubic-bezier(.2,.8,.2,1) 0.20s, transform .6s cubic-bezier(.2,.8,.2,1) 0.20s">
-          <sc-for list="{{ modal.items }}" as="i" hint-placeholder-count="4"><li style="display:flex; gap:12px; font-size: clamp(15px,.95vw,16px); line-height:1.5; color:var(--mc-slate)"><span style="flex:none; width:22px; height:22px; border-radius:50%; background:var(--mc-check); color:var(--mc-white); display:grid; place-items:center; margin-top:2px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="brand/mccain-icons.svg#check"></use></svg></span>{{ i }}</li></sc-for>
-        </ul>
-      </div>
-      <div data-stage style="position:relative; margin-top: clamp(28px,4vw,52px); height: {{ stageH }}; border-radius:16px; overflow:hidden; background:var(--mc-surface); opacity: {{ modalOp }}; transform: {{ modalRise }}; transition: opacity .5s cubic-bezier(.2,.8,.2,1) 0.28s, transform .6s cubic-bezier(.2,.8,.2,1) 0.28s">
-        <div aria-hidden="true" data-flow style="position:absolute; inset:-40%; opacity:.9"><div data-anim style="position:absolute; inset:0; background: {{ modal.gradA }}; animation: flowA 26s ease-in-out infinite; will-change: transform"></div><div data-anim style="position:absolute; inset:0; background: {{ modal.gradB }}; animation: flowB 32s ease-in-out infinite; opacity:.85; will-change: transform"></div></div>
-        <div style="position:absolute; left: clamp(12px,5%,64px); right: clamp(12px,5%,64px); top:11%; bottom:-2%; background:var(--mc-white); border-radius:12px 12px 0 0; box-shadow: 0 40px 100px -30px color-mix(in srgb, var(--mc-navy) 50%, transparent), 0 0 0 1px color-mix(in srgb, var(--mc-navy) 6%, transparent); overflow:hidden">
-          <div style="display:flex; align-items:center; gap:6px; padding:11px 14px; border-bottom:1px solid var(--mc-line); background:var(--mc-chrome)"><span style="width:9px; height:9px; border-radius:50%; background:var(--mc-line)"></span><span style="width:9px; height:9px; border-radius:50%; background:var(--mc-line)"></span><span style="width:9px; height:9px; border-radius:50%; background:var(--mc-line)"></span><span style="margin:0 auto; display:inline-flex; align-items:center; gap:6px; font-size:11px; color:var(--mc-text-grey); background:var(--mc-grey-100); padding:4px 14px; border-radius:999px; white-space:nowrap"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>{{ modal.url }}</span></div>
-          <div style="padding: clamp(16px,3vw,32px)">
-            <sc-if value="{{ modal.vAi }}" hint-placeholder-val="{{ false }}">
-              <div style="display:grid; gap:12px; max-width:640px">
-                <div style="justify-self:end; max-width:80%; background:var(--mc-action-tint); color:var(--mc-navy); border-radius:14px 14px 4px 14px; padding:12px 16px; font-size:14px; line-height:1.5">{{ t.mock.aiQ }}</div>
-                <div style="justify-self:start; max-width:86%; background:var(--mc-surface); color:var(--mc-navy); border-radius:14px 14px 14px 4px; padding:12px 16px; font-size:14px; line-height:1.5; box-shadow: inset 0 0 0 1px var(--mc-line)">{{ t.mock.aiA }}<br><span style="display:inline-flex; align-items:center; gap:6px; margin-top:10px; font-size:11px; font-weight:600; color:var(--acc-text); background:var(--mc-action-tint); padding:4px 9px; border-radius:999px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path></svg>{{ t.mock.aiSrc }}</span></div>
-                <div style="display:flex; gap:8px; align-items:center; margin-top:4px; font-size:12px; color:var(--mc-text-grey)"><span style="width:8px; height:8px; border-radius:50%; background:var(--mc-success)"></span>{{ t.mock.grounded }}</div>
-              </div>
-            </sc-if>
-            <sc-if value="{{ modal.vApps }}" hint-placeholder-val="{{ false }}">
-              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:14px">
-                <div style="padding:14px 16px; border-radius:10px; background:var(--mc-surface)"><div style="font-size:11px; color:var(--mc-text-grey)">{{ t.mock.mrr }}</div><div style="font-size: clamp(21px,1.67vw,24px); font-weight:700; letter-spacing:-.03em; margin-top:4px">48.210 €</div><div style="font-size:12px; font-weight:600; color:var(--mc-success-text); margin-top:4px">+18 %</div></div>
-                <div style="padding:14px 16px; border-radius:10px; background:var(--mc-surface)"><div style="font-size:11px; color:var(--mc-text-grey)">{{ t.mock.kpi1 }}</div><div style="font-size: clamp(21px,1.67vw,24px); font-weight:700; letter-spacing:-.03em; margin-top:4px">12.480</div><div style="font-size:12px; font-weight:600; color:var(--mc-success-text); margin-top:4px">+9 %</div></div>
-                <div style="padding:14px 16px; border-radius:10px; background:var(--mc-surface)"><div style="font-size:11px; color:var(--mc-text-grey)">{{ t.mock.kpi2 }}</div><div style="font-size: clamp(21px,1.67vw,24px); font-weight:700; letter-spacing:-.03em; margin-top:4px">84 ms</div><div style="font-size:12px; font-weight:600; color:var(--mc-success-text); margin-top:4px">LCP 0,9 s</div></div>
-              </div>
-              <div style="margin-top:22px"><div style="display:flex; align-items:flex-end; gap:5px; height:130px"><sc-for list="{{ bars }}" as="b" hint-placeholder-count="14"><span style="flex:1; height: {{ b.h }}; border-radius:3px 3px 0 0; background: {{ b.bg }}"></span></sc-for></div></div>
-            </sc-if>
-            <sc-if value="{{ modal.vScores }}" hint-placeholder-val="{{ false }}">
-              <div style="max-width:560px"><div style="display:grid; grid-template-columns: repeat(4,1fr); gap:10px"><sc-for list="{{ lhScores }}" as="l" hint-placeholder-count="4"><div style="text-align:center"><div style="width:72px; height:72px; margin:0 auto; border-radius:50%; border:3px solid var(--mc-success); display:grid; place-items:center; font-size: clamp(17px,1.3vw,19px); font-weight:700; color:var(--mc-success-text); background:color-mix(in srgb, var(--mc-success) 8%, transparent)">100</div><div style="font-size:10px; color:var(--mc-text-grey); margin-top:6px; line-height:1.3">{{ l }}</div></div></sc-for></div><div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:22px"><span style="font-size:11px; font-weight:600; color:var(--mc-navy); background:var(--mc-surface); box-shadow: inset 0 0 0 1px var(--mc-line); padding:4px 10px; border-radius:999px">CLS 0</span><span style="font-size:11px; font-weight:600; color:var(--mc-navy); background:var(--mc-surface); box-shadow: inset 0 0 0 1px var(--mc-line); padding:4px 10px; border-radius:999px">TBT 0 ms</span><span style="font-size:11px; font-weight:600; color:var(--mc-navy); background:var(--mc-surface); box-shadow: inset 0 0 0 1px var(--mc-line); padding:4px 10px; border-radius:999px">LCP &lt; 1 s</span><span style="font-size:11px; font-weight:600; color:var(--mc-navy); background:var(--mc-surface); box-shadow: inset 0 0 0 1px var(--mc-line); padding:4px 10px; border-radius:999px">JSON-LD</span><span style="font-size:11px; font-weight:600; color:var(--mc-navy); background:var(--mc-surface); box-shadow: inset 0 0 0 1px var(--mc-line); padding:4px 10px; border-radius:999px">llms.txt</span><span style="font-size:11px; font-weight:600; color:var(--mc-navy); background:var(--mc-surface); box-shadow: inset 0 0 0 1px var(--mc-line); padding:4px 10px; border-radius:999px">Sitemap</span><span style="font-size:11px; font-weight:600; color:var(--mc-navy); background:var(--mc-surface); box-shadow: inset 0 0 0 1px var(--mc-line); padding:4px 10px; border-radius:999px">Agentic 3/3</span></div></div>
-            </sc-if>
-            <sc-if value="{{ modal.vSoftware }}" hint-placeholder-val="{{ false }}">
-              <div style="border-radius:10px; box-shadow: inset 0 0 0 1px var(--mc-line); overflow:hidden">
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:13px 18px; border-bottom:1px solid var(--mc-line); font-size:13px; font-weight:600; color:var(--mc-navy)">{{ t.mock.opsTitle }}<span style="font-size:11px; font-weight:600; color:var(--mc-success-text); background:color-mix(in srgb, var(--mc-success) 14%, transparent); padding:3px 8px; border-radius:999px">{{ t.mock.live }}</span></div>
-                <div style="display:grid; grid-template-columns: 1.4fr 1fr 1fr; gap:8px; padding:10px 18px; font-size:10px; font-weight:600; color:var(--mc-text-grey); text-transform:uppercase; letter-spacing:.06em; border-bottom:1px solid var(--mc-line)"><span>{{ t.mock.col1 }}</span><span>{{ t.mock.col2 }}</span><span style="text-align:right">{{ t.mock.col3 }}</span></div><sc-for list="{{ opsRows }}" as="r" hint-placeholder-count="6"><div style="display:grid; grid-template-columns: 1.4fr 1fr 1fr; gap:8px; align-items:center; padding:10px 18px; border-bottom:1px solid var(--mc-line-soft); font-size:12px; color:var(--mc-slate); background: {{ r.bg }}"><span style="display:flex; align-items:center; gap:8px; font-weight:600; color:var(--mc-navy)"><span style="flex:none; width:18px; height:18px; border-radius:50%; background: {{ r.dot }}"></span>{{ r.name }}</span><span>{{ r.sys }}</span><span style="text-align:right; font-family:'JetBrains Mono',monospace">{{ r.val }}</span></div></sc-for>
-              </div>
-            </sc-if>
-            <sc-if value="{{ modal.vRecall }}" hint-placeholder-val="{{ false }}">
-              <div style="max-width:620px; background:var(--mc-navy); border-radius:12px; padding:18px 20px; font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.85; color:var(--mc-grey-401)"><div style="display:flex; gap:6px; margin-bottom:10px"><span style="width:9px;height:9px;border-radius:50%;background:var(--mc-mock-close)"></span><span style="width:9px;height:9px;border-radius:50%;background:var(--mc-mock-min)"></span><span style="width:9px;height:9px;border-radius:50%;background:var(--mc-mock-max)"></span></div><div><span style="color:var(--mc-dark-accent)">$</span> recall write "auth uses refresh tokens"</div><div><span style="color:var(--mc-success)">✓</span> stamped onto commit <span style="color:var(--mc-white)">a91f3c</span></div><div><span style="color:var(--mc-dark-accent)">$</span> recall read auth</div><div><span style="color:var(--mc-pink)">→</span> 0.25 ms · 0 tokens · 108,000+ anchors</div></div>
-            </sc-if>
-          </div>
-        </div>
-      </div>
-      <sc-if value="{{ modal.hasDeep }}" hint-placeholder-val="{{ false }}">
-        <div style="margin-top: clamp(44px,5vw,72px)">
-          <div style="font-size:13px; font-weight:600; color:var(--acc-text)">{{ dl.build }}</div>
-          <h4 style="font-size: clamp(22px,2.26vw,27px); letter-spacing:-.025em; font-weight:700; color:var(--mc-navy); margin-top:6px">{{ dl.buildTitle }}</h4>
-          <p style="font-size:15px; line-height:1.6; color:var(--mc-slate); margin-top:8px; max-width:70ch">{{ dl.buildNote }}</p>
-          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:14px; margin-top:22px">
-            <sc-for list="{{ modal.deep.useCases }}" as="u" hint-placeholder-count="5">
-              <div style="padding:20px; border-radius:12px; background:var(--mc-surface); display:flex; flex-direction:column; gap:8px">
-                <span style="font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--mc-text-grey)">{{ u.tag }}</span>
-                <span style="font-size: clamp(15px,.95vw,16px); font-weight:600; color:var(--mc-navy); line-height:1.35">{{ u.title }}</span>
-                <span style="font-size:14px; line-height:1.5; color:var(--mc-slate); margin-top:auto; padding-top:6px"><span style="color:var(--acc-text); font-weight:600">→ </span>{{ u.out }}</span>
-              </div>
-            </sc-for>
-          </div>
-        </div>
-        <div style="display:grid; grid-template-columns: {{ modalCols }}; gap: clamp(28px,4vw,56px); margin-top: clamp(44px,5vw,72px)">
-          <div>
-            <div style="font-size:13px; font-weight:600; color:var(--acc-text)">{{ dl.engine }}</div>
-            <h4 style="font-size: clamp(22px,2.26vw,27px); letter-spacing:-.025em; font-weight:700; color:var(--mc-navy); margin-top:6px">{{ dl.engineTitle }}</h4>
-            <div style="display:grid; gap:18px; margin-top:22px">
-              <sc-for list="{{ modal.deep.caps }}" as="c" hint-placeholder-count="4"><div style="display:flex; gap:14px"><span style="flex:none; width:24px; height:24px; border-radius:7px; background:var(--acc-soft); color:var(--acc-text); display:grid; place-items:center; margin-top:1px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="brand/mccain-icons.svg#check"></use></svg></span><div><div style="font-size: clamp(15px,.95vw,16px); font-weight:600; color:var(--mc-navy)">{{ c.title }}</div><p style="font-size:14px; line-height:1.55; color:var(--mc-slate); margin-top:4px">{{ c.text }}</p></div></div></sc-for>
+        <div style="margin-top: clamp(0px,2vw,40px); display:flex; flex-direction:column; gap:20px; align-content:start; opacity: {{ modalOp }}; transform: {{ modalRise }}; transition: opacity .5s cubic-bezier(.2,.8,.2,1) .2s, transform .6s cubic-bezier(.2,.8,.2,1) .2s">
+          <sc-if value="{{ modal.isAi }}" hint-placeholder-val="{{ false }}">
+            <div style="border-radius:16px; background:var(--mc-plate); padding:18px; display:flex; flex-direction:column; gap:12px; box-shadow: 0 30px 70px -44px color-mix(in srgb, var(--mc-navy) 90%, transparent)">
+              <div style="align-self:flex-end; max-width:82%; background:color-mix(in srgb, var(--mc-white) 10%, transparent); color:var(--mc-white); border-radius:13px 13px 4px 13px; padding:11px 14px; font-size:14px; line-height:1.5">{{ t.mock.aiQ }}</div>
+              <div style="align-self:flex-start; max-width:88%; background:var(--mc-white); color:var(--mc-navy); border-radius:13px 13px 13px 4px; padding:11px 14px; font-size:14px; line-height:1.5">{{ t.mock.aiA }}<span style="display:inline-flex; align-items:center; gap:6px; margin-top:9px; font-size:11px; font-weight:600; color:var(--acc-text); background:var(--mc-action-tint); padding:4px 9px; border-radius:999px">{{ t.mock.aiSrc }}</span></div>
+              <div style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--mc-dark-text-2)"><span style="width:8px; height:8px; border-radius:50%; background:var(--mc-success)"></span>{{ mx.ai.grounded }}</div>
+              <div style="display:flex; flex-wrap:wrap; gap:7px; padding-top:4px; border-top:1px solid color-mix(in srgb, var(--mc-white) 10%, transparent)"><sc-for list="{{ mx.ai.chips }}" as="c" hint-placeholder-count="3"><span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.06em; color:var(--mc-dark-muted); background:color-mix(in srgb, var(--mc-white) 7%, transparent); padding:5px 9px; border-radius:6px">{{ c }}</span></sc-for></div>
             </div>
-          </div>
-          <div>
-            <div style="font-size:13px; font-weight:600; color:var(--acc-text)">{{ dl.how }}</div>
-            <h4 style="font-size: clamp(22px,2.26vw,27px); letter-spacing:-.025em; font-weight:700; color:var(--mc-navy); margin-top:6px">{{ dl.howTitle }}</h4>
-            <div style="display:grid; gap:16px; margin-top:22px">
-              <sc-for list="{{ modal.deep.steps }}" as="s" hint-placeholder-count="4"><div style="display:flex; gap:14px"><span style="flex:none; font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; color:var(--acc-text); margin-top:4px">0{{ s.n }}</span><div><div style="font-size: clamp(15px,.95vw,16px); font-weight:600; color:var(--mc-navy)">{{ s.title }}</div><p style="font-size:14px; line-height:1.55; color:var(--mc-slate); margin-top:4px">{{ s.text }}</p></div></div></sc-for>
+            <ul style="list-style:none; padding:0; margin:0; display:grid; gap:11px"><sc-for list="{{ modal.items }}" as="i" hint-placeholder-count="4"><li style="display:flex; gap:11px; font-size:14.5px; line-height:1.5; color:var(--mc-slate)"><span style="flex:none; width:18px; height:18px; border-radius:50%; background:var(--mc-action-tint); color:var(--acc-text); display:grid; place-items:center; margin-top:1px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="brand/mccain-icons.svg#check"></use></svg></span>{{ i }}</li></sc-for></ul>
+          </sc-if>
+          <sc-if value="{{ modal.isApps }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column">
+              <sc-for list="{{ mx.apps.steps }}" as="st" hint-placeholder-count="3">
+                <div style="display:flex; align-items:center; gap:14px"><span style="flex:none; width:11px; height:11px; border-radius:3px; background: linear-gradient(135deg,var(--mc-action),var(--mc-sky))"></span><span style="font-size:15.5px; font-weight:600; color:var(--mc-navy)">{{ st }}</span></div>
+                <span aria-hidden="true" style="width:1px; height:22px; margin-left:5px; background: repeating-linear-gradient(180deg, color-mix(in srgb, var(--mc-action) 50%, transparent) 0 3px, transparent 3px 6px)"></span>
+              </sc-for>
+              <div style="font-size:13.5px; line-height:1.55; color:var(--mc-text-grey); margin-top:2px">{{ mx.apps.note }}</div>
             </div>
-            <div style="font-size:13px; font-weight:600; color:var(--mc-navy); margin-top:28px">{{ dl.stack }}</div>
-            <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px"><sc-for list="{{ modal.deep.stack }}" as="k" hint-placeholder-count="8"><span style="font-size:11px; font-weight:600; color:var(--mc-navy); background:var(--mc-surface); box-shadow: inset 0 0 0 1px var(--mc-line); padding:4px 10px; border-radius:999px">{{ k }}</span></sc-for></div>
-          </div>
+            <ul style="list-style:none; padding:0; margin:0; display:grid; gap:11px; padding-top:16px; border-top:1px solid var(--mc-line)"><sc-for list="{{ modal.items }}" as="i" hint-placeholder-count="4"><li style="display:flex; gap:11px; font-size:14.5px; line-height:1.5; color:var(--mc-slate)"><span style="flex:none; width:18px; height:18px; border-radius:50%; background:var(--mc-action-tint); color:var(--acc-text); display:grid; place-items:center; margin-top:1px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="brand/mccain-icons.svg#check"></use></svg></span>{{ i }}</li></sc-for></ul>
+          </sc-if>
+          <sc-if value="{{ modal.isWeb }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px">
+              <sc-for list="{{ mx.web.scores }}" as="sc" hint-placeholder-count="4">
+                <div style="display:flex; flex-direction:column; align-items:center; gap:8px; padding:14px 6px; border-radius:12px; background:var(--mc-success-tint-6); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mc-success) 22%, transparent)"><span style="font-size:21px; font-weight:700; letter-spacing:-.03em; color:var(--mc-success)">{{ sc.v }}</span><span style="font-size:10.5px; line-height:1.3; text-align:center; color:var(--mc-text-grey)">{{ sc.l }}</span></div>
+              </sc-for>
+            </div>
+            <div style="font-size:13.5px; line-height:1.55; color:var(--mc-text-grey); margin-top:-8px">{{ mx.web.note }}</div>
+            <ul style="list-style:none; padding:0; margin:0; display:grid; gap:11px; padding-top:16px; border-top:1px solid var(--mc-line)"><sc-for list="{{ modal.items }}" as="i" hint-placeholder-count="4"><li style="display:flex; gap:11px; font-size:14.5px; line-height:1.5; color:var(--mc-slate)"><span style="flex:none; width:18px; height:18px; border-radius:50%; background:var(--mc-action-tint); color:var(--acc-text); display:grid; place-items:center; margin-top:1px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="brand/mccain-icons.svg#check"></use></svg></span>{{ i }}</li></sc-for></ul>
+          </sc-if>
+          <sc-if value="{{ modal.isSoftware }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid; grid-template-columns: 1fr auto; gap:14px; align-items:center; padding:18px; border-radius:16px; background:var(--mc-surface); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mc-navy) 7%, transparent)">
+              <div style="display:flex; flex-wrap:wrap; gap:7px"><sc-for list="{{ mx.software.systems }}" as="sy" hint-placeholder-count="6"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--mc-slate); background:var(--mc-white); box-shadow: inset 0 0 0 1px var(--mc-line); padding:6px 10px; border-radius:6px">{{ sy }}</span></sc-for></div>
+              <div style="display:flex; align-items:center; gap:10px"><span aria-hidden="true" style="width:26px; height:1px; background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--mc-action) 60%, transparent) 0 3px, transparent 3px 6px)"></span><span style="display:inline-flex; align-items:center; height:40px; padding:0 14px; border-radius:9px; background:var(--mc-plate); color:var(--mc-white); font-size:13.5px; font-weight:600; white-space:nowrap">{{ mx.software.app }}</span></div>
+            </div>
+            <div style="font-size:13.5px; line-height:1.55; color:var(--mc-text-grey); margin-top:-8px">{{ mx.software.note }}</div>
+            <ul style="list-style:none; padding:0; margin:0; display:grid; gap:11px; padding-top:16px; border-top:1px solid var(--mc-line)"><sc-for list="{{ modal.items }}" as="i" hint-placeholder-count="4"><li style="display:flex; gap:11px; font-size:14.5px; line-height:1.5; color:var(--mc-slate)"><span style="flex:none; width:18px; height:18px; border-radius:50%; background:var(--mc-action-tint); color:var(--acc-text); display:grid; place-items:center; margin-top:1px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="brand/mccain-icons.svg#check"></use></svg></span>{{ i }}</li></sc-for></ul>
+          </sc-if>
+          <sc-if value="{{ modal.isCaseLike }}" hint-placeholder-val="{{ true }}">
+            <ul style="list-style:none; padding:0; margin:0; display:grid; gap:11px"><sc-for list="{{ modal.items }}" as="i" hint-placeholder-count="4"><li style="display:flex; gap:11px; font-size:14.5px; line-height:1.5; color:var(--mc-slate)"><span style="flex:none; width:18px; height:18px; border-radius:50%; background:var(--mc-action-tint); color:var(--acc-text); display:grid; place-items:center; margin-top:1px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="brand/mccain-icons.svg#check"></use></svg></span>{{ i }}</li></sc-for></ul>
+          </sc-if>
         </div>
-        <div style="margin-top: clamp(44px,5vw,72px)">
-          <div style="font-size:13px; font-weight:600; color:var(--acc-text)">{{ dl.faq }}</div>
-          <h4 style="font-size: clamp(22px,2.26vw,27px); letter-spacing:-.025em; font-weight:700; color:var(--mc-navy); margin-top:6px">{{ dl.faqTitle }}</h4>
-          <div style="margin-top:16px; border-top:1px solid var(--mc-line)">
-            <sc-for list="{{ modal.deep.faqs }}" as="f" hint-placeholder-count="5"><div style="padding:18px 0; border-bottom:1px solid var(--mc-line); display:grid; grid-template-columns: {{ modalCols }}; gap:10px 32px"><div style="font-size: clamp(15px,.95vw,16px); font-weight:600; color:var(--mc-navy); line-height:1.4">{{ f.q }}</div><p style="font-size:15px; line-height:1.6; color:var(--mc-slate)">{{ f.a }}</p></div></sc-for>
-          </div>
-        </div>
-        <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px 24px; margin-top: clamp(32px,4vw,48px); padding:22px 24px; border-radius:14px; background:var(--mc-surface)">
-          <div><div style="font-size: clamp(16px,1.05vw,18px); font-weight:600; color:var(--mc-navy)">{{ dl.more }}</div><div style="font-size:14px; color:var(--mc-slate); margin-top:4px; max-width:60ch">{{ dl.moreText }}</div></div>
-          <button data-px onClick="{{ modalCta }}" style="display:inline-flex; align-items:center; gap:4px; height:44px; padding:0 12px 0 20px; border-radius:8px; background:var(--acc); color:var(--mc-white); font-size:15px; font-weight:600; transition: background .2s, transform .2s" style-hover="background:var(--mc-navy); transform: translateY(-1px)">{{ modal.cta }}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="brand/mccain-icons.svg#chevron-right"></use></svg></button>
-        </div>
+      </div>
+      <sc-if value="{{ modal.hasPage }}" hint-placeholder-val="{{ false }}">
+        <a href="{{ modal.page }}" style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px 24px; margin-top: clamp(26px,3.2vw,40px); padding: clamp(18px,2vw,24px); border-radius:14px; background:var(--mc-surface); color:var(--mc-navy); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mc-navy) 7%, transparent); transition: box-shadow .25s, background .25s" style-hover="box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mc-action) 40%, transparent); background:var(--mc-action-tint-hover)">
+          <span style="min-width:0; display:flex; flex-direction:column; gap:5px">
+            <span style="font-size: clamp(16px,1.05vw,18px); font-weight:600">{{ modal.pageTitle }}</span>
+            <span style="font-size:14px; line-height:1.55; color:var(--mc-slate); max-width:58ch">{{ modal.pageText }}</span>
+          </span>
+          <span style="flex:none; display:inline-flex; align-items:center; gap:7px; height:44px; padding:0 20px; border-radius:8px; background:var(--acc); color:var(--mc-white); font-size:15px; font-weight:600">{{ modal.pageCta }}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="brand/mccain-icons.svg#arrow-right"></use></svg></span>
+        </a>
       </sc-if>
     </div>
   </div>
@@ -635,10 +637,61 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;heroVariant&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A&quot;,&quot;B&quot;],&quot;default&quot;:&quot;A&quot;,&quot;tsType&quot;:&quot;'A' | 'B'&quot;,&quot;section&quot;:&quot;Hero&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;options&quot;:[&quot;var(--mc-action)&quot;,&quot;var(--mc-pink)&quot;,&quot;var(--mc-navy)&quot;,&quot;var(--mc-check)&quot;],&quot;default&quot;:&quot;var(--mc-action)&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Farbe&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Bewegung&quot;}}">
 class Component extends DCLogic {
-  static MENU_W = { services: 780, work: 540, studio: 560, process: 540, resources: 780, pricing: 480 };
+  static SELF = 'McCain Digital Kontakt.dc.html';
+  /* Where a page sits: which header item is active (nav). up/here and CRUMB_UP
+   * fed the breadcrumb pill, taken out on 19.9.2026 (owner: too much focus);
+   * kept for its return, the variants are in internal/polish-0919/crumb/.
+   * Keyed by artboard file name, like SELF and PAGES. */
+  static TRAIL = {
+    'McCain Digital Uebersicht.dc.html': { nav: 'services', up: [], here: { de: 'Leistungen', en: 'Services' } },
+    'McCain Digital KI.dc.html': { nav: 'services', up: ['svc'], here: { de: 'KI & Automatisierung', en: 'AI & automation' } },
+    'McCain Digital Web-Apps.dc.html': { nav: 'services', up: ['svc'], here: { de: 'Web-Apps & Plattformen', en: 'Web apps & platforms' } },
+    'McCain Digital Websites.dc.html': { nav: 'services', up: ['svc'], here: { de: 'Websites & Landingpages', en: 'Websites & landing pages' } },
+    'McCain Digital Software.dc.html': { nav: 'services', up: ['svc'], here: { de: 'Individualsoftware', en: 'Custom software' } },
+    'McCain Digital Tech Next.dc.html': { nav: 'services', up: ['svc', 'apps'], here: 'Next.js' },
+    'McCain Digital Tech MCP.dc.html': { nav: 'services', up: ['svc', 'ai'], here: { de: 'MCP-Server', en: 'MCP servers' } },
+    'McCain Digital Tech RAG.dc.html': { nav: 'services', up: ['svc', 'ai'], here: { de: 'RAG & Retrieval', en: 'RAG & retrieval' } },
+    'McCain Digital Tech ERP.dc.html': { nav: 'services', up: ['svc', 'custom'], here: { de: 'ERP-Integration', en: 'ERP integration' } },
+    'McCain Digital Vergleich WordPress.dc.html': { nav: 'resources', up: ['cmp'], here: { de: 'WordPress oder handgeschrieben', en: 'WordPress or hand-written' } },
+    'McCain Digital Vergleich RAG.dc.html': { nav: 'resources', up: ['cmp'], here: { de: 'ChatGPT oder eigenes RAG', en: 'ChatGPT or your own RAG' } },
+    'McCain Digital md-recall.dc.html': { nav: 'software', up: ['sw'], here: 'md-recall' },
+    'McCain Digital md-cms.dc.html': { nav: 'software', up: ['sw'], here: 'md-cms' },
+    'McCain Digital md-portal.dc.html': { nav: 'software', up: ['sw'], here: 'md-portal' },
+    'McCain Digital Preise.dc.html': { nav: 'pricing', up: [], here: { de: 'Preise', en: 'Pricing' } },
+    'McCain Digital Studio.dc.html': { nav: 'studio', up: [], here: 'Studio' },
+    'McCain Digital Kontakt.dc.html': { nav: null, up: [], here: { de: 'Kontakt', en: 'Contact' } },
+    'McCain Digital Recht.dc.html': { nav: null, up: [], here: { de: 'Rechtliches', en: 'Legal' } },
+    'McCain Digital Styleguide.dc.html': { nav: 'resources', up: ['brand'], here: { de: 'Styleguide', en: 'Style guide' } },
+    'McCain Digital Brand Guide v2.dc.html': { nav: 'resources', up: [], here: { de: 'Marke', en: 'Brand' } },
+    'McCain Digital News.dc.html': { nav: 'resources', up: [], here: 'News' },
+    'McCain Digital News md-recall.dc.html': { nav: 'resources', up: ['news'], here: 'md-recall' },
+  };
+  static CRUMB_UP = {
+    svc: [{ de: 'Leistungen', en: 'Services' }, 'McCain Digital Uebersicht.dc.html'],
+    ai: [{ de: 'KI & Automatisierung', en: 'AI & automation' }, 'McCain Digital KI.dc.html'],
+    apps: [{ de: 'Web-Apps', en: 'Web apps' }, 'McCain Digital Web-Apps.dc.html'],
+    custom: [{ de: 'Individualsoftware', en: 'Custom software' }, 'McCain Digital Software.dc.html'],
+    cmp: [{ de: 'Vergleich', en: 'Comparison' }, 'McCain Digital Uebersicht.dc.html#vergleiche'],
+    sw: ['Software', 'McCain Digital Studio.dc.html#produkte'],
+    news: ['News', 'McCain Digital News.dc.html'],
+    brand: [{ de: 'Marke', en: 'Brand' }, 'McCain Digital Brand Guide v2.dc.html'],
+  };
+  /* The "Software" menu. Status says what is true today: md-cms has login and
+   * the sites overview, the editor is still being built. */
+  static SOFTWARE = [
+    { id: 'recall', title: 'md-recall', live: true, status: 'Live', menu: { de: 'KI-natives Projektgedächtnis für Software-Teams', en: 'AI-native project memory for software teams' } },
+    { id: 'cms', icon: 'layers', title: 'md-cms', live: false, status: { de: 'Im Aufbau', en: 'Early build' }, menu: { de: 'Das CMS für die Websites, die wir bauen', en: 'The CMS for the websites we build' } },
+    { id: 'portal', icon: 'layout', title: 'md-portal', live: true, status: 'Live', menu: { de: 'Ihr Kundenportal: Projekte, Aufgaben, Rechnungen', en: 'Your client portal: projects, tasks, invoices' } },
+  ];
+  static SOFTWARE_SOON = { title: '360', menu: { de: '360°-Panoramen hosten und einbetten', en: 'Host and embed 360° panoramas' } };
+  static LOGIN = [
+    { icon: 'layers', name: 'md-cms', href: 'https://cms.mccain-digital.com', domain: 'cms.mccain-digital.com', desc: { de: 'Ihre Websites im Überblick', en: 'Your websites at a glance' } },
+    { icon: 'layout', name: 'md-portal', href: 'https://portal.mccain-digital.com', domain: 'portal.mccain-digital.com', desc: { de: 'Projekte, Aufgaben, Freigaben', en: 'Projects, tasks, approvals' } },
+  ];
+  static MENU_W = { services: 780, work: 540, studio: 560, process: 540, resources: 780, software: 600, pricing: 480, login: 320 };
   static GOALIAS = { process: ['ablauf'], studio: ['menschen'], work: ['faelle', 'produkte'], services: ['faehigkeiten', 'leistung', 'handwerk', 'kette'], ai: ['ai'], faq: ['faq'] };
   static GOTO = { services: 'McCain Digital Uebersicht.dc.html', pricing: 'McCain Digital Preise.dc.html', recall: 'McCain Digital md-recall.dc.html', process: 'McCain Digital Web-Apps.dc.html#ablauf', stack: 'McCain Digital Web-Apps.dc.html#stack', work: 'McCain Digital Studio.dc.html#produkte', studio: 'McCain Digital Studio.dc.html#menschen', contact: 'McCain Digital Kontakt.dc.html#contact', services: 'McCain Digital KI.dc.html', faq: 'McCain Digital KI.dc.html#faq', ai: 'McCain Digital KI.dc.html#ai' };
-  static PAGES = { styleguide: 'McCain Digital Styleguide.dc.html', ai: 'McCain Digital KI.dc.html', apps: 'McCain Digital Web-Apps.dc.html', web: 'McCain Digital Websites.dc.html', software: 'McCain Digital Software.dc.html', studio: 'McCain Digital Studio.dc.html', contact: 'McCain Digital Kontakt.dc.html', legal: 'McCain Digital Recht.dc.html', recall: 'McCain Digital md-recall.dc.html', pricing: 'McCain Digital Preise.dc.html', cmpWp: 'McCain Digital Vergleich WordPress.dc.html', cmpRag: 'McCain Digital Vergleich RAG.dc.html', techNext: 'McCain Digital Tech Next.dc.html', techMcp: 'McCain Digital Tech MCP.dc.html', techRag: 'McCain Digital Tech RAG.dc.html', techErp: 'McCain Digital Tech ERP.dc.html', hub: 'McCain Digital Uebersicht.dc.html' };
+  static PAGES = { cms: 'McCain Digital md-cms.dc.html', portal: 'McCain Digital md-portal.dc.html', styleguide: 'McCain Digital Styleguide.dc.html', ai: 'McCain Digital KI.dc.html', apps: 'McCain Digital Web-Apps.dc.html', web: 'McCain Digital Websites.dc.html', software: 'McCain Digital Software.dc.html', studio: 'McCain Digital Studio.dc.html', contact: 'McCain Digital Kontakt.dc.html', legal: 'McCain Digital Recht.dc.html', recall: 'McCain Digital md-recall.dc.html', pricing: 'McCain Digital Preise.dc.html', cmpWp: 'McCain Digital Vergleich WordPress.dc.html', cmpRag: 'McCain Digital Vergleich RAG.dc.html', techNext: 'McCain Digital Tech Next.dc.html', techMcp: 'McCain Digital Tech MCP.dc.html', techRag: 'McCain Digital Tech RAG.dc.html', techErp: 'McCain Digital Tech ERP.dc.html', hub: 'McCain Digital Uebersicht.dc.html' };
   static GRAD = ['var(--mc-orange)', 'var(--mc-pink)', 'var(--mc-violet)', 'var(--mc-sky)', 'var(--mc-rose)'];
   static FLOW = { ai: ['var(--mc-pink)', 'var(--mc-orange)', 'var(--mc-violet)'], apps: ['var(--mc-plate)', 'var(--mc-sky)', 'var(--mc-sky-ink)'], web: ['var(--mc-orange)', 'var(--mc-pink)', 'var(--mc-coral)'], software: ['var(--mc-violet)', 'var(--mc-rose)', 'var(--mc-pink)'], recall: ['var(--mc-plate)', 'var(--mc-sky-ink)', 'var(--mc-sky)'], site: ['var(--mc-sky)', 'var(--mc-orange)', 'var(--mc-pink)'] };
   static ICONS = {
@@ -652,10 +705,11 @@ class Component extends DCLogic {
     file: ['M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z', 'M14 2v4a2 2 0 0 0 2 2h4', 'M10 9H8', 'M16 13H8', 'M16 17H8'],
     layers: ['M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z', 'M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12', 'M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17'],
     commit: ['M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'M3 12h6', 'M15 12h6'],
-    gauge: ['m12 14 4-4', 'M3.34 19a10 10 0 1 1 17.32 0']
+    gauge: ['m12 14 4-4', 'M3.34 19a10 10 0 1 1 17.32 0'],
+    user: ['M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2', 'M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z']
   };
   static T = {
-    nav: { services: { de: 'Leistungen', en: 'Services' }, work: { de: 'Arbeiten', en: 'Work' }, studio: 'Studio', process: { de: 'Ablauf', en: 'Process' }, resources: { de: 'Ressourcen', en: 'Resources' }, pricing: { de: 'Preise', en: 'Pricing' }, contact: { de: 'Kontakt', en: 'Contact' }, menu: { de: 'Menü', en: 'Menu' } },
+    nav: { services: { de: 'Leistungen', en: 'Services' }, work: { de: 'Arbeiten', en: 'Work' }, studio: 'Studio', process: { de: 'Ablauf', en: 'Process' }, resources: { de: 'Ressourcen', en: 'Resources' }, pricing: { de: 'Preise', en: 'Pricing' }, contact: { de: 'Kontakt', en: 'Contact' }, menu: { de: 'Menü', en: 'Menu' }, software: 'Software', login: { de: 'Kunden-Login', en: 'Client login' } },
     hero: {
       eyebrow: { de: 'Digital Product Studio · Bayern · seit 2016', en: 'Digital product studio · Bavaria · since 2016' },
       title: { de: 'Software, die in Produktion geht.', en: 'Software that ships to production.' },
@@ -696,6 +750,7 @@ class Component extends DCLogic {
       privacy: { de: 'Ihre Angaben werden nur zur Beantwortung Ihrer Anfrage verwendet.', en: 'Your details are used only to answer your request.' }
     },
     footer: {
+      software: 'Software', loginAt: { de: 'Login', en: 'Sign in:' },
       services: { de: 'Leistungen', en: 'Services' }, work: { de: 'Arbeiten', en: 'Work' }, studio: 'Studio', resources: { de: 'Ressourcen', en: 'Resources' }, legal: { de: 'Rechtliches', en: 'Legal' },
       team: 'Team', news: 'News', process: { de: 'Ablauf', en: 'Process' }, faq: { de: 'Fragen & Antworten', en: 'Questions & answers' }, contact: { de: 'Kontakt', en: 'Contact' },
       notes: { de: 'Tech-Notizen', en: 'Tech notes' }, llms: { de: 'llms.txt & KI-Lesbarkeit', en: 'llms.txt & AI readability' }, stack: { de: 'Stack & Werkzeuge', en: 'Stack & tools' },
@@ -703,6 +758,9 @@ class Component extends DCLogic {
       copy: { de: '© 2026 McCain Digital · Oberostendorf, Bayern', en: '© 2026 McCain Digital · Oberostendorf, Bavaria' }, tagline: { de: 'Gebaut von den zwei Personen, die es anbieten.', en: 'Built by the two people who quote it.' }
     },
     menus: {
+      here: { de: 'Sie sind hier', en: 'You are here' }, soon: { de: 'Bald', en: 'Soon' },
+      swFoot: { de: 'Eigene Software – gebaut und betrieben von uns.', en: 'Our own software — built and run by us.' }, swFootLink: { de: 'Wir sind unser erster Kunde', en: 'We are our first client' },
+      loginTitle: { de: 'Anmelden bei', en: 'Sign in to' }, loginNote: { de: 'Ein Konto für beides.', en: 'One account for both.' },
       configurator: { de: 'Konfigurator · Preis in zwei Minuten', en: 'Configurator · price in two minutes' },
       configShort: { de: 'Zum Konfigurator', en: 'Open the configurator' },
       servicesFoot: { de: 'Nicht sicher, was passt?', en: 'Not sure what fits?' }, askSite: { de: 'Die Seite fragen', en: 'Ask the site' }, seeProcess: { de: 'Ablauf ansehen', en: 'See the process' },
@@ -716,7 +774,7 @@ class Component extends DCLogic {
       pricingTitle: { de: 'Konfigurator statt Preisliste', en: 'A configurator instead of a price list' }, pricingText: { de: 'Keine Preisliste – aber ein Rechner, der die Größenordnung zeigt, bevor Sie schreiben. Das Angebot danach ist eine Zahl mit klarem Umfang.', en: 'No price list — but a calculator that shows the ballpark before you write. The quote that follows is one number with a defined scope.' },
       pricingFoot: { de: 'Bis zum Angebot kostet Sie nichts.', en: 'Nothing costs you anything up to the quote.' }, pricingCta: { de: 'Zum Konfigurator', en: 'Open the configurator' }
     },
-    common: { skip: { de: 'Zum Inhalt springen', en: 'Skip to content' }, details: { de: 'Details', en: 'Details' }, viewCase: { de: 'Projekt ansehen', en: 'View project' }, viewAll: { de: 'Alle Projekte', en: 'All projects' }, close: { de: 'Schließen', en: 'Close' }, cta: { de: 'Projekt anfragen', en: 'Start a project' }, visit: { de: 'Produkt öffnen', en: 'Open product' }, visitSite: { de: 'Seite öffnen', en: 'Open site' }, get: { de: 'Was Sie bekommen', en: 'What you get' }, done: { de: 'Was gebaut wurde', en: 'What was built' }, service: { de: 'Leistung', en: 'Service' }, caseLabel: { de: 'Projekt', en: 'Project' } }
+    common: { moreOn: { de: 'Mehr zu', en: 'More on' }, toPage: { de: 'Zur Seite', en: 'Open the page' }, skip: { de: 'Zum Inhalt springen', en: 'Skip to content' }, details: { de: 'Details', en: 'Details' }, viewCase: { de: 'Projekt ansehen', en: 'View project' }, viewAll: { de: 'Alle Projekte', en: 'All projects' }, close: { de: 'Schließen', en: 'Close' }, cta: { de: 'Projekt anfragen', en: 'Start a project' }, visit: { de: 'Produkt öffnen', en: 'Open product' }, visitSite: { de: 'Seite öffnen', en: 'Open site' }, get: { de: 'Was Sie bekommen', en: 'What you get' }, done: { de: 'Was gebaut wurde', en: 'What was built' }, service: { de: 'Leistung', en: 'Service' }, caseLabel: { de: 'Projekt', en: 'Project' } }
   };
   static X = {
     mock: { aiQ: { de: 'Wie lange ist die Gewährleistung bei der Serie B?', en: 'How long is the warranty on the B series?' }, aiA: { de: '24 Monate ab Lieferung – verlängerbar auf 36 Monate.', en: '24 months from delivery — extendable to 36 months.' }, aiSrc: { de: 'handbuch-v4.pdf · S. 12', en: 'manual-v4.pdf · p. 12' }, grounded: { de: 'Antwort aus Ihrer Wissensbasis – mit Quelle', en: 'Answered from your knowledge base — with the source' }, mrr: { de: 'Monatlicher Umsatz', en: 'Monthly revenue' }, kpi1: { de: 'Aktive Nutzer', en: 'Active users' }, kpi2: { de: 'Antwortzeit p95', en: 'Response p95' }, agentic: 'Agentic Browsing 3/3', opsTitle: { de: 'Offene Aufträge', en: 'Open orders' }, col1: { de: 'Kunde', en: 'Customer' }, col2: 'System', col3: { de: 'Betrag', en: 'Amount' } },
@@ -778,6 +836,12 @@ class Component extends DCLogic {
       items: { de: ['Lighthouse 100/100/100/100 – Performance, Barrierefreiheit, Best Practices, SEO', 'Cumulative Layout Shift 0, Total Blocking Time 0 ms', 'JSON-LD, Sitemap und llms.txt für Maschinen', 'Eigene Pixel-Physik-Engine auf Canvas, die sich bei Inaktivität schlafen legt'], en: ['Lighthouse 100/100/100/100 — performance, accessibility, best practices, SEO', 'Cumulative Layout Shift 0, Total Blocking Time 0 ms', 'JSON-LD, sitemap and llms.txt for machines', 'Custom canvas pixel-physics engine that sleeps when idle'] },
       stats: [{ v: '4×100', l: 'Lighthouse' }, { v: '3/3', l: 'Agentic Browsing' }, { v: '0', l: { de: 'Page-Builder', en: 'page builders' } }], facts: [{ k: { de: 'Nachweis', en: 'Proof' }, v: '100 / 100 / 100 / 100 · CLS 0 · TBT 0 ms' }, { k: 'Stack', v: 'Vanilla HTML/CSS/JS · Canvas · JSON-LD' }, { k: 'Status', v: 'Live' }] }
   ];
+  static MODALX = {
+    web: { scores: [{ v: '100', l: 'Performance' }, { v: '100', l: { de: 'Barrierefreiheit', en: 'Accessibility' } }, { v: '100', l: 'Best Practices' }, { v: '100', l: 'SEO' }], note: { de: 'Gemessen an unserer eigenen Seite – dieselbe Messlatte gilt für Ihre.', en: 'Measured on our own site — the same bar applies to yours.' } },
+    apps: { steps: [{ de: 'Daten und Systeme', en: 'Data and systems' }, { de: 'Anwendung', en: 'Application' }, { de: 'Betrieb und Übergabe', en: 'Operations and handover' }], note: { de: 'Ein Strang: von der Quelle bis in den Betrieb, ohne Bruch.', en: 'One line: from source to production, without a break.' } },
+    software: { systems: ['SAP', 'REST', 'CSV', 'SOAP', 'Excel', 'Wiki'], app: { de: 'Ihre Anwendung', en: 'Your application' }, note: { de: 'Wir hängen uns an das an, was schon läuft – kein Rundumschlag.', en: 'We attach to what already runs — no big-bang replacement.' } },
+    ai: { grounded: { de: 'Aus Ihrer Wissensbasis beantwortet – mit Quelle', en: 'Answered from your knowledge base — with the source' }, chips: ['pgvector', 'MCP', 'Claude · Llama'] }
+  };
   static FAQS = [
     { q: { de: 'Was kostet ein Projekt?', en: 'What does a project cost?' }, a: { de: 'Es gibt keine Preisliste. Innerhalb von 48 Stunden nach Ihrer Beschreibung erhalten Sie ein Festpreisangebot – eine konkrete Zahl, keine Spanne, die sich später verdoppelt. Eine kleine Website beginnt im niedrigen fünfstelligen Bereich; ein KI-Werkzeug auf Ihren Daten kostet mehr, weil die Arbeit in den Daten steckt, nicht im Modell.', en: 'There is no price list. Within 48 hours of your description you receive a fixed quote — a concrete number, not a range that doubles later. A small website starts in the low five figures; an AI tool on your data costs more, because the work is in the data, not in the model.' } },
     { q: { de: 'Wie lange dauert es?', en: 'How long does it take?' }, a: { de: 'Marketing-Website 3–6 Wochen. Web-App-MVP 6–12 Wochen. KI-Werkzeug auf Ihren Daten 4–10 Wochen, je nach Zustand der Daten. Interne Software 8–14 Wochen. In der ersten Woche sehen Sie etwas Klickbares.', en: 'Marketing site 3–6 weeks. Web app MVP 6–12 weeks. AI tool on your data 4–10 weeks, depending on how tidy the data is. Internal software 8–14 weeks. You see something clickable in the first week.' } },
@@ -1012,6 +1076,8 @@ class Component extends DCLogic {
     const S = this.state, C = Component, t = this.loc(C.T), x = this.loc(C.X), dl = x.dl, integ = x.integ, scale = x.scale;
     Object.assign(t.mock, x.mock); Object.assign(t.common, x.common); Object.assign(t.ai, x.ai); Object.assign(t.nav, x.nav); Object.assign(t.hero, x.hero); Object.assign(t.studio, x.studio);
     const isDesktop = S.vw >= 960;
+    /* The full header needs 1180 px; below that the menu button takes over (it used to cut off "Kontakt" between 960 and 1180). */
+    const navFull = S.vw >= 1180, navWide = S.vw >= 1400;
     const bars = [34, 48, 40, 62, 55, 74, 66, 82, 70, 90, 84, 96, 88, 100].map((v, i) => ({ h: v + '%', bg: i > 10 ? 'var(--acc)' : 'linear-gradient(180deg, var(--mc-dark-accent), var(--acc))' }));
     const opsRows = [['Nordlicht GmbH', 'SAP', '7.513,00 €'], ['Baumann & Söhne', 'HubSpot', '1.352,00 €'], ['Alpina Logistik', 'Legacy · SOAP', '22.112,18 €'], ['Werk 3', 'CSV → App', '3.290,00 €'], ['Hafenkontor', 'REST', '27.840,00 €'], ['Kessler Technik', 'Excel → App', '2.021,00 €']].map((r, i) => ({ name: r[0], sys: r[1], val: r[2], bg: i === 1 ? 'var(--mc-surface)' : 'var(--mc-white)', dot: ['var(--mc-pink)', 'var(--mc-action)', 'var(--mc-orange)', 'var(--mc-sky)', 'var(--mc-violet)', 'var(--mc-success)'][i] }));
     const PING = { mcp: [7, 1.4], hooks: [7, 2.9], rag: [6, 1.8], pipe: [6, 4.5], guard: [7, 5.18], src: [6, 0], pg: [6, 6], claude: [7, 7], openai: [7, 1.5], llama: [4, 6.2] };
@@ -1025,18 +1091,17 @@ class Component extends DCLogic {
     const heroA = String(this.props.heroVariant || 'A').toUpperCase() !== 'B';
     const onGradient = false;
     const navFg = onGradient ? 'var(--mc-white)' : 'var(--mc-navy)';
-    const ids = ['services', 'work', 'studio', 'process', 'resources', 'pricing'];
+    const ids = ['services', 'work', 'studio', 'process', 'resources', 'software', 'pricing'];
     const activeIdx = ids.indexOf(S.menu);
-    const here = (typeof location !== 'undefined' ? decodeURIComponent(String(location.pathname).split('/').pop() || '') : '');
-    const onSvc = /KI\.dc|Web-Apps\.dc|Websites\.dc|Software\.dc/.test(here), onStudio = /Studio\.dc/.test(here);
-    const activeNav = onSvc ? 'services' : onStudio ? 'studio' : /Preise\.dc/.test(here) ? 'pricing' : /md-recall\.dc/.test(here) ? 'work' : null;
-    const navItems = ids.map((id, i) => { const on = S.menu === id, cur = activeNav === id; return { id, label: t.nav[id], open: () => this.openMenu(id), toggle: (id === 'studio' || id === 'pricing') ? ((e) => { if (e && e.preventDefault) e.preventDefault(); window.location.href = (id === 'studio' ? Component.PAGES.studio : Component.PAGES.pricing); }) : (() => this.toggleMenu(id)), color: navFg, fg: cur ? 'var(--acc-text)' : navFg, bg: on ? (onGradient ? 'color-mix(in srgb, var(--mc-white) 16%, transparent)' : 'color-mix(in srgb, var(--mc-navy) 6%, transparent)') : 'transparent', opacity: (S.menu && !on) ? 0.6 : 1, chev: on ? 'rotate(180deg)' : 'none', dotOp: cur ? 1 : 0 }; });
-    const mv = {}; ids.forEach((id, i) => { const on = S.menu === id; const sign = activeIdx < 0 ? 1 : (i < activeIdx ? -1 : 1); mv[id] = { op: on ? 1 : 0, tf: on ? 'translateX(0)' : 'translateX(' + (sign * -28) + 'px)', pe: on ? 'auto' : 'none' }; });
+    const trail = Component.TRAIL[Component.SELF] || null;
+    const activeNav = trail ? trail.nav : null;
+    const navItems = ids.map((id, i) => { const on = S.menu === id, cur = activeNav === id; return { id, label: t.nav[id], open: () => this.openMenu(id), toggle: (id === 'studio' || id === 'pricing') ? ((e) => { if (e && e.preventDefault) e.preventDefault(); window.location.href = (id === 'studio' ? Component.PAGES.studio : Component.PAGES.pricing); }) : (() => this.toggleMenu(id)), color: navFg, fg: navFg, cur, fw: cur ? '600' : '500', bg: on ? (onGradient ? 'color-mix(in srgb, var(--mc-white) 16%, transparent)' : 'color-mix(in srgb, var(--mc-navy) 6%, transparent)') : 'transparent', opacity: (S.menu && !on) ? 0.6 : 1, chev: on ? 'rotate(180deg)' : 'none', dotOp: cur ? 1 : 0 }; });
+    const mv = {}; ids.forEach((id, i) => { const on = S.menu === id; const sign = activeIdx < 0 ? 1 : (i < activeIdx ? -1 : 1); mv[id] = { op: on ? 1 : 0, tf: on ? 'translateX(0)' : 'translateX(' + (sign * -28) + 'px)', pe: on ? 'auto' : 'none' }; }); mv.login = { op: S.menu === 'login' ? 1 : 0, tf: S.menu === 'login' ? 'translateX(0)' : 'translateX(28px)', pe: S.menu === 'login' ? 'auto' : 'none' };
     const ease = 'cubic-bezier(.2,.8,.2,1)';
     const panelTransition = S.fresh ? 'opacity .22s, transform .3s ' + ease : 'left .35s ' + ease + ', width .35s ' + ease + ', height .35s ' + ease + ', opacity .22s, transform .3s ' + ease;
-    const services = this.loc(C.SERVICES).map((s, i) => Object.assign(s, this.flow(s.id), { icon: this.icon(C.SERVICES[i].icon, 22), iconSm: this.icon(C.SERVICES[i].icon, 18), delay: (i * 0.08).toFixed(2), tileTitle: x.tiles[s.id], url: x.urls[s.id], isAi: s.id === 'ai', isApps: s.id === 'apps', isWeb: s.id === 'web', isSoftware: s.id === 'software', page: Component.PAGES[s.id], current: (typeof location !== 'undefined' && decodeURIComponent(String(location.pathname)).indexOf(Component.PAGES[s.id]) >= 0), curBg: (typeof location !== 'undefined' && decodeURIComponent(String(location.pathname)).indexOf(Component.PAGES[s.id]) >= 0) ? 'var(--mc-surface)' : 'transparent', openModal: (e) => this.openModal('service', s.id, e), hoverOn: () => this.setHover(s.id), hoverOff: () => this.setHover(null), expBg: S.hover === s.id ? 'var(--acc)' : 'var(--mc-action-tint)', expFg: S.hover === s.id ? 'var(--mc-white)' : 'var(--acc)', vizTf: S.hover === s.id ? 'scale(1.035)' : 'scale(1)' }));
-    const cases = this.loc(C.CASES).map((c, i) => Object.assign(c, this.flow(c.id), { delay: (i * 0.1).toFixed(2), isRecall: c.id === 'recall', isSite: c.id === 'site', tileTitle: x.tiles[c.id], url: c.link.replace('https://', ''), iconSm: c.id === 'recall' ? React.createElement('img', { src: 'brand/mccain-recall-logo-128.png', alt: '', width: 24, height: 24, style: { display: 'block', borderRadius: '6px' } }) : this.icon('gauge', 18),
-      tileBg: c.id === 'recall' ? 'var(--mc-white)' : c.tileBg, tileRing: c.id === 'recall' ? 'inset 0 0 0 1px color-mix(in srgb, var(--mc-navy) 12%, transparent)' : 'none', icon: this.icon(c.id === 'recall' ? 'commit' : 'gauge', 22), openModal: (e) => this.openModal('case', c.id, e), hoverOn: () => this.setHover(c.id), hoverOff: () => this.setHover(null), expBg: S.hover === c.id ? 'var(--acc)' : 'var(--mc-action-tint)', expFg: S.hover === c.id ? 'var(--mc-white)' : 'var(--acc)', vizTf: S.hover === c.id ? 'scale(1.035)' : 'scale(1)' }));
+    const services = this.loc(C.SERVICES).map((s, i) => Object.assign(s, this.flow(s.id), { icon: this.icon(C.SERVICES[i].icon, 22), iconSm: this.icon(C.SERVICES[i].icon, 18), delay: (i * 0.08).toFixed(2), tileTitle: x.tiles[s.id], url: x.urls[s.id], isAi: s.id === 'ai', isApps: s.id === 'apps', isWeb: s.id === 'web', isSoftware: s.id === 'software', page: Component.PAGES[s.id], current: Component.PAGES[s.id] === Component.SELF ? 'page' : undefined, isHere: Component.PAGES[s.id] === Component.SELF, curBg: Component.PAGES[s.id] === Component.SELF ? 'var(--mc-action-tint)' : 'transparent', openModal: (e) => this.openModal('service', s.id, e), hoverOn: () => this.setHover(s.id), hoverOff: () => this.setHover(null), expBg: S.hover === s.id ? 'var(--acc)' : 'var(--mc-action-tint)', expFg: S.hover === s.id ? 'var(--mc-white)' : 'var(--acc)', vizTf: S.hover === s.id ? 'scale(1.035)' : 'scale(1)' }));
+    const cases = this.loc(C.CASES).map((c, i) => Object.assign(c, this.flow(c.id), { delay: (i * 0.1).toFixed(2), isRecall: c.id === 'recall', isSite: c.id === 'site', tileTitle: x.tiles[c.id], url: c.link.replace('https://', ''), iconSm: c.id === 'recall' ? React.createElement('img', { src: 'brand/md-recall-mark.svg', alt: '', width: 34, height: 34, style: { display: 'block' } }) : this.icon('gauge', 18),
+      tileBg: c.id === 'recall' ? 'transparent' : c.tileBg, tileRing: 'none', icon: this.icon(c.id === 'recall' ? 'commit' : 'gauge', 22), openModal: (e) => this.openModal('case', c.id, e), hoverOn: () => this.setHover(c.id), hoverOff: () => this.setHover(null), expBg: S.hover === c.id ? 'var(--acc)' : 'var(--mc-action-tint)', expFg: S.hover === c.id ? 'var(--mc-white)' : 'var(--acc)', vizTf: S.hover === c.id ? 'scale(1.035)' : 'scale(1)' }));
     const faqs = this.loc(C.FAQS).map((f, i) => { const open = S.faqOpen === i; return Object.assign(f, { open, toggle: () => this.setState({ faqOpen: open ? -1 : i }), rows: open ? '1fr' : '0fr', rot: open ? 'rotate(45deg)' : 'rotate(0deg)', iconBg: open ? 'var(--mc-navy)' : 'var(--mc-line-soft)', iconFg: open ? 'var(--mc-white)' : 'var(--mc-navy)', border: i === 0 ? '0' : '1px solid color-mix(in srgb, var(--mc-navy) 8%, transparent)' }); });
     const steps = this.loc(C.STEPS);
     const stats = this.loc(C.STATS).map((s) => Object.assign(s, { display: s.prefix + s.to + s.suffix }));
@@ -1053,7 +1118,7 @@ class Component extends DCLogic {
       { icon: this.icon('file', 18), title: t.menus.resLlms, text: t.menus.resLlmsText, soon: false, href: 'https://mccain-digital.com/llms.txt', target: '_blank' },
       { icon: this.icon('layout', 18), title: (S.lang === 'de' ? 'Styleguide' : 'Style guide'), text: (S.lang === 'de' ? 'Farben, Typografie, Komponenten und Bewegung' : 'Colours, type, components and motion'), soon: false, href: Component.PAGES.styleguide, target: '_self' },
       { icon: this.icon('layers', 18), title: t.menus.resStack, text: t.menus.resStackText, soon: false, href: '#stack', target: '_self', onClick: this.goHandler('stack') },
-      { icon: React.createElement('img', { src: 'brand/mccain-recall-logo-128.png', alt: '', width: 24, height: 24, style: { display: 'block', borderRadius: '6px' } }), iconBg: 'var(--mc-white)', iconRing: 'inset 0 0 0 1px color-mix(in srgb, var(--mc-navy) 12%, transparent)', title: 'md-recall', text: (S.lang === 'de' ? 'Unser Projektgedächtnis – zum Download' : 'Our project memory — free download'), soon: false, href: Component.PAGES.recall, target: '_self' },
+      { icon: React.createElement('img', { src: 'brand/md-recall-mark.svg', alt: '', width: 36, height: 36, style: { display: 'block' } }), iconBg: 'transparent', iconRing: 'none', title: 'md-recall', text: (S.lang === 'de' ? 'Unser Projektgedächtnis – zum Download' : 'Our project memory — free download'), soon: false, href: Component.PAGES.recall, target: '_self' },
       { icon: this.icon('gauge', 18), title: t.nav.pricing, text: (S.lang === 'de' ? 'Rechner und echte Größenordnungen' : 'Calculator and honest ranges'), soon: false, href: Component.PAGES.pricing, target: '_self' },
       { icon: this.icon('shield', 18), title: (S.lang === 'de' ? 'WordPress oder handgeschrieben' : 'WordPress or hand-written'), text: (S.lang === 'de' ? 'Wann ein Baukasten reicht – und wann nicht' : 'When a page builder is enough — and when it is not'), soon: false, href: Component.PAGES.cmpWp, target: '_self' },
       { icon: this.icon('shield', 18), title: (S.lang === 'de' ? 'ChatGPT oder eigenes RAG' : 'ChatGPT or your own RAG'), text: (S.lang === 'de' ? 'Welcher Weg zu welcher Aufgabe passt' : 'Which route fits which task'), soon: false, href: Component.PAGES.cmpRag, target: '_self' },
@@ -1062,23 +1127,29 @@ class Component extends DCLogic {
     ];
     const priceSteps = steps.slice(0, 3).map((s) => ({ n: s.n, time: s.time, title: s.title }));
     const ext = (href) => ({ href, target: '_blank' });
+    const swItems = this.loc(Component.SOFTWARE).map((p) => { const here = Component.PAGES[p.id] === Component.SELF; return Object.assign(p, { href: Component.PAGES[p.id], current: here ? 'page' : undefined, isHere: here, curBg: here ? 'var(--mc-action-tint)' : 'transparent', statusFg: p.live ? 'var(--mc-green-ink)' : 'var(--mc-text-grey)', statusBg: p.live ? 'color-mix(in srgb, var(--mc-success-on-dark) 16%, transparent)' : 'color-mix(in srgb, var(--mc-navy) 6%, transparent)', mark: p.id === 'recall' ? React.createElement('img', { src: 'brand/md-recall-mark.svg', alt: '', width: 36, height: 36, style: { display: 'block' } }) : this.icon(p.icon, 18), tileBg: p.id === 'recall' ? 'transparent' : 'var(--mc-navy)' }); });
+    const sw360 = Object.assign(this.loc(Component.SOFTWARE_SOON), { icon: this.icon('globe', 18) });
+    const loginItems = this.loc(Component.LOGIN).map((l) => Object.assign(l, { icon: this.icon(l.icon, 16) }));
     const footerCols = [
       { title: t.footer.services, links: [{ label: (S.lang === 'de' ? 'Überblick' : 'Overview'), href: Component.PAGES.hub, target: '_self' }].concat(services.map((s) => ({ label: s.title, href: Component.PAGES[s.id], target: '_self' }))) },
       { title: t.footer.work, links: [{ label: 'md-recall', href: Component.PAGES.recall, target: '_self' }, { label: t.nav.pricing, href: Component.PAGES.pricing, target: '_self' }, { label: cases[1] ? cases[1].title : 'mccain-digital.com', href: '#work', target: '_self', onClick: (e) => { e.preventDefault(); this.openModal('case', 'site'); } }] },
+      { title: t.footer.software, links: swItems.map((p) => ({ label: p.title, href: p.href, target: '_self' })).concat(loginItems.map((l) => ({ label: t.footer.loginAt + ' ' + l.name, href: l.href, target: '_self' }))) },
       { title: t.footer.studio, links: [{ label: t.footer.team, href: Component.PAGES.studio, target: '_self' }, { label: t.footer.news, href: 'McCain Digital News.dc.html', target: '_self' }, { label: t.footer.process, href: '#process', target: '_self', onClick: this.goHandler('process') }, { label: t.menus.configShort, href: Component.PAGES.pricing + '#rechner', target: '_self' }, { label: t.footer.faq, href: '#faq', target: '_self', onClick: this.goHandler('faq') }, { label: t.footer.contact, href: Component.PAGES.contact, target: '_self' }] },
       { title: t.footer.resources, links: [{ label: t.menus.configShort, href: Component.PAGES.pricing + '#rechner', target: '_self' }, { label: 'md-recall', href: Component.PAGES.recall, target: '_self' }, { label: t.footer.notes, href: '#', target: '_self', onClick: (e) => e.preventDefault() }, Object.assign({ label: t.footer.llms }, ext('https://mccain-digital.com/llms.txt')), { label: t.footer.stack, href: '#stack', target: '_self', onClick: this.goHandler('stack') }, { label: (S.lang === 'de' ? 'Styleguide' : 'Style guide'), href: Component.PAGES.styleguide, target: '_self' }, { label: (S.lang === 'de' ? 'Marke' : 'Brand'), href: 'McCain Digital Brand Guide v2.dc.html', target: '_self' }, { label: (S.lang === 'de' ? 'WordPress oder handgeschrieben' : 'WordPress or hand-written'), href: Component.PAGES.cmpWp, target: '_self' }, { label: (S.lang === 'de' ? 'ChatGPT oder eigenes RAG' : 'ChatGPT or your own RAG'), href: Component.PAGES.cmpRag, target: '_self' }, { label: 'Next.js', href: Component.PAGES.techNext, target: '_self' }, { label: 'MCP-Server', href: Component.PAGES.techMcp, target: '_self' }, { label: 'RAG', href: Component.PAGES.techRag, target: '_self' }, { label: 'ERP-Integration', href: Component.PAGES.techErp, target: '_self' }] },
       { title: t.footer.legal, links: [{ label: t.footer.imprint, href: Component.PAGES.legal + '#impressum', target: '_self' }, { label: t.footer.privacy, href: Component.PAGES.legal + '#datenschutz', target: '_self' }, { label: t.footer.terms, href: Component.PAGES.legal + '#agb', target: '_self' }, { label: t.footer.withdrawal, href: Component.PAGES.legal + '#widerruf', target: '_self' }] }
     ];
     resItems.forEach((r) => { if (!r.iconBg) { r.iconBg = RIB; r.iconRing = RIR; } });
-    const footerActive = (() => { try { return decodeURIComponent((window.location.pathname.split('/').pop() || '')); } catch (e) { return ''; } })();
-    footerCols.forEach((c) => c.links.forEach((l) => { const h = decodeURIComponent(String(l.href || '')).split('#')[0]; const on = !!h && !!footerActive && h === footerActive;
-      l.current = on ? 'page' : undefined; l.fg = on ? 'var(--mc-white)' : 'var(--mc-dark-text-2)'; l.fw = on ? '600' : '400'; l.dotOp = on ? '1' : '0'; }));
+    const footerActive = Component.SELF;
+    footerCols.forEach((c) => c.links.forEach((l) => { const h = String(l.href || ''); const on = h.indexOf('#') < 0 && h === footerActive;
+      l.current = on ? 'page' : undefined; l.fg = on ? 'var(--mc-white)' : 'var(--mc-dark-text-2)'; l.fw = on ? '600' : '400'; l.dotOp = on ? '1' : '0'; l.on = on; }));
     const mobileGroups = [
       { title: t.nav.services, links: [{ label: (S.lang === 'de' ? 'Überblick' : 'Overview'), onClick: () => { window.location.href = Component.PAGES.hub; } }].concat(services.map((s) => ({ label: s.title, onClick: () => { window.location.href = Component.PAGES[s.id]; } }))) },
       { title: t.nav.work, links: cases.map((c) => ({ label: c.title, onClick: c.openModal })) },
       { title: t.nav.studio, links: [{ label: t.footer.team, onClick: () => { window.location.href = Component.PAGES.studio; } }, { label: t.footer.faq, onClick: this.goHandler('faq') }, { label: t.footer.contact, onClick: () => { window.location.href = Component.PAGES.contact; } }, { label: t.footer.imprint, onClick: () => { window.location.href = Component.PAGES.legal; } }] },
       { title: t.nav.process, links: steps.map((s) => ({ label: s.n + ' · ' + s.title, onClick: this.goHandler('process') })) },
       { title: t.nav.resources, links: resItems.map((r) => ({ label: r.title, onClick: r.onClick || (() => window.open(r.href, '_blank', 'noopener')) })) },
+      { title: t.nav.software, links: swItems.map((p) => ({ label: p.title, onClick: () => { window.location.href = p.href; } })) },
+      { title: t.nav.login, links: loginItems.map((l) => ({ label: l.name, onClick: () => { window.location.href = l.href; } })) },
       { title: t.nav.pricing, links: [{ label: t.menus.configurator, onClick: () => { window.location.href = Component.PAGES.pricing + '#rechner'; } }, { label: t.menus.pricingTitle, onClick: () => { window.location.href = Component.PAGES.pricing; } }, { label: t.menus.pricingCta, onClick: () => { window.location.href = Component.PAGES.pricing + '#rechner'; } }] }
     ];
     const emptyDeep = { stats: [], useCases: [], caps: [], steps: [], faqs: [], stack: [] };
@@ -1088,10 +1159,10 @@ class Component extends DCLogic {
         const s = services.find((v) => v.id === S.modal.id) || services[0];
         const raw = S.deep && S.deep[s.id] ? this.loc(S.deep[s.id]) : null;
         const deep = raw ? Object.assign({}, raw, { steps: raw.steps.map((st, i) => Object.assign({}, st, { n: i + 1 })) }) : null;
-        modal = Object.assign({}, s, { kicker: t.common.service + ' · ' + s.title, title: s.tileTitle, cta: t.common.cta, hasLink: false, link: '', linkLabel: '', stats: deep ? deep.stats : [], deep: deep || emptyDeep, hasDeep: !!deep, vAi: s.id === 'ai', vApps: s.id === 'apps', vScores: s.id === 'web', vSoftware: s.id === 'software', vRecall: false });
+        const mp = Component.PAGES[s.id] || ''; modal = Object.assign({}, s, { isCaseLike: false, isAi: s.id === 'ai', isApps: s.id === 'apps', isWeb: s.id === 'web', isSoftware: s.id === 'software', hasPage: !!mp, page: mp, pageTitle: (t.common.moreOn || 'Mehr zu') + ' ' + s.title, pageText: s.short, pageCta: t.common.toPage || (this.state.lang === 'en' ? 'Open the page' : 'Zur Seite'), kicker: t.common.service + ' · ' + s.title, title: s.tileTitle, cta: t.common.cta, hasLink: false, link: '', linkLabel: '', stats: deep ? deep.stats : [], deep: deep || emptyDeep, hasDeep: !!deep, vAi: s.id === 'ai', vApps: s.id === 'apps', vScores: s.id === 'web', vSoftware: s.id === 'software', vRecall: false });
       } else {
         const c = cases.find((v) => v.id === S.modal.id) || cases[0];
-        modal = Object.assign({}, c, { kicker: t.common.caseLabel + ' · ' + c.title, title: c.tileTitle, cta: t.common.cta, hasLink: true, linkLabel: c.id === 'recall' ? t.common.visit : t.common.visitSite, stats: c.stats || [], deep: emptyDeep, hasDeep: false, vAi: false, vApps: false, vScores: c.id === 'site', vSoftware: false, vRecall: c.id === 'recall' });
+        modal = Object.assign({}, c, { isCaseLike: true, isAi: false, isApps: false, isWeb: false, isSoftware: false, hasPage: false, page: '', pageTitle: '', pageText: '', pageCta: '', kicker: t.common.caseLabel + ' · ' + c.title, title: c.tileTitle, cta: t.common.cta, hasLink: true, linkLabel: c.id === 'recall' ? t.common.visit : t.common.visitSite, stats: c.stats || [], deep: emptyDeep, hasDeep: false, vAi: false, vApps: false, vScores: c.id === 'site', vSoftware: false, vRecall: c.id === 'recall' });
       }
     }
     const mobile = S.vw < 960, pad = mobile ? 0 : Math.min(40, Math.max(12, S.vw * 0.03)), fw = Math.min(1180, S.vw - 2 * pad), fx = (S.vw - fw) / 2, fh = Math.max(420, (typeof window !== 'undefined' ? window.innerHeight : 800) * 0.92);
@@ -1111,15 +1182,16 @@ class Component extends DCLogic {
       dockBorder: S.dockGlow ? '2px solid transparent' : '1px solid color-mix(in srgb, var(--mc-white) 10%, transparent)',
       dockShadow: S.dockGlow ? '0 0 36px -6px color-mix(in srgb, var(--mc-violet) 55%, transparent), 0 40px 100px -30px color-mix(in srgb, var(--mc-black) 70%, transparent)' : '0 40px 100px -30px color-mix(in srgb, var(--mc-black) 70%, transparent)',
       configHref: Component.PAGES.pricing + '#rechner',
-      showSearchLabel: S.vw >= 520,
+      showSearchLabel: navFull ? navWide : S.vw >= 520, navFull, navCompact: !navFull, navGap: navWide ? '4px' : '2px', navItemPad: navWide ? '8px 12px' : '8px 8px', navMl: navWide ? '8px' : '0px',
+      swItems, sw360, loginItems, loginIcon: this.icon('user', 17), loginOpen: () => this.openMenu('login'), loginToggle: () => this.toggleMenu('login'), loginBg: S.menu === 'login' ? 'var(--mc-surface)' : 'var(--mc-white)',
       configHref: Component.PAGES.pricing + '#rechner',
       cfgHint: this.loc(Component.CFGHINT),
-      t, isDesktop, isMobile: !isDesktop, isHeroA: heroA, isHeroB: !heroA, logosReady: true, showLangInNav: !isDesktop || S.vw >= 1080, showGhost: isDesktop && S.vw >= 1180,
+      t, isDesktop, isMobile: !isDesktop, isHeroA: heroA, isHeroB: !heroA, logosReady: true, showLangInNav: !navFull || S.vw >= 1280, showGhost: isDesktop && S.vw >= 1180,
       dockRight: isDesktop ? '20px' : '12px', dockLeft: isDesktop ? 'auto' : (S.dockOpen ? '12px' : 'auto'), dockBottom: isDesktop ? '20px' : 'max(12px, env(safe-area-inset-bottom))', dockW: isDesktop ? 'min(380px, calc(100vw - 40px))' : '100%',
       tileGap: isDesktop ? '20px' : '14px', gridTop: isDesktop ? '52px' : '32px', tilePad: isDesktop ? '26px' : '20px', tileMinH: isDesktop ? '560px' : '460px', caseMinH: isDesktop ? '540px' : '440px',
       modalPad: isDesktop ? 'clamp(12px,3vw,40px) clamp(12px,3vw,40px) clamp(40px,6vw,80px)' : '56px 0 0', modalMargin: isDesktop ? '0 auto' : '0 auto -1px', modalMinH: isDesktop ? '0' : 'calc(100vh - 56px)', modalRadius: isDesktop ? '20px' : '20px 20px 0 0', modalInner: isDesktop ? 'clamp(28px,4vw,56px) clamp(22px,4.5vw,64px) clamp(32px,4vw,56px)' : '16px 20px 40px', closePos: isDesktop ? 'absolute' : 'sticky', closeMr: isDesktop ? '0' : '12px', closeMb: isDesktop ? '0' : '-44px', closeTop: isDesktop ? '22px' : '10px', stageH: isDesktop ? 'clamp(300px, 42vw, 500px)' : '300px', modalRise: S.modalIn ? 'none' : 'translateY(18px)',
       heroCols: isDesktop ? '1.05fr .95fr' : 'minmax(0, 1fr)', heroBCols: isDesktop ? '1.15fr .85fr' : 'minmax(0, 1fr)', aiCols: isDesktop ? '.9fr 1.1fr' : 'minmax(0, 1fr)', processCols: isDesktop ? '.8fr 1.2fr' : 'minmax(0, 1fr)', faqCols: isDesktop ? '.8fr 1.2fr' : 'minmax(0, 1fr)', contactCols: isDesktop ? '1fr 1fr' : 'minmax(0, 1fr)', stickyPos: isDesktop ? 'sticky' : 'static',
-      navShadow: S.scrolled ? '0 1px 0 var(--mc-line), 0 10px 30px -18px color-mix(in srgb, var(--mc-navy) 18%, transparent)' : '0 1px 0 var(--mc-line)', caretTop: 69, panelTop: 76, indLeft: S.indLeft, indW: S.indW, indOp: menuOpen ? 1 : 0, indBg: 'color-mix(in srgb, var(--mc-navy) 6%, transparent)', brandsLoop: C.BRANDS.concat(C.BRANDS),
+      navShadow: S.scrolled ? '0 1px 0 var(--mc-line), 0 10px 30px -18px color-mix(in srgb, var(--mc-navy) 18%, transparent)' : '0 1px 0 var(--mc-line)', caretTop: 69, panelTop: 76, indLeft: S.indLeft, indW: S.indW, indOp: menuOpen && S.menu !== 'login' ? 1 : 0, indBg: 'color-mix(in srgb, var(--mc-navy) 6%, transparent)', brandsLoop: C.BRANDS.concat(C.BRANDS),
       navFg, markBg: onGradient ? 'var(--mc-white)' : 'var(--mc-navy)', markFg: onGradient ? 'var(--mc-navy)' : 'var(--mc-white)', toggleBorder: onGradient ? 'color-mix(in srgb, var(--mc-white) 35%, transparent)' : 'color-mix(in srgb, var(--mc-navy) 14%, transparent)',
       ctaBg: onGradient ? 'var(--mc-white)' : 'var(--acc)', ctaFg: onGradient ? 'var(--mc-navy)' : 'var(--mc-white)',
       deBg: de ? (onGradient ? 'var(--mc-white)' : 'var(--mc-navy)') : 'transparent', deFg: de ? (onGradient ? 'var(--mc-navy)' : 'var(--mc-white)') : navFg, enBg: !de ? (onGradient ? 'var(--mc-white)' : 'var(--mc-navy)') : 'transparent', enFg: !de ? (onGradient ? 'var(--mc-navy)' : 'var(--mc-white)') : navFg,
@@ -1134,7 +1206,7 @@ class Component extends DCLogic {
       askFg: S.aiMode === 'ask' ? 'var(--mc-white)' : 'var(--mc-dark-muted)', askLine: S.aiMode === 'ask' ? 'var(--acc)' : 'transparent', briefFg: S.aiMode === 'brief' ? 'var(--mc-white)' : 'var(--mc-dark-muted)', briefLine: S.aiMode === 'brief' ? 'var(--acc)' : 'transparent',
       setModeAsk: () => this.setState({ aiMode: 'ask' }), setModeBrief: () => this.setState({ aiMode: 'brief' }), aiThinking: S.aiPhase === 'thinking', aiTypingShown: S.aiPhase === 'typing', aiSubmit: this.aiSubmit,
       formIdle: !S.formSent, formSent: S.formSent, formSubmit: this.formSubmit,
-      streamPoints: (this._pts = x.points.concat(x.points).map(ptStyle)), heroLine: mkLine({ color: 'var(--mc-action)', backgroundImage: 'var(--mc-heading-gradient)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', paddingRight: '.04em' }), heroLineB: mkLine({ color: 'var(--acc)' }), showStatus: isDesktop && S.vw >= 1180, pillBg: onGradient ? 'color-mix(in srgb, var(--mc-white) 14%, transparent)' : 'var(--mc-surface)', progOp: S.scrolled ? 1 : 0, menuGradA: mg.gradA, menuGradB: mg.gradB, dl, integ, scale, bigStats, bars, opsRows, voices, pricing, fall: x.fall, fallCols: isDesktop ? '1.1fr .9fr' : 'minmax(0, 1fr)', openRecall: (e) => this.openModal('case', 'recall', e), heroSubmit: this.heroSubmit, heroCta2: S.lang === 'de' ? 'So arbeitet die KI-Konsole' : 'How the AI console works', openDock: () => { if (this.state.aiVisible) { this.go('ai'); setTimeout(() => { if (this.aiInput) this.aiInput.focus(); }, 500); } else this.setState({ dockOpen: true }, () => setTimeout(() => { if (this.dockInput) this.dockInput.focus(); }, 60)); }, heroInputRef: (el) => { this.heroInput = el; }, heroAskHint: S.lang === 'de' ? 'Fragen Sie die Seite – z. B. „Was kostet eine Web-App?“' : 'Ask the site — e.g. “What does a web app cost?”', integNodes, integSys, sq, diagOverflow: S.vw < 760 ? 'auto' : 'visible', modalCols: isDesktop ? '1.1fr .9fr' : 'minmax(0, 1fr)', modalAsk: this.modalAsk, focusAi: () => { if (this.aiInput) this.aiInput.focus(); }, openAiModal: () => this.openModal('service', 'ai'), openSoftwareModal: () => this.openModal('service', 'software'), modalOpen: !!S.modal, modalOp: S.modalIn ? 1 : 0, modalTf, modal, closeModal: this.closeModal, stop: this.stop, modalCta: this.modalCta
+      streamPoints: (this._pts = x.points.concat(x.points).map(ptStyle)), heroLine: mkLine({ color: 'var(--mc-action)', backgroundImage: 'var(--mc-heading-gradient)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', paddingRight: '.04em' }), heroLineB: mkLine({ color: 'var(--acc)' }), showStatus: isDesktop && S.vw >= 1180, pillBg: onGradient ? 'color-mix(in srgb, var(--mc-white) 14%, transparent)' : 'var(--mc-surface)', progOp: S.scrolled ? 1 : 0, menuGradA: mg.gradA, menuGradB: mg.gradB, dl, integ, scale, bigStats, bars, opsRows, voices, pricing, fall: x.fall, fallCols: isDesktop ? '1.1fr .9fr' : 'minmax(0, 1fr)', openRecall: (e) => this.openModal('case', 'recall', e), heroSubmit: this.heroSubmit, heroCta2: S.lang === 'de' ? 'So arbeitet die KI-Konsole' : 'How the AI console works', openDock: () => { if (this.state.aiVisible) { this.go('ai'); setTimeout(() => { if (this.aiInput) this.aiInput.focus(); }, 500); } else this.setState({ dockOpen: true }, () => setTimeout(() => { if (this.dockInput) this.dockInput.focus(); }, 60)); }, heroInputRef: (el) => { this.heroInput = el; }, heroAskHint: S.lang === 'de' ? 'Fragen Sie die Seite – z. B. „Was kostet eine Web-App?“' : 'Ask the site — e.g. “What does a web app cost?”', integNodes, integSys, sq, diagOverflow: S.vw < 760 ? 'auto' : 'visible', modalCols: isDesktop ? '1.1fr .9fr' : 'minmax(0, 1fr)', modalAsk: this.modalAsk, focusAi: () => { if (this.aiInput) this.aiInput.focus(); }, openAiModal: () => this.openModal('service', 'ai'), openSoftwareModal: () => this.openModal('service', 'software'), modalOpen: !!S.modal, modalOp: S.modalIn ? 1 : 0, modalTf, modal, closeModal: this.closeModal, stop: this.stop, modalCta: this.modalCta, mx: this.loc(Component.MODALX)
     };
   }
 

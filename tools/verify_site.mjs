@@ -71,6 +71,8 @@ const LIVE_PAGES = [
   "/vergleich/wordpress-oder-handgeschrieben/",
   "/vergleich/chatgpt-oder-eigenes-rag/",
   "/md-recall/",
+  "/md-cms/",
+  "/md-portal/",
   "/preise/",
   "/studio/",
   "/kontakt/",
@@ -889,6 +891,53 @@ if (BASE.startsWith("http") && !BASE.includes("127.0.0.1")) {
       console.log(`    ${ok(!cut.length)} ${String(width).padStart(4)}  ${p}${cut.length ? `  (${cut.length})` : ""}`);
       for (const c of cut.slice(0, 4)) fail(`${p} @${width}: ${c}`);
       if (cut.length > 4) fail(`${p} @${width}: ...and ${cut.length - 4} more`);
+    }
+    await ctx.close();
+  }
+}
+
+/* THE HEADER FITS AT EVERY DESKTOP WIDTH (19.9.2026).
+ * The header is position:fixed, so the gate above never looks at it. Between
+ * 960 and 1180 px it used to lose "Kontakt" off its right edge, and the first
+ * build of the new tiers (1180 / 1280 / 1400) showed the 1280 layout at every
+ * width from 1180 up, because v5build only rendered the breakpoints it knew.
+ * Checked on the BUILT page, at each tier and on both sides of each boundary:
+ * the last item ends inside the bar's padding, no item wraps, and each tier
+ * shows what it promises (menu button below 1180, search label from 1400). */
+{
+  console.log("\n  the header fits (desktop tiers)");
+  for (const width of [1000, 1179, 1180, 1279, 1280, 1399, 1400, 1440]) {
+    const ctx = await browser.newContext({ viewport: { width, height: 900 } });
+    /* No active item, "Leistungen" active, "Software" active (bold is wider). */
+    for (const p of ["/", "/leistungen/websites/", "/md-cms/"]) {
+      const page = await ctx.newPage();
+      await page.goto(BASE + p, { waitUntil: "load" });
+      await waitForV5(page);
+      const r = await page.evaluate(() => {
+        const inner = document.querySelector("[data-nav-inner]");
+        if (!inner) return { err: "no [data-nav-inner]" };
+        const box = inner.getBoundingClientRect(), padR = parseFloat(getComputedStyle(inner).paddingRight);
+        const shown = (el) => el && getComputedStyle(el).display !== "none" && el.getBoundingClientRect().width > 0;
+        const kids = [...inner.children].filter((k) => shown(k) && getComputedStyle(k).position !== "absolute");
+        if (!kids.length) return { err: "the header shows nothing" };
+        const over = Math.round(Math.max(...kids.map((k) => k.getBoundingClientRect().right)) - (box.right - padR));
+        /* The bar's own controls only: the mega menu's cards live inside the
+         * bar too (closed, still laid out) and are tall by design. */
+        const inMenu = (e) => !!e.closest("[data-v5-panel], [data-menu-content]");
+        const wrapped = [...inner.querySelectorAll("[data-nav-item], button, a")].filter((e) => !inMenu(e) && shown(e) && e.getBoundingClientRect().height > 48).length;
+        const list = shown(inner.querySelector("[data-nav-list]"));
+        /* The built page keeps the label in the DOM and hides it by media
+         * query, so the text alone says nothing: the label must have a width. */
+        const search = [...inner.querySelectorAll("button")].find((b) => !inMenu(b) && /Suche|Search/.test(b.textContent));
+        const searchLabel = !!search && [...search.querySelectorAll("*")].some((e) => /^(Suche|Search)$/.test(e.textContent.trim()) && e.getBoundingClientRect().width > 0);
+        return { over, wrapped, list, searchLabel };
+      });
+      await page.close();
+      const want = { list: width >= 1180, searchLabel: width >= 1400 };
+      const bad = r.err || [r.over > 0 && `${r.over}px past the bar`, r.wrapped && `${r.wrapped} item(s) wrap`,
+        r.list !== want.list && `nav list ${r.list ? "shown" : "hidden"}`, want.list && r.searchLabel !== want.searchLabel && `search label ${r.searchLabel ? "shown" : "hidden"}`].filter(Boolean).join(", ");
+      console.log(`    ${ok(!bad)} ${String(width).padStart(4)}  ${p}${bad ? "  " + bad : ""}`);
+      if (bad) fail(`header @${width} ${p}: ${bad}`);
     }
     await ctx.close();
   }

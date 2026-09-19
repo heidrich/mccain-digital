@@ -3,7 +3,58 @@
 window.__v5Logic = function (DCLogic, StreamableLogic, React) {
 
 class Component extends DCLogic {
-  static MENU_W = { services: 780, work: 540, studio: 560, process: 540, resources: 780, pricing: 480 };
+  static SELF = '/leistungen/websites/';
+  /* Where a page sits: which header item is active (nav). up/here and CRUMB_UP
+   * fed the breadcrumb pill, taken out on 19.9.2026 (owner: too much focus);
+   * kept for its return, the variants are in internal/polish-0919/crumb/.
+   * Keyed by artboard file name, like SELF and PAGES. */
+  static TRAIL = {
+    '/leistungen/': { nav: 'services', up: [], here: { de: 'Leistungen', en: 'Services' } },
+    '/leistungen/ki-automatisierung/': { nav: 'services', up: ['svc'], here: { de: 'KI & Automatisierung', en: 'AI & automation' } },
+    '/leistungen/web-apps/': { nav: 'services', up: ['svc'], here: { de: 'Web-Apps & Plattformen', en: 'Web apps & platforms' } },
+    '/leistungen/websites/': { nav: 'services', up: ['svc'], here: { de: 'Websites & Landingpages', en: 'Websites & landing pages' } },
+    '/leistungen/individualsoftware/': { nav: 'services', up: ['svc'], here: { de: 'Individualsoftware', en: 'Custom software' } },
+    '/leistungen/nextjs-entwicklung/': { nav: 'services', up: ['svc', 'apps'], here: 'Next.js' },
+    '/leistungen/mcp-server-entwickeln/': { nav: 'services', up: ['svc', 'ai'], here: { de: 'MCP-Server', en: 'MCP servers' } },
+    '/leistungen/rag-beratung/': { nav: 'services', up: ['svc', 'ai'], here: { de: 'RAG & Retrieval', en: 'RAG & retrieval' } },
+    '/leistungen/erp-integration/': { nav: 'services', up: ['svc', 'custom'], here: { de: 'ERP-Integration', en: 'ERP integration' } },
+    '/vergleich/wordpress-oder-handgeschrieben/': { nav: 'resources', up: ['cmp'], here: { de: 'WordPress oder handgeschrieben', en: 'WordPress or hand-written' } },
+    '/vergleich/chatgpt-oder-eigenes-rag/': { nav: 'resources', up: ['cmp'], here: { de: 'ChatGPT oder eigenes RAG', en: 'ChatGPT or your own RAG' } },
+    '/md-recall/': { nav: 'software', up: ['sw'], here: 'md-recall' },
+    '/md-cms/': { nav: 'software', up: ['sw'], here: 'md-cms' },
+    '/md-portal/': { nav: 'software', up: ['sw'], here: 'md-portal' },
+    '/preise/': { nav: 'pricing', up: [], here: { de: 'Preise', en: 'Pricing' } },
+    '/studio/': { nav: 'studio', up: [], here: 'Studio' },
+    '/kontakt/': { nav: null, up: [], here: { de: 'Kontakt', en: 'Contact' } },
+    '/rechtliches/': { nav: null, up: [], here: { de: 'Rechtliches', en: 'Legal' } },
+    '/styleguide/': { nav: 'resources', up: ['brand'], here: { de: 'Styleguide', en: 'Style guide' } },
+    '/marke/': { nav: 'resources', up: [], here: { de: 'Marke', en: 'Brand' } },
+    '/news/': { nav: 'resources', up: [], here: 'News' },
+    '/news/md-recall/': { nav: 'resources', up: ['news'], here: 'md-recall' },
+  };
+  static CRUMB_UP = {
+    svc: [{ de: 'Leistungen', en: 'Services' }, '/leistungen/'],
+    ai: [{ de: 'KI & Automatisierung', en: 'AI & automation' }, '/leistungen/ki-automatisierung/'],
+    apps: [{ de: 'Web-Apps', en: 'Web apps' }, '/leistungen/web-apps/'],
+    custom: [{ de: 'Individualsoftware', en: 'Custom software' }, '/leistungen/individualsoftware/'],
+    cmp: [{ de: 'Vergleich', en: 'Comparison' }, '/leistungen/#vergleiche'],
+    sw: ['Software', '/studio/#produkte'],
+    news: ['News', '/news/'],
+    brand: [{ de: 'Marke', en: 'Brand' }, '/marke/'],
+  };
+  /* The "Software" menu. Status says what is true today: md-cms has login and
+   * the sites overview, the editor is still being built. */
+  static SOFTWARE = [
+    { id: 'recall', title: 'md-recall', live: true, status: 'Live', menu: { de: 'KI-natives Projektgedächtnis für Software-Teams', en: 'AI-native project memory for software teams' } },
+    { id: 'cms', icon: 'layers', title: 'md-cms', live: false, status: { de: 'Im Aufbau', en: 'Early build' }, menu: { de: 'Das CMS für die Websites, die wir bauen', en: 'The CMS for the websites we build' } },
+    { id: 'portal', icon: 'layout', title: 'md-portal', live: true, status: 'Live', menu: { de: 'Ihr Kundenportal: Projekte, Aufgaben, Rechnungen', en: 'Your client portal: projects, tasks, invoices' } },
+  ];
+  static SOFTWARE_SOON = { title: '360', menu: { de: '360°-Panoramen hosten und einbetten', en: 'Host and embed 360° panoramas' } };
+  static LOGIN = [
+    { icon: 'layers', name: 'md-cms', href: 'https://cms.mccain-digital.com', domain: 'cms.mccain-digital.com', desc: { de: 'Ihre Websites im Überblick', en: 'Your websites at a glance' } },
+    { icon: 'layout', name: 'md-portal', href: 'https://portal.mccain-digital.com', domain: 'portal.mccain-digital.com', desc: { de: 'Projekte, Aufgaben, Freigaben', en: 'Projects, tasks, approvals' } },
+  ];
+  static MENU_W = { services: 780, work: 540, studio: 560, process: 540, resources: 780, software: 600, pricing: 480, login: 320 };
   static GOALIAS = { process: ['ablauf'], studio: ['menschen'], work: ['faelle', 'produkte'], services: ['faehigkeiten', 'leistung', 'handwerk', 'kette'], ai: ['ai'], faq: ['faq'] };
   static GOTO = { services: '/leistungen/', pricing: '/preise/', recall: '/md-recall/', process: '/leistungen/web-apps/#ablauf', stack: '/leistungen/web-apps/#stack', work: '/studio/#produkte', studio: '/studio/#menschen', contact: '/kontakt/#contact', services: '/leistungen/ki-automatisierung/', faq: '/leistungen/ki-automatisierung/#faq', ai: '/leistungen/ki-automatisierung/#ai' };
   static CFGHINT = { title: { de: 'Schon ein Projekt im Kopf?', en: 'Already have a project in mind?' }, text: { de: 'Im Konfigurator sehen Sie Größenordnung und Dauer sofort – und schicken die Aufstellung direkt an uns.', en: 'The configurator shows ballpark and duration right away — and sends the summary straight to us.' } };
@@ -25,7 +76,7 @@ class Component extends DCLogic {
     liveCta: { de: 'Live ansehen', en: 'See it live' },
     guideCta: { de: 'Styleguide ansehen', en: 'See the style guide' }
   };
-  static PAGES = { styleguide: '/styleguide/', ai: '/leistungen/ki-automatisierung/', apps: '/leistungen/web-apps/', web: '/leistungen/websites/', software: '/leistungen/individualsoftware/', studio: '/studio/', contact: '/kontakt/', legal: '/rechtliches/', recall: '/md-recall/', pricing: '/preise/', cmpWp: '/vergleich/wordpress-oder-handgeschrieben/', cmpRag: '/vergleich/chatgpt-oder-eigenes-rag/', techNext: '/leistungen/nextjs-entwicklung/', techMcp: '/leistungen/mcp-server-entwickeln/', techRag: '/leistungen/rag-beratung/', techErp: '/leistungen/erp-integration/', hub: '/leistungen/' };
+  static PAGES = { cms: '/md-cms/', portal: '/md-portal/', styleguide: '/styleguide/', ai: '/leistungen/ki-automatisierung/', apps: '/leistungen/web-apps/', web: '/leistungen/websites/', software: '/leistungen/individualsoftware/', studio: '/studio/', contact: '/kontakt/', legal: '/rechtliches/', recall: '/md-recall/', pricing: '/preise/', cmpWp: '/vergleich/wordpress-oder-handgeschrieben/', cmpRag: '/vergleich/chatgpt-oder-eigenes-rag/', techNext: '/leistungen/nextjs-entwicklung/', techMcp: '/leistungen/mcp-server-entwickeln/', techRag: '/leistungen/rag-beratung/', techErp: '/leistungen/erp-integration/', hub: '/leistungen/' };
   static GRAD = ['#FFB46B', '#FF5A8C', '#C05CFF', '#5FC3FF', '#FF8FB8'];
   static FLOW = { ai: ['#FF5A8C', '#FFB46B', '#C05CFF'], apps: ['#0A1F44', '#5FC3FF', '#0099F5'], web: ['#FFB46B', '#FF5A8C', '#FF8A5B'], software: ['#C05CFF', '#FF8FB8', '#FF5A8C'], recall: ['#0A1F44', '#0099F5', '#5FC3FF'], site: ['#5FC3FF', '#FFB46B', '#FF5A8C'] };
   static ICONS = {
@@ -39,10 +90,11 @@ class Component extends DCLogic {
     file: ['M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z', 'M14 2v4a2 2 0 0 0 2 2h4', 'M10 9H8', 'M16 13H8', 'M16 17H8'],
     layers: ['M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z', 'M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12', 'M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17'],
     commit: ['M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'M3 12h6', 'M15 12h6'],
-    gauge: ['m12 14 4-4', 'M3.34 19a10 10 0 1 1 17.32 0']
+    gauge: ['m12 14 4-4', 'M3.34 19a10 10 0 1 1 17.32 0'],
+    user: ['M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2', 'M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z']
   };
   static T = {
-    nav: { services: { de: 'Leistungen', en: 'Services' }, work: { de: 'Arbeiten', en: 'Work' }, studio: 'Studio', process: { de: 'Ablauf', en: 'Process' }, resources: { de: 'Ressourcen', en: 'Resources' }, pricing: { de: 'Preise', en: 'Pricing' }, contact: { de: 'Kontakt', en: 'Contact' }, menu: { de: 'Menü', en: 'Menu' } },
+    nav: { services: { de: 'Leistungen', en: 'Services' }, work: { de: 'Arbeiten', en: 'Work' }, studio: 'Studio', process: { de: 'Ablauf', en: 'Process' }, resources: { de: 'Ressourcen', en: 'Resources' }, pricing: { de: 'Preise', en: 'Pricing' }, contact: { de: 'Kontakt', en: 'Contact' }, menu: { de: 'Menü', en: 'Menu' }, software: 'Software', login: { de: 'Kunden-Login', en: 'Client login' } },
     hero: {
       eyebrow: { de: 'Digital Product Studio · Bayern · seit 2016', en: 'Digital product studio · Bavaria · since 2016' },
       title: { de: 'Software, die in Produktion geht.', en: 'Software that ships to production.' },
@@ -83,6 +135,7 @@ class Component extends DCLogic {
       privacy: { de: 'Ihre Angaben werden nur zur Beantwortung Ihrer Anfrage verwendet.', en: 'Your details are used only to answer your request.' }
     },
     footer: {
+      software: 'Software', loginAt: { de: 'Login', en: 'Sign in:' },
       services: { de: 'Leistungen', en: 'Services' }, work: { de: 'Arbeiten', en: 'Work' }, studio: 'Studio', resources: { de: 'Ressourcen', en: 'Resources' }, legal: { de: 'Rechtliches', en: 'Legal' },
       team: 'Team', news: 'News', process: { de: 'Ablauf', en: 'Process' }, faq: { de: 'Fragen & Antworten', en: 'Questions & answers' }, contact: { de: 'Kontakt', en: 'Contact' },
       notes: { de: 'Tech-Notizen', en: 'Tech notes' }, llms: { de: 'llms.txt & KI-Lesbarkeit', en: 'llms.txt & AI readability' }, stack: { de: 'Stack & Werkzeuge', en: 'Stack & tools' },
@@ -90,6 +143,9 @@ class Component extends DCLogic {
       copy: { de: '© 2026 McCain Digital · Oberostendorf, Bayern', en: '© 2026 McCain Digital · Oberostendorf, Bavaria' }, tagline: { de: 'Gebaut von den zwei Personen, die es anbieten.', en: 'Built by the two people who quote it.' }
     },
     menus: {
+      here: { de: 'Sie sind hier', en: 'You are here' }, soon: { de: 'Bald', en: 'Soon' },
+      swFoot: { de: 'Eigene Software – gebaut und betrieben von uns.', en: 'Our own software — built and run by us.' }, swFootLink: { de: 'Wir sind unser erster Kunde', en: 'We are our first client' },
+      loginTitle: { de: 'Anmelden bei', en: 'Sign in to' }, loginNote: { de: 'Ein Konto für beides.', en: 'One account for both.' },
       configurator: { de: 'Konfigurator · Preis in zwei Minuten', en: 'Configurator · price in two minutes' },
       configShort: { de: 'Zum Konfigurator', en: 'Open the configurator' },
       servicesFoot: { de: 'Nicht sicher, was passt?', en: 'Not sure what fits?' }, askSite: { de: 'Die Seite fragen', en: 'Ask the site' }, seeProcess: { de: 'Ablauf ansehen', en: 'See the process' },
@@ -103,7 +159,7 @@ class Component extends DCLogic {
       pricingTitle: { de: 'Konfigurator statt Preisliste', en: 'A configurator instead of a price list' }, pricingText: { de: 'Keine Preisliste – aber ein Rechner, der die Größenordnung zeigt, bevor Sie schreiben. Das Angebot danach ist eine Zahl mit klarem Umfang.', en: 'No price list — but a calculator that shows the ballpark before you write. The quote that follows is one number with a defined scope.' },
       pricingFoot: { de: 'Bis zum Angebot kostet Sie nichts.', en: 'Nothing costs you anything up to the quote.' }, pricingCta: { de: 'Zum Konfigurator', en: 'Open the configurator' }
     },
-    common: { skip: { de: 'Zum Inhalt springen', en: 'Skip to content' }, details: { de: 'Details', en: 'Details' }, viewCase: { de: 'Projekt ansehen', en: 'View project' }, viewAll: { de: 'Alle Projekte', en: 'All projects' }, close: { de: 'Schließen', en: 'Close' }, cta: { de: 'Projekt anfragen', en: 'Start a project' }, visit: { de: 'Produkt öffnen', en: 'Open product' }, visitSite: { de: 'Seite öffnen', en: 'Open site' }, get: { de: 'Was Sie bekommen', en: 'What you get' }, done: { de: 'Was gebaut wurde', en: 'What was built' }, service: { de: 'Leistung', en: 'Service' }, caseLabel: { de: 'Projekt', en: 'Project' } }
+    common: { moreOn: { de: 'Mehr zu', en: 'More on' }, toPage: { de: 'Zur Seite', en: 'Open the page' }, skip: { de: 'Zum Inhalt springen', en: 'Skip to content' }, details: { de: 'Details', en: 'Details' }, viewCase: { de: 'Projekt ansehen', en: 'View project' }, viewAll: { de: 'Alle Projekte', en: 'All projects' }, close: { de: 'Schließen', en: 'Close' }, cta: { de: 'Projekt anfragen', en: 'Start a project' }, visit: { de: 'Produkt öffnen', en: 'Open product' }, visitSite: { de: 'Seite öffnen', en: 'Open site' }, get: { de: 'Was Sie bekommen', en: 'What you get' }, done: { de: 'Was gebaut wurde', en: 'What was built' }, service: { de: 'Leistung', en: 'Service' }, caseLabel: { de: 'Projekt', en: 'Project' } }
   };
   static X = {
     mock: { aiQ: { de: 'Wie lange ist die Gewährleistung bei der Serie B?', en: 'How long is the warranty on the B series?' }, aiA: { de: '24 Monate ab Lieferung – verlängerbar auf 36 Monate.', en: '24 months from delivery — extendable to 36 months.' }, aiSrc: { de: 'handbuch-v4.pdf · S. 12', en: 'manual-v4.pdf · p. 12' }, grounded: { de: 'Antwort aus Ihrer Wissensbasis – mit Quelle', en: 'Answered from your knowledge base — with the source' }, mrr: { de: 'Monatlicher Umsatz', en: 'Monthly revenue' }, kpi1: { de: 'Aktive Nutzer', en: 'Active users' }, kpi2: { de: 'Antwortzeit p95', en: 'Response p95' }, agentic: 'Agentic Browsing 3/3', opsTitle: { de: 'Offene Aufträge', en: 'Open orders' }, col1: { de: 'Kunde', en: 'Customer' }, col2: 'System', col3: { de: 'Betrag', en: 'Amount' } },
@@ -165,6 +221,12 @@ class Component extends DCLogic {
       items: { de: ['Lighthouse 100/100/100/100 – Performance, Barrierefreiheit, Best Practices, SEO', 'Cumulative Layout Shift 0, Total Blocking Time 0 ms', 'JSON-LD, Sitemap und llms.txt für Maschinen', 'Eigene Pixel-Physik-Engine auf Canvas, die sich bei Inaktivität schlafen legt'], en: ['Lighthouse 100/100/100/100 — performance, accessibility, best practices, SEO', 'Cumulative Layout Shift 0, Total Blocking Time 0 ms', 'JSON-LD, sitemap and llms.txt for machines', 'Custom canvas pixel-physics engine that sleeps when idle'] },
       stats: [{ v: '4×100', l: 'Lighthouse' }, { v: '3/3', l: 'Agentic Browsing' }, { v: '0', l: { de: 'Page-Builder', en: 'page builders' } }], facts: [{ k: { de: 'Nachweis', en: 'Proof' }, v: '100 / 100 / 100 / 100 · CLS 0 · TBT 0 ms' }, { k: 'Stack', v: 'Vanilla HTML/CSS/JS · Canvas · JSON-LD' }, { k: 'Status', v: 'Live' }] }
   ];
+  static MODALX = {
+    web: { scores: [{ v: '100', l: 'Performance' }, { v: '100', l: { de: 'Barrierefreiheit', en: 'Accessibility' } }, { v: '100', l: 'Best Practices' }, { v: '100', l: 'SEO' }], note: { de: 'Gemessen an unserer eigenen Seite – dieselbe Messlatte gilt für Ihre.', en: 'Measured on our own site — the same bar applies to yours.' } },
+    apps: { steps: [{ de: 'Daten und Systeme', en: 'Data and systems' }, { de: 'Anwendung', en: 'Application' }, { de: 'Betrieb und Übergabe', en: 'Operations and handover' }], note: { de: 'Ein Strang: von der Quelle bis in den Betrieb, ohne Bruch.', en: 'One line: from source to production, without a break.' } },
+    software: { systems: ['SAP', 'REST', 'CSV', 'SOAP', 'Excel', 'Wiki'], app: { de: 'Ihre Anwendung', en: 'Your application' }, note: { de: 'Wir hängen uns an das an, was schon läuft – kein Rundumschlag.', en: 'We attach to what already runs — no big-bang replacement.' } },
+    ai: { grounded: { de: 'Aus Ihrer Wissensbasis beantwortet – mit Quelle', en: 'Answered from your knowledge base — with the source' }, chips: ['pgvector', 'MCP', 'Claude · Llama'] }
+  };
   static FAQS = [
     { q: { de: 'Was kostet ein Projekt?', en: 'What does a project cost?' }, a: { de: 'Es gibt keine Preisliste. Innerhalb von 48 Stunden nach Ihrer Beschreibung erhalten Sie ein Festpreisangebot – eine konkrete Zahl, keine Spanne, die sich später verdoppelt. Eine kleine Website beginnt im niedrigen fünfstelligen Bereich; ein KI-Werkzeug auf Ihren Daten kostet mehr, weil die Arbeit in den Daten steckt, nicht im Modell.', en: 'There is no price list. Within 48 hours of your description you receive a fixed quote — a concrete number, not a range that doubles later. A small website starts in the low five figures; an AI tool on your data costs more, because the work is in the data, not in the model.' } },
     { q: { de: 'Wie lange dauert es?', en: 'How long does it take?' }, a: { de: 'Marketing-Website 3–6 Wochen. Web-App-MVP 6–12 Wochen. KI-Werkzeug auf Ihren Daten 4–10 Wochen, je nach Zustand der Daten. Interne Software 8–14 Wochen. In der ersten Woche sehen Sie etwas Klickbares.', en: 'Marketing site 3–6 weeks. Web app MVP 6–12 weeks. AI tool on your data 4–10 weeks, depending on how tidy the data is. Internal software 8–14 weeks. You see something clickable in the first week.' } },
@@ -571,6 +633,8 @@ class Component extends DCLogic {
     const S = this.state, C = Component, t = this.loc(C.T), x = this.loc(C.X), dl = x.dl, integ = x.integ, scale = x.scale;
     Object.assign(t.mock, x.mock); Object.assign(t.common, x.common); Object.assign(t.ai, x.ai); Object.assign(t.nav, x.nav); Object.assign(t.hero, x.hero); Object.assign(t.studio, x.studio);
     const isDesktop = S.vw >= 960;
+    /* The full header needs 1180 px; below that the menu button takes over (it used to cut off "Kontakt" between 960 and 1180). */
+    const navFull = S.vw >= 1180, navWide = S.vw >= 1400;
     const bars = [34, 48, 40, 62, 55, 74, 66, 82, 70, 90, 84, 96, 88, 100].map((v, i) => ({ h: v + '%', bg: i > 10 ? 'var(--acc)' : 'linear-gradient(180deg, #5FC3FF, var(--acc))' }));
     const opsRows = [['Nordlicht GmbH', 'SAP', '7.513,00 €'], ['Baumann & Söhne', 'HubSpot', '1.352,00 €'], ['Alpina Logistik', 'Legacy · SOAP', '22.112,18 €'], ['Werk 3', 'CSV → App', '3.290,00 €'], ['Hafenkontor', 'REST', '27.840,00 €'], ['Kessler Technik', 'Excel → App', '2.021,00 €']].map((r, i) => ({ name: r[0], sys: r[1], val: r[2], bg: i === 1 ? '#F6F9FC' : '#FFFFFF', dot: ['#FF5A8C', '#0A1F44', '#FFB46B', '#5FC3FF', '#C05CFF', '#15BE53'][i] }));
     const PING = { mcp: [7, 1.4], hooks: [7, 2.9], rag: [6, 1.8], pipe: [6, 4.5], guard: [7, 5.18], src: [6, 0], pg: [6, 6], claude: [7, 7], openai: [7, 1.5], llama: [4, 6.2] };
@@ -584,18 +648,17 @@ class Component extends DCLogic {
     const heroA = String(this.props.heroVariant || 'A').toUpperCase() !== 'B';
     const onGradient = false;
     const navFg = onGradient ? '#FFFFFF' : '#0A2540';
-    const ids = ['services', 'work', 'studio', 'process', 'resources', 'pricing'];
+    const ids = ['services', 'work', 'studio', 'process', 'resources', 'software', 'pricing'];
     const activeIdx = ids.indexOf(S.menu);
-    const here = (typeof location !== 'undefined' ? decodeURIComponent(String(location.pathname).split('/').pop() || '') : '');
-    const onSvc = /KI\.dc|Web-Apps\.dc|Websites\.dc|Software\.dc/.test(here), onStudio = /Studio\.dc/.test(here);
-    const activeNav = onSvc ? 'services' : onStudio ? 'studio' : /Preise\.dc/.test(here) ? 'pricing' : /md-recall\.dc/.test(here) ? 'work' : null;
-    const navItems = ids.map((id, i) => { const on = S.menu === id, cur = activeNav === id; return { id, label: t.nav[id], open: () => this.openMenu(id), toggle: (id === 'studio' || id === 'pricing') ? ((e) => { if (e && e.preventDefault) e.preventDefault(); window.location.href = (id === 'studio' ? Component.PAGES.studio : Component.PAGES.pricing); }) : (() => this.toggleMenu(id)), color: navFg, fg: cur ? 'var(--acc-text)' : navFg, bg: on ? (onGradient ? 'rgba(255,255,255,.16)' : 'rgba(10,37,64,.06)') : 'transparent', opacity: (S.menu && !on) ? 0.6 : 1, chev: on ? 'rotate(180deg)' : 'none', dotOp: cur ? 1 : 0 }; });
-    const mv = {}; ids.forEach((id, i) => { const on = S.menu === id; const sign = activeIdx < 0 ? 1 : (i < activeIdx ? -1 : 1); mv[id] = { op: on ? 1 : 0, tf: on ? 'translateX(0)' : 'translateX(' + (sign * -28) + 'px)', pe: on ? 'auto' : 'none' }; });
+    const trail = Component.TRAIL[Component.SELF] || null;
+    const activeNav = trail ? trail.nav : null;
+    const navItems = ids.map((id, i) => { const on = S.menu === id, cur = activeNav === id; return { id, label: t.nav[id], open: () => this.openMenu(id), toggle: (id === 'studio' || id === 'pricing') ? ((e) => { if (e && e.preventDefault) e.preventDefault(); window.location.href = (id === 'studio' ? Component.PAGES.studio : Component.PAGES.pricing); }) : (() => this.toggleMenu(id)), color: navFg, fg: navFg, cur, fw: cur ? '600' : '500', bg: on ? (onGradient ? 'rgba(255,255,255,.16)' : 'rgba(10,37,64,.06)') : 'transparent', opacity: (S.menu && !on) ? 0.6 : 1, chev: on ? 'rotate(180deg)' : 'none', dotOp: cur ? 1 : 0 }; });
+    const mv = {}; ids.forEach((id, i) => { const on = S.menu === id; const sign = activeIdx < 0 ? 1 : (i < activeIdx ? -1 : 1); mv[id] = { op: on ? 1 : 0, tf: on ? 'translateX(0)' : 'translateX(' + (sign * -28) + 'px)', pe: on ? 'auto' : 'none' }; }); mv.login = { op: S.menu === 'login' ? 1 : 0, tf: S.menu === 'login' ? 'translateX(0)' : 'translateX(28px)', pe: S.menu === 'login' ? 'auto' : 'none' };
     const ease = 'cubic-bezier(.2,.8,.2,1)';
     const panelTransition = S.fresh ? 'opacity .22s, transform .3s ' + ease : 'left .35s ' + ease + ', width .35s ' + ease + ', height .35s ' + ease + ', opacity .22s, transform .3s ' + ease;
-    const services = this.loc(C.SERVICES).map((s, i) => Object.assign(s, this.flow(s.id), { icon: this.icon(C.SERVICES[i].icon, 22), iconSm: this.icon(C.SERVICES[i].icon, 18), delay: (i * 0.08).toFixed(2), tileTitle: x.tiles[s.id], url: x.urls[s.id], isAi: s.id === 'ai', isApps: s.id === 'apps', isWeb: s.id === 'web', isSoftware: s.id === 'software', page: Component.PAGES[s.id], current: (typeof location !== 'undefined' && decodeURIComponent(String(location.pathname)).indexOf(Component.PAGES[s.id]) >= 0), curBg: (typeof location !== 'undefined' && decodeURIComponent(String(location.pathname)).indexOf(Component.PAGES[s.id]) >= 0) ? '#F6F9FC' : 'transparent', openModal: (e) => this.openModal('service', s.id, e), hoverOn: () => this.setHover(s.id), hoverOff: () => this.setHover(null), expBg: S.hover === s.id ? 'var(--acc)' : '#E8EDF5', expFg: S.hover === s.id ? '#FFFFFF' : 'var(--acc)', vizTf: S.hover === s.id ? 'scale(1.035)' : 'scale(1)' }));
-    const cases = this.loc(C.CASES).map((c, i) => Object.assign(c, this.flow(c.id), { delay: (i * 0.1).toFixed(2), isRecall: c.id === 'recall', isSite: c.id === 'site', tileTitle: x.tiles[c.id], url: c.link.replace('https://', ''), iconSm: c.id === 'recall' ? React.createElement('img', { src: '/brand/mccain-recall-logo-128.webp', alt: '', width: 24, height: 24, style: { display: 'block', borderRadius: '6px' } }) : this.icon('gauge', 18),
-      tileBg: c.id === 'recall' ? '#FFFFFF' : c.tileBg, tileRing: c.id === 'recall' ? 'inset 0 0 0 1px rgba(10,37,64,.12)' : 'none', icon: this.icon(c.id === 'recall' ? 'commit' : 'gauge', 22), openModal: (e) => this.openModal('case', c.id, e), hoverOn: () => this.setHover(c.id), hoverOff: () => this.setHover(null), expBg: S.hover === c.id ? 'var(--acc)' : '#E8EDF5', expFg: S.hover === c.id ? '#FFFFFF' : 'var(--acc)', vizTf: S.hover === c.id ? 'scale(1.035)' : 'scale(1)' }));
+    const services = this.loc(C.SERVICES).map((s, i) => Object.assign(s, this.flow(s.id), { icon: this.icon(C.SERVICES[i].icon, 22), iconSm: this.icon(C.SERVICES[i].icon, 18), delay: (i * 0.08).toFixed(2), tileTitle: x.tiles[s.id], url: x.urls[s.id], isAi: s.id === 'ai', isApps: s.id === 'apps', isWeb: s.id === 'web', isSoftware: s.id === 'software', page: Component.PAGES[s.id], current: Component.PAGES[s.id] === Component.SELF ? 'page' : undefined, isHere: Component.PAGES[s.id] === Component.SELF, curBg: Component.PAGES[s.id] === Component.SELF ? '#E8EDF5' : 'transparent', openModal: (e) => this.openModal('service', s.id, e), hoverOn: () => this.setHover(s.id), hoverOff: () => this.setHover(null), expBg: S.hover === s.id ? 'var(--acc)' : '#E8EDF5', expFg: S.hover === s.id ? '#FFFFFF' : 'var(--acc)', vizTf: S.hover === s.id ? 'scale(1.035)' : 'scale(1)' }));
+    const cases = this.loc(C.CASES).map((c, i) => Object.assign(c, this.flow(c.id), { delay: (i * 0.1).toFixed(2), isRecall: c.id === 'recall', isSite: c.id === 'site', tileTitle: x.tiles[c.id], url: c.link.replace('https://', ''), iconSm: c.id === 'recall' ? React.createElement('img', { src: '/brand/md-recall-mark.svg', alt: '', width: 34, height: 34, style: { display: 'block' } }) : this.icon('gauge', 18),
+      tileBg: c.id === 'recall' ? 'transparent' : c.tileBg, tileRing: 'none', icon: this.icon(c.id === 'recall' ? 'commit' : 'gauge', 22), openModal: (e) => this.openModal('case', c.id, e), hoverOn: () => this.setHover(c.id), hoverOff: () => this.setHover(null), expBg: S.hover === c.id ? 'var(--acc)' : '#E8EDF5', expFg: S.hover === c.id ? '#FFFFFF' : 'var(--acc)', vizTf: S.hover === c.id ? 'scale(1.035)' : 'scale(1)' }));
     const faqs = this.loc(C.FAQS).map((f, i) => { const open = S.faqOpen === i; return Object.assign(f, { open, toggle: () => this.setState({ faqOpen: open ? -1 : i }), rows: open ? '1fr' : '0fr', rot: open ? 'rotate(45deg)' : 'rotate(0deg)', iconBg: open ? '#0A2540' : '#F0F3FA', iconFg: open ? '#FFFFFF' : '#0A2540', border: i === 0 ? '0' : '1px solid rgba(10,37,64,.08)' }); });
     const steps = this.loc(C.STEPS);
     const stats = this.loc(C.STATS).map((s) => Object.assign(s, { display: s.prefix + s.to + s.suffix }));
@@ -612,7 +675,7 @@ class Component extends DCLogic {
       { icon: this.icon('file', 18), title: t.menus.resLlms, text: t.menus.resLlmsText, soon: false, href: 'https://mccain-digital.com/llms.txt', target: '_blank' },
       { icon: this.icon('layout', 18), title: (S.lang === 'de' ? 'Styleguide' : 'Style guide'), text: (S.lang === 'de' ? 'Farben, Typografie, Komponenten und Bewegung' : 'Colours, type, components and motion'), soon: false, href: Component.PAGES.styleguide, target: '_self' },
       { icon: this.icon('layers', 18), title: t.menus.resStack, text: t.menus.resStackText, soon: false, href: '/#stack', target: '_self', onClick: this.goHandler('stack') },
-      { icon: React.createElement('img', { src: '/brand/mccain-recall-logo-128.webp', alt: '', width: 24, height: 24, style: { display: 'block', borderRadius: '6px' } }), iconBg: '#FFFFFF', iconRing: 'inset 0 0 0 1px rgba(10,37,64,.12)', title: 'md-recall', text: (S.lang === 'de' ? 'Unser Projektgedächtnis – zum Download' : 'Our project memory — free download'), soon: false, href: Component.PAGES.recall, target: '_self' },
+      { icon: React.createElement('img', { src: '/brand/md-recall-mark.svg', alt: '', width: 36, height: 36, style: { display: 'block' } }), iconBg: 'transparent', iconRing: 'none', title: 'md-recall', text: (S.lang === 'de' ? 'Unser Projektgedächtnis – zum Download' : 'Our project memory — free download'), soon: false, href: Component.PAGES.recall, target: '_self' },
       { icon: this.icon('gauge', 18), title: t.nav.pricing, text: (S.lang === 'de' ? 'Rechner und echte Größenordnungen' : 'Calculator and honest ranges'), soon: false, href: Component.PAGES.pricing, target: '_self' },
       { icon: this.icon('shield', 18), title: (S.lang === 'de' ? 'WordPress oder handgeschrieben' : 'WordPress or hand-written'), text: (S.lang === 'de' ? 'Wann ein Baukasten reicht – und wann nicht' : 'When a page builder is enough — and when it is not'), soon: false, href: Component.PAGES.cmpWp, target: '_self' },
       { icon: this.icon('shield', 18), title: (S.lang === 'de' ? 'ChatGPT oder eigenes RAG' : 'ChatGPT or your own RAG'), text: (S.lang === 'de' ? 'Welcher Weg zu welcher Aufgabe passt' : 'Which route fits which task'), soon: false, href: Component.PAGES.cmpRag, target: '_self' },
@@ -621,23 +684,29 @@ class Component extends DCLogic {
     ];
     const priceSteps = steps.slice(0, 3).map((s) => ({ n: s.n, time: s.time, title: s.title }));
     const ext = (href) => ({ href, target: '_blank' });
+    const swItems = this.loc(Component.SOFTWARE).map((p) => { const here = Component.PAGES[p.id] === Component.SELF; return Object.assign(p, { href: Component.PAGES[p.id], current: here ? 'page' : undefined, isHere: here, curBg: here ? '#E8EDF5' : 'transparent', statusFg: p.live ? '#1F8A5B' : '#5A6880', statusBg: p.live ? 'rgba(79,207,140,.16)' : 'rgba(10,37,64,.06)', mark: p.id === 'recall' ? React.createElement('img', { src: '/brand/md-recall-mark.svg', alt: '', width: 36, height: 36, style: { display: 'block' } }) : this.icon(p.icon, 18), tileBg: p.id === 'recall' ? 'transparent' : '#0A2540' }); });
+    const sw360 = Object.assign(this.loc(Component.SOFTWARE_SOON), { icon: this.icon('globe', 18) });
+    const loginItems = this.loc(Component.LOGIN).map((l) => Object.assign(l, { icon: this.icon(l.icon, 16) }));
     const footerCols = [
       { title: t.footer.services, links: [{ label: (S.lang === 'de' ? 'Überblick' : 'Overview'), href: Component.PAGES.hub, target: '_self' }].concat(services.map((s) => ({ label: s.title, href: Component.PAGES[s.id], target: '_self' }))) },
       { title: t.footer.work, links: [{ label: 'md-recall', href: Component.PAGES.recall, target: '_self' }, { label: t.nav.pricing, href: Component.PAGES.pricing, target: '_self' }, { label: cases[1] ? cases[1].title : 'mccain-digital.com', href: '/#work', target: '_self', onClick: (e) => { e.preventDefault(); this.openModal('case', 'site'); } }] },
+      { title: t.footer.software, links: swItems.map((p) => ({ label: p.title, href: p.href, target: '_self' })).concat(loginItems.map((l) => ({ label: t.footer.loginAt + ' ' + l.name, href: l.href, target: '_self' }))) },
       { title: t.footer.studio, links: [{ label: t.footer.team, href: Component.PAGES.studio, target: '_self' }, { label: t.footer.news, href: '/news/', target: '_self' }, { label: t.footer.process, href: '/#process', target: '_self', onClick: this.goHandler('process') }, { label: t.menus.configShort, href: Component.PAGES.pricing + '#rechner', target: '_self' }, { label: t.footer.faq, href: '#faq', target: '_self', onClick: this.goHandler('faq') }, { label: t.footer.contact, href: Component.PAGES.contact, target: '_self' }] },
       { title: t.footer.resources, links: [{ label: t.menus.configShort, href: Component.PAGES.pricing + '#rechner', target: '_self' }, { label: 'md-recall', href: Component.PAGES.recall, target: '_self' },  Object.assign({ label: t.footer.llms }, ext('https://mccain-digital.com/llms.txt')), { label: t.footer.stack, href: '/#stack', target: '_self', onClick: this.goHandler('stack') }, { label: (S.lang === 'de' ? 'Styleguide' : 'Style guide'), href: Component.PAGES.styleguide, target: '_self' }, { label: (S.lang === 'de' ? 'Marke' : 'Brand'), href: '/marke/', target: '_self' }, { label: (S.lang === 'de' ? 'WordPress oder handgeschrieben' : 'WordPress or hand-written'), href: Component.PAGES.cmpWp, target: '_self' }, { label: (S.lang === 'de' ? 'ChatGPT oder eigenes RAG' : 'ChatGPT or your own RAG'), href: Component.PAGES.cmpRag, target: '_self' }, { label: 'Next.js', href: Component.PAGES.techNext, target: '_self' }, { label: 'MCP-Server', href: Component.PAGES.techMcp, target: '_self' }, { label: 'RAG', href: Component.PAGES.techRag, target: '_self' }, { label: 'ERP-Integration', href: Component.PAGES.techErp, target: '_self' }] },
       { title: t.footer.legal, links: [{ label: t.footer.imprint, href: Component.PAGES.legal + '#impressum', target: '_self' }, { label: t.footer.privacy, href: Component.PAGES.legal + '#datenschutz', target: '_self' }, { label: t.footer.terms, href: Component.PAGES.legal + '#agb', target: '_self' }, { label: t.footer.withdrawal, href: Component.PAGES.legal + '#widerruf', target: '_self' }] }
     ];
     resItems.forEach((r) => { if (!r.iconBg) { r.iconBg = RIB; r.iconRing = RIR; } });
-    const footerActive = (() => { try { return decodeURIComponent((window.location.pathname.split('/').pop() || '')); } catch (e) { return ''; } })();
-    footerCols.forEach((c) => c.links.forEach((l) => { const h = decodeURIComponent(String(l.href || '')).split('#')[0]; const on = !!h && !!footerActive && h === footerActive;
-      l.current = on ? 'page' : undefined; l.fg = on ? '#FFFFFF' : '#C8D4E8'; l.fw = on ? '600' : '400'; l.dotOp = on ? '1' : '0'; }));
+    const footerActive = Component.SELF;
+    footerCols.forEach((c) => c.links.forEach((l) => { const h = String(l.href || ''); const on = h.indexOf('#') < 0 && h === footerActive;
+      l.current = on ? 'page' : undefined; l.fg = on ? '#FFFFFF' : '#C8D4E8'; l.fw = on ? '600' : '400'; l.dotOp = on ? '1' : '0'; l.on = on; }));
     const mobileGroups = [
       { title: t.nav.services, links: [{ label: (S.lang === 'de' ? 'Überblick' : 'Overview'), onClick: () => { window.location.href = Component.PAGES.hub; } }].concat(services.map((s) => ({ label: s.title, onClick: () => { window.location.href = Component.PAGES[s.id]; } }))) },
       { title: t.nav.work, links: cases.map((c) => ({ label: c.title, onClick: c.openModal })) },
       { title: t.nav.studio, links: [{ label: t.footer.team, onClick: () => { window.location.href = Component.PAGES.studio; } }, { label: t.footer.faq, onClick: this.goHandler('faq') }, { label: t.footer.contact, onClick: () => { window.location.href = Component.PAGES.contact; } }, { label: t.footer.imprint, onClick: () => { window.location.href = Component.PAGES.legal; } }] },
       { title: t.nav.process, links: steps.map((s) => ({ label: s.n + ' · ' + s.title, onClick: this.goHandler('process') })) },
       { title: t.nav.resources, links: resItems.map((r) => ({ label: r.title, onClick: r.onClick || (() => window.open(r.href, '_blank', 'noopener')) })) },
+      { title: t.nav.software, links: swItems.map((p) => ({ label: p.title, onClick: () => { window.location.href = p.href; } })) },
+      { title: t.nav.login, links: loginItems.map((l) => ({ label: l.name, onClick: () => { window.location.href = l.href; } })) },
       { title: t.nav.pricing, links: [{ label: t.menus.configurator, onClick: () => { window.location.href = Component.PAGES.pricing + '#rechner'; } }, { label: t.menus.pricingTitle, onClick: () => { window.location.href = Component.PAGES.pricing; } }, { label: t.menus.pricingCta, onClick: () => { window.location.href = Component.PAGES.contact; } }] }
     ];
     const emptyDeep = { stats: [], useCases: [], caps: [], steps: [], faqs: [], stack: [] };
@@ -647,10 +716,10 @@ class Component extends DCLogic {
         const s = services.find((v) => v.id === S.modal.id) || services[0];
         const raw = S.deep && S.deep[s.id] ? this.loc(S.deep[s.id]) : null;
         const deep = raw ? Object.assign({}, raw, { steps: raw.steps.map((st, i) => Object.assign({}, st, { n: i + 1 })) }) : null;
-        modal = Object.assign({}, s, { kicker: t.common.service + ' · ' + s.title, title: s.tileTitle, cta: t.common.cta, hasLink: false, link: '', linkLabel: '', stats: deep ? deep.stats : [], deep: deep || emptyDeep, hasDeep: !!deep, vAi: s.id === 'ai', vApps: s.id === 'apps', vScores: s.id === 'web', vSoftware: s.id === 'software', vRecall: false });
+        const mp = Component.PAGES[s.id] || ''; modal = Object.assign({}, s, { isCaseLike: false, isAi: s.id === 'ai', isApps: s.id === 'apps', isWeb: s.id === 'web', isSoftware: s.id === 'software', hasPage: !!mp, page: mp, pageTitle: (t.common.moreOn || 'Mehr zu') + ' ' + s.title, pageText: s.short, pageCta: t.common.toPage || (this.state.lang === 'en' ? 'Open the page' : 'Zur Seite'), kicker: t.common.service + ' · ' + s.title, title: s.tileTitle, cta: t.common.cta, hasLink: false, link: '', linkLabel: '', stats: deep ? deep.stats : [], deep: deep || emptyDeep, hasDeep: !!deep, vAi: s.id === 'ai', vApps: s.id === 'apps', vScores: s.id === 'web', vSoftware: s.id === 'software', vRecall: false });
       } else {
         const c = cases.find((v) => v.id === S.modal.id) || cases[0];
-        modal = Object.assign({}, c, { kicker: t.common.caseLabel + ' · ' + c.title, title: c.tileTitle, cta: t.common.cta, hasLink: true, linkLabel: c.id === 'recall' ? t.common.visit : t.common.visitSite, stats: c.stats || [], deep: emptyDeep, hasDeep: false, vAi: false, vApps: false, vScores: c.id === 'site', vSoftware: false, vRecall: c.id === 'recall' });
+        modal = Object.assign({}, c, { isCaseLike: true, isAi: false, isApps: false, isWeb: false, isSoftware: false, hasPage: false, page: '', pageTitle: '', pageText: '', pageCta: '', kicker: t.common.caseLabel + ' · ' + c.title, title: c.tileTitle, cta: t.common.cta, hasLink: true, linkLabel: c.id === 'recall' ? t.common.visit : t.common.visitSite, stats: c.stats || [], deep: emptyDeep, hasDeep: false, vAi: false, vApps: false, vScores: c.id === 'site', vSoftware: false, vRecall: c.id === 'recall' });
       }
     }
     const mobile = S.vw < 960, pad = mobile ? 0 : Math.min(40, Math.max(12, S.vw * 0.03)), fw = Math.min(1180, S.vw - 2 * pad), fx = (S.vw - fw) / 2, fh = Math.max(420, (typeof window !== 'undefined' ? window.innerHeight : 800) * 0.92);
@@ -673,14 +742,15 @@ class Component extends DCLogic {
       dockBorder: S.dockGlow ? '2px solid transparent' : '1px solid rgba(255,255,255,.1)',
       dockShadow: S.dockGlow ? '0 0 36px -6px rgba(192,92,255,.55), 0 40px 100px -30px rgba(0,0,0,.7)' : '0 40px 100px -30px rgba(0,0,0,.7)',
       configHref: Component.PAGES.pricing + '#rechner',
-      showSearchLabel: S.vw >= 520,
+      showSearchLabel: navFull ? navWide : S.vw >= 520, navFull, navCompact: !navFull, navGap: navWide ? '4px' : '2px', navItemPad: navWide ? '8px 12px' : '8px 8px', navMl: navWide ? '8px' : '0px',
+      swItems, sw360, loginItems, loginIcon: this.icon('user', 17), loginOpen: () => this.openMenu('login'), loginToggle: () => this.toggleMenu('login'), loginBg: S.menu === 'login' ? '#F6F9FC' : '#FFFFFF',
       cfgHint: this.loc(Component.CFGHINT),
-      t, isDesktop, isMobile: !isDesktop, isHeroA: heroA, isHeroB: !heroA, logosReady: true, showLangInNav: !isDesktop || S.vw >= 1080, showGhost: isDesktop && S.vw >= 1180,
+      t, isDesktop, isMobile: !isDesktop, isHeroA: heroA, isHeroB: !heroA, logosReady: true, showLangInNav: !navFull || S.vw >= 1280, showGhost: isDesktop && S.vw >= 1180,
       dockRight: isDesktop ? '20px' : '12px', dockLeft: isDesktop ? 'auto' : (S.dockOpen ? '12px' : 'auto'), dockBottom: isDesktop ? '20px' : 'max(12px, env(safe-area-inset-bottom))', dockW: isDesktop ? 'min(380px, calc(100vw - 40px))' : '100%',
       tileGap: isDesktop ? '20px' : '14px', gridTop: isDesktop ? '52px' : '32px', tilePad: isDesktop ? '26px' : '20px', tileMinH: isDesktop ? '560px' : '460px', caseMinH: isDesktop ? '540px' : '440px',
       modalPad: isDesktop ? 'clamp(12px,3vw,40px) clamp(12px,3vw,40px) clamp(40px,6vw,80px)' : '56px 0 0', modalMargin: isDesktop ? '0 auto' : '0 auto -1px', modalMinH: isDesktop ? '0' : 'calc(100vh - 56px)', modalRadius: isDesktop ? '20px' : '20px 20px 0 0', modalInner: isDesktop ? 'clamp(28px,4vw,56px) clamp(22px,4.5vw,64px) clamp(32px,4vw,56px)' : '16px 20px 40px', closePos: isDesktop ? 'absolute' : 'sticky', closeMr: isDesktop ? '0' : '12px', closeMb: isDesktop ? '0' : '-44px', closeTop: isDesktop ? '22px' : '10px', stageH: isDesktop ? 'clamp(300px, 42vw, 500px)' : '300px', modalRise: S.modalIn ? 'none' : 'translateY(18px)',
       heroCols: isDesktop ? '1.05fr .95fr' : 'minmax(0, 1fr)', heroBCols: isDesktop ? '1.15fr .85fr' : 'minmax(0, 1fr)', aiCols: isDesktop ? '.9fr 1.1fr' : 'minmax(0, 1fr)', processCols: isDesktop ? '.8fr 1.2fr' : 'minmax(0, 1fr)', faqCols: isDesktop ? '.8fr 1.2fr' : 'minmax(0, 1fr)', contactCols: isDesktop ? '1fr 1fr' : 'minmax(0, 1fr)', stickyPos: isDesktop ? 'sticky' : 'static',
-      navShadow: S.scrolled ? '0 1px 0 #E3E8EE, 0 10px 30px -18px rgba(10,37,64,.18)' : '0 1px 0 #E3E8EE', caretTop: 69, panelTop: 76, indLeft: S.indLeft, indW: S.indW, indOp: menuOpen ? 1 : 0, indBg: 'rgba(10,37,64,.06)', brandsLoop: C.BRANDS.concat(C.BRANDS),
+      navShadow: S.scrolled ? '0 1px 0 #E3E8EE, 0 10px 30px -18px rgba(10,37,64,.18)' : '0 1px 0 #E3E8EE', caretTop: 69, panelTop: 76, indLeft: S.indLeft, indW: S.indW, indOp: menuOpen && S.menu !== 'login' ? 1 : 0, indBg: 'rgba(10,37,64,.06)', brandsLoop: C.BRANDS.concat(C.BRANDS),
       navFg, markBg: onGradient ? '#FFFFFF' : '#0A2540', markFg: onGradient ? '#0A2540' : '#FFFFFF', toggleBorder: onGradient ? 'rgba(255,255,255,.35)' : 'rgba(10,37,64,.14)',
       ctaBg: onGradient ? '#FFFFFF' : 'var(--acc)', ctaFg: onGradient ? '#0A2540' : '#FFFFFF',
       deBg: de ? (onGradient ? '#FFFFFF' : '#0A2540') : 'transparent', deFg: de ? (onGradient ? '#0A2540' : '#FFFFFF') : navFg, enBg: !de ? (onGradient ? '#FFFFFF' : '#0A2540') : 'transparent', enFg: !de ? (onGradient ? '#0A2540' : '#FFFFFF') : navFg,
@@ -695,7 +765,7 @@ class Component extends DCLogic {
       askFg: S.aiMode === 'ask' ? '#FFFFFF' : '#9DB1D2', askLine: S.aiMode === 'ask' ? 'var(--acc)' : 'transparent', briefFg: S.aiMode === 'brief' ? '#FFFFFF' : '#9DB1D2', briefLine: S.aiMode === 'brief' ? 'var(--acc)' : 'transparent',
       setModeAsk: () => this.setState({ aiMode: 'ask' }), setModeBrief: () => this.setState({ aiMode: 'brief' }), aiThinking: S.aiPhase === 'thinking', aiTypingShown: S.aiPhase === 'typing', aiSubmit: this.aiSubmit,
       formIdle: !S.formSent, formSent: S.formSent, formSubmit: this.formSubmit,
-      streamPoints: (this._pts = x.points.concat(x.points).map(ptStyle)), heroLine: mkLine({ color: '#0A1F44', backgroundImage: 'linear-gradient(92deg,#0099F5 0%,#C05CFF 52%,#FF5A8C 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', paddingRight: '.04em' }), heroLineB: mkLine({ color: 'var(--acc)' }), showStatus: isDesktop && S.vw >= 1180, pillBg: onGradient ? 'rgba(255,255,255,.14)' : '#F6F9FC', progOp: S.scrolled ? 1 : 0, menuGradA: mg.gradA, menuGradB: mg.gradB, dl, integ, scale, bigStats, bars, opsRows, voices, pricing, fall: x.fall, fallCols: isDesktop ? '1.1fr .9fr' : 'minmax(0, 1fr)', openRecall: (e) => this.openModal('case', 'recall', e), heroSubmit: this.heroSubmit, heroCta2: S.lang === 'de' ? 'So arbeitet die KI-Konsole' : 'How the AI console works', openDock: () => { if (this.state.aiVisible) { this.go('ai'); setTimeout(() => { if (this.aiInput) this.aiInput.focus(); }, 500); } else this.setState({ dockOpen: true }, () => setTimeout(() => { if (this.dockInput) this.dockInput.focus(); }, 60)); }, heroInputRef: (el) => { this.heroInput = el; }, heroAskHint: S.lang === 'de' ? 'Fragen Sie die Seite – z. B. „Was kostet eine Web-App?“' : 'Ask the site — e.g. “What does a web app cost?”', integNodes, integSys, sq, diagOverflow: S.vw < 760 ? 'auto' : 'visible', modalCols: isDesktop ? '1.1fr .9fr' : 'minmax(0, 1fr)', modalAsk: this.modalAsk, focusAi: () => { if (this.aiInput) this.aiInput.focus(); }, openAiModal: () => this.openModal('service', 'ai'), openSoftwareModal: () => this.openModal('service', 'software'), modalOpen: !!S.modal, modalOp: S.modalIn ? 1 : 0, modalTf, modal, closeModal: this.closeModal, stop: this.stop, modalCta: this.modalCta
+      streamPoints: (this._pts = x.points.concat(x.points).map(ptStyle)), heroLine: mkLine({ color: '#0A1F44', backgroundImage: 'linear-gradient(92deg,#0099F5 0%,#C05CFF 52%,#FF5A8C 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', paddingRight: '.04em' }), heroLineB: mkLine({ color: 'var(--acc)' }), showStatus: isDesktop && S.vw >= 1180, pillBg: onGradient ? 'rgba(255,255,255,.14)' : '#F6F9FC', progOp: S.scrolled ? 1 : 0, menuGradA: mg.gradA, menuGradB: mg.gradB, dl, integ, scale, bigStats, bars, opsRows, voices, pricing, fall: x.fall, fallCols: isDesktop ? '1.1fr .9fr' : 'minmax(0, 1fr)', openRecall: (e) => this.openModal('case', 'recall', e), heroSubmit: this.heroSubmit, heroCta2: S.lang === 'de' ? 'So arbeitet die KI-Konsole' : 'How the AI console works', openDock: () => { if (this.state.aiVisible) { this.go('ai'); setTimeout(() => { if (this.aiInput) this.aiInput.focus(); }, 500); } else this.setState({ dockOpen: true }, () => setTimeout(() => { if (this.dockInput) this.dockInput.focus(); }, 60)); }, heroInputRef: (el) => { this.heroInput = el; }, heroAskHint: S.lang === 'de' ? 'Fragen Sie die Seite – z. B. „Was kostet eine Web-App?“' : 'Ask the site — e.g. “What does a web app cost?”', integNodes, integSys, sq, diagOverflow: S.vw < 760 ? 'auto' : 'visible', modalCols: isDesktop ? '1.1fr .9fr' : 'minmax(0, 1fr)', modalAsk: this.modalAsk, focusAi: () => { if (this.aiInput) this.aiInput.focus(); }, openAiModal: () => this.openModal('service', 'ai'), openSoftwareModal: () => this.openModal('service', 'software'), modalOpen: !!S.modal, modalOp: S.modalIn ? 1 : 0, modalTf, modal, closeModal: this.closeModal, stop: this.stop, modalCta: this.modalCta, mx: this.loc(Component.MODALX)
     };
   }
 

@@ -7,7 +7,7 @@ Sprache: de
 
 Eigenes Produkt · Download v0.9 · beta
 
-![md-recall](https://mccain-digital.com/brand/mccain-recall-logo-128.webp)
+![md-recall](https://mccain-digital.com/brand/md-recall-mark.svg)
 
 Projektgedächtnis, das am Commit hängt.
 

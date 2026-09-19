@@ -24,8 +24,9 @@
  *
  * HOW - and why React still runs, but only here
  * The markup is not rewritten by hand. Each export component is rendered with
- * react-dom/server, like tools/prerender.mjs does, but 8 times: the logic lays
- * out by `vw` in JS (breakpoints 520, 600, 620, 760, 960, 1080, 1180), and the
+ * react-dom/server, like tools/prerender.mjs does, but 10 times: the logic lays
+ * out by `vw` in JS (breakpoints 520, 600, 620, 760, 960, 1080, 1180, 1280,
+ * 1400 - a new threshold in an artboard needs its entry in mergeInTab), and the
  * built pages only carry the vw=1280 render - phones got theirs from a client
  * re-render. The renders are merged node by node. Identity is the template node
  * id (data-dc-tpl, kept in the output so the runtime can find every node
@@ -339,8 +340,13 @@ function readPage(page) {
 /* Runs in the staging tab. Renders the component at every sample width and
  * merges the renders into one markup with media queries. */
 function mergeInTab([deep]) {
-  const W = [400, 560, 610, 700, 860, 1000, 1120, 1280];
-  const L = [0, 520, 600, 620, 760, 960, 1080, 1180];
+  /* 1280 and 1400 since 19.9.2026: the header has tiers there (DE/EN in the
+   * bar from 1280, search label and wider items from 1400). A threshold the
+   * list does not know is quantised to the sample of its tier - the built
+   * header showed the 1280 render at every width from 1180 up. 1280 keeps its
+   * old sample, so the typical desktop render is the one it always was. */
+  const W = [400, 560, 610, 700, 860, 1000, 1120, 1200, 1280, 1440];
+  const L = [0, 520, 600, 620, 760, 960, 1080, 1180, 1280, 1400];
   const NW = W.length;
   const warns = [];
   const warn = (m) => warns.length < 60 && !warns.includes(m) && warns.push(m);
@@ -386,7 +392,7 @@ function mergeInTab([deep]) {
     window.__v5vw = W[b];
     renders.push(window.ReactDOMServer.renderToString(window.React.createElement(Root, props)));
   }
-  if (renders[0] === renders[NW - 1]) warn("render at 400 equals render at 1280 - the vw patch did not take");
+  if (renders[0] === renders[NW - 1]) warn(`render at ${W[0]} equals render at ${W[NW - 1]} - the vw patch did not take`);
 
   const keyed = (dom) => {
     const out = [], occ = new Map();
@@ -676,6 +682,14 @@ function assemble(P, merged, heights) {
       en: "One click opens the Tools: how this page is really built, the code that moves it, the timings your browser has just measured, and how Google and language models read it. Nothing is stored; the only thing sent is what you ask in the “Ask” tab.",
     },
     cta: { de: "Tools öffnen", en: "Open the Tools" },
+    /* The mini inspector (owner 19.9.2026, "zu langweilig, geht beim Scrollen
+     * unter" -> variant A: navy plate with a glimpse of what the click opens).
+     * The rows are the Tools' three real views, not invented measurements. */
+    rows: [
+      [{ de: "Röntgen", en: "X-ray" }, { de: "Aufbau · Code · Messwerte", en: "structure · code · metrics" }],
+      [{ de: "Google & KI", en: "Google & AI" }, { de: "wie Maschinen lesen", en: "how machines read it" }],
+      [{ de: "Fragen", en: "Ask" }, { de: "Claude, nur mit Seitenfakten", en: "Claude, page facts only" }],
+    ],
   };
   const both = (v) => typeof v === "string" ? v : `<span data-lang="de">${v.de}</span><span data-lang="en">${v.en}</span>`;
   const work = html.match(/<section [^>]*id="work"[^>]*>/);
@@ -684,19 +698,29 @@ function assemble(P, merged, heights) {
     if (!open) throw new Error(`v5build: ${route}: no section#konfig-band to clone for the workshop band`);
     const end = elementEnd(html, open.index);
     let band = html.slice(open.index, end);
-    const spans = [...band.matchAll(/<span class="sc-interp">[^<]*<\/span>/g)];
-    if (spans.length !== 4) throw new Error(`v5build: ${route}: the Konfigurator band has ${spans.length} text spans, expected 4 (eyebrow, title, text, cta)`);
-    const texts = [WERKSTATT_BAND.eyebrow, WERKSTATT_BAND.title, WERKSTATT_BAND.text, WERKSTATT_BAND.cta].map(both);
-    let k = 0;
-    band = band.replace(/<span class="sc-interp">[^<]*<\/span>/g, () => `<span class="sc-interp">${texts[k++]}</span>`);
     band = once(band, 'id="konfig-band"', `id="${WERKSTATT_BAND.id}" data-v5-static`);
     band = once(band, 'data-screen-label="Konfigurator-Hinweis"', `data-screen-label="${WERKSTATT_BAND.label}"`);
     band = band.replace(/ data-dc-tpl="\d+"/g, "");
-    const cta = band.match(/<a href="[^"]*" data-px class="([^"]*)">/);
-    if (!cta) throw new Error(`v5build: ${route}: the Konfigurator band's CTA link is not where it was`);
-    band = once(band, cta[0], `<button type="button" data-v5-dev-open data-px class="${cta[1]}">`);
-    if (band.split("</a>").length !== 2) throw new Error(`v5build: ${route}: expected exactly one </a> in the Konfigurator band`);
-    band = band.replace("</a>", "</button>");
+    /* The section and its container stay the Konfigurator band's (same width
+     * and rhythm as the page); the grey box inside becomes the navy plate.
+     * data-avoid keeps the stream flowing around it, data-reveal its entrance. */
+    const box = band.match(/<div data-reveal data-avoid class="[^"]*">/);
+    if (!box) throw new Error(`v5build: ${route}: the Konfigurator band's box (data-reveal data-avoid) is not where it was`);
+    const B = WERKSTATT_BAND;
+    const rows = B.rows.map(([k, v]) =>
+      `<div style="display:flex; justify-content:space-between; gap:12px; padding:9px 12px; border-radius:8px; background:color-mix(in srgb, var(--mc-white) 6%, transparent); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--mc-dark-text-2) 22%, transparent)">` +
+      `<span style="color:var(--mc-dark-accent)">${both(k)}</span><span style="color:var(--mc-dark-text); text-align:right">${both(v)}</span></div>`).join("");
+    const plate = resolveColors(
+      `<div data-reveal data-avoid style="position:relative; overflow:hidden; border-radius:18px; background:var(--mc-plate); color:var(--mc-dark-text); padding:clamp(24px,3.4vw,40px); display:flex; flex-wrap:wrap; gap:clamp(20px,2.6vw,32px); align-items:center">` +
+      `<div aria-hidden="true" style="position:absolute; left:0; right:0; top:0; height:3px; background:var(--mc-stream)"></div>` +
+      `<div style="flex:1 1 320px; min-width:0">` +
+      `<div style="font-size:13px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--mc-dark-accent)">${both(B.eyebrow)}</div>` +
+      `<div style="margin-top:10px; font-size:clamp(21px,1.9vw,27px); font-weight:700; line-height:1.2; letter-spacing:-.02em; color:var(--mc-white)">${both(B.title)}</div>` +
+      `<p style="margin:12px 0 0; max-width:58ch; font-size:15px; line-height:1.6; color:var(--mc-dark-text-2)">${both(B.text)}</p></div>` +
+      `<div aria-hidden="true" style="flex:0 1 300px; min-width:0; display:flex; flex-direction:column; gap:8px; font-family:'JetBrains Mono',monospace; font-size:12px">${rows}</div>` +
+      `<button type="button" data-v5-dev-open data-px style="flex:none; display:inline-flex; align-items:center; gap:6px; height:46px; padding:0 14px 0 20px; border:0; border-radius:10px; background:var(--mc-dark-accent); color:var(--mc-dark-accent-text); font-family:inherit; font-size:15px; font-weight:700; cursor:pointer">` +
+      `${both(B.cta)}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="/brand/mccain-icons.svg#chevron-right"></use></svg></button></div>`);
+    band = band.slice(0, box.index) + plate + band.slice(elementEnd(band, box.index));
     const workEnd = elementEnd(html, work.index);
     html = html.slice(0, workEnd) + "\n" + band + html.slice(workEnd);
     notes.push("workshop band");

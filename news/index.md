@@ -14,3 +14,11 @@ Produkt-Updates zu md-recall, Notizen aus der Technik und Nachrichten aus dem St
 ## Weitere Beiträge
 
 Technik 2. September 2026 7 Min Warum der Index im Repository liegt Ein Gedächtnis, das neben dem Code wohnt, überlebt Maschinenwechsel, Branches und Reviews. Wie der .mind-Ordner aufgebaut ist und was bewusst draußen bleibt. Studio 18. August 2026 3 Min Zwei Personen, ein Kalender Wir nehmen ab Herbst nur noch zwei Projekte gleichzeitig an. Was das für Anfragen bedeutet – und warum es die Arbeit besser macht.
+
+In Vorbereitung
+
+Produkt demnächst
+
+### Nächster Beitrag folgt
+
+Hier erscheint der nächste Beitrag.
