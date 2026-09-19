@@ -6,4 +6,4 @@ Weiße Kachel mit Hairline-Ring, Titel + Expand-Icon, Absatz und Bühne mit lang
 </Tile>
 ```
 
-Farbsets aus der Website: ai [#FF5A8C,#FFB46B,#C05CFF] · apps [#6E7BFF,#5FC3FF,#C05CFF] · web [#FFB46B,#FF5A8C,#FF8A5B] · software [#C05CFF,#6E7BFF,#FF5A8C].
+Farbsets aus der Website: ai [#FF5A8C,#FFB46B,#C05CFF] · apps [#0A1F44,#5FC3FF,#C05CFF] · web [#FFB46B,#FF5A8C,#FF8A5B] · software [#C05CFF,#5FC3FF,#FF5A8C].

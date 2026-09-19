@@ -42,6 +42,7 @@ import { fileURLToPath } from "node:url";
 import { chromium } from "playwright-core";
 import { findChrome } from "./browser.mjs";
 import { PAGES } from "./pages.mjs";
+import { checkOutputs, checkSources } from "./color_guard.mjs";
 
 const SITE = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const CONFIG = JSON.parse(fs.readFileSync(path.join(SITE, "site.config.json"), "utf8"));
@@ -80,7 +81,8 @@ const LIVE_PAGES = [
   "/marke/",
 ];
 
-/* The 404 is the only hand-written page left, and the only one that must work
+/* The 404 is a hand-written page (its source is mccain-design-system/static/
+ * since 19.9.2026, the build writes it), and the only one that must work
  * when the runtime does not. `indexable: false` exempts it from the
  * description/canonical checks: it is not a page that can be canonical to
  * anything, and demanding that of it would be a failing test asking for the
@@ -105,6 +107,14 @@ const fail = (msg) => {
   failures++;
   console.log("      " + msg);
 };
+
+/* A colour is written in ONE place (19.9.2026). The build refuses a literal
+ * already; this repeats it before a push, for a hand edit after the build. */
+{
+  const found = [...checkSources(), ...checkOutputs()];
+  console.log(`${ok(!found.length)} colours: every source writes tokens, every shipped file carries resolved values`);
+  for (const f of found.slice(0, 12)) fail(f);
+}
 
 const executablePath = findChrome();
 if (!executablePath) {
@@ -272,6 +282,18 @@ for (const p of LIVE_PAGES) {
       missingSample: v5 ? v5.stats.missing.slice(0, 3) : [],
       mark: performance.getEntriesByName("v5:mount").length,
       alternate: document.querySelector('link[rel="alternate"][type="text/markdown"]')?.getAttribute("href") || "",
+      /* The same icon twice, side by side: the runtime inserted element
+       * content next to the build's copy instead of replacing it - every icon
+       * tile of /leistungen/ki-automatisierung/ showed this, live, until
+       * 19.9.2026 (bindText adopted nothing for a list still empty at bind). */
+      doubled: [...document.querySelectorAll("#dc-root *")].filter((el) => {
+        const k = el.children;
+        for (let i = 1; i < k.length; i++) {
+          const a = k[i - 1];
+          if ((a.tagName === "svg" || a.tagName === "IMG") && !a.hasAttribute("data-dc-tpl") && a.outerHTML === k[i].outerHTML) return true;
+        }
+        return false;
+      }).length,
     };
   });
 
@@ -313,6 +335,7 @@ for (const p of LIVE_PAGES) {
   console.log(`    ${ok(booted && boot.mounted)} window.__v5 mounted, v5:mount seen (${boot.mark} mark(s))`);
   console.log(`    ${ok(boot.adopted > 0 && boot.missing === 0)} the binder adopted ${boot.adopted} template node(s), ${boot.missing} missing`);
   console.log(`    ${ok(boot.scHosts === 1)} one copy of the page (${boot.scHosts})`);
+  console.log(`    ${ok(!boot.doubled)} no icon rendered twice (${boot.doubled})`);
   console.log(`    ${ok(boot.hasTemplate && boot.templateInert)} template delivered inert`);
   console.log(`    ${ok(!boot.xdc)} no live <x-dc> subtree in the DOM`);
   console.log(`    ${ok(!boot.hasReact)} no window.React`);
@@ -430,6 +453,7 @@ for (const p of LIVE_PAGES) {
   if (boot.mounted && !boot.adopted) fail(`${p}: window.__v5.stats.adopted is 0 - the binder found nothing to bind to`);
   if (boot.missing > 0) fail(`${p}: ${boot.missing} template node(s) the binder expected but did not find in the DOM (e.g. ${boot.missingSample.join(", ")})`);
   if (boot.scHosts !== 1) fail(`${p}: ${boot.scHosts} copies of the page's root in #dc-root, expected 1`);
+  if (boot.doubled) fail(`${p}: ${boot.doubled} element(s) show the same icon twice side by side - see bindText() in tools/runtime.js`);
   if (!boot.hasTemplate) fail(`${p}: no #dc-template - the build stopped shipping the template`);
   if (boot.hasTemplate && !boot.templateInert) fail(`${p}: #dc-template is not inert - its content is not sitting in .content the way a <template> should`);
   if (boot.xdc) fail(`${p}: a live <x-dc> element exists in the DOM - the template is being parsed as markup`);

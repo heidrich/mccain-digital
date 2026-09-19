@@ -14,7 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 body{margin:0;background:#F6F9FC;font-family:'Instrument Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-a{color:#635BFF}a:hover{color:#0A2540}
+a{color:#0A1F44}a:hover{color:#0A2540}
 @keyframes flowA{0%{transform:translate3d(-6%,-4%,0) scale(1.1)}50%{transform:translate3d(6%,5%,0) scale(1.25)}100%{transform:translate3d(-6%,-4%,0) scale(1.1)}}
 @keyframes flowB{0%{transform:translate3d(5%,4%,0) scale(1.2)}50%{transform:translate3d(-5%,-5%,0) scale(1.05)}100%{transform:translate3d(5%,4%,0) scale(1.2)}}
 @keyframes barIn{from{transform:scaleX(0)}to{transform:scaleX(1)}}
@@ -102,7 +102,7 @@ a{color:#635BFF}a:hover{color:#0A2540}
           <sc-for list="{{ lead.rows }}" as="r" hint-placeholder-count="4">
             <div style="display:grid; grid-template-columns:minmax(0,1fr) 62px 40px; align-items:center; gap:10px; padding:8px 14px; border-top:{{ r.border }}">
               <span style="font-family:'JetBrains Mono',monospace; font-size:11.5px; color:#0A2540; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ r.k }}</span>
-              <span aria-hidden="true" style="position:relative; height:4px; border-radius:2px; background:#E6E9F5"><span style="position:absolute; inset:0 auto 0 0; width:{{ r.w }}; border-radius:2px; background:#635BFF; transform-origin:0 50%; animation:{{ r.anim }}"></span></span>
+              <span aria-hidden="true" style="position:relative; height:4px; border-radius:2px; background:#E6E9F5"><span style="position:absolute; inset:0 auto 0 0; width:{{ r.w }}; border-radius:2px; background:#0A1F44; transform-origin:0 50%; animation:{{ r.anim }}"></span></span>
               <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#5A6880; text-align:right">{{ r.v }}</span>
             </div>
           </sc-for>
@@ -110,7 +110,7 @@ a{color:#635BFF}a:hover{color:#0A2540}
       </article>
       <div style="display:grid; gap:2px">
         <sc-for list="{{ rest }}" as="r" hint-placeholder-count="6">
-          <div style="display:grid; grid-template-columns:38px minmax(0,1fr) auto; align-items:baseline; gap:14px; padding:16px 18px; background:#fff; border-radius:12px; box-shadow:0 0 0 1px #E8ECF3; transition:box-shadow .18s, transform .18s" style-hover="box-shadow:0 0 0 1px rgba(99,91,255,.32); transform:translateX(3px)">
+          <div style="display:grid; grid-template-columns:38px minmax(0,1fr) auto; align-items:baseline; gap:14px; padding:16px 18px; background:#fff; border-radius:12px; box-shadow:0 0 0 1px #E8ECF3; transition:box-shadow .18s, transform .18s" style-hover="box-shadow:0 0 0 1px rgba(10,31,68,.32); transform:translateX(3px)">
             <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:{{ r.ink }}">{{ r.n }}</span>
             <span><span style="display:block; font-size:16px; font-weight:600; letter-spacing:-.015em; color:#0A2540">{{ r.title }}</span>
               <span style="display:block; font-size:13.5px; line-height:1.5; color:#5A6880; margin-top:3px">{{ r.line }}</span></span>
@@ -139,13 +139,13 @@ class Component extends DCLogic {
     const hits = this.rows([['master_agreement_v7.pdf', '0.91', '91%'], ['annex_b_2024-11.md', '0.84', '84%'], ['faq_internal.md', '0.78', '78%'], ['ticket_4471.json', '0.61', '61%']]);
     const items = [
       { n: '01', kicker: 'Retrieval', title: 'RAG over your own data', text: 'Answers grounded in your documents, code or database — with citations and a path that can say “I don’t know”.',
-        ink: '#635BFF', iconSoft: 'rgba(99,91,255,.12)', bar: 'linear-gradient(90deg,#635BFF,#C05CFF)', gradA: 'radial-gradient(60% 60% at 30% 40%, #FF5A8C, transparent 70%), radial-gradient(60% 60% at 70% 60%, #C05CFF, transparent 70%)',
+        ink: '#0A1F44', iconSoft: 'rgba(10,31,68,.12)', bar: 'linear-gradient(90deg,#0A1F44,#C05CFF)', gradA: 'radial-gradient(60% 60% at 30% 40%, #FF5A8C, transparent 70%), radial-gradient(60% 60% at 70% 60%, #C05CFF, transparent 70%)',
         iconHref: SP + 'layers', chips: ['pgvector', 'Qdrant', 're-ranking'], panelLabel: 'Passages retrieved', rows: hits.slice(0, 3) },
       { n: '02', kicker: 'Agents', title: 'Autonomous, multi-step agents', text: 'Workflows that plan, call your real APIs and check their own work — with guardrails and a human where it matters.',
         ink: '#C05CFF', iconSoft: 'rgba(192,92,255,.12)', bar: 'linear-gradient(90deg,#C05CFF,#5FC3FF)', gradA: 'radial-gradient(60% 60% at 35% 45%, #C05CFF, transparent 70%), radial-gradient(60% 60% at 70% 55%, #5FC3FF, transparent 70%)',
         iconHref: SP + 'zap', chips: ['plan()', 'tools.call()', 'verify()'], panelLabel: 'Run outcome', rows: this.rows([['steps completed', '6 / 6', '100%'], ['schema checks', 'pass', '100%'], ['human approvals', '1', '20%']]) },
       { n: '03', kicker: 'Integration', title: 'MCP tool servers', text: 'Model Context Protocol servers so Claude or ChatGPT can use your systems — read, search, create, with a log.',
-        ink: '#5FC3FF', iconSoft: 'rgba(95,195,255,.14)', bar: 'linear-gradient(90deg,#5FC3FF,#635BFF)', gradA: 'radial-gradient(60% 60% at 30% 50%, #5FC3FF, transparent 70%), radial-gradient(60% 60% at 75% 45%, #635BFF, transparent 70%)',
+        ink: '#5FC3FF', iconSoft: 'rgba(95,195,255,.14)', bar: 'linear-gradient(90deg,#5FC3FF,#0A1F44)', gradA: 'radial-gradient(60% 60% at 30% 50%, #5FC3FF, transparent 70%), radial-gradient(60% 60% at 75% 45%, #0A1F44, transparent 70%)',
         iconHref: SP + 'terminal', chips: ['auth', 'rate-limit', 'audit-log'], panelLabel: 'Tools exposed', rows: this.rows([['crm.createLead()', '200', '100%'], ['erp.getStock()', '200', '100%'], ['db.query()', '200', '86%']]) }
     ];
     const rest = [
@@ -154,7 +154,7 @@ class Component extends DCLogic {
       { n: '04', title: 'Document & email automation', line: 'Extraction into your system, inbox triage, replies drafted.', hint: '6.5 h / week', ink: '#FFB46B' },
       { n: '05', title: 'Local AI, on your hardware', line: 'Open weights in your data centre. No data egress.', hint: 'Llama 3.3 70B', ink: '#FF5A8C' },
       { n: '06', title: 'Image & asset generation', line: 'One run, every format your channels need.', hint: '1:1 · 4:5 · 16:9', ink: '#FF8FB8' },
-      { n: '07', title: 'Enablement for your team', line: 'Your people learn the tools we hand over.', hint: '2 workshops', ink: '#635BFF' }
+      { n: '07', title: 'Enablement for your team', line: 'Your people learn the tools we hand over.', hint: '2 workshops', ink: '#0A1F44' }
     ];
     const vw = this.state.vw;
     return { items, rest, triCols: vw >= 1160 ? 'repeat(3,minmax(0,1fr))' : (vw >= 720 ? 'repeat(2,minmax(0,1fr))' : '1fr'), lead: Object.assign({}, items[0], { rows: hits, panelLabel: 'Passages retrieved' }),

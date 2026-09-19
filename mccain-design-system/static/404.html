@@ -20,7 +20,7 @@
 <title>Seite nicht gefunden — McCain Digital</title>
 <meta name="description" content="Diese Seite gibt es nicht (mehr). Zurück zur Startseite von McCain Digital.">
 <meta name="robots" content="noindex, follow">
-<meta name="theme-color" content="#0A1F44">
+<meta name="theme-color" content="var(--mc-plate)">
 <link rel="icon" href="/brand/mccain-favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/brand/apple-touch-icon-180.png">
 <link rel="preload" href="/fonts/instrument-sans-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -30,15 +30,15 @@
    colour is a token out of mccain-design-system/tokens/colors.css, resolved to
    its value at build time - this page loads no stylesheet of the site's own,
    so what ships carries the values, and a token change reaches it too. */
-:root{--acc:#0A1F44;--acc-text:#0A1F44;--ink:#0A2540;--slate:#425466;
-  --line:#E3E8EE;--ring:rgba(10,31,68,.28);--wash:rgba(10,31,68,.1)}
+:root{--acc:var(--mc-action);--acc-text:var(--mc-action-text);--ink:var(--mc-navy);--slate:var(--mc-slate);
+  --line:var(--mc-line);--ring:color-mix(in srgb, var(--mc-action) 28%, transparent);--wash:color-mix(in srgb, var(--mc-action) 10%, transparent)}
 *,*::before,*::after{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;background:#FFFFFF;color-scheme:light}
+html{-webkit-text-size-adjust:100%;background:var(--mc-white);color-scheme:light}
 body{margin:0;min-height:100vh;display:flex;flex-direction:column;
   font-family:'Instrument Sans',system-ui,-apple-system,sans-serif;color:var(--ink);
   -webkit-font-smoothing:antialiased;background:
-    radial-gradient(1200px 600px at 50% -10%,var(--wash),transparent 70%),#FFFFFF}
-.skip{position:absolute;left:12px;top:-60px;padding:10px 14px;border-radius:8px;background:var(--ink);color:#FFFFFF;font-weight:600;text-decoration:none;z-index:9}
+    radial-gradient(1200px 600px at 50% -10%,var(--wash),transparent 70%),var(--mc-white)}
+.skip{position:absolute;left:12px;top:-60px;padding:10px 14px;border-radius:8px;background:var(--ink);color:var(--mc-white);font-weight:600;text-decoration:none;z-index:9}
 .skip:focus{top:12px}
 header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 24px;border-bottom:1px solid var(--line)}
 header.top .brand{display:inline-flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font-weight:700;letter-spacing:-.01em}
@@ -49,7 +49,7 @@ header.top nav a:hover,footer.bottom a:hover{color:var(--acc-text)}
 main{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 24px}
 footer.bottom{display:flex;flex-wrap:wrap;gap:4px 20px;justify-content:center;padding:10px 24px 22px;border-top:1px solid var(--line)}
 @media (max-width:600px){header.top nav{display:none}}
-@media print{header.top,footer.bottom,.row,nav.more,.skip{display:none}body{background:#FFFFFF}}
+@media print{header.top,footer.bottom,.row,nav.more,.skip{display:none}body{background:var(--mc-white)}}
 .card{width:100%;max-width:640px;text-align:center}
 .code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;font-weight:500;
   letter-spacing:.14em;text-transform:uppercase;color:var(--acc-text)}
@@ -58,9 +58,9 @@ p{margin:16px auto 0;max-width:46ch;font-size:17px;line-height:1.6;color:var(--s
 .row{margin-top:30px;display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
 a.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:10px;
   font-size:15px;font-weight:600;text-decoration:none;transition:transform .15s,background .15s}
-a.primary{background:var(--acc);color:#FFFFFF}
+a.primary{background:var(--acc);color:var(--mc-white)}
 a.primary:hover{background:var(--ink);transform:translateY(-1px)}
-a.ghost{background:#FFFFFF;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+a.ghost{background:var(--mc-white);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
 a.ghost:hover{box-shadow:inset 0 0 0 1px var(--ring);transform:translateY(-1px)}
 nav.more{margin-top:34px;padding-top:22px;border-top:1px solid var(--line);
   display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:center}

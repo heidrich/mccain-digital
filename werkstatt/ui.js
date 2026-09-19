@@ -270,7 +270,7 @@ export const COLORS = {
   slate: "#425466",
   mute: "#8898AA",
   line: "#E3E8EE",
-  indigo: "#635BFF",
+  plate: "#0A1F44",
   orange: "#FFB46B",
   pink: "#FF5A8C",
   violet: "#C05CFF",

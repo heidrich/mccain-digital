@@ -196,7 +196,7 @@ export function mountPerf(W) {
     fpsStat.append(h("div", { "data-tone": cur >= 55 ? "good" : cur >= 28 ? "warn" : "bad" }, h("b", String(cur)), h("small", "Bilder/s jetzt")), h("div", h("b", String(min)), h("small", "Minimum")));
     const ctx = spark.getContext("2d");
     ctx.clearRect(0, 0, spark.width, spark.height);
-    ctx.strokeStyle = "#635BFF"; ctx.lineWidth = 2; ctx.beginPath();
+    ctx.strokeStyle = "#0A1F44"; ctx.lineWidth = 2; ctx.beginPath();
     fpsHist.forEach((v, i) => { const x = (i / 39) * spark.width, y = spark.height - 4 - (Math.min(v, 120) / 120) * (spark.height - 8); if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); });
     ctx.stroke();
     const canvas = document.querySelector("canvas[data-global]");

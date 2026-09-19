@@ -404,13 +404,19 @@
         if (cur.n && cur.n.nodeType === 3) { p.node = cur.n; cur.n = cur.n.nextSibling; }
       } else {
         const v = live ? tp.get(scope) : undefined;
-        if (isRich(v)) {
+        /* Without a value (a list still empty at bind time, an item the build
+         * rendered for a wider screen) the build's DOM says what the part was:
+         * an element that is neither an anchor nor an sc-interp span is rendered
+         * element content. Not adopting it left it in place when the first real
+         * pass inserted its own copy - every icon tile of /leistungen/ki-
+         * automatisierung/ showed its icon twice (19.9.2026). */
+        if (live ? isRich(v) : !!cur.n && cur.n.nodeType === 1 && !isAnchor(cur.n) && !isInterp(cur.n)) {
           /* An element-valued interpolation rendered as many nodes as it liked;
            * they end where the next template neighbour begins. */
           const next = t.parts[i + 1];
           p.nodes = [];
           while (cur.n && !isAnchor(cur.n) && !isInterp(cur.n) && !(next && next.text !== undefined && cur.n.nodeType === 3)) { p.nodes.push(cur.n); cur.n = cur.n.nextSibling; }
-          p.key = ser(v);
+          p.key = live ? ser(v) : undefined;   /* undefined: the first pass replaces the adopted nodes */
         } else {
           p.str = toText(v);
           if (cur.n && isInterp(cur.n)) { p.span = cur.n; cur.n = cur.n.nextSibling; }
@@ -871,17 +877,17 @@
      * head); closing is the console's own × or Escape, and the tab returns.
      * The light ring keeps it visible on the dark sections (owner). */
     css.textContent =
-      ".v5-dev-switch{position:fixed;left:0;top:50%;z-index:70;display:flex;flex-direction:column;align-items:center;gap:9px;width:32px;padding:12px 0 11px;border-radius:0 10px 10px 0;background:#0A2540;color:#fff;font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;box-shadow:0 0 0 1.5px rgba(255,255,255,.75),10px 0 30px -12px rgba(10,37,64,.5);cursor:pointer;transform:translateY(-50%);animation:v5DevIn .5s cubic-bezier(.2,.8,.2,1) both;transition:background .2s,transform .2s}" +
-      ".v5-dev-switch::before{content:'';width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#FFB46B,#FF5A8C,#C05CFF,#5FC3FF)}" +
+      ".v5-dev-switch{position:fixed;left:0;top:50%;z-index:70;display:flex;flex-direction:column;align-items:center;gap:9px;width:32px;padding:12px 0 11px;border-radius:0 10px 10px 0;background:var(--mc-navy);color:var(--mc-white);font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;box-shadow:0 0 0 1.5px color-mix(in srgb, var(--mc-white) 75%, transparent),10px 0 30px -12px color-mix(in srgb, var(--mc-navy) 50%, transparent);cursor:pointer;transform:translateY(-50%);animation:v5DevIn .5s cubic-bezier(.2,.8,.2,1) both;transition:background .2s,transform .2s}" +
+      ".v5-dev-switch::before{content:'';width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,var(--mc-orange),var(--mc-pink),var(--mc-violet),var(--mc-sky))}" +
       /* The gradient ring: a masked pseudo 3 px outside the tab, pulsing four times over five seconds after the slide-in, then gone. */
-      ".v5-dev-switch::after{content:'';position:absolute;inset:-3px;padding:3px;border-radius:0 13px 13px 0;background:linear-gradient(135deg,#FFB46B,#FF5A8C,#C05CFF,#5FC3FF);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;opacity:0;pointer-events:none;animation:v5DevPulse 1.25s ease-in-out .5s 4}" +
+      ".v5-dev-switch::after{content:'';position:absolute;inset:-3px;padding:3px;border-radius:0 13px 13px 0;background:linear-gradient(135deg,var(--mc-orange),var(--mc-pink),var(--mc-violet),var(--mc-sky));-webkit-mask:linear-gradient(var(--mc-black) 0 0) content-box,linear-gradient(var(--mc-black) 0 0);-webkit-mask-composite:xor;mask:linear-gradient(var(--mc-black) 0 0) content-box,linear-gradient(var(--mc-black) 0 0);mask-composite:exclude;opacity:0;pointer-events:none;animation:v5DevPulse 1.25s ease-in-out .5s 4}" +
       "@keyframes v5DevPulse{0%,100%{opacity:0}50%{opacity:1}}" +
       ".v5-dev-switch>span{writing-mode:vertical-rl;transform:rotate(180deg)}" +
-      ".v5-dev-switch:hover{background:#0A1F44;transform:translateY(-50%) translateX(2px)}" +
-      ".v5-dev-switch:focus-visible{outline:2px solid #635BFF;outline-offset:3px}" +
+      ".v5-dev-switch:hover{background:var(--mc-action);transform:translateY(-50%) translateX(2px)}" +
+      ".v5-dev-switch:focus-visible{outline:2px solid var(--mc-action);outline-offset:3px}" +
       ".v5-dev-switch[aria-expanded=true]{display:none}" +
       ".v5-dev-switch[data-state=loading]{opacity:.7;cursor:progress}" +
-      ".v5-dev-switch[data-state=failed]{background:#425466}" +
+      ".v5-dev-switch[data-state=failed]{background:var(--mc-slate)}" +
       "@keyframes v5DevIn{from{opacity:0;transform:translateY(-50%) translateX(-100%)}to{opacity:1;transform:translateY(-50%)}}" +
       "@media (pointer:coarse){.v5-dev-switch{width:38px}}" +
       "@media (prefers-reduced-motion:reduce){.v5-dev-switch{animation:none;transition:none}.v5-dev-switch::after{animation:none}}";

@@ -9,7 +9,7 @@ export function Button({ variant = "primary", size = "md", onDark = false, chevr
     primary: [{ background: "var(--accent)", color: "#fff" }, { background: "var(--accent-hover)", transform: "translateY(-1px)" }],
     dark: [{ background: "var(--mc-navy)", color: "#fff" }, { background: "#1B3A5F", transform: "translateY(-1px)" }],
     onGradient: [{ background: "#fff", color: "var(--mc-navy)" }, { transform: "translateY(-1px)" }],
-    ghost: onDark ? [{ background: "transparent", color: "#fff", boxShadow: "inset 0 0 0 1px rgba(143,161,230,.5)" }, { boxShadow: "inset 0 0 0 1px #fff", background: "rgba(255,255,255,.06)" }] : [{ background: "#fff", color: "var(--text-accent)", boxShadow: "inset 0 0 0 1px rgba(99,91,255,.35)" }, { boxShadow: "inset 0 0 0 1px var(--accent)", color: "var(--accent)" }],
+    ghost: onDark ? [{ background: "transparent", color: "#fff", boxShadow: "inset 0 0 0 1px rgba(157,177,210,.5)" }, { boxShadow: "inset 0 0 0 1px #fff", background: "rgba(255,255,255,.06)" }] : [{ background: "#fff", color: "var(--text-accent)", boxShadow: "inset 0 0 0 1px rgba(10,31,68,.35)" }, { boxShadow: "inset 0 0 0 1px var(--accent)", color: "var(--accent)" }],
     outline: [{ background: "#fff", color: "var(--mc-navy)", boxShadow: "inset 0 0 0 1px rgba(10,37,64,.16)" }, { boxShadow: "inset 0 0 0 1px rgba(10,37,64,.4)" }],
   };
   const [base, hov] = V[variant] || V.primary;

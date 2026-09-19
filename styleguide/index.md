@@ -11,21 +11,33 @@ Farben, Typografie, Raster, Komponenten und Bewegung – alles, was auf mccain-d
 
 01 Farben
 
-## Eine Leitfarbe, ein Tiefblau, drei Signale.
+## Navy führt, Himmel antwortet, drei Signale.
 
-Violett trägt jede Aktion. Navy trägt die Flächen, auf denen etwas erklärt wird. Grün bestätigt, Orange markiert, Pink warnt – nie mehr als eine Signalfarbe pro Abschnitt.
+Navy trägt jede Aktion auf Hell und die Flächen, auf denen etwas erklärt wird; auf diesen dunklen Flächen übernimmt das Himmelblau die Aktion. Links sind immer unterstrichen, denn Navy ist auch die Textfarbe. Grün bestätigt, Orange markiert, Pink warnt – nie mehr als eine Signalfarbe pro Abschnitt.
 
 Akzent
 
-#635BFF
+#0A1F44
 
-Buttons, Links, aktive Zustände
+Buttons, Links, aktive Zustände auf Hell
 
-Akzent Text
+Akzent Hover
 
-#4D47C7
+#1A3A6E
 
-Textlinks auf Weiß, Eyebrows
+Hover eines Navy-Buttons
+
+Tönung
+
+#E8EDF5
+
+Aktiver Menüpunkt, Chips, ausgewählte Zeile
+
+Akzent auf Dunkel
+
+#5FC3FF
+
+Buttons und Links auf Navy, mit Navy-Schrift
 
 Navy
 

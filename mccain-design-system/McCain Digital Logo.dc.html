@@ -14,7 +14,7 @@
 <style>
 body{margin:0;background:#EEF1F6;color:#0A2540;font-family:'Instrument Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 *,*::before,*::after{box-sizing:border-box}
-a{color:#4D47C7;text-decoration:none}a:hover{color:#0A2540}
+a{color:#0A1F44;text-decoration:none}a:hover{color:#0A2540}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer}
 h1,h2,h3,p{margin:0}
 @keyframes tile-in{0%{opacity:0;transform:scale(.88)}100%{opacity:1;transform:scale(1)}}
@@ -45,7 +45,7 @@ h1,h2,h3,p{margin:0}
 <section data-screen-label="{{ rd.label }}" style="padding:48px 48px 12px; display:flex; flex-direction:column; gap:24px">
   <div style="display:flex; flex-direction:column; gap:12px; max-width:1000px">
     <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap">
-      <span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:#4D47C7; background:#fff; padding:6px 10px; border-radius:6px; box-shadow:0 0 0 1px #E3E8EE">{{ rd.badge }}</span>
+      <span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:#0A1F44; background:#fff; padding:6px 10px; border-radius:6px; box-shadow:0 0 0 1px #E3E8EE">{{ rd.badge }}</span>
       <h1 style="font-size:28px; font-weight:700; letter-spacing:-.03em">{{ rd.title }}</h1>
     </div>
     <p style="font-size:15px; line-height:1.55; color:#425466; text-wrap:pretty">{{ rd.desc }}</p>
@@ -64,7 +64,7 @@ h1,h2,h3,p{margin:0}
           </div>
         </div>
         <div style="display:flex; align-items:flex-start; gap:10px; padding:4px 14px 14px">
-          <a href="#{{ m.id }}" style="flex:none; font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; color:#fff; background:#635BFF; padding:3px 7px; border-radius:5px">{{ m.id }}</a>
+          <a href="#{{ m.id }}" style="flex:none; font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; color:#fff; background:#0A1F44; padding:3px 7px; border-radius:5px">{{ m.id }}</a>
           <div style="min-width:0"><div style="display:flex; align-items:baseline; gap:8px; flex-wrap:wrap"><h2 style="font-size:15px; font-weight:700; letter-spacing:-.02em">{{ m.name }}</h2><span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:#5A6880">{{ m.tag }}</span></div><p style="font-size:12.5px; line-height:1.5; color:#425466; margin-top:3px; text-wrap:pretty">{{ m.rule }}</p></div>
         </div>
       </article>
@@ -77,18 +77,18 @@ h1,h2,h3,p{margin:0}
   <div style="display:flex; flex-wrap:wrap; align-items:flex-start; gap:16px 28px; max-width:1240px">
     <div style="display:flex; flex-direction:column; gap:12px; max-width:900px">
       <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap">
-        <span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:#4D47C7; background:#fff; padding:6px 10px; border-radius:6px; box-shadow:0 0 0 1px #E3E8EE">{{ rd.badge }}</span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:#0A1F44; background:#fff; padding:6px 10px; border-radius:6px; box-shadow:0 0 0 1px #E3E8EE">{{ rd.badge }}</span>
         <h1 style="font-size:28px; font-weight:700; letter-spacing:-.03em">{{ rd.title }}</h1>
       </div>
       <p style="font-size:15px; line-height:1.55; color:#425466; text-wrap:pretty">{{ rd.desc }}</p>
     </div>
-    <button onClick="{{ replay }}" style="display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 18px; border-radius:999px; background:#635BFF; color:#fff; font-size:14px; font-weight:600; margin-left:auto; transition: background .2s" style-hover="background:#0A2540"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg>Nochmal abspielen</button>
+    <button onClick="{{ replay }}" style="display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 18px; border-radius:999px; background:#0A1F44; color:#fff; font-size:14px; font-weight:600; margin-left:auto; transition: background .2s" style-hover="background:#0A2540"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg>Nochmal abspielen</button>
   </div>
   <div style="display:flex; flex-wrap:wrap; gap:28px; align-items:flex-start">
     <sc-for list="{{ rd.cards }}" as="b" hint-placeholder-count="3">
     <article id="{{ b.id }}" data-screen-label="{{ b.label }}" style="width:min(600px, 100%); background:#fff; border-radius:20px; box-shadow:0 0 0 1px #E3E8EE, 0 20px 50px -30px rgba(10,37,64,.25); overflow:hidden">
       <div style="display:flex; align-items:flex-start; gap:14px; padding:24px 28px 20px">
-        <a href="#{{ b.id }}" style="flex:none; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:#fff; background:#635BFF; padding:5px 9px; border-radius:6px">{{ b.id }}</a>
+        <a href="#{{ b.id }}" style="flex:none; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:#fff; background:#0A1F44; padding:5px 9px; border-radius:6px">{{ b.id }}</a>
         <div>
           <h2 style="font-size:22px; font-weight:700; letter-spacing:-.02em">{{ b.name }}</h2>
           <p style="font-size:14px; line-height:1.55; color:#425466; margin-top:6px; text-wrap:pretty">{{ b.rule }}</p>
@@ -147,12 +147,12 @@ h1,h2,h3,p{margin:0}
 </section>
 </sc-if>
 </sc-for>
-<div style="padding:0 48px 24px"><button onClick="{{ toggleOld }}" style="display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 18px; border-radius:999px; background:#fff; color:#0A2540; font-size:14px; font-weight:600; box-shadow:0 0 0 1px #E3E8EE; transition: box-shadow .2s" style-hover="box-shadow:0 0 0 1px #635BFF">{{ oldLabel }}</button></div>
+<div style="padding:0 48px 24px"><button onClick="{{ toggleOld }}" style="display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 18px; border-radius:999px; background:#fff; color:#0A2540; font-size:14px; font-weight:600; box-shadow:0 0 0 1px #E3E8EE; transition: box-shadow .2s" style-hover="box-shadow:0 0 0 1px #0A1F44">{{ oldLabel }}</button></div>
 <sc-if value="{{ showOld }}" hint-placeholder-val="{{ false }}">
 <section data-screen-label="Runde 2" style="padding:48px 48px 12px; display:flex; flex-direction:column; gap:24px">
   <div style="display:flex; flex-direction:column; gap:12px; max-width:1000px">
     <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap">
-      <span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:#4D47C7; background:#fff; padding:6px 10px; border-radius:6px; box-shadow:0 0 0 1px #E3E8EE">Runde 2 · 24 Skizzen</span>
+      <span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:#0A1F44; background:#fff; padding:6px 10px; border-radius:6px; box-shadow:0 0 0 1px #E3E8EE">Runde 2 · 24 Skizzen</span>
       <h1 style="font-size:28px; font-weight:700; letter-spacing:-.03em">Austoben: Strom, Pixel, Knoten, Zeichen, Fläche</h1>
     </div>
     <p style="font-size:15px; line-height:1.55; color:#425466; text-wrap:pretty">Alle auf derselben Kachel (64, Ecken 23,4 %), Navy oder Weiß, Verlauf Orange → Pink → Violett. Absichtlich roh: Jede Skizze ist eine Idee, keine Ausarbeitung. Sag, welche Nummern weiterkommen – daraus baue ich Kachel, Wortmarke, Bewegung wie in <a href="#1a">Runde 1</a>.</p>
@@ -171,7 +171,7 @@ h1,h2,h3,p{margin:0}
           </div>
         </div>
         <div style="display:flex; align-items:flex-start; gap:10px; padding:4px 14px 14px">
-          <a href="#{{ m.id }}" style="flex:none; font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; color:#fff; background:#635BFF; padding:3px 7px; border-radius:5px">{{ m.id }}</a>
+          <a href="#{{ m.id }}" style="flex:none; font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; color:#fff; background:#0A1F44; padding:3px 7px; border-radius:5px">{{ m.id }}</a>
           <div style="min-width:0"><div style="display:flex; align-items:baseline; gap:8px; flex-wrap:wrap"><h2 style="font-size:15px; font-weight:700; letter-spacing:-.02em">{{ m.name }}</h2><span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:#5A6880">{{ m.tag }}</span></div><p style="font-size:12.5px; line-height:1.5; color:#425466; margin-top:3px; text-wrap:pretty">{{ m.rule }}</p></div>
         </div>
       </article>
@@ -182,19 +182,19 @@ h1,h2,h3,p{margin:0}
   <div style="display:flex; flex-wrap:wrap; align-items:flex-start; gap:16px 28px; max-width:1880px">
     <div style="display:flex; flex-direction:column; gap:12px; max-width:900px">
       <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap">
-        <span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:#4D47C7; background:#fff; padding:6px 10px; border-radius:6px; box-shadow:0 0 0 1px #E3E8EE">Runde 1 · 3 Richtungen</span>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:#0A1F44; background:#fff; padding:6px 10px; border-radius:6px; box-shadow:0 0 0 1px #E3E8EE">Runde 1 · 3 Richtungen</span>
         <h1 style="font-size:28px; font-weight:700; letter-spacing:-.03em">Logo für McCain Digital</h1>
       </div>
       <p style="font-size:15px; line-height:1.55; color:#425466; text-wrap:pretty">Wie bei Hallvern ist jede Marke eine Regel, kein gezeichnetes Bild: wenige Zahlen aus dem Vokabular der neuen Seite – Pixelstrom, Verlauf, Auflösung. Kein Buchstabe. Jede funktioniert als Kachel (Ecken 23,4 %), auf Hell und Dunkel, einfarbig, im Favicon und in der Navigation, und hat drei Zustände: Ankommen, Anmelden, Warten. Die Wortmarke bleibt konstant: mccain digital, Instrument Sans 600, klein geschrieben.</p>
     </div>
-    <button onClick="{{ replay }}" style="display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 18px; border-radius:999px; background:#635BFF; color:#fff; font-size:14px; font-weight:600; margin-left:auto; transition: background .2s" style-hover="background:#0A2540"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg>Nochmal abspielen</button>
+    <button onClick="{{ replay }}" style="display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 18px; border-radius:999px; background:#0A1F44; color:#fff; font-size:14px; font-weight:600; margin-left:auto; transition: background .2s" style-hover="background:#0A2540"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg>Nochmal abspielen</button>
   </div>
 
   <div style="display:flex; flex-wrap:wrap; gap:28px; align-items:flex-start">
 
     <article id="1a" data-screen-label="1a Drei Pixel" style="width:min(600px, 100%); background:#fff; border-radius:20px; box-shadow:0 0 0 1px #E3E8EE, 0 20px 50px -30px rgba(10,37,64,.25); overflow:hidden">
       <div style="display:flex; align-items:flex-start; gap:14px; padding:24px 28px 20px">
-        <a href="#1a" style="flex:none; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:#fff; background:#635BFF; padding:5px 9px; border-radius:6px">1a</a>
+        <a href="#1a" style="flex:none; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:#fff; background:#0A1F44; padding:5px 9px; border-radius:6px">1a</a>
         <div>
           <h2 style="font-size:22px; font-weight:700; letter-spacing:-.02em">Drei Pixel</h2>
           <p style="font-size:14px; line-height:1.55; color:#425466; margin-top:6px; text-wrap:pretty">Drei Pixel aus dem Strom – Orange, Pink, Violett – im Schritt von einer Kante. In der Wortmarke werden sie zu den drei i-Punkten von mccain digital: Der Strom kommt an.</p>
@@ -261,11 +261,11 @@ h1,h2,h3,p{margin:0}
       </div>
     </article>
 
-    <div style="width:280px; padding:24px 28px; border-radius:20px; background:#fff; box-shadow:0 0 0 1px #E3E8EE"><a href="#3a" style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:#fff; background:#635BFF; padding:5px 9px; border-radius:6px">1b</a><h2 style="font-size:20px; font-weight:700; letter-spacing:-.02em; margin-top:14px">Der Strom</h2><p style="font-size:14px; line-height:1.55; color:#425466; margin-top:6px">Weiterentwickelt in Runde 3 – als Bogen (<a href="#3a">3a</a>), als S (<a href="#3b">3b</a>) und als D (<a href="#3c">3c</a>) – und in Runde 4 in vier Fassungen des D (<a href="#4a">4a</a>–<a href="#4d">4d</a>).</p></div>
+    <div style="width:280px; padding:24px 28px; border-radius:20px; background:#fff; box-shadow:0 0 0 1px #E3E8EE"><a href="#3a" style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:#fff; background:#0A1F44; padding:5px 9px; border-radius:6px">1b</a><h2 style="font-size:20px; font-weight:700; letter-spacing:-.02em; margin-top:14px">Der Strom</h2><p style="font-size:14px; line-height:1.55; color:#425466; margin-top:6px">Weiterentwickelt in Runde 3 – als Bogen (<a href="#3a">3a</a>), als S (<a href="#3b">3b</a>) und als D (<a href="#3c">3c</a>) – und in Runde 4 in vier Fassungen des D (<a href="#4a">4a</a>–<a href="#4d">4d</a>).</p></div>
 
     <article id="1c" data-screen-label="1c Das Fenster" style="width:min(600px, 100%); background:#fff; border-radius:20px; box-shadow:0 0 0 1px #E3E8EE, 0 20px 50px -30px rgba(10,37,64,.25); overflow:hidden">
       <div style="display:flex; align-items:flex-start; gap:14px; padding:24px 28px 20px">
-        <a href="#1c" style="flex:none; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:#fff; background:#635BFF; padding:5px 9px; border-radius:6px">1c</a>
+        <a href="#1c" style="flex:none; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:#fff; background:#0A1F44; padding:5px 9px; border-radius:6px">1c</a>
         <div>
           <h2 style="font-size:22px; font-weight:700; letter-spacing:-.02em">Das Fenster</h2>
           <p style="font-size:14px; line-height:1.55; color:#425466; margin-top:6px; text-wrap:pretty">Ein Verlauf, zwei Auflösungen. Links Pixel, rechts glatt – getrennt durch eine Kante, die von 58 auf 42 % fällt. Links die Daten, rechts das Produkt.</p>
@@ -339,7 +339,7 @@ h1,h2,h3,p{margin:0}
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   static EASE = 'cubic-bezier(.2,.8,.2,1)';
-  static C = { navy: '#0A2540', ind: '#635BFF', white: '#FFFFFF', hair: '#E3E8EE', field: '#F6F9FC', stops: ['#FFB46B', '#FF5A8C', '#C05CFF', '#5FC3FF'] };
+  static C = { navy: '#0A2540', ind: '#0A1F44', white: '#FFFFFF', hair: '#E3E8EE', field: '#F6F9FC', stops: ['#FFB46B', '#FF5A8C', '#C05CFF', '#5FC3FF'] };
   state = { take: 0, motionOn: true, showOld: false, dotTop: '0.17em', dotSize: '0.12em' };
   toggleOld = () => this.setState({ showOld: !this.state.showOld });
 
@@ -524,7 +524,7 @@ class Component extends DCLogic {
 
   marks2() {
     if (this._m2) return this._m2;
-    const NAVY = '#0A2540', W = '#FFFFFF', IND = '#635BFF', HAIR = '#E3E8EE', G3 = ['#FFB46B', '#FF5A8C', '#C05CFF'];
+    const NAVY = '#0A2540', W = '#FFFFFF', IND = '#0A1F44', HAIR = '#E3E8EE', G3 = ['#FFB46B', '#FF5A8C', '#C05CFF'];
     const BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
     const n2 = (v) => +v.toFixed(2);
     const rr = (x, y, w, h, r) => { const R = Math.min(r, w / 2, h / 2); return 'M' + n2(x + R) + ' ' + n2(y) + 'H' + n2(x + w - R) + 'A' + R + ' ' + R + ' 0 0 1 ' + n2(x + w) + ' ' + n2(y + R) + 'V' + n2(y + h - R) + 'A' + R + ' ' + R + ' 0 0 1 ' + n2(x + w - R) + ' ' + n2(y + h) + 'H' + n2(x + R) + 'A' + R + ' ' + R + ' 0 0 1 ' + n2(x) + ' ' + n2(y + h - R) + 'V' + n2(y + R) + 'A' + R + ' ' + R + ' 0 0 1 ' + n2(x + R) + ' ' + n2(y) + 'Z'; };
@@ -601,7 +601,7 @@ class Component extends DCLogic {
 
   marks10() {
     if (this._m10) return this._m10;
-    const NAVY = '#0A2540', W = '#FFFFFF', OR = '#FFB46B', PK = '#FF5A8C', VI = '#C05CFF', SK = '#5FC3FF', IND = '#635BFF', HAIR = '#E3E8EE';
+    const NAVY = '#0A2540', W = '#FFFFFF', OR = '#FFB46B', PK = '#FF5A8C', VI = '#C05CFF', SK = '#5FC3FF', IND = '#0A1F44', HAIR = '#E3E8EE';
     const n2 = (v) => +v.toFixed(2);
     const rr = (x, y, w, hh, r) => { const R = Math.min(r, w / 2, hh / 2); return 'M' + n2(x + R) + ' ' + n2(y) + 'H' + n2(x + w - R) + 'A' + R + ' ' + R + ' 0 0 1 ' + n2(x + w) + ' ' + n2(y + R) + 'V' + n2(y + hh - R) + 'A' + R + ' ' + R + ' 0 0 1 ' + n2(x + w - R) + ' ' + n2(y + hh) + 'H' + n2(x + R) + 'A' + R + ' ' + R + ' 0 0 1 ' + n2(x) + ' ' + n2(y + hh - R) + 'V' + n2(y + R) + 'A' + R + ' ' + R + ' 0 0 1 ' + n2(x + R) + ' ' + n2(y) + 'Z'; };
     const px = (x, y, s) => rr(x - s / 2, y - s / 2, s, s, s * 0.18);

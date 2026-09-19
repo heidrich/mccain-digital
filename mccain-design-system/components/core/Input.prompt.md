@@ -1,4 +1,4 @@
-Textfeld 48 px, Radius 8, Hairline-Rahmen; Fokus = Indigo-Rahmen + 4-px-Ring. `as="textarea"` für Nachrichten, `onDark` in der Konsole.
+Textfeld 48 px, Radius 8, Hairline-Rahmen; Fokus = Navy-Rahmen + 4-px-Ring. `as="textarea"` für Nachrichten, `onDark` in der Konsole.
 
 ```jsx
 <Input label="E-Mail" type="email" placeholder="name@firma.de" />

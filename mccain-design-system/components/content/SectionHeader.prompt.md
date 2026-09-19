@@ -1,4 +1,4 @@
-Sektions-Kopf: Eyebrow (Indigo-Text) → Titel → Lead, linksbündig, max 720 px.
+Sektions-Kopf: Eyebrow (Navy, auf Dunkel Himmel) → Titel → Lead, linksbündig, max 720 px.
 
 ```jsx
 <SectionHeader eyebrow="Leistungen" title="Vier Dinge, die wir richtig gut können." desc="Jede Kachel öffnet die ganze Leistung." />

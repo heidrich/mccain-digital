@@ -12,7 +12,7 @@
   --shadow-modal:0 60px 140px -30px rgba(10,37,64,.55);
   --shadow-console:0 40px 100px -30px rgba(0,0,0,.7);
   --shadow-node:0 10px 24px -12px rgba(10,37,64,.6);
-  --shadow-node-hot:0 0 0 3px rgba(99,91,255,.25),0 14px 30px -12px rgba(99,91,255,.7);
+  --shadow-node-hot:0 0 0 3px rgba(10,31,68,.25),0 14px 30px -12px rgba(10,31,68,.7);
   /* Breakpoints (Referenz) */
   --bp-nav:880px; --bp-sheet:960px; --bp-lang:1080px;
 }

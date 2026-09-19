@@ -41,7 +41,7 @@ Weiße Platte mit Haarlinie, für dunkle Flächen und Papier.
 
 Einfarbig
 
-Weiß auf Indigo. Eine Farbe, für Stickerei und Stempel.
+Weiß auf Navy. Eine Farbe, für Stickerei und Stempel.
 
 Invertiert
 
@@ -55,7 +55,7 @@ Die Logo-Kombination in vier Größen: Kachel 24/28/32/46, Wort 15/17/21/33. Der
 
 ### Ohne Platte
 
-Auf der Website und überall dort, wo die dunkle Platte zu schwer wirken würde, steht die Bildmarke frei: Farbe auf Hell, Weiß auf Dunkel, einfarbig Indigo oder Navy. Kein Rahmen, kein Untergrund – der Staub braucht dann eine ruhige Fläche.
+Auf der Website und überall dort, wo die dunkle Platte zu schwer wirken würde, steht die Bildmarke frei: Farbe auf Hell, Weiß auf Dunkel, einfarbig Navy. Kein Rahmen, kein Untergrund – der Staub braucht dann eine ruhige Fläche.
 
 ![Farbe](https://mccain-digital.com/brand/mccain-mark-free-color.svg)
 
@@ -68,12 +68,6 @@ Der Standard auf Weiß und Papier – die Website, Dokumente.
 Weiß
 
 Auf Navy und anderen dunklen Flächen.
-
-![Indigo](https://mccain-digital.com/brand/mccain-mark-free-indigo.svg)
-
-Indigo
-
-Einfarbig im Akzentton – Buttons, Chips, kleine Flächen.
 
 ![Navy](https://mccain-digital.com/brand/mccain-mark-free-navy.svg)
 
@@ -140,16 +134,16 @@ Wortmarke mit Verlauf · PNG
 
 ## Farbe
 
-Navy trägt, Indigo zeigt. Die vier Verlaufsfarben gehören dem Stream und der Bildmarke – sie erscheinen nie allein als Fläche.
+Navy trägt und zeigt: Auf Hell ist Navy auch die Aktion, auf Dunkel übernimmt das Himmelblau. Die vier Verlaufsfarben gehören dem Stream und der Bildmarke – sie erscheinen nie allein als Fläche.
 
 - Navy #0A2540 rgb(10, 37, 64) Text, Überschriften
-- Plate #0A1F44 rgb(10, 31, 68) Platte, dunkle Flächen, Footer
-- Indigo #635BFF rgb(99, 91, 255) Akzent: Buttons, Links, aktive Zustände
-- Indigo Text #4D47C7 rgb(77, 71, 199) Indigo als Schriftfarbe auf Hell
+- Plate #0A1F44 rgb(10, 31, 68) Aktion auf Hell: Buttons, Links, aktive Zustände; Platte, dunkle Flächen, Footer
+- Hover #1A3A6E rgb(26, 58, 110) Hover einer Navy-Fläche
+- Tint #E8EDF5 rgb(232, 237, 245) Getönte Fläche: aktiver Menüpunkt, Chips
 - Orange #FFB46B rgb(255, 180, 107) Verlauf 1
 - Pink #FF5A8C rgb(255, 90, 140) Verlauf 2
 - Violet #C05CFF rgb(192, 92, 255) Verlauf 3
-- Sky #5FC3FF rgb(95, 195, 255) Verlauf 4
+- Sky #5FC3FF rgb(95, 195, 255) Verlauf 4; Aktion auf Dunkel, mit Navy-Schrift
 - Paper #F6F9FC rgb(246, 249, 252) Flächen, Karten
 
 linear-gradient(90deg, #FFB46B, #FF5A8C 33%, #C05CFF 66%, #5FC3FF)
@@ -192,7 +186,7 @@ Button · 15 · 600 Projekt anfragen →
 
 ## Icons
 
-Dünne Linien, 1.75 Strichstärke auf einem 24er-Raster, runde Kappen – im Lucide-Stil. Die Farbe kommt vom Text (currentColor); Indigo nur im aktiven Zustand. Die einzige Ausnahme ist der Pixel: Ein KI-Zustand darf einen einzelnen Verlaufspixel tragen, sonst nichts.
+Dünne Linien, 1.75 Strichstärke auf einem 24er-Raster, runde Kappen – im Lucide-Stil. Die Farbe kommt vom Text (currentColor); Navy, auf Dunkel Himmelblau, nur im aktiven Zustand. Die einzige Ausnahme ist der Pixel: Ein KI-Zustand darf einen einzelnen Verlaufspixel tragen, sonst nichts.
 
 Eine Quelle. Alle Icons leben als Sprite in [mccain-icons.svg](https://mccain-digital.com/brand/mccain-icons.svg), jeweils als <symbol id="…">. Die Website bezieht ihre Icons von hier – ein Icon einmal ändern, und es ändert sich überall. Neue Icons kommen in die Datei und in diese Liste, sonst nirgendwo.
 
@@ -306,9 +300,10 @@ Tokens
 
 :root {
  --mc-navy: #0A2540;
- --mc-plate: #0A1F44;
- --mc-indigo: #635BFF;
- --mc-indigo-text: #4D47C7;
+ --mc-plate: #0A1F44; /* also the action on light */
+ --mc-hover: #1A3A6E;
+ --mc-tint: #E8EDF5;
+ --mc-sky: #5FC3FF; /* the action on dark */
  --mc-paper: #F6F9FC;
  --mc-hair: #E3E8EE;
  --mc-gradient: linear-gradient(90deg,

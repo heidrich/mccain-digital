@@ -1,22 +1,93 @@
+/* THE ONLY PLACE A COLOUR OF THIS SITE IS WRITTEN DOWN (owner 19.9.2026).
+ *
+ * The artboards write var(--mc-…) and, for a translucent step,
+ * color-mix(in srgb, var(--mc-…) 6%, transparent) — never a hex or rgba
+ * literal. tools/tokens.mjs resolves both at build time, so what ships is the
+ * same fixed values as before: no custom property, no color-mix reaches the
+ * visitor, no runtime cost. Change a value here, rebuild, and every page and
+ * every translucent step of it follows. tools/color_guard.mjs fails the build
+ * on a colour literal anywhere else.
+ *
+ * Rules for this file:
+ *  - one value per token; a token that means the same as another is a var()
+ *    alias, not a copy of the value
+ *  - translucent steps are not tokens: they are derived where they are used
+ *  - ROLE tokens (action, plate, dark-accent …) carry today's values twice on
+ *    purpose: navy is both the plate and the action on light, sky both a
+ *    stream colour and the action on dark. The roles stay separable.
+ *  - names marked "Doppelgänger" are near-identical values the export carried
+ *    in; they stay exact until someone decides to merge them.
+ */
 :root{
-  /* Marke */
-  --mc-indigo:#635BFF; --mc-indigo-text:#4D47C7; --mc-indigo-hover:#7A73FF; --mc-indigo-soft:rgba(99,91,255,.10); --mc-indigo-ring:rgba(99,91,255,.28); --mc-indigo-tint:#EEF0FF;
+  /* Marke — Palette D „Navy + Himmel“ (Owner 19.9.2026: „das Indigo raus“). Navy ist auf
+     hellem Grund die Aktion (Buttons, Links, aktive Zustände; Links immer unterstrichen, weil
+     Navy auch die Textfarbe ist), auf dunklem Grund übernimmt das Himmelblau die Aktion. */
+  --mc-action:#0A1F44; --mc-action-text:#0A1F44; --mc-action-hover:#1A3A6E; --mc-action-tint:#E8EDF5; --mc-action-tint-hover:#F4F7FB;
+  --mc-action-soft:var(--mc-action-tint); --mc-action-ring:color-mix(in srgb, var(--mc-action) 28%, transparent);
   --mc-navy:#0A2540; --mc-slate:#425466; --mc-muted:#727F96; --mc-mute-2:#8898AA;
+  --mc-white:#FFFFFF; --mc-black:#000000;
+
   /* Flächen & Linien (hell) */
-  --mc-paper:#FFFFFF; --mc-surface:#F6F9FC; --mc-line:#E3E8EE; --mc-line-soft:#F0F3FA; --mc-chrome:#FAFBFD;
-  /* Dunkle Sektion */
-  --mc-dark:#0A1F44; --mc-dark-2:#10285A; --mc-dark-3:#14275F; --mc-dark-text:#EEF1FA; --mc-dark-text-2:#C5D0F5; --mc-dark-muted:#8DA2E0; --mc-dark-accent:#9F99FF; --mc-dark-line:rgba(255,255,255,.08); --mc-dark-line-hi:rgba(143,161,230,.22);
-  /* Pixelstrom */
-  --mc-orange:#FFB46B; --mc-pink:#FF5A8C; --mc-violet:#C05CFF; --mc-sky:#5FC3FF; --mc-rose:#FF8FB8; --mc-periwinkle:#6E7BFF;
-  --mc-stream:linear-gradient(135deg,#FFB46B 0%,#FF5A8C 32%,#C05CFF 62%,#5FC3FF 100%);
-  --mc-stream-text-1:linear-gradient(90deg,#FFB46B,#FF5A8C); --mc-stream-text-2:linear-gradient(90deg,#FF5A8C,#C05CFF); --mc-stream-text-3:linear-gradient(90deg,#C05CFF,#6E7BFF);
-  --mc-indigo-text-gradient:linear-gradient(90deg,#635BFF,#9B7BFF);
+  --mc-paper:var(--mc-white); --mc-surface:#F6F9FC; --mc-line:#E3E8EE; --mc-line-soft:#F0F3FA; --mc-chrome:#FAFBFD;
+
+  /* Graustufen der Seiten (Text, Rahmen, Flächen) */
+  --mc-text-grey:#5A6880;            /* Fließtext grau, 5.9:1 auf Weiß */
+  --mc-text-grey-2:#5E6D84;          /* Doppelgänger von --mc-text-grey */
+  --mc-grey-450:#8A93A8; --mc-grey-451:#8B93A6;   /* Doppelgänger */
+  --mc-grey-400:#A6AEBF; --mc-grey-401:#A3B1C6;   /* Doppelgänger */
+  --mc-grey-300:#C6CCD8; --mc-grey-250:#D5DCE6; --mc-grey-240:#D9E0EA;
+  --mc-grey-100:#EEF1F5; --mc-grey-101:#EEF1F6;   /* Doppelgänger */
+  --mc-grey-030:#FBFCFD; --mc-grey-020:#FCFDFF;
+  --mc-wash-blue:#EEF2F9; --mc-wash-blue-2:#F1F6FD; --mc-wash-blue-3:#E4EEFB;
+
+  /* Dunkle Sektion — Aktion Himmel mit Navy-Schrift, Hover Himmel + 15 % Weiß */
+  --mc-plate:#0A1F44; --mc-dark:var(--mc-plate);
+  --mc-dark-2:#10285A; --mc-dark-3:#14275F;
+  --mc-dark-1b:#0B2149; --mc-dark-1c:#0F2456; --mc-dark-2b:#102A57; --mc-dark-3b:#132C61; --mc-dark-3c:#132C66; --mc-dark-4:#1D3B60;
+  --mc-night:#040C1E; --mc-night-2:#06122A; --mc-night-3:#081B3C;
+  --mc-dark-text:#EEF1FA; --mc-dark-text-2:#C8D4E8; --mc-dark-muted:#9DB1D2;
+  /* Auf Navy schimmert nur Himmel: jede warme Farbe mit wenig Deckkraft über Navy wird
+     Indigo-Violett (Pink 12 % auf Navy = Farbton 242°, gemessen 19.9.2026). */
+  --mc-dark-accent:#5FC3FF; --mc-dark-accent-hover:#77CCFF; --mc-dark-accent-text:#0A1F44;
+  --mc-dark-line:color-mix(in srgb, var(--mc-white) 8%, transparent); --mc-dark-line-hi:color-mix(in srgb, var(--mc-dark-muted) 22%, transparent);
+
+  /* Pixelstrom — Orange, Pink, Violett, Himmel. Logo und Strom behalten den Übergang
+     Violett → Himmel (Owner 19.9.2026); sonst mischen Warm und Blau nie direkt. */
+  --mc-orange:#FFB46B; --mc-pink:#FF5A8C; --mc-violet:#C05CFF; --mc-sky:#5FC3FF; --mc-rose:#FF8FB8;
+  --mc-coral:#FF8A5B; --mc-check:#FF7A45;
+  --mc-stream:linear-gradient(135deg,var(--mc-orange) 0%,var(--mc-pink) 32%,var(--mc-violet) 62%,var(--mc-sky) 100%);
+  --mc-stream-text-1:linear-gradient(90deg,var(--mc-orange),var(--mc-pink)); --mc-stream-text-2:linear-gradient(90deg,var(--mc-pink),var(--mc-violet)); --mc-stream-text-3:linear-gradient(90deg,var(--mc-violet),var(--mc-sky));
+  /* Verlaufs-Überschriften (Owner 19.9.2026: „mit dem hellen Blau starten und farbenfroher,
+     so wie bei Individualsoftware“): Himmel → Violett → Pink. Das Himmelblau für Schrift ist
+     derselbe Ton wie --mc-sky, nur so tief, dass groß gesetzt 3:1 auf Weiß hält (#5FC3FF: 2,0:1). */
+  --mc-sky-ink:#0099F5;
+  --mc-heading-gradient:linear-gradient(92deg,var(--mc-sky-ink) 0%,var(--mc-violet) 52%,var(--mc-pink) 100%);
+  --mc-action-text-gradient:var(--mc-heading-gradient);
+
+  /* Warme Nebenfarben */
+  --mc-orange-ink:#C2410C; --mc-rust:#B4472B; --mc-peach:#FFB48A;
+  --mc-orange-tint:#FDEBE0; --mc-orange-tint-2:#FDF1EA; --mc-orange-tint-3:#FFF4EC; --mc-orange-tint-4:#FFF7F1; --mc-blush:#FFF6F5;
+  --mc-pink-ink:#B3245A; --mc-pink-deep:#D6336C;
+  /* Violett-Familie (Individualsoftware) und Flieder-Tönungen */
+  --mc-violet-700:#6D28D9; --mc-violet-600:#7C3AED; --mc-violet-400:#C084FC; --mc-violet-300:#C4A6FF;
+  --mc-violet-100:#EFE8FF; --mc-violet-050:#F3EBFF; --mc-violet-025:#F7F4FF; --mc-orchid-tint:#F7ECFA;
+  /* Papier-Mock (warme Graus eines gedruckten Belegs) */
+  --mc-sepia-900:#3F3729; --mc-sepia-700:#6E6353; --mc-sepia-600:#7A6E5F; --mc-sepia-300:#C9BFB1; --mc-sepia-250:#CFC4B4; --mc-sepia-200:#D8CFC2; --mc-sepia-100:#E7E0D4; --mc-sepia-050:#EFEAE3;
+  /* Fensterknöpfe in Programm-Mocks */
+  --mc-mock-close:#FF5F57; --mc-mock-min:#FEBC2E; --mc-mock-max:#28C840;
+  /* Weitere Blautöne in Mocks */
+  --mc-link-blue:#1D6FD0; --mc-steel:#5E76B4;
+
   /* Semantik */
-  --mc-success:#15BE53; --mc-success-text:#0E8A4C; --mc-success-soft:rgba(21,190,83,.14); --mc-check:#FF7A45; --mc-danger:#E5484D;
-  /* Semantische Aliase */
-  --text-heading:var(--mc-navy); --text-body:var(--mc-slate); --text-muted:var(--mc-muted); --text-accent:var(--mc-indigo-text); --text-on-accent:#fff;
+  --mc-success:#15BE53; --mc-success-text:#0E8A4C; --mc-success-soft:color-mix(in srgb, var(--mc-success) 14%, transparent);
+  --mc-success-deep:#0E6B3C; --mc-success-deep-2:#0B7340; --mc-green-ink:#1F8A5B; --mc-success-on-dark:#4FCF8C; --mc-mint:#7EE2A8;
+  --mc-success-tint:#EAF9F0; --mc-success-tint-2:#E2F4E9; --mc-success-tint-3:#EFF7F2; --mc-success-tint-4:#F1FAF4; --mc-success-tint-5:#F1FBF5; --mc-success-tint-6:#F3FBF6; --mc-success-tint-7:#F5FBF7; --mc-teal-tint:#E9F8F5;
+  --mc-danger:#E5484D;
+
+  /* Semantische Aliase (Design-System-Karten unter guidelines/ und components/) */
+  --text-heading:var(--mc-navy); --text-body:var(--mc-slate); --text-muted:var(--mc-muted); --text-accent:var(--mc-action-text); --text-on-accent:var(--mc-white);
   --surface-page:var(--mc-paper); --surface-card:var(--mc-paper); --surface-subtle:var(--mc-surface); --surface-dark:var(--mc-dark); --surface-console:var(--mc-dark-2);
   --border-default:var(--mc-line); --border-soft:var(--mc-line-soft);
-  --accent:var(--mc-indigo); --accent-hover:var(--mc-indigo-hover); --accent-soft:var(--mc-indigo-soft); --focus-ring:0 0 0 4px var(--mc-indigo-ring);
-  --selection:rgba(99,91,255,.22);
+  --accent:var(--mc-action); --accent-hover:var(--mc-action-hover); --accent-soft:var(--mc-action-soft); --focus-ring:0 0 0 4px var(--mc-action-ring);
+  --selection:color-mix(in srgb, var(--mc-sky) 35%, transparent);
 }

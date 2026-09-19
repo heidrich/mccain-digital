@@ -1,5 +1,36 @@
 # Uebergabe — Stand 17. September 2026
 
+## ▶ STAND 19.9. NACHTS — FARBEN NUR NOCH ÜBER TOKENS, PALETTE D „NAVY + HIMMEL“ — ZUERST LESEN
+
+**Owner 19.9.:** „das Indigo raus, Brand etc. alles anpassen und Style Guide“ → dann „wir können keine aufwendigen Webseiten bauen, wenn wir jede Seite anfassen müssen, nur um eine Farbe zu ändern. Das sollten wir umstellen!“ Und: „wesentlich seriöser und erwachsener, ohne den lockeren Stil zu verlieren; wesentlich besser lesbar“. Owner prüft lokal auf **http://localhost:8898/** bzw. nach dem Push auf **https://mccain-digital.vercel.app/** (`.com` = Coming soon).
+
+**DIE REGEL: Eine Farbe steht an EINER Stelle — `mccain-design-system/tokens/colors.css`.**
+- Artboards schreiben `var(--mc-…)`, halbtransparent `color-mix(in srgb, var(--mc-…) N%, transparent)`. Nie Hex, nie `rgba(…)`.
+- `tools/tokens.mjs` löst beim Bauen auf (Stufe 1: Datei-Lesen + Browser-Route für `*.dc.html`; Stufe 2: `runtime.js`, `static/`; `prodserve.py` für die Rohansicht). Ausgeliefert werden feste Werte → keine Laufzeitkosten.
+- `tools/color_guard.mjs` bricht beide Stufen ab (Literal in einer Quelle / unaufgelöstes Token in der Ausgabe). Ausnahmen stehen benannt in der Datei (Code-Beispiel auf `/marke/`, fremde `pixel-engine.js` und `image-slot.js`).
+- Ein Code-Beispiel, das `var(--mc-navy)` ZEIGEN soll, schreibt `var(--mc-navy)` (sonst löst der Build es auf). Kurze Aliase aus `colors.css` (`--accent`, `--text-body` …) gehören nur den Designsystem-Karten; der Build löst sie nicht auf, die Sperre meldet sie in einer Seite.
+- 404 und Coming soon: Quelle `mccain-design-system/static/`, der Build schreibt `404.html` und `coming-soon/index.html`. **Dort nie direkt editieren.**
+- `NOT_PUBLISHED`-Artboards (Designstudien) sind nicht umgestellt und nicht bewacht.
+
+**Palette D (Rollen in colors.css):**
+- Hell: Aktion `--mc-action` Navy, Hover `--mc-action-hover` `#1A3A6E`, Tönung `--mc-action-tint` `#E8EDF5`. Dunkle Fläche `--mc-plate` (heute gleicher Wert, andere Rolle).
+- Navy-Sektionen: Aktion `--mc-dark-accent` Himmel mit Navy-Schrift `--mc-dark-accent-text`, Text `--mc-dark-text-2`, gedämpft `--mc-dark-muted`.
+- **Warm und Blau mischen nie direkt**: Violett nur mit Pink/Orange/Rose, Navy nur mit Himmel. Ausnahme (Owner-Entscheid A): **Logo und Pixelstrom** behalten Violett → Himmel.
+- Verlaufs-Überschriften: `--mc-heading-gradient` = `--mc-sky-ink` `#0099F5` → Violett → Pink (Owner: „mit dem hellen Blau starten, farbenfroher, so wie bei Individualsoftware“). `#5FC3FF` selbst hätte 2,0:1 → für Schrift `--mc-sky-ink` (3,05:1).
+- Doppelgänger-Tokens (z. B. `--mc-grey-450/451`) sind markiert — zusammenführen ist eine sichtbare Änderung, nur mit Owner.
+
+**Erledigt (19.9.):** Tokenisierung (18.580 Werte, Rollen aus dem Stand vor Palette D zurückgewonnen), Nachweis ohne Farbänderung (alle Seiten gleich bis auf 404/Coming soon), Indigo-Reste auf Rollen, Mischregel, Überschriften, doppelte Icons auf der KI-Seite (`runtime.js` `bindText`), Skill `neue-webseite` Phase 4 „Farben NUR über Tokens — mit Build-Sperre“.
+
+**Stand 19.9. ~15:30: committet und gepusht** (`git log -1`), Deploy auf https://mccain-digital.vercel.app/. Vorher: `verify_site` 0 FAIL, Farbsperre mit Absicht-Fehler gegengeprüft, Code-Review der Werkzeuge (3 Befunde behoben: Sperre kennt `hsl()`/8-stelliges Hex/Leerzeichen-`rgb()` und die kurzen Aliase; `prodserve.py` 500 statt Abbruch, wenn Node fehlt). `v5build` tauscht in `vercel.json` nur noch den CSP-Wert (vorher formatierte er die Datei neu).
+- **Lehre:** `prodserve.py` liest `vercel.json` (CSP) nur beim Start. Nach einem Build, der den Skript-Hash ändert, den Server neu starten — sonst blockiert die alte CSP das Formular-Skript und `verify_site` meldet Konsolenfehler und „kein Request an Web3Forms“. Auf Windows können zwei Server denselben Port halten; `netstat -ano | grep :8898` zeigt, ob noch ein alter antwortet.
+
+**Offen:**
+1. Owner-Blick auf die Überschriften (Übergang Blau → Violett zeigt kurz Periwinkle; kürzer = eine Zeile im Token).
+2. Marken-Dateien unter `brand/` (Lockups, OG-Bilder, Icons) sind statische SVG/PNG mit festen Farben — nächster Schritt: aus Tokens erzeugen.
+3. Designsystem-Karten (`guidelines/`, `components/`) lesen `tokens/colors.css` schon über `styles.css`, tragen aber noch eigene Literale.
+4. Das Token-Beispiel im Markenleitfaden nennt noch die alten Namen (`--mc-paper` = `#F6F9FC`, `--mc-hair`) — auf die Namen der Token-Datei umstellen.
+5. Werkstatt (`werkstatt/dev.css`) hat eigene `--wk-*`-Tokens — an `colors.css` anbinden.
+
 ## ▶ STAND 18.9. ABENDS — mccain-digital.com ZEIGT COMING SOON (live, gemessen)
 
 Owner: Texte und Bilder nicht final, Go-live später (Textrunde am Wochenende).

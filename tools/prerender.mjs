@@ -69,6 +69,8 @@ import { fileURLToPath } from "node:url";
 import * as esbuild from "esbuild";
 import { launch, open, settle } from "./browser.mjs";
 import { NOT_PUBLISHED, ORIGIN, PAGES } from "./pages.mjs";
+import { resolveColors, token } from "./tokens.mjs";
+import { checkSources } from "./color_guard.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SITE = path.dirname(HERE);
@@ -176,6 +178,11 @@ const DERIVED = [
 /* One switch for the whole site - see site.config.json for why it is a file and
  * not a constant in here. */
 const CONFIG = JSON.parse(fs.readFileSync(path.join(SITE, "site.config.json"), "utf8"));
+/* A colour is written in ONE place (tools/color_guard.mjs) - fail before four minutes of rendering, not after. */
+{
+  const found = checkSources();
+  if (found.length) throw new Error(`prerender: ${found.length} colour literal(s) outside tokens/colors.css\n  ` + found.slice(0, 12).join("\n  "));
+}
 const ROBOTS = CONFIG.noindex
   ? "noindex, follow"
   : "index, follow, max-image-preview:large, max-snippet:-1";
@@ -599,7 +606,8 @@ const FORM_PATCH_TO =
  * back to editable and says so - the design has no error state, so the message
  * is appended with role="alert" and names the address to write to instead.
  * Nothing here ever shows the success panel for a request that did not land. */
-const FORM_RUNTIME = `<script>/* contact delivery - injected by tools/prerender.mjs */
+/* Its colours are tokens (mccain-design-system/tokens/colors.css), resolved here. */
+const FORM_RUNTIME = resolveColors(`<script>/* contact delivery - injected by tools/prerender.mjs */
 (function(){window.__mcdSend=function(form,fd,onSent){
 if(!form||!fd){return;}
 fd.delete('company');
@@ -619,9 +627,9 @@ if(btn){btn.disabled=false;btn.removeAttribute('aria-busy');btn.textContent=btnT
 var box=form.querySelector('.mcd-form-error');
 if(!box){box=document.createElement('p');box.className='mcd-form-error';
 box.setAttribute('role','alert');
-box.style.cssText='margin:12px 0 0;padding:12px 14px;border-radius:10px;border:1px solid #E3E8EE;border-left:3px solid #E5484D;background:#F6F9FC;color:#0A2540;font-size:14px;line-height:1.5';
+box.style.cssText='margin:12px 0 0;padding:12px 14px;border-radius:10px;border:1px solid var(--mc-line);border-left:3px solid var(--mc-danger);background:var(--mc-surface);color:var(--mc-navy);font-size:14px;line-height:1.5';
 form.appendChild(box);}
-box.innerHTML=en?'The form could not be sent. Please write to us directly at <a href="mailto:info@mccain-digital.com" style="color:#4D47C7;text-decoration:underline">info@mccain-digital.com</a>.':'Das Formular konnte nicht gesendet werden. Bitte schreiben Sie uns direkt an <a href="mailto:info@mccain-digital.com" style="color:#4D47C7;text-decoration:underline">info@mccain-digital.com</a>.';});};})();</script>`;
+box.innerHTML=en?'The form could not be sent. Please write to us directly at <a href="mailto:info@mccain-digital.com" style="color:var(--mc-action-text);text-decoration:underline">info@mccain-digital.com</a>.':'Das Formular konnte nicht gesendet werden. Bitte schreiben Sie uns direkt an <a href="mailto:info@mccain-digital.com" style="color:var(--mc-action-text);text-decoration:underline">info@mccain-digital.com</a>.';});};})();</script>`);
 
 /* The brand guide's icon gallery hands an ARRAY of sub-paths to a single
  * <path d>, so the runtime stringifies it with commas and Blink rejects it:
@@ -1514,7 +1522,7 @@ function metaOf(src, page) {
   const title = pick(/<title>([\s\S]*?)<\/title>/);
   const desc = pick(/<meta name="description" content="([^"]*)"/);
   const ogImage = pick(/<meta property="og:image" content="([^"]*)"/);
-  const themeColor = pick(/<meta name="theme-color" content="([^"]*)"/) || "#635BFF";
+  const themeColor = pick(/<meta name="theme-color" content="([^"]*)"/) || token("mc-plate");
   const declared = pick(/<link rel="canonical" href="([^"]*)"/);
   const ld = h.match(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g) || [];
 
@@ -1640,6 +1648,20 @@ for (const f of VENDOR_REACT) {
 }
 
 const { browser, context } = await launch(1440, 900);
+
+/* THE ARTBOARDS WRITE TOKENS, THE BROWSER GETS VALUES. An artboard says
+ * var(--mc-navy), also inside JS strings a canvas or WebGL parses - so every
+ * artboard this build opens in a browser is answered here with its tokens
+ * resolved (tools/tokens.mjs), the same text the fs read below sees. Without
+ * this the render and the script it ships beside would disagree. */
+await context.route(
+  (url) => url.pathname.startsWith("/mccain-design-system/") && url.pathname.endsWith(".dc.html"),
+  async (route) => {
+    const file = path.join(SITE, decodeURIComponent(new URL(route.request().url()).pathname));
+    if (!fs.existsSync(file)) return route.continue();
+    await route.fulfill({ status: 200, contentType: "text/html; charset=utf-8", body: resolveColors(fs.readFileSync(file, "utf8")) });
+  }
+);
 
 /* ------------------------------------------------- the build-time render */
 /* THE MARKUP IS RENDERED BY REACT, NOT SCRAPED OUT OF A BROWSER.
@@ -1843,7 +1865,7 @@ for (const page of PAGES) {
   const snap = await grab(tab, page.h1, page.src);
   await tab.close();
 
-  const src = fs.readFileSync(srcFile, "utf8");
+  const src = resolveColors(fs.readFileSync(srcFile, "utf8"));
   const openTag = /<x-dc(?:\s[^>]*)?>/.exec(src);
   const closeAt = src.lastIndexOf("</x-dc>");
   if (!openTag || closeAt < 0) throw new Error(`prerender: no <x-dc> block in ${page.src}`);

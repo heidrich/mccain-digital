@@ -19,6 +19,7 @@ import gzip
 import io
 import json
 import os
+import subprocess
 import sys
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
@@ -111,6 +112,27 @@ class Handler(SimpleHTTPRequestHandler):
 
     def send_head(self):
         path = self.translate_path(self.path)
+        # THE ARTBOARDS WRITE TOKENS (19.9.2026). An artboard says var(--mc-navy),
+        # also inside JS strings a canvas parses; the build resolves that through
+        # tools/tokens.mjs, and so does this server, so an artboard opened straight
+        # out of mccain-design-system/ looks like the page it builds.
+        rel = self.path.split("?")[0]
+        if rel.startswith("/mccain-design-system/") and (rel.endswith(".dc.html") or "/static/" in rel) and os.path.isfile(path):
+            try:
+                out = subprocess.run(["node", os.path.join(ROOT, "tools", "tokens.mjs"), "--resolve", path],
+                                     capture_output=True)
+            except OSError as exc:
+                self.send_error(500, "tokens.mjs: node did not start (%s)" % exc)
+                return None
+            if out.returncode != 0:
+                self.send_error(500, "tokens.mjs: " + out.stderr.decode("utf-8", "replace")[:200])
+                return None
+            body = out.stdout
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            return io.BytesIO(body)
         if os.path.isdir(path):
             # A DIRECTORY REQUEST IS A PAGE REQUEST, AND IT WAS NOT BEING GZIPPED.
             #

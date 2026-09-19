@@ -23,7 +23,7 @@
 <meta name="description" content="McCain Digital, Digital Product Studio aus Bayern: KI, Web-Apps, Websites und Individualsoftware. Unsere neue Website entsteht gerade – erreichen Sie uns direkt.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://mccain-digital.com/coming-soon/">
-<meta name="theme-color" content="#0A1F44">
+<meta name="theme-color" content="var(--mc-plate)">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="McCain Digital">
 <meta property="og:title" content="McCain Digital — Neue Website in Kürze">
@@ -45,16 +45,16 @@
    site's own, so what ships carries the values, and a token change reaches it
    too. --mc-muted is left out on purpose: 4.05:1 on white fails AA for text
    under 18 px. */
-:root{--acc:#0A1F44;--acc-text:#0A1F44;--ink:#0A2540;--slate:#425466;
-  --line:#E3E8EE;--ring:rgba(10,31,68,.28);--wash:rgba(10,31,68,.1);
-  --stream:linear-gradient(135deg,#FFB46B 0%,#FF5A8C 32%,#C05CFF 62%,#5FC3FF 100%)}
+:root{--acc:var(--mc-action);--acc-text:var(--mc-action-text);--ink:var(--mc-navy);--slate:var(--mc-slate);
+  --line:var(--mc-line);--ring:color-mix(in srgb, var(--mc-action) 28%, transparent);--wash:color-mix(in srgb, var(--mc-action) 10%, transparent);
+  --stream:var(--mc-stream)}
 *,*::before,*::after{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;background:#FFFFFF;color-scheme:light}
+html{-webkit-text-size-adjust:100%;background:var(--mc-white);color-scheme:light}
 body{margin:0;min-height:100vh;min-height:100svh;display:flex;flex-direction:column;
   font-family:'Instrument Sans',system-ui,-apple-system,sans-serif;color:var(--ink);
   -webkit-font-smoothing:antialiased;background:
-    radial-gradient(1100px 560px at 50% -12%,var(--wash),transparent 70%),#FFFFFF}
-.skip{position:absolute;left:12px;top:-60px;padding:10px 14px;border-radius:8px;background:var(--ink);color:#FFFFFF;font-weight:600;text-decoration:none;z-index:9}
+    radial-gradient(1100px 560px at 50% -12%,var(--wash),transparent 70%),var(--mc-white)}
+.skip{position:absolute;left:12px;top:-60px;padding:10px 14px;border-radius:8px;background:var(--ink);color:var(--mc-white);font-weight:600;text-decoration:none;z-index:9}
 .skip:focus{top:12px}
 header.top{display:flex;align-items:center;padding:14px 24px}
 .brand{display:inline-flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.01em}
@@ -75,7 +75,7 @@ h1 .grad{background:var(--stream);-webkit-background-clip:text;background-clip:t
    twice the width of the line and repeats, so the held frame matches the first. */
 .stream{margin:34px auto 0;width:min(280px,70%);height:3px;border-radius:3px;overflow:hidden}
 .stream::before{content:"";display:block;width:200%;height:100%;
-  background:linear-gradient(90deg,#FFB46B,#FF5A8C,#C05CFF,#5FC3FF,#FFB46B,#FF5A8C,#C05CFF,#5FC3FF,#FFB46B);
+  background:linear-gradient(90deg,var(--mc-orange),var(--mc-pink),var(--mc-violet),var(--mc-sky),var(--mc-orange),var(--mc-pink),var(--mc-violet),var(--mc-sky),var(--mc-orange));
   animation:flow 3s linear 2}
 p.lead{margin:30px auto 0;max-width:48ch;font-size:17px;line-height:1.6;color:var(--slate);text-wrap:pretty}
 p.lead[lang=en]{margin-top:10px;font-size:15px}
@@ -83,9 +83,9 @@ p.lead[lang=en]{margin-top:10px;font-size:15px}
 a.btn{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:12px 20px;border-radius:10px;
   font-size:15px;font-weight:600;text-decoration:none;transition:transform .15s}
 a.btn svg{width:18px;height:18px;flex:none}
-a.primary{background:var(--acc);color:#FFFFFF}
+a.primary{background:var(--acc);color:var(--mc-white)}
 a.primary:hover{background:var(--ink);transform:translateY(-1px)}
-a.ghost{background:#FFFFFF;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+a.ghost{background:var(--mc-white);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
 a.ghost:hover{box-shadow:inset 0 0 0 1px var(--ring);transform:translateY(-1px)}
 a.btn:focus-visible,footer a:focus-visible,.brand:focus-visible{outline:3px solid var(--ring);outline-offset:3px}
 address{margin-top:28px;font-style:normal;font-size:14px;line-height:1.6;color:var(--slate)}
@@ -95,7 +95,7 @@ footer a:hover{color:var(--acc-text)}
 @keyframes flow{to{transform:translateX(-50%)}}
 @keyframes beat{0%{opacity:.6;transform:scale(.6)}100%{opacity:0;transform:scale(1.6)}}
 @media (prefers-reduced-motion:reduce){.stream::before,.dot::after{animation:none}a.btn{transition:none}a.btn:hover{transform:none}}
-@media print{.skip,.stream,footer{display:none}body{background:#FFFFFF}}
+@media print{.skip,.stream,footer{display:none}body{background:var(--mc-white)}}
 </style>
 </head>
 <body>
