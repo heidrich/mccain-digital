@@ -785,16 +785,29 @@ const MUST_404 = [
 if (BASE.startsWith("http") && !BASE.includes("127.0.0.1")) {
   console.log("\n  must not be reachable");
   for (const p of MUST_404) {
-    let status = 0;
+    /* Vercel answers ".../index.html" with 308 to the folder before it looks
+     * for the file, so a redirect alone proves nothing: follow same-origin
+     * hops (at most three) and judge where the request ends. */
+    const hops = [];
+    let url = BASE + p;
     try {
-      const res = await fetch(BASE + p, { method: "GET", redirect: "manual" });
-      status = res.status;
+      for (let i = 0; i < 4; i++) {
+        const res = await fetch(url, { method: "GET", redirect: "manual" });
+        hops.push(res.status);
+        const next = res.status >= 300 && res.status < 400 && res.headers.get("location");
+        if (!next || i === 3) break;
+        const target = new URL(next, url);
+        if (target.origin !== new URL(BASE).origin) break;
+        url = target.href;
+      }
     } catch {
-      status = -1;
+      hops.push(-1);
     }
+    const status = hops[hops.length - 1];
     const good = status === 404 || status === 401 || status === 403;
-    console.log(`    ${ok(good)} ${String(status).padStart(3)}  ${p}`);
-    if (!good) fail(`${p} is reachable (${status}) - it must be in .vercelignore`);
+    const shown = hops.join("→");
+    console.log(`    ${ok(good)} ${shown.padStart(3)}  ${p}`);
+    if (!good) fail(`${p} is reachable (${shown}) - it must be in .vercelignore`);
   }
 }
 

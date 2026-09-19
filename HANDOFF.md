@@ -1,6 +1,26 @@
 # Uebergabe — Stand 17. September 2026
 
-## ▶ STAND 19.9. NACHTS — FARBEN NUR NOCH ÜBER TOKENS, PALETTE D „NAVY + HIMMEL“ — ZUERST LESEN
+## ▶ NEUE SITZUNG AB 19.9. ABENDS — NÄCHSTE AUFGABE: WEBSEITEN-POLISH — ZUERST LESEN
+
+**Owner 19.9.:** „wir machen dann weiter mit Webseiten-Polish, alles andere sollte ja abgearbeitet sein“. Die Sitzung wurde neu gestartet, weil in der alten keine Bilder mehr gingen. **Der Owner schickt Screenshots; welche Stellen zuerst dran sind, sagt er. Nicht raten, nicht selbst eine Liste abarbeiten.**
+
+**Stand, alles gepusht:**
+- Farben kommen nur aus `mccain-design-system/tokens/colors.css`, Palette D ist live auf https://mccain-digital.vercel.app/ (`7b26e37`). `mccain-digital.com` zeigt Coming soon, jetzt mit Navy statt Indigo. Die Regeln stehen im Block darunter.
+- md-cms und md-portal sind ebenfalls auf Palette D (design-system-8 auf `main` der mccain-cms, `65e078e`). Das ist nicht Teil dieses Repos und steht nur zur Einordnung hier.
+
+**Arbeitsweise für den Polish:**
+- Eine Farbe wird **nur** in `colors.css` geändert. Neue Farbe = neues Token dort, im Artboard `var(--mc-…)`. Die Sperre bricht sonst den Build ab. Farben und Schriften ändern nur mit Owner-Freigabe.
+- Server: `python prodserve.py 8898 --dev`; Owner prüft lokal auf http://localhost:8898/.
+  - **Nach jedem Build, der ein Inline-Skript ändert, den Server neu starten.** Er liest die CSP aus `vercel.json` nur beim Start.
+  - **Auf Windows können zwei Server auf demselben Port lauschen.** `netstat -ano | grep ":8898 "` muss genau eine Listener-Zeile zeigen. Beenden nur über die PID, nie über den Namen.
+- Build:
+  - voll: `node tools/prerender.mjs` (≈ 4 min), dann `node tools/v5build.mjs`, dann `node tools/verify_site.mjs`;
+  - eine Seite: `node tools/v5build.mjs --route <route>`.
+  - Gegen live prüfen: `MCD_BASE=https://mccain-digital.vercel.app node tools/verify_site.mjs`.
+- Farbrest-Prüfung im Bild: `node tools/hue_scan.mjs <routenteil>` (Indigo-/Violett-Band je Element).
+- Push auf `main` = Deploy auf vercel.app; der Coming-soon-Stand geht mit auf `.com`.
+
+## ▶ STAND 19.9. NACHTS — FARBEN NUR NOCH ÜBER TOKENS, PALETTE D „NAVY + HIMMEL“
 
 **Owner 19.9.:** „das Indigo raus, Brand etc. alles anpassen und Style Guide“ → dann „wir können keine aufwendigen Webseiten bauen, wenn wir jede Seite anfassen müssen, nur um eine Farbe zu ändern. Das sollten wir umstellen!“ Und: „wesentlich seriöser und erwachsener, ohne den lockeren Stil zu verlieren; wesentlich besser lesbar“. Owner prüft lokal auf **http://localhost:8898/** bzw. nach dem Push auf **https://mccain-digital.vercel.app/** (`.com` = Coming soon).
 
