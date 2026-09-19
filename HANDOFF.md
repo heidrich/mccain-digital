@@ -1,22 +1,20 @@
 # Uebergabe — Stand 19. September 2026
 
-## ▶▶ STAND 19.9. ABENDS (~20 Uhr) — POLISH RUNDE 2: FINALER BUILD + PRÜFUNG, DANN COMMIT + PUSH (Owner: „wenn der wieder raus ist, pushen und compact vorbereiten“)
+## ▶▶ STAND 19.9. ABENDS (~21 Uhr) — POLISH RUNDE 2 GEPUSHT (`d68f98f`), NÄCHSTE RUNDE WARTET AUF DEN OWNER
 
-**Gepusht:** Runde 1 (`e4751a3`) und Live-Reload im Dev-Server (`68d52e0`). **Dev-Server:** `python prodserve.py 8898 --dev` lädt jede Seite neu, wenn sich die Dateien dahinter ändern (Rohansicht: Artboard + colors.css; gebaute Seite: nach dem Build). Übersicht aller Artboards: <http://localhost:8898/__dev>. **Owner-Lehre (19.9.):** „ich schaue seit 2 h auf den gleichen Build“ – nie Änderungen sammeln, ohne sie in die gebaute Seite zu bringen; nach jedem sichtbaren Schritt bauen oder auf die Rohansicht verweisen, und selbst im Browser ansehen, bevor „fertig“ gesagt wird.
+**Gepusht auf `main`:** Runde 1 (`e4751a3`), Live-Reload im Dev-Server (`68d52e0`), Runde 2 (`d68f98f`). `verify_site`: alle Tore grün, inkl. der neuen „nichts abgeschnitten“ und „Kopfzeile passt“ – beide gegen live gegengeprobt (finden dort die alten Fehler). Owner nach Runde 2: „Super coole Arbeit!“
 
-**Runde 2, in der Arbeitskopie (nicht committet), alles auf allen 23 Artboards per Skript mit Zählprüfung (`internal/polish-0919/tools/`):**
+**Arbeitsweise (Owner-Lehre 19.9.):** Änderungen sofort sichtbar machen – nach jedem sichtbaren Schritt bauen (`prerender --route X` + `v5build --route X`, mit `MSYS_NO_PATHCONV=1` in Git Bash) oder den Rohansicht-Link geben, selbst ansehen, bevor „fertig“. Dev-Server `python prodserve.py 8898 --dev` lädt Seiten bei Änderungen selbst neu; Übersicht aller Artboards <http://localhost:8898/__dev>. Der Owner korrigiert schnell, wenn er sieht (4 Runden in einer Stunde).
 
-- `nav-patch.mjs`: `static SELF`/`TRAIL`/`CRUMB_UP`, Menü „Software“ (360 „Bald“), Kunden-Login-Dropdown, Fußzeilen-Spalte Software, mobile Gruppen, Kopfzeilen-Stufen (<1180 Menü-Knopf, <1280 ohne DE/EN, <1400 Suche nur Symbol), md-recall-Zeichen in `cases`/`resItems`, Lighthouse-Beschriftung `{{ l.k }}` in der Vorlage. `lh-revert.mjs` hat einen Fehlgriff des ersten Laufs zurückgenommen (die Daten waren schon Objekte).
-- `navpad.mjs`: Menüpunkte unter 1400 einheitlich 8 px (Puffer für die 17-px-Scrollleiste unter Windows).
-- `active-dot.mjs` (Owner): Kopfzeile ohne graue Pille, nur Punkt; Fußzeile nur Punkt davor.
-- Brotkrumen-Pille: `crumb-navy.mjs` → `crumb-edge.mjs` (Variante 2 „auf der Kante“, Rand füllt sich im Verlauf) → `crumb-resize.mjs` (Review-Befund) → **`crumb-remove.mjs`: wieder raus** (Owner nach dem Blick auf die gebaute Seite: „sau cool, aber der nimmt den ganzen Fokus von der Seite weg“). Demo mit fünf Varianten bleibt in `internal/polish-0919/crumb/`; `TRAIL` bleibt (aktiver Menüpunkt), `up`/`here`/`CRUMB_UP` für eine Rückkehr.
-- `modal-port.mjs` (Agent): kompakte Chip-Modals der Startseite auf 22 Unterseiten.
-- Agenten: Kacheln A (v2 `#work`, Studio `#produkte`), News-Übersicht 1440 + Filter, Produktseiten md-cms/md-portal (Routen in `tools/pages.mjs`, `LIVE_PAGES`).
-- `tools/v5build.mjs`: Umschaltpunkte 1280 und 1400 ergänzt (ohne sie zeigte der Build ab 1180 überall die 1280er-Kopfzeile), Tools-Band A (Navy + Mini-Inspektor mit den drei echten Ansichten der Tools). `tools/prerender.mjs`: `EXPORT_FIXES` leer (Korrektur jetzt in der Quelle). `tools/verify_site.mjs`: Prüftor „Kopfzeile passt“ (1000–1440, beidseits jeder Stufe).
+**Was Runde 2 enthält** (Details im CHANGELOG): Menü „Software“ (360 „Bald“), Kunden-Login-Dropdown, aktive Punkte (Kopfzeile: fett + Himmelpunkt, ohne graue Pille; Fußzeile: Punkt davor), Kopfzeilen-Stufen 1180/1280/1400 (+ Umschaltpunkte in `tools/v5build.mjs`), /md-cms/ und /md-portal/, md-recall-Zeichen, kompakte Chip-Modals auf den Unterseiten, Kacheln A, News 1440 + Filter, Tools-Band A. **Brotkrumen-Pille: gebaut und auf Owner-Wunsch wieder raus** („nimmt den Fokus von der Seite“); Demo mit fünf Varianten in `internal/polish-0919/crumb/`, `TRAIL`/`CRUMB_UP` bleiben. Alle Artboard-Änderungen liefen über zählgeprüfte Skripte in `internal/polish-0919/tools/` (Reihenfolge im CHANGELOG).
 
-**Nächste Schritte:** Höhen sind gemessen (`tools/v5-heights.json`, 23 Seiten). Finaler Lauf prerender → v5build → verify_site läuft (Logs `$TEMP/mcd-*.log`). Code-Review (Agent) erledigt: 3 Befunde behoben (Kopfzeilen-Tor: leere Kopfzeile + Seite mit „Software“ aktiv; Resize – durch das Entfernen der Pille erledigt), 3 als harmlos belassen. Dann Commit (Artboards, `brand/md-recall-mark*` + `mccain-design-system/brand/md-recall-mark*`, Build-Ausgaben inkl. `md-cms/`, `md-portal/`, tools, `internal/polish-0919/` inkl. `crumb/` und `tools/`; NICHT `.claude/skills/html-performance/scripts/package-lock.json`), Push auf `main`. Punkt 14 dem Owner nennen: /md-cms/ ist gebaut, ehrlich getrennt in live und „Als Nächstes“ (Editor fehlt noch).
-
-**Offen danach:** Studio „Eigene Produkte“ zeigt nur md-recall + die Website, nicht md-cms/md-portal (Owner fragen). Schwellen außerhalb der Build-Umschaltpunkte (700, 860, 980, 1100) werden im Build auf die Stufe gerundet – bestehend, prüfen. Handy-Menü markiert die aktuelle Seite nicht.
+**Offen / Owner fragen:**
+1. Punkt 14: /md-cms/ ist live gebaut, ehrlich getrennt in „live“ und „Als Nächstes“ (der Editor fehlt noch) – Owner hat das noch nicht bestätigt.
+2. Studio „Eigene Produkte“ zeigt nur md-recall + die Website, nicht md-cms/md-portal – ergänzen?
+3. Handy-Menü markiert die aktuelle Seite nicht.
+4. vw-Schwellen außerhalb der Build-Umschaltpunkte (700, 860, 980, 1100 in einzelnen Artboards) werden im Build auf die Stufe gerundet – bestehend, prüfen.
+5. Alte Logo-Dateien `brand/mccain-recall-logo-128.png`/`.webp` liegen noch – Verweise prüfen, dann weg.
+6. `internal/polish-0919/tools/navshots.mjs` schreibt in einen festen Scratchpad-Pfad (nur intern).
 
 ## ▶ POLISH RUNDE 1 (19.9. ABENDS) — STAND UND WAS AUF DEN OWNER WARTET
 
