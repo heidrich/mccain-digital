@@ -59,8 +59,6 @@ Mo–Fr · 9:00–18:00 Uhr (MEZ)
 
 Post und Rechnungsadresse stehen im Impressum. Telefonisch am besten nach einer kurzen Mail – dann sind wir vorbereitet.
 
-[Schon ein Projekt im Kopf? Stellen Sie es im Konfigurator zusammen – Größenordnung und Dauer stehen sofort da, die Aufstellung schicken Sie von dort direkt an uns.](https://mccain-digital.com/preise/#rechner)
-
 Erst fragen?
 
 Die Konsole kennt Preise, Ablauf und Stack. Die Antwort erscheint im Chat unten rechts.

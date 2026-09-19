@@ -309,7 +309,7 @@ class Component extends DCLogic {
     const C = Component.CFG, L = this.loc(C.copy), sel = this.state.cfgSel || [], isDesktop = this.state.vw >= 960;
     const picked = C.items.filter((o) => sel.indexOf(o.id) >= 0);
     return { cfg: Object.assign({}, L, {
-      cols: isDesktop ? '1.08fr .92fr' : '1fr',
+      cols: isDesktop ? '1.08fr .92fr' : 'minmax(0, 1fr)',
       count: String(picked.length), isEmpty: picked.length === 0,
       chosen: picked.map((o) => ({ label: this.loc(o.label) })),
       items: C.items.map((o) => { const on = sel.indexOf(o.id) >= 0; return { label: this.loc(o.label), on, toggle: () => this.cfgToggle(o.id),
@@ -429,7 +429,7 @@ class Component extends DCLogic {
     });
     const act = set.steps[si];
     const proc = Object.assign({}, K.proc, {
-      metrics, steps: procSteps, shellCols: S.vw >= 1100 ? '280px minmax(0,1fr)' : '1fr', innerCols: S.vw >= 860 ? 'minmax(0,1fr) minmax(0,1fr)' : '1fr',
+      metrics, steps: procSteps, shellCols: S.vw >= 1100 ? '280px minmax(0,1fr)' : 'minmax(0, 1fr)', innerCols: S.vw >= 860 ? 'minmax(0,1fr) minmax(0,1fr)' : 'minmax(0, 1fr)',
       leave: () => this.setState({ procHover: null }), stepCounter: (si + 1) + ' / ' + set.steps.length, stepProgress: (((si + 1) / set.steps.length) * 100).toFixed(0) + '%',
       anim: 'fadeIn ' + (S.procMode ? '.34s' : '.35s') + ' ease both', detailAnim: 'fadeUp ' + (si % 2 ? '.4s' : '.41s') + ' cubic-bezier(.2,.8,.2,1) both',
       modes: K.proc.modes.map((label, i) => { const on = S.procMode === i; return { label, on, pick: () => { this.procPause = performance.now() + 12000; this.setState({ procMode: i, procStep: 0 }); }, bg: on ? (i ? '#0E8A4C' : '#0A2540') : 'transparent', fg: on ? '#FFFFFF' : '#425466', sh: on ? '0 10px 24px -12px rgba(10,37,64,.7)' : 'none' }; }),
@@ -437,13 +437,13 @@ class Component extends DCLogic {
     });
     const ii = Math.max(0, Math.min(S.integNode, K.integ.spokes.length - 1));
     const POS = [[50, 6], [88, 27], [88, 73], [50, 94], [12, 73], [12, 27]];
-    const AR = 0.82; const spokes = K.integ.spokes.map((n, i) => { const on = ii === i, p = POS[i] || [50, 50]; const dx = p[0] - 50, dy = (p[1] - 50) * AR; const deg = Math.atan2(dy, dx) * 180 / Math.PI; const len = Math.sqrt(dx * dx + dy * dy); return { label: n.label, on, aria: n.label + ' – ' + n.kind, pick: () => { this.integPause = performance.now() + 12000; this.setState({ integNode: i }); }, left: p[0] + '%', top: p[1] + '%', scale: on ? '1.05' : '1', bg: on ? 'var(--acc)' : 'rgba(20,39,95,.9)', fg: on ? '#FFFFFF' : '#C8D4E8', ring: on ? '0 0 0 1px rgba(95,195,255,.55), 0 0 0 5px rgba(10,31,68,.16), 0 20px 44px -16px rgba(10,31,68,.9)' : 'inset 0 0 0 1px rgba(157,177,210,.2), 0 10px 26px -18px rgba(4,12,30,.9)', dot: on ? '#FFFFFF' : '#C084FC', deg: deg.toFixed(2) + 'deg', lineW: len.toFixed(2) + '%', lineH: on ? '1.5px' : '1px', lineFrom: on ? 'rgba(95,195,255,.85)' : 'rgba(157,177,210,.26)', lineTo: on ? 'rgba(95,195,255,.1)' : 'rgba(157,177,210,.04)', pulseOp: on ? '1' : '0', pulseAnim: on ? 'spokePulse 2.6s cubic-bezier(.4,0,.5,1) infinite' : 'none' }; });
+    const AR = 0.82; const spokes = K.integ.spokes.map((n, i) => { const on = ii === i, p = POS[i] || [50, 50], edge = Math.ceil((String(n.label).length * 8 + 46) * 1.06 / 2); const dx = p[0] - 50, dy = (p[1] - 50) * AR; const deg = Math.atan2(dy, dx) * 180 / Math.PI; const len = Math.sqrt(dx * dx + dy * dy); return { label: n.label, on, aria: n.label + ' – ' + n.kind, pick: () => { this.integPause = performance.now() + 12000; this.setState({ integNode: i }); }, left: 'clamp(' + edge + 'px, ' + p[0] + '%, calc(100% - ' + edge + 'px))', top: p[1] + '%', scale: on ? '1.05' : '1', bg: on ? 'var(--acc)' : 'rgba(20,39,95,.9)', fg: on ? '#FFFFFF' : '#C8D4E8', ring: on ? '0 0 0 1px rgba(95,195,255,.55), 0 0 0 5px rgba(10,31,68,.16), 0 20px 44px -16px rgba(10,31,68,.9)' : 'inset 0 0 0 1px rgba(157,177,210,.2), 0 10px 26px -18px rgba(4,12,30,.9)', dot: on ? '#FFFFFF' : '#C084FC', deg: deg.toFixed(2) + 'deg', lineW: len.toFixed(2) + '%', lineH: on ? '1.5px' : '1px', lineFrom: on ? 'rgba(95,195,255,.85)' : 'rgba(157,177,210,.26)', lineTo: on ? 'rgba(95,195,255,.1)' : 'rgba(157,177,210,.04)', pulseOp: on ? '1' : '0', pulseAnim: on ? 'spokePulse 2.6s cubic-bezier(.4,0,.5,1) infinite' : 'none' }; });
     const dr = Math.max(0, Math.min(S.dashRange, 2));
     const kset = K.dash.kpiSets[dr];
     const rowsAll = K.dash.rowsData;
     const rows = rowsAll.slice(0, dr === 0 ? 5 : dr === 1 ? 6 : 7).map((r, i) => ({ name: r.name, sys: r.sys, val: r.val, state: r.st, dot: ['linear-gradient(135deg,#0A1F44,#5FC3FF)', 'linear-gradient(135deg,#C05CFF,#FF5A8C)', 'linear-gradient(135deg,#FF5A8C,#C05CFF)', 'linear-gradient(135deg,#FFB46B,#FF5A8C)'][i % 4], stFg: r.ok ? '#0E8A4C' : '#C2410C', stBg: r.ok ? 'rgba(21,190,83,.14)' : 'rgba(255,138,91,.18)', anim: 'fadeIn ' + (0.2 + i * 0.05).toFixed(2) + 's ease both' }));
     const dash = Object.assign({}, K.dash, {
-      cols: isDesktop ? '.88fr 1.12fr' : '1fr',
+      cols: isDesktop ? '.88fr 1.12fr' : 'minmax(0, 1fr)',
       ranges: K.dash.ranges.map((label, i) => { const on = dr === i; return { label, on, pick: () => this.setState({ dashRange: i }), bg: on ? '#FFFFFF' : 'transparent', fg: on ? '#0A2540' : '#5A6880', sh: on ? '0 1px 2px rgba(10,37,64,.14)' : 'none' }; }),
       kpis: K.dash.kpiLabels.map((l, i) => ({ l, v: kset[i], trend: K.dash.trends[i], bg: i === 2 ? 'rgba(255,180,107,.14)' : '#F6F9FC', fg: i === 2 ? '#C2410C' : '#0A2540', trendFg: i === 2 ? '#C2410C' : '#5E6D84' })),
       cols2: K.dash.cols.map((label, i) => ({ label, align: i > 1 ? 'right' : 'left' })), rows
@@ -465,10 +465,10 @@ class Component extends DCLogic {
     const faqItems = raw ? raw.faqs.map((f, i) => { const open = S.pgFaq === i; return Object.assign({}, f, { open, toggle: () => this.setState({ pgFaq: open ? -1 : i }), rows: open ? '1fr' : '0fr', rot: open ? 'rotate(45deg)' : 'rotate(0deg)', iconBg: open ? '#0A2540' : '#F0F3FA', iconFg: open ? '#FFFFFF' : '#0A2540', border: i === 0 ? '0' : '1px solid rgba(10,37,64,.08)' }); }) : [];
     return {
       bc: K.bc, hero: K.hero, statItems, proc, dash, capItems, ucItems, stepItems, faqItems,
-      heroCols: isDesktop ? '1.1fr .9fr' : '1fr', goProc: this.goHandler('prozess'),
-      integ: Object.assign({}, K.integ, { spokes, active: K.integ.spokes[ii], cols: isDesktop ? '1.05fr .95fr' : '1fr', anim: 'fadeUp ' + (ii % 2 ? '.4s' : '.41s') + ' cubic-bezier(.2,.8,.2,1) both' }),
-      caps: K.caps, uc: Object.assign({}, K.uc, { cols: isDesktop ? '1fr 1fr' : '1fr', rowCols: isDesktop ? '1.02fr .98fr' : '1fr', cta: t.common.cta }),
-      ask: Object.assign({}, K.ask, { cols: isDesktop ? '.9fr 1.1fr' : '1fr', submit: this.pageAsk, chips: K.ask.chips.map((label) => ({ label, ask: () => { if (this.aiInput) { this.aiInput.value = label; this.aiInput.focus(); try { this.aiInput.setSelectionRange(label.length, label.length); } catch (e) {} } } })) }),
+      heroCols: isDesktop ? '1.1fr .9fr' : 'minmax(0, 1fr)', goProc: this.goHandler('prozess'),
+      integ: Object.assign({}, K.integ, { spokes, active: K.integ.spokes[ii], cols: isDesktop ? '1.05fr .95fr' : 'minmax(0, 1fr)', anim: 'fadeUp ' + (ii % 2 ? '.4s' : '.41s') + ' cubic-bezier(.2,.8,.2,1) both' }),
+      caps: K.caps, uc: Object.assign({}, K.uc, { cols: isDesktop ? '1fr 1fr' : 'minmax(0, 1fr)', rowCols: isDesktop ? '1.02fr .98fr' : 'minmax(0, 1fr)', cta: t.common.cta }),
+      ask: Object.assign({}, K.ask, { cols: isDesktop ? '.9fr 1.1fr' : 'minmax(0, 1fr)', submit: this.pageAsk, chips: K.ask.chips.map((label) => ({ label, ask: () => { if (this.aiInput) { this.aiInput.value = label; this.aiInput.focus(); try { this.aiInput.setSelectionRange(label.length, label.length); } catch (e) {} } } })) }),
       steps: K.steps, faq: K.faq
     };
   }
@@ -485,7 +485,7 @@ class Component extends DCLogic {
       { k: 'recall', t: { de: 'Das Warum liegt bei', en: 'The reasoning comes with it' }, s: { de: 'md-recall hängt die Begründungen an die Zeile – für Ihr Team und für Ihre KI-Assistenten.', en: 'md-recall pins the reasoning to the line — for your team and for your AI assistants.' } }
     ]
   };
-  handover() { const H = this.loc(Component.HANDOVER), d = this.state.vw >= 960; return Object.assign({}, H, { cols: d ? '.85fr 1.15fr' : '1fr', itemCols: d ? 'repeat(3, minmax(0,1fr))' : this.state.vw >= 620 ? 'repeat(2, minmax(0,1fr))' : '1fr' }); }
+  handover() { const H = this.loc(Component.HANDOVER), d = this.state.vw >= 960; return Object.assign({}, H, { cols: d ? '.85fr 1.15fr' : 'minmax(0, 1fr)', itemCols: d ? 'repeat(3, minmax(0,1fr))' : this.state.vw >= 620 ? 'repeat(2, minmax(0,1fr))' : 'minmax(0, 1fr)' }); }
 
   faqLd() {
     try {
@@ -655,7 +655,7 @@ class Component extends DCLogic {
       dockRight: isDesktop ? '20px' : '12px', dockLeft: isDesktop ? 'auto' : (S.dockOpen ? '12px' : 'auto'), dockBottom: isDesktop ? '20px' : 'max(12px, env(safe-area-inset-bottom))', dockW: isDesktop ? 'min(380px, calc(100vw - 40px))' : '100%',
       tileGap: isDesktop ? '20px' : '14px', gridTop: isDesktop ? '52px' : '32px', tilePad: isDesktop ? '26px' : '20px', tileMinH: isDesktop ? '560px' : '460px', caseMinH: isDesktop ? '540px' : '440px',
       modalPad: isDesktop ? 'clamp(12px,3vw,40px) clamp(12px,3vw,40px) clamp(40px,6vw,80px)' : '56px 0 0', modalMargin: isDesktop ? '0 auto' : '0 auto -1px', modalMinH: isDesktop ? '0' : 'calc(100vh - 56px)', modalRadius: isDesktop ? '20px' : '20px 20px 0 0', modalInner: isDesktop ? 'clamp(28px,4vw,56px) clamp(22px,4.5vw,64px) clamp(32px,4vw,56px)' : '16px 20px 40px', closePos: isDesktop ? 'absolute' : 'sticky', closeMr: isDesktop ? '0' : '12px', closeMb: isDesktop ? '0' : '-44px', closeTop: isDesktop ? '22px' : '10px', stageH: isDesktop ? 'clamp(300px, 42vw, 500px)' : '300px', modalRise: S.modalIn ? 'none' : 'translateY(18px)',
-      heroCols: isDesktop ? '1.05fr .95fr' : '1fr', heroBCols: isDesktop ? '1.15fr .85fr' : '1fr', aiCols: isDesktop ? '.9fr 1.1fr' : '1fr', processCols: isDesktop ? '.8fr 1.2fr' : '1fr', faqCols: isDesktop ? '.8fr 1.2fr' : '1fr', contactCols: isDesktop ? '1fr 1fr' : '1fr', stickyPos: isDesktop ? 'sticky' : 'static',
+      heroCols: isDesktop ? '1.05fr .95fr' : 'minmax(0, 1fr)', heroBCols: isDesktop ? '1.15fr .85fr' : 'minmax(0, 1fr)', aiCols: isDesktop ? '.9fr 1.1fr' : 'minmax(0, 1fr)', processCols: isDesktop ? '.8fr 1.2fr' : 'minmax(0, 1fr)', faqCols: isDesktop ? '.8fr 1.2fr' : 'minmax(0, 1fr)', contactCols: isDesktop ? '1fr 1fr' : 'minmax(0, 1fr)', stickyPos: isDesktop ? 'sticky' : 'static',
       navShadow: S.scrolled ? '0 1px 0 #E3E8EE, 0 10px 30px -18px rgba(10,37,64,.18)' : '0 1px 0 #E3E8EE', caretTop: 69, panelTop: 76, indLeft: S.indLeft, indW: S.indW, indOp: menuOpen ? 1 : 0, indBg: 'rgba(10,37,64,.06)', brandsLoop: C.BRANDS.concat(C.BRANDS),
       navFg, markBg: onGradient ? '#FFFFFF' : '#0A2540', markFg: onGradient ? '#0A2540' : '#FFFFFF', toggleBorder: onGradient ? 'rgba(255,255,255,.35)' : 'rgba(10,37,64,.14)',
       ctaBg: onGradient ? '#FFFFFF' : 'var(--acc)', ctaFg: onGradient ? '#0A2540' : '#FFFFFF',
@@ -671,7 +671,7 @@ class Component extends DCLogic {
       askFg: S.aiMode === 'ask' ? '#FFFFFF' : '#9DB1D2', askLine: S.aiMode === 'ask' ? 'var(--acc)' : 'transparent', briefFg: S.aiMode === 'brief' ? '#FFFFFF' : '#9DB1D2', briefLine: S.aiMode === 'brief' ? 'var(--acc)' : 'transparent',
       setModeAsk: () => this.setState({ aiMode: 'ask' }), setModeBrief: () => this.setState({ aiMode: 'brief' }), aiThinking: S.aiPhase === 'thinking', aiTypingShown: S.aiPhase === 'typing', aiSubmit: this.aiSubmit,
       formIdle: !S.formSent, formSent: S.formSent, formSubmit: this.formSubmit,
-      streamPoints: (this._pts = x.points.concat(x.points).map(ptStyle)), heroLine: mkLine({ color: '#0A1F44', backgroundImage: 'linear-gradient(92deg,#0099F5 0%,#C05CFF 52%,#FF5A8C 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', paddingRight: '.04em' }), heroLineB: mkLine({ color: 'var(--acc)' }), showStatus: isDesktop && S.vw >= 1180, pillBg: onGradient ? 'rgba(255,255,255,.14)' : '#F6F9FC', progOp: S.scrolled ? 1 : 0, menuGradA: mg.gradA, menuGradB: mg.gradB, dl, integ, scale, bigStats, bars, opsRows, voices, pricing, fall: x.fall, fallCols: isDesktop ? '1.1fr .9fr' : '1fr', openRecall: (e) => this.openModal('case', 'recall', e), heroSubmit: this.heroSubmit, heroCta2: S.lang === 'de' ? 'So arbeitet die KI-Konsole' : 'How the AI console works', openDock: () => { if (this.state.aiVisible) { this.go('ai'); setTimeout(() => { if (this.aiInput) this.aiInput.focus(); }, 500); } else this.setState({ dockOpen: true }, () => setTimeout(() => { if (this.dockInput) this.dockInput.focus(); }, 60)); }, heroInputRef: (el) => { this.heroInput = el; }, heroAskHint: S.lang === 'de' ? 'Fragen Sie die Seite – z. B. „Was kostet eine Web-App?“' : 'Ask the site — e.g. “What does a web app cost?”', integNodes, integSys, sq, diagOverflow: S.vw < 760 ? 'auto' : 'visible', modalCols: isDesktop ? '1.1fr .9fr' : '1fr', modalAsk: this.modalAsk, focusAi: () => { if (this.aiInput) this.aiInput.focus(); }, openAiModal: () => this.openModal('service', 'ai'), openSoftwareModal: () => this.openModal('service', 'software'), modalOpen: !!S.modal, modalOp: S.modalIn ? 1 : 0, modalTf, modal, closeModal: this.closeModal, stop: this.stop, modalCta: this.modalCta
+      streamPoints: (this._pts = x.points.concat(x.points).map(ptStyle)), heroLine: mkLine({ color: '#0A1F44', backgroundImage: 'linear-gradient(92deg,#0099F5 0%,#C05CFF 52%,#FF5A8C 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', paddingRight: '.04em' }), heroLineB: mkLine({ color: 'var(--acc)' }), showStatus: isDesktop && S.vw >= 1180, pillBg: onGradient ? 'rgba(255,255,255,.14)' : '#F6F9FC', progOp: S.scrolled ? 1 : 0, menuGradA: mg.gradA, menuGradB: mg.gradB, dl, integ, scale, bigStats, bars, opsRows, voices, pricing, fall: x.fall, fallCols: isDesktop ? '1.1fr .9fr' : 'minmax(0, 1fr)', openRecall: (e) => this.openModal('case', 'recall', e), heroSubmit: this.heroSubmit, heroCta2: S.lang === 'de' ? 'So arbeitet die KI-Konsole' : 'How the AI console works', openDock: () => { if (this.state.aiVisible) { this.go('ai'); setTimeout(() => { if (this.aiInput) this.aiInput.focus(); }, 500); } else this.setState({ dockOpen: true }, () => setTimeout(() => { if (this.dockInput) this.dockInput.focus(); }, 60)); }, heroInputRef: (el) => { this.heroInput = el; }, heroAskHint: S.lang === 'de' ? 'Fragen Sie die Seite – z. B. „Was kostet eine Web-App?“' : 'Ask the site — e.g. “What does a web app cost?”', integNodes, integSys, sq, diagOverflow: S.vw < 760 ? 'auto' : 'visible', modalCols: isDesktop ? '1.1fr .9fr' : 'minmax(0, 1fr)', modalAsk: this.modalAsk, focusAi: () => { if (this.aiInput) this.aiInput.focus(); }, openAiModal: () => this.openModal('service', 'ai'), openSoftwareModal: () => this.openModal('service', 'software'), modalOpen: !!S.modal, modalOp: S.modalIn ? 1 : 0, modalTf, modal, closeModal: this.closeModal, stop: this.stop, modalCta: this.modalCta
     };
   }
 
@@ -726,7 +726,7 @@ class Component extends DCLogic {
   closeCap = () => { this.setState({ capOpen: null }); document.body.style.overflow = ''; };
   capVals() {
     const S = this.state, i = S.capOpen, t = this.loc(Component.T), K = this.loc(Component.PG);
-    const empty = { on: false, bullets: [], meta: [], stack: [], title: '', lead: '', kicker: '', close: t.common.close, cta: t.common.cta, dismiss: this.closeCap, contact: this.closeCap, metaCols: '1fr', bg: '#F7F4FF', iconBg: '#EFE8FF', iconFg: '#6D28D9', iconRing: 'rgba(109,40,217,.16)', iconHref: '/brand/mccain-icons.svg#layers' };
+    const empty = { on: false, bullets: [], meta: [], stack: [], title: '', lead: '', kicker: '', close: t.common.close, cta: t.common.cta, dismiss: this.closeCap, contact: this.closeCap, metaCols: 'minmax(0, 1fr)', bg: '#F7F4FF', iconBg: '#EFE8FF', iconFg: '#6D28D9', iconRing: 'rgba(109,40,217,.16)', iconHref: '/brand/mccain-icons.svg#layers' };
     if (i == null) return empty;
     const raw = S.deep && S.deep.software ? this.loc(S.deep.software) : null;
     const c = raw && raw.caps ? raw.caps[i] : null;
@@ -735,7 +735,7 @@ class Component extends DCLogic {
     return Object.assign({}, th, {
       on: true, title: c.title, lead: c.lead || c.text, bullets: c.bullets || [], meta: c.meta || [], stack: c.stack || [],
       kicker: K.caps.eyebrow, close: t.common.close, cta: t.common.cta,
-      metaCols: S.vw >= 620 ? 'repeat(3, minmax(0,1fr))' : '1fr',
+      metaCols: S.vw >= 620 ? 'repeat(3, minmax(0,1fr))' : 'minmax(0, 1fr)',
       iconHref: '/brand/mccain-icons.svg#' + (c.icon || 'layers'),
       dismiss: this.closeCap,
       contact: () => { this.closeCap(); setTimeout(() => this.go('contact'), 60); }

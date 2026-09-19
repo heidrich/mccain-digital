@@ -63,6 +63,12 @@
   --mc-sky-ink:#0099F5;
   --mc-heading-gradient:linear-gradient(92deg,var(--mc-sky-ink) 0%,var(--mc-violet) 52%,var(--mc-pink) 100%);
   --mc-action-text-gradient:var(--mc-heading-gradient);
+  /* Seitenthemen der Leistungsseiten (Owner 19.9.2026: „bei KI weiter den Verlauf, Web-Apps sind
+     blau“) – wie Orange bei Websites und Violett bei Individualsoftware. Der Ink-Verlauf ist
+     derselbe Weg Blau → Violett → Pink, nur in Stufen, die als kleine Schrift (Eyebrows) je
+     ≥ 4,5:1 auf Weiß halten; der blaue ist die Hero-Zeile von Web-Apps, groß gesetzt ≥ 3:1. */
+  --mc-heading-gradient-ink:linear-gradient(90deg,var(--mc-link-blue) 0%,var(--mc-violet-700) 52%,var(--mc-pink-ink) 100%);
+  --mc-heading-gradient-blue:linear-gradient(92deg,var(--mc-sky-ink) 0%,var(--mc-link-blue) 100%);
 
   /* Warme Nebenfarben */
   --mc-orange-ink:#C2410C; --mc-rust:#B4472B; --mc-peach:#FFB48A;
@@ -75,7 +81,7 @@
   --mc-sepia-900:#3F3729; --mc-sepia-700:#6E6353; --mc-sepia-600:#7A6E5F; --mc-sepia-300:#C9BFB1; --mc-sepia-250:#CFC4B4; --mc-sepia-200:#D8CFC2; --mc-sepia-100:#E7E0D4; --mc-sepia-050:#EFEAE3;
   /* Fensterknöpfe in Programm-Mocks */
   --mc-mock-close:#FF5F57; --mc-mock-min:#FEBC2E; --mc-mock-max:#28C840;
-  /* Weitere Blautöne in Mocks */
+  /* Weitere Blautöne: Mocks, und seit 19.9.2026 die Themenfarbe von Web-Apps (5,0:1 auf Weiß) */
   --mc-link-blue:#1D6FD0; --mc-steel:#5E76B4;
 
   /* Semantik */

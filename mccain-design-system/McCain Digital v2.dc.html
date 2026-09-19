@@ -357,7 +357,7 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
   </div>
 </section>
 
-<section id="services" data-screen-label="Leistungen" style="padding: 0 0 clamp(72px,8vw,116px); background:transparent">
+<section id="services" data-screen-label="Leistungen" style="padding: clamp(48px,6.4vw,92px) 0 clamp(72px,8vw,116px); background:transparent">
   <div style="max-width:1440px; margin:0 auto; padding:0 clamp(20px,4vw,48px)">
     <div data-reveal style="max-width:720px"><div style="font-size:15px; font-weight:600; color:var(--acc-text)">{{ t.services.eyebrow }}</div><h2 style="font-size: clamp(30px,3.38vw,41px); line-height:1.1; letter-spacing:-.03em; font-weight:700; color:var(--mc-navy); margin-top:10px; text-wrap:balance">{{ t.services.title }}</h2><p style="font-size: clamp(16px,1.05vw,18px); line-height:1.6; color:var(--mc-slate); margin-top:16px; text-wrap:pretty">{{ t.services.desc }}</p></div>
     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(min(290px, 100%), 1fr)); gap: {{ tileGap }}; margin-top: {{ gridTop }}">
@@ -637,7 +637,7 @@ input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 4px var
   </div>
 </section>
 
-<section id="process" data-screen-label="Ablauf" style="padding: 0 0 clamp(72px,8vw,116px); background:transparent">
+<section id="process" data-screen-label="Ablauf" style="padding: 4px 0 clamp(72px,8vw,116px); background:transparent">
   <div style="max-width:1440px; margin:0 auto; padding:0 clamp(20px,4vw,48px); display:grid; grid-template-columns: {{ processCols }}; gap: clamp(36px,5vw,96px); align-items:start">
     <div data-reveal style="position: {{ stickyPos }}; top:104px; align-self:start">
       <div style="font-size:15px; font-weight:600; color:var(--acc-text)">{{ t.process.eyebrow }}</div>
@@ -1237,7 +1237,7 @@ class Component extends DCLogic {
       { k: 'recall', t: { de: 'Das Warum liegt bei', en: 'The reasoning comes with it' }, s: { de: 'md-recall hängt die Begründungen an die Zeile – für Ihr Team und für Ihre KI-Assistenten.', en: 'md-recall pins the reasoning to the line — for your team and for your AI assistants.' } }
     ]
   };
-  handover() { const H = this.loc(Component.HANDOVER), d = this.state.vw >= 960; return Object.assign({}, H, { cols: d ? '.85fr 1.15fr' : '1fr', itemCols: d ? 'repeat(3, minmax(0,1fr))' : this.state.vw >= 620 ? 'repeat(2, minmax(0,1fr))' : '1fr' }); }
+  handover() { const H = this.loc(Component.HANDOVER), d = this.state.vw >= 960; return Object.assign({}, H, { cols: d ? '.85fr 1.15fr' : 'minmax(0, 1fr)', itemCols: d ? 'repeat(3, minmax(0,1fr))' : this.state.vw >= 620 ? 'repeat(2, minmax(0,1fr))' : 'minmax(0, 1fr)' }); }
 
   faqLd() {
     try {
@@ -1496,7 +1496,7 @@ class Component extends DCLogic {
     const all = K.sources.concat(K.map).concat(K.outs.ask || []).concat([K.pg]);
     const sel = all.find((n) => n.id === pk);
     return { dg: {
-      ref: this.dgRef, hint: K.hint, rows, rowCols: S.vw >= 760 ? '196px minmax(0,1fr)' : '1fr',
+      ref: this.dgRef, hint: K.hint, rows, rowCols: S.vw >= 760 ? '196px minmax(0,1fr)' : 'minmax(0, 1fr)',
       railX: S.vw >= 760 ? '196px' : '0px', railDot: S.vw >= 760 ? '193.5px' : '-9px',
       outTitle: L({ de: 'Ergebnis', en: 'Outcome' }), outAnswer: L({ de: 'Die Antwort steht in Ihrem Handbuch – zitiert mit Seitenzahl, nicht aus dem Modellgedächtnis.', en: 'The answer comes from your manual — cited with the page number, not from the model’s memory.' }), outSource: 'handbuch-v4.pdf · S. 12',
       outFacts: [{ v: '310 ms', l: L({ de: 'bis zur Antwort', en: 'to the answer' }), c: 'var(--mc-sky)' }, { v: '1', l: L({ de: 'Quelle, nachprüfbar', en: 'source, verifiable' }), c: 'var(--mc-success)' }, { v: '0', l: L({ de: 'erfundene Angaben', en: 'invented facts' }), c: 'var(--mc-pink)' }],
@@ -1618,7 +1618,7 @@ band: this.bandVals(), cs: this.consentVals(), ho: this.handover(), logoFootEl: 
       dockRight: isDesktop ? '20px' : '12px', dockLeft: isDesktop ? 'auto' : (S.dockOpen ? '12px' : 'auto'), dockBottom: isDesktop ? '20px' : 'max(12px, env(safe-area-inset-bottom))', dockW: isDesktop ? 'min(380px, calc(100vw - 40px))' : '100%',
       tileGap: isDesktop ? '20px' : '14px', gridTop: isDesktop ? '52px' : '32px', tilePad: isDesktop ? '26px' : '20px', tileMinH: isDesktop ? '560px' : '460px', caseMinH: isDesktop ? '540px' : '440px',
       modalPad: isDesktop ? 'clamp(12px,3vw,40px) clamp(12px,3vw,40px) clamp(40px,6vw,80px)' : '56px 0 0', modalMargin: isDesktop ? '0 auto' : '0 auto -1px', modalMinH: isDesktop ? '0' : 'calc(100vh - 56px)', modalRadius: isDesktop ? '20px' : '20px 20px 0 0', modalInner: isDesktop ? 'clamp(28px,4vw,56px) clamp(22px,4.5vw,64px) clamp(32px,4vw,56px)' : '16px 20px 40px', closePos: isDesktop ? 'absolute' : 'sticky', closeMr: isDesktop ? '0' : '12px', closeMb: isDesktop ? '0' : '-44px', closeTop: isDesktop ? '22px' : '10px', stageH: isDesktop ? 'clamp(300px, 42vw, 500px)' : '300px', modalRise: S.modalIn ? 'none' : 'translateY(18px)',
-      heroCols: isDesktop ? '1.05fr .95fr' : '1fr', heroMinH: S.heroH ? S.heroH + 'px' : '2.2em', aiCols: isDesktop ? '.9fr 1.1fr' : '1fr', processCols: isDesktop ? '.8fr 1.2fr' : '1fr', faqCols: isDesktop ? '.8fr 1.2fr' : '1fr', contactCols: isDesktop ? '1fr 1fr' : '1fr', stickyPos: isDesktop ? 'sticky' : 'static',
+      heroCols: isDesktop ? '1.05fr .95fr' : 'minmax(0, 1fr)', heroMinH: S.heroH ? S.heroH + 'px' : '2.2em', aiCols: isDesktop ? '.9fr 1.1fr' : 'minmax(0, 1fr)', processCols: isDesktop ? '.8fr 1.2fr' : 'minmax(0, 1fr)', faqCols: isDesktop ? '.8fr 1.2fr' : 'minmax(0, 1fr)', contactCols: isDesktop ? '1fr 1fr' : 'minmax(0, 1fr)', stickyPos: isDesktop ? 'sticky' : 'static',
       navShadow: S.scrolled ? '0 1px 0 var(--mc-line), 0 10px 30px -18px color-mix(in srgb, var(--mc-navy) 18%, transparent)' : '0 1px 0 var(--mc-line)', caretTop: 69, panelTop: 76, indLeft: S.indLeft, indW: S.indW, indOp: menuOpen ? 1 : 0, indBg: 'color-mix(in srgb, var(--mc-navy) 6%, transparent)', brandsLoop: C.BRANDS.concat(C.BRANDS),
       navFg, markBg: onGradient ? 'var(--mc-white)' : 'var(--mc-navy)', markFg: onGradient ? 'var(--mc-navy)' : 'var(--mc-white)', toggleBorder: onGradient ? 'color-mix(in srgb, var(--mc-white) 35%, transparent)' : 'color-mix(in srgb, var(--mc-navy) 14%, transparent)',
       ctaBg: onGradient ? 'var(--mc-white)' : 'var(--acc)', ctaFg: onGradient ? 'var(--mc-navy)' : 'var(--mc-white)',
@@ -1634,7 +1634,7 @@ band: this.bandVals(), cs: this.consentVals(), ho: this.handover(), logoFootEl: 
       askFg: S.aiMode === 'ask' ? 'var(--mc-white)' : 'var(--mc-dark-muted)', askLine: S.aiMode === 'ask' ? 'var(--acc)' : 'transparent', briefFg: S.aiMode === 'brief' ? 'var(--mc-white)' : 'var(--mc-dark-muted)', briefLine: S.aiMode === 'brief' ? 'var(--acc)' : 'transparent',
       setModeAsk: () => this.setState({ aiMode: 'ask' }), setModeBrief: () => this.setState({ aiMode: 'brief' }), aiThinking: S.aiPhase === 'thinking', aiTypingShown: S.aiPhase === 'typing', aiSubmit: this.aiSubmit,
       formIdle: !S.formSent, formSent: S.formSent, formSubmit: this.formSubmit,
-      streamPoints: (this._pts = x.points.concat(x.points).map(ptStyle)), heroLine: mkLine({ color: 'var(--mc-action)', backgroundImage: 'var(--mc-heading-gradient)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', paddingRight: '.04em' }), showStatus: isDesktop && S.vw >= 1180, pillBg: onGradient ? 'color-mix(in srgb, var(--mc-white) 14%, transparent)' : 'var(--mc-surface)', progOp: S.scrolled ? 1 : 0, menuGradA: mg.gradA, menuGradB: mg.gradB, dl, integ, scale, bigStats, bars, opsRows, voices, pricing, fall: x.fall, fallCols: isDesktop ? '1.1fr .9fr' : '1fr', openRecall: (e) => this.openModal('case', 'recall', e), heroSubmit: this.heroSubmit, heroCta2: S.lang === 'de' ? 'So arbeitet die KI-Konsole' : 'How the AI console works', openDock: () => { if (this.state.aiVisible) { this.go('ai'); setTimeout(() => { if (this.aiInput) this.aiInput.focus(); }, 500); } else this.setState({ dockOpen: true }, () => setTimeout(() => { if (this.dockInput) this.dockInput.focus(); }, 60)); }, heroInputRef: (el) => { this.heroInput = el; }, heroAskHint: S.lang === 'de' ? 'Fragen Sie die Seite – z. B. „Was kostet eine Web-App?“' : 'Ask the site — e.g. “What does a web app cost?”', integNodes, integSys, sq, diagOverflow: S.vw < 760 ? 'auto' : 'visible', modalCols: isDesktop ? '1.1fr .9fr' : '1fr', modalAsk: this.modalAsk, focusAi: () => { if (this.aiInput) this.aiInput.focus(); }, openAiModal: () => this.openModal('service', 'ai'), openSoftwareModal: () => this.openModal('service', 'software'), modalOpen: !!S.modal, modalOp: S.modalIn ? 1 : 0, modalTf, modal, closeModal: this.closeModal, stop: this.stop, modalCta: this.modalCta
+      streamPoints: (this._pts = x.points.concat(x.points).map(ptStyle)), heroLine: mkLine({ color: 'var(--mc-action)', backgroundImage: 'var(--mc-heading-gradient)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', paddingRight: '.04em' }), showStatus: isDesktop && S.vw >= 1180, pillBg: onGradient ? 'color-mix(in srgb, var(--mc-white) 14%, transparent)' : 'var(--mc-surface)', progOp: S.scrolled ? 1 : 0, menuGradA: mg.gradA, menuGradB: mg.gradB, dl, integ, scale, bigStats, bars, opsRows, voices, pricing, fall: x.fall, fallCols: isDesktop ? '1.1fr .9fr' : 'minmax(0, 1fr)', openRecall: (e) => this.openModal('case', 'recall', e), heroSubmit: this.heroSubmit, heroCta2: S.lang === 'de' ? 'So arbeitet die KI-Konsole' : 'How the AI console works', openDock: () => { if (this.state.aiVisible) { this.go('ai'); setTimeout(() => { if (this.aiInput) this.aiInput.focus(); }, 500); } else this.setState({ dockOpen: true }, () => setTimeout(() => { if (this.dockInput) this.dockInput.focus(); }, 60)); }, heroInputRef: (el) => { this.heroInput = el; }, heroAskHint: S.lang === 'de' ? 'Fragen Sie die Seite – z. B. „Was kostet eine Web-App?“' : 'Ask the site — e.g. “What does a web app cost?”', integNodes, integSys, sq, diagOverflow: S.vw < 760 ? 'auto' : 'visible', modalCols: isDesktop ? '1.1fr .9fr' : 'minmax(0, 1fr)', modalAsk: this.modalAsk, focusAi: () => { if (this.aiInput) this.aiInput.focus(); }, openAiModal: () => this.openModal('service', 'ai'), openSoftwareModal: () => this.openModal('service', 'software'), modalOpen: !!S.modal, modalOp: S.modalIn ? 1 : 0, modalTf, modal, closeModal: this.closeModal, stop: this.stop, modalCta: this.modalCta
     });
   }
 

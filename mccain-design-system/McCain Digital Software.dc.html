@@ -1199,7 +1199,7 @@ class Component extends DCLogic {
     const C = Component.CFG, L = this.loc(C.copy), sel = this.state.cfgSel || [], isDesktop = this.state.vw >= 960;
     const picked = C.items.filter((o) => sel.indexOf(o.id) >= 0);
     return { cfg: Object.assign({}, L, {
-      cols: isDesktop ? '1.08fr .92fr' : '1fr',
+      cols: isDesktop ? '1.08fr .92fr' : 'minmax(0, 1fr)',
       count: String(picked.length), isEmpty: picked.length === 0,
       chosen: picked.map((o) => ({ label: this.loc(o.label) })),
       items: C.items.map((o) => { const on = sel.indexOf(o.id) >= 0; return { label: this.loc(o.label), on, toggle: () => this.cfgToggle(o.id),
@@ -1319,7 +1319,7 @@ class Component extends DCLogic {
     });
     const act = set.steps[si];
     const proc = Object.assign({}, K.proc, {
-      metrics, steps: procSteps, shellCols: S.vw >= 1100 ? '280px minmax(0,1fr)' : '1fr', innerCols: S.vw >= 860 ? 'minmax(0,1fr) minmax(0,1fr)' : '1fr',
+      metrics, steps: procSteps, shellCols: S.vw >= 1100 ? '280px minmax(0,1fr)' : 'minmax(0, 1fr)', innerCols: S.vw >= 860 ? 'minmax(0,1fr) minmax(0,1fr)' : 'minmax(0, 1fr)',
       leave: () => this.setState({ procHover: null }), stepCounter: (si + 1) + ' / ' + set.steps.length, stepProgress: (((si + 1) / set.steps.length) * 100).toFixed(0) + '%',
       anim: 'fadeIn ' + (S.procMode ? '.34s' : '.35s') + ' ease both', detailAnim: 'fadeUp ' + (si % 2 ? '.4s' : '.41s') + ' cubic-bezier(.2,.8,.2,1) both',
       modes: K.proc.modes.map((label, i) => { const on = S.procMode === i; return { label, on, pick: () => { this.procPause = performance.now() + 12000; this.setState({ procMode: i, procStep: 0 }); }, bg: on ? (i ? 'var(--mc-success-text)' : 'var(--mc-navy)') : 'transparent', fg: on ? 'var(--mc-white)' : 'var(--mc-slate)', sh: on ? '0 10px 24px -12px color-mix(in srgb, var(--mc-navy) 70%, transparent)' : 'none' }; }),
@@ -1327,13 +1327,13 @@ class Component extends DCLogic {
     });
     const ii = Math.max(0, Math.min(S.integNode, K.integ.spokes.length - 1));
     const POS = [[50, 6], [88, 27], [88, 73], [50, 94], [12, 73], [12, 27]];
-    const AR = 0.82; const spokes = K.integ.spokes.map((n, i) => { const on = ii === i, p = POS[i] || [50, 50]; const dx = p[0] - 50, dy = (p[1] - 50) * AR; const deg = Math.atan2(dy, dx) * 180 / Math.PI; const len = Math.sqrt(dx * dx + dy * dy); return { label: n.label, on, aria: n.label + ' – ' + n.kind, pick: () => { this.integPause = performance.now() + 12000; this.setState({ integNode: i }); }, left: p[0] + '%', top: p[1] + '%', scale: on ? '1.05' : '1', bg: on ? 'var(--acc)' : 'color-mix(in srgb, var(--mc-dark-3) 90%, transparent)', fg: on ? 'var(--mc-white)' : 'var(--mc-dark-text-2)', ring: on ? '0 0 0 1px color-mix(in srgb, var(--mc-dark-accent) 55%, transparent), 0 0 0 5px color-mix(in srgb, var(--mc-action) 16%, transparent), 0 20px 44px -16px color-mix(in srgb, var(--mc-action) 90%, transparent)' : 'inset 0 0 0 1px color-mix(in srgb, var(--mc-dark-muted) 20%, transparent), 0 10px 26px -18px color-mix(in srgb, var(--mc-night) 90%, transparent)', dot: on ? 'var(--mc-white)' : 'var(--mc-violet-400)', deg: deg.toFixed(2) + 'deg', lineW: len.toFixed(2) + '%', lineH: on ? '1.5px' : '1px', lineFrom: on ? 'color-mix(in srgb, var(--mc-dark-accent) 85%, transparent)' : 'color-mix(in srgb, var(--mc-dark-muted) 26%, transparent)', lineTo: on ? 'color-mix(in srgb, var(--mc-dark-accent) 10%, transparent)' : 'color-mix(in srgb, var(--mc-dark-muted) 4%, transparent)', pulseOp: on ? '1' : '0', pulseAnim: on ? 'spokePulse 2.6s cubic-bezier(.4,0,.5,1) infinite' : 'none' }; });
+    const AR = 0.82; const spokes = K.integ.spokes.map((n, i) => { const on = ii === i, p = POS[i] || [50, 50], edge = Math.ceil((String(n.label).length * 8 + 46) * 1.06 / 2); const dx = p[0] - 50, dy = (p[1] - 50) * AR; const deg = Math.atan2(dy, dx) * 180 / Math.PI; const len = Math.sqrt(dx * dx + dy * dy); return { label: n.label, on, aria: n.label + ' – ' + n.kind, pick: () => { this.integPause = performance.now() + 12000; this.setState({ integNode: i }); }, left: 'clamp(' + edge + 'px, ' + p[0] + '%, calc(100% - ' + edge + 'px))', top: p[1] + '%', scale: on ? '1.05' : '1', bg: on ? 'var(--acc)' : 'color-mix(in srgb, var(--mc-dark-3) 90%, transparent)', fg: on ? 'var(--mc-white)' : 'var(--mc-dark-text-2)', ring: on ? '0 0 0 1px color-mix(in srgb, var(--mc-dark-accent) 55%, transparent), 0 0 0 5px color-mix(in srgb, var(--mc-action) 16%, transparent), 0 20px 44px -16px color-mix(in srgb, var(--mc-action) 90%, transparent)' : 'inset 0 0 0 1px color-mix(in srgb, var(--mc-dark-muted) 20%, transparent), 0 10px 26px -18px color-mix(in srgb, var(--mc-night) 90%, transparent)', dot: on ? 'var(--mc-white)' : 'var(--mc-violet-400)', deg: deg.toFixed(2) + 'deg', lineW: len.toFixed(2) + '%', lineH: on ? '1.5px' : '1px', lineFrom: on ? 'color-mix(in srgb, var(--mc-dark-accent) 85%, transparent)' : 'color-mix(in srgb, var(--mc-dark-muted) 26%, transparent)', lineTo: on ? 'color-mix(in srgb, var(--mc-dark-accent) 10%, transparent)' : 'color-mix(in srgb, var(--mc-dark-muted) 4%, transparent)', pulseOp: on ? '1' : '0', pulseAnim: on ? 'spokePulse 2.6s cubic-bezier(.4,0,.5,1) infinite' : 'none' }; });
     const dr = Math.max(0, Math.min(S.dashRange, 2));
     const kset = K.dash.kpiSets[dr];
     const rowsAll = K.dash.rowsData;
     const rows = rowsAll.slice(0, dr === 0 ? 5 : dr === 1 ? 6 : 7).map((r, i) => ({ name: r.name, sys: r.sys, val: r.val, state: r.st, dot: ['linear-gradient(135deg,var(--mc-action),var(--mc-sky))', 'linear-gradient(135deg,var(--mc-violet),var(--mc-pink))', 'linear-gradient(135deg,var(--mc-pink),var(--mc-violet))', 'linear-gradient(135deg,var(--mc-orange),var(--mc-pink))'][i % 4], stFg: r.ok ? 'var(--mc-success-text)' : 'var(--mc-orange-ink)', stBg: r.ok ? 'color-mix(in srgb, var(--mc-success) 14%, transparent)' : 'color-mix(in srgb, var(--mc-coral) 18%, transparent)', anim: 'fadeIn ' + (0.2 + i * 0.05).toFixed(2) + 's ease both' }));
     const dash = Object.assign({}, K.dash, {
-      cols: isDesktop ? '.88fr 1.12fr' : '1fr',
+      cols: isDesktop ? '.88fr 1.12fr' : 'minmax(0, 1fr)',
       ranges: K.dash.ranges.map((label, i) => { const on = dr === i; return { label, on, pick: () => this.setState({ dashRange: i }), bg: on ? 'var(--mc-white)' : 'transparent', fg: on ? 'var(--mc-navy)' : 'var(--mc-text-grey)', sh: on ? '0 1px 2px color-mix(in srgb, var(--mc-navy) 14%, transparent)' : 'none' }; }),
       kpis: K.dash.kpiLabels.map((l, i) => ({ l, v: kset[i], trend: K.dash.trends[i], bg: i === 2 ? 'color-mix(in srgb, var(--mc-orange) 14%, transparent)' : 'var(--mc-surface)', fg: i === 2 ? 'var(--mc-orange-ink)' : 'var(--mc-navy)', trendFg: i === 2 ? 'var(--mc-orange-ink)' : 'var(--mc-text-grey-2)' })),
       cols2: K.dash.cols.map((label, i) => ({ label, align: i > 1 ? 'right' : 'left' })), rows
@@ -1355,10 +1355,10 @@ class Component extends DCLogic {
     const faqItems = raw ? raw.faqs.map((f, i) => { const open = S.pgFaq === i; return Object.assign({}, f, { open, toggle: () => this.setState({ pgFaq: open ? -1 : i }), rows: open ? '1fr' : '0fr', rot: open ? 'rotate(45deg)' : 'rotate(0deg)', iconBg: open ? 'var(--mc-navy)' : 'var(--mc-line-soft)', iconFg: open ? 'var(--mc-white)' : 'var(--mc-navy)', border: i === 0 ? '0' : '1px solid color-mix(in srgb, var(--mc-navy) 8%, transparent)' }); }) : [];
     return {
       bc: K.bc, hero: K.hero, statItems, proc, dash, capItems, ucItems, stepItems, faqItems,
-      heroCols: isDesktop ? '1.1fr .9fr' : '1fr', goProc: this.goHandler('prozess'),
-      integ: Object.assign({}, K.integ, { spokes, active: K.integ.spokes[ii], cols: isDesktop ? '1.05fr .95fr' : '1fr', anim: 'fadeUp ' + (ii % 2 ? '.4s' : '.41s') + ' cubic-bezier(.2,.8,.2,1) both' }),
-      caps: K.caps, uc: Object.assign({}, K.uc, { cols: isDesktop ? '1fr 1fr' : '1fr', rowCols: isDesktop ? '1.02fr .98fr' : '1fr', cta: t.common.cta }),
-      ask: Object.assign({}, K.ask, { cols: isDesktop ? '.9fr 1.1fr' : '1fr', submit: this.pageAsk, chips: K.ask.chips.map((label) => ({ label, ask: () => { if (this.aiInput) { this.aiInput.value = label; this.aiInput.focus(); try { this.aiInput.setSelectionRange(label.length, label.length); } catch (e) {} } } })) }),
+      heroCols: isDesktop ? '1.1fr .9fr' : 'minmax(0, 1fr)', goProc: this.goHandler('prozess'),
+      integ: Object.assign({}, K.integ, { spokes, active: K.integ.spokes[ii], cols: isDesktop ? '1.05fr .95fr' : 'minmax(0, 1fr)', anim: 'fadeUp ' + (ii % 2 ? '.4s' : '.41s') + ' cubic-bezier(.2,.8,.2,1) both' }),
+      caps: K.caps, uc: Object.assign({}, K.uc, { cols: isDesktop ? '1fr 1fr' : 'minmax(0, 1fr)', rowCols: isDesktop ? '1.02fr .98fr' : 'minmax(0, 1fr)', cta: t.common.cta }),
+      ask: Object.assign({}, K.ask, { cols: isDesktop ? '.9fr 1.1fr' : 'minmax(0, 1fr)', submit: this.pageAsk, chips: K.ask.chips.map((label) => ({ label, ask: () => { if (this.aiInput) { this.aiInput.value = label; this.aiInput.focus(); try { this.aiInput.setSelectionRange(label.length, label.length); } catch (e) {} } } })) }),
       steps: K.steps, faq: K.faq
     };
   }
@@ -1375,7 +1375,7 @@ class Component extends DCLogic {
       { k: 'recall', t: { de: 'Das Warum liegt bei', en: 'The reasoning comes with it' }, s: { de: 'md-recall hängt die Begründungen an die Zeile – für Ihr Team und für Ihre KI-Assistenten.', en: 'md-recall pins the reasoning to the line — for your team and for your AI assistants.' } }
     ]
   };
-  handover() { const H = this.loc(Component.HANDOVER), d = this.state.vw >= 960; return Object.assign({}, H, { cols: d ? '.85fr 1.15fr' : '1fr', itemCols: d ? 'repeat(3, minmax(0,1fr))' : this.state.vw >= 620 ? 'repeat(2, minmax(0,1fr))' : '1fr' }); }
+  handover() { const H = this.loc(Component.HANDOVER), d = this.state.vw >= 960; return Object.assign({}, H, { cols: d ? '.85fr 1.15fr' : 'minmax(0, 1fr)', itemCols: d ? 'repeat(3, minmax(0,1fr))' : this.state.vw >= 620 ? 'repeat(2, minmax(0,1fr))' : 'minmax(0, 1fr)' }); }
 
   faqLd() {
     try {
@@ -1539,7 +1539,7 @@ class Component extends DCLogic {
       dockRight: isDesktop ? '20px' : '12px', dockLeft: isDesktop ? 'auto' : (S.dockOpen ? '12px' : 'auto'), dockBottom: isDesktop ? '20px' : 'max(12px, env(safe-area-inset-bottom))', dockW: isDesktop ? 'min(380px, calc(100vw - 40px))' : '100%',
       tileGap: isDesktop ? '20px' : '14px', gridTop: isDesktop ? '52px' : '32px', tilePad: isDesktop ? '26px' : '20px', tileMinH: isDesktop ? '560px' : '460px', caseMinH: isDesktop ? '540px' : '440px',
       modalPad: isDesktop ? 'clamp(12px,3vw,40px) clamp(12px,3vw,40px) clamp(40px,6vw,80px)' : '56px 0 0', modalMargin: isDesktop ? '0 auto' : '0 auto -1px', modalMinH: isDesktop ? '0' : 'calc(100vh - 56px)', modalRadius: isDesktop ? '20px' : '20px 20px 0 0', modalInner: isDesktop ? 'clamp(28px,4vw,56px) clamp(22px,4.5vw,64px) clamp(32px,4vw,56px)' : '16px 20px 40px', closePos: isDesktop ? 'absolute' : 'sticky', closeMr: isDesktop ? '0' : '12px', closeMb: isDesktop ? '0' : '-44px', closeTop: isDesktop ? '22px' : '10px', stageH: isDesktop ? 'clamp(300px, 42vw, 500px)' : '300px', modalRise: S.modalIn ? 'none' : 'translateY(18px)',
-      heroCols: isDesktop ? '1.05fr .95fr' : '1fr', heroBCols: isDesktop ? '1.15fr .85fr' : '1fr', aiCols: isDesktop ? '.9fr 1.1fr' : '1fr', processCols: isDesktop ? '.8fr 1.2fr' : '1fr', faqCols: isDesktop ? '.8fr 1.2fr' : '1fr', contactCols: isDesktop ? '1fr 1fr' : '1fr', stickyPos: isDesktop ? 'sticky' : 'static',
+      heroCols: isDesktop ? '1.05fr .95fr' : 'minmax(0, 1fr)', heroBCols: isDesktop ? '1.15fr .85fr' : 'minmax(0, 1fr)', aiCols: isDesktop ? '.9fr 1.1fr' : 'minmax(0, 1fr)', processCols: isDesktop ? '.8fr 1.2fr' : 'minmax(0, 1fr)', faqCols: isDesktop ? '.8fr 1.2fr' : 'minmax(0, 1fr)', contactCols: isDesktop ? '1fr 1fr' : 'minmax(0, 1fr)', stickyPos: isDesktop ? 'sticky' : 'static',
       navShadow: S.scrolled ? '0 1px 0 var(--mc-line), 0 10px 30px -18px color-mix(in srgb, var(--mc-navy) 18%, transparent)' : '0 1px 0 var(--mc-line)', caretTop: 69, panelTop: 76, indLeft: S.indLeft, indW: S.indW, indOp: menuOpen ? 1 : 0, indBg: 'color-mix(in srgb, var(--mc-navy) 6%, transparent)', brandsLoop: C.BRANDS.concat(C.BRANDS),
       navFg, markBg: onGradient ? 'var(--mc-white)' : 'var(--mc-navy)', markFg: onGradient ? 'var(--mc-navy)' : 'var(--mc-white)', toggleBorder: onGradient ? 'color-mix(in srgb, var(--mc-white) 35%, transparent)' : 'color-mix(in srgb, var(--mc-navy) 14%, transparent)',
       ctaBg: onGradient ? 'var(--mc-white)' : 'var(--acc)', ctaFg: onGradient ? 'var(--mc-navy)' : 'var(--mc-white)',
@@ -1555,7 +1555,7 @@ class Component extends DCLogic {
       askFg: S.aiMode === 'ask' ? 'var(--mc-white)' : 'var(--mc-dark-muted)', askLine: S.aiMode === 'ask' ? 'var(--acc)' : 'transparent', briefFg: S.aiMode === 'brief' ? 'var(--mc-white)' : 'var(--mc-dark-muted)', briefLine: S.aiMode === 'brief' ? 'var(--acc)' : 'transparent',
       setModeAsk: () => this.setState({ aiMode: 'ask' }), setModeBrief: () => this.setState({ aiMode: 'brief' }), aiThinking: S.aiPhase === 'thinking', aiTypingShown: S.aiPhase === 'typing', aiSubmit: this.aiSubmit,
       formIdle: !S.formSent, formSent: S.formSent, formSubmit: this.formSubmit,
-      streamPoints: (this._pts = x.points.concat(x.points).map(ptStyle)), heroLine: mkLine({ color: 'var(--mc-action)', backgroundImage: 'var(--mc-heading-gradient)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', paddingRight: '.04em' }), heroLineB: mkLine({ color: 'var(--acc)' }), showStatus: isDesktop && S.vw >= 1180, pillBg: onGradient ? 'color-mix(in srgb, var(--mc-white) 14%, transparent)' : 'var(--mc-surface)', progOp: S.scrolled ? 1 : 0, menuGradA: mg.gradA, menuGradB: mg.gradB, dl, integ, scale, bigStats, bars, opsRows, voices, pricing, fall: x.fall, fallCols: isDesktop ? '1.1fr .9fr' : '1fr', openRecall: (e) => this.openModal('case', 'recall', e), heroSubmit: this.heroSubmit, heroCta2: S.lang === 'de' ? 'So arbeitet die KI-Konsole' : 'How the AI console works', openDock: () => { if (this.state.aiVisible) { this.go('ai'); setTimeout(() => { if (this.aiInput) this.aiInput.focus(); }, 500); } else this.setState({ dockOpen: true }, () => setTimeout(() => { if (this.dockInput) this.dockInput.focus(); }, 60)); }, heroInputRef: (el) => { this.heroInput = el; }, heroAskHint: S.lang === 'de' ? 'Fragen Sie die Seite – z. B. „Was kostet eine Web-App?“' : 'Ask the site — e.g. “What does a web app cost?”', integNodes, integSys, sq, diagOverflow: S.vw < 760 ? 'auto' : 'visible', modalCols: isDesktop ? '1.1fr .9fr' : '1fr', modalAsk: this.modalAsk, focusAi: () => { if (this.aiInput) this.aiInput.focus(); }, openAiModal: () => this.openModal('service', 'ai'), openSoftwareModal: () => this.openModal('service', 'software'), modalOpen: !!S.modal, modalOp: S.modalIn ? 1 : 0, modalTf, modal, closeModal: this.closeModal, stop: this.stop, modalCta: this.modalCta
+      streamPoints: (this._pts = x.points.concat(x.points).map(ptStyle)), heroLine: mkLine({ color: 'var(--mc-action)', backgroundImage: 'var(--mc-heading-gradient)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', paddingRight: '.04em' }), heroLineB: mkLine({ color: 'var(--acc)' }), showStatus: isDesktop && S.vw >= 1180, pillBg: onGradient ? 'color-mix(in srgb, var(--mc-white) 14%, transparent)' : 'var(--mc-surface)', progOp: S.scrolled ? 1 : 0, menuGradA: mg.gradA, menuGradB: mg.gradB, dl, integ, scale, bigStats, bars, opsRows, voices, pricing, fall: x.fall, fallCols: isDesktop ? '1.1fr .9fr' : 'minmax(0, 1fr)', openRecall: (e) => this.openModal('case', 'recall', e), heroSubmit: this.heroSubmit, heroCta2: S.lang === 'de' ? 'So arbeitet die KI-Konsole' : 'How the AI console works', openDock: () => { if (this.state.aiVisible) { this.go('ai'); setTimeout(() => { if (this.aiInput) this.aiInput.focus(); }, 500); } else this.setState({ dockOpen: true }, () => setTimeout(() => { if (this.dockInput) this.dockInput.focus(); }, 60)); }, heroInputRef: (el) => { this.heroInput = el; }, heroAskHint: S.lang === 'de' ? 'Fragen Sie die Seite – z. B. „Was kostet eine Web-App?“' : 'Ask the site — e.g. “What does a web app cost?”', integNodes, integSys, sq, diagOverflow: S.vw < 760 ? 'auto' : 'visible', modalCols: isDesktop ? '1.1fr .9fr' : 'minmax(0, 1fr)', modalAsk: this.modalAsk, focusAi: () => { if (this.aiInput) this.aiInput.focus(); }, openAiModal: () => this.openModal('service', 'ai'), openSoftwareModal: () => this.openModal('service', 'software'), modalOpen: !!S.modal, modalOp: S.modalIn ? 1 : 0, modalTf, modal, closeModal: this.closeModal, stop: this.stop, modalCta: this.modalCta
     };
   }
 
@@ -1610,7 +1610,7 @@ class Component extends DCLogic {
   closeCap = () => { this.setState({ capOpen: null }); document.body.style.overflow = ''; };
   capVals() {
     const S = this.state, i = S.capOpen, t = this.loc(Component.T), K = this.loc(Component.PG);
-    const empty = { on: false, bullets: [], meta: [], stack: [], title: '', lead: '', kicker: '', close: t.common.close, cta: t.common.cta, dismiss: this.closeCap, contact: this.closeCap, metaCols: '1fr', bg: 'var(--mc-violet-025)', iconBg: 'var(--mc-violet-100)', iconFg: 'var(--mc-violet-700)', iconRing: 'color-mix(in srgb, var(--mc-violet-700) 16%, transparent)', iconHref: 'brand/mccain-icons.svg#layers' };
+    const empty = { on: false, bullets: [], meta: [], stack: [], title: '', lead: '', kicker: '', close: t.common.close, cta: t.common.cta, dismiss: this.closeCap, contact: this.closeCap, metaCols: 'minmax(0, 1fr)', bg: 'var(--mc-violet-025)', iconBg: 'var(--mc-violet-100)', iconFg: 'var(--mc-violet-700)', iconRing: 'color-mix(in srgb, var(--mc-violet-700) 16%, transparent)', iconHref: 'brand/mccain-icons.svg#layers' };
     if (i == null) return empty;
     const raw = S.deep && S.deep.software ? this.loc(S.deep.software) : null;
     const c = raw && raw.caps ? raw.caps[i] : null;
@@ -1619,7 +1619,7 @@ class Component extends DCLogic {
     return Object.assign({}, th, {
       on: true, title: c.title, lead: c.lead || c.text, bullets: c.bullets || [], meta: c.meta || [], stack: c.stack || [],
       kicker: K.caps.eyebrow, close: t.common.close, cta: t.common.cta,
-      metaCols: S.vw >= 620 ? 'repeat(3, minmax(0,1fr))' : '1fr',
+      metaCols: S.vw >= 620 ? 'repeat(3, minmax(0,1fr))' : 'minmax(0, 1fr)',
       iconHref: 'brand/mccain-icons.svg#' + (c.icon || 'layers'),
       dismiss: this.closeCap,
       contact: () => { this.closeCap(); setTimeout(() => this.go('contact'), 60); }

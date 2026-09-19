@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Polish 19.9. — Entwurfsvarianten</title>
+<link rel="stylesheet" href="/mccain-design-system/tokens/colors.css">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+  *,*::before,*::after{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--mc-white); color:var(--mc-navy); font-family:'Instrument Sans',system-ui,sans-serif; -webkit-font-smoothing:antialiased}
+  img{max-width:100%; display:block}
+  code,.mono{font-family:'JetBrains Mono',monospace}
+  a{color:inherit}
+  a.news-a-hero, a.news-b-mast, a.row-card, a.news-a-card, a.case-link{text-decoration:none}
+  .wrap{max-width:1320px; margin:0 auto; padding:0 clamp(18px,4vw,48px)}
+
+  /* ---------- intro ---------- */
+  .intro{background:var(--mc-plate); color:var(--mc-dark-text); padding:clamp(40px,6vw,64px) 0}
+  .intro .kicker{color:var(--mc-dark-accent)}
+  .intro h1{font-size:clamp(26px,3.2vw,36px); letter-spacing:-.02em; margin:12px 0 14px; line-height:1.15}
+  .intro p{font-size:15.5px; line-height:1.65; color:var(--mc-dark-text-2); max-width:78ch; margin:0 0 10px}
+  .intro .tags{display:flex; flex-wrap:wrap; gap:8px; margin-top:20px}
+  .intro .tags a{font-size:13px; font-weight:600; color:var(--mc-white); background:color-mix(in srgb, var(--mc-white) 8%, transparent); padding:7px 13px; border-radius:999px; text-decoration:none; box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--mc-white) 14%, transparent)}
+  .intro .tags a:hover{background:color-mix(in srgb, var(--mc-white) 14%, transparent)}
+
+  /* ---------- spot shell ---------- */
+  .spot{padding:clamp(56px,7vw,92px) 0; border-bottom:1px solid var(--mc-line)}
+  .spot:nth-child(even){background:var(--mc-surface)}
+  .kicker{font-size:13px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--mc-action-text)}
+  .spot h2{font-size:clamp(24px,2.6vw,32px); letter-spacing:-.025em; font-weight:700; color:var(--mc-navy); margin:10px 0 12px}
+  .spot .owner-quote{font-size:15.5px; line-height:1.6; color:var(--mc-slate); max-width:78ch; margin:0 0 6px}
+  .spot .owner-quote b{color:var(--mc-navy)}
+  .sub{font-size:16px; font-weight:700; color:var(--mc-navy); margin:0 0 6px}
+  .sub-note{font-size:13.5px; color:var(--mc-text-grey); margin:0 0 16px}
+
+  .heute{margin-top:26px}
+  .heute-frame{border-radius:14px; overflow:hidden; box-shadow:0 0 0 1px var(--mc-line), 0 20px 50px -34px color-mix(in srgb, var(--mc-navy) 40%, transparent)}
+  .heute-frame img{width:100%; height:auto}
+  .heute-cap{font-size:13px; color:var(--mc-text-grey); margin-top:10px}
+
+  .variants{margin-top:40px; display:grid; grid-template-columns:repeat(auto-fit, minmax(320px,1fr)); gap:26px}
+  .variant{border-radius:14px; box-shadow:0 0 0 1px var(--mc-line); background:var(--mc-white); overflow:hidden; display:flex; flex-direction:column}
+  .variant-head{padding:14px 18px; border-bottom:1px solid var(--mc-line); background:var(--mc-chrome)}
+  .variant-head .name{font-weight:700; color:var(--mc-navy); font-size:14.5px}
+  .variant-head .idea{font-size:12.5px; color:var(--mc-text-grey-2); margin-top:3px; line-height:1.45}
+  .variant-body{padding:18px; flex:1; display:flex; flex-direction:column; gap:16px}
+
+  .recommend{margin-top:30px; padding:18px 22px; border-radius:12px; background:var(--mc-action-tint); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--mc-action) 16%, transparent)}
+  .recommend .lbl{font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--mc-action-text)}
+  .recommend p{margin:6px 0 0; font-size:14.5px; line-height:1.6; color:var(--mc-navy)}
+
+  /* ================= CASE CARDS (spot 1 + 2 — one shared language) ================= */
+  .case-card{background:var(--mc-white); border-radius:16px; box-shadow:0 0 0 1px var(--mc-line), 0 1px 2px color-mix(in srgb, var(--mc-navy) 4%, transparent); overflow:hidden; display:flex; flex-direction:column}
+  .case-top{padding:18px 18px 0}
+  .case-meta{display:flex; flex-wrap:wrap; gap:8px; align-items:center; font-size:11.5px; color:var(--mc-text-grey)}
+  .case-status{font-weight:700; color:var(--mc-success-text); background:color-mix(in srgb, var(--mc-success) 14%, transparent); padding:2px 8px; border-radius:999px}
+  .case-title{font-size:19px; font-weight:600; letter-spacing:-.02em; color:var(--mc-navy); margin-top:9px}
+  .case-desc{padding:8px 18px 0; font-size:13.5px; line-height:1.55; color:var(--mc-slate)}
+  .case-stats{display:flex; flex-wrap:wrap; gap:16px 26px; padding:14px 18px 0}
+  .case-stats div b{display:block; font-size:16px; font-weight:700; letter-spacing:-.02em; color:var(--mc-navy)}
+  .case-stats div span{display:block; font-size:11px; color:var(--mc-text-grey); margin-top:2px; max-width:16ch; line-height:1.3}
+  .case-link{margin:14px 18px 0; align-self:flex-start; display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 12px; border-radius:7px; background:var(--mc-surface); color:var(--mc-navy); font-size:12.5px; font-weight:600; box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--mc-navy) 10%, transparent); text-decoration:none}
+
+  .case-visual{position:relative; margin-top:16px; min-height:190px; display:flex; align-items:center; justify-content:center; padding:18px}
+  .case-visual.short{min-height:96px; padding:0}
+
+  /* mocks */
+  .mock{border-radius:9px; width:100%; max-width:250px}
+  .mock-term{background:var(--mc-navy); color:var(--mc-grey-401); font-size:11px; line-height:1.75; padding:12px 14px; box-shadow:0 18px 38px -18px color-mix(in srgb, var(--mc-navy) 55%, transparent); position:relative; z-index:1}
+  .mock-term .dots{display:flex; gap:5px; margin-bottom:7px}
+  .mock-term .dots span{width:8px; height:8px; border-radius:50%}
+  .mock-term .dots span:nth-child(1){background:var(--mc-mock-close)}
+  .mock-term .dots span:nth-child(2){background:var(--mc-mock-min)}
+  .mock-term .dots span:nth-child(3){background:var(--mc-mock-max)}
+  .mock-term .p{color:var(--mc-dark-accent)}
+  .mock-term .ok{color:var(--mc-success)}
+  .mock-term .ar{color:var(--mc-pink)}
+  .mock-term b{color:var(--mc-white); font-weight:600}
+  .mock-browser{background:var(--mc-white); box-shadow:0 18px 38px -18px color-mix(in srgb, var(--mc-navy) 38%, transparent), 0 0 0 1px color-mix(in srgb, var(--mc-navy) 7%, transparent); position:relative; z-index:1}
+  .mock-browser .bar{display:flex; align-items:center; gap:5px; padding:8px 10px; border-bottom:1px solid var(--mc-line); background:var(--mc-chrome)}
+  .mock-browser .bar i{width:7px; height:7px; border-radius:50%; background:var(--mc-line); display:block}
+  .mock-browser .bar .u{margin:0 auto; font-size:9.5px; color:var(--mc-text-grey); background:var(--mc-grey-100); padding:3px 11px; border-radius:999px}
+  .mock-browser .scores{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; padding:12px 12px 4px}
+  .mock-browser .score{text-align:center}
+  .mock-browser .ring{width:30px; height:30px; margin:0 auto; border-radius:50%; border:2.5px solid var(--mc-success); display:grid; place-items:center; font-size:9.5px; font-weight:700; color:var(--mc-success-text); background:color-mix(in srgb, var(--mc-success) 8%, transparent)}
+  .mock-browser .score em{display:block; font-style:normal; font-size:7.5px; color:var(--mc-text-grey); margin-top:3px; letter-spacing:.03em}
+  .mock-browser .chips{display:flex; flex-wrap:wrap; gap:5px; padding:5px 12px 12px}
+  .mock-browser .chips span{font-size:8.5px; font-weight:700; color:var(--mc-navy); background:var(--mc-surface); box-shadow:inset 0 0 0 1px var(--mc-line); padding:2.5px 7px; border-radius:999px}
+
+  /* Variant A — Messfeld: flat plate + crisp heading-gradient hairline + dot texture (dot recipe reused from the News thumbnails) */
+  .cv-a{overflow:hidden}
+  .cv-a::before{content:"";position:absolute; inset:0 0 auto 0; height:3px; background:var(--mc-heading-gradient); z-index:2}
+  .cv-a::after{content:""; position:absolute; inset:0; background-image:radial-gradient(var(--dot-c) 1.6px, transparent 1.8px); background-size:15px 15px; -webkit-mask-image:radial-gradient(80% 85% at 50% 30%, var(--mc-black) 12%, transparent 78%); mask-image:radial-gradient(80% 85% at 50% 30%, var(--mc-black) 12%, transparent 78%)}
+  .cv-a.tone-recall{background:var(--mc-plate); --dot-c:color-mix(in srgb, var(--mc-white) 16%, transparent)}
+  .cv-a.tone-site{background:var(--mc-surface); --dot-c:color-mix(in srgb, var(--mc-navy) 7%, transparent)}
+
+  /* Variant B — Konturrahmen: flat single-family tint + crisp gradient frame around the mock, small tag */
+  .cv-b.tone-recall{background:color-mix(in srgb, var(--mc-violet) 7%, var(--mc-paper))}
+  .cv-b.tone-site{background:color-mix(in srgb, var(--mc-sky) 9%, var(--mc-paper))}
+  .cv-b .frame{padding:2px; border-radius:11px}
+  .cv-b.tone-recall .frame{background:linear-gradient(135deg,var(--mc-pink),var(--mc-violet))}
+  .cv-b.tone-site .frame{background:linear-gradient(135deg,var(--mc-plate),var(--mc-sky))}
+  .cv-b .frame > .mock{border-radius:9px; overflow:hidden; max-width:246px}
+  .cv-b .tag{position:absolute; left:14px; bottom:12px; font-size:10.5px; font-weight:700; color:var(--mc-navy); background:color-mix(in srgb, var(--mc-white) 88%, transparent); padding:4px 9px; border-radius:999px; box-shadow:0 0 0 1px var(--mc-line)}
+
+  /* Variant C — Messband: neutral, mock + a real measured-value strip, crisp flat underline */
+  .cv-c{background:var(--mc-chrome); flex-direction:column; gap:0; padding:18px 18px 0; align-items:center}
+  .cv-c .under{height:2px; width:100%; max-width:250px; margin-top:10px}
+  .cv-c.tone-recall .under{background:linear-gradient(90deg,var(--mc-pink),var(--mc-violet))}
+  .cv-c.tone-site .under{background:linear-gradient(90deg,var(--mc-plate),var(--mc-sky))}
+  .cv-c .strip{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; padding:10px 12px 14px}
+  .cv-c .strip span{font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:600; color:var(--mc-navy); background:var(--mc-surface); box-shadow:inset 0 0 0 1px var(--mc-line); padding:3px 8px; border-radius:999px}
+
+  .case-row{display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:18px}
+
+  /* studio-scale band (spot 2 — same three systems, compact form) */
+  .band-short{position:relative; height:88px; border-radius:0; display:flex; align-items:center; justify-content:center}
+  .band-short.cv-a::before{height:3px}
+  .band-short .lab{font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:600; z-index:1}
+  .band-short.tone-recall.cv-a .lab, .band-short.tone-site.cv-a .lab{color:var(--mc-navy)}
+  .band-short.cv-a.tone-recall .lab{color:var(--mc-dark-text)}
+  .band-short.cv-b{padding:10px}
+  .band-short.cv-b .frame{width:100%; height:100%; display:flex}
+  .band-short.cv-b .frame .lab{margin:auto; color:var(--mc-navy)}
+  .band-short.cv-c{padding:0; flex-direction:row; gap:10px; justify-content:center; align-items:center}
+  .band-short.cv-c .under{display:none}
+
+  /* ================= SPOT 3 — Tools band ================= */
+  .tools-a{background:var(--mc-plate); color:var(--mc-dark-text); border-radius:16px; padding:clamp(22px,3vw,30px); display:flex; flex-wrap:wrap; gap:22px; align-items:center; justify-content:space-between}
+  .tools-a .txt{flex:1; min-width:220px}
+  .tools-a .kicker{color:var(--mc-dark-accent)}
+  .tools-a h3{font-size:18px; margin:8px 0 8px; color:var(--mc-white); letter-spacing:-.02em}
+  .tools-a p{font-size:13.5px; line-height:1.55; color:var(--mc-dark-text-2); margin:0; max-width:52ch}
+  .mini-inspect{flex:none; width:230px; display:flex; flex-direction:column; gap:7px; font-family:'JetBrains Mono',monospace; font-size:10.5px}
+  .mi-row{display:flex; justify-content:space-between; gap:8px; padding:7px 10px; border-radius:7px; background:color-mix(in srgb, var(--mc-white) 6%, transparent); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--mc-dark-text-2) 22%, transparent); color:var(--mc-dark-text-2)}
+  .mi-row b{color:var(--mc-white); font-weight:500}
+  .btn-dark{flex:none; display:inline-flex; align-items:center; gap:6px; height:42px; padding:0 12px 0 17px; border-radius:8px; background:var(--mc-dark-accent); color:var(--mc-dark-accent-text); font-size:14px; font-weight:700; text-decoration:none}
+
+  .tools-b{position:relative; border-radius:16px; padding:2px; background:var(--mc-stream); background-size:300% 100%; animation:streamBorder 8s linear infinite}
+  .tools-b .in{background:var(--mc-surface); border-radius:14px; padding:clamp(20px,2.8vw,28px)}
+  .tools-b .stripv{display:flex; flex-wrap:wrap; gap:7px; margin-bottom:14px}
+  .tools-b .stripv span{font-family:'JetBrains Mono',monospace; font-size:10.5px; font-weight:700; color:var(--mc-navy); background:var(--mc-white); box-shadow:inset 0 0 0 1px var(--mc-line); padding:4px 9px; border-radius:999px}
+  .tools-b h3{font-size:18px; margin:0 0 8px; color:var(--mc-navy); letter-spacing:-.02em}
+  .tools-b p{font-size:13.5px; line-height:1.55; color:var(--mc-slate); margin:0 0 16px; max-width:60ch}
+  .btn-navy{display:inline-flex; align-items:center; gap:6px; height:42px; padding:0 12px 0 17px; border-radius:8px; background:var(--mc-action); color:var(--mc-white); font-size:14px; font-weight:700; text-decoration:none}
+  @media (prefers-reduced-motion:reduce){.tools-b{animation:none; background-position:0 50%}}
+
+  .tools-c{display:grid; grid-template-columns:1.25fr 1fr; border-radius:16px; overflow:hidden; background:var(--mc-surface)}
+  .tools-c .txt{padding:clamp(20px,2.8vw,28px)}
+  .tools-c .txt h3{font-size:18px; margin:8px 0 8px; color:var(--mc-navy); letter-spacing:-.02em}
+  .tools-c .txt p{font-size:13.5px; line-height:1.55; color:var(--mc-slate); margin:0 0 16px; max-width:48ch}
+  .tools-c .term{position:relative; background:var(--mc-navy); color:var(--mc-grey-401); font-family:'JetBrains Mono',monospace; font-size:11px; line-height:1.85; padding:20px}
+  .tools-c .term .p{color:var(--mc-dark-accent)}
+  .tools-c .dust{position:absolute; right:14px; top:14px; display:grid; grid-template-columns:repeat(3,6px); gap:4px}
+  .tools-c .dust span{width:6px; height:6px; border-radius:1.5px}
+  .tools-c .dust span:nth-child(1){background:var(--mc-orange)} .tools-c .dust span:nth-child(2){background:var(--mc-pink)} .tools-c .dust span:nth-child(3){background:var(--mc-violet)}
+  .tools-c .dust span:nth-child(4){background:var(--mc-pink)} .tools-c .dust span:nth-child(5){background:var(--mc-violet)} .tools-c .dust span:nth-child(6){background:var(--mc-sky)}
+  @media (max-width:640px){.tools-c{grid-template-columns:1fr}}
+  @keyframes streamBorder{to{background-position:200% 50%}}
+
+  /* ================= SPOT 4 — News overview ================= */
+  .news-wrap{max-width:1240px}
+  .chipbar{display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 22px}
+  .chip{font-size:13px; font-weight:600; color:var(--mc-navy); background:var(--mc-white); box-shadow:inset 0 0 0 1px var(--mc-line); padding:8px 15px; border-radius:999px; cursor:pointer; transition:background .15s, box-shadow .15s}
+  .chip.is-active{background:var(--mc-action); color:var(--mc-white); box-shadow:none}
+  .thumb{position:relative; border-radius:12px; overflow:hidden; aspect-ratio:3/2}
+  .thumb::after{content:""; position:absolute; inset:0; background-image:radial-gradient(color-mix(in srgb, var(--mc-white) 34%, transparent) 1px, transparent 1.4px), radial-gradient(color-mix(in srgb, var(--mc-plate) 18%, transparent) 1px, transparent 1.4px); background-size:13px 13px,19px 19px; background-position:0 0,6px 9px; -webkit-mask-image:radial-gradient(86% 80% at 70% 16%, var(--mc-black) 6%, transparent 74%); mask-image:radial-gradient(86% 80% at 70% 16%, var(--mc-black) 6%, transparent 74%)}
+  .post-meta{display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--mc-text-grey-2)}
+  .post-meta .cat{color:var(--mc-action-text)}
+
+  /* A — featured + wide grid */
+  .news-a-hero{display:grid; grid-template-columns:1.15fr 1fr; gap:clamp(20px,3vw,36px); align-items:center; padding:clamp(18px,2.2vw,26px); border-radius:18px; background:var(--mc-white); box-shadow:0 0 0 1px var(--mc-line), 0 24px 60px -42px color-mix(in srgb, var(--mc-navy) 45%, transparent)}
+  .news-a-hero .thumb{aspect-ratio:16/11}
+  .news-a-hero .badge{position:absolute; left:14px; top:12px; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--mc-white); background:color-mix(in srgb, var(--mc-plate) 55%, transparent); padding:5px 9px; border-radius:6px; z-index:1}
+  .news-a-hero h3{font-size:clamp(21px,2vw,27px); line-height:1.16; letter-spacing:-.025em; margin:12px 0 10px; color:var(--mc-navy)}
+  .news-a-hero p{font-size:14.5px; line-height:1.6; color:var(--mc-slate); margin:0 0 14px; max-width:56ch}
+  .read-link{display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:700; color:var(--mc-action-text); text-decoration:none}
+  .news-a-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:22px; margin-top:26px}
+  .news-a-card{display:flex; flex-direction:column; gap:12px; padding:14px; border-radius:16px; background:var(--mc-white); box-shadow:inset 0 0 0 1px var(--mc-line)}
+  .news-a-card h4{font-size:16.5px; letter-spacing:-.015em; margin:0; color:var(--mc-navy); line-height:1.3}
+  .news-a-card p{font-size:13px; line-height:1.55; color:var(--mc-text-grey-2); margin:0}
+  .news-a-card.placeholder{box-shadow:inset 0 0 0 1.5px var(--mc-grey-250); opacity:.72}
+  .news-a-card.placeholder .thumb{background:var(--mc-grey-100); display:flex; align-items:center; justify-content:center}
+  .news-a-card.placeholder .thumb::after{display:none}
+  .news-a-card.placeholder .thumb span{font-size:11px; color:var(--mc-text-grey); font-weight:600}
+
+  /* B — magazine masthead */
+  .news-b-mast{position:relative; border-radius:20px; overflow:hidden; aspect-ratio:21/8; display:flex; align-items:flex-end; color:var(--mc-white)}
+  .news-b-mast .bg{position:absolute; inset:0}
+  .news-b-mast .bg::after{content:""; position:absolute; inset:0; background-image:radial-gradient(color-mix(in srgb, var(--mc-white) 30%, transparent) 1.4px, transparent 1.8px); background-size:17px 17px}
+  .news-b-mast .scrim{position:absolute; inset:0; background:linear-gradient(0deg, color-mix(in srgb, var(--mc-navy) 78%, transparent) 0%, transparent 62%)}
+  .news-b-mast .content{position:relative; z-index:1; padding:clamp(20px,3vw,34px); max-width:70ch}
+  .news-b-mast .post-meta{color:color-mix(in srgb, var(--mc-white) 78%, transparent)}
+  .news-b-mast .post-meta .cat{color:var(--mc-white)}
+  .news-b-mast h3{font-size:clamp(22px,2.6vw,32px); margin:10px 0 14px; letter-spacing:-.025em; line-height:1.15}
+  .pill-btn{display:inline-flex; align-items:center; gap:6px; height:38px; padding:0 15px; border-radius:999px; background:var(--mc-white); color:var(--mc-navy); font-size:13.5px; font-weight:700; text-decoration:none}
+  .segmented{display:inline-flex; padding:4px; border-radius:999px; background:var(--mc-surface); box-shadow:inset 0 0 0 1px var(--mc-line); gap:2px; margin:24px 0 22px}
+  .segmented button{border:0; background:transparent; font-size:13px; font-weight:600; color:var(--mc-slate); padding:8px 16px; border-radius:999px; cursor:pointer}
+  .segmented button.is-active{background:var(--mc-navy); color:var(--mc-white)}
+  .news-b-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:22px}
+  .news-b-card h4{font-size:16px; margin:10px 0 0; color:var(--mc-navy); letter-spacing:-.015em}
+
+  /* C — editorial rail + rows */
+  .news-c{display:grid; grid-template-columns:210px 1fr; gap:34px; align-items:start}
+  .rail{position:sticky; top:20px; display:flex; flex-direction:column; gap:4px}
+  .rail .rail-h{font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--mc-text-grey); margin-bottom:6px}
+  .rail button{display:flex; justify-content:space-between; border:0; background:transparent; text-align:left; font-size:14.5px; font-weight:600; color:var(--mc-slate); padding:9px 10px; border-radius:8px; cursor:pointer}
+  .rail button span{font-size:12px; color:var(--mc-text-grey); font-weight:600}
+  .rail button.is-active{background:var(--mc-action-tint); color:var(--mc-navy)}
+  .rows{display:flex; flex-direction:column; gap:2px}
+  .row-card{display:flex; gap:18px; padding:18px 6px; border-bottom:1px solid var(--mc-line)}
+  .row-card .thumb{flex:none; width:120px; aspect-ratio:1/1}
+  .row-card .body{min-width:0}
+  .row-card h4{font-size:17px; margin:8px 0 6px; color:var(--mc-navy); letter-spacing:-.02em}
+  .row-card p{font-size:13.5px; line-height:1.55; color:var(--mc-text-grey-2); margin:0 0 8px; max-width:64ch}
+  .row-card.featured{background:var(--mc-white); border-radius:14px; box-shadow:0 0 0 1px var(--mc-line); border-bottom:0; padding:18px}
+  .row-card.placeholder{opacity:.65}
+  .row-card.placeholder .thumb{background:var(--mc-grey-100); display:flex; align-items:center; justify-content:center}
+  .row-card.placeholder .thumb::after{display:none}
+
+  @media (max-width:720px){
+    .news-a-hero{grid-template-columns:1fr}
+    .news-c{grid-template-columns:1fr}
+    .rail{position:static; flex-direction:row; flex-wrap:wrap}
+    .row-card{flex-direction:column}
+    .row-card .thumb{width:100%; aspect-ratio:16/9}
+    .case-visual.short{padding:10px}
+  }
+</style>
+</head>
+<body>
+
+<header class="intro">
+  <div class="wrap">
+    <div class="kicker">Werkstatt-intern · 19.9.2026 · nicht live, nicht verlinkt</div>
+    <h1>Vier Stellen, drei Vorschläge, eine Entscheidung je Stelle</h1>
+    <p>Wegwerf-Seite zum Durchklicken — sie greift in nichts an der echten Seite ein. Jeder Abschnitt zeigt zuerst „Heute" (Screenshot des Ist-Zustands unter <code class="mono">localhost:8898</code>), dann die Vorschläge A/B/C mit echten Inhalten der Seite. Farben ausschließlich über die Tokens aus <code class="mono">tokens/colors.css</code>.</p>
+    <div class="tags">
+      <a href="#spot-1">1 · Start — Projekt-Kacheln</a>
+      <a href="#spot-2">2 · Studio — Eigene Produkte</a>
+      <a href="#spot-3">3 · Tools-Band</a>
+      <a href="#spot-4">4 · News-Übersicht</a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================================================ SPOT 1 ============================================================ -->
+<section class="spot" id="spot-1">
+  <div class="wrap">
+    <div class="kicker">1 · Start-Seite, Abschnitt „Arbeiten"</div>
+    <h2>Ausgewählte Projekte — die Kachel-Farbverläufe</h2>
+    <p class="owner-quote">Owner: <b>„Die Farbverläufe in den Kacheln sind wirklich schlecht, bitte überarbeiten."</b> Die untere Hälfte jeder Karte ist aktuell ein unscharfer Verlaufsklecks (blau/grau links, pfirsich/pink rechts) hinter dem Terminal- bzw. Browser-Mock.</p>
+
+    <div class="heute">
+      <div class="sub">Heute</div>
+      <div class="heute-frame"><img src="shots/before/index-html--idwork-1440.png" alt="Ist-Zustand: zwei Karten mit unscharfem Farbverlauf-Klecks unter dem Mock" loading="lazy"></div>
+      <div class="heute-cap">Screenshot, localhost:8898/ · Abschnitt „Arbeiten"</div>
+    </div>
+
+    <div class="variants">
+
+      <!-- Variant A -->
+      <div class="variant">
+        <div class="variant-head"><div class="name">Vorschlag A — Messfeld</div><div class="idea">Flache Fläche statt Klecks, ein scharfer 3&nbsp;px-Steg in <code class="mono">--mc-heading-gradient</code>, feines Punktraster (dieselbe Textur wie auf den News-Kacheln).</div></div>
+        <div class="variant-body">
+          <div class="case-row">
+            <article class="case-card">
+              <div class="case-top"><div class="case-meta"><span class="case-status">Live</span><span>Eigenes Produkt · md-recall</span></div><div class="case-title">Projektgedächtnis, das am Commit hängt</div></div>
+              <p class="case-desc">KI-natives Projektgedächtnis für Software-Teams. Wissen wird beim Schreiben an den Git-Commit gestempelt.</p>
+              <div class="case-visual cv-a tone-recall">
+                <div class="mock mock-term"><div class="dots"><span></span><span></span><span></span></div>
+                  <div><span class="p">$</span> recall write "auth uses refresh tokens"</div>
+                  <div><span class="ok">✓</span> stamped onto commit <b>a91f3c</b></div>
+                  <div><span class="p">$</span> recall read auth</div>
+                  <div><span class="ar">→</span> 0,25 ms · 0 Tokens · 108.000+ Anker</div>
+                </div>
+              </div>
+            </article>
+            <article class="case-card">
+              <div class="case-top"><div class="case-meta"><span class="case-status">Live</span><span>Website · mccain-digital.com</span></div><div class="case-title">Unsere eigene Seite: 4×100 in Lighthouse</div></div>
+              <p class="case-desc">Handgeschrieben ohne Framework, mit eigener Canvas-Physik-Engine — bei CLS 0 und TBT 0 ms.</p>
+              <div class="case-visual cv-a tone-site">
+                <div class="mock mock-browser">
+                  <div class="bar"><i></i><i></i><i></i><span class="u">mccain-digital.com</span></div>
+                  <div class="scores">
+                    <div class="score"><div class="ring">100</div><em>PERF</em></div>
+                    <div class="score"><div class="ring">100</div><em>A11Y</em></div>
+                    <div class="score"><div class="ring">100</div><em>BP</em></div>
+                    <div class="score"><div class="ring">100</div><em>SEO</em></div>
+                  </div>
+                  <div class="chips"><span>CLS 0</span><span>TBT 0 ms</span></div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+
+      <!-- Variant B -->
+      <div class="variant">
+        <div class="variant-head"><div class="name">Vorschlag B — Konturrahmen</div><div class="idea">Volle, einfarbige Tönung (eine Farbfamilie, keine Mischung), der Mock bekommt stattdessen einen scharfen 2&nbsp;px-Verlaufsrahmen und ein kleines Etikett.</div></div>
+        <div class="variant-body">
+          <div class="case-row">
+            <article class="case-card">
+              <div class="case-top"><div class="case-meta"><span class="case-status">Live</span><span>Eigenes Produkt · md-recall</span></div><div class="case-title">Projektgedächtnis, das am Commit hängt</div></div>
+              <p class="case-desc">KI-natives Projektgedächtnis für Software-Teams. Wissen wird beim Schreiben an den Git-Commit gestempelt.</p>
+              <div class="case-visual cv-b tone-recall">
+                <div class="frame"><div class="mock mock-term"><div class="dots"><span></span><span></span><span></span></div>
+                  <div><span class="p">$</span> recall write "auth uses refresh tokens"</div>
+                  <div><span class="ok">✓</span> stamped onto commit <b>a91f3c</b></div>
+                  <div><span class="ar">→</span> 0,25 ms · 0 Tokens</div>
+                </div></div>
+                <span class="tag">Terminal</span>
+              </div>
+            </article>
+            <article class="case-card">
+              <div class="case-top"><div class="case-meta"><span class="case-status">Live</span><span>Website · mccain-digital.com</span></div><div class="case-title">Unsere eigene Seite: 4×100 in Lighthouse</div></div>
+              <p class="case-desc">Handgeschrieben ohne Framework, mit eigener Canvas-Physik-Engine — bei CLS 0 und TBT 0 ms.</p>
+              <div class="case-visual cv-b tone-site">
+                <div class="frame"><div class="mock mock-browser">
+                  <div class="bar"><i></i><i></i><i></i><span class="u">mccain-digital.com</span></div>
+                  <div class="scores">
+                    <div class="score"><div class="ring">100</div><em>PERF</em></div>
+                    <div class="score"><div class="ring">100</div><em>A11Y</em></div>
+                    <div class="score"><div class="ring">100</div><em>BP</em></div>
+                    <div class="score"><div class="ring">100</div><em>SEO</em></div>
+                  </div>
+                </div></div>
+                <span class="tag">Lighthouse</span>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+
+      <!-- Variant C -->
+      <div class="variant">
+        <div class="variant-head"><div class="name">Vorschlag C — Messband</div><div class="idea">Kein Farbfeld mehr — der Mock steht auf neutralem Grund, darunter eine echte Messwert-Leiste (dieselben Zahlen wie im Modal) und ein schmaler, satter Steg statt Verlaufsfläche.</div></div>
+        <div class="variant-body">
+          <div class="case-row">
+            <article class="case-card">
+              <div class="case-top"><div class="case-meta"><span class="case-status">Live</span><span>Eigenes Produkt · md-recall</span></div><div class="case-title">Projektgedächtnis, das am Commit hängt</div></div>
+              <p class="case-desc">KI-natives Projektgedächtnis für Software-Teams. Wissen wird beim Schreiben an den Git-Commit gestempelt.</p>
+              <div class="case-visual cv-c tone-recall">
+                <div class="mock mock-term"><div class="dots"><span></span><span></span><span></span></div>
+                  <div><span class="p">$</span> recall write "auth uses refresh tokens"</div>
+                  <div><span class="ok">✓</span> stamped onto commit <b>a91f3c</b></div>
+                </div>
+                <div class="under"></div>
+                <div class="strip"><span>0 Tokens</span><span>0,25 ms</span><span>108.000+ Anker</span></div>
+              </div>
+            </article>
+            <article class="case-card">
+              <div class="case-top"><div class="case-meta"><span class="case-status">Live</span><span>Website · mccain-digital.com</span></div><div class="case-title">Unsere eigene Seite: 4×100 in Lighthouse</div></div>
+              <p class="case-desc">Handgeschrieben ohne Framework, mit eigener Canvas-Physik-Engine — bei CLS 0 und TBT 0 ms.</p>
+              <div class="case-visual cv-c tone-site">
+                <div class="mock mock-browser">
+                  <div class="bar"><i></i><i></i><i></i><span class="u">mccain-digital.com</span></div>
+                  <div class="scores">
+                    <div class="score"><div class="ring">100</div><em>PERF</em></div>
+                    <div class="score"><div class="ring">100</div><em>A11Y</em></div>
+                    <div class="score"><div class="ring">100</div><em>BP</em></div>
+                    <div class="score"><div class="ring">100</div><em>SEO</em></div>
+                  </div>
+                </div>
+                <div class="under"></div>
+                <div class="strip"><span>4×100</span><span>CLS 0</span><span>TBT 0 ms</span></div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="recommend">
+      <div class="lbl">Empfehlung</div>
+      <p><b>Vorschlag A (Messfeld).</b> Er behebt nebenbei einen echten Fehler: Die „site"-Kachel mischte bisher Himmelblau direkt mit Orange/Pink (<code class="mono">flow.site</code> in „McCain Digital v2.dc.html", Zeile 969) — genau die Kombination, vor der der Farb-Kommentar in <code class="mono">tokens/colors.css</code> warnt („jede warme Farbe mit wenig Deckkraft über Navy wird Indigo-Violett"). Das war technisch die Ursache des Kleckses. A ersetzt die Fläche durch eine einzige Flächenfarbe je Karte plus den bereits bestehenden, freigegebenen <code class="mono">--mc-heading-gradient</code>-Steg als Signatur — und nutzt exakt das Punktraster, das auf der News-Seite schon existiert (Wiedererkennung statt neuer Dekoration). Vorschlag C ist die zweitbeste Wahl, wenn die Zahlen stärker im Vordergrund stehen sollen.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ SPOT 2 ============================================================ -->
+<section class="spot" id="spot-2">
+  <div class="wrap">
+    <div class="kicker">2 · Studio-Seite, Abschnitt „Eigene Produkte"</div>
+    <h2>Wir sind unser erster Kunde — dieselbe Kachel-Sprache</h2>
+    <p class="owner-quote">Owner: <b>„Die Kacheln dort sehen wirklich nicht gut aus!"</b> Unteres Drittel ist ein breites, unscharfes Verlaufsband (blau für md-recall, pink→violett für die Website). Löst dieselbe Ursache wie Punkt 1 — deshalb hier dieselben drei Systeme, nur im schmaleren Studio-Format.</p>
+
+    <div class="heute">
+      <div class="sub">Heute</div>
+      <div class="heute-frame"><img src="shots/before/studio-index-html--idprodukte-1440.png" alt="Ist-Zustand: zwei Produktkarten mit breitem Verlaufsband am unteren Rand" loading="lazy"></div>
+      <div class="heute-cap">Screenshot, localhost:8898/studio/ · Abschnitt „Eigene Produkte"</div>
+    </div>
+
+    <div class="variants">
+      <div class="variant">
+        <div class="variant-head"><div class="name">A — Messfeld</div><div class="idea">Gleiches System wie oben, kompakt: Fläche + Steg + Punktraster statt Verlaufsband.</div></div>
+        <div class="variant-body">
+          <div class="case-row">
+            <article class="case-card">
+              <div class="case-top"><div class="case-meta"><span class="case-title" style="font-size:16px; margin:0">md-recall</span><span class="case-status">Live</span></div></div>
+              <p class="case-desc">KI-natives Projektgedächtnis – live, self-hosted</p>
+              <div class="case-stats"><div><b>0</b><span>Tokens pro Abruf</span></div><div><b>0,25 ms</b><span>Lookup über 108.000+ Anker</span></div><div><b>100 %</b><span>self-hosted</span></div></div>
+              <a class="case-link" href="#">/md-recall/ ↗</a>
+              <div class="case-visual band-short cv-a tone-recall"><span class="lab">/md-recall/ · self-hosted</span></div>
+            </article>
+            <article class="case-card">
+              <div class="case-top"><div class="case-meta"><span class="case-title" style="font-size:16px; margin:0">mccain-digital.com</span><span class="case-status">Live</span></div></div>
+              <p class="case-desc">Handgeschrieben, 100/100/100/100 in Lighthouse</p>
+              <div class="case-stats"><div><b>4×100</b><span>Lighthouse</span></div><div><b>3/3</b><span>Agentic Browsing</span></div><div><b>0</b><span>Page-Builder</span></div></div>
+              <a class="case-link" href="#">mccain-digital.com ↗</a>
+              <div class="case-visual band-short cv-a tone-site"><span class="lab">CLS 0 · TBT 0 ms</span></div>
+            </article>
+          </div>
+        </div>
+      </div>
+
+      <div class="variant">
+        <div class="variant-head"><div class="name">B — Konturrahmen</div><div class="idea">Flache Tönung über die ganze Bandbreite, der scharfe Verlauf wandert an den Rand.</div></div>
+        <div class="variant-body">
+          <div class="case-row">
+            <article class="case-card">
+              <div class="case-top"><div class="case-meta"><span class="case-title" style="font-size:16px; margin:0">md-recall</span><span class="case-status">Live</span></div></div>
+              <p class="case-desc">KI-natives Projektgedächtnis – live, self-hosted</p>
+              <div class="case-stats"><div><b>0</b><span>Tokens pro Abruf</span></div><div><b>0,25 ms</b><span>Lookup über 108.000+ Anker</span></div><div><b>100 %</b><span>self-hosted</span></div></div>
+              <a class="case-link" href="#">/md-recall/ ↗</a>
+              <div class="case-visual band-short cv-b tone-recall"><div class="frame"><span class="lab">Eigenes Produkt</span></div></div>
+            </article>
+            <article class="case-card">
+              <div class="case-top"><div class="case-meta"><span class="case-title" style="font-size:16px; margin:0">mccain-digital.com</span><span class="case-status">Live</span></div></div>
+              <p class="case-desc">Handgeschrieben, 100/100/100/100 in Lighthouse</p>
+              <div class="case-stats"><div><b>4×100</b><span>Lighthouse</span></div><div><b>3/3</b><span>Agentic Browsing</span></div><div><b>0</b><span>Page-Builder</span></div></div>
+              <a class="case-link" href="#">mccain-digital.com ↗</a>
+              <div class="case-visual band-short cv-b tone-site"><div class="frame"><span class="lab">Website</span></div></div>
+            </article>
+          </div>
+        </div>
+      </div>
+
+      <div class="variant">
+        <div class="variant-head"><div class="name">C — Messband</div><div class="idea">Neutraler Grund, die Fakten stehen für sich statt in Farbe verpackt zu sein.</div></div>
+        <div class="variant-body">
+          <div class="case-row">
+            <article class="case-card">
+              <div class="case-top"><div class="case-meta"><span class="case-title" style="font-size:16px; margin:0">md-recall</span><span class="case-status">Live</span></div></div>
+              <p class="case-desc">KI-natives Projektgedächtnis – live, self-hosted</p>
+              <div class="case-stats"><div><b>0</b><span>Tokens pro Abruf</span></div><div><b>0,25 ms</b><span>Lookup über 108.000+ Anker</span></div><div><b>100 %</b><span>self-hosted</span></div></div>
+              <a class="case-link" href="#">/md-recall/ ↗</a>
+              <div class="case-visual band-short cv-c tone-recall"><span class="strip"><span>0 Tokens</span><span>0,25 ms</span></span></div>
+            </article>
+            <article class="case-card">
+              <div class="case-top"><div class="case-meta"><span class="case-title" style="font-size:16px; margin:0">mccain-digital.com</span><span class="case-status">Live</span></div></div>
+              <p class="case-desc">Handgeschrieben, 100/100/100/100 in Lighthouse</p>
+              <div class="case-stats"><div><b>4×100</b><span>Lighthouse</span></div><div><b>3/3</b><span>Agentic Browsing</span></div><div><b>0</b><span>Page-Builder</span></div></div>
+              <a class="case-link" href="#">mccain-digital.com ↗</a>
+              <div class="case-visual band-short cv-c tone-site"><span class="strip"><span>4×100</span><span>CLS 0</span></span></div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="recommend">
+      <div class="lbl">Empfehlung</div>
+      <p><b>A (Messfeld) — dieselbe Wahl wie bei Punkt 1.</b> Das war die Vorgabe des Owners: ein System für beide Stellen. Die kompakte Bandhöhe der Studio-Karte verträgt keinen großen Mock, deshalb trägt hier ein kurzes, gesetztes Etikett (URL bzw. Kennzahl) die gleiche Formsprache weiter.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ SPOT 3 ============================================================ -->
+<section class="spot" id="spot-3">
+  <div class="wrap">
+    <div class="kicker">3 · Tools-Band (aktuell nur auf der Startseite gebaut)</div>
+    <h2>„Sehen Sie selbst, wie diese Seite gebaut ist."</h2>
+    <p class="owner-quote">Owner: <b>„Der Abschnitt ist cool, aber viel zu langweilig für mich! Er verschwindet beim Scrollen fast."</b> Aktuell ist es dieselbe graue Box wie das Konfigurator-Hinweisband (Klon, siehe <code class="mono">tools/v5build.mjs</code>) — nichts unterscheidet „geöffnet die Werkstatt" von einem gewöhnlichen Info-Kasten.</p>
+    <p class="sub-note">Annahme: <code class="mono">grep</code> findet die Band-Texte aktuell nur in <code class="mono">index.html</code>; auf <code class="mono">/leistungen/websites/</code> öffnet bislang nur der linke „Tools"-Reiter dieselbe Werkstatt. Screenshot unten ist deshalb von der Startseite.</p>
+
+    <div class="heute">
+      <div class="sub">Heute</div>
+      <div class="heute-frame"><img src="shots/before/tools-band-1440-1440.png" alt="Ist-Zustand: graue Box, eyebrow Tools, Titel, Text, Navy-Button" loading="lazy"></div>
+      <div class="heute-cap">Screenshot, localhost:8898/ · Tools-Band unter „Arbeiten"</div>
+    </div>
+
+    <div class="variants" style="grid-template-columns:1fr">
+
+      <div class="variant">
+        <div class="variant-head"><div class="name">Vorschlag A — Navy-Platte mit Mini-Inspektor</div><div class="idea">Dieselbe dunkle Fläche wie Terminal-Mock und Kontaktbereich; ein kleiner, echt aussehender Ausschnitt der Werkstatt macht sichtbar, was hinter dem Klick steckt.</div></div>
+        <div class="variant-body">
+          <div class="tools-a">
+            <div class="txt">
+              <div class="kicker">Tools</div>
+              <h3>Sehen Sie selbst, wie diese Seite gebaut ist.</h3>
+              <p>Ein Klick öffnet die Tools: der echte Aufbau der Seite, der Code, der sie bewegt, die Zeiten, die Ihr Browser gerade gemessen hat, und wie Google und Sprachmodelle sie lesen.</p>
+            </div>
+            <div class="mini-inspect">
+              <div class="mi-row"><span>section#work</span><b>14 Knoten</b></div>
+              <div class="mi-row"><span>LCP</span><b>0,4 s</b></div>
+              <div class="mi-row"><span>img.lazy</span><b>loading=lazy</b></div>
+            </div>
+            <a class="btn-dark" href="#">Tools öffnen ›</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="variant">
+        <div class="variant-head"><div class="name">Vorschlag B — Messwert-Leiste + Verlaufsrand</div><div class="idea">Bleibt hell, bekommt aber eine echte Messwert-Reihe oben und einen schmalen, langsam wandernden Verlaufsrand (dieselbe Technik wie das Eingabefeld im „Seite fragen"-Bereich der Studio-Seite) — bewegt sich nicht bei reduzierter Bewegung.</div></div>
+        <div class="variant-body">
+          <div class="tools-b"><div class="in">
+            <div class="stripv"><span>LCP 0,4 s</span><span>TBT 0 ms</span><span>CLS 0</span><span>108.000+ Anker</span></div>
+            <div class="kicker">Tools</div>
+            <h3>Sehen Sie selbst, wie diese Seite gebaut ist.</h3>
+            <p>Ein Klick öffnet die Tools: der echte Aufbau der Seite, der Code, der sie bewegt, und wie Google und Sprachmodelle sie lesen.</p>
+            <a class="btn-navy" href="#">Tools öffnen ›</a>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="variant">
+        <div class="variant-head"><div class="name">Vorschlag C — Geteiltes Panel mit Terminal-Einblick</div><div class="idea">Text links wie heute, rechts ein dunkler Ausschnitt, der wie ein echter Befehl aus der Werkstatt aussieht, plus der Pixelstrom-Punktmotiv in der Ecke.</div></div>
+        <div class="variant-body">
+          <div class="tools-c">
+            <div class="txt">
+              <div class="kicker">Tools</div>
+              <h3>Sehen Sie selbst, wie diese Seite gebaut ist.</h3>
+              <p>Ein Klick öffnet die Tools: der echte Aufbau der Seite, der Code, der sie bewegt, und die Zeiten, die Ihr Browser gerade gemessen hat.</p>
+              <a class="btn-navy" href="#">Tools öffnen ›</a>
+            </div>
+            <div class="term">
+              <div class="dust"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+              <div><span class="p">&gt;</span> inspect(#hero)</div>
+              <div>role=banner · 1 Bild</div>
+              <div>LCP 0,4 s · CLS 0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="recommend">
+      <div class="lbl">Empfehlung</div>
+      <p><b>Vorschlag A (Navy-Platte).</b> Navy ist an dieser Stelle keine neue Farbe — der Kontaktbereich, der „Seite fragen"-Bereich und der Terminal-Mock in Punkt 1 sind bereits dunkel; das Band reiht sich also in ein bestehendes Muster ein statt eine weitere Optik einzuführen. Es braucht keine Bewegung (robust bei <code class="mono">prefers-reduced-motion</code>) und der Kontrastsprung zum umgebenden Weiß ist genau das, was gegen „verschwindet beim Scrollen" hilft. B ist die zweite Wahl, wenn eine helle Seite gewünscht ist.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ SPOT 4 ============================================================ -->
+<section class="spot" id="spot-4">
+  <div class="wrap news-wrap">
+    <div class="kicker">4 · News-Übersicht</div>
+    <h2>Zu schmal für eine Übersichtsseite</h2>
+    <p class="owner-quote">Owner: <b>„Die Beitragsübersicht ist zu schmal. Für die Beiträge selbst ok, aber als Übersichtsseite lahm."</b> Die Liste steckt in einer <code class="mono">max-width:1080px</code>-Spalte, während der Rest der Seite bis 1440&nbsp;px geht — rechts bleibt bei jeder Auflösung ab Desktop ungenutzter Raum. Alle drei Vorschläge nutzen die echten drei Beiträge von <code class="mono">McCain Digital News.dc.html</code>; die vierte, gestrichelte Kachel ist ausdrücklich als Platzhalter markiert.</p>
+
+    <div class="heute">
+      <div class="sub">Heute</div>
+      <div class="heute-frame"><img src="shots/before/news-crop-1440-1440.png" alt="Ist-Zustand: schmale einspaltige Liste mit viel Weißraum rechts" loading="lazy"></div>
+      <div class="heute-cap">Screenshot, localhost:8898/news/</div>
+    </div>
+
+    <div class="variants" style="grid-template-columns:1fr; gap:40px">
+
+      <!-- Variant A -->
+      <div class="variant">
+        <div class="variant-head"><div class="name">Vorschlag A — Aufmacher groß + breites Raster + Filter</div><div class="idea">Container auf 1240 px statt 1080 px, Filter-Chips nach Kategorie (hier klickbar, rein clientseitig zur Vorschau), 3er-Raster darunter.</div></div>
+        <div class="variant-body" data-filter-scope="a">
+          <div class="chipbar" data-filter-group>
+            <button class="chip is-active" data-filter="all">Alle</button>
+            <button class="chip" data-filter="Produkt">Produkt</button>
+            <button class="chip" data-filter="Technik">Technik</button>
+            <button class="chip" data-filter="Studio">Studio</button>
+          </div>
+          <a class="news-a-hero" href="#">
+            <div class="thumb" style="background:linear-gradient(135deg,var(--mc-orange),var(--mc-pink) 45%,var(--mc-violet))"><span class="badge">Aktuell</span></div>
+            <div>
+              <div class="post-meta"><span class="cat">Produkt</span><span aria-hidden="true">·</span><span>11. September 2026</span><span aria-hidden="true">·</span><span>4 Min</span></div>
+              <h3>recall heißt jetzt md-recall – und ist frei für alle</h3>
+              <p>Neuer Name, neue Lizenz, neuer Ort: Das Projektgedächtnis läuft ab sofort ohne Seat-Grenze und ist direkt von hier erreichbar.</p>
+              <span class="read-link">Lesen →</span>
+            </div>
+          </a>
+          <div class="news-a-grid">
+            <a class="news-a-card" href="#" data-cat="Technik">
+              <div class="thumb" style="background:linear-gradient(135deg,var(--mc-orange),var(--mc-pink) 60%,var(--mc-violet))"></div>
+              <div class="post-meta"><span class="cat">Technik</span><span aria-hidden="true">·</span><span>2. Sept. 2026</span><span aria-hidden="true">·</span><span>7 Min</span></div>
+              <h4>Warum der Index im Repository liegt</h4>
+              <p>Ein Gedächtnis, das neben dem Code wohnt, überlebt Maschinenwechsel, Branches und Reviews.</p>
+            </a>
+            <a class="news-a-card" href="#" data-cat="Studio">
+              <div class="thumb" style="background:linear-gradient(135deg,var(--mc-sky),var(--mc-action) 60%,var(--mc-dark-2))"></div>
+              <div class="post-meta"><span class="cat">Studio</span><span aria-hidden="true">·</span><span>18. Aug. 2026</span><span aria-hidden="true">·</span><span>3 Min</span></div>
+              <h4>Zwei Personen, ein Kalender</h4>
+              <p>Wir nehmen ab Herbst nur noch zwei Projekte gleichzeitig an. Was das für Anfragen bedeutet.</p>
+            </a>
+            <div class="news-a-card placeholder" data-cat="Produkt">
+              <div class="thumb"><span>In Vorbereitung</span></div>
+              <div class="post-meta"><span class="cat">Produkt</span><span aria-hidden="true">·</span><span>demnächst</span></div>
+              <h4>Nächster Beitrag folgt</h4>
+              <p>Platzhalter, zeigt nur, wie das Raster bei drei Spalten wirkt.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Variant B -->
+      <div class="variant">
+        <div class="variant-head"><div class="name">Vorschlag B — Magazin-Aufmacher + Kategorie-Segment</div><div class="idea">Volle Breite als Titelbild mit Textüberlagerung, Kategorie-Umschalter im Stil des DE/EN-Schalters aus der Kopfzeile.</div></div>
+        <div class="variant-body" data-filter-scope="b">
+          <a class="news-b-mast" href="#">
+            <div class="bg"><div style="position:absolute; inset:0; background:linear-gradient(135deg,var(--mc-orange),var(--mc-pink) 45%,var(--mc-violet))"></div></div>
+            <div class="scrim"></div>
+            <div class="content">
+              <div class="post-meta"><span class="cat">Produkt</span><span aria-hidden="true">·</span><span>11. September 2026</span><span aria-hidden="true">·</span><span>4 Min</span></div>
+              <h3>recall heißt jetzt md-recall – und ist frei für alle</h3>
+              <span class="pill-btn">Lesen →</span>
+            </div>
+          </a>
+          <div class="segmented" data-filter-group>
+            <button class="is-active" data-filter="all">Alle</button>
+            <button data-filter="Produkt">Produkt</button>
+            <button data-filter="Technik">Technik</button>
+            <button data-filter="Studio">Studio</button>
+          </div>
+          <div class="news-b-grid">
+            <a class="news-a-card news-b-card" href="#" data-cat="Technik">
+              <div class="thumb" style="background:linear-gradient(135deg,var(--mc-orange),var(--mc-pink) 60%,var(--mc-violet))"></div>
+              <div class="post-meta"><span class="cat">Technik</span><span aria-hidden="true">·</span><span>2. Sept. 2026</span><span aria-hidden="true">·</span><span>7 Min</span></div>
+              <h4>Warum der Index im Repository liegt</h4>
+            </a>
+            <a class="news-a-card news-b-card" href="#" data-cat="Studio">
+              <div class="thumb" style="background:linear-gradient(135deg,var(--mc-sky),var(--mc-action) 60%,var(--mc-dark-2))"></div>
+              <div class="post-meta"><span class="cat">Studio</span><span aria-hidden="true">·</span><span>18. Aug. 2026</span><span aria-hidden="true">·</span><span>3 Min</span></div>
+              <h4>Zwei Personen, ein Kalender</h4>
+            </a>
+            <div class="news-a-card news-b-card placeholder" data-cat="Produkt">
+              <div class="thumb"><span>In Vorbereitung</span></div>
+              <div class="post-meta"><span class="cat">Produkt</span><span aria-hidden="true">·</span><span>demnächst</span></div>
+              <h4>Nächster Beitrag folgt</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Variant C -->
+      <div class="variant">
+        <div class="variant-head"><div class="name">Vorschlag C — Register links, Liste rechts</div><div class="idea">Editorialer Index: sticky Kategorie-Register mit Anzahl, breite Zeilenkarten statt Kacheln — trägt auch, wenn deutlich mehr Beiträge dazukommen.</div></div>
+        <div class="variant-body" data-filter-scope="c">
+          <div class="news-c">
+            <nav class="rail" data-filter-group>
+              <div class="rail-h">Kategorien</div>
+              <button class="is-active" data-filter="all">Alle <span>3</span></button>
+              <button data-filter="Produkt">Produkt <span>1</span></button>
+              <button data-filter="Technik">Technik <span>1</span></button>
+              <button data-filter="Studio">Studio <span>1</span></button>
+            </nav>
+            <div class="rows">
+              <a class="row-card featured" href="#" data-cat="Produkt">
+                <div class="thumb" style="background:linear-gradient(135deg,var(--mc-orange),var(--mc-pink) 45%,var(--mc-violet)); width:150px; flex:none"></div>
+                <div class="body">
+                  <div class="post-meta"><span class="cat">Produkt · Aktuell</span><span aria-hidden="true">·</span><span>11. September 2026</span><span aria-hidden="true">·</span><span>4 Min</span></div>
+                  <h4>recall heißt jetzt md-recall – und ist frei für alle</h4>
+                  <p>Neuer Name, neue Lizenz, neuer Ort: Das Projektgedächtnis läuft ab sofort ohne Seat-Grenze.</p>
+                  <span class="read-link">Lesen →</span>
+                </div>
+              </a>
+              <a class="row-card" href="#" data-cat="Technik">
+                <div class="thumb" style="background:linear-gradient(135deg,var(--mc-orange),var(--mc-pink) 60%,var(--mc-violet))"></div>
+                <div class="body">
+                  <div class="post-meta"><span class="cat">Technik</span><span aria-hidden="true">·</span><span>2. September 2026</span><span aria-hidden="true">·</span><span>7 Min</span></div>
+                  <h4>Warum der Index im Repository liegt</h4>
+                  <p>Ein Gedächtnis, das neben dem Code wohnt, überlebt Maschinenwechsel, Branches und Reviews.</p>
+                </div>
+              </a>
+              <a class="row-card" href="#" data-cat="Studio">
+                <div class="thumb" style="background:linear-gradient(135deg,var(--mc-sky),var(--mc-action) 60%,var(--mc-dark-2))"></div>
+                <div class="body">
+                  <div class="post-meta"><span class="cat">Studio</span><span aria-hidden="true">·</span><span>18. August 2026</span><span aria-hidden="true">·</span><span>3 Min</span></div>
+                  <h4>Zwei Personen, ein Kalender</h4>
+                  <p>Wir nehmen ab Herbst nur noch zwei Projekte gleichzeitig an. Was das für Anfragen bedeutet.</p>
+                </div>
+              </a>
+              <div class="row-card placeholder" data-cat="Produkt">
+                <div class="thumb"><span style="font-size:11px; color:var(--mc-text-grey); font-weight:600">Bald</span></div>
+                <div class="body">
+                  <div class="post-meta"><span class="cat">Produkt</span><span aria-hidden="true">·</span><span>demnächst</span></div>
+                  <h4>Nächster Beitrag folgt</h4>
+                  <p>Platzhalter, zeigt nur, wie die Liste bei vier Einträgen wirkt.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="recommend">
+      <div class="lbl">Empfehlung</div>
+      <p><b>Vorschlag A (Aufmacher + breites Raster).</b> Löst „zu schmal" am direktesten (Container von 1080 auf 1240&nbsp;px) und bleibt strukturell am nächsten am heutigen Aufbau, ist also der kleinste Umbau. Vorschlag C trägt am besten, sobald wesentlich mehr Beiträge dazukommen (die News-Seite hat aktuell nur drei) — beide sind für später eine Überlegung wert, wenn die Kategorie-Zahl wächst. Vorschlag B ist optisch am stärksten, aber am aufwendigsten in Bild-Kuratierung, weil das Titelbild groß und einzeln sitzt.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer style="padding:32px 0; text-align:center; color:var(--mc-text-grey); font-size:13px">
+  <div class="wrap">Wegwerf-Vergleichsseite · internal/polish-0919/sections/ · wird nicht deployt</div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  function initFilterGroup(group){
+    var scope = group.closest("[data-filter-scope]") || document;
+    var buttons = group.querySelectorAll("[data-filter]");
+    var cards = scope.querySelectorAll("[data-cat]");
+    buttons.forEach(function(btn){
+      btn.addEventListener("click", function(){
+        buttons.forEach(function(b){ b.classList.remove("is-active"); });
+        btn.classList.add("is-active");
+        var f = btn.getAttribute("data-filter");
+        cards.forEach(function(card){
+          var show = f === "all" || card.getAttribute("data-cat") === f;
+          card.hidden = !show;
+        });
+      });
+    });
+  }
+  document.querySelectorAll("[data-filter-group]").forEach(initFilterGroup);
+})();
+</script>
+
+</body>
+</html>

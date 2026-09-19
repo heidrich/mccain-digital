@@ -29,6 +29,10 @@ __pycache__/
 
 # Screenshots are a look, not a record - regenerate with tools/shots.mjs
 internal/shots/
+# The polish demos' own verification shots; sections/shots/before/ stays, the
+# demo page shows those images as "Heute".
+internal/polish-0919/header/shots/
+internal/polish-0919/sections/shots/after/
 
 # Lighthouse reports: half a megabyte each, regenerable in a minute with the
 # skill's `lighthouse-psi.mjs` (~/.claude/skills/html-performance/scripts/).

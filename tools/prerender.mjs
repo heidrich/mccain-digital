@@ -2,6 +2,13 @@
  *
  *   python prodserve.py 8898 --dev      # must be running
  *   node tools/prerender.mjs
+ *   node tools/prerender.mjs --route /kontakt/ --route /preise/   # some pages
+ *
+ * --route renders only those artboards to _dcbuild/react/; the other pages
+ * keep what the last run wrote there. Everything outside the page loop (the
+ * shared assets, derived images, og images) runs either way. Same flag as
+ * tools/v5build.mjs, so one edit is `prerender --route X` then
+ * `v5build --route X` instead of a full four-minute build.
  *
  * WHAT CHANGED ON 12.9.2026
  * The export used to be ONE artboard (the start page) plus a brand guide, and
@@ -71,6 +78,12 @@ import { launch, open, settle } from "./browser.mjs";
 import { NOT_PUBLISHED, ORIGIN, PAGES } from "./pages.mjs";
 import { resolveColors, token } from "./tokens.mjs";
 import { checkSources } from "./color_guard.mjs";
+
+const argv = process.argv.slice(2);
+const ONLY = argv.flatMap((a, i) => (a === "--route" ? [argv[i + 1]] : []));
+for (const r of ONLY) if (!PAGES.some((p) => p.route === r)) throw new Error(`prerender: --route ${r} is not in tools/pages.mjs`);
+const unknown = argv.filter((a, i) => a !== "--route" && argv[i - 1] !== "--route");
+if (unknown.length) throw new Error(`prerender: unknown option ${unknown.join(" ")} - --route /x/ renders single pages`);
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SITE = path.dirname(HERE);
@@ -1622,8 +1635,13 @@ function assertMoustachesAreInert(doc, what) {
  * THIS build's, patched by patchRuntime(). Copied afterwards, as it was until
  * the build-time render existed, every page would be rendered against the
  * PREVIOUS build's runtime and the mismatch would only show as a hydration
- * error, on a page that still looks fine. */
-fs.rmSync(SSR_DIR, { recursive: true, force: true });
+ * error, on a page that still looks fine.
+ *
+ * A --route run keeps react/: the other pages' output from the last run is
+ * what v5build reads for them, and wiping it here would leave a single page. */
+if (ONLY.length && fs.existsSync(SSR_DIR)) {
+  for (const e of fs.readdirSync(SSR_DIR)) if (e !== "react") fs.rmSync(path.join(SSR_DIR, e), { recursive: true, force: true });
+} else fs.rmSync(SSR_DIR, { recursive: true, force: true });
 fs.mkdirSync(path.join(SSR_DIR, "vendor"), { recursive: true });
 for (const [from, to] of Object.entries(ASSETS)) copy(from, to);
 for (const f of VENDOR_REACT) {
@@ -1851,7 +1869,7 @@ const built = [];
 let fixedCanonicals = 0;
 const markFiles = new Map();
 
-for (const page of PAGES) {
+for (const page of PAGES.filter((p) => !ONLY.length || ONLY.includes(p.route))) {
   const srcFile = path.join(EXPORT_DIR, page.src);
   if (!fs.existsSync(srcFile)) throw new Error(`prerender: ${page.src} is not in the export`);
 

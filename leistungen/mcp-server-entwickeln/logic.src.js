@@ -381,26 +381,26 @@ class Component extends DCLogic {
     const ti = Math.max(0, Math.min(S.tab, K.code.tabs.length - 1));
     return {
       bc: K.bc, hero: K.hero, tint: K.tint,
-      heroCols: isDesktop ? '1fr .92fr' : '1fr',
+      heroCols: isDesktop ? '1fr .92fr' : 'minmax(0, 1fr)',
       code: Object.assign({}, K.code, { body: K.code.bodies[ti], minH: isDesktop ? '300px' : '240px', anim: 'fadeIn ' + (ti % 2 ? '.3s' : '.31s') + ' ease both', tabs: K.code.tabs.map((label, i) => { const on = ti === i; return { label, on, pick: () => { this.pause_tab = performance.now() + 12000; this.setState({ tab: i }); }, bg: on ? 'rgba(255,255,255,.14)' : 'transparent', fg: on ? '#FFFFFF' : '#9DB1D2' }; }) }),
       flow: (() => { const i = Math.max(0, Math.min(S.flowStep, K.flow.steps.length - 1)), A = K.flow.steps[i];
         const TONE = { user: ['#0A1F44', 'rgba(10,31,68,.08)', 'rgba(10,31,68,.22)'], client: ['#C05CFF', 'rgba(192,92,255,.08)', 'rgba(192,92,255,.22)'], guard: ['#FF8A5B', 'rgba(255,138,91,.1)', 'rgba(255,138,91,.28)'], system: ['#15BE53', 'rgba(21,190,83,.08)', 'rgba(21,190,83,.24)'] };
-        return Object.assign({}, K.flow, { cols: isDesktop ? '1.05fr .95fr' : '1fr', anim: 'fadeUp ' + (i % 2 ? '.4s' : '.41s') + ' cubic-bezier(.2,.8,.2,1) both',
+        return Object.assign({}, K.flow, { cols: isDesktop ? '1.05fr .95fr' : 'minmax(0, 1fr)', anim: 'fadeUp ' + (i % 2 ? '.4s' : '.41s') + ' cubic-bezier(.2,.8,.2,1) both',
           active: Object.assign({}, A, { noteBg: TONE[A.kind][1], noteBorder: TONE[A.kind][2], noteDot: TONE[A.kind][0] }),
           steps: K.flow.steps.map((s, j) => { const on = i === j, T = TONE[s.kind]; return { n: s.n, label: s.label, where: s.where, on, pick: () => { this.pause_flowStep = performance.now() + 12000; this.setState({ flowStep: j }); }, w: isDesktop ? '168px' : '150px', hasArrow: j < K.flow.steps.length - 1, bg: on ? '#0A2540' : T[1], ring: on ? '0 22px 46px -24px rgba(10,37,64,.8)' : 'inset 0 0 0 1px ' + T[2], tf: on ? 'translateY(-3px)' : 'none', fg: on ? '#FFFFFF' : '#0A2540', numFg: on ? '#5FC3FF' : '#5A6880', whereFg: on ? 'rgba(200,212,232,.9)' : '#5A6880', dot: T[0], arrowFg: 'rgba(10,37,64,.25)' }; }) });
       })(),
       toolItems: K.tools.items.map((tl, j) => { const on = Math.max(0, Math.min(S.tool, K.tools.items.length - 1)) === j; return { name: tl.name, kind: tl.kind, short: tl.short, on, pick: () => { this.pause_tool = performance.now() + 12000; this.setState({ tool: j }); }, bg: on ? '#10285A' : 'rgba(255,255,255,.04)', ring: on ? 'inset 0 0 0 1.5px rgba(95,195,255,.55)' : 'inset 0 0 0 1px rgba(255,255,255,.08)', fg: on ? '#FFFFFF' : '#C8D4E8', subFg: on ? '#9DB1D2' : '#9DB1D2', kindFg: tl.write ? '#FFB46B' : '#4FCF8C', dot: tl.write ? '#FFB46B' : '#4FCF8C' }; }),
       tools: (() => { const j = Math.max(0, Math.min(S.tool, K.tools.items.length - 1)), A = K.tools.items[j];
-        return Object.assign({}, K.tools, { cols: isDesktop ? '.82fr 1.18fr' : '1fr', anim: 'fadeUp ' + (j % 2 ? '.4s' : '.41s') + ' cubic-bezier(.2,.8,.2,1) both',
+        return Object.assign({}, K.tools, { cols: isDesktop ? '.82fr 1.18fr' : 'minmax(0, 1fr)', anim: 'fadeUp ' + (j % 2 ? '.4s' : '.41s') + ' cubic-bezier(.2,.8,.2,1) both',
           active: Object.assign({}, A, { kindFg2: A.write ? '#FFB46B' : '#4FCF8C', kindBg: A.write ? 'rgba(255,180,107,.16)' : 'rgba(79,207,140,.16)', rules: A.rules.map((r) => ({ t: r.t, bg: r.ok ? 'rgba(21,190,83,.18)' : 'rgba(255,180,107,.2)', fg: r.ok ? '#4FCF8C' : '#FFB46B' })) }) });
       })(),
       sysItems: K.sys.items.map((sy, j) => { const on = Math.max(0, Math.min(S.sysIdx, K.sys.items.length - 1)) === j; return { label: sy.label, on, pick: () => { this.pause_sysIdx = performance.now() + 12000; this.setState({ sysIdx: j }); }, bg: on ? '#0A2540' : '#FFFFFF', fg: on ? '#FFFFFF' : '#0A2540', ring: on ? '0 16px 34px -20px rgba(10,37,64,.8)' : 'inset 0 0 0 1px rgba(10,37,64,.12)', dot: on ? '#5FC3FF' : '#5FC3FF' }; }),
       sys: (() => { const j = Math.max(0, Math.min(S.sysIdx, K.sys.items.length - 1)), A = K.sys.items[j];
-        return Object.assign({}, K.sys, { cols: isDesktop ? '1.05fr .95fr' : '1fr', anim: 'fadeUp ' + (j % 2 ? '.4s' : '.41s') + ' cubic-bezier(.2,.8,.2,1) both',
+        return Object.assign({}, K.sys, { cols: isDesktop ? '1.05fr .95fr' : 'minmax(0, 1fr)', anim: 'fadeUp ' + (j % 2 ? '.4s' : '.41s') + ' cubic-bezier(.2,.8,.2,1) both',
           active: Object.assign({}, A, { facts: A.facts.map((fx) => ({ k: fx.k, v: fx.v, fg: fx.good ? '#0E8A4C' : '#C2410C' })) }) });
       })(),
-      use: Object.assign({}, K.use, { cols: isDesktop ? 'repeat(2, minmax(0,1fr))' : '1fr' }), useItems: K.use.items.map((u, i) => Object.assign({}, u, { n: (i < 9 ? '0' : '') + (i + 1), delay: ((i % 2) * 0.06).toFixed(2) })),
-      del: Object.assign({}, K.del, { cols: isDesktop ? '.85fr 1.15fr' : '1fr' }), delItems: K.del.items,
+      use: Object.assign({}, K.use, { cols: isDesktop ? 'repeat(2, minmax(0,1fr))' : 'minmax(0, 1fr)' }), useItems: K.use.items.map((u, i) => Object.assign({}, u, { n: (i < 9 ? '0' : '') + (i + 1), delay: ((i % 2) * 0.06).toFixed(2) })),
+      del: Object.assign({}, K.del, { cols: isDesktop ? '.85fr 1.15fr' : 'minmax(0, 1fr)' }), delItems: K.del.items,
       ask: Object.assign({}, K.ask, { submit: this.pageAsk, chips: K.ask.chips.map((label) => ({ label, ask: () => { if (this.aiInput) { this.aiInput.value = label; this.aiInput.focus(); try { this.aiInput.setSelectionRange(label.length, label.length); } catch (e) {} } } })) }),
       faq: K.faq, faqItems: K.faq.items.map((f, i) => { const open = S.pgFaq === i; return Object.assign({}, f, { open, toggle: () => this.setState({ pgFaq: open ? -1 : i }), rows: open ? '1fr' : '0fr', rot: open ? 'rotate(45deg)' : 'rotate(0deg)', iconBg: open ? '#0A2540' : '#F0F3FA', iconFg: open ? '#FFFFFF' : '#0A2540', border: i === 0 ? '0' : '1px solid rgba(10,37,64,.08)' }); })
     };
@@ -418,7 +418,7 @@ class Component extends DCLogic {
       { k: 'recall', t: { de: 'Das Warum liegt bei', en: 'The reasoning comes with it' }, s: { de: 'md-recall hängt die Begründungen an die Zeile – für Ihr Team und für Ihre KI-Assistenten.', en: 'md-recall pins the reasoning to the line — for your team and for your AI assistants.' } }
     ]
   };
-  handover() { const H = this.loc(Component.HANDOVER), d = this.state.vw >= 960; return Object.assign({}, H, { cols: d ? '.85fr 1.15fr' : '1fr', itemCols: d ? 'repeat(3, minmax(0,1fr))' : this.state.vw >= 620 ? 'repeat(2, minmax(0,1fr))' : '1fr' }); }
+  handover() { const H = this.loc(Component.HANDOVER), d = this.state.vw >= 960; return Object.assign({}, H, { cols: d ? '.85fr 1.15fr' : 'minmax(0, 1fr)', itemCols: d ? 'repeat(3, minmax(0,1fr))' : this.state.vw >= 620 ? 'repeat(2, minmax(0,1fr))' : 'minmax(0, 1fr)' }); }
 
   faqLd() {
     try {
@@ -466,8 +466,8 @@ class Component extends DCLogic {
   proof() {
     const P = this.loc(Component.PROOF), d = this.state.vw >= 960;
     return Object.assign({}, P, {
-      cols: d ? 'repeat(3, minmax(0,1fr))' : this.state.vw >= 620 ? 'repeat(2, minmax(0,1fr))' : '1fr',
-      whoCols: d ? 'auto 1fr auto' : '1fr',
+      cols: d ? 'repeat(3, minmax(0,1fr))' : this.state.vw >= 620 ? 'repeat(2, minmax(0,1fr))' : 'minmax(0, 1fr)',
+      whoCols: d ? 'auto 1fr auto' : 'minmax(0, 1fr)',
       items: P.items.map((it, i) => Object.assign({}, it, { delay: (i * 0.06).toFixed(2) })),
       people: [{ img: '/team/portrait-christian-240.webp' }, { img: '/team/portrait-kathi-240.webp' }]
     });
@@ -518,10 +518,10 @@ class Component extends DCLogic {
     const POS = [[50, 7], [89, 28], [89, 72], [50, 93], [11, 72], [11, 28]];
     const TONE = ['#5FC3FF', '#5FC3FF', '#4FCF8C', '#FFB46B', '#C084FC', '#FF8FB8'];
     const nodes = K.nodes.map((n, j) => {
-      const on = i === j, p = POS[j] || [50, 50], dx = p[0] - 50, dy = p[1] - 50;
+      const on = i === j, p = POS[j] || [50, 50], dx = p[0] - 50, dy = p[1] - 50, edge = Math.ceil((String(n.label).length * 8 + 46) * 1.06 / 2);
       const deg = Math.atan2(dy, dx) * 180 / Math.PI, len = Math.sqrt(dx * dx + dy * dy);
       return { label: n.label, on, aria: n.label + ' – ' + n.kind, pick: () => { this.pause_mapIdx = performance.now() + 12000; this.setState({ mapIdx: j }); },
-        left: p[0] + '%', top: p[1] + '%', scale: on ? '1.06' : '1',
+        left: 'clamp(' + edge + 'px, ' + p[0] + '%, calc(100% - ' + edge + 'px))', top: p[1] + '%', scale: on ? '1.06' : '1',
         bg: on ? 'var(--acc)' : '#14275F', fg: on ? '#FFFFFF' : '#C8D4E8',
         ring: on ? '0 0 0 3px rgba(95,195,255,.3), 0 18px 40px -14px rgba(10,31,68,.95)' : 'inset 0 0 0 1px rgba(157,177,210,.22)',
         dot: on ? '#FFFFFF' : TONE[j % TONE.length], deg: deg.toFixed(1) + 'deg', lineW: len + '%',
@@ -529,7 +529,7 @@ class Component extends DCLogic {
         dotAnim: this.reduced() ? 'none' : 'mapRun 3.6s linear infinite ' + (j * 0.6).toFixed(1) + 's',
         dotOp: on ? 1 : 0.45 };
     });
-    return Object.assign({}, K, { cols: d ? '1.05fr .95fr' : '1fr', nodes, anim: 'fadeUp ' + (i % 2 ? '.4s' : '.41s') + ' cubic-bezier(.2,.8,.2,1) both',
+    return Object.assign({}, K, { cols: d ? '1.05fr .95fr' : 'minmax(0, 1fr)', nodes, anim: 'fadeUp ' + (i % 2 ? '.4s' : '.41s') + ' cubic-bezier(.2,.8,.2,1) both',
       active: Object.assign({}, K.nodes[i], { dot: TONE[i % TONE.length] }) });
   }
 
@@ -670,7 +670,7 @@ class Component extends DCLogic {
       dockRight: isDesktop ? '20px' : '12px', dockLeft: isDesktop ? 'auto' : (S.dockOpen ? '12px' : 'auto'), dockBottom: isDesktop ? '20px' : 'max(12px, env(safe-area-inset-bottom))', dockW: isDesktop ? 'min(380px, calc(100vw - 40px))' : '100%',
       tileGap: isDesktop ? '20px' : '14px', gridTop: isDesktop ? '52px' : '32px', tilePad: isDesktop ? '26px' : '20px', tileMinH: isDesktop ? '560px' : '460px', caseMinH: isDesktop ? '540px' : '440px',
       modalPad: isDesktop ? 'clamp(12px,3vw,40px) clamp(12px,3vw,40px) clamp(40px,6vw,80px)' : '56px 0 0', modalMargin: isDesktop ? '0 auto' : '0 auto -1px', modalMinH: isDesktop ? '0' : 'calc(100vh - 56px)', modalRadius: isDesktop ? '20px' : '20px 20px 0 0', modalInner: isDesktop ? 'clamp(28px,4vw,56px) clamp(22px,4.5vw,64px) clamp(32px,4vw,56px)' : '16px 20px 40px', closePos: isDesktop ? 'absolute' : 'sticky', closeMr: isDesktop ? '0' : '12px', closeMb: isDesktop ? '0' : '-44px', closeTop: isDesktop ? '22px' : '10px', stageH: isDesktop ? 'clamp(300px, 42vw, 500px)' : '300px', modalRise: S.modalIn ? 'none' : 'translateY(18px)',
-      heroCols: isDesktop ? '1.05fr .95fr' : '1fr', heroBCols: isDesktop ? '1.15fr .85fr' : '1fr', aiCols: isDesktop ? '.9fr 1.1fr' : '1fr', processCols: isDesktop ? '.8fr 1.2fr' : '1fr', faqCols: isDesktop ? '.8fr 1.2fr' : '1fr', contactCols: isDesktop ? '1fr 1fr' : '1fr', stickyPos: isDesktop ? 'sticky' : 'static',
+      heroCols: isDesktop ? '1.05fr .95fr' : 'minmax(0, 1fr)', heroBCols: isDesktop ? '1.15fr .85fr' : 'minmax(0, 1fr)', aiCols: isDesktop ? '.9fr 1.1fr' : 'minmax(0, 1fr)', processCols: isDesktop ? '.8fr 1.2fr' : 'minmax(0, 1fr)', faqCols: isDesktop ? '.8fr 1.2fr' : 'minmax(0, 1fr)', contactCols: isDesktop ? '1fr 1fr' : 'minmax(0, 1fr)', stickyPos: isDesktop ? 'sticky' : 'static',
       navShadow: S.scrolled ? '0 1px 0 #E3E8EE, 0 10px 30px -18px rgba(10,37,64,.18)' : '0 1px 0 #E3E8EE', caretTop: 69, panelTop: 76, indLeft: S.indLeft, indW: S.indW, indOp: menuOpen ? 1 : 0, indBg: 'rgba(10,37,64,.06)', brandsLoop: C.BRANDS.concat(C.BRANDS),
       navFg, markBg: onGradient ? '#FFFFFF' : '#0A2540', markFg: onGradient ? '#0A2540' : '#FFFFFF', toggleBorder: onGradient ? 'rgba(255,255,255,.35)' : 'rgba(10,37,64,.14)',
       ctaBg: onGradient ? '#FFFFFF' : 'var(--acc)', ctaFg: onGradient ? '#0A2540' : '#FFFFFF',
@@ -686,7 +686,7 @@ class Component extends DCLogic {
       askFg: S.aiMode === 'ask' ? '#FFFFFF' : '#9DB1D2', askLine: S.aiMode === 'ask' ? 'var(--acc)' : 'transparent', briefFg: S.aiMode === 'brief' ? '#FFFFFF' : '#9DB1D2', briefLine: S.aiMode === 'brief' ? 'var(--acc)' : 'transparent',
       setModeAsk: () => this.setState({ aiMode: 'ask' }), setModeBrief: () => this.setState({ aiMode: 'brief' }), aiThinking: S.aiPhase === 'thinking', aiTypingShown: S.aiPhase === 'typing', aiSubmit: this.aiSubmit,
       formIdle: !S.formSent, formSent: S.formSent, formSubmit: this.formSubmit,
-      streamPoints: (this._pts = x.points.concat(x.points).map(ptStyle)), heroLine: mkLine({ color: '#0A1F44', backgroundImage: 'linear-gradient(92deg,#0099F5 0%,#C05CFF 52%,#FF5A8C 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', paddingRight: '.04em' }), heroLineB: mkLine({ color: 'var(--acc)' }), showStatus: isDesktop && S.vw >= 1180, pillBg: onGradient ? 'rgba(255,255,255,.14)' : '#F6F9FC', progOp: S.scrolled ? 1 : 0, menuGradA: mg.gradA, menuGradB: mg.gradB, dl, integ, scale, bigStats, bars, opsRows, voices, pricing, fall: x.fall, fallCols: isDesktop ? '1.1fr .9fr' : '1fr', openRecall: (e) => this.openModal('case', 'recall', e), heroSubmit: this.heroSubmit, heroCta2: S.lang === 'de' ? 'So arbeitet die KI-Konsole' : 'How the AI console works', openDock: () => { if (this.state.aiVisible) { this.go('ai'); setTimeout(() => { if (this.aiInput) this.aiInput.focus(); }, 500); } else this.setState({ dockOpen: true }, () => setTimeout(() => { if (this.dockInput) this.dockInput.focus(); }, 60)); }, heroInputRef: (el) => { this.heroInput = el; }, heroAskHint: S.lang === 'de' ? 'Fragen Sie die Seite – z. B. „Was kostet eine Web-App?“' : 'Ask the site — e.g. “What does a web app cost?”', integNodes, integSys, sq, diagOverflow: S.vw < 760 ? 'auto' : 'visible', modalCols: isDesktop ? '1.1fr .9fr' : '1fr', modalAsk: this.modalAsk, focusAi: () => { if (this.aiInput) this.aiInput.focus(); }, openAiModal: () => this.openModal('service', 'ai'), openSoftwareModal: () => this.openModal('service', 'software'), modalOpen: !!S.modal, modalOp: S.modalIn ? 1 : 0, modalTf, modal, closeModal: this.closeModal, stop: this.stop, modalCta: this.modalCta
+      streamPoints: (this._pts = x.points.concat(x.points).map(ptStyle)), heroLine: mkLine({ color: '#0A1F44', backgroundImage: 'linear-gradient(92deg,#0099F5 0%,#C05CFF 52%,#FF5A8C 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', paddingRight: '.04em' }), heroLineB: mkLine({ color: 'var(--acc)' }), showStatus: isDesktop && S.vw >= 1180, pillBg: onGradient ? 'rgba(255,255,255,.14)' : '#F6F9FC', progOp: S.scrolled ? 1 : 0, menuGradA: mg.gradA, menuGradB: mg.gradB, dl, integ, scale, bigStats, bars, opsRows, voices, pricing, fall: x.fall, fallCols: isDesktop ? '1.1fr .9fr' : 'minmax(0, 1fr)', openRecall: (e) => this.openModal('case', 'recall', e), heroSubmit: this.heroSubmit, heroCta2: S.lang === 'de' ? 'So arbeitet die KI-Konsole' : 'How the AI console works', openDock: () => { if (this.state.aiVisible) { this.go('ai'); setTimeout(() => { if (this.aiInput) this.aiInput.focus(); }, 500); } else this.setState({ dockOpen: true }, () => setTimeout(() => { if (this.dockInput) this.dockInput.focus(); }, 60)); }, heroInputRef: (el) => { this.heroInput = el; }, heroAskHint: S.lang === 'de' ? 'Fragen Sie die Seite – z. B. „Was kostet eine Web-App?“' : 'Ask the site — e.g. “What does a web app cost?”', integNodes, integSys, sq, diagOverflow: S.vw < 760 ? 'auto' : 'visible', modalCols: isDesktop ? '1.1fr .9fr' : 'minmax(0, 1fr)', modalAsk: this.modalAsk, focusAi: () => { if (this.aiInput) this.aiInput.focus(); }, openAiModal: () => this.openModal('service', 'ai'), openSoftwareModal: () => this.openModal('service', 'software'), modalOpen: !!S.modal, modalOp: S.modalIn ? 1 : 0, modalTf, modal, closeModal: this.closeModal, stop: this.stop, modalCta: this.modalCta
     };
   }
 

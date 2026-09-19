@@ -1,6 +1,43 @@
-# Uebergabe — Stand 17. September 2026
+# Uebergabe — Stand 19. September 2026
 
-## ▶ NEUE SITZUNG AB 19.9. ABENDS — NÄCHSTE AUFGABE: WEBSEITEN-POLISH — ZUERST LESEN
+## ▶▶ NACH DEM COMPACT HIER WEITER (19.9. ~17:30) — POLISH RUNDE 2 LÄUFT
+
+**Owner:** „ich folge allen deinen Polish-Vorschlägen“ → umzusetzen sind die Empfehlungen aus beiden Demos: Kopfzeile Indikator **C+D** (getönte Pille `--mc-action-tint` + Himmelpunkt, Karte im Mega-Menü „Sie sind hier“), Brotkrumen **b** (Pille unter der Kopfzeile, ab 1180 px, mit aktuellem Abschnitt + Fortschrittslinie), Fußzeile **V2** (Streifen `--mc-stream` + 7 % Weiß-Tönung), Menüpunkt **Software** (md-recall, md-cms „Im Aufbau“, md-portal, 360 ausgegraut „Bald“ = Whatever 360, Panorama-Hosting), **Login als Icon-Knopf** mit Dropdown (cms./portal.mccain-digital.com, „Ein Konto für beides“), Kacheln/Tools-Band/News jeweils **A**. Punkt 14: Empfehlung an den Owner gegeben „CMS-Seite jetzt, ehrlich (live vs. ‚Als Nächstes‘)“ – keine Antwort bisher, Seite wird gebaut, vor dem Push nochmal erwähnen.
+
+**Git:** Runde 1 ist im Index eingefroren (`git add` 16:37, 35 Dateien: Artboards, colors.css, prerender/verify_site, .gitignore, internal/polish-0919). **Nicht `git add` auf Artboards**, bevor Runde 1 committet ist – die Arbeitskopie enthält schon Runde-2-Änderungen der Agenten. Runde 1 committen, sobald die Prüfung grün ist: dann nur die Build-Ausgaben dazu (`git add -u` ohne `mccain-design-system/`, `brand/`), Commit, Push. CHANGELOG/HANDOFF/README sind in `.gitignore` (lokal gepflegt, Absicht).
+
+**Hintergrundlauf Runde 1** (gestartet ~16:10): `v5heights --base http://127.0.0.1:8898` → `v5build` → `verify_site`; Logs `$TEMP/mcd-heights.log`, `mcd-v5build2.log`, `mcd-verify.log`. Das neue Prüftor (abgeschnittene Inhalte bei 390/1440) läuft darin zum ersten Mal – Fehlalarme möglich, einzeln ansehen.
+
+**Agenten Runde 2 (Sonnet):**
+
+- Logo C **fertig:** `brand/md-recall-mark.svg` (+`-16`, `-on-navy`, `-180.png`, `-512.png`), gespiegelt nach `mccain-design-system/brand/` (Rohansicht löst dort auf). Alte Verweise in 17 Artboards ersetzt. **Übrig: je 2 Stellen pro Artboard im Skript** – `cases` → `iconSm` und `resItems` → recall-`icon` (`React.createElement('img', { src: 'brand/mccain-recall-logo-128.png' …`; Brand Guide schreibt `/brand/…`). Die tauscht der Nav-Patch noch nicht → **ergänzen** (dazu `tileBg`/`tileRing` für recall in `cases` auf transparent/none, das neue Zeichen hat eine eigene Kachel).
+- Kacheln (Startseite `#work`, Studio `#produkte`) + News-Übersicht, Variante A: **läuft**, schreibt in v2/Studio/News.
+- Produktseiten `McCain Digital md-cms.dc.html` / `md-portal.dc.html` (Klon von md-recall, Texte aus `internal/polish-0919/content/`): **läuft**. Danach von mir: Routen `/md-cms/`, `/md-portal/` in `tools/pages.mjs` + `LIVE_PAGES` in `verify_site`, md-recall-Brotkrumen „Produkte“ → „Software“.
+
+**Mein Teil – Nav-Patch** `internal/polish-0919/tools/nav-patch.mjs` (Kopie im Repo; `--file <artboard> --out <pfad>` oder `--all`, jede Ersetzung mit Zählprüfung). Macht: `static SELF` (eigener Artboard-Name; prerender schreibt Dateinamen zu Routen um → Aktiv-Erkennung stimmt roh und gebaut; die alte verglich `location.pathname` mit Dateinamen und griff gebaut **nie**), `TRAIL`/`CRUMB_UP` (Brotkrumen je Seite, Texte = Hero-Brotkrumen), `SOFTWARE`/`LOGIN`, Menü „Software“ + Login-Panel im selben Mega-Panel (`MENU_W` software 600, login 320), Pille, Fußzeilen-Spalte „Software“ + V2-Aktiv, mobile Gruppen Software/Kunden-Login, `updateCrumb()` im Scroll-Handler (DOM direkt, setState nur beim Schwellwert), Icon `user` in `static ICONS`.
+
+- **Trockenlauf:** alle 23 Artboards ok. Arbeitskopie `mccain-design-system/McCain Digital Websites DEV.dc.html` (untracked, **vor dem Commit löschen**), Rohansicht `http://localhost:8898/mccain-design-system/McCain%20Digital%20Websites%20DEV.dc.html`, Aufnahmen `internal/polish-0919/tools/navshots.mjs` → Scratchpad `nav/`.
+- **Offen im Patch:** passt noch nicht – bei 1280 px 9 px, bei 1180 px 22 px zu breit (Messung `navshots.mjs`). Stufen heute: ≥1400 voll; <1400 Suche nur Icon, Punkte `8px 10px`, Abstand 2 px; <1280 DE/EN aus der Kopfzeile; <1180 Menü-Knopf. Weiter sparen, z. B. Chevrons bei <1400 kleiner/Abstand 1 px, oder Stufe 1180 → 1240. Die Screenshots der Arbeitskopie (Menüs, Pille, Fußzeile) sind noch nicht angesehen.
+- **Befund (bestehender Fehler, wird mit behoben):** die Kopfzeile passt heute zwischen 960 und 1180 px nicht – bei 960/1080 fehlt „Kontakt“ ganz. Deshalb die Stufe „Menü-Knopf unter 1180“.
+- Danach: Prüftor in `verify_site` für die Kopfzeilen-Passform (1180/1280/1440; die Kopfzeile ist `position:fixed` und fällt durch das Abschneide-Tor), Punkt 10 (Modal der Startseite in die Unterseiten), Punkt 6 (Tools-Band A in `tools/v5build.mjs` `WERKSTATT_BAND`), dann `--all`, voller Build (`prerender` → `v5heights` → `v5build` → `verify_site`), Code-Review, CHANGELOG, Commit, Push.
+
+## ▶ POLISH RUNDE 1 (19.9. ABENDS) — STAND UND WAS AUF DEN OWNER WARTET
+
+**Die Owner-Liste (17 Punkte, Screenshots im Chat):** 1 Abstand Laufband → Leistungen · 2 Kopfzeile zeigt nicht, wo man ist · 3 Fußzeile ebenso · 4 neues md-recall-Logo (Richtung C) auf der Seite und im Menü · 5 Farbverläufe der Projekt-Kacheln (Startseite) · 6 Tools-Band „zu langweilig“ · 7 Zeitleiste: Kreis 01 abgeschnitten · 8 Beitragsübersicht zu schmal · 9 Brotkrumen dynamisch unter der Kopfzeile (Desktop, nicht volle Breite) · 10 die Chip-Modals („Notes“ im Pixelstrom) der Unterseiten wie auf der Startseite · 11 Seitenthemen: KI = Verlauf, Web-Apps = blau · 12 Studio „Eigene Produkte“-Kacheln · 13 Kontakt: doppelter Konfigurator-Hinweis raus · 14 eigene Seite md-cms · 15 eigene Seite md-portal · 16 Menübereich „Software“ (recall, cms, portal, später 360) · 17 Kunden-Login (cms/portal) mit Dropdown in der Kopfzeile.
+
+**Erledigt (CHANGELOG „Webseiten-Polish, Runde 1“):** 1, 7, 11, 13, dazu die abgeschnittenen Handy-Inhalte (`minmax(0, 1fr)`, Schaubild-Knoten) und das Prüftor dafür in `verify_site`, `prerender --route`.
+
+**Wartet auf die Owner-Wahl (Entwürfe, lokal):**
+
+- <http://localhost:8898/internal/polish-0919/header/index.html> → 2, 3, 9, 16, 17
+- <http://localhost:8898/internal/polish-0919/sections/index.html> → 5, 12, 6, 8
+- Punkt 14/15: Textentwürfe `internal/polish-0919/content/md-cms.md`, `md-portal.md`. **Offene Owner-Frage:** md-cms hat noch keinen Editor (live: Login, Site-Übersicht, „Site anlegen“) – Seite jetzt als „in Arbeit“ oder erst mit Editor? md-portal: Kanban noch nicht gebaut.
+
+**Noch offen, ohne Owner-Entscheidung machbar:** 10 (Modal-Vorlage + Logik der Startseite in die Unterseiten übernehmen – die Startseite hat je Leistung eigene Inhalte `modal.isAi`/`isApps`…, die Unterseiten die alte große Fassung) und 4 (Logo C: Quelle `whatever-recall/internal/dashboard-redesign-2026-09/canvas/project/Logo.dc.html`, Spezifikation `whatever-recall/docs/plans/2026-09-18-dashboard-redesign-design.md` „Logo C“; ersetzt `brand/mccain-recall-logo-128.png`).
+
+**Wichtig für jede Kopfzeilen-/Fußzeilen-Änderung:** Kopfzeile, Mega-Menü und Fußzeile stehen in jedem der 21 Artboards als eigene Kopie (Kopfzeile in 19 byte-gleich, v2 und KI weichen ab; Fußzeile überall gleich), die Menü-Logik (`navItems`, `footerCols`) ebenso im Skript jeder Seite. Änderung = ein Skript mit exakten Treffern und Zählprüfung, kein Sammel-`sed`. Befund des Kopfzeilen-Agenten: der aktive Punkt der Fußzeile vergleicht den URL-Pfad mit dem alten Artboard-Dateinamen und greift deshalb nie.
+
+## ▶ SITZUNG AB 19.9. ABENDS — WEBSEITEN-POLISH — ARBEITSWEISE
 
 **Owner 19.9.:** „wir machen dann weiter mit Webseiten-Polish, alles andere sollte ja abgearbeitet sein“. Die Sitzung wurde neu gestartet, weil in der alten keine Bilder mehr gingen. **Der Owner schickt Screenshots; welche Stellen zuerst dran sind, sagt er. Nicht raten, nicht selbst eine Liste abarbeiten.**
 
@@ -15,7 +52,8 @@
   - **Auf Windows können zwei Server auf demselben Port lauschen.** `netstat -ano | grep ":8898 "` muss genau eine Listener-Zeile zeigen. Beenden nur über die PID, nie über den Namen.
 - Build:
   - voll: `node tools/prerender.mjs` (≈ 4 min), dann `node tools/v5build.mjs`, dann `node tools/verify_site.mjs`;
-  - eine Seite: `node tools/v5build.mjs --route <route>`.
+  - eine Seite: `node tools/prerender.mjs --route <route>`, dann `node tools/v5build.mjs --route <route>`.
+  - Ändert sich die Höhe verzögerter Sektionen: `node tools/v5heights.mjs --base http://127.0.0.1:8898`, dann `v5build` erneut.
   - Gegen live prüfen: `MCD_BASE=https://mccain-digital.vercel.app node tools/verify_site.mjs`.
 - Farbrest-Prüfung im Bild: `node tools/hue_scan.mjs <routenteil>` (Indigo-/Violett-Band je Element).
 - Push auf `main` = Deploy auf vercel.app; der Coming-soon-Stand geht mit auf `.com`.

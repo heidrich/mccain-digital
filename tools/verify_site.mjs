@@ -811,6 +811,89 @@ if (BASE.startsWith("http") && !BASE.includes("127.0.0.1")) {
   }
 }
 
+/* NOTHING IS CUT OFF WITHOUT A SCROLLBAR (19.9.2026).
+ *
+ * Two things clip content here without any horizontal scroll to give it away,
+ * so an overflow check on document.scrollWidth never sees them:
+ *  - content-visibility:auto on the deferred sections (data-cv) implies paint
+ *    containment: whatever reaches past the section's box is not painted. The
+ *    first step dot of the start page's timeline sat 2 px above its section
+ *    and lost its top edge - the owner saw it, no check did.
+ *  - the page wrapper clips horizontally, so a column that grows past the
+ *    phone screen is simply cut. A grid track of `1fr` is minmax(auto, 1fr)
+ *    and never shrinks below its widest unbreakable content (a <pre>, a row
+ *    of nowrap tabs): the code panel on the MCP page ran 105 px past the
+ *    screen, the md-recall screens 533 px.
+ * An element counts when it is partly visible and partly outside - wholly
+ * off-screen is deliberate (the forms' honeypot sits at -9999 px). A narrower
+ * container that clips or scrolls on purpose (a code block's overflow-x, the
+ * logo ticker's mask) ends the search below it; page-wide wrappers do not. */
+{
+  console.log("\n  nothing is cut off (content-visibility boxes, screen edges)");
+  for (const width of [390, 1440]) {
+    const ctx = await browser.newContext({ viewport: { width, height: width < 600 ? 844 : 900 } });
+    for (const p of LIVE_PAGES) {
+      const page = await ctx.newPage();
+      await page.goto(BASE + p, { waitUntil: "load" });
+      await waitForV5(page);
+      const cut = await page.evaluate(async () => {
+        document.documentElement.style.scrollBehavior = "auto";
+        const vw = document.documentElement.clientWidth;
+        const out = [];
+        const label = (el) => (el.getAttribute("data-dc-tpl") ? `tpl ${el.getAttribute("data-dc-tpl")} ` : "") + `<${el.tagName.toLowerCase()}> "${el.textContent.trim().replace(/\s+/g, " ").slice(0, 32)}"`;
+        const skip = (el, cs) => cs.display === "none" || cs.visibility === "hidden" || cs.position === "fixed" || el.closest("[aria-hidden=true]");
+        /* box: the clipping rectangle; walk down until an element straddles it */
+        const walk = (el, box, what, wide) => {
+          for (const c of el.children) {
+            const cs = getComputedStyle(c);
+            if (skip(c, cs)) continue;
+            const r = c.getBoundingClientRect();
+            if (!r.width || !r.height) continue;
+            const inside = r.left >= box.left - 0.5 && r.right <= box.right + 0.5 && r.top >= box.top - 0.5 && r.bottom <= box.bottom + 0.5;
+            const outside = r.right <= box.left || r.left >= box.right || r.bottom <= box.top || r.top >= box.bottom;
+            if (!inside && !outside) { out.push(`${what}: ${label(c)}`); continue; }
+            const clips = cs.overflowX !== "visible" || cs.overflowY !== "visible";
+            if (!clips || (wide && r.width >= vw - 1)) walk(c, box, what, wide);
+          }
+        };
+        /* A section is measured while it is on screen: once it scrolls away
+         * again, content-visibility skips it and its box falls back to the
+         * placeholder height, so its content would seem to stick out. And only
+         * once its reveal has run - a block still sliding in (translateY) pokes
+         * past the section's bottom for a moment. Endless animations (the
+         * pixel stream, the logo ticker) are left out of the wait. A section
+         * taller than the screen is walked down to its end, or its lower
+         * blocks are still waiting to be revealed (opacity 0, shifted down). */
+        const settle = async (s) => {
+          await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+          const finite = s.getAnimations({ subtree: true }).filter((a) => a.effect && a.effect.getComputedTiming().endTime !== Infinity);
+          await Promise.race([Promise.all(finite.map((a) => a.finished.catch(() => {}))), new Promise((r) => setTimeout(r, 2500))]);
+        };
+        for (const s of document.querySelectorAll("[data-cv]")) {
+          s.scrollIntoView();
+          await settle(s);
+          while (s.getBoundingClientRect().bottom > innerHeight + 1) {
+            const before = scrollY;
+            scrollBy(0, Math.round(innerHeight * 0.8));
+            if (scrollY === before) break;
+            await settle(s);
+          }
+          const r = s.getBoundingClientRect();
+          walk(s, { left: r.left, right: r.right, top: r.top, bottom: r.bottom }, `outside its deferred section #${s.id || "?"}`, false);
+        }
+        const screen = { left: 0, right: vw, top: -Infinity, bottom: Infinity };
+        walk(document.body, screen, "past the screen edge", true);
+        return [...new Set(out)];
+      });
+      await page.close();
+      console.log(`    ${ok(!cut.length)} ${String(width).padStart(4)}  ${p}${cut.length ? `  (${cut.length})` : ""}`);
+      for (const c of cut.slice(0, 4)) fail(`${p} @${width}: ${c}`);
+      if (cut.length > 4) fail(`${p} @${width}: ...and ${cut.length - 4} more`);
+    }
+    await ctx.close();
+  }
+}
+
 await browser.close();
 console.log();
 if (failures) {
