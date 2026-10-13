@@ -1,0 +1,52 @@
+name: PageSpeed mobile
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  psi:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PSI_KEY: ${{ secrets.PSI_KEY }}
+      URLS: |
+        https://mccain-digital.vercel.app/
+        https://mccain-digital.vercel.app/leistungen/
+        https://mccain-digital.vercel.app/kontakt/
+    steps:
+      - name: Mobile performance must be >= 0.95
+        run: |
+          # PSI is flaky: one retry per URL; the key is optional (keyless calls hit the shared quota).
+          fail=0
+          {
+            echo "### PageSpeed mobile (threshold 0.95)"
+            echo
+            echo "| URL | Score | LCP | TBT | CLS |"
+            echo "|---|---|---|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+          while read -r url; do
+            [ -z "$url" ] && continue
+            api="https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${url}&strategy=mobile&category=performance"
+            [ -n "$PSI_KEY" ] && api="${api}&key=${PSI_KEY}"
+            ok=0
+            for attempt in 1 2; do
+              if curl -sS --fail --max-time 120 "$api" -o psi.json && jq -e '.lighthouseResult.categories.performance.score != null' psi.json >/dev/null; then ok=1; break; fi
+              echo "attempt $attempt failed for $url"; sleep 20
+            done
+            if [ "$ok" != 1 ]; then
+              echo "| $url | API error | - | - | - |" >> "$GITHUB_STEP_SUMMARY"; fail=1; continue
+            fi
+            score=$(jq -r '.lighthouseResult.categories.performance.score' psi.json)
+            lcp=$(jq -r '.lighthouseResult.audits["largest-contentful-paint"].displayValue' psi.json)
+            tbt=$(jq -r '.lighthouseResult.audits["total-blocking-time"].displayValue' psi.json)
+            cls=$(jq -r '.lighthouseResult.audits["cumulative-layout-shift"].displayValue' psi.json)
+            echo "| $url | $score | $lcp | $tbt | $cls |" >> "$GITHUB_STEP_SUMMARY"
+            echo "$url score=$score lcp=$lcp tbt=$tbt cls=$cls"
+            if jq -e '.lighthouseResult.categories.performance.score < 0.95' psi.json >/dev/null; then fail=1; fi
+          done <<< "$URLS"
+          exit $fail
