@@ -35,7 +35,7 @@ internal/polish-0919/header/shots/
 internal/polish-0919/sections/shots/after/
 
 # Lighthouse reports: half a megabyte each, regenerable in a minute with the
-# skill's `lighthouse-psi.mjs` (~/.claude/skills/html-performance/scripts/).
+# global skill html-performance (`lighthouse-psi.mjs`).
 # The numbers that matter are written down in HANDOFF.md instead.
 internal/lighthouse/
 

@@ -609,7 +609,7 @@ den 17.9.: Skill-Regeln laden-javascript 17 (Minify ohne Lowering),
 laden-auslieferung 20 (CSP aus dem Build, kein unsafe-eval),
 messen-methode 10 (Zeit-Tore nur allein), lighthouse-psi 25 (PSI-API-Kontingent),
 Fallstudie „Umschaltung", audit-website (macOS-Signatur); Sync-Repo
-gepusht, Kopie hier unter `.claude/skills/`.
+gepusht.
 
 **Nächster Schritt (Owner, nach dem Compact) (siehe neuer Block oben):**
 volles Code-Review, vor allem **mobil** und **Security** — Kandidaten: die
@@ -934,16 +934,12 @@ Juni, alte Ignore-Regel, siehe unten), die Entscheidung liegt beim Owner.
   (Bauanleitung, Messen, Lighthouse/PSI, Laden, Rendern, React/Next, Widerlegt,
   Fallstudien), `scripts/` (neun Messwerkzeuge auf playwright-core plus
   `prodserve.py`). **Quelle der Wahrheit ist `~/.claude/skills/html-performance/`
-  im Sync-Repo `heidrich/dotclaude`.** Eine Kopie liegt in diesem Repo unter
-  `.claude/skills/html-performance/`, damit das Projekt ihn auch ohne Sync trägt.
+  im Sync-Repo `heidrich/dotclaude`.** Das Projekt hat keine eigene Kopie mehr.
   - **Am PC:** `cd ~/.claude && git pull` holt Skill, die Sonnet-Regel
     (`rules/subagents.md`, `settings.json`) und die geänderten Skills
     (`web-skills-suite`, `neue-webseite`, `browser-verify`). Danach einmal
     `npm install` in `~/.claude/skills/html-performance/scripts/` (holt nur
     playwright-core; Chromium aus dem ms-playwright-Cache oder `HP_CHROME`).
-  - **Kopie auffrischen** (nur nach Änderungen an der Quelle):
-    `rsync -a --delete --exclude node_modules --exclude package-lock.json
-    ~/.claude/skills/html-performance/ .claude/skills/html-performance/`
   - **Pflege:** Neue Lehre → `references/fallstudien.md`, dann Regel in der
     passenden Referenz; falsche Annahme → `widerlegt.md`; im Sync-Repo committen
     und pushen. Bei jedem Webprojekt gilt die `bauanleitung.md` beim Bauen und
@@ -954,8 +950,7 @@ Juni, alte Ignore-Regel, siehe unten), die Entscheidung liegt beim Owner.
     `laden-kritischer-pfad.md` 29, `laden-javascript.md` 15,
     `laden-auslieferung.md` 19; je 7–20k Tokens statt 24–36k). Regeln pro Datei
     neu von 1 nummeriert, alle 600 Links im Skill maschinell umgestellt und
-    geprüft. Die Kopie unter `.claude/skills/html-performance/` ist auf diesem
-    Stand; am PC `cd ~/.claude && git pull`. Größter Rest: `messen.md`
+    geprüft. Am PC `cd ~/.claude && git pull`. Größter Rest: `messen.md`
     (~24k Tokens) ist ungeteilt.
 - **Dev-Modus „Werkstatt" (Owner-Idee 16.9., GEBAUT 16.9. abends, nur v5).**
   Owner am Abend: „baue erstmal die funktionen, die texte kannst du so reinhauen,
